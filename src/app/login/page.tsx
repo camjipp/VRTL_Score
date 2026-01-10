@@ -1,13 +1,9 @@
 import { LoginForm } from "@/components/LoginForm";
 
-type SearchParams =
-  | Record<string, string | string[] | undefined>
-  | Promise<Record<string, string | string[] | undefined>>;
-
 export default async function LoginPage({
   searchParams
 }: {
-  searchParams?: SearchParams;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const sp = searchParams ? await searchParams : undefined;
 
