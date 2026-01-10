@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -21,6 +21,7 @@ async function onboard(accessToken: string) {
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = getSupabaseBrowserClient();
 
   const [email, setEmail] = useState("");
@@ -43,10 +44,20 @@ export default function LoginPage() {
 
       const session = result.data.session ?? (await supabase.auth.getSession()).data.session;
       const accessToken = session?.access_token;
-      if (!accessToken) throw new Error("Missing session access token");
+      if (!accessToken) {
+        // This typically happens when Supabase email confirmation is enabled:
+        // signUp succeeds but does not create a session until the email is confirmed.
+        setError(
+          mode === "signup"
+            ? "Account created. Please confirm your email, then return and sign in."
+            : "Signed in but no session token was found. Please try again."
+        );
+        return;
+      }
 
       await onboard(accessToken);
-      router.replace("/app");
+      const next = searchParams.get("next");
+      router.replace(next && next.startsWith("/") ? next : "/app");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
