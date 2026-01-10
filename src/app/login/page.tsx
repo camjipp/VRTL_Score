@@ -1,17 +1,17 @@
-import { LoginForm } from "@/app/login/login-form";
+import { LoginForm } from "@/components/LoginForm";
 
 export default function LoginPage({
   searchParams
 }: {
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: { next?: string };
 }) {
   const nextParam = searchParams?.next;
-  const next =
-    typeof nextParam === "string" && nextParam.startsWith("/") ? nextParam : undefined;
+  const nextPath =
+    typeof nextParam === "string" && nextParam.startsWith("/") ? nextParam : "/app";
 
   return (
     <main className="p-6">
-      <LoginForm next={next} />
+      <LoginForm nextPath={nextPath} />
     </main>
   );
 }
