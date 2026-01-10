@@ -1,10 +1,10 @@
+import type { PageProps } from "next";
+
 import { LoginForm } from "@/components/LoginForm";
 
 export default function LoginPage({
   searchParams
-}: {
-  searchParams?: { next?: string };
-}) {
+}: PageProps<{ next?: string }>) {
   const nextParam = searchParams?.next;
   const nextPath =
     typeof nextParam === "string" && nextParam.startsWith("/") ? nextParam : "/app";
