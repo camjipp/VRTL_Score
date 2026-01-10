@@ -1,21 +1,23 @@
 import { LoginForm } from "@/components/LoginForm";
 
-type LoginPageProps = {
-  searchParams?: {
-    next?: string | string[];
-  };
-};
+type SearchParams =
+  | Record<string, string | string[] | undefined>
+  | Promise<Record<string, string | string[] | undefined>>;
 
-export default function LoginPage({ searchParams }: LoginPageProps) {
-  const rawNext = searchParams?.next;
-  const nextParam = Array.isArray(rawNext) ? rawNext[0] : rawNext;
-  const nextPath = typeof nextParam === "string" && nextParam.startsWith("/") ? nextParam : "/app";
+export default async function LoginPage({
+  searchParams
+}: {
+  searchParams?: SearchParams;
+}) {
+  const sp = searchParams ? await searchParams : undefined;
 
-  return (
-    <main className="p-6">
-      <LoginForm nextPath={nextPath} />
-    </main>
-  );
+  const nextParam = sp?.next;
+  const nextStr = Array.isArray(nextParam) ? nextParam[0] : nextParam;
+
+  // allow only internal paths to prevent open redirects
+  const nextPath = typeof nextStr === "string" && nextStr.startsWith("/") ? nextStr : "/app";
+
+  return <LoginForm nextPath={nextPath} />;
 }
 
 
