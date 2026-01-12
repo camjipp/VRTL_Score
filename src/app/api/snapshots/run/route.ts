@@ -32,174 +32,216 @@ const SYSTEM_PROMPT = `You are a strict JSON generator. Respond ONLY with a JSON
 Do not include any extra keys or text. evidence_snippet must be <= 200 characters.`;
 
 export async function POST(req: Request) {
-  const token = bearerToken(req);
-  if (!token) {
-    return NextResponse.json({ error: "Missing Authorization: Bearer <token>" }, { status: 401 });
-  }
+  let snapshotId: string | null = null;
 
-  const body = (await req.json()) as RunBody;
-  if (!body.clientId) {
-    return NextResponse.json({ error: "Missing clientId" }, { status: 400 });
-  }
+  try {
+    const token = bearerToken(req);
+    if (!token) {
+      return NextResponse.json({ error: "Missing Authorization: Bearer <token>" }, { status: 401 });
+    }
 
-  const supabase = getSupabaseAdminClient();
+    const body = (await req.json()) as RunBody;
+    if (!body.clientId) {
+      return NextResponse.json({ error: "Missing clientId" }, { status: 400 });
+    }
+    console.log("snapshot start", { clientId: body.clientId });
 
-  // Auth
-  const userRes = await supabase.auth.getUser(token);
-  const user = userRes.data.user;
-  if (userRes.error || !user) {
-    return NextResponse.json(
-      { error: userRes.error?.message ?? "Unauthorized" },
-      { status: 401 }
-    );
-  }
+    const supabase = getSupabaseAdminClient();
 
-  // Map user -> agency
-  const agencyUser = await supabase
-    .from("agency_users")
-    .select("agency_id")
-    .eq("user_id", user.id)
-    .maybeSingle();
-  if (agencyUser.error || !agencyUser.data?.agency_id) {
-    return NextResponse.json({ error: "Agency not found for user" }, { status: 403 });
-  }
-  const agencyId = agencyUser.data.agency_id as string;
+    // Auth
+    const userRes = await supabase.auth.getUser(token);
+    const user = userRes.data.user;
+    if (userRes.error || !user) {
+      return NextResponse.json(
+        { error: userRes.error?.message ?? "Unauthorized" },
+        { status: 401 }
+      );
+    }
 
-  // Verify client belongs to agency
-  const clientRes = await supabase
-    .from("clients")
-    .select("id,name,website,industry,agency_id")
-    .eq("id", body.clientId)
-    .maybeSingle();
-  if (clientRes.error || !clientRes.data) {
-    return NextResponse.json({ error: "Client not found" }, { status: 404 });
-  }
-  if (clientRes.data.agency_id !== agencyId) {
-    return NextResponse.json({ error: "Client not in your agency" }, { status: 403 });
-  }
+    // Map user -> agency
+    const agencyUser = await supabase
+      .from("agency_users")
+      .select("agency_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (agencyUser.error || !agencyUser.data?.agency_id) {
+      return NextResponse.json({ error: "Agency not found for user" }, { status: 403 });
+    }
+    const agencyId = agencyUser.data.agency_id as string;
 
-  // Enforce lock: existing running snapshot
-  const running = await supabase
-    .from("snapshots")
-    .select("id")
-    .eq("client_id", body.clientId)
-    .eq("status", "running")
-    .limit(1)
-    .maybeSingle();
-  if (running.data?.id) {
-    return NextResponse.json({ error: "Snapshot already running" }, { status: 409 });
-  }
+    // Verify client belongs to agency
+    const clientRes = await supabase
+      .from("clients")
+      .select("id,name,website,industry,agency_id")
+      .eq("id", body.clientId)
+      .maybeSingle();
+    if (clientRes.error || !clientRes.data) {
+      return NextResponse.json({ error: "Client not found" }, { status: 404 });
+    }
+    if (clientRes.data.agency_id !== agencyId) {
+      return NextResponse.json({ error: "Client not in your agency" }, { status: 403 });
+    }
 
-  // Create snapshot
-  const snapshotInsert = await supabase
-    .from("snapshots")
-    .insert({
-      agency_id: agencyId,
-      client_id: body.clientId,
-      status: "running",
-      started_at: new Date().toISOString(),
-      prompt_pack_version: PROMPT_PACK_VERSION
-    })
-    .select("id")
-    .single();
+    // Enforce lock: existing running snapshot
+    const running = await supabase
+      .from("snapshots")
+      .select("id")
+      .eq("client_id", body.clientId)
+      .eq("status", "running")
+      .limit(1)
+      .maybeSingle();
+    if (running.data?.id) {
+      return NextResponse.json({ error: "Snapshot already running" }, { status: 409 });
+    }
 
-  if (snapshotInsert.error || !snapshotInsert.data?.id) {
-    return NextResponse.json(
-      { error: snapshotInsert.error?.message ?? "Failed to create snapshot" },
-      { status: 500 }
-    );
-  }
-  const snapshotId = snapshotInsert.data.id as string;
+    // Create snapshot
+    const snapshotInsert = await supabase
+      .from("snapshots")
+      .insert({
+        agency_id: agencyId,
+        client_id: body.clientId,
+        status: "running",
+        started_at: new Date().toISOString(),
+        prompt_pack_version: PROMPT_PACK_VERSION
+      })
+      .select("id")
+      .single();
 
-  // Context: competitors list
-  const competitorsRes = await supabase
-    .from("competitors")
-    .select("name,website")
-    .eq("client_id", body.clientId);
-  const competitorNames =
-    competitorsRes.error || !competitorsRes.data ? [] : competitorsRes.data.map((c) => c.name);
+    if (snapshotInsert.error || !snapshotInsert.data?.id) {
+      return NextResponse.json(
+        { error: snapshotInsert.error?.message ?? "Failed to create snapshot" },
+        { status: 500 }
+      );
+    }
+    snapshotId = snapshotInsert.data.id as string;
+    console.log("created snapshot", { snapshotId });
 
-  const providers = getEnabledProviders();
-  if (providers.length === 0) {
+    // Context: competitors list
+    const competitorsRes = await supabase
+      .from("competitors")
+      .select("name,website")
+      .eq("client_id", body.clientId);
+    const competitorNames =
+      competitorsRes.error || !competitorsRes.data ? [] : competitorsRes.data.map((c) => c.name);
+
+    const providers = getEnabledProviders();
+    console.log("enabled providers", providers);
+    if (providers.length === 0) {
+      await supabase
+        .from("snapshots")
+        .update({
+          status: "failed",
+          error: "No providers enabled (set OPENAI_API_KEY or others)",
+          completed_at: new Date().toISOString()
+        })
+        .eq("id", snapshotId);
+      return NextResponse.json({ error: "No providers enabled" }, { status: 500 });
+    }
+
+    if (providers.includes("openai") && !process.env.OPENAI_API_KEY) {
+      await supabase
+        .from("snapshots")
+        .update({
+          status: "failed",
+          error: "OPENAI_API_KEY is missing",
+          completed_at: new Date().toISOString()
+        })
+        .eq("id", snapshotId);
+      return NextResponse.json({ error: "OPENAI_API_KEY is missing" }, { status: 500 });
+    }
+
+    const byProviderExtractions: Record<Provider, Extraction[]> = {
+      openai: [],
+      anthropic: [],
+      gemini: []
+    };
+
+    for (const provider of providers) {
+      if (provider !== "openai") continue; // only OpenAI implemented
+
+      for (const [idx, prompt] of PROMPTS.entries()) {
+        console.log("before openai call", { promptKey: prompt.key });
+        let rawText = "";
+        let parseOk = false;
+        let parsedJson: unknown = null;
+        let errorText: string | null = null;
+        let latencyMs: number | null = null;
+        let modelUsed: string | null = null;
+
+        try {
+          const result = await runOpenAI({
+            system: SYSTEM_PROMPT,
+            prompt: buildPrompt(
+              clientRes.data.name,
+              clientRes.data.industry,
+              competitorNames,
+              prompt
+            ),
+            model: process.env.OPENAI_MODEL
+          });
+          rawText = result.rawText;
+          latencyMs = result.latencyMs;
+          modelUsed = result.modelUsed;
+          parseOk = result.parsed.success;
+          if (result.parsed.success) {
+            parsedJson = result.parsed.data;
+            byProviderExtractions[provider].push(result.parsed.data);
+          } else {
+            parsedJson = result.parsed.error.flatten();
+          }
+        } catch (err) {
+          errorText = err instanceof Error ? err.message : String(err);
+        }
+
+        await supabase.from("responses").insert({
+          snapshot_id: snapshotId,
+          agency_id: agencyId,
+          prompt_ordinal: idx,
+          prompt_key: prompt.key,
+          prompt_text: prompt.text,
+          provider,
+          model: modelUsed,
+          raw_text: rawText,
+          parsed_json: parsedJson,
+          parse_ok: parseOk,
+          error: errorText,
+          latency_ms: latencyMs
+        });
+        console.log("stored response");
+      }
+    }
+
+    console.log("scoring");
+    const score = scoreBalanced(byProviderExtractions);
+
     await supabase
       .from("snapshots")
       .update({
-        status: "failed",
-        error: "No providers enabled (set OPENAI_API_KEY or others)"
+        status: "complete",
+        completed_at: new Date().toISOString(),
+        score_overall: score.overallScore,
+        score_by_provider: score.byProvider,
+        score_breakdown: score.breakdown
       })
       .eq("id", snapshotId);
-    return NextResponse.json({ error: "No providers enabled" }, { status: 500 });
-  }
 
-  const byProviderExtractions: Record<Provider, Extraction[]> = {
-    openai: [],
-    anthropic: [],
-    gemini: []
-  };
-
-  for (const provider of providers) {
-    if (provider !== "openai") continue; // only OpenAI implemented
-
-    for (const [idx, prompt] of PROMPTS.entries()) {
-      let rawText = "";
-      let parseOk = false;
-      let parsedJson: unknown = null;
-      let errorText: string | null = null;
-      let latencyMs: number | null = null;
-      let modelUsed: string | null = null;
-
-      try {
-        const result = await runOpenAI({
-          system: SYSTEM_PROMPT,
-          prompt: buildPrompt(clientRes.data.name, clientRes.data.industry, competitorNames, prompt),
-          model: process.env.OPENAI_MODEL
-        });
-        rawText = result.rawText;
-        latencyMs = result.latencyMs;
-        modelUsed = result.modelUsed;
-        parseOk = result.parsed.success;
-        if (result.parsed.success) {
-          parsedJson = result.parsed.data;
-          if (!byProviderExtractions[provider]) byProviderExtractions[provider] = [];
-          byProviderExtractions[provider].push(result.parsed.data);
-        } else {
-          parsedJson = result.parsed.error.flatten();
-        }
-      } catch (err) {
-        errorText = err instanceof Error ? err.message : String(err);
-      }
-
-      await supabase.from("responses").insert({
-        snapshot_id: snapshotId,
-        agency_id: agencyId,
-        prompt_ordinal: idx,
-        prompt_key: prompt.key,
-        prompt_text: prompt.text,
-        provider,
-        model: modelUsed,
-        raw_text: rawText,
-        parsed_json: parsedJson,
-        parse_ok: parseOk,
-        error: errorText,
-        latency_ms: latencyMs
-      });
+    console.log("snapshot complete");
+    return NextResponse.json({ snapshot_id: snapshotId, status: "complete", score });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (snapshotId) {
+      const supabase = getSupabaseAdminClient();
+      await supabase
+        .from("snapshots")
+        .update({
+          status: "failed",
+          error: message,
+          completed_at: new Date().toISOString()
+        })
+        .eq("id", snapshotId);
     }
+    return NextResponse.json({ error: message }, { status: 500 });
   }
-
-  const score = scoreBalanced(byProviderExtractions);
-
-  await supabase
-    .from("snapshots")
-    .update({
-      status: "complete",
-      completed_at: new Date().toISOString(),
-      score_overall: score.overallScore,
-      score_by_provider: score.byProvider,
-      score_breakdown: score.breakdown
-    })
-    .eq("id", snapshotId);
-
-  return NextResponse.json({ snapshot_id: snapshotId, status: "complete", score });
 }
 
 function buildPrompt(
