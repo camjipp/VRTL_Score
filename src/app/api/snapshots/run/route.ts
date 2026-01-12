@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { extractionSchema } from "@/lib/extraction/schema";
+import type { Extraction } from "@/lib/extraction/schema";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { PROMPT_PACK_VERSION, PROMPTS } from "@/lib/prompts/v1_core_10";
 import { runOpenAI } from "@/lib/llm/openai";
@@ -130,8 +131,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "No providers enabled" }, { status: 500 });
   }
 
-  const byProviderExtractions: Record<Provider, Array<ReturnType<typeof extractionSchema.parse>>> =
-    {} as any;
+  const byProviderExtractions: Record<Provider, Extraction[]> = {
+    openai: [],
+    anthropic: [],
+    gemini: []
+  };
 
   for (const provider of providers) {
     if (provider !== "openai") continue; // only OpenAI implemented
@@ -182,7 +186,7 @@ export async function POST(req: Request) {
     }
   }
 
-  const score = scoreBalanced(byProviderExtractions as any);
+  const score = scoreBalanced(byProviderExtractions);
 
   await supabase
     .from("snapshots")
