@@ -27,6 +27,7 @@ type SnapshotRow = {
   score_by_provider: Record<string, number> | null;
   completed_at: string | null;
   created_at: string;
+  error?: string | null;
 };
 
 type ResponseRow = {
@@ -81,7 +82,7 @@ export default function ClientDetailPage() {
     // latest snapshot
     const snapRes = await supabase
       .from("snapshots")
-      .select("id,status,vrtl_score,score_by_provider,completed_at,created_at")
+      .select("id,status,vrtl_score,score_by_provider,completed_at,created_at,error")
       .eq("client_id", clientId)
       .order("created_at", { ascending: false })
       .limit(1)
