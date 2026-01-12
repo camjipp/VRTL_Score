@@ -303,9 +303,8 @@ export async function POST(req: Request) {
       .update({
         status: "complete",
         completed_at: new Date().toISOString(),
-        score_overall: score.overallScore,
-        score_by_provider: score.byProvider,
-        score_breakdown: score.breakdown
+        vrtl_score: score.overallScore,
+        score_by_provider: score.byProvider
       })
       .eq("id", snapshotId);
 

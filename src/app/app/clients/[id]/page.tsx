@@ -23,9 +23,8 @@ type CompetitorRow = {
 type SnapshotRow = {
   id: string;
   status: string;
-  score_overall: number | null;
+  vrtl_score: number | null;
   score_by_provider: Record<string, number> | null;
-  score_breakdown: Record<string, number> | null;
   completed_at: string | null;
   created_at: string;
 };
@@ -82,7 +81,7 @@ export default function ClientDetailPage() {
     // latest snapshot
     const snapRes = await supabase
       .from("snapshots")
-      .select("id,status,score_overall,score_by_provider,score_breakdown,completed_at,created_at")
+      .select("id,status,vrtl_score,score_by_provider,completed_at,created_at")
       .eq("client_id", clientId)
       .order("created_at", { ascending: false })
       .limit(1)
@@ -316,7 +315,7 @@ export default function ClientDetailPage() {
           <div className="mt-4 rounded border p-4">
             <div className="text-sm text-gray-600">Status: {snapshot.status}</div>
             <div className="text-lg font-semibold">
-              Overall score: {snapshot.score_overall ?? "n/a"}
+              Overall score: {snapshot.vrtl_score ?? "n/a"}
             </div>
             {snapshot.score_by_provider ? (
               <div className="mt-2 text-sm">
