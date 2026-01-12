@@ -31,7 +31,12 @@ const SYSTEM_PROMPT = `You are a strict JSON generator. Respond ONLY with a JSON
 }
 Do not include any extra keys or text. evidence_snippet must be <= 200 characters.`;
 
-const STALE_RUNNING_SNAPSHOT_MS = 15 * 60 * 1000;
+function staleRunningSnapshotMs(): number {
+  const raw = process.env.SNAPSHOT_STALE_RUNNING_MS;
+  if (!raw) return 15 * 60 * 1000;
+  const n = Number(raw);
+  return Number.isFinite(n) && n > 0 ? n : 15 * 60 * 1000;
+}
 
 export async function POST(req: Request) {
   let snapshotId: string | null = null;
@@ -98,21 +103,27 @@ export async function POST(req: Request) {
       const ageMs = startedAtMs ? Date.now() - startedAtMs : null;
 
       // If we have a stale "running" snapshot (e.g., crash mid-run), auto-clear it so the user can retry.
-      if (ageMs !== null && ageMs > STALE_RUNNING_SNAPSHOT_MS) {
+      const staleMs = staleRunningSnapshotMs();
+      if (ageMs !== null && ageMs > staleMs) {
         console.log("stale running snapshot detected; auto-failing", {
           clientId: body.clientId,
           runningSnapshotId: running.data.id,
-          ageMs
+          ageMs,
+          staleMs
         });
+        const cutoffIso = new Date(Date.now() - staleMs).toISOString();
         await supabase
           .from("snapshots")
           .update({
             status: "failed",
-            error: `Auto-failed stale running snapshot (${running.data.id})`,
+            error: `auto-reset: stale>${Math.round(staleMs / 60000)}m (${running.data.id})`,
             completed_at: new Date().toISOString()
           })
           .eq("id", running.data.id)
-          .eq("status", "running");
+          .eq("status", "running")
+          // extra guards to reduce races with a legitimately active worker
+          .eq("started_at", startedAtIso ?? null)
+          .lt("started_at", cutoffIso);
       } else {
         console.log("snapshot lock hit", {
           clientId: body.clientId,
