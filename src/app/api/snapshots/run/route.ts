@@ -31,6 +31,8 @@ const SYSTEM_PROMPT = `You are a strict JSON generator. Respond ONLY with a JSON
 }
 Do not include any extra keys or text. evidence_snippet must be <= 200 characters.`;
 
+const STALE_RUNNING_SNAPSHOT_MS = 15 * 60 * 1000;
+
 export async function POST(req: Request) {
   let snapshotId: string | null = null;
 
@@ -85,18 +87,67 @@ export async function POST(req: Request) {
     // Enforce lock: existing running snapshot
     const running = await supabase
       .from("snapshots")
-      .select("id")
+      .select("id,started_at")
       .eq("client_id", body.clientId)
       .eq("status", "running")
       .limit(1)
       .maybeSingle();
     if (running.data?.id) {
-      console.log("snapshot lock hit", { clientId: body.clientId, runningSnapshotId: running.data.id });
+      const startedAtIso = running.data.started_at as string | null | undefined;
+      const startedAtMs = startedAtIso ? new Date(startedAtIso).getTime() : null;
+      const ageMs = startedAtMs ? Date.now() - startedAtMs : null;
+
+      // If we have a stale "running" snapshot (e.g., crash mid-run), auto-clear it so the user can retry.
+      if (ageMs !== null && ageMs > STALE_RUNNING_SNAPSHOT_MS) {
+        console.log("stale running snapshot detected; auto-failing", {
+          clientId: body.clientId,
+          runningSnapshotId: running.data.id,
+          ageMs
+        });
+        await supabase
+          .from("snapshots")
+          .update({
+            status: "failed",
+            error: `Auto-failed stale running snapshot (${running.data.id})`,
+            completed_at: new Date().toISOString()
+          })
+          .eq("id", running.data.id)
+          .eq("status", "running");
+      } else {
+        console.log("snapshot lock hit", {
+          clientId: body.clientId,
+          runningSnapshotId: running.data.id,
+          ageMs
+        });
+        return NextResponse.json(
+          {
+            error: "Snapshot already running",
+            clientId: body.clientId,
+            running_snapshot_id: running.data.id
+          },
+          { status: 409 }
+        );
+      }
+    }
+
+    // Re-check lock after potential stale-clear
+    const runningAfter = await supabase
+      .from("snapshots")
+      .select("id")
+      .eq("client_id", body.clientId)
+      .eq("status", "running")
+      .limit(1)
+      .maybeSingle();
+    if (runningAfter.data?.id) {
+      console.log("snapshot lock still present after stale-clear attempt", {
+        clientId: body.clientId,
+        runningSnapshotId: runningAfter.data.id
+      });
       return NextResponse.json(
         {
           error: "Snapshot already running",
           clientId: body.clientId,
-          running_snapshot_id: running.data.id
+          running_snapshot_id: runningAfter.data.id
         },
         { status: 409 }
       );
