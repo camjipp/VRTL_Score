@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 
 import { ensureOnboarded } from "@/lib/onboard";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -56,6 +57,7 @@ export default function ClientDetailPage() {
 
   const [snapshot, setSnapshot] = useState<SnapshotRow | null>(null);
   const [responses, setResponses] = useState<ResponseRow[]>([]);
+  const [snapshots, setSnapshots] = useState<SnapshotRow[]>([]);
   const [running, setRunning] = useState(false);
   const [runError, setRunError] = useState<string | null>(null);
 
@@ -79,26 +81,37 @@ export default function ClientDetailPage() {
     if (competitorsRes.error) throw competitorsRes.error;
     setCompetitors((competitorsRes.data ?? []) as CompetitorRow[]);
 
-    // latest snapshot
-    const snapRes = await supabase
+    // last 10 snapshots (newest first)
+    const snapsRes = await supabase
       .from("snapshots")
       .select("id,status,vrtl_score,score_by_provider,completed_at,created_at,error")
       .eq("client_id", clientId)
       .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (!snapRes.error && snapRes.data) {
-      setSnapshot(snapRes.data as SnapshotRow);
+      .limit(10);
+
+    if (!snapsRes.error && snapsRes.data) {
+      const rows = snapsRes.data as SnapshotRow[];
+      setSnapshots(rows);
+
+      const latest = rows[0] ?? null;
+      setSnapshot(latest);
+
+      if (!latest) {
+        setResponses([]);
+        return;
+      }
+
       const respRes = await supabase
         .from("responses")
         .select("id,provider,prompt_key,parsed_json,parse_ok")
-        .eq("snapshot_id", snapRes.data.id);
+        .eq("snapshot_id", latest.id);
       if (!respRes.error && respRes.data) {
         setResponses(respRes.data as ResponseRow[]);
       }
     } else {
       setSnapshot(null);
       setResponses([]);
+      setSnapshots([]);
     }
   }
 
@@ -335,8 +348,55 @@ export default function ClientDetailPage() {
                 Competitors mentioned: {competitorMentions.join(", ")}
               </div>
             ) : null}
+            {snapshot.error ? (
+              <div className="mt-3 text-sm text-red-700">Error: {snapshot.error}</div>
+            ) : null}
           </div>
         ) : null}
+
+        <div className="mt-6 overflow-x-auto">
+          <table className="min-w-full border text-sm">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="border px-3 py-2 text-left">Date</th>
+                <th className="border px-3 py-2 text-left">Status</th>
+                <th className="border px-3 py-2 text-left">VRTL Score</th>
+                <th className="border px-3 py-2 text-left">Providers</th>
+                <th className="border px-3 py-2 text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {snapshots.map((s) => (
+                <tr key={s.id}>
+                  <td className="border px-3 py-2">
+                    {new Date(s.created_at).toLocaleString()}
+                  </td>
+                  <td className="border px-3 py-2">{s.status}</td>
+                  <td className="border px-3 py-2">{s.vrtl_score ?? "—"}</td>
+                  <td className="border px-3 py-2">
+                    {s.score_by_provider
+                      ? Object.entries(s.score_by_provider)
+                          .map(([k, v]) => `${k}: ${v}`)
+                          .join(", ")
+                      : "—"}
+                  </td>
+                  <td className="border px-3 py-2">
+                    <Link className="underline" href={`/app/clients/${clientId}/snapshots/${s.id}`}>
+                      View
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+              {snapshots.length === 0 ? (
+                <tr>
+                  <td className="border px-3 py-2 text-gray-600" colSpan={5}>
+                    No snapshots yet.
+                  </td>
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
       </section>
     </main>
   );
