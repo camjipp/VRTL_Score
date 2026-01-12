@@ -8,6 +8,12 @@ import { runOpenAI } from "@/lib/llm/openai";
 import { getEnabledProviders, type Provider } from "@/lib/llm/providers";
 import { scoreBalanced } from "@/lib/scoring/v1_balanced";
 
+// Vercel/Next route hints: snapshot runs can take longer than default serverless timeouts.
+// Keep this on Node.js runtime (needed for OpenAI fetch + server-only env usage).
+export const runtime = "nodejs";
+export const maxDuration = 60;
+export const dynamic = "force-dynamic";
+
 type RunBody = {
   clientId?: string;
 };
@@ -112,7 +118,7 @@ export async function POST(req: Request) {
           staleMs
         });
         const cutoffIso = new Date(Date.now() - staleMs).toISOString();
-        await supabase
+        const cleared = await supabase
           .from("snapshots")
           .update({
             status: "failed",
@@ -121,9 +127,17 @@ export async function POST(req: Request) {
           })
           .eq("id", running.data.id)
           .eq("status", "running")
-          // extra guards to reduce races with a legitimately active worker
-          .eq("started_at", startedAtIso ?? null)
-          .lt("started_at", cutoffIso);
+          .lt("started_at", cutoffIso)
+          .select("id")
+          .maybeSingle();
+
+        if (cleared.data?.id) {
+          console.log("stale running snapshot auto-failed", { snapshotId: cleared.data.id });
+        } else {
+          console.log("stale-clear attempted but no row updated (race?)", {
+            runningSnapshotId: running.data.id
+          });
+        }
       } else {
         console.log("snapshot lock hit", {
           clientId: body.clientId,
