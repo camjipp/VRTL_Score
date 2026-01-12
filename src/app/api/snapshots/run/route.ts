@@ -94,6 +94,8 @@ export async function POST(req: Request) {
     if (clientRes.data.agency_id !== agencyId) {
       return NextResponse.json({ error: "Client not in your agency" }, { status: 403 });
     }
+    const clientName = clientRes.data.name as string;
+    const clientIndustry = clientRes.data.industry as string;
 
     // Enforce lock: existing running snapshot
     const running = await supabase
@@ -243,56 +245,61 @@ export async function POST(req: Request) {
     for (const provider of providers) {
       if (provider !== "openai") continue; // only OpenAI implemented
 
-      for (const [idx, prompt] of PROMPTS.entries()) {
-        console.log("before openai call", { promptKey: prompt.key });
-        let rawText = "";
-        let parseOk = false;
-        let parsedJson: unknown = null;
-        let errorText: string | null = null;
-        let latencyMs: number | null = null;
-        let modelUsed: string | null = null;
+      // Run prompts with limited concurrency to avoid Vercel timeouts while keeping load reasonable.
+      await runWithConcurrency(
+        PROMPTS.map((prompt, idx) => ({ prompt, idx })),
+        3,
+        async ({ prompt, idx }) => {
+          console.log("before openai call", { promptKey: prompt.key });
+          let rawText = "";
+          let parseOk = false;
+          let parsedJson: unknown = null;
+          let errorText: string | null = null;
+          let latencyMs: number | null = null;
+          let modelUsed: string | null = null;
 
-        try {
-          const result = await runOpenAI({
-            system: SYSTEM_PROMPT,
-            prompt: buildPrompt(
-              clientRes.data.name,
-              clientRes.data.industry,
-              competitorNames,
-              prompt
-            ),
-            model: process.env.OPENAI_MODEL
-          });
-          rawText = result.rawText;
-          latencyMs = result.latencyMs;
-          modelUsed = result.modelUsed;
-          parseOk = result.parsed.success;
-          if (result.parsed.success) {
-            parsedJson = result.parsed.data;
-            byProviderExtractions[provider].push(result.parsed.data);
-          } else {
-            parsedJson = result.parsed.error.flatten();
+          try {
+            const result = await runOpenAI({
+              system: SYSTEM_PROMPT,
+              prompt: buildPrompt(
+                clientName,
+                clientIndustry,
+                competitorNames,
+                prompt
+              ),
+              model: process.env.OPENAI_MODEL
+            });
+            rawText = result.rawText;
+            latencyMs = result.latencyMs;
+            modelUsed = result.modelUsed;
+            parseOk = result.parsed.success;
+            if (result.parsed.success) {
+              parsedJson = result.parsed.data;
+              byProviderExtractions[provider].push(result.parsed.data);
+            } else {
+              parsedJson = result.parsed.error.flatten();
+            }
+          } catch (err) {
+            errorText = err instanceof Error ? err.message : String(err);
           }
-        } catch (err) {
-          errorText = err instanceof Error ? err.message : String(err);
-        }
 
-        await supabase.from("responses").insert({
-          snapshot_id: snapshotId,
-          agency_id: agencyId,
-          prompt_ordinal: idx,
-          prompt_key: prompt.key,
-          prompt_text: prompt.text,
-          provider,
-          model: modelUsed,
-          raw_text: rawText,
-          parsed_json: parsedJson,
-          parse_ok: parseOk,
-          error: errorText,
-          latency_ms: latencyMs
-        });
-        console.log("stored response");
-      }
+          await supabase.from("responses").insert({
+            snapshot_id: snapshotId,
+            agency_id: agencyId,
+            prompt_ordinal: idx,
+            prompt_key: prompt.key,
+            prompt_text: prompt.text,
+            provider,
+            model: modelUsed,
+            raw_text: rawText,
+            parsed_json: parsedJson,
+            parse_ok: parseOk,
+            error: errorText,
+            latency_ms: latencyMs
+          });
+          console.log("stored response", { promptKey: prompt.key });
+        }
+      );
     }
 
     console.log("scoring");
@@ -325,6 +332,22 @@ export async function POST(req: Request) {
     }
     return NextResponse.json({ error: message }, { status: 500 });
   }
+}
+
+async function runWithConcurrency<T>(
+  items: T[],
+  concurrency: number,
+  fn: (item: T) => Promise<void>
+): Promise<void> {
+  const queue = items.slice();
+  const workers = Array.from({ length: Math.max(1, concurrency) }, async () => {
+    while (queue.length) {
+      const item = queue.shift();
+      if (!item) return;
+      await fn(item);
+    }
+  });
+  await Promise.all(workers);
 }
 
 function buildPrompt(
