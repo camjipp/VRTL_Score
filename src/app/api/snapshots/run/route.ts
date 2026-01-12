@@ -91,7 +91,15 @@ export async function POST(req: Request) {
       .limit(1)
       .maybeSingle();
     if (running.data?.id) {
-      return NextResponse.json({ error: "Snapshot already running" }, { status: 409 });
+      console.log("snapshot lock hit", { clientId: body.clientId, runningSnapshotId: running.data.id });
+      return NextResponse.json(
+        {
+          error: "Snapshot already running",
+          clientId: body.clientId,
+          running_snapshot_id: running.data.id
+        },
+        { status: 409 }
+      );
     }
 
     // Create snapshot
