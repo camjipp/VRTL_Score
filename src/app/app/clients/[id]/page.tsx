@@ -20,6 +20,24 @@ type CompetitorRow = {
   created_at: string;
 };
 
+type SnapshotRow = {
+  id: string;
+  status: string;
+  score_overall: number | null;
+  score_by_provider: Record<string, number> | null;
+  score_breakdown: Record<string, number> | null;
+  completed_at: string | null;
+  created_at: string;
+};
+
+type ResponseRow = {
+  id: string;
+  provider: string | null;
+  prompt_key: string | null;
+  parsed_json: { competitors_mentioned?: string[] } | null;
+  parse_ok: boolean | null;
+};
+
 export default function ClientDetailPage() {
   const params = useParams<{ id: string }>();
   const clientId = useMemo(() => (typeof params?.id === "string" ? params.id : ""), [params]);
@@ -35,6 +53,11 @@ export default function ClientDetailPage() {
   const [newName, setNewName] = useState("");
   const [newWebsite, setNewWebsite] = useState("");
   const [busy, setBusy] = useState(false);
+
+  const [snapshot, setSnapshot] = useState<SnapshotRow | null>(null);
+  const [responses, setResponses] = useState<ResponseRow[]>([]);
+  const [running, setRunning] = useState(false);
+  const [runError, setRunError] = useState<string | null>(null);
 
   async function refresh(currentAgencyId: string) {
     const clientRes = await supabase
@@ -55,6 +78,28 @@ export default function ClientDetailPage() {
 
     if (competitorsRes.error) throw competitorsRes.error;
     setCompetitors((competitorsRes.data ?? []) as CompetitorRow[]);
+
+    // latest snapshot
+    const snapRes = await supabase
+      .from("snapshots")
+      .select("id,status,score_overall,score_by_provider,score_breakdown,completed_at,created_at")
+      .eq("client_id", clientId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!snapRes.error && snapRes.data) {
+      setSnapshot(snapRes.data as SnapshotRow);
+      const respRes = await supabase
+        .from("responses")
+        .select("id,provider,prompt_key,parsed_json,parse_ok")
+        .eq("snapshot_id", snapRes.data.id);
+      if (!respRes.error && respRes.data) {
+        setResponses(respRes.data as ResponseRow[]);
+      }
+    } else {
+      setSnapshot(null);
+      setResponses([]);
+    }
   }
 
   useEffect(() => {
@@ -80,6 +125,41 @@ export default function ClientDetailPage() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientId]);
+
+  async function runSnapshot() {
+    if (!clientId) return;
+    setRunError(null);
+    setRunning(true);
+    try {
+      const { accessToken } = await ensureOnboarded();
+      const res = await fetch("/api/snapshots/run", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({ clientId })
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Snapshot failed (${res.status})`);
+      }
+      // reload snapshot/responses
+      await refresh(agencyId ?? "");
+    } catch (e) {
+      setRunError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setRunning(false);
+    }
+  }
+
+  const competitorMentions = Array.from(
+    new Set(
+      responses
+        .filter((r) => r.parse_ok && r.parsed_json?.competitors_mentioned)
+        .flatMap((r) => r.parsed_json?.competitors_mentioned ?? [])
+    )
+  );
 
   async function addCompetitor(e: React.FormEvent) {
     e.preventDefault();
@@ -204,6 +284,59 @@ export default function ClientDetailPage() {
             {busy ? "Adding…" : "Add competitor"}
           </button>
         </form>
+      </section>
+
+      <section className="mt-10">
+        <h2 className="text-lg font-medium">Snapshots</h2>
+        <div className="mt-3 flex items-center gap-3">
+          <button
+            className="rounded border px-3 py-2 text-sm"
+            disabled={running}
+            onClick={runSnapshot}
+            type="button"
+          >
+            {running ? "Running…" : "Run Snapshot"}
+          </button>
+          {snapshot ? (
+            <span className="text-xs text-gray-600">
+              Latest: {snapshot.status}{" "}
+              {snapshot.completed_at ? `@ ${new Date(snapshot.completed_at).toLocaleString()}` : ""}
+            </span>
+          ) : (
+            <span className="text-xs text-gray-600">No snapshots yet.</span>
+          )}
+        </div>
+        {runError ? (
+          <div className="mt-3 rounded border border-red-300 bg-red-50 p-2 text-sm text-red-800">
+            {runError}
+          </div>
+        ) : null}
+
+        {snapshot ? (
+          <div className="mt-4 rounded border p-4">
+            <div className="text-sm text-gray-600">Status: {snapshot.status}</div>
+            <div className="text-lg font-semibold">
+              Overall score: {snapshot.score_overall ?? "n/a"}
+            </div>
+            {snapshot.score_by_provider ? (
+              <div className="mt-2 text-sm">
+                Providers:
+                <ul className="ml-4 list-disc">
+                  {Object.entries(snapshot.score_by_provider).map(([p, s]) => (
+                    <li key={p}>
+                      {p}: {s}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+            {competitorMentions.length ? (
+              <div className="mt-3 text-sm">
+                Competitors mentioned: {competitorMentions.join(", ")}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </section>
     </main>
   );
