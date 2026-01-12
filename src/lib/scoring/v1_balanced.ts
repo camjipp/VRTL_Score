@@ -72,11 +72,13 @@ function scoreOne(extractions: Extraction[]): ScoreResult {
 export function scoreBalanced(
   byProviderExtractions: Record<Provider, Extraction[]>
 ): ScoreResult {
-  const byProvider: ProviderScores = {} as ProviderScores;
+  const byProvider: Partial<ProviderScores> = {};
   const breakdown: Record<string, number> = {};
   const overallScores: number[] = [];
 
   for (const [provider, extractions] of Object.entries(byProviderExtractions)) {
+    // Only score providers that actually ran (i.e., produced extractions).
+    if (!Array.isArray(extractions) || extractions.length === 0) continue;
     const res = scoreOne(extractions);
     byProvider[provider as Provider] = res.overallScore;
     overallScores.push(res.overallScore);
@@ -93,7 +95,7 @@ export function scoreBalanced(
 
   return {
     overallScore: clamp100(overall),
-    byProvider,
+    byProvider: byProvider as ProviderScores,
     breakdown
   };
 }
