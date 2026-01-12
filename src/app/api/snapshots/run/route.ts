@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-import { extractionSchema } from "@/lib/extraction/schema";
 import type { Extraction } from "@/lib/extraction/schema";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { PROMPT_PACK_VERSION, PROMPTS } from "@/lib/prompts/v1_core_10";

@@ -33,9 +33,19 @@ type ResponseRow = {
   prompt_ordinal: number | null;
   prompt_text: string | null;
   parse_ok: boolean | null;
-  parsed_json: any | null;
+  parsed_json: ParsedJson | null;
   raw_text: string | null;
   created_at: string;
+};
+
+type ParsedJson = {
+  client_mentioned?: boolean;
+  client_position?: string;
+  recommendation_strength?: string;
+  evidence_snippet?: string;
+  competitors_mentioned?: string[];
+  has_sources_or_citations?: boolean;
+  has_specific_features?: boolean;
 };
 
 type PageProps = {
