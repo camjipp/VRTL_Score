@@ -11,7 +11,7 @@ import { scoreBalanced } from "@/lib/scoring/v1_balanced";
 // Vercel/Next route hints: snapshot runs can take longer than default serverless timeouts.
 // Keep this on Node.js runtime (needed for OpenAI fetch + server-only env usage).
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 300;
 export const dynamic = "force-dynamic";
 
 type RunBody = {
@@ -42,6 +42,14 @@ function staleRunningSnapshotMs(): number {
   if (!raw) return 15 * 60 * 1000;
   const n = Number(raw);
   return Number.isFinite(n) && n > 0 ? n : 15 * 60 * 1000;
+}
+
+function openAiConcurrency(): number {
+  const raw = process.env.SNAPSHOT_OPENAI_CONCURRENCY;
+  if (!raw) return 6;
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return 6;
+  return Math.max(1, Math.min(10, Math.floor(n)));
 }
 
 export async function POST(req: Request) {
@@ -248,7 +256,7 @@ export async function POST(req: Request) {
       // Run prompts with limited concurrency to avoid Vercel timeouts while keeping load reasonable.
       await runWithConcurrency(
         PROMPTS.map((prompt, idx) => ({ prompt, idx })),
-        3,
+        openAiConcurrency(),
         async ({ prompt, idx }) => {
           console.log("before openai call", { promptKey: prompt.key });
           let rawText = "";
