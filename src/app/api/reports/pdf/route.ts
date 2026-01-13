@@ -106,14 +106,25 @@ export async function GET(req: Request) {
   const clientId = snapshotRes.data.client_id as string;
 
   // Agency
-  const agencyRes = await supabase
+  let agencyRes = await supabase
     .from("agencies")
     .select("name,brand_logo_url,brand_accent")
     .eq("id", agencyId)
     .maybeSingle();
-  const agency = agencyRes.data;
+  let agency = agencyRes.data;
   if (!agency) {
-    return NextResponse.json({ error: "Agency record not found", agencyId }, { status: 404 });
+    const agencyInsert = await supabase
+      .from("agencies")
+      .insert({ id: agencyId, name: "New Agency" })
+      .select("name,brand_logo_url,brand_accent")
+      .single();
+    if (agencyInsert.error || !agencyInsert.data) {
+      return NextResponse.json(
+        { error: agencyInsert.error?.message ?? "Failed to create agency", agencyId },
+        { status: 500 }
+      );
+    }
+    agency = agencyInsert.data;
   }
 
   // Client
