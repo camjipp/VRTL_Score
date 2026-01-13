@@ -91,13 +91,16 @@ export async function GET(req: Request) {
     .eq("id", snapshotId)
     .maybeSingle();
   if (snapshotRes.error || !snapshotRes.data) {
-    return NextResponse.json({ error: "Snapshot not found" }, { status: 404 });
+    return NextResponse.json({ error: "Snapshot not found", snapshotId }, { status: 404 });
   }
   const snapshotAgencyId = snapshotRes.data.agency_id as string;
 
   // Enforce snapshot belongs to user's agency
   if (snapshotAgencyId !== agencyId) {
-    return NextResponse.json({ error: "Snapshot not in your agency" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Snapshot not in your agency", snapshotId, snapshotAgencyId, userAgencyId: agencyId },
+      { status: 403 }
+    );
   }
 
   const clientId = snapshotRes.data.client_id as string;
@@ -110,7 +113,7 @@ export async function GET(req: Request) {
     .maybeSingle();
   const agency = agencyRes.data;
   if (!agency) {
-    return NextResponse.json({ error: "Agency record not found" }, { status: 404 });
+    return NextResponse.json({ error: "Agency record not found", agencyId }, { status: 404 });
   }
 
   // Client
