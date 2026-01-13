@@ -48,14 +48,12 @@ type ParsedJson = {
   has_specific_features?: boolean;
 };
 
-type ParamsShape = {
-  id?: string;
-  snapshotId?: string;
+type PageProps = {
+  params: Promise<{
+    id: string;
+    snapshotId: string;
+  }>;
 };
-
-type PageProps =
-  | { params?: ParamsShape }
-  | { params?: Promise<ParamsShape> };
 
 function formatDate(d?: string | null) {
   if (!d) return "—";
@@ -76,9 +74,9 @@ function truncateText(text: string, len = 180) {
 }
 
 export default async function SnapshotDetailPage({ params }: PageProps) {
-  const resolvedParams = params && "then" in params ? await params : params;
-  const clientId = resolvedParams?.id ?? "";
-  const snapshotId = resolvedParams?.snapshotId ?? "";
+  const resolvedParams = await params;
+  const clientId = resolvedParams.id;
+  const snapshotId = resolvedParams.snapshotId;
   const supabase = getSupabaseAdminClient();
 
   // Fetch snapshot
