@@ -33,8 +33,6 @@ type SnapshotRow = {
 
 type ResponseRow = {
   id: string;
-  provider: string | null;
-  prompt_key: string | null;
   parsed_json: { competitors_mentioned?: string[] } | null;
   parse_ok: boolean | null;
 };
@@ -103,7 +101,7 @@ export default function ClientDetailPage() {
 
       const respRes = await supabase
         .from("responses")
-        .select("id,provider,prompt_key,parsed_json,parse_ok")
+        .select("id,parsed_json,parse_ok")
         .eq("snapshot_id", latest.id);
       if (!respRes.error && respRes.data) {
         setResponses(respRes.data as ResponseRow[]);

@@ -28,8 +28,6 @@ type CompetitorRow = {
 
 type ResponseRow = {
   id: string;
-  provider: string | null;
-  model: string | null;
   prompt_ordinal: number | null;
   prompt_text: string | null;
   parse_ok: boolean | null;
@@ -123,7 +121,7 @@ export default async function SnapshotDetailPage({ params }: PageProps) {
   const responsesRes = await supabase
     .from("responses")
     .select(
-      "id,provider,model,prompt_ordinal,prompt_text,parse_ok,parsed_json,raw_text,created_at"
+      "id,prompt_ordinal,prompt_text,parse_ok,parsed_json,raw_text,created_at"
     )
     .eq("snapshot_id", snapshotId)
     .order("prompt_ordinal", { ascending: true });
@@ -227,7 +225,7 @@ export default async function SnapshotDetailPage({ params }: PageProps) {
           return (
             <div key={r.id} className="rounded border p-3 text-sm">
               <div className="text-xs text-gray-600">
-                {r.provider ?? "—"} · {r.prompt_text ?? "Prompt"} · parse_ok:{" "}
+                prompt #{String(r.prompt_ordinal ?? "—")} · {r.prompt_text ?? "Prompt"} · parse_ok:{" "}
                 {String(Boolean(r.parse_ok))}
               </div>
               <div className="mt-1">

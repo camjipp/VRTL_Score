@@ -290,20 +290,16 @@ export async function POST(req: Request) {
             errorText = err instanceof Error ? err.message : String(err);
           }
 
-          await supabase.from("responses").insert({
+          const ins = await supabase.from("responses").insert({
             snapshot_id: snapshotId,
             agency_id: agencyId,
             prompt_ordinal: idx,
-            prompt_key: prompt.key,
             prompt_text: prompt.text,
-            provider,
-            model: modelUsed,
             raw_text: rawText,
             parsed_json: parsedJson,
             parse_ok: parseOk,
-            error: errorText,
-            latency_ms: latencyMs
           });
+          if (ins.error) throw new Error(`Failed to insert response: ${ins.error.message}`);
           console.log("stored response", { promptKey: prompt.key });
         }
       );
