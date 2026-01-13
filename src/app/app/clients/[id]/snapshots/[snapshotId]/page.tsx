@@ -71,6 +71,30 @@ function truncateText(text: string, len = 180) {
   return `${text.slice(0, len)}…`;
 }
 
+type CompetitorConfidence = {
+  level: "low" | "medium" | "high";
+  label: "Low" | "Medium" | "High";
+  message: string | null;
+};
+
+function getCompetitorConfidence(count: number): CompetitorConfidence {
+  if (count <= 0) {
+    return {
+      level: "low",
+      label: "Low",
+      message: "Competitive analysis disabled — add 3+ competitors for full comparison."
+    };
+  }
+  if (count < 3) {
+    return {
+      level: "medium",
+      label: "Medium",
+      message: "Competitive analysis limited — add 1–2 more competitors for best results."
+    };
+  }
+  return { level: "high", label: "High", message: null };
+}
+
 export default async function SnapshotDetailPage({ params }: PageProps) {
   const resolvedParams = await params;
   const clientId = resolvedParams.id;
@@ -116,6 +140,7 @@ export default async function SnapshotDetailPage({ params }: PageProps) {
     .eq("client_id", clientId)
     .order("name", { ascending: true });
   const competitors = (competitorsRes.data ?? []) as CompetitorRow[];
+  const competitorConfidence = getCompetitorConfidence(competitors.length);
 
   // Fetch responses
   const responsesRes = await supabase
@@ -165,6 +190,11 @@ export default async function SnapshotDetailPage({ params }: PageProps) {
           {formatDate(snapshot.completed_at)}
         </div>
         <div className="text-lg font-semibold">Overall score: {snapshot.vrtl_score ?? "—"}</div>
+        {competitorConfidence.level !== "high" ? (
+          <div className="text-sm text-gray-700">
+            Score confidence: {competitorConfidence.label} due to limited competitor set.
+          </div>
+        ) : null}
         <div className="text-sm">Providers: {summarizeProviders(snapshot.score_by_provider)}</div>
         <div className="text-sm">Prompt pack: {snapshot.prompt_pack_version ?? "—"}</div>
         {client ? (
@@ -185,6 +215,11 @@ export default async function SnapshotDetailPage({ params }: PageProps) {
             ? competitors.map((c) => c.name).join(", ")
             : "none"}
         </div>
+        {competitorConfidence.message ? (
+          <div className="text-sm rounded border bg-yellow-50 p-2">
+            {competitorConfidence.message}
+          </div>
+        ) : null}
         {snapshot.error ? (
           <div className="text-sm text-red-700">Error: {snapshot.error}</div>
         ) : null}

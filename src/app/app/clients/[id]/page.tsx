@@ -37,6 +37,30 @@ type ResponseRow = {
   parse_ok: boolean | null;
 };
 
+type CompetitorConfidence = {
+  level: "low" | "medium" | "high";
+  label: "Low" | "Medium" | "High";
+  message: string | null;
+};
+
+function getCompetitorConfidence(count: number): CompetitorConfidence {
+  if (count <= 0) {
+    return {
+      level: "low",
+      label: "Low",
+      message: "Competitive scoring disabled — add 3+ competitors for full comparison."
+    };
+  }
+  if (count < 3) {
+    return {
+      level: "medium",
+      label: "Medium",
+      message: "Competitive scoring limited — add 1–2 more competitors for best results."
+    };
+  }
+  return { level: "high", label: "High", message: null };
+}
+
 export default function ClientDetailPage() {
   const params = useParams<{ id: string }>();
   const clientId = useMemo(() => (typeof params?.id === "string" ? params.id : ""), [params]);
@@ -172,6 +196,8 @@ export default function ClientDetailPage() {
     )
   );
 
+  const competitorConfidence = getCompetitorConfidence(competitors.length);
+
   async function addCompetitor(e: React.FormEvent) {
     e.preventDefault();
     if (!agencyId) return;
@@ -299,6 +325,12 @@ export default function ClientDetailPage() {
 
       <section className="mt-10">
         <h2 className="text-lg font-medium">Snapshots</h2>
+        {competitorConfidence.message ? (
+          <div className="mt-3 rounded border bg-yellow-50 p-3 text-sm">
+            <div className="font-medium">Score confidence: {competitorConfidence.label}</div>
+            <div className="mt-1">{competitorConfidence.message}</div>
+          </div>
+        ) : null}
         <div className="mt-3 flex items-center gap-3">
           <button
             className="rounded border px-3 py-2 text-sm"
@@ -329,6 +361,11 @@ export default function ClientDetailPage() {
             <div className="text-lg font-semibold">
               Overall score: {snapshot.vrtl_score ?? "n/a"}
             </div>
+            {competitorConfidence.level !== "high" ? (
+              <div className="mt-1 text-sm text-gray-700">
+                Score confidence: {competitorConfidence.label} due to limited competitor set.
+              </div>
+            ) : null}
             {snapshot.score_by_provider ? (
               <div className="mt-2 text-sm">
                 Providers:
