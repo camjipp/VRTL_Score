@@ -48,12 +48,14 @@ type ParsedJson = {
   has_specific_features?: boolean;
 };
 
-type PageProps = {
-  params: {
-    id: string;
-    snapshotId: string;
-  };
+type ParamsShape = {
+  id?: string;
+  snapshotId?: string;
 };
+
+type PageProps =
+  | { params?: ParamsShape }
+  | { params?: Promise<ParamsShape> };
 
 function formatDate(d?: string | null) {
   if (!d) return "—";
@@ -74,8 +76,9 @@ function truncateText(text: string, len = 180) {
 }
 
 export default async function SnapshotDetailPage({ params }: PageProps) {
-  const clientId = params.id;
-  const snapshotId = params.snapshotId;
+  const resolvedParams = params && "then" in params ? await params : params;
+  const clientId = resolvedParams?.id ?? "";
+  const snapshotId = resolvedParams?.snapshotId ?? "";
   const supabase = getSupabaseAdminClient();
 
   // Fetch snapshot
@@ -168,6 +171,24 @@ export default async function SnapshotDetailPage({ params }: PageProps) {
         <div className="text-lg font-semibold">Overall score: {snapshot.vrtl_score ?? "—"}</div>
         <div className="text-sm">Providers: {summarizeProviders(snapshot.score_by_provider)}</div>
         <div className="text-sm">Prompt pack: {snapshot.prompt_pack_version ?? "—"}</div>
+        {client ? (
+          <div className="text-sm">
+            Client site:{" "}
+            {client.website ? (
+              <a className="underline" href={client.website} target="_blank" rel="noreferrer">
+                {client.website}
+              </a>
+            ) : (
+              "—"
+            )}
+          </div>
+        ) : null}
+        <div className="text-sm">
+          Competitors:{" "}
+          {competitors.length
+            ? competitors.map((c) => c.name).join(", ")
+            : "none"}
+        </div>
         {snapshot.error ? (
           <div className="text-sm text-red-700">Error: {snapshot.error}</div>
         ) : null}
