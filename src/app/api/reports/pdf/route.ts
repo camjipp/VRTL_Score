@@ -43,65 +43,39 @@ export async function GET(req: Request) {
     );
   }
 
-  // Resolve agency_id for user (self-heal if missing)
-  let agencyId: string | null = null;
-  const agencyUser = await supabase
-    .from("agency_users")
-    .select("agency_id")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (agencyUser.data?.agency_id) {
-    agencyId = agencyUser.data.agency_id as string;
-  } else {
-    // Self-heal: create agency + upsert mapping
-    const agencyInsert = await supabase
-      .from("agencies")
-      .insert({ name: "New Agency" })
-      .select("id")
-      .single();
-    if (agencyInsert.error || !agencyInsert.data?.id) {
-      return NextResponse.json(
-        { error: agencyInsert.error?.message ?? "Failed to create agency" },
-        { status: 500 }
-      );
-    }
-    agencyId = agencyInsert.data.id as string;
-
-    const mapping = await supabase
-      .from("agency_users")
-      .upsert({ user_id: user.id, agency_id: agencyId, role: "owner" }, { onConflict: "user_id" })
-      .select("agency_id")
-      .single();
-    if (mapping.error || !mapping.data?.agency_id) {
-      return NextResponse.json(
-        { error: mapping.error?.message ?? "Failed to map user to agency" },
-        { status: 500 }
-      );
-    }
-    agencyId = mapping.data.agency_id as string;
-  }
-
-  // Snapshot (get agency_id directly)
+  // Snapshot (authoritative agency_id)
   const snapshotRes = await supabase
     .from("snapshots")
     .select(
       "id,status,vrtl_score,score_by_provider,created_at,completed_at,error,prompt_pack_version,client_id,agency_id"
     )
     .eq("id", snapshotId)
-    .maybeSingle();
+    .single();
   if (snapshotRes.error || !snapshotRes.data) {
     return NextResponse.json({ error: "Snapshot not found", snapshotId }, { status: 404 });
   }
   const snapshotAgencyId = snapshotRes.data.agency_id as string;
 
+  // Resolve agency membership for user (no auto-create here)
+  const agencyUser = await supabase
+    .from("agency_users")
+    .select("agency_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (agencyUser.error || !agencyUser.data?.agency_id) {
+    return NextResponse.json({ error: "User not onboarded" }, { status: 403 });
+  }
+  const userAgencyId = agencyUser.data.agency_id as string;
+
   // Enforce snapshot belongs to user's agency
-  if (snapshotAgencyId !== agencyId) {
+  if (snapshotAgencyId !== userAgencyId) {
     return NextResponse.json(
-      { error: "Snapshot not in your agency", snapshotId, snapshotAgencyId, userAgencyId: agencyId },
+      { error: "Snapshot not in your agency", snapshotId, snapshotAgencyId, userAgencyId },
       { status: 403 }
     );
   }
+
+  const agencyId = snapshotAgencyId;
 
   const clientId = snapshotRes.data.client_id as string;
 
