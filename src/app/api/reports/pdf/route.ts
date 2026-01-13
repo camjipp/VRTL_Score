@@ -80,7 +80,7 @@ export async function GET(req: Request) {
   const clientId = snapshotRes.data.client_id as string;
 
   // Agency
-  let agencyRes = await supabase
+  const agencyRes = await supabase
     .from("agencies")
     .select("name,brand_logo_url,brand_accent")
     .eq("id", agencyId)
