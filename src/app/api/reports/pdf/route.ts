@@ -1,3 +1,5 @@
+import { Buffer } from "node:buffer";
+
 import { NextResponse } from "next/server";
 
 import chromium from "@sparticuz/chromium";
@@ -7,6 +9,7 @@ import { renderReportHtml } from "@/lib/reports/renderReportHtml";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 function bearerToken(req: Request): string | null {
@@ -130,7 +133,8 @@ export async function GET(req: Request) {
     const filename = `VRTLScore_${clientRes.data.name.replace(/\s+/g, "_")}_${new Date()
       .toISOString()
       .slice(0, 10)}.pdf`;
-    return new NextResponse(pdfBuffer, {
+    const body = Buffer.from(pdfBuffer);
+    return new NextResponse(body, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",

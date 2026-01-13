@@ -261,7 +261,7 @@ export async function POST(req: Request) {
           let rawText = "";
           let parseOk = false;
           let parsedJson: unknown = null;
-          let errorText: string | null = null;
+        let _errorText: string | null = null;
           let latencyMs: number | null = null;
           let modelUsed: string | null = null;
 
@@ -287,7 +287,7 @@ export async function POST(req: Request) {
               parsedJson = result.parsed.error.flatten();
             }
           } catch (err) {
-            errorText = err instanceof Error ? err.message : String(err);
+          _errorText = err instanceof Error ? err.message : String(err);
           }
 
           const ins = await supabase.from("responses").insert({
