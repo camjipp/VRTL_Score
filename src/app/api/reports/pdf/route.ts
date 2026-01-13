@@ -43,6 +43,45 @@ export async function GET(req: Request) {
     );
   }
 
+  // Resolve agency_id for user (self-heal if missing)
+  let agencyId: string | null = null;
+  const agencyUser = await supabase
+    .from("agency_users")
+    .select("agency_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (agencyUser.data?.agency_id) {
+    agencyId = agencyUser.data.agency_id as string;
+  } else {
+    // Self-heal: create agency + upsert mapping
+    const agencyInsert = await supabase
+      .from("agencies")
+      .insert({ name: "New Agency" })
+      .select("id")
+      .single();
+    if (agencyInsert.error || !agencyInsert.data?.id) {
+      return NextResponse.json(
+        { error: agencyInsert.error?.message ?? "Failed to create agency" },
+        { status: 500 }
+      );
+    }
+    agencyId = agencyInsert.data.id as string;
+
+    const mapping = await supabase
+      .from("agency_users")
+      .upsert({ user_id: user.id, agency_id: agencyId, role: "owner" }, { onConflict: "user_id" })
+      .select("agency_id")
+      .single();
+    if (mapping.error || !mapping.data?.agency_id) {
+      return NextResponse.json(
+        { error: mapping.error?.message ?? "Failed to map user to agency" },
+        { status: 500 }
+      );
+    }
+    agencyId = mapping.data.agency_id as string;
+  }
+
   // Snapshot (get agency_id directly)
   const snapshotRes = await supabase
     .from("snapshots")
@@ -54,16 +93,10 @@ export async function GET(req: Request) {
   if (snapshotRes.error || !snapshotRes.data) {
     return NextResponse.json({ error: "Snapshot not found" }, { status: 404 });
   }
-  const agencyId = snapshotRes.data.agency_id as string;
+  const snapshotAgencyId = snapshotRes.data.agency_id as string;
 
-  // Verify user is in this snapshot's agency
-  const agencyUser = await supabase
-    .from("agency_users")
-    .select("agency_id")
-    .eq("user_id", user.id)
-    .eq("agency_id", agencyId)
-    .maybeSingle();
-  if (agencyUser.error || !agencyUser.data?.agency_id) {
+  // Enforce snapshot belongs to user's agency
+  if (snapshotAgencyId !== agencyId) {
     return NextResponse.json({ error: "Snapshot not in your agency" }, { status: 403 });
   }
 
