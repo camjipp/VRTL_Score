@@ -43,18 +43,7 @@ export async function GET(req: Request) {
     );
   }
 
-  // Map user -> agency
-  const agencyUser = await supabase
-    .from("agency_users")
-    .select("agency_id")
-    .eq("user_id", user.id)
-    .maybeSingle();
-  if (agencyUser.error || !agencyUser.data?.agency_id) {
-    return NextResponse.json({ error: "Agency not found for user" }, { status: 403 });
-  }
-  const agencyId = agencyUser.data.agency_id as string;
-
-  // Snapshot
+  // Snapshot (get agency_id directly)
   const snapshotRes = await supabase
     .from("snapshots")
     .select(
@@ -65,7 +54,16 @@ export async function GET(req: Request) {
   if (snapshotRes.error || !snapshotRes.data) {
     return NextResponse.json({ error: "Snapshot not found" }, { status: 404 });
   }
-  if (snapshotRes.data.agency_id !== agencyId) {
+  const agencyId = snapshotRes.data.agency_id as string;
+
+  // Verify user is in this snapshot's agency
+  const agencyUser = await supabase
+    .from("agency_users")
+    .select("agency_id")
+    .eq("user_id", user.id)
+    .eq("agency_id", agencyId)
+    .maybeSingle();
+  if (agencyUser.error || !agencyUser.data?.agency_id) {
     return NextResponse.json({ error: "Snapshot not in your agency" }, { status: 403 });
   }
 
