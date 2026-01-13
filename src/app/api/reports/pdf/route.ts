@@ -108,10 +108,9 @@ export async function GET(req: Request) {
     .select("name,brand_logo_url,brand_accent")
     .eq("id", agencyId)
     .maybeSingle();
-  const agency =
-    !agencyRes.error && agencyRes.data
-      ? agencyRes.data
-      : { name: "Agency", brand_logo_url: null, brand_accent: null };
+  const agency = !agencyRes.error && agencyRes.data
+    ? agencyRes.data
+    : { name: "Agency", brand_logo_url: null, brand_accent: null };
 
   // Client
   const clientRes = await supabase

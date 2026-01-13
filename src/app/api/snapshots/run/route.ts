@@ -261,24 +261,16 @@ export async function POST(req: Request) {
           let rawText = "";
           let parseOk = false;
           let parsedJson: unknown = null;
-        let _errorText: string | null = null;
-          let latencyMs: number | null = null;
-          let modelUsed: string | null = null;
+          // kept for possible future logging; eslint ignore to avoid unused warnings
+          let _errorText: string | null = null; // eslint-disable-line @typescript-eslint/no-unused-vars
 
           try {
             const result = await runOpenAI({
               system: SYSTEM_PROMPT,
-              prompt: buildPrompt(
-                clientName,
-                clientIndustry,
-                competitorNames,
-                prompt
-              ),
+              prompt: buildPrompt(clientName, clientIndustry, competitorNames, prompt),
               model: process.env.OPENAI_MODEL
             });
             rawText = result.rawText;
-            latencyMs = result.latencyMs;
-            modelUsed = result.modelUsed;
             parseOk = result.parsed.success;
             if (result.parsed.success) {
               parsedJson = result.parsed.data;
@@ -287,7 +279,7 @@ export async function POST(req: Request) {
               parsedJson = result.parsed.error.flatten();
             }
           } catch (err) {
-          _errorText = err instanceof Error ? err.message : String(err);
+            _errorText = err instanceof Error ? err.message : String(err);
           }
 
           const ins = await supabase.from("responses").insert({
@@ -297,7 +289,7 @@ export async function POST(req: Request) {
             prompt_text: prompt.text,
             raw_text: rawText,
             parsed_json: parsedJson,
-            parse_ok: parseOk,
+            parse_ok: parseOk
           });
           if (ins.error) throw new Error(`Failed to insert response: ${ins.error.message}`);
           console.log("stored response", { promptKey: prompt.key });
