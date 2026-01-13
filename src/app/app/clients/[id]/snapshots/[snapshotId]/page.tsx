@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
+import { DownloadPdfButton } from "@/components/DownloadPdfButton";
 
 type SnapshotRow = {
   id: string;
@@ -220,6 +221,7 @@ export default async function SnapshotDetailPage({ params }: PageProps) {
             {competitorConfidence.message}
           </div>
         ) : null}
+        <DownloadPdfButton snapshotId={snapshot.id} />
         {snapshot.error ? (
           <div className="text-sm text-red-700">Error: {snapshot.error}</div>
         ) : null}
