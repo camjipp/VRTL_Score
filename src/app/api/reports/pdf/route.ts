@@ -108,9 +108,10 @@ export async function GET(req: Request) {
     .select("name,brand_logo_url,brand_accent")
     .eq("id", agencyId)
     .maybeSingle();
-  const agency = !agencyRes.error && agencyRes.data
-    ? agencyRes.data
-    : { name: "Agency", brand_logo_url: null, brand_accent: null };
+  const agency = agencyRes.data;
+  if (!agency) {
+    return NextResponse.json({ error: "Agency record not found" }, { status: 404 });
+  }
 
   // Client
   const clientRes = await supabase
@@ -138,7 +139,7 @@ export async function GET(req: Request) {
   const responses = responsesRes.data ?? [];
 
   const html = renderReportHtml({
-    agency: agencyRes.data,
+    agency,
     client: clientRes.data,
     snapshot: snapshotRes.data,
     competitors,
