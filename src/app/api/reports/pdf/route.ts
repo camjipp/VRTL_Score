@@ -82,7 +82,7 @@ export async function GET(req: Request) {
   // Agency
   const agencyRes = await supabase
     .from("agencies")
-    .select("name,brand_logo_url,brand_accent")
+    .select("name")
     .eq("id", agencyId)
     .maybeSingle();
   let agency = agencyRes.data;
@@ -90,7 +90,7 @@ export async function GET(req: Request) {
     const agencyInsert = await supabase
       .from("agencies")
       .insert({ id: agencyId, name: "New Agency" })
-      .select("name,brand_logo_url,brand_accent")
+      .select("name")
       .single();
     if (agencyInsert.error || !agencyInsert.data) {
       return NextResponse.json(
