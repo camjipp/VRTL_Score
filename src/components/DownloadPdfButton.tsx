@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { ensureOnboarded } from "@/lib/onboard";
 
 type DownloadPdfButtonProps = {
   snapshotId: string;
@@ -17,13 +18,12 @@ export function DownloadPdfButton({ snapshotId }: DownloadPdfButtonProps) {
     setBusy(true);
     setError(null);
     try {
-      const sessionRes = await supabase.auth.getSession();
-      const token = sessionRes.data.session?.access_token;
-      if (!token) throw new Error("Not authenticated");
+      const { accessToken } = await ensureOnboarded();
+      if (!accessToken) throw new Error("Not authenticated");
 
       const res = await fetch(`/api/reports/pdf?snapshotId=${snapshotId}`, {
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${accessToken}`
         }
       });
       if (!res.ok) {
