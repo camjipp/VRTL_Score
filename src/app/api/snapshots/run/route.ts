@@ -288,8 +288,7 @@ export async function POST(req: Request) {
             prompt_text: prompt.text,
             raw_text: rawText,
             parsed_json: parsedJson,
-            parse_ok: parseOk,
-            error: errorText
+            parse_ok: parseOk
           });
           if (ins.error) throw new Error(`Failed to insert response: ${ins.error.message}`);
           console.log("stored response", { promptKey: prompt.key });
