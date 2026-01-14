@@ -136,6 +136,7 @@ export async function GET(req: Request) {
 
   let browser: Awaited<ReturnType<typeof puppeteer.launch>> | null = null;
   let executablePath: string | null = null;
+  const headlessMode: "shell" = "shell";
   try {
     executablePath = await chromium.executablePath();
     console.log("[pdf] runtime", {
@@ -149,7 +150,7 @@ export async function GET(req: Request) {
     browser = await puppeteer.launch({
       args: chromium.args,
       executablePath,
-      headless: chromium.headless
+      headless: headlessMode
     });
 
     const page = await browser.newPage();
@@ -188,7 +189,7 @@ export async function GET(req: Request) {
           arch: process.arch,
           executablePath,
           argsLength: chromium.args.length,
-          headless: chromium.headless
+          headless: headlessMode
         }
       },
       { status: 500 }
