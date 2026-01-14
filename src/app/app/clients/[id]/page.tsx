@@ -223,7 +223,6 @@ export default function ClientDetailPage() {
     try {
       const insertRes = await supabase.from("competitors").insert({
         client_id: clientId,
-        agency_id: agencyId,
         name: newName,
         website: newWebsite || null
       });
