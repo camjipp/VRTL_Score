@@ -13,6 +13,8 @@ export const runtime = "nodejs";
 export const maxDuration = 300;
 export const dynamic = "force-dynamic";
 
+const SNAPSHOT_API_VERSION = "2026-01-13";
+
 type RunBody = {
   clientId?: string;
 };
@@ -310,7 +312,12 @@ export async function POST(req: Request) {
       .eq("id", snapshotId);
 
     console.log("snapshot complete");
-    return NextResponse.json({ snapshot_id: snapshotId, status: "complete", score });
+    return NextResponse.json({
+      apiVersion: SNAPSHOT_API_VERSION,
+      snapshot_id: snapshotId,
+      status: "complete",
+      score
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     if (snapshotId) {
@@ -324,7 +331,7 @@ export async function POST(req: Request) {
         })
         .eq("id", snapshotId);
     }
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ apiVersion: SNAPSHOT_API_VERSION, error: message }, { status: 500 });
   }
 }
 
