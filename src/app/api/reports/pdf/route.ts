@@ -183,6 +183,7 @@ export async function GET(req: Request) {
         message,
         snapshotId,
         diagnostics: {
+          awsLambdaJsRuntime: process.env.AWS_LAMBDA_JS_RUNTIME ?? null,
           node: process.version,
           platform: process.platform,
           arch: process.arch,
