@@ -1,5 +1,4 @@
 import { Buffer } from "node:buffer";
-import fs from "node:fs";
 
 import { NextResponse } from "next/server";
 
@@ -12,49 +11,6 @@ import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
-
-function firstExistingPath(paths: string[]): string | null {
-  for (const p of paths) {
-    try {
-      if (p && fs.existsSync(p)) return p;
-    } catch {
-      // ignore
-    }
-  }
-  return null;
-}
-
-async function resolveExecutablePath(): Promise<{ executablePath: string; args: string[] }> {
-  // Vercel/serverless is linux; use Sparticuz Chromium + args.
-  if (process.platform === "linux") {
-    const executablePath = await chromium.executablePath();
-    return { executablePath, args: chromium.args };
-  }
-
-  // Local dev (macOS/Windows): @sparticuz/chromium is not guaranteed to run.
-  const envPath =
-    process.env.PUPPETEER_EXECUTABLE_PATH ||
-    process.env.CHROME_EXECUTABLE_PATH ||
-    process.env.CHROME_PATH;
-  if (envPath) return { executablePath: envPath, args: [] };
-
-  const macCandidates = [
-    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-    "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary",
-    "/Applications/Chromium.app/Contents/MacOS/Chromium"
-  ];
-  const winCandidates = [
-    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-    "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
-  ];
-
-  const candidate = firstExistingPath(process.platform === "darwin" ? macCandidates : winCandidates);
-  if (candidate) return { executablePath: candidate, args: [] };
-
-  throw new Error(
-    "No Chrome executable found for local PDF generation. Set PUPPETEER_EXECUTABLE_PATH (or CHROME_EXECUTABLE_PATH)."
-  );
-}
 
 function bearerToken(req: Request): string | null {
   const header = req.headers.get("authorization") || req.headers.get("Authorization");
@@ -179,13 +135,23 @@ export async function GET(req: Request) {
   });
 
   let browser: Awaited<ReturnType<typeof puppeteer.launch>> | null = null;
+  let executablePath: string | null = null;
   try {
-    const { executablePath, args } = await resolveExecutablePath();
+    executablePath = await chromium.executablePath();
+    console.log("[pdf] runtime", {
+      node: process.version,
+      platform: process.platform,
+      arch: process.arch,
+      executablePath,
+      argsLength: chromium.args.length
+    });
+
     browser = await puppeteer.launch({
-      args,
+      args: chromium.args,
       defaultViewport: chromium.defaultViewport,
       executablePath,
-      headless: chromium.headless
+      headless: chromium.headless,
+      ignoreHTTPSErrors: true
     });
 
     const page = await browser.newPage();
@@ -211,8 +177,23 @@ export async function GET(req: Request) {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error("pdf_generation_failed", { snapshotId, message });
-    return NextResponse.json({ error: "PDF generation failed", message, snapshotId }, { status: 500 });
+    console.error("pdf_generation_failed", { snapshotId, message, executablePath });
+    return NextResponse.json(
+      {
+        error: "PDF generation failed",
+        message,
+        snapshotId,
+        diagnostics: {
+          node: process.version,
+          platform: process.platform,
+          arch: process.arch,
+          executablePath,
+          argsLength: chromium.args.length,
+          headless: chromium.headless
+        }
+      },
+      { status: 500 }
+    );
   } finally {
     if (browser) await browser.close();
   }
