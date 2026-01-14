@@ -43,6 +43,22 @@ type CompetitorConfidence = {
   message: string | null;
 };
 
+function errorMessage(e: unknown): string {
+  if (e instanceof Error) return e.message;
+  if (typeof e === "string") return e;
+  if (e && typeof e === "object") {
+    const maybe = e as Record<string, unknown>;
+    const msg = typeof maybe.message === "string" ? maybe.message : null;
+    const details = typeof maybe.details === "string" ? maybe.details : null;
+    const hint = typeof maybe.hint === "string" ? maybe.hint : null;
+    const code = typeof maybe.code === "string" ? maybe.code : null;
+    const parts = [msg, details, hint].filter(Boolean);
+    const base = parts.length ? parts.join(" · ") : "Unknown error";
+    return code ? `${base} (code: ${code})` : base;
+  }
+  return "Unknown error";
+}
+
 function getCompetitorConfidence(count: number): CompetitorConfidence {
   if (count <= 0) {
     return {
@@ -149,7 +165,7 @@ export default function ClientDetailPage() {
         setAgencyId(agencyId);
         await refresh(agencyId);
       } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e.message : String(e));
+        if (!cancelled) setError(errorMessage(e));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -182,7 +198,7 @@ export default function ClientDetailPage() {
       // reload snapshot/responses
       await refresh(agencyId ?? "");
     } catch (e) {
-      setRunError(e instanceof Error ? e.message : String(e));
+      setRunError(errorMessage(e));
     } finally {
       setRunning(false);
     }
@@ -216,7 +232,7 @@ export default function ClientDetailPage() {
       setNewWebsite("");
       await refresh(agencyId);
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -231,7 +247,7 @@ export default function ClientDetailPage() {
       if (delRes.error) throw delRes.error;
       await refresh(agencyId);
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(errorMessage(e));
     } finally {
       setBusy(false);
     }
