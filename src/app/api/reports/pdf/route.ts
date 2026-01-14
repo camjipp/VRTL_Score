@@ -136,7 +136,7 @@ export async function GET(req: Request) {
 
   let browser: Awaited<ReturnType<typeof puppeteer.launch>> | null = null;
   let executablePath: string | null = null;
-  const headlessMode: "shell" = "shell";
+  const headlessMode = "shell" as const;
   try {
     executablePath = await chromium.executablePath();
     console.log("[pdf] runtime", {
