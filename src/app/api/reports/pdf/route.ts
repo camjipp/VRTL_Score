@@ -20,126 +20,138 @@ function bearerToken(req: Request): string | null {
 }
 
 export async function GET(req: Request) {
+  const nextRuntime = process.env.NEXT_RUNTIME ?? null;
+  if (nextRuntime === "edge") {
+    return NextResponse.json(
+      { error: "PDF generation requires nodejs runtime (not edge)", diagnostics: { nextRuntime } },
+      { status: 500 }
+    );
+  }
+
   const url = new URL(req.url);
   const snapshotId = url.searchParams.get("snapshotId");
-  if (!snapshotId) {
-    return NextResponse.json({ error: "Missing snapshotId" }, { status: 400 });
-  }
 
-  const token = bearerToken(req);
-  if (!token) {
-    return NextResponse.json({ error: "Missing Authorization: Bearer <token>" }, { status: 401 });
-  }
+  // Track diagnostics even if we fail early.
+  const headlessMode = "shell" as const;
+  let executablePath: string | null = null;
+  let browser: Awaited<ReturnType<typeof puppeteer.launch>> | null = null;
 
-  const supabase = getSupabaseAdminClient();
+  try {
+    if (!snapshotId) {
+      return NextResponse.json({ error: "Missing snapshotId" }, { status: 400 });
+    }
 
-  // Auth user
-  const userRes = await supabase.auth.getUser(token);
-  const user = userRes.data.user;
-  if (userRes.error || !user) {
-    return NextResponse.json(
-      { error: userRes.error?.message ?? "Unauthorized" },
-      { status: 401 }
-    );
-  }
+    const token = bearerToken(req);
+    if (!token) {
+      return NextResponse.json({ error: "Missing Authorization: Bearer <token>" }, { status: 401 });
+    }
 
-  // Snapshot (authoritative agency_id)
-  const snapshotRes = await supabase
-    .from("snapshots")
-    .select(
-      "id,status,vrtl_score,score_by_provider,created_at,completed_at,error,prompt_pack_version,client_id,agency_id"
-    )
-    .eq("id", snapshotId)
-    .single();
-  if (snapshotRes.error || !snapshotRes.data) {
-    return NextResponse.json({ error: "Snapshot not found", snapshotId }, { status: 404 });
-  }
-  const snapshotAgencyId = snapshotRes.data.agency_id as string;
+    const supabase = getSupabaseAdminClient();
 
-  // Resolve agency membership for user (no auto-create here)
-  const agencyUser = await supabase
-    .from("agency_users")
-    .select("agency_id")
-    .eq("user_id", user.id)
-    .maybeSingle();
-  if (agencyUser.error || !agencyUser.data?.agency_id) {
-    return NextResponse.json({ error: "User not onboarded" }, { status: 403 });
-  }
-  const userAgencyId = agencyUser.data.agency_id as string;
-
-  // Enforce snapshot belongs to user's agency
-  if (snapshotAgencyId !== userAgencyId) {
-    return NextResponse.json(
-      { error: "Snapshot not in your agency", snapshotId, snapshotAgencyId, userAgencyId },
-      { status: 403 }
-    );
-  }
-
-  const agencyId = snapshotAgencyId;
-
-  const clientId = snapshotRes.data.client_id as string;
-
-  // Agency
-  const agencyRes = await supabase
-    .from("agencies")
-    .select("name")
-    .eq("id", agencyId)
-    .maybeSingle();
-  let agency = agencyRes.data;
-  if (!agency) {
-    const agencyInsert = await supabase
-      .from("agencies")
-      .insert({ id: agencyId, name: "New Agency" })
-      .select("name")
-      .single();
-    if (agencyInsert.error || !agencyInsert.data) {
+    // Auth user
+    const userRes = await supabase.auth.getUser(token);
+    const user = userRes.data.user;
+    if (userRes.error || !user) {
       return NextResponse.json(
-        { error: agencyInsert.error?.message ?? "Failed to create agency", agencyId },
-        { status: 500 }
+        { error: userRes.error?.message ?? "Unauthorized" },
+        { status: 401 }
       );
     }
-    agency = agencyInsert.data;
-  }
 
-  // Client
-  const clientRes = await supabase
-    .from("clients")
-    .select("id,name,website")
-    .eq("id", clientId)
-    .maybeSingle();
-  if (clientRes.error || !clientRes.data) {
-    return NextResponse.json({ error: "Client not found" }, { status: 404 });
-  }
+    // Snapshot (authoritative agency_id)
+    const snapshotRes = await supabase
+      .from("snapshots")
+      .select(
+        "id,status,vrtl_score,score_by_provider,created_at,completed_at,error,prompt_pack_version,client_id,agency_id"
+      )
+      .eq("id", snapshotId)
+      .single();
+    if (snapshotRes.error || !snapshotRes.data) {
+      return NextResponse.json({ error: "Snapshot not found", snapshotId }, { status: 404 });
+    }
+    const snapshotAgencyId = snapshotRes.data.agency_id as string;
 
-  // Competitors
-  const competitorsRes = await supabase
-    .from("competitors")
-    .select("name,website")
-    .eq("client_id", clientId);
-  const competitors = competitorsRes.data ?? [];
+    // Resolve agency membership for user (no auto-create here)
+    const agencyUser = await supabase
+      .from("agency_users")
+      .select("agency_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (agencyUser.error || !agencyUser.data?.agency_id) {
+      return NextResponse.json({ error: "User not onboarded" }, { status: 403 });
+    }
+    const userAgencyId = agencyUser.data.agency_id as string;
 
-  // Responses
-  const responsesRes = await supabase
-    .from("responses")
-    .select("prompt_ordinal,prompt_text,parsed_json,raw_text")
-    .eq("snapshot_id", snapshotId)
-    .order("prompt_ordinal", { ascending: true });
-  const responses = responsesRes.data ?? [];
+    // Enforce snapshot belongs to user's agency
+    if (snapshotAgencyId !== userAgencyId) {
+      return NextResponse.json(
+        { error: "Snapshot not in your agency", snapshotId, snapshotAgencyId, userAgencyId },
+        { status: 403 }
+      );
+    }
 
-  const html = renderReportHtml({
-    agency,
-    client: clientRes.data,
-    snapshot: snapshotRes.data,
-    competitors,
-    responses
-  });
+    const agencyId = snapshotAgencyId;
+    const clientId = snapshotRes.data.client_id as string;
 
-  let browser: Awaited<ReturnType<typeof puppeteer.launch>> | null = null;
-  let executablePath: string | null = null;
-  const headlessMode = "shell" as const;
-  try {
+    // Agency
+    const agencyRes = await supabase
+      .from("agencies")
+      .select("name")
+      .eq("id", agencyId)
+      .maybeSingle();
+    let agency = agencyRes.data;
+    if (!agency) {
+      const agencyInsert = await supabase
+        .from("agencies")
+        .insert({ id: agencyId, name: "New Agency" })
+        .select("name")
+        .single();
+      if (agencyInsert.error || !agencyInsert.data) {
+        return NextResponse.json(
+          { error: agencyInsert.error?.message ?? "Failed to create agency", agencyId },
+          { status: 500 }
+        );
+      }
+      agency = agencyInsert.data;
+    }
+
+    // Client
+    const clientRes = await supabase
+      .from("clients")
+      .select("id,name,website")
+      .eq("id", clientId)
+      .maybeSingle();
+    if (clientRes.error || !clientRes.data) {
+      return NextResponse.json({ error: "Client not found" }, { status: 404 });
+    }
+
+    // Competitors
+    const competitorsRes = await supabase
+      .from("competitors")
+      .select("name,website")
+      .eq("client_id", clientId);
+    const competitors = competitorsRes.data ?? [];
+
+    // Responses
+    const responsesRes = await supabase
+      .from("responses")
+      .select("prompt_ordinal,prompt_text,parsed_json,raw_text")
+      .eq("snapshot_id", snapshotId)
+      .order("prompt_ordinal", { ascending: true });
+    const responses = responsesRes.data ?? [];
+
+    const html = renderReportHtml({
+      agency,
+      client: clientRes.data,
+      snapshot: snapshotRes.data,
+      competitors,
+      responses
+    });
+
+    // Hard: always use Sparticuz-provided executablePath (it extracts to /tmp on Lambda/Vercel).
     executablePath = await chromium.executablePath();
     console.log("[pdf] runtime", {
+      nextRuntime,
       node: process.version,
       platform: process.platform,
       arch: process.arch,
@@ -183,6 +195,7 @@ export async function GET(req: Request) {
         message,
         snapshotId,
         diagnostics: {
+          nextRuntime,
           awsLambdaJsRuntime: process.env.AWS_LAMBDA_JS_RUNTIME ?? null,
           node: process.version,
           platform: process.platform,
