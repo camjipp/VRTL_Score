@@ -263,7 +263,6 @@ export async function POST(req: Request) {
           let rawText = "";
           let parseOk = false;
           let parsedJson: unknown = null;
-          let errorText: string | null = null;
 
           try {
             const result = await runOpenAI({
@@ -280,7 +279,10 @@ export async function POST(req: Request) {
               parsedJson = result.parsed.error.flatten();
             }
           } catch (err) {
-            errorText = err instanceof Error ? err.message : String(err);
+            const message = err instanceof Error ? err.message : String(err);
+            rawText = `ERROR: ${message}`;
+            parsedJson = { error: message };
+            parseOk = false;
           }
 
           const ins = await supabase.from("responses").insert({

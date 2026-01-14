@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 
-import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { ensureOnboarded } from "@/lib/onboard";
 
 type DownloadPdfButtonProps = {
@@ -10,7 +9,6 @@ type DownloadPdfButtonProps = {
 };
 
 export function DownloadPdfButton({ snapshotId }: DownloadPdfButtonProps) {
-  const supabase = getSupabaseBrowserClient();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
