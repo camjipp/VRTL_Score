@@ -64,13 +64,6 @@ export function renderReportHtml(data: ReportData): string {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
 
-  const providerScores = snapshot.score_by_provider
-    ? Object.entries(snapshot.score_by_provider)
-        .sort((a, b) => a[0].localeCompare(b[0]))
-        .map(([k, v]) => `<div class="pill">${escapeHtml(k)}: ${v}</div>`)
-        .join("")
-    : "—";
-
   const providerTable = snapshot.score_by_provider
     ? `<table class="table">
         <thead><tr><th>Provider</th><th>Score</th></tr></thead>

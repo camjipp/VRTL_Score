@@ -81,11 +81,18 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Agency not found" }, { status: 404 });
   }
 
+  const fullData = full.data as {
+    id: string;
+    name: string;
+    brand_logo_url?: string | null;
+    brand_accent?: string | null;
+  };
+
   return NextResponse.json({
-    agency_id: full.data.id,
-    name: full.data.name,
-    brand_logo_url: (full.data as any).brand_logo_url ?? null,
-    brand_accent: (full.data as any).brand_accent ?? null
+    agency_id: fullData.id,
+    name: fullData.name,
+    brand_logo_url: fullData.brand_logo_url ?? null,
+    brand_accent: fullData.brand_accent ?? null
   } satisfies AgencySettings);
 }
 
