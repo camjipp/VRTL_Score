@@ -26,6 +26,7 @@ type SnapshotRow = {
   status: string;
   vrtl_score: number | null;
   score_by_provider: Record<string, number> | null;
+  started_at?: string | null;
   completed_at: string | null;
   created_at: string;
   error?: string | null;
@@ -122,7 +123,7 @@ export default function ClientDetailPage() {
     // last 10 snapshots (newest first)
     const snapsRes = await supabase
       .from("snapshots")
-      .select("id,status,vrtl_score,score_by_provider,completed_at,created_at,error")
+      .select("id,status,vrtl_score,score_by_provider,started_at,completed_at,created_at,error")
       .eq("client_id", clientId)
       .order("created_at", { ascending: false })
       .limit(10);
@@ -176,6 +177,24 @@ export default function ClientDetailPage() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientId]);
+
+  // Auto-refresh while a snapshot is running (helps recover from timeouts/crashes and shows completion without manual reload).
+  useEffect(() => {
+    if (!agencyId) return;
+    if (snapshot?.status !== "running") return;
+    let cancelled = false;
+    const t = window.setInterval(() => {
+      if (cancelled) return;
+      refresh(agencyId).catch((e) => {
+        if (!cancelled) setError(errorMessage(e));
+      });
+    }, 5000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(t);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [agencyId, snapshot?.status]);
 
   async function resetRunningSnapshot() {
     if (!clientId) return;
@@ -409,7 +428,11 @@ export default function ClientDetailPage() {
           {snapshot ? (
             <span className="text-xs text-gray-600">
               Latest: {snapshot.status}{" "}
-              {snapshot.completed_at ? `@ ${new Date(snapshot.completed_at).toLocaleString()}` : ""}
+              {snapshot.completed_at
+                ? `@ ${new Date(snapshot.completed_at).toLocaleString()}`
+                : snapshot.started_at
+                ? `(started ${new Date(snapshot.started_at).toLocaleString()})`
+                : ""}
             </span>
           ) : (
             <span className="text-xs text-gray-600">No snapshots yet.</span>

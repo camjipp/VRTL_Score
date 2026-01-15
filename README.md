@@ -59,6 +59,22 @@ pnpm db:check
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY` (server-only; never expose to browser)
+- `OPENAI_API_KEY` (server-only)
+
+**Optional (recommended):**
+- `OPENAI_MODEL`
+- `SNAPSHOT_OPENAI_CONCURRENCY`
+- `SNAPSHOT_OPENAI_RETRIES`
+- `SNAPSHOT_STALE_RUNNING_MS`
+- `SNAPSHOT_CLIENT_COOLDOWN_MS`
+- `SNAPSHOT_DAILY_LIMIT`
+
+**PDF branding (optional):**
+- Create a Supabase Storage bucket named `agency-logos` (public recommended for v1) or set `AGENCY_LOGO_BUCKET`.
+- Add `brand_logo_url` + `brand_accent` columns to `public.agencies` (SQL in chat history).
+
+**Observability (optional):**
+- `SENTRY_DSN` (server) and/or `NEXT_PUBLIC_SENTRY_DSN` (client)
 
 **Supabase dashboard settings:**
 - Authentication → URL Configuration
