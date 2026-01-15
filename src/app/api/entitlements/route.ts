@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
+import { isAdminEmail } from "@/lib/admin";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -37,6 +38,11 @@ export async function GET(req: Request) {
   const user = userRes.data.user;
   if (userRes.error || !user) {
     return NextResponse.json({ error: userRes.error?.message ?? "Unauthorized" }, { status: 401 });
+  }
+
+  // Admin bypass: allowlisted admins can always access /app (needed to activate agencies).
+  if (isAdminEmail(user.email)) {
+    return NextResponse.json({ entitled: true, agencyId: null, billingEnabled: billingEnabled(), admin: true });
   }
 
   const agencyUser = await supabase

@@ -26,6 +26,9 @@ export function AppShell() {
         <Link className="underline" href="/app/settings">
           Settings
         </Link>
+        <Link className="underline" href="/app/admin">
+          Admin
+        </Link>
       </nav>
       <button className="rounded border px-3 py-1 text-sm" disabled={busy} onClick={logout}>
         {busy ? "Logging out..." : "Log out"}
