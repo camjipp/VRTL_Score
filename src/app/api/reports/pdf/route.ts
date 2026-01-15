@@ -12,6 +12,12 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
+type AgencyForReport = {
+  name: string;
+  brand_logo_url?: string | null;
+  brand_accent?: string | null;
+};
+
 async function getColumnSet(
   supabase: ReturnType<typeof getSupabaseAdminClient>,
   tableName: string
@@ -125,7 +131,7 @@ export async function GET(req: Request) {
       .select(selectCols.join(","))
       .eq("id", agencyId)
       .maybeSingle();
-    let agency = agencyRes.data;
+    let agency: AgencyForReport | null = (agencyRes.data as AgencyForReport | null) ?? null;
     if (!agency) {
       const agencyInsert = await supabase
         .from("agencies")
@@ -138,7 +144,10 @@ export async function GET(req: Request) {
           { status: 500 }
         );
       }
-      agency = agencyInsert.data;
+      agency = agencyInsert.data as AgencyForReport;
+    }
+    if (!agency?.name) {
+      return NextResponse.json({ error: "Agency not found" }, { status: 500 });
     }
 
     // Client
