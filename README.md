@@ -73,9 +73,6 @@ pnpm db:check
 - Create a Supabase Storage bucket named `agency-logos` (public recommended for v1) or set `AGENCY_LOGO_BUCKET`.
 - Add `brand_logo_url` + `brand_accent` columns to `public.agencies` (SQL in chat history).
 
-**Observability (optional):**
-- `SENTRY_DSN` (server) and/or `NEXT_PUBLIC_SENTRY_DSN` (client)
-
 **Supabase dashboard settings:**
 - Authentication → URL Configuration
   - **Site URL**: set to your Production domain (e.g. `https://vrtlscore.vercel.app`)

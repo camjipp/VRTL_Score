@@ -14,7 +14,6 @@
     "db:check": "node scripts/supabase_healthcheck.mjs"
   },
   "dependencies": {
-    "@sentry/nextjs": "^10.34.0",
     "@sparticuz/chromium": "^141.0.0",
     "@supabase/supabase-js": "^2.49.1",
     "next": "^15.1.4",
