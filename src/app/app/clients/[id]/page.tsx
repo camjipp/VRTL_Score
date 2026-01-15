@@ -177,6 +177,39 @@ export default function ClientDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientId]);
 
+  async function resetRunningSnapshot() {
+    if (!clientId) return;
+    if (!agencyId) return;
+    const ok = window.confirm(
+      "Reset the currently running snapshot? This marks it as failed so you can run again."
+    );
+    if (!ok) return;
+
+    setRunError(null);
+    setRunning(true);
+    try {
+      const { accessToken } = await ensureOnboarded();
+      const res = await fetch("/api/snapshots/reset", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({ clientId })
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Reset failed (${res.status})`);
+      }
+      await refresh(agencyId);
+    } catch (e) {
+      setRunError(errorMessage(e));
+    } finally {
+      setRunning(false);
+    }
+  }
+
   async function runSnapshot() {
     if (!clientId) return;
     setRunError(null);
@@ -192,6 +225,11 @@ export default function ClientDetailPage() {
         body: JSON.stringify({ clientId })
       });
       if (!res.ok) {
+        const contentType = res.headers.get("content-type") ?? "";
+        if (contentType.includes("application/json")) {
+          const json = (await res.json()) as { error?: string; [k: string]: unknown };
+          throw new Error(json.error ? String(json.error) : `Snapshot failed (${res.status})`);
+        }
         const text = await res.text();
         throw new Error(text || `Snapshot failed (${res.status})`);
       }
@@ -355,6 +393,16 @@ export default function ClientDetailPage() {
           >
             {running ? "Running…" : "Run Snapshot"}
           </button>
+          {snapshot?.status === "running" ? (
+            <button
+              className="rounded border px-3 py-2 text-sm"
+              disabled={running}
+              onClick={resetRunningSnapshot}
+              type="button"
+            >
+              Reset running snapshot
+            </button>
+          ) : null}
           {snapshot ? (
             <span className="text-xs text-gray-600">
               Latest: {snapshot.status}{" "}
