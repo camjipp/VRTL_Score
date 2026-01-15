@@ -83,6 +83,22 @@ export function renderReportHtml(data: ReportData): string {
       </table>`
     : `<div class="muted">—</div>`;
 
+  const providerBars = snapshot.score_by_provider
+    ? `<div class="bars">
+        ${Object.entries(snapshot.score_by_provider)
+          .sort((a, b) => a[0].localeCompare(b[0]))
+          .map(([k, v]) => {
+            const pct = Math.max(0, Math.min(100, Number.isFinite(v) ? v : 0));
+            return `<div class="barRow">
+              <div class="barLabel">${escapeHtml(k)}</div>
+              <div class="barTrack"><div class="barFill" style="width:${pct}%"></div></div>
+              <div class="barValue">${pct}</div>
+            </div>`;
+          })
+          .join("")}
+      </div>`
+    : `<div class="muted">—</div>`;
+
   const competitorMentionsTable = `<table class="table">
     <thead><tr><th>Competitor</th><th>Mentions</th></tr></thead>
     <tbody>
@@ -133,17 +149,22 @@ export function renderReportHtml(data: ReportData): string {
         pj?.evidence_snippet ??
         (r.raw_text ? truncate(r.raw_text, 180) : "No evidence available");
       return `<div class="card">
-        <div class="muted text-xs">Prompt #${r.prompt_ordinal ?? idx + 1}</div>
-        <div class="text-sm"><strong>${escapeHtml(r.prompt_text ?? "Prompt")}</strong></div>
-        <div class="text-sm">
-          client_mentioned: ${pj?.client_mentioned ? "true" : "false"} · position: ${pj?.client_position ?? "—"} · strength: ${pj?.recommendation_strength ?? "—"}
+        <div class="cardTop">
+          <div class="muted text-xs">Prompt #${r.prompt_ordinal ?? idx + 1}</div>
+          <div class="pill small">${pj?.client_position ?? "—"}</div>
+          <div class="pill small">${pj?.recommendation_strength ?? "—"}</div>
+          <div class="pill small">${pj?.client_mentioned ? "mentioned" : "not mentioned"}</div>
         </div>
-        <div class="text-sm">competitors: ${
+        <div class="promptTitle">${escapeHtml(r.prompt_text ?? "Prompt")}</div>
+        <div class="text-sm muted">Competitors mentioned: ${
           pj?.competitors_mentioned && pj.competitors_mentioned.length
             ? pj.competitors_mentioned.map(escapeHtml).join(", ")
             : "—"
         }</div>
-        <div class="text-sm">evidence: ${escapeHtml(snippet)}</div>
+        <div class="evidence">
+          <div class="evidenceLabel">Evidence</div>
+          <div class="evidenceText">${escapeHtml(snippet)}</div>
+        </div>
       </div>`;
     })
     .join("");
@@ -154,28 +175,44 @@ export function renderReportHtml(data: ReportData): string {
   <meta charset="UTF-8" />
   <style>
     :root { --accent: ${agency.brand_accent || "#0f172a"}; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; padding: 24px; color: #0f172a; }
-    h1,h2,h3 { margin: 0 0 8px; }
+    html, body { margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #0f172a; font-size: 13px; line-height: 1.35; }
+    h1,h2,h3 { margin: 0 0 10px; letter-spacing: -0.01em; }
+    h2 { font-size: 16px; }
     .muted { color: #64748b; }
-    .pill { display: inline-block; padding: 4px 8px; margin: 2px 4px 2px 0; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; }
-    .card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin: 8px 0; }
-    .section { margin: 20px 0; page-break-inside: avoid; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .score { font-size: 28px; font-weight: 700; color: var(--accent); }
+    .pill { display: inline-block; padding: 4px 8px; margin: 2px 6px 2px 0; border: 1px solid #e2e8f0; border-radius: 999px; font-size: 12px; background: #fff; }
+    .pill.small { font-size: 11px; padding: 3px 8px; }
+    .card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin: 10px 0; background: #fff; }
+    .section { margin: 18px 0; page-break-inside: avoid; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
     .warn { background: #fef9c3; border: 1px solid #fcd34d; padding: 10px; border-radius: 6px; }
     .row { display: flex; gap: 12px; flex-wrap: wrap; }
     .col { flex: 1 1 220px; }
-    .cover { border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin-bottom: 18px; }
-    .coverTitle { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
-    .coverSub { margin-top: 8px; }
-    .scoreBlock { border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; background: #ffffff; }
+    .cover { border: 1px solid #e2e8f0; border-radius: 16px; padding: 22px; margin: 0 0 18px; background: linear-gradient(180deg, rgba(15,23,42,0.02), rgba(15,23,42,0.00)); page-break-after: always; }
+    .coverTitle { font-size: 30px; font-weight: 900; letter-spacing: -0.03em; }
+    .coverSub { margin-top: 10px; }
+    .coverMeta { margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; }
+    .metaItem { border-top: 1px solid #e2e8f0; padding-top: 8px; }
+    .scoreGrid { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; }
+    .scoreBlock { border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; background: #ffffff; }
     .scoreLabel { font-size: 12px; color: #64748b; }
-    .scoreValue { font-size: 34px; font-weight: 800; color: var(--accent); }
+    .scoreValue { font-size: 38px; font-weight: 900; color: var(--accent); letter-spacing: -0.02em; }
     .table { width: 100%; border-collapse: collapse; margin-top: 8px; }
     .table th, .table td { border: 1px solid #e2e8f0; padding: 8px; text-align: left; font-size: 12px; }
     .table th { background: #f8fafc; }
     .cardTitle { font-weight: 700; margin-bottom: 6px; }
     .footer { margin-top: 18px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; }
+    .promptTitle { font-weight: 800; margin: 6px 0 8px; }
+    .cardTop { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .evidence { margin-top: 10px; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px; background: rgba(15,23,42,0.02); }
+    .evidenceLabel { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+    .evidenceText { font-size: 13px; }
+    .bars { margin-top: 10px; display: grid; gap: 8px; }
+    .barRow { display: grid; grid-template-columns: 120px 1fr 34px; align-items: center; gap: 10px; }
+    .barLabel { font-size: 12px; color: #0f172a; }
+    .barTrack { height: 10px; border: 1px solid #e2e8f0; background: #fff; border-radius: 999px; overflow: hidden; }
+    .barFill { height: 100%; background: linear-gradient(90deg, var(--accent), rgba(15,23,42,0.30)); }
+    .barValue { text-align: right; font-size: 12px; color: #0f172a; font-variant-numeric: tabular-nums; }
   </style>
 </head>
 <body>
@@ -188,25 +225,41 @@ export function renderReportHtml(data: ReportData): string {
           <div><strong>${escapeHtml(client.name)}</strong></div>
           <div class="muted">${escapeHtml(agency.name)}${client.website ? ` · ${escapeHtml(client.website)}` : ""}</div>
         </div>
+        <div class="coverMeta">
+          <div class="metaItem">
+            <div class="muted text-xs">Snapshot</div>
+            <div class="text-sm">${escapeHtml(snapshot.id)}</div>
+          </div>
+          <div class="metaItem">
+            <div class="muted text-xs">Prompt pack</div>
+            <div class="text-sm">${escapeHtml(snapshot.prompt_pack_version ?? "—")}</div>
+          </div>
+          <div class="metaItem">
+            <div class="muted text-xs">Status</div>
+            <div class="text-sm">${escapeHtml(snapshot.status)}</div>
+          </div>
+          <div class="metaItem">
+            <div class="muted text-xs">Completed</div>
+            <div class="text-sm">${snapshot.completed_at ? formatDate(snapshot.completed_at) : "—"}</div>
+          </div>
+        </div>
       </div>
       ${agency.brand_logo_url ? `<img src="${escapeHtml(agency.brand_logo_url)}" alt="logo" style="max-height:54px;">` : ""}
     </div>
   </div>
 
   <div class="section">
-    <div class="row">
-      <div class="col scoreBlock">
+    <div class="scoreGrid">
+      <div class="scoreBlock">
         <div class="scoreLabel">VRTL Score</div>
         <div class="scoreValue">${snapshot.vrtl_score ?? "—"}</div>
         <div class="muted text-sm">Confidence: ${confidence.label}</div>
       </div>
-      <div class="col scoreBlock">
-        <div class="scoreLabel">Providers</div>
-        <div>${providerScores}</div>
-        <div class="muted text-sm">Prompt pack: ${escapeHtml(snapshot.prompt_pack_version ?? "—")}</div>
-        <div class="muted text-sm">Status: ${escapeHtml(snapshot.status)}</div>
+      <div class="scoreBlock">
+        <div class="scoreLabel">Provider comparison</div>
+        ${providerBars}
       </div>
-      <div class="col scoreBlock">
+      <div class="scoreBlock">
         <div class="scoreLabel">Coverage</div>
         <div class="text-sm">Client mentioned in <strong>${clientMentioned}</strong> response(s)</div>
         <div class="muted text-sm">Competitors in set: ${competitorCount}</div>
@@ -220,7 +273,7 @@ export function renderReportHtml(data: ReportData): string {
   </div>
 
   <div class="section">
-    <h2>Provider comparison</h2>
+    <h2>Provider details</h2>
     ${providerTable}
   </div>
 
