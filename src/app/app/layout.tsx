@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import { AppAuthGate } from "@/components/AppAuthGate";
+import { AppEntitlementGate } from "@/components/AppEntitlementGate";
 import { AppShell } from "@/components/AppShell";
 
 export const metadata: Metadata = {
@@ -15,10 +16,12 @@ export default function AppLayout({
 }>) {
   return (
     <AppAuthGate>
-      <section className="p-6">
-        <AppShell />
-        {children}
-      </section>
+      <AppEntitlementGate>
+        <section className="p-6">
+          <AppShell />
+          {children}
+        </section>
+      </AppEntitlementGate>
     </AppAuthGate>
   );
 }

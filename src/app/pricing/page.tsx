@@ -3,7 +3,7 @@ export default function PricingPage() {
     <main className="p-6">
       <h1 className="text-xl font-semibold">Pricing</h1>
       <p className="mt-2 text-sm">
-        Placeholder only. Stripe/billing is explicitly not implemented in v1.
+        Placeholder. If you were redirected here from the app, your agency doesn’t currently have access.
       </p>
     </main>
   );
