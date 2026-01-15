@@ -18,6 +18,21 @@ type AgencyForReport = {
   brand_accent?: string | null;
 };
 
+function parseAgencyForReport(value: unknown): AgencyForReport | null {
+  if (!value || typeof value !== "object") return null;
+  const v = value as Record<string, unknown>;
+  if (typeof v.name !== "string" || v.name.length === 0) return null;
+  const brand_logo_url =
+    typeof v.brand_logo_url === "string" ? v.brand_logo_url : (v.brand_logo_url ?? null);
+  const brand_accent =
+    typeof v.brand_accent === "string" ? v.brand_accent : (v.brand_accent ?? null);
+  return {
+    name: v.name,
+    brand_logo_url: brand_logo_url as string | null,
+    brand_accent: brand_accent as string | null
+  };
+}
+
 async function getColumnSet(
   supabase: ReturnType<typeof getSupabaseAdminClient>,
   tableName: string
@@ -131,7 +146,7 @@ export async function GET(req: Request) {
       .select(selectCols.join(","))
       .eq("id", agencyId)
       .maybeSingle();
-    let agency: AgencyForReport | null = (agencyRes.data as AgencyForReport | null) ?? null;
+    let agency: AgencyForReport | null = parseAgencyForReport(agencyRes.data);
     if (!agency) {
       const agencyInsert = await supabase
         .from("agencies")
@@ -144,7 +159,7 @@ export async function GET(req: Request) {
           { status: 500 }
         );
       }
-      agency = agencyInsert.data as AgencyForReport;
+      agency = parseAgencyForReport(agencyInsert.data);
     }
     if (!agency?.name) {
       return NextResponse.json({ error: "Agency not found" }, { status: 500 });
