@@ -53,6 +53,22 @@ function openAiConcurrency(): number {
   return Math.max(1, Math.min(10, Math.floor(n)));
 }
 
+function dailySnapshotLimit(): number | null {
+  const raw = process.env.SNAPSHOT_DAILY_LIMIT;
+  if (!raw) return null;
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return null;
+  const clamped = Math.max(0, Math.floor(n));
+  return clamped === 0 ? 0 : clamped;
+}
+
+function clientCooldownMs(): number {
+  const raw = process.env.SNAPSHOT_CLIENT_COOLDOWN_MS;
+  if (!raw) return 0;
+  const n = Number(raw);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
 export async function POST(req: Request) {
   let snapshotId: string | null = null;
 
@@ -105,6 +121,54 @@ export async function POST(req: Request) {
     }
     const clientName = clientRes.data.name as string;
     const clientIndustry = clientRes.data.industry as string;
+
+    // Guardrails: rate/cost controls (no schema changes; uses snapshots.started_at)
+    const cooldownMs = clientCooldownMs();
+    if (cooldownMs > 0) {
+      const latestRes = await supabase
+        .from("snapshots")
+        .select("id,started_at,status")
+        .eq("client_id", body.clientId)
+        .order("started_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const latestStarted = latestRes.data?.started_at as string | null | undefined;
+      const latestStartedMs = latestStarted ? new Date(latestStarted).getTime() : null;
+      const ageMs = latestStartedMs ? Date.now() - latestStartedMs : null;
+      if (ageMs !== null && ageMs >= 0 && ageMs < cooldownMs) {
+        return NextResponse.json(
+          {
+            error: "Snapshot cooldown active",
+            clientId: body.clientId,
+            retry_after_ms: cooldownMs - ageMs
+          },
+          { status: 429 }
+        );
+      }
+    }
+
+    const limit = dailySnapshotLimit();
+    if (limit !== null) {
+      const sinceIso = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const countRes = await supabase
+        .from("snapshots")
+        .select("id", { count: "exact", head: true })
+        .eq("agency_id", agencyId)
+        .gte("started_at", sinceIso);
+      const used = countRes.count ?? 0;
+      if (used >= limit) {
+        return NextResponse.json(
+          {
+            error: "Daily snapshot limit reached",
+            agencyId,
+            window_hours: 24,
+            used,
+            limit
+          },
+          { status: 429 }
+        );
+      }
+    }
 
     // Enforce lock: existing running snapshot
     const running = await supabase
