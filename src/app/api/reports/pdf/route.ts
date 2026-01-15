@@ -12,6 +12,27 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
+async function getColumnSet(
+  supabase: ReturnType<typeof getSupabaseAdminClient>,
+  tableName: string
+): Promise<Set<string>> {
+  try {
+    const res = await supabase
+      .from("information_schema.columns")
+      .select("column_name")
+      .eq("table_schema", "public")
+      .eq("table_name", tableName);
+    if (res.error || !res.data) return new Set();
+    return new Set(
+      (res.data as Array<{ column_name: string | null }>)
+        .map((r) => r.column_name)
+        .filter((c): c is string => typeof c === "string" && c.length > 0)
+    );
+  } catch {
+    return new Set();
+  }
+}
+
 function bearerToken(req: Request): string | null {
   const header = req.headers.get("authorization") || req.headers.get("Authorization");
   if (!header) return null;
@@ -94,9 +115,14 @@ export async function GET(req: Request) {
     const clientId = snapshotRes.data.client_id as string;
 
     // Agency
+    const agencyCols = await getColumnSet(supabase, "agencies");
+    const selectCols = ["name"];
+    if (agencyCols.has("brand_logo_url")) selectCols.push("brand_logo_url");
+    if (agencyCols.has("brand_accent")) selectCols.push("brand_accent");
+
     const agencyRes = await supabase
       .from("agencies")
-      .select("name")
+      .select(selectCols.join(","))
       .eq("id", agencyId)
       .maybeSingle();
     let agency = agencyRes.data;
@@ -104,7 +130,7 @@ export async function GET(req: Request) {
       const agencyInsert = await supabase
         .from("agencies")
         .insert({ id: agencyId, name: "New Agency" })
-        .select("name")
+        .select(selectCols.join(","))
         .single();
       if (agencyInsert.error || !agencyInsert.data) {
         return NextResponse.json(

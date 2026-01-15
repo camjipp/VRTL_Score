@@ -66,9 +66,65 @@ export function renderReportHtml(data: ReportData): string {
 
   const providerScores = snapshot.score_by_provider
     ? Object.entries(snapshot.score_by_provider)
-        .map(([k, v]) => `<div class="pill">${k}: ${v}</div>`)
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([k, v]) => `<div class="pill">${escapeHtml(k)}: ${v}</div>`)
         .join("")
     : "—";
+
+  const providerTable = snapshot.score_by_provider
+    ? `<table class="table">
+        <thead><tr><th>Provider</th><th>Score</th></tr></thead>
+        <tbody>
+          ${Object.entries(snapshot.score_by_provider)
+            .sort((a, b) => a[0].localeCompare(b[0]))
+            .map(([k, v]) => `<tr><td>${escapeHtml(k)}</td><td>${v}</td></tr>`)
+            .join("")}
+        </tbody>
+      </table>`
+    : `<div class="muted">—</div>`;
+
+  const competitorMentionsTable = `<table class="table">
+    <thead><tr><th>Competitor</th><th>Mentions</th></tr></thead>
+    <tbody>
+      ${
+        topCompetitors.length
+          ? topCompetitors
+              .map(([name, count]) => `<tr><td>${escapeHtml(name)}</td><td>${count}</td></tr>`)
+              .join("")
+          : "<tr><td class='muted' colspan='2'>None</td></tr>"
+      }
+    </tbody>
+  </table>`;
+
+  const score = snapshot.vrtl_score ?? null;
+  const actions: Array<{ title: string; detail: string }> = [];
+  if (competitorCount < 3) {
+    actions.push({
+      title: "Add 3+ competitors",
+      detail: "This improves competitive comparisons and makes the score more reliable."
+    });
+  }
+  if (score !== null && score < 50) {
+    actions.push({
+      title: "Improve positioning in AI recommendations",
+      detail: "Aim for more ‘top’ placements and stronger recommendations across prompts."
+    });
+  } else {
+    actions.push({
+      title: "Maintain coverage & credibility",
+      detail: "Keep sources/citations and concrete feature evidence present in responses."
+    });
+  }
+  actions.push({
+    title: "Re-run after key changes",
+    detail: "Re-run snapshots after changing messaging, website content, or competitor set."
+  });
+  const actionsHtml = `<div class="row">
+    ${actions.slice(0, 3).map((a) => `<div class="card">
+      <div class="cardTitle">${escapeHtml(a.title)}</div>
+      <div class="text-sm muted">${escapeHtml(a.detail)}</div>
+    </div>`).join("")}
+  </div>`;
 
   const responseBlocks = responses
     .map((r, idx) => {
@@ -109,32 +165,51 @@ export function renderReportHtml(data: ReportData): string {
     .warn { background: #fef9c3; border: 1px solid #fcd34d; padding: 10px; border-radius: 6px; }
     .row { display: flex; gap: 12px; flex-wrap: wrap; }
     .col { flex: 1 1 220px; }
+    .cover { border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin-bottom: 18px; }
+    .coverTitle { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
+    .coverSub { margin-top: 8px; }
+    .scoreBlock { border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; background: #ffffff; }
+    .scoreLabel { font-size: 12px; color: #64748b; }
+    .scoreValue { font-size: 34px; font-weight: 800; color: var(--accent); }
+    .table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    .table th, .table td { border: 1px solid #e2e8f0; padding: 8px; text-align: left; font-size: 12px; }
+    .table th { background: #f8fafc; }
+    .cardTitle { font-weight: 700; margin-bottom: 6px; }
+    .footer { margin-top: 18px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; }
   </style>
 </head>
 <body>
-  <div class="header">
-    <div>
-      <div class="muted text-sm">${formatDate(snapshot.created_at)}</div>
-      <h1>${escapeHtml(agency.name)} — ${escapeHtml(client.name)}</h1>
-      <div class="muted">${client.website ? escapeHtml(client.website) : ""}</div>
+  <div class="cover">
+    <div class="header">
+      <div>
+        <div class="muted text-sm">${formatDate(snapshot.created_at)}</div>
+        <div class="coverTitle">VRTL Score Report</div>
+        <div class="coverSub">
+          <div><strong>${escapeHtml(client.name)}</strong></div>
+          <div class="muted">${escapeHtml(agency.name)}${client.website ? ` · ${escapeHtml(client.website)}` : ""}</div>
+        </div>
+      </div>
+      ${agency.brand_logo_url ? `<img src="${escapeHtml(agency.brand_logo_url)}" alt="logo" style="max-height:54px;">` : ""}
     </div>
-    ${agency.brand_logo_url ? `<img src="${escapeHtml(agency.brand_logo_url)}" alt="logo" style="max-height:48px;">` : ""}
   </div>
 
   <div class="section">
-    <div class="score">VRTL Score: ${snapshot.vrtl_score ?? "—"}</div>
     <div class="row">
-      <div class="col">
-        <div class="muted">Status</div>
-        <div>${escapeHtml(snapshot.status)}</div>
+      <div class="col scoreBlock">
+        <div class="scoreLabel">VRTL Score</div>
+        <div class="scoreValue">${snapshot.vrtl_score ?? "—"}</div>
+        <div class="muted text-sm">Confidence: ${confidence.label}</div>
       </div>
-      <div class="col">
-        <div class="muted">Providers</div>
+      <div class="col scoreBlock">
+        <div class="scoreLabel">Providers</div>
         <div>${providerScores}</div>
+        <div class="muted text-sm">Prompt pack: ${escapeHtml(snapshot.prompt_pack_version ?? "—")}</div>
+        <div class="muted text-sm">Status: ${escapeHtml(snapshot.status)}</div>
       </div>
-      <div class="col">
-        <div class="muted">Prompt pack</div>
-        <div>${escapeHtml(snapshot.prompt_pack_version ?? "—")}</div>
+      <div class="col scoreBlock">
+        <div class="scoreLabel">Coverage</div>
+        <div class="text-sm">Client mentioned in <strong>${clientMentioned}</strong> response(s)</div>
+        <div class="muted text-sm">Competitors in set: ${competitorCount}</div>
       </div>
     </div>
     ${
@@ -145,22 +220,28 @@ export function renderReportHtml(data: ReportData): string {
   </div>
 
   <div class="section">
-    <h2>Competitive summary</h2>
-    <div>Client mentioned in ${clientMentioned} response(s)</div>
-    <div>Competitor set: ${competitorCount} (${confidence.label} confidence)</div>
-    <div class="muted">Top competitor mentions:</div>
-    <ul>
-      ${
-        topCompetitors.length
-          ? topCompetitors.map(([name, count]) => `<li>${escapeHtml(name)}: ${count}</li>`).join("")
-          : "<li>None</li>"
-      }
-    </ul>
+    <h2>Provider comparison</h2>
+    ${providerTable}
+  </div>
+
+  <div class="section">
+    <h2>Competitor mentions</h2>
+    <div class="muted text-sm">Top competitors mentioned across prompts</div>
+    ${competitorMentionsTable}
+  </div>
+
+  <div class="section">
+    <h2>3 actions</h2>
+    ${actionsHtml}
   </div>
 
   <div class="section">
     <h2>Evidence by prompt</h2>
     ${responseBlocks || "<div class='muted'>No responses.</div>"}
+  </div>
+
+  <div class="footer">
+    Prepared by ${escapeHtml(agency.name)}
   </div>
 </body>
 </html>`;

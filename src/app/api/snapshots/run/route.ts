@@ -69,6 +69,60 @@ function clientCooldownMs(): number {
   return Number.isFinite(n) && n > 0 ? n : 0;
 }
 
+function isMissingColumnError(e: unknown): boolean {
+  if (!e || typeof e !== "object") return false;
+  const any = e as { code?: unknown; message?: unknown; details?: unknown };
+  const code = typeof any.code === "string" ? any.code : "";
+  const msg = typeof any.message === "string" ? any.message : "";
+  const details = typeof any.details === "string" ? any.details : "";
+  // PostgREST: PGRST204 "Could not find the '<col>' column ... in the schema cache"
+  return (
+    code === "PGRST204" ||
+    msg.includes("schema cache") ||
+    msg.includes("Could not find") ||
+    details.includes("schema cache")
+  );
+}
+
+async function insertResponseWithFallback(
+  supabase: ReturnType<typeof getSupabaseAdminClient>,
+  baseRow: Record<string, unknown>,
+  extraRow: Record<string, unknown>
+) {
+  // Try inserting with extra columns; if the DB doesn't have them, retry with base.
+  const first = await supabase.from("responses").insert(extraRow);
+  if (!first.error) return;
+  if (!isMissingColumnError(first.error)) throw first.error;
+  const second = await supabase.from("responses").insert(baseRow);
+  if (second.error) throw second.error;
+}
+
+function sleepMs(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+async function runOpenAIWithRetry(args: Parameters<typeof runOpenAI>[0]) {
+  const maxAttempts = Math.max(1, Number(process.env.SNAPSHOT_OPENAI_RETRIES ?? "2"));
+  let lastErr: unknown = null;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      return await runOpenAI(args);
+    } catch (err) {
+      lastErr = err;
+      if (attempt >= maxAttempts) break;
+      const backoffMs = 250 * attempt;
+      console.log("openai call failed; retrying", {
+        attempt,
+        maxAttempts,
+        backoffMs,
+        message: err instanceof Error ? err.message : String(err)
+      });
+      await sleepMs(backoffMs);
+    }
+  }
+  throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
+}
+
 export async function POST(req: Request) {
   let snapshotId: string | null = null;
 
@@ -275,6 +329,9 @@ export async function POST(req: Request) {
     snapshotId = snapshotInsert.data.id as string;
     console.log("created snapshot", { snapshotId });
 
+    // We may store extra response metadata if the DB supports it.
+    // If columns don't exist (schema cache mismatch), we fall back to base columns.
+
     // Context: competitors list
     const competitorsRes = await supabase
       .from("competitors")
@@ -327,14 +384,18 @@ export async function POST(req: Request) {
           let rawText = "";
           let parseOk = false;
           let parsedJson: unknown = null;
+          let modelUsed: string | null = null;
+          let latencyMs: number | null = null;
 
           try {
-            const result = await runOpenAI({
+            const result = await runOpenAIWithRetry({
               system: SYSTEM_PROMPT,
               prompt: buildPrompt(clientName, clientIndustry, competitorNames, prompt),
               model: process.env.OPENAI_MODEL
             });
             rawText = result.rawText;
+            modelUsed = result.modelUsed;
+            latencyMs = result.latencyMs;
             parseOk = result.parsed.success;
             if (result.parsed.success) {
               parsedJson = result.parsed.data;
@@ -349,7 +410,7 @@ export async function POST(req: Request) {
             parseOk = false;
           }
 
-          const ins = await supabase.from("responses").insert({
+          const baseRow: Record<string, unknown> = {
             snapshot_id: snapshotId,
             agency_id: agencyId,
             prompt_ordinal: idx,
@@ -357,8 +418,18 @@ export async function POST(req: Request) {
             raw_text: rawText,
             parsed_json: parsedJson,
             parse_ok: parseOk
-          });
-          if (ins.error) throw new Error(`Failed to insert response: ${ins.error.message}`);
+          };
+
+          const extraRow: Record<string, unknown> = {
+            ...baseRow,
+            provider,
+            prompt_key: prompt.key,
+            prompt_pack_version: PROMPT_PACK_VERSION,
+            model_used: modelUsed,
+            latency_ms: latencyMs
+          };
+
+          await insertResponseWithFallback(supabase, baseRow, extraRow);
           console.log("stored response", { promptKey: prompt.key });
         }
       );

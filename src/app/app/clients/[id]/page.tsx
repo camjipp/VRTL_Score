@@ -382,6 +382,9 @@ export default function ClientDetailPage() {
           <div className="mt-3 rounded border bg-yellow-50 p-3 text-sm">
             <div className="font-medium">Score confidence: {competitorConfidence.label}</div>
             <div className="mt-1">{competitorConfidence.message}</div>
+            <div className="mt-2 text-xs text-gray-700">
+              You can still run a snapshot now — competitors just make the report stronger.
+            </div>
           </div>
         ) : null}
         <div className="mt-3 flex items-center gap-3">
