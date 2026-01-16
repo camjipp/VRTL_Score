@@ -52,41 +52,44 @@ export default function AppPage() {
 
   return (
     <main>
-      <h1 className="text-xl font-semibold">Clients</h1>
-      <p className="mt-2 text-sm">Create and manage clients for your agency.</p>
-
-      <div className="mt-4 flex items-center gap-3">
-        <Link className="rounded border px-3 py-2 text-sm" href="/app/clients/new">
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Clients</h1>
+          <p className="mt-2 text-sm text-text-2">Create and manage clients for your agency.</p>
+        </div>
+        <Link className="btn-primary" href="/app/clients/new">
           New client
         </Link>
-        {agencyId ? <span className="text-xs text-gray-500">agency_id: {agencyId}</span> : null}
       </div>
+
+      {agencyId ? <div className="mt-3 text-xs text-muted">agency_id: {agencyId}</div> : null}
 
       {loading ? <div className="mt-6 text-sm">Loading…</div> : null}
       {error ? (
-        <div className="mt-6 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800">
+        <div className="mt-6 rounded-lg border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
           {error}
         </div>
       ) : null}
 
-      <ul className="mt-6 space-y-2">
+      <ul className="mt-6 space-y-3">
         {clients.map((c) => (
-          <li key={c.id} className="rounded border p-3">
+          <li key={c.id} className="card-surface p-4">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <div className="font-medium">{c.name}</div>
-                <div className="text-sm text-gray-600">
-                  {c.website ? c.website : "No website"} · {c.industry}
+                <div className="font-medium text-text">{c.name}</div>
+                <div className="mt-1 text-sm text-text-2">
+                  {c.website ? c.website : "No website"} <span className="text-muted">·</span>{" "}
+                  {c.industry}
                 </div>
               </div>
-              <Link className="underline" href={`/app/clients/${c.id}`}>
+              <Link className="btn-secondary" href={`/app/clients/${c.id}`}>
                 Open
               </Link>
             </div>
           </li>
         ))}
         {!loading && !error && clients.length === 0 ? (
-          <li className="text-sm text-gray-600">No clients yet.</li>
+          <li className="text-sm text-text-2">No clients yet.</li>
         ) : null}
       </ul>
     </main>

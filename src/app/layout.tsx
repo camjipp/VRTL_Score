@@ -7,7 +7,7 @@ import { SiteNav } from "@/components/SiteNav";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "VRTLScore",
+  title: "VRTL Score",
   description: "Internal agency diagnostic + measurement tool"
 };
 
@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body className="min-h-screen bg-bg0 text-text antialiased">
         <SiteNav />
         {children}
       </body>

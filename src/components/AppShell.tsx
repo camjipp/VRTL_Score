@@ -18,21 +18,27 @@ export function AppShell() {
   }
 
   return (
-    <header className="mb-6 flex items-center justify-between border-b pb-3">
-      <nav className="flex gap-4 text-sm">
-        <Link className="underline" href="/app">
-          App
-        </Link>
-        <Link className="underline" href="/app/settings">
-          Settings
-        </Link>
-        <Link className="underline" href="/app/admin">
-          Admin
-        </Link>
-      </nav>
-      <button className="rounded border px-3 py-1 text-sm" disabled={busy} onClick={logout}>
-        {busy ? "Logging out..." : "Log out"}
-      </button>
+    <header className="mb-6 rounded-xl border border-border/60 bg-bg1/40 backdrop-blur">
+      <div className="flex items-center justify-between px-4 py-3">
+        <nav className="flex items-center gap-3 text-sm">
+          <Link className="font-semibold text-text" href="/app">
+            VRTL Score
+          </Link>
+          <span className="text-muted">/</span>
+          <Link className="text-text-2 hover:text-text" href="/app">
+            Clients
+          </Link>
+          <Link className="text-text-2 hover:text-text" href="/app/settings">
+            Settings
+          </Link>
+          <Link className="text-text-2 hover:text-text" href="/app/admin">
+            Admin
+          </Link>
+        </nav>
+        <button className="btn-secondary" disabled={busy} onClick={logout}>
+          {busy ? "Logging out..." : "Log out"}
+        </button>
+      </div>
     </header>
   );
 }

@@ -13,7 +13,15 @@ export default async function LoginPage({
   // allow only internal paths to prevent open redirects
   const nextPath = typeof nextStr === "string" && nextStr.startsWith("/") ? nextStr : "/app";
 
-  return <LoginForm nextPath={nextPath} />;
+  return (
+    <main className="bg-bg0">
+      <div className="container-xl py-14">
+        <div className="card-surface mx-auto max-w-lg p-6">
+          <LoginForm nextPath={nextPath} />
+        </div>
+      </div>
+    </main>
+  );
 }
 
 

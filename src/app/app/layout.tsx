@@ -6,7 +6,7 @@ import { AppEntitlementGate } from "@/components/AppEntitlementGate";
 import { AppShell } from "@/components/AppShell";
 
 export const metadata: Metadata = {
-  title: "VRTLScore — App"
+  title: "VRTL Score — App"
 };
 
 export default function AppLayout({
@@ -17,9 +17,11 @@ export default function AppLayout({
   return (
     <AppAuthGate>
       <AppEntitlementGate>
-        <section className="p-6">
-          <AppShell />
-          {children}
+        <section className="bg-bg0">
+          <div className="container-xl py-6">
+            <AppShell />
+            {children}
+          </div>
         </section>
       </AppEntitlementGate>
     </AppAuthGate>

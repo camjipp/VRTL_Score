@@ -2,5 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* VRTL Score — Dark-first theme tokens */
+  --bg-0: 12 15 22; /* #0C0F16 */
+  --bg-1: 18 23 38; /* #121726 */
+  --surface: 24 29 46; /* #181D2E */
+  --border: 35 40 66; /* #232842 */
+  --text: 248 250 252; /* #F8FAFC */
+  --text-2: 161 166 179; /* #A1A6B3 */
+  --muted: 107 114 128; /* #6B7280 */
+  --accent: 109 92 255; /* #6D5CFF */
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: rgb(var(--bg-0));
+  color: rgb(var(--text));
+}
+
+@layer components {
+  .container-xl {
+    @apply mx-auto w-full max-w-6xl px-6;
+  }
+  .card-surface {
+    @apply rounded-xl border border-border/60 bg-surface/80 backdrop-blur;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-accent/90;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-lg border border-border/70 bg-surface/40 px-4 py-2 text-sm font-medium text-text transition hover:bg-surface/70;
+  }
+  .badge {
+    @apply inline-flex items-center rounded-full border border-border/70 bg-surface/40 px-2 py-0.5 text-xs text-text-2;
+  }
+}
 
 
