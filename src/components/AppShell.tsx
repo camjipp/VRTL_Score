@@ -23,7 +23,7 @@ export function AppShell() {
       <div className="flex items-center justify-between px-4 py-3">
         <nav className="flex items-center gap-3 text-sm">
           <Link className="flex items-center" href="/app">
-            <Image alt="VRTL Score" height={22} src="/brand/vrtl-score-wordmark.svg" width={130} />
+            <Image alt="VRTL Score" height={22} src="/brand/Logo_2.png" width={140} />
           </Link>
           <span className="text-muted">/</span>
           <Link className="text-text-2 hover:text-text" href="/app">

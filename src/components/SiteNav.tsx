@@ -11,8 +11,8 @@ export function SiteNav() {
               alt="VRTL Score"
               height={28}
               priority
-              src="/brand/vrtl-score-wordmark.svg"
-              width={160}
+              src="/brand/Logo_2.png"
+              width={170}
             />
           </Link>
 
