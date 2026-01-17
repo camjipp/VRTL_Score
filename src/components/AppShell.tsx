@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -23,7 +22,9 @@ export function AppShell() {
       <div className="flex items-center justify-between px-4 py-3">
         <nav className="flex items-center gap-3 text-sm">
           <Link className="flex items-center" href="/app">
-            <Image alt="VRTL Score" height={22} src="/brand/Logo_2.png" width={140} />
+            <span className="font-semibold tracking-tight text-text">
+              VRTL <span className="text-text-2">Score</span>
+            </span>
           </Link>
           <span className="text-muted">/</span>
           <Link className="text-text-2 hover:text-text" href="/app">

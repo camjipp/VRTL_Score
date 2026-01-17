@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 
 export function SiteNav() {
   return (
@@ -7,13 +6,15 @@ export function SiteNav() {
       <div className="container-xl">
         <nav className="flex h-16 items-center justify-between">
           <Link className="flex items-center gap-3" href="/">
-            <Image
-              alt="VRTL Score"
-              height={28}
-              priority
-              src="/brand/Logo_2.png"
-              width={170}
-            />
+            <div className="flex items-center gap-2">
+              <div className="h-9 w-9 rounded-lg bg-accent/20 ring-1 ring-accent/40" />
+              <div className="leading-tight">
+                <div className="text-[15px] font-semibold tracking-tight text-text">
+                  VRTL <span className="text-text-2">Score</span>
+                </div>
+                <div className="text-xs text-muted">AI visibility for agencies</div>
+              </div>
+            </div>
           </Link>
 
           <div className="flex items-center gap-3 text-sm">
