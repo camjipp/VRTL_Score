@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { DomainSearchBar } from "@/components/DomainSearchBar";
+
 export default function HomePage() {
   return (
     <main>
@@ -18,6 +20,8 @@ export default function HomePage() {
             VRTL Score runs a standardized prompt pack, extracts structured evidence, and produces a
             branded report you can share with clients.
           </p>
+
+          <DomainSearchBar />
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link className="btn-primary" href="/app">
