@@ -3,10 +3,10 @@ import Link from "next/link";
 export default function HomePage() {
   return (
     <main>
-      <section className="relative overflow-hidden border-b border-border/60 bg-bg0">
+      <section className="relative overflow-hidden border-b border-border/15 bg-bg0">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-accent/20 blur-3xl" />
-          <div className="absolute bottom-[-240px] right-[-140px] h-[520px] w-[520px] rounded-full bg-surface/60 blur-3xl" />
+          <div className="absolute -top-44 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-accent/15 blur-3xl" />
+          <div className="absolute bottom-[-240px] right-[-140px] h-[520px] w-[520px] rounded-full bg-black/5 blur-3xl" />
         </div>
 
         <div className="container-xl relative py-16">

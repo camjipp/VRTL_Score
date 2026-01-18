@@ -33,8 +33,8 @@ function XMark() {
 export default function PricingPage() {
   return (
     <main className="bg-bg0">
-      <section className="relative overflow-hidden border-b border-border/60">
-        <div className="pointer-events-none absolute inset-0 opacity-[0.08]">
+      <section className="relative overflow-hidden border-b border-border/15">
+        <div className="pointer-events-none absolute inset-0 opacity-[0.12] mix-blend-multiply">
           {/* Brand watermark */}
           <div className="absolute right-[-120px] top-[-120px] rotate-[-8deg]">
             {/* eslint-disable-next-line @next/next/no-img-element */}

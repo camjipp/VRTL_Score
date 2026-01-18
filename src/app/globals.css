@@ -3,13 +3,13 @@
 @tailwind utilities;
 
 :root {
-  /* VRTL Score — Dark-first theme tokens */
-  --bg-0: 12 15 22; /* #0C0F16 */
-  --bg-1: 18 23 38; /* #121726 */
-  --surface: 24 29 46; /* #181D2E */
-  --border: 35 40 66; /* #232842 */
-  --text: 248 250 252; /* #F8FAFC */
-  --text-2: 161 166 179; /* #A1A6B3 */
+  /* VRTL Score — Light-first "ink + paper" tokens (fits graffiti wordmark) */
+  --bg-0: 245 241 230; /* #F5F1E6 paper */
+  --bg-1: 255 255 255; /* #FFFFFF */
+  --surface: 255 255 255; /* cards */
+  --border: 20 20 24; /* #141418 ink border */
+  --text: 13 13 16; /* #0D0D10 ink */
+  --text-2: 55 65 81; /* #374151 */
   --muted: 107 114 128; /* #6B7280 */
   --accent: 109 92 255; /* #6D5CFF */
 }
@@ -29,16 +29,16 @@ body {
     @apply mx-auto w-full max-w-6xl px-6;
   }
   .card-surface {
-    @apply rounded-xl border border-border/60 bg-surface/80 backdrop-blur;
+    @apply rounded-xl border border-border/15 bg-surface shadow-[0_1px_0_rgba(0,0,0,0.04)];
   }
   .btn-primary {
     @apply inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-accent/90;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-lg border border-border/70 bg-surface/40 px-4 py-2 text-sm font-medium text-text transition hover:bg-surface/70;
+    @apply inline-flex items-center justify-center rounded-lg border border-border/15 bg-bg1 px-4 py-2 text-sm font-medium text-text transition hover:bg-bg1/90;
   }
   .badge {
-    @apply inline-flex items-center rounded-full border border-border/70 bg-surface/40 px-2 py-0.5 text-xs text-text-2;
+    @apply inline-flex items-center rounded-full border border-border/15 bg-bg1 px-2 py-0.5 text-xs text-text-2;
   }
 }
 
