@@ -40,7 +40,8 @@ export default function HomePage() {
                 <span>AI coverage</span>
                 <span className="h-4 w-px bg-border" />
                 <span className="inline-flex items-center gap-2">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2">
+                  <span className="inline-flex items-center -space-x-2">
+                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2">
                     <span className="sr-only">ChatGPT</span>
                     <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
                       <path
@@ -51,13 +52,13 @@ export default function HomePage() {
                       />
                     </svg>
                   </span>
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2">
+                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2">
                     <span className="sr-only">Gemini</span>
                     <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
                       <path d="M12 3l1.6 5 5 1.6-5 1.6-1.6 5-1.6-5-5-1.6 5-1.6L12 3Z" fill="currentColor" />
                     </svg>
                   </span>
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2">
+                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2">
                     <span className="sr-only">Claude</span>
                     <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
                       <path
@@ -68,8 +69,9 @@ export default function HomePage() {
                       />
                     </svg>
                   </span>
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2 text-xs font-semibold text-text-3">
-                    <span className="sr-only">More</span>+
+                  </span>
+                  <span className="inline-flex items-center rounded-full border border-border bg-surface-2 px-2.5 py-1 text-xs text-text-3">
+                    &amp; more
                   </span>
                 </span>
               </span>
