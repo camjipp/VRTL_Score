@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { ButtonLink } from "@/components/ui/ButtonLink";
+
 export function SiteNav() {
   return (
     <header className="border-b border-border/60 bg-bg/80 backdrop-blur">
@@ -24,9 +26,9 @@ export function SiteNav() {
             <Link className="text-text-2 hover:text-text" href="/login">
               Log in
             </Link>
-            <Link className="btn-primary" href="/app">
+            <ButtonLink href="/app" size="sm" variant="primary">
               Open app
-            </Link>
+            </ButtonLink>
           </div>
         </nav>
       </div>
