@@ -43,31 +43,18 @@ export default function HomePage() {
                   <span className="inline-flex items-center -space-x-2">
                     <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2">
                     <span className="sr-only">ChatGPT</span>
-                    <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M12 3.8c2.2-1.3 5.1-.6 6.4 1.6 1.1 1.9.7 4.2-.7 5.7 1.7 1 2.5 3.2 1.7 5.1-1 2.5-4 3.7-6.4 2.5-.4-.2-.7-.4-1-.7-.4 2.3-2.4 4-4.8 4-2.7 0-4.9-2.2-4.9-4.9 0-2.2 1.5-4.1 3.5-4.7-1.5-1.7-1.8-4.2-.5-6.2 1.3-2.2 4.2-2.9 6.3-1.6Z"
-                        stroke="currentColor"
-                        strokeWidth="1.6"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img alt="" className="h-3.5 w-3.5" src="/ai/chatgpt.svg" />
                   </span>
                     <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2">
                     <span className="sr-only">Gemini</span>
-                    <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
-                      <path d="M12 3l1.6 5 5 1.6-5 1.6-1.6 5-1.6-5-5-1.6 5-1.6L12 3Z" fill="currentColor" />
-                    </svg>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img alt="" className="h-3.5 w-3.5" src="/ai/gemini.svg" />
                   </span>
                     <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2">
                     <span className="sr-only">Claude</span>
-                    <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M16.5 8.2c-.9-1.1-2.3-1.9-4.1-1.9-3 0-5.4 2.4-5.4 5.4s2.4 5.4 5.4 5.4c1.8 0 3.2-.7 4.1-1.9"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                    </svg>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img alt="" className="h-3.5 w-3.5" src="/ai/claude.svg" />
                   </span>
                   </span>
                   <span className="inline-flex items-center rounded-full border border-border bg-surface-2 px-2.5 py-1 text-xs text-text-3">
