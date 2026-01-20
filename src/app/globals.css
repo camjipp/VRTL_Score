@@ -5,29 +5,29 @@
 :root {
   /* VRTL Score — Brand Tokens */
   /* Core neutrals */
-  --bg: 246 247 249;
-  --bg-2: 240 242 245;
+  --bg: 250 249 246;
+  --bg-2: 245 244 240;
   --surface: 255 255 255;
-  --surface-2: 250 250 251;
-  --border: 220 223 228;
+  --surface-2: 250 249 246;
+  --border: 225 225 225;
 
   /* Text */
-  --text: 10 10 10;
-  --text-2: 60 60 60;
+  --text: 8 8 8;
+  --text-2: 58 58 58;
   --text-3: 120 120 120;
 
   /* Brand accent */
-  --accent: 180 30 30;
-  --accent-2: 200 45 45;
+  --accent: 8 8 8;
+  --accent-2: 35 35 35;
 
   /* Semantic */
-  --success: 20 130 70;
-  --warning: 200 120 30;
-  --danger: 180 30 30;
+  --success: 16 120 74;
+  --warning: 180 110 20;
+  --danger: 160 30 30;
 
   /* Effects */
   --ring: var(--accent);
-  --shadow-lift: 0 10px 28px rgba(0,0,0,0.12);
+  --shadow-lift: 0 8px 18px rgba(0,0,0,0.08);
 
   /*
     Compatibility aliases (so existing classes like bg-bg0/bg-bg1/muted keep working)
