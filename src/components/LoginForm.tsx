@@ -66,19 +66,19 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
 
   return (
     <>
-      <h1 className="text-xl font-semibold">Log in</h1>
-      <p className="mt-2 text-sm text-text-2">Use your email + password to access your agency workspace.</p>
+      <h1 className="text-2xl font-semibold tracking-tight text-text">Log in</h1>
+      <p className="mt-2 text-sm text-text-2">Use your email + password to access your workspace.</p>
 
-      <div className="mt-4 flex gap-2 text-sm">
+      <div className="mt-6 inline-flex w-full max-w-sm rounded-2xl border border-border bg-bg-2 p-1 text-sm">
         <button
-          className={`rounded-lg border border-border/70 px-3 py-1 ${mode === "signin" ? "bg-surface/60 font-semibold" : "bg-surface/20 text-text-2"}`}
+          className={`flex-1 rounded-xl px-3 py-2 transition ${mode === "signin" ? "bg-surface font-semibold text-text" : "text-text-2 hover:bg-surface-2"}`}
           onClick={() => setMode("signin")}
           type="button"
         >
           Sign in
         </button>
         <button
-          className={`rounded-lg border border-border/70 px-3 py-1 ${mode === "signup" ? "bg-surface/60 font-semibold" : "bg-surface/20 text-text-2"}`}
+          className={`flex-1 rounded-xl px-3 py-2 transition ${mode === "signup" ? "bg-surface font-semibold text-text" : "text-text-2 hover:bg-surface-2"}`}
           onClick={() => setMode("signup")}
           type="button"
         >
@@ -86,9 +86,9 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
         </button>
       </div>
 
-      <form className="mt-6 max-w-sm space-y-3" onSubmit={handleSubmit}>
+      <form className="mt-6 w-full max-w-sm space-y-4" onSubmit={handleSubmit}>
         <label className="block text-sm">
-          <div className="mb-1">Email</div>
+          <div className="mb-1 text-text-2">Email</div>
           <Input
             autoComplete="email"
             onChange={(e) => setEmail(e.target.value)}
@@ -99,7 +99,7 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
         </label>
 
         <label className="block text-sm">
-          <div className="mb-1">Password</div>
+          <div className="mb-1 text-text-2">Password</div>
           <Input
             autoComplete={mode === "signup" ? "new-password" : "current-password"}
             minLength={8}
