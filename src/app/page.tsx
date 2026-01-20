@@ -21,7 +21,7 @@ export default function HomePage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 alt="VRTL"
-                className="h-[54px] w-auto sm:h-[66px]"
+                className="h-[58px] w-[140px] object-cover object-center sm:h-[70px] sm:w-[170px]"
                 src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
               />
               <div className="text-[52px] font-semibold leading-none tracking-tight text-text sm:text-[64px]">
@@ -57,26 +57,14 @@ export default function HomePage() {
             <div className="mx-auto mt-8 max-w-2xl">
               <DomainSearchBar />
             </div>
-
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <ButtonLink href="/app" variant="primary">
-                Get insights
-              </ButtonLink>
-              <ButtonLink href="/pricing" variant="secondary">
-                View pricing
-              </ButtonLink>
-            </div>
-
-            <div className="mt-10">
-              <div className="text-xs font-medium uppercase tracking-wide text-text-3">
-                Built for agency teams
-              </div>
-              <div className="mt-3 flex flex-wrap justify-center gap-2">
-                <Badge variant="neutral">Client services</Badge>
-                <Badge variant="neutral">SEO</Badge>
-                <Badge variant="neutral">Strategy</Badge>
-                <Badge variant="neutral">Ops</Badge>
-              </div>
+            <div className="mt-6 flex items-center justify-center gap-3 text-sm">
+              <Link className="text-text-2 hover:text-text" href="/pricing">
+                See plans & pricing →
+              </Link>
+              <span className="text-text-3">·</span>
+              <Link className="text-text-2 hover:text-text" href="/app">
+                Open the app
+              </Link>
             </div>
           </div>
         </div>
