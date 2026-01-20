@@ -47,6 +47,11 @@ export default function HomePage() {
                         <img alt="" className="h-3.5 w-3.5" src="/ai/icons8-chatgpt.svg" />
                   </span>
                     <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2">
+                    <span className="sr-only">Google</span>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img alt="" className="h-3.5 w-3.5" src="/ai/icons8-google-48.svg" />
+                  </span>
+                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2">
                     <span className="sr-only">Gemini</span>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img alt="" className="h-3.5 w-3.5" src="/ai/gemini.svg" />
