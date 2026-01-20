@@ -23,7 +23,7 @@ export default function HomePage() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   alt="VRTL"
-                  className="h-full w-full scale-[1.9] object-cover object-center"
+                  className="h-full w-full scale-[1.85] object-cover object-left"
                   src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
                 />
               </div>
