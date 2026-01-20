@@ -11,8 +11,9 @@ export default function HomePage() {
       {/* Hero (Semrush-One inspired) */}
       <section className="relative overflow-hidden border-b border-border bg-bg">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-48 left-1/2 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-accent/15 blur-3xl" />
-          <div className="absolute bottom-[-240px] right-[-140px] h-[520px] w-[520px] rounded-full bg-bg-2 blur-3xl" />
+          {/* Editorial paper haze (accent is monochrome, so keep this subtle) */}
+          <div className="absolute -top-48 left-1/2 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-text/5 blur-3xl" />
+          <div className="absolute bottom-[-240px] right-[-140px] h-[520px] w-[520px] rounded-full bg-text/3 blur-3xl" />
         </div>
 
         <div className="container-xl relative py-20">
