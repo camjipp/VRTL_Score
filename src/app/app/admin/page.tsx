@@ -3,6 +3,19 @@
 import { useEffect, useState } from "react";
 
 import { ensureOnboarded } from "@/lib/onboard";
+import { Alert, AlertDescription } from "@/components/ui/Alert";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  TableWrapper
+} from "@/components/ui/Table";
 
 type AgencyRow = {
   id: string;
@@ -74,64 +87,81 @@ export default function AdminPage() {
   return (
     <main>
       <h1 className="text-xl font-semibold">Admin</h1>
-      <p className="mt-2 text-sm text-gray-600">
-        Internal-only: manage agency access (paywall entitlement).
-      </p>
+      <p className="mt-2 text-sm text-text-2">Internal-only: manage agency access (paywall entitlement).</p>
 
       {loading ? <div className="mt-6 text-sm">Loading…</div> : null}
       {error ? (
-        <div className="mt-6 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800">
-          {error}
+        <div className="mt-6">
+          <Alert variant="danger">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         </div>
       ) : null}
 
-      <div className="mt-6 overflow-x-auto">
-        <table className="min-w-full border text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="border px-3 py-2 text-left">Agency</th>
-              <th className="border px-3 py-2 text-left">ID</th>
-              <th className="border px-3 py-2 text-left">Active</th>
-              <th className="border px-3 py-2 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {agencies.map((a) => (
-              <tr key={a.id}>
-                <td className="border px-3 py-2">{a.name}</td>
-                <td className="border px-3 py-2 font-mono text-xs">{a.id}</td>
-                <td className="border px-3 py-2">{a.is_active ? "true" : "false"}</td>
-                <td className="border px-3 py-2">
-                  <div className="flex gap-2">
-                    <button
-                      className="rounded border px-2 py-1 text-xs"
-                      disabled={busyId === a.id || a.is_active}
-                      onClick={() => setActive(a.id, true)}
-                      type="button"
-                    >
-                      {busyId === a.id ? "Working…" : "Activate"}
-                    </button>
-                    <button
-                      className="rounded border px-2 py-1 text-xs"
-                      disabled={busyId === a.id || !a.is_active}
-                      onClick={() => setActive(a.id, false)}
-                      type="button"
-                    >
-                      {busyId === a.id ? "Working…" : "Deactivate"}
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {!loading && agencies.length === 0 ? (
-              <tr>
-                <td className="border px-3 py-2 text-gray-600" colSpan={4}>
-                  No agencies found.
-                </td>
-              </tr>
-            ) : null}
-          </tbody>
-        </table>
+      <div className="mt-6">
+        <Card className="p-5">
+          <div className="mb-4">
+            <div className="text-sm font-medium text-text">Agencies</div>
+            <div className="mt-1 text-xs text-text-3">Toggle active access for paywall entitlement.</div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <TableWrapper>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Agency</TableHead>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Active</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {agencies.map((a) => (
+                    <TableRow key={a.id}>
+                      <TableCell className="font-medium">{a.name}</TableCell>
+                      <TableCell className="font-mono text-xs text-text-2">{a.id}</TableCell>
+                      <TableCell>
+                        <Badge variant={a.is_active ? "success" : "neutral"}>
+                          {a.is_active ? "active" : "inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="inline-flex gap-2">
+                          <Button
+                            className="h-9 px-3 text-xs"
+                            disabled={busyId === a.id || a.is_active}
+                            onClick={() => setActive(a.id, true)}
+                            size="sm"
+                            variant="primary"
+                          >
+                            {busyId === a.id ? "Working…" : "Activate"}
+                          </Button>
+                          <Button
+                            className="h-9 px-3 text-xs"
+                            disabled={busyId === a.id || !a.is_active}
+                            onClick={() => setActive(a.id, false)}
+                            size="sm"
+                            variant="outline"
+                          >
+                            {busyId === a.id ? "Working…" : "Deactivate"}
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {!loading && agencies.length === 0 ? (
+                    <TableRow>
+                      <TableCell className="text-text-2" colSpan={4}>
+                        No agencies found.
+                      </TableCell>
+                    </TableRow>
+                  ) : null}
+                </TableBody>
+              </Table>
+            </TableWrapper>
+          </div>
+        </Card>
       </div>
     </main>
   );

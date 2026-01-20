@@ -6,6 +6,21 @@ import Link from "next/link";
 
 import { ensureOnboarded } from "@/lib/onboard";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { Alert, AlertDescription } from "@/components/ui/Alert";
+import { Badge } from "@/components/ui/Badge";
+import type { BadgeVariant } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  TableWrapper
+} from "@/components/ui/Table";
 
 type ClientRow = {
   id: string;
@@ -83,6 +98,23 @@ export default function ClientDetailPage() {
   const clientId = useMemo(() => (typeof params?.id === "string" ? params.id : ""), [params]);
 
   const supabase = getSupabaseBrowserClient();
+
+  function statusVariant(status: string | null | undefined): BadgeVariant {
+    const s = String(status ?? "").toLowerCase();
+    if (!s) return "neutral";
+    if (s.includes("complete") || s.includes("success") || s.includes("succeed")) return "success";
+    if (s.includes("fail") || s.includes("error") || s.includes("cancel")) return "danger";
+    if (s.includes("running") || s.includes("queued") || s.includes("pending") || s.includes("processing"))
+      return "warning";
+    return "neutral";
+  }
+
+  function scoreVariant(score: number | null | undefined): BadgeVariant {
+    if (typeof score !== "number") return "neutral";
+    if (score >= 80) return "success";
+    if (score >= 50) return "warning";
+    return "danger";
+  }
 
   const [agencyId, setAgencyId] = useState<string | null>(null);
   const [client, setClient] = useState<ClientRow | null>(null);
@@ -315,55 +347,65 @@ export default function ClientDetailPage() {
 
       {loading ? <div className="mt-6 text-sm">Loading…</div> : null}
       {error ? (
-        <div className="mt-6 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800">
-          {error}
+        <div className="mt-6">
+          <Alert variant="danger">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         </div>
       ) : null}
 
       {!loading && !error && !client ? (
-        <div className="mt-6 text-sm text-gray-600">Client not found (or not in your agency).</div>
+        <div className="mt-6 text-sm text-text-2">Client not found (or not in your agency).</div>
       ) : null}
 
       {client ? (
-        <div className="mt-6 rounded border p-4">
-          <div className="font-medium">{client.name}</div>
-          <div className="text-sm text-gray-600">
-            {client.website ? client.website : "No website"} · {client.industry}
-          </div>
+        <div className="mt-6">
+          <Card className="p-4">
+            <div className="font-medium text-text">{client.name}</div>
+            <div className="mt-1 text-sm text-text-2">
+              {client.website ? client.website : "No website"}{" "}
+              <span className="text-text-3">·</span> {client.industry}
+            </div>
+          </Card>
         </div>
       ) : null}
 
       <section className="mt-8">
         <h2 className="text-lg font-medium">Competitors</h2>
-        <p className="mt-1 text-sm text-gray-600">Max 8 competitors.</p>
+        <p className="mt-1 text-sm text-text-2">Max 8 competitors.</p>
 
         <ul className="mt-4 space-y-2">
           {competitors.map((c) => (
-            <li key={c.id} className="flex items-center justify-between gap-3 rounded border p-3">
-              <div>
-                <div className="font-medium">{c.name}</div>
-                <div className="text-sm text-gray-600">{c.website ? c.website : "No website"}</div>
-              </div>
-              <button
-                className="rounded border px-3 py-1 text-sm"
-                disabled={busy}
-                onClick={() => deleteCompetitor(c.id)}
-                type="button"
-              >
-                Delete
-              </button>
+            <li key={c.id}>
+              <Card className="p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="font-medium text-text">{c.name}</div>
+                    <div className="text-sm text-text-2">
+                      {c.website ? c.website : "No website"}
+                    </div>
+                  </div>
+                  <Button
+                    disabled={busy}
+                    onClick={() => deleteCompetitor(c.id)}
+                    size="sm"
+                    variant="outline"
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </Card>
             </li>
           ))}
           {!loading && competitors.length === 0 ? (
-            <li className="text-sm text-gray-600">No competitors yet.</li>
+            <li className="text-sm text-text-2">No competitors yet.</li>
           ) : null}
         </ul>
 
         <form className="mt-6 max-w-md space-y-3" onSubmit={addCompetitor}>
           <label className="block text-sm">
             <div className="mb-1">Name</div>
-            <input
-              className="w-full rounded border px-3 py-2"
+            <Input
               disabled={busy || competitors.length >= 8}
               onChange={(e) => setNewName(e.target.value)}
               required
@@ -373,8 +415,7 @@ export default function ClientDetailPage() {
 
           <label className="block text-sm">
             <div className="mb-1">Website (optional)</div>
-            <input
-              className="w-full rounded border px-3 py-2"
+            <Input
               disabled={busy || competitors.length >= 8}
               onChange={(e) => setNewWebsite(e.target.value)}
               value={newWebsite}
@@ -382,83 +423,87 @@ export default function ClientDetailPage() {
           </label>
 
           {competitors.length >= 8 ? (
-            <div className="text-sm text-red-700">You’ve reached the max of 8 competitors.</div>
+            <div className="text-sm text-danger">You’ve reached the max of 8 competitors.</div>
           ) : null}
 
-          <button
-            className="rounded border px-3 py-2 text-sm"
-            disabled={busy || competitors.length >= 8}
-            type="submit"
-          >
+          <Button disabled={busy || competitors.length >= 8} type="submit" variant="primary">
             {busy ? "Adding…" : "Add competitor"}
-          </button>
+          </Button>
         </form>
       </section>
 
       <section className="mt-10">
         <h2 className="text-lg font-medium">Snapshots</h2>
         {competitorConfidence.message ? (
-          <div className="mt-3 rounded border bg-yellow-50 p-3 text-sm">
-            <div className="font-medium">Score confidence: {competitorConfidence.label}</div>
-            <div className="mt-1">{competitorConfidence.message}</div>
-            <div className="mt-2 text-xs text-gray-700">
-              You can still run a snapshot now — competitors just make the report stronger.
-            </div>
+          <div className="mt-3">
+            <Alert variant="warning">
+              <AlertDescription>
+                <span className="font-semibold text-text">Score confidence:</span>{" "}
+                <span className="text-text">{competitorConfidence.label}</span>
+                <div className="mt-1 text-text-2">{competitorConfidence.message}</div>
+                <div className="mt-2 text-xs text-text-3">
+                  You can still run a snapshot now — competitors just make the report stronger.
+                </div>
+              </AlertDescription>
+            </Alert>
           </div>
         ) : null}
         <div className="mt-3 flex items-center gap-3">
-          <button
-            className="rounded border px-3 py-2 text-sm"
-            disabled={running}
-            onClick={runSnapshot}
-            type="button"
-          >
+          <Button disabled={running} onClick={runSnapshot} variant="primary">
             {running ? "Running…" : "Run Snapshot"}
-          </button>
+          </Button>
           {snapshot?.status === "running" ? (
-            <button
-              className="rounded border px-3 py-2 text-sm"
-              disabled={running}
-              onClick={resetRunningSnapshot}
-              type="button"
-            >
+            <Button disabled={running} onClick={resetRunningSnapshot} variant="outline">
               Reset running snapshot
-            </button>
+            </Button>
           ) : null}
           {snapshot ? (
-            <span className="text-xs text-gray-600">
-              Latest: {snapshot.status}{" "}
-              {snapshot.completed_at
-                ? `@ ${new Date(snapshot.completed_at).toLocaleString()}`
-                : snapshot.started_at
-                ? `(started ${new Date(snapshot.started_at).toLocaleString()})`
-                : ""}
+            <span className="inline-flex items-center gap-2 text-xs text-text-2">
+              <span className="text-text-3">Latest</span>
+              <Badge variant={statusVariant(snapshot.status)}>{snapshot.status}</Badge>
+              <span>
+                {snapshot.completed_at
+                  ? `@ ${new Date(snapshot.completed_at).toLocaleString()}`
+                  : snapshot.started_at
+                  ? `(started ${new Date(snapshot.started_at).toLocaleString()})`
+                  : ""}
+              </span>
             </span>
           ) : (
-            <span className="text-xs text-gray-600">No snapshots yet.</span>
+            <span className="text-xs text-text-2">No snapshots yet.</span>
           )}
         </div>
         {runError ? (
-          <div className="mt-3 rounded border border-red-300 bg-red-50 p-2 text-sm text-red-800">
-            {runError}
+          <div className="mt-3">
+            <Alert variant="danger">
+              <AlertDescription>{runError}</AlertDescription>
+            </Alert>
           </div>
         ) : null}
 
         {snapshot ? (
-          <div className="mt-4 rounded border p-4">
-            <div className="text-sm text-gray-600">Status: {snapshot.status}</div>
-            <div className="text-lg font-semibold">
-              Overall score: {snapshot.vrtl_score ?? "n/a"}
-            </div>
+          <div className="mt-4">
+            <Card className="p-4">
+              <div className="text-sm text-text-2">
+                Status: <Badge variant={statusVariant(snapshot.status)}>{snapshot.status}</Badge>
+              </div>
+              <div className="mt-2 flex items-center gap-2">
+                <div className="text-sm font-semibold text-text">
+                  Overall <span className="marker-underline">score</span>
+                </div>
+                <Badge variant={scoreVariant(snapshot.vrtl_score)}>
+                  {snapshot.vrtl_score == null ? "n/a" : snapshot.vrtl_score}
+                </Badge>
+              </div>
             {competitorConfidence.level !== "high" ? (
-              <div className="mt-1 text-sm text-gray-700">
+              <div className="mt-2 text-sm text-text-2">
                 Score confidence: {competitorConfidence.label} due to limited competitor set.
               </div>
             ) : null}
             {snapshot.score_by_provider ? (
-              <div className="mt-2 text-sm">
-                Providers:
-                <ul className="ml-4 list-disc">
+              <div className="mt-3 text-sm">
+                <div className="font-medium text-text">Providers</div>
+                <ul className="mt-1 ml-4 list-disc text-text-2">
                   {Object.entries(snapshot.score_by_provider).map(([p, s]) => (
                     <li key={p}>
                       {p}: {s}
@@ -468,58 +513,84 @@ export default function ClientDetailPage() {
               </div>
             ) : null}
             {competitorMentions.length ? (
-              <div className="mt-3 text-sm">
-                Competitors mentioned: {competitorMentions.join(", ")}
+              <div className="mt-3 text-sm text-text-2">
+                <span className="font-medium text-text">Competitors mentioned:</span>{" "}
+                {competitorMentions.join(", ")}
               </div>
             ) : null}
             {snapshot.error ? (
-              <div className="mt-3 text-sm text-red-700">Error: {snapshot.error}</div>
+              <div className="mt-3">
+                <Alert variant="danger">
+                  <AlertDescription>Error: {snapshot.error}</AlertDescription>
+                </Alert>
+              </div>
             ) : null}
+            </Card>
           </div>
         ) : null}
 
         <div className="mt-6 overflow-x-auto">
-          <table className="min-w-full border text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="border px-3 py-2 text-left">Date</th>
-                <th className="border px-3 py-2 text-left">Status</th>
-                <th className="border px-3 py-2 text-left">VRTL Score</th>
-                <th className="border px-3 py-2 text-left">Providers</th>
-                <th className="border px-3 py-2 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {snapshots.map((s) => (
-                <tr key={s.id}>
-                  <td className="border px-3 py-2">
-                    {new Date(s.created_at).toLocaleString()}
-                  </td>
-                  <td className="border px-3 py-2">{s.status}</td>
-                  <td className="border px-3 py-2">{s.vrtl_score ?? "—"}</td>
-                  <td className="border px-3 py-2">
-                    {s.score_by_provider
-                      ? Object.entries(s.score_by_provider)
-                          .map(([k, v]) => `${k}: ${v}`)
-                          .join(", ")
-                      : "—"}
-                  </td>
-                  <td className="border px-3 py-2">
-                    <Link className="underline" href={`/app/clients/${clientId}/snapshots/${s.id}`}>
-                      View
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-              {snapshots.length === 0 ? (
-                <tr>
-                  <td className="border px-3 py-2 text-gray-600" colSpan={5}>
-                    No snapshots yet.
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
+          <TableWrapper>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>VRTL Score</TableHead>
+                  <TableHead>Providers</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {snapshots.map((s) => {
+                  const providersString = s.score_by_provider
+                    ? Object.entries(s.score_by_provider)
+                        .map(([k, v]) => `${k}: ${v}`)
+                        .join(", ")
+                    : "—";
+
+                  return (
+                    <TableRow key={s.id}>
+                      <TableCell className="text-text-2">
+                        {new Date(s.created_at).toLocaleString()}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={statusVariant(s.status)}>{s.status}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={scoreVariant(s.vrtl_score)}>
+                          {s.vrtl_score == null ? "—" : s.vrtl_score}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-text-2">
+                        <span
+                          className="block max-w-[360px] truncate"
+                          title={providersString !== "—" ? providersString : undefined}
+                        >
+                          {providersString}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Link
+                          className="text-accent underline underline-offset-4 hover:text-accent-2"
+                          href={`/app/clients/${clientId}/snapshots/${s.id}`}
+                        >
+                          View
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {snapshots.length === 0 ? (
+                  <TableRow>
+                    <TableCell className="text-text-2" colSpan={5}>
+                      No snapshots yet.
+                    </TableCell>
+                  </TableRow>
+                ) : null}
+              </TableBody>
+            </Table>
+          </TableWrapper>
         </div>
       </section>
     </main>

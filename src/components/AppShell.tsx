@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { Button } from "@/components/ui/Button";
 
 export function AppShell() {
   const supabase = getSupabaseBrowserClient();
@@ -18,7 +19,7 @@ export function AppShell() {
   }
 
   return (
-    <header className="mb-6 rounded-xl border border-border/60 bg-bg1/40 backdrop-blur">
+    <header className="mb-6 rounded-2xl border border-border bg-surface shadow-lift">
       <div className="flex items-center justify-between px-4 py-3">
         <nav className="flex items-center gap-3 text-sm">
           <Link className="flex items-center" href="/app">
@@ -26,7 +27,7 @@ export function AppShell() {
               VRTL <span className="text-text-2">Score</span>
             </span>
           </Link>
-          <span className="text-muted">/</span>
+          <span className="text-text-3">/</span>
           <Link className="text-text-2 hover:text-text" href="/app">
             Clients
           </Link>
@@ -37,9 +38,9 @@ export function AppShell() {
             Admin
           </Link>
         </nav>
-        <button className="btn-secondary" disabled={busy} onClick={logout}>
+        <Button disabled={busy} onClick={logout} variant="secondary">
           {busy ? "Logging out..." : "Log out"}
-        </button>
+        </Button>
       </div>
     </header>
   );

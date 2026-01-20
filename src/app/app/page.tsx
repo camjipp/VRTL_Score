@@ -5,6 +5,18 @@ import { useEffect, useState } from "react";
 
 import { ensureOnboarded } from "@/lib/onboard";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { Alert, AlertDescription } from "@/components/ui/Alert";
+import { Badge } from "@/components/ui/Badge";
+import { ButtonLink } from "@/components/ui/ButtonLink";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  TableWrapper
+} from "@/components/ui/Table";
 
 type ClientRow = {
   id: string;
@@ -57,41 +69,67 @@ export default function AppPage() {
           <h1 className="text-2xl font-semibold tracking-tight">Clients</h1>
           <p className="mt-2 text-sm text-text-2">Create and manage clients for your agency.</p>
         </div>
-        <Link className="btn-primary" href="/app/clients/new">
+        <ButtonLink href="/app/clients/new" variant="primary">
           New client
-        </Link>
+        </ButtonLink>
       </div>
 
-      {agencyId ? <div className="mt-3 text-xs text-muted">agency_id: {agencyId}</div> : null}
-
-      {loading ? <div className="mt-6 text-sm">Loading…</div> : null}
-      {error ? (
-        <div className="mt-6 rounded-lg border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
-          {error}
+      {agencyId ? (
+        <div className="mt-3 flex items-center gap-2 text-xs text-text-2">
+          <span className="text-text-3">agency_id</span>
+          <Badge variant="neutral">{agencyId}</Badge>
         </div>
       ) : null}
 
-      <ul className="mt-6 space-y-3">
-        {clients.map((c) => (
-          <li key={c.id} className="card-surface p-4">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <div className="font-medium text-text">{c.name}</div>
-                <div className="mt-1 text-sm text-text-2">
-                  {c.website ? c.website : "No website"} <span className="text-muted">·</span>{" "}
-                  {c.industry}
-                </div>
-              </div>
-              <Link className="btn-secondary" href={`/app/clients/${c.id}`}>
-                Open
-              </Link>
-            </div>
-          </li>
-        ))}
-        {!loading && !error && clients.length === 0 ? (
-          <li className="text-sm text-text-2">No clients yet.</li>
-        ) : null}
-      </ul>
+      {loading ? <div className="mt-6 text-sm">Loading…</div> : null}
+      {error ? (
+        <div className="mt-6">
+          <Alert variant="danger">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </div>
+      ) : null}
+
+      <div className="mt-6 overflow-x-auto">
+        <TableWrapper>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Website</TableHead>
+                <TableHead>Industry</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {clients.map((c) => (
+                <TableRow key={c.id}>
+                  <TableCell className="font-medium">{c.name}</TableCell>
+                  <TableCell className="text-text-2">{c.website ? c.website : "No website"}</TableCell>
+                  <TableCell>
+                    <Badge variant="neutral">{c.industry}</Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Link
+                      className="text-accent underline underline-offset-4 hover:text-accent-2"
+                      href={`/app/clients/${c.id}`}
+                    >
+                      View
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {!loading && !error && clients.length === 0 ? (
+                <TableRow>
+                  <TableCell className="text-text-2" colSpan={4}>
+                    No clients yet.
+                  </TableCell>
+                </TableRow>
+              ) : null}
+            </TableBody>
+          </Table>
+        </TableWrapper>
+      </div>
     </main>
   );
 }

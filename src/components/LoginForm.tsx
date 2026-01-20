@@ -4,6 +4,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Alert, AlertDescription } from "@/components/ui/Alert";
 
 async function onboard(accessToken: string) {
   const res = await fetch("/api/onboard", {
@@ -86,8 +89,7 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
       <form className="mt-6 max-w-sm space-y-3" onSubmit={handleSubmit}>
         <label className="block text-sm">
           <div className="mb-1">Email</div>
-          <input
-            className="w-full rounded-lg border border-border/70 bg-bg1/60 px-3 py-2 text-text placeholder:text-muted outline-none focus:ring-2 focus:ring-accent/40"
+          <Input
             autoComplete="email"
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -98,8 +100,7 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
 
         <label className="block text-sm">
           <div className="mb-1">Password</div>
-          <input
-            className="w-full rounded-lg border border-border/70 bg-bg1/60 px-3 py-2 text-text placeholder:text-muted outline-none focus:ring-2 focus:ring-accent/40"
+          <Input
             autoComplete={mode === "signup" ? "new-password" : "current-password"}
             minLength={8}
             onChange={(e) => setPassword(e.target.value)}
@@ -110,14 +111,14 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
         </label>
 
         {error ? (
-          <div className="rounded-lg border border-red-400/40 bg-red-500/10 p-2 text-sm text-red-200">
-            {error}
-          </div>
+          <Alert variant="danger">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         ) : null}
 
-        <button className="btn-primary w-full" disabled={busy} type="submit">
+        <Button className="w-full" disabled={busy} type="submit" variant="primary">
           {busy ? "Working..." : mode === "signup" ? "Create account" : "Sign in"}
-        </button>
+        </Button>
       </form>
     </>
   );

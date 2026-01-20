@@ -2,6 +2,10 @@ import Link from "next/link";
 
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { DownloadPdfButton } from "@/components/DownloadPdfButton";
+import { Alert, AlertDescription } from "@/components/ui/Alert";
+import { Badge } from "@/components/ui/Badge";
+import type { BadgeVariant } from "@/components/ui/Badge";
+import { Card } from "@/components/ui/Card";
 
 type SnapshotRow = {
   id: string;
@@ -67,6 +71,23 @@ function summarizeProviders(score_by_provider: Record<string, number> | null) {
     .join(", ");
 }
 
+function statusVariant(status: string | null | undefined): BadgeVariant {
+  const s = String(status ?? "").toLowerCase();
+  if (!s) return "neutral";
+  if (s.includes("complete") || s.includes("success") || s.includes("succeed")) return "success";
+  if (s.includes("fail") || s.includes("error") || s.includes("cancel")) return "danger";
+  if (s.includes("running") || s.includes("queued") || s.includes("pending") || s.includes("processing"))
+    return "warning";
+  return "neutral";
+}
+
+function scoreVariant(score: number | null | undefined): BadgeVariant {
+  if (typeof score !== "number") return "neutral";
+  if (score >= 80) return "success";
+  if (score >= 50) return "warning";
+  return "danger";
+}
+
 function truncateText(text: string, len = 180) {
   if (text.length <= len) return text;
   return `${text.slice(0, len)}…`;
@@ -112,15 +133,19 @@ export default async function SnapshotDetailPage({ params }: PageProps) {
     .maybeSingle();
   if (snapRes.error || !snapRes.data) {
     return (
-      <main className="p-6">
-        <div className="text-sm text-red-700">Snapshot not found.</div>
+      <main>
+        <Alert variant="danger">
+          <AlertDescription>Snapshot not found.</AlertDescription>
+        </Alert>
       </main>
     );
   }
   if (snapRes.data.client_id !== clientId) {
     return (
-      <main className="p-6">
-        <div className="text-sm text-red-700">Snapshot does not belong to this client.</div>
+      <main>
+        <Alert variant="danger">
+          <AlertDescription>Snapshot does not belong to this client.</AlertDescription>
+        </Alert>
       </main>
     );
   }
@@ -174,76 +199,135 @@ export default async function SnapshotDetailPage({ params }: PageProps) {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
 
+  const providersString = summarizeProviders(snapshot.score_by_provider);
+
   return (
-    <main className="p-6 space-y-6">
+    <main className="space-y-6">
       <div className="text-sm">
-        <Link className="underline" href={`/app/clients/${clientId}`}>
+        <Link
+          className="text-accent underline underline-offset-4 hover:text-accent-2"
+          href={`/app/clients/${clientId}`}
+        >
           ← Back to client
         </Link>
       </div>
 
-      <section className="space-y-2">
-        <h1 className="text-xl font-semibold">
-          Snapshot {snapshot.id.slice(0, 8)}… {client ? `for ${client.name}` : ""}
-        </h1>
-        <div className="text-sm text-gray-700">
-          Status: {snapshot.status} · Created: {formatDate(snapshot.created_at)} · Completed:{" "}
-          {formatDate(snapshot.completed_at)}
-        </div>
-        <div className="text-lg font-semibold">Overall score: {snapshot.vrtl_score ?? "—"}</div>
-        {competitorConfidence.level !== "high" ? (
-          <div className="text-sm text-gray-700">
-            Score confidence: {competitorConfidence.label} due to limited competitor set.
+      <section>
+        <Card className="p-5">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-xl font-semibold">
+              Snapshot {snapshot.id.slice(0, 8)}… {client ? `for ${client.name}` : ""}
+            </h1>
+
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text-2">
+              <span className="inline-flex items-center gap-2">
+                <span className="text-text-3">Status</span>
+                <Badge variant={statusVariant(snapshot.status)}>{snapshot.status}</Badge>
+              </span>
+              <span className="text-text-3">·</span>
+              <span>
+                <span className="text-text-3">Created</span> {formatDate(snapshot.created_at)}
+              </span>
+              <span className="text-text-3">·</span>
+              <span>
+                <span className="text-text-3">Completed</span> {formatDate(snapshot.completed_at)}
+              </span>
+            </div>
+
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <div className="text-sm font-semibold text-text">
+                Overall <span className="marker-underline">score</span>
+              </div>
+              <Badge variant={scoreVariant(snapshot.vrtl_score)}>
+                {snapshot.vrtl_score == null ? "—" : snapshot.vrtl_score}
+              </Badge>
+            </div>
+
+            {competitorConfidence.level !== "high" ? (
+              <div className="text-sm text-text-2">
+                Score confidence: {competitorConfidence.label} due to limited competitor set.
+              </div>
+            ) : null}
+
+            <div className="text-sm text-text-2">
+              <span className="text-text-3">Providers</span>{" "}
+              <span
+                className="inline-block max-w-[360px] truncate align-bottom"
+                title={providersString !== "—" ? providersString : undefined}
+              >
+                {providersString}
+              </span>
+            </div>
+
+            <div className="text-sm text-text-2">
+              <span className="text-text-3">Prompt pack</span> {snapshot.prompt_pack_version ?? "—"}
+            </div>
+
+            {client ? (
+              <div className="text-sm text-text-2">
+                <span className="text-text-3">Client site</span>{" "}
+                {client.website ? (
+                  <a
+                    className="text-accent underline underline-offset-4 hover:text-accent-2"
+                    href={client.website}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {client.website}
+                  </a>
+                ) : (
+                  "—"
+                )}
+              </div>
+            ) : null}
+
+            <div className="text-sm text-text-2">
+              <span className="text-text-3">Competitors</span>{" "}
+              {competitors.length ? competitors.map((c) => c.name).join(", ") : "none"}
+            </div>
+
+            {competitorConfidence.message ? (
+              <div className="mt-2">
+                <Alert variant="warning">
+                  <AlertDescription>{competitorConfidence.message}</AlertDescription>
+                </Alert>
+              </div>
+            ) : null}
+
+            <DownloadPdfButton snapshotId={snapshot.id} />
+
+            {snapshot.error ? (
+              <div className="mt-2">
+                <Alert variant="danger">
+                  <AlertDescription>Error: {snapshot.error}</AlertDescription>
+                </Alert>
+              </div>
+            ) : null}
           </div>
-        ) : null}
-        <div className="text-sm">Providers: {summarizeProviders(snapshot.score_by_provider)}</div>
-        <div className="text-sm">Prompt pack: {snapshot.prompt_pack_version ?? "—"}</div>
-        {client ? (
-          <div className="text-sm">
-            Client site:{" "}
-            {client.website ? (
-              <a className="underline" href={client.website} target="_blank" rel="noreferrer">
-                {client.website}
-              </a>
-            ) : (
-              "—"
-            )}
-          </div>
-        ) : null}
-        <div className="text-sm">
-          Competitors:{" "}
-          {competitors.length
-            ? competitors.map((c) => c.name).join(", ")
-            : "none"}
-        </div>
-        {competitorConfidence.message ? (
-          <div className="text-sm rounded border bg-yellow-50 p-2">
-            {competitorConfidence.message}
-          </div>
-        ) : null}
-        <DownloadPdfButton snapshotId={snapshot.id} />
-        {snapshot.error ? (
-          <div className="text-sm text-red-700">Error: {snapshot.error}</div>
-        ) : null}
+        </Card>
       </section>
 
-      <section className="space-y-2">
-        <h2 className="text-lg font-medium">Competitive summary</h2>
-        <div className="text-sm">
-          Client mentioned/recommended in {clientMentionedCount} response(s)
-        </div>
-        <div className="text-sm">Top competitors mentioned:</div>
-        <ul className="ml-4 list-disc text-sm">
-          {topCompetitors.length === 0 ? (
-            <li className="text-gray-600">None</li>
-          ) : (
-            topCompetitors.map(([name, count]) => (
-              <li key={name}>
-                {name}: {count}
-              </li>
-            ))
-          )}
-        </ul>
+      <section>
+        <Card className="p-5">
+          <div className="space-y-2">
+            <h2 className="text-lg font-medium">Competitive summary</h2>
+            <div className="text-sm text-text-2">
+              Client mentioned/recommended in {clientMentionedCount} response(s)
+            </div>
+            <div className="text-sm text-text-2">Top competitors mentioned:</div>
+            <ul className="ml-4 list-disc text-sm text-text-2">
+              {topCompetitors.length === 0 ? (
+                <li className="text-text-3">None</li>
+              ) : (
+                topCompetitors.map(([name, count]) => (
+                  <li key={name}>
+                    <span className="text-text">{name}</span>: {count}
+                  </li>
+                ))
+              )}
+            </ul>
+          </div>
+        </Card>
       </section>
 
       <section className="space-y-3">
@@ -260,33 +344,49 @@ export default async function SnapshotDetailPage({ params }: PageProps) {
             pj.evidence_snippet ??
             (r.raw_text ? truncateText(r.raw_text, 180) : "No evidence available");
           return (
-            <div key={r.id} className="rounded border p-3 text-sm">
-              <div className="text-xs text-gray-600">
-                prompt #{String(r.prompt_ordinal ?? "—")} · {r.prompt_text ?? "Prompt"} · parse_ok:{" "}
-                {String(Boolean(r.parse_ok))}
+            <Card key={r.id} className="p-4">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-3">
+                <span>prompt #{String(r.prompt_ordinal ?? "—")}</span>
+                <span>·</span>
+                <span className="text-text-2">{r.prompt_text ?? "Prompt"}</span>
+                <span>·</span>
+                <span className="inline-flex items-center gap-2">
+                  <span>parse_ok</span>
+                  <Badge variant={r.parse_ok ? "success" : "danger"}>{String(Boolean(r.parse_ok))}</Badge>
+                </span>
               </div>
-              <div className="mt-1">
-                client_mentioned: {String(Boolean(pj.client_mentioned))}; position:{" "}
-                {pj.client_position ?? "—"}; strength: {pj.recommendation_strength ?? "—"}
+
+              <div className="mt-2 text-sm text-text-2">
+                <span className="text-text-3">client_mentioned</span>{" "}
+                <span className="text-text">{String(Boolean(pj.client_mentioned))}</span>
+                <span className="text-text-3">; position</span> {pj.client_position ?? "—"}
+                <span className="text-text-3">; strength</span> {pj.recommendation_strength ?? "—"}
               </div>
-              <div className="mt-1">
-                competitors:{" "}
+
+              <div className="mt-2 text-sm text-text-2">
+                <span className="text-text-3">competitors</span>{" "}
                 {Array.isArray(pj.competitors_mentioned) && pj.competitors_mentioned.length
                   ? pj.competitors_mentioned.join(", ")
                   : "—"}
               </div>
-              <div className="mt-1">evidence: {snippet}</div>
-              <details className="mt-2">
-                <summary className="cursor-pointer text-xs underline">Raw output</summary>
-                <pre className="mt-1 whitespace-pre-wrap break-words text-xs">
+
+              <div className="mt-2 text-sm text-text-2">
+                <span className="text-text-3">evidence</span> {snippet}
+              </div>
+
+              <details className="mt-3">
+                <summary className="cursor-pointer text-xs text-accent underline underline-offset-4 hover:text-accent-2">
+                  Raw output
+                </summary>
+                <pre className="mt-2 max-h-[320px] overflow-auto whitespace-pre-wrap break-words text-xs text-text-2">
                   {r.raw_text ?? ""}
                 </pre>
               </details>
-            </div>
+            </Card>
           );
         })}
         {responses.length === 0 ? (
-          <div className="text-sm text-gray-600">No responses found.</div>
+          <div className="text-sm text-text-2">No responses found.</div>
         ) : null}
       </section>
     </main>

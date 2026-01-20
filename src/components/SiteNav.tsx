@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export function SiteNav() {
   return (
-    <header className="border-b border-border/60 bg-bg0/80 backdrop-blur">
+    <header className="border-b border-border/60 bg-bg/80 backdrop-blur">
       <div className="container-xl">
         <nav className="flex h-16 items-center justify-between">
           <Link className="flex items-center gap-3" href="/">
@@ -12,7 +12,7 @@ export function SiteNav() {
                 <div className="text-[15px] font-semibold tracking-tight text-text">
                   VRTL <span className="text-text-2">Score</span>
                 </div>
-                <div className="text-xs text-muted">AI visibility for agencies</div>
+                <div className="text-xs text-text-3">AI visibility for agencies</div>
               </div>
             </div>
           </Link>

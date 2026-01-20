@@ -3,6 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { ensureOnboarded } from "@/lib/onboard";
+import { Alert, AlertDescription } from "@/components/ui/Alert";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
 
 type AgencySettings = {
   agency_id: string;
@@ -115,88 +119,105 @@ export default function SettingsPage() {
   return (
     <main className="max-w-2xl">
       <h1 className="text-xl font-semibold">Settings</h1>
-      <p className="mt-1 text-sm text-gray-600">Agency profile used on PDF reports.</p>
+      <p className="mt-1 text-sm text-text-2">Agency profile used on PDF reports.</p>
 
       {loading ? <div className="mt-6 text-sm">Loading…</div> : null}
       {error ? (
-        <div className="mt-6 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800">
-          {error}
+        <div className="mt-6">
+          <Alert variant="danger">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         </div>
       ) : null}
 
       {!loading && settings ? (
         <>
-          <form className="mt-6 space-y-4 rounded border p-4" onSubmit={saveSettings}>
-            <div className="text-sm font-medium">Agency</div>
+          <form className="mt-6" onSubmit={saveSettings}>
+            <Card className="p-5">
+              <div className="space-y-4">
+                <div>
+                  <div className="text-sm font-medium text-text">Agency</div>
+                  <div className="mt-1 text-xs text-text-3">Basic agency details used across the app and PDFs.</div>
+                </div>
 
-            <label className="block text-sm">
-              <div className="mb-1">Name</div>
-              <input
-                className="w-full rounded border px-3 py-2"
-                disabled={saving}
-                onChange={(e) => setName(e.target.value)}
-                required
-                value={name}
-              />
-            </label>
+                <label className="block text-sm">
+                  <div className="mb-1 text-text">Name</div>
+                  <Input
+                    disabled={saving}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    value={name}
+                  />
+                </label>
 
-            <label className="block text-sm">
-              <div className="mb-1">Accent color (optional)</div>
-              <input
-                className="w-full rounded border px-3 py-2"
-                disabled={saving}
-                onChange={(e) => setAccent(e.target.value)}
-                placeholder="#0f172a"
-                value={accent}
-              />
-              <div className="mt-1 text-xs text-gray-600">
-                Used for score highlights in the PDF. Hex recommended (e.g. <code>#0f172a</code>).
+                <label className="block text-sm">
+                  <div className="mb-1 text-text">Accent color (optional)</div>
+                  <Input
+                    disabled={saving}
+                    onChange={(e) => setAccent(e.target.value)}
+                    placeholder="#0f172a"
+                    value={accent}
+                  />
+                  <div className="mt-1 text-xs text-text-3">
+                    Used for score highlights in the PDF. Hex recommended (e.g. <code>#0f172a</code>).
+                  </div>
+                </label>
+
+                {!canEditBranding ? (
+                  <Alert variant="warning">
+                    <AlertDescription>
+                      Branding fields aren’t enabled in your DB yet. Name updates still work.
+                    </AlertDescription>
+                  </Alert>
+                ) : null}
+
+                <div className="flex items-center gap-3">
+                  <Button disabled={saving} type="submit" variant="primary">
+                    {saving ? "Saving…" : "Save"}
+                  </Button>
+                </div>
               </div>
-            </label>
-
-            {!canEditBranding ? (
-              <div className="text-xs text-amber-700">
-                Branding fields aren’t enabled in your DB yet. Name updates still work.
-              </div>
-            ) : null}
-
-            <button className="rounded border px-3 py-2 text-sm" disabled={saving} type="submit">
-              {saving ? "Saving…" : "Save"}
-            </button>
+            </Card>
           </form>
 
-          <form className="mt-6 space-y-4 rounded border p-4" onSubmit={uploadLogo}>
-            <div className="text-sm font-medium">Logo</div>
-            {settings.brand_logo_url ? (
-              <div className="rounded border bg-white p-3">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  alt="Agency logo"
-                  src={settings.brand_logo_url}
-                  style={{ maxHeight: 64, maxWidth: 240 }}
-                />
-                <div className="mt-2 text-xs text-gray-600 break-all">{settings.brand_logo_url}</div>
-              </div>
-            ) : (
-              <div className="text-sm text-gray-600">No logo uploaded yet.</div>
-            )}
+          <form className="mt-6" onSubmit={uploadLogo}>
+            <Card className="p-5">
+              <div className="space-y-4">
+                <div>
+                  <div className="text-sm font-medium text-text">Logo</div>
+                  <div className="mt-1 text-xs text-text-3">Used on generated PDF reports.</div>
+                </div>
 
-            <input
-              accept="image/*"
-              disabled={uploading}
-              onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)}
-              type="file"
-            />
-            <button
-              className="rounded border px-3 py-2 text-sm"
-              disabled={uploading || !logoFile}
-              type="submit"
-            >
-              {uploading ? "Uploading…" : "Upload logo"}
-            </button>
-            <div className="text-xs text-gray-600">
-              Note: this uses Supabase Storage. Make sure you’ve created a public bucket for logos (v1).
-            </div>
+                {settings.brand_logo_url ? (
+                  <div className="rounded-2xl border border-border bg-surface-2 p-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      alt="Agency logo"
+                      src={settings.brand_logo_url}
+                      style={{ maxHeight: 64, maxWidth: 240 }}
+                    />
+                    <div className="mt-2 text-xs text-text-3 break-all">{settings.brand_logo_url}</div>
+                  </div>
+                ) : (
+                  <div className="text-sm text-text-2">No logo uploaded yet.</div>
+                )}
+
+                <input
+                  accept="image/*"
+                  disabled={uploading}
+                  onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)}
+                  type="file"
+                />
+                <div className="flex items-center gap-3">
+                  <Button disabled={uploading || !logoFile} type="submit" variant="secondary">
+                    {uploading ? "Uploading…" : "Upload logo"}
+                  </Button>
+                </div>
+                <div className="text-xs text-text-3">
+                  Note: this uses Supabase Storage. Make sure you’ve created a public bucket for logos (v1).
+                </div>
+              </div>
+            </Card>
           </form>
         </>
       ) : null}

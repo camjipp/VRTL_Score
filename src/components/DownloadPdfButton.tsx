@@ -3,6 +3,8 @@
 import { useState } from "react";
 
 import { ensureOnboarded } from "@/lib/onboard";
+import { Button } from "@/components/ui/Button";
+import { Alert, AlertDescription } from "@/components/ui/Alert";
 
 type DownloadPdfButtonProps = {
   snapshotId: string;
@@ -46,15 +48,19 @@ export function DownloadPdfButton({ snapshotId }: DownloadPdfButtonProps) {
 
   return (
     <div className="mt-3 flex items-center gap-2 text-sm">
-      <button
-        className="rounded border px-3 py-2 text-sm"
+      <Button
         disabled={busy}
         onClick={download}
-        type="button"
+        size="sm"
+        variant="outline"
       >
         {busy ? "Preparing PDF…" : "Download PDF"}
-      </button>
-      {error ? <span className="text-red-700">{error}</span> : null}
+      </Button>
+      {error ? (
+        <Alert className="py-2" variant="danger">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : null}
     </div>
   );
 }

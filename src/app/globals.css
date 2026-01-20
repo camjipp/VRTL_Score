@@ -3,15 +3,39 @@
 @tailwind utilities;
 
 :root {
-  /* VRTL Score — Light-first "ink + paper" tokens (fits graffiti wordmark) */
-  --bg-0: 245 241 230; /* #F5F1E6 paper */
-  --bg-1: 255 255 255; /* #FFFFFF */
-  --surface: 255 255 255; /* cards */
-  --border: 20 20 24; /* #141418 ink border */
-  --text: 13 13 16; /* #0D0D10 ink */
-  --text-2: 55 65 81; /* #374151 */
-  --muted: 107 114 128; /* #6B7280 */
-  --accent: 109 92 255; /* #6D5CFF */
+  /* VRTL Score — Brand Tokens */
+  /* Core neutrals */
+  --bg: 248 250 252;
+  --bg-2: 241 245 249;
+  --surface: 255 255 255;
+  --surface-2: 248 250 252;
+  --border: 226 232 240;
+
+  /* Text */
+  --text: 15 23 42;
+  --text-2: 51 65 85;
+  --text-3: 100 116 139;
+
+  /* Brand accent */
+  --accent: 79 70 229;
+  --accent-2: 99 102 241;
+
+  /* Semantic */
+  --success: 22 163 74; /* #16A34A */
+  --warning: 245 158 11; /* #F59E0B */
+  --danger: 220 38 38; /* #DC2626 */
+
+  /* Effects */
+  --ring: var(--accent);
+  --shadow-lift: 0 8px 24px rgba(0,0,0,0.06);
+
+  /*
+    Compatibility aliases (so existing classes like bg-bg0/bg-bg1/muted keep working)
+    Feel free to remove once the UI is migrated to the new token names.
+  */
+  --bg-0: var(--bg);
+  --bg-1: var(--bg-2);
+  --muted: var(--text-3);
 }
 
 html,
@@ -20,8 +44,26 @@ body {
 }
 
 body {
-  background: rgb(var(--bg-0));
+  background: rgb(var(--bg));
   color: rgb(var(--text));
+}
+
+/* Controlled “marker underline” motif (logo-derived) */
+.marker-underline {
+  position: relative;
+  display: inline-block;
+}
+.marker-underline::after {
+  content: "";
+  position: absolute;
+  left: -2%;
+  right: -2%;
+  bottom: -0.18em;
+  height: 0.22em;
+  background: rgb(var(--accent) / 0.55);
+  border-radius: 999px;
+  transform: rotate(-0.6deg);
+  z-index: -1;
 }
 
 @layer components {
@@ -35,10 +77,10 @@ body {
     @apply inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-accent/90;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-lg border border-border/15 bg-bg1 px-4 py-2 text-sm font-medium text-text transition hover:bg-bg1/90;
+    @apply inline-flex items-center justify-center rounded-lg border border-border/15 bg-bg-2 px-4 py-2 text-sm font-medium text-text transition hover:bg-bg-2/90;
   }
   .badge {
-    @apply inline-flex items-center rounded-full border border-border/15 bg-bg1 px-2 py-0.5 text-xs text-text-2;
+    @apply inline-flex items-center rounded-full border border-border/15 bg-bg-2 px-2 py-0.5 text-xs text-text-2;
   }
 }
 
