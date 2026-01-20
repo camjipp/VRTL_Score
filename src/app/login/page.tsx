@@ -1,4 +1,5 @@
 import { LoginForm } from "@/components/LoginForm";
+import { Card } from "@/components/ui/Card";
 
 export default async function LoginPage({
   searchParams
@@ -14,11 +15,11 @@ export default async function LoginPage({
   const nextPath = typeof nextStr === "string" && nextStr.startsWith("/") ? nextStr : "/app";
 
   return (
-    <main className="bg-bg0">
+    <main className="bg-bg">
       <div className="container-xl py-14">
-        <div className="card-surface mx-auto max-w-lg p-6">
+        <Card className="mx-auto max-w-lg p-6 shadow-none">
           <LoginForm nextPath={nextPath} />
-        </div>
+        </Card>
       </div>
     </main>
   );
