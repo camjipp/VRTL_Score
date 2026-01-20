@@ -35,33 +35,33 @@ export default function HomePage() {
             </div>
 
             <div className="mx-auto mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-3">
-              <div className="text-[30px] font-semibold leading-[1.05] tracking-tight text-text sm:text-[36px]">
+              <div className="text-[26px] font-semibold leading-[1.06] tracking-tight text-text sm:text-[31px]">
                 AI visibility, measured.
               </div>
               <div className="inline-flex items-center gap-2">
                 <div className="inline-flex items-center -space-x-2">
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface">
+                  <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-surface">
                     <span className="sr-only">ChatGPT</span>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt="" className="h-5 w-5" src="/ai/icons8-chatgpt.svg" />
+                    <img alt="" className="h-[17px] w-[17px]" src="/ai/icons8-chatgpt.svg" />
                   </span>
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface">
+                  <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-surface">
                     <span className="sr-only">Google</span>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt="" className="h-5 w-5" src="/ai/icons8-google-48.svg" />
+                    <img alt="" className="h-[17px] w-[17px]" src="/ai/icons8-google-48.svg" />
                   </span>
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface">
+                  <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-surface">
                     <span className="sr-only">Gemini</span>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt="" className="h-5 w-5" src="/ai/gemini.svg" />
+                    <img alt="" className="h-[17px] w-[17px]" src="/ai/gemini.svg" />
                   </span>
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface">
+                  <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-surface">
                     <span className="sr-only">Claude</span>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt="" className="h-5 w-5" src="/ai/icons8-claude.svg" />
+                    <img alt="" className="h-[17px] w-[17px]" src="/ai/icons8-claude.svg" />
                   </span>
                 </div>
-                <span className="text-base text-text-3">&amp; more</span>
+                <span className="text-sm text-text-3">&amp; more</span>
               </div>
             </div>
 
