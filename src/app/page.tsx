@@ -19,11 +19,11 @@ export default function HomePage() {
           <div className="mx-auto max-w-3xl text-center">
             <div className="flex items-end justify-center gap-1 sm:gap-2">
               {/* Crop out the extra transparent padding baked into the PNG */}
-              <div className="h-[118px] w-[240px] overflow-hidden sm:h-[148px] sm:w-[300px]">
+              <div className="h-[118px] w-[260px] overflow-hidden sm:h-[148px] sm:w-[320px]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   alt="VRTL"
-                  className="h-full w-full scale-[1.85] object-cover object-left"
+                  className="h-full w-full scale-[1.75] object-cover object-[15%_50%]"
                   src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
                 />
               </div>
