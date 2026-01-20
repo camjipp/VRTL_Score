@@ -17,17 +17,17 @@ export default function HomePage() {
 
         <div className="container-xl relative py-20">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="flex items-end justify-center gap-2 sm:gap-3">
+            <div className="flex items-end justify-center gap-1 sm:gap-2">
               {/* Crop out the extra transparent padding baked into the PNG */}
-              <div className="h-[104px] w-[190px] overflow-hidden sm:h-[128px] sm:w-[230px]">
+              <div className="h-[118px] w-[240px] overflow-hidden sm:h-[148px] sm:w-[300px]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   alt="VRTL"
-                  className="h-full w-full scale-[1.65] object-cover object-center"
+                  className="h-full w-full scale-[1.9] object-cover object-center"
                   src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
                 />
               </div>
-              <div className="text-[104px] font-semibold leading-[0.9] tracking-tight text-text sm:text-[128px]">
+              <div className="-ml-1 text-[88px] font-semibold leading-[0.9] tracking-tight text-text sm:-ml-2 sm:text-[112px]">
                 Score
               </div>
             </div>
