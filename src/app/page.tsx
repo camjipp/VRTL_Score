@@ -44,7 +44,7 @@ export default function HomePage() {
                     <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2">
                     <span className="sr-only">ChatGPT</span>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img alt="" className="h-3.5 w-3.5" src="/ai/chatgpt.svg" />
+                        <img alt="" className="h-3.5 w-3.5" src="/ai/icons8-chatgpt.svg" />
                   </span>
                     <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2">
                     <span className="sr-only">Gemini</span>
@@ -54,7 +54,7 @@ export default function HomePage() {
                     <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2">
                     <span className="sr-only">Claude</span>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img alt="" className="h-3.5 w-3.5" src="/ai/claude.svg" />
+                        <img alt="" className="h-3.5 w-3.5" src="/ai/icons8-claude.svg" />
                   </span>
                   </span>
                   <span className="inline-flex items-center rounded-full border border-border bg-surface-2 px-2.5 py-1 text-xs text-text-3">
