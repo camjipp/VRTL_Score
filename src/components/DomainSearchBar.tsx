@@ -3,6 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { Alert, AlertDescription } from "@/components/ui/Alert";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+
 function normalizeWebsite(input: string): string {
   const raw = input.trim();
   if (!raw) return "";
@@ -54,13 +59,13 @@ export function DomainSearchBar() {
 
   return (
     <form className="mt-8" onSubmit={submit}>
-      <div className="rounded-2xl border border-border/15 bg-bg1 shadow-[0_10px_30px_rgba(0,0,0,0.10)]">
-        <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center">
-          <div className="flex flex-1 items-center gap-3 rounded-xl bg-bg0/40 px-3 py-2">
-            <div className="grid h-9 w-9 place-items-center rounded-lg bg-black/5">
+      <Card className="shadow-none">
+        <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+          <div className="flex flex-1 items-center gap-3 rounded-xl bg-bg-2 px-3 py-2 ring-1 ring-border/60">
+            <div className="grid h-9 w-9 place-items-center rounded-lg bg-surface">
               <svg
                 aria-hidden="true"
-                className="h-5 w-5 text-muted"
+                className="h-5 w-5 text-text-3"
                 fill="none"
                 viewBox="0 0 24 24"
               >
@@ -86,8 +91,8 @@ export function DomainSearchBar() {
               <div className="text-[11px] font-medium text-text-2">
                 Enter a client website
               </div>
-              <input
-                className="mt-1 w-full bg-transparent text-base text-text outline-none placeholder:text-muted"
+              <Input
+                className="mt-1 border-0 bg-transparent px-0 py-0 text-base placeholder:text-text-3 focus-visible:ring-0"
                 onChange={(e) => setValue(e.target.value)}
                 placeholder="example.com"
                 value={value}
@@ -95,13 +100,19 @@ export function DomainSearchBar() {
             </div>
           </div>
 
-          <button className="btn-primary h-12 rounded-xl px-5 text-base" type="submit">
+          <Button className="h-12 rounded-xl px-5 text-base" type="submit" variant="primary">
             Get VRTL Score
-          </button>
+          </Button>
         </div>
-      </div>
-      {error ? <div className="mt-2 text-sm text-red-700">{error}</div> : null}
-      <div className="mt-2 text-xs text-muted">
+      </Card>
+      {error ? (
+        <div className="mt-2">
+          <Alert variant="danger">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </div>
+      ) : null}
+      <div className="mt-2 text-xs text-text-3">
         You’ll create an account next, then we’ll guide you through agency setup and access.
       </div>
     </form>
