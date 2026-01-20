@@ -17,7 +17,7 @@ export default function HomePage() {
           <div className="absolute bottom-[-240px] right-[-140px] h-[520px] w-[520px] rounded-full bg-text/3 blur-3xl" />
         </div>
 
-        <div className="container-xl relative py-20">
+        <div className="container-xl relative py-16 sm:py-20">
           <div className="mx-auto max-w-3xl text-center">
             <div className="flex items-end justify-center gap-0">
               {/* Crop out the extra transparent padding baked into the PNG */}
@@ -34,54 +34,52 @@ export default function HomePage() {
               </div>
             </div>
 
-            <p className="mx-auto mt-6 max-w-2xl text-[17px] leading-relaxed text-text-2">
-              Standardized prompts, structured evidence, and client-ready reports for agencies.
-            </p>
-
-            <div className="mx-auto mt-5 flex items-center justify-center gap-4 text-text-3">
-              <span className="text-sm">AI coverage</span>
-              <span className="h-4 w-px bg-border" />
-              <div className="flex items-center gap-3">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
-                  <span className="sr-only">ChatGPT</span>
-                  <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M12 3.8c2.2-1.3 5.1-.6 6.4 1.6 1.1 1.9.7 4.2-.7 5.7 1.7 1 2.5 3.2 1.7 5.1-1 2.5-4 3.7-6.4 2.5-.4-.2-.7-.4-1-.7-.4 2.3-2.4 4-4.8 4-2.7 0-4.9-2.2-4.9-4.9 0-2.2 1.5-4.1 3.5-4.7-1.5-1.7-1.8-4.2-.5-6.2 1.3-2.2 4.2-2.9 6.3-1.6Z"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+            <div className="mx-auto mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-3 text-[17px] leading-relaxed text-text-2">
+              <span>Standardized prompts, structured evidence, and client-ready reports for agencies.</span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-sm text-text-3">
+                <span>AI coverage</span>
+                <span className="h-4 w-px bg-border" />
+                <span className="inline-flex items-center gap-2">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2">
+                    <span className="sr-only">ChatGPT</span>
+                    <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M12 3.8c2.2-1.3 5.1-.6 6.4 1.6 1.1 1.9.7 4.2-.7 5.7 1.7 1 2.5 3.2 1.7 5.1-1 2.5-4 3.7-6.4 2.5-.4-.2-.7-.4-1-.7-.4 2.3-2.4 4-4.8 4-2.7 0-4.9-2.2-4.9-4.9 0-2.2 1.5-4.1 3.5-4.7-1.5-1.7-1.8-4.2-.5-6.2 1.3-2.2 4.2-2.9 6.3-1.6Z"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </span>
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2">
+                    <span className="sr-only">Gemini</span>
+                    <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                      <path d="M12 3l1.6 5 5 1.6-5 1.6-1.6 5-1.6-5-5-1.6 5-1.6L12 3Z" fill="currentColor" />
+                    </svg>
+                  </span>
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2">
+                    <span className="sr-only">Claude</span>
+                    <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M16.5 8.2c-.9-1.1-2.3-1.9-4.1-1.9-3 0-5.4 2.4-5.4 5.4s2.4 5.4 5.4 5.4c1.8 0 3.2-.7 4.1-1.9"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </span>
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2 text-xs font-semibold text-text-3">
+                    <span className="sr-only">More</span>+
+                  </span>
                 </span>
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
-                  <span className="sr-only">Gemini</span>
-                  <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 3l1.6 5 5 1.6-5 1.6-1.6 5-1.6-5-5-1.6 5-1.6L12 3Z" fill="currentColor" />
-                  </svg>
-                </span>
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
-                  <span className="sr-only">Claude</span>
-                  <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M16.5 8.2c-.9-1.1-2.3-1.9-4.1-1.9-3 0-5.4 2.4-5.4 5.4s2.4 5.4 5.4 5.4c1.8 0 3.2-.7 4.1-1.9"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </span>
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
-                  <span className="sr-only">More</span>
-                  <span className="text-sm font-semibold leading-none text-text-3">+</span>
-                </span>
-              </div>
+              </span>
             </div>
 
             {/* Centered search bar (Semrush-like) */}
-            <div className="mx-auto mt-8 max-w-2xl">
+            <div className="mx-auto mt-6 max-w-3xl">
               <DomainSearchBar />
             </div>
-            <div className="mt-6 flex items-center justify-center gap-3 text-sm">
+            <div className="mt-5 flex items-center justify-center gap-3 text-sm">
               <Link className="text-text-2 hover:text-text" href="/pricing">
                 See plans & pricing →
               </Link>

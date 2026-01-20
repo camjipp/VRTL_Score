@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { cn } from "@/lib/cn";
 
 function normalizeWebsite(input: string): string {
   const raw = input.trim();
@@ -57,19 +58,25 @@ export function DomainSearchBar() {
   }
 
   return (
-    <form className="mt-8" onSubmit={submit}>
+    <form onSubmit={submit}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="flex flex-1 items-center rounded-2xl border border-border bg-surface px-4 py-3">
-          <Input
-            className="border-0 bg-transparent px-0 py-0 text-base placeholder:text-text-3 focus-visible:ring-0"
-            onChange={(e) => setValue(e.target.value)}
-            placeholder="Enter a client website"
-            value={value}
-          />
+        <div className="flex flex-1 items-stretch overflow-hidden rounded-2xl border border-border bg-surface shadow-lift">
+          <div className="flex min-w-0 flex-1 items-center px-5">
+            <Input
+              className={cn(
+                "h-12 w-full border-0 bg-transparent px-0 py-0 text-base placeholder:text-text-3 focus-visible:ring-0",
+                "sm:h-14"
+              )}
+              onChange={(e) => setValue(e.target.value)}
+              placeholder="Enter website or URL"
+              value={value}
+            />
+          </div>
+          <div className="hidden w-px bg-border sm:block" />
+          <Button className="h-12 rounded-none px-6 text-base sm:h-14" type="submit" variant="primary">
+            Get insights
+          </Button>
         </div>
-        <Button className="h-12 rounded-2xl px-6 text-base" type="submit" variant="primary">
-          Get VRTL Score
-        </Button>
       </div>
       {error ? (
         <div className="mt-2">
