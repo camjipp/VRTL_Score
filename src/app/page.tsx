@@ -21,10 +21,10 @@ export default function HomePage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 alt="VRTL"
-                className="h-14 w-auto sm:h-20"
+                className="h-[54px] w-auto sm:h-[66px]"
                 src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
               />
-              <div className="text-5xl font-semibold tracking-tight text-text sm:text-6xl">
+              <div className="text-[52px] font-semibold leading-none tracking-tight text-text sm:text-[64px]">
                 Score
               </div>
             </div>
