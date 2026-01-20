@@ -34,39 +34,35 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="mx-auto mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-3 text-[17px] leading-relaxed text-text-2">
-              <span>Standardized prompts, structured evidence, and client-ready reports for agencies.</span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-sm text-text-3">
-                <span>AI coverage</span>
-                <span className="h-4 w-px bg-border" />
-                <span className="inline-flex items-center gap-2">
-                  <span className="inline-flex items-center -space-x-2">
-                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2">
+            <div className="mx-auto mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-3">
+              <div className="text-[22px] font-semibold leading-[1.15] tracking-tight text-text sm:text-2xl">
+                AI visibility, measured.
+              </div>
+              <div className="inline-flex items-center gap-2">
+                <div className="inline-flex items-center -space-x-2">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface">
                     <span className="sr-only">ChatGPT</span>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img alt="" className="h-3.5 w-3.5" src="/ai/icons8-chatgpt.svg" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img alt="" className="h-3.5 w-3.5" src="/ai/icons8-chatgpt.svg" />
                   </span>
-                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface">
                     <span className="sr-only">Google</span>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img alt="" className="h-3.5 w-3.5" src="/ai/icons8-google-48.svg" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img alt="" className="h-3.5 w-3.5" src="/ai/icons8-google-48.svg" />
                   </span>
-                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface">
                     <span className="sr-only">Gemini</span>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img alt="" className="h-3.5 w-3.5" src="/ai/gemini.svg" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img alt="" className="h-3.5 w-3.5" src="/ai/gemini.svg" />
                   </span>
-                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-2">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface">
                     <span className="sr-only">Claude</span>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img alt="" className="h-3.5 w-3.5" src="/ai/icons8-claude.svg" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img alt="" className="h-3.5 w-3.5" src="/ai/icons8-claude.svg" />
                   </span>
-                  </span>
-                  <span className="inline-flex items-center rounded-full border border-border bg-surface-2 px-2.5 py-1 text-xs text-text-3">
-                    &amp; more
-                  </span>
-                </span>
-              </span>
+                </div>
+                <span className="text-sm text-text-3">&amp; more</span>
+              </div>
             </div>
 
             {/* Centered search bar (Semrush-like) */}
