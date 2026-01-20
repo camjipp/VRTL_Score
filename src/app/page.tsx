@@ -34,62 +34,17 @@ export default function HomePage() {
             </div>
 
             <h1 className="mt-6 text-4xl font-semibold tracking-tight text-text sm:text-6xl sm:leading-[1.06]">
-              Win <span className="marker-underline">AI Search Visibility</span>
+              Measure AI Visibility. Don’t Guess.
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-relaxed text-text-2">
-              Standardized prompt packs, structured evidence extraction, and client-ready reporting
-              for agencies.
+              Standardized prompts, structured evidence, and client-ready reports for agencies.
             </p>
 
-            <div className="mx-auto mt-6 flex flex-wrap items-center justify-center gap-2 text-sm text-text-2">
-              <span className="text-text-3">AI coverage:</span>
-
-              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-sm text-text">
-                <span className="grid h-5 w-5 place-items-center rounded-full bg-bg-2">
-                  <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M12 3.8c2.2-1.3 5.1-.6 6.4 1.6 1.1 1.9.7 4.2-.7 5.7 1.7 1 2.5 3.2 1.7 5.1-1 2.5-4 3.7-6.4 2.5-.4-.2-.7-.4-1-.7-.4 2.3-2.4 4-4.8 4-2.7 0-4.9-2.2-4.9-4.9 0-2.2 1.5-4.1 3.5-4.7-1.5-1.7-1.8-4.2-.5-6.2 1.3-2.2 4.2-2.9 6.3-1.6Z"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </span>
-                ChatGPT
-              </span>
-
-              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-sm text-text">
-                <span className="grid h-5 w-5 place-items-center rounded-full bg-bg-2">
-                  <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M12 3l1.6 5 5 1.6-5 1.6-1.6 5-1.6-5-5-1.6 5-1.6L12 3Z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                </span>
-                Gemini
-              </span>
-
-              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-sm text-text">
-                <span className="grid h-5 w-5 place-items-center rounded-full bg-bg-2">
-                  <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M16.5 8.2c-.9-1.1-2.3-1.9-4.1-1.9-3 0-5.4 2.4-5.4 5.4s2.4 5.4 5.4 5.4c1.8 0 3.2-.7 4.1-1.9"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </span>
-                Claude
-              </span>
-
-              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-sm text-text-2">
-                <span className="grid h-5 w-5 place-items-center rounded-full bg-bg-2 text-text-3">
-                  <span className="text-[11px] font-semibold leading-none">+</span>
-                </span>
-                more
-              </span>
+            <div className="mx-auto mt-6 text-sm text-text-2">
+              <span className="text-text-3">AI coverage</span>{" "}
+              <span className="text-text-3">·</span> ChatGPT <span className="text-text-3">·</span>{" "}
+              Gemini <span className="text-text-3">·</span> Claude{" "}
+              <span className="text-text-3">·</span> More
             </div>
 
             {/* Centered search bar (Semrush-like) */}
@@ -112,9 +67,9 @@ export default function HomePage() {
       {/* “One solution…” */}
       <section className="bg-bg">
         <div className="container-xl py-16">
-          <h2 className="text-2xl font-semibold tracking-tight text-text">One workflow for AI search.</h2>
+          <h2 className="text-2xl font-semibold tracking-tight text-text">One workflow. One score.</h2>
           <p className="mt-2 max-w-2xl text-sm text-text-2">
-            VRTL Score helps agencies measure, explain, and improve how brands show up across LLMs.
+            VRTL Score shows how brands appear across major AI models—using the same prompts, every time.
           </p>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
@@ -127,13 +82,13 @@ export default function HomePage() {
             <Card className="p-5 shadow-none transition hover:shadow-lift">
               <div className="text-sm font-medium text-text">Evidence you can defend</div>
               <div className="mt-2 text-sm text-text-2">
-                Structured extraction plus raw outputs so clients can trust the conclusions.
+                Structured extraction plus raw outputs, so conclusions hold up in client reviews.
               </div>
             </Card>
             <Card className="p-5 shadow-none transition hover:shadow-lift">
               <div className="text-sm font-medium text-text">Client-ready reporting</div>
               <div className="mt-2 text-sm text-text-2">
-                Branded PDF with score dashboard, confidence, and evidence by prompt.
+                Branded PDFs with scores, confidence, and evidence by prompt.
               </div>
             </Card>
           </div>
@@ -146,10 +101,10 @@ export default function HomePage() {
           <div className="flex flex-col gap-2">
             <Badge variant="neutral">Toolkits</Badge>
             <h2 className="text-2xl font-semibold tracking-tight text-text">
-              Everything an agency needs to ship AI visibility.
+              Everything agencies need to ship AI visibility.
             </h2>
             <p className="max-w-2xl text-sm text-text-2">
-              Run snapshots, benchmark competitors, and generate reports—all in one calm workflow.
+              Run snapshots, benchmark competitors, and deliver reports—without ad-hoc analysis.
             </p>
           </div>
 
@@ -157,37 +112,37 @@ export default function HomePage() {
             <Card className="p-5 shadow-none transition hover:shadow-lift">
               <div className="text-sm font-medium text-text">Snapshot scoring</div>
               <div className="mt-2 text-sm text-text-2">
-                Execute the prompt pack and capture repeatable measurement runs.
+                Run the prompt pack and capture repeatable measurement runs.
               </div>
             </Card>
             <Card className="p-5 shadow-none transition hover:shadow-lift">
               <div className="text-sm font-medium text-text">Competitive analysis</div>
               <div className="mt-2 text-sm text-text-2">
-                Track mentions and positioning signals versus a curated competitor set.
+                Track mentions and positioning versus a defined competitor set.
               </div>
             </Card>
             <Card className="p-5 shadow-none transition hover:shadow-lift">
               <div className="text-sm font-medium text-text">Provider breakdown</div>
               <div className="mt-2 text-sm text-text-2">
-                Understand differences across models and where the score comes from.
+                See where scores come from across models.
               </div>
             </Card>
             <Card className="p-5 shadow-none transition hover:shadow-lift">
               <div className="text-sm font-medium text-text">Evidence by prompt</div>
               <div className="mt-2 text-sm text-text-2">
-                Keep the raw outputs close to the metrics to reduce “black box” pushback.
+                Keep raw outputs tied directly to metrics.
               </div>
             </Card>
             <Card className="p-5 shadow-none transition hover:shadow-lift">
               <div className="text-sm font-medium text-text">Client reporting</div>
               <div className="mt-2 text-sm text-text-2">
-                Generate a polished PDF your team can send the same day.
+                Generate a polished PDF the same day.
               </div>
             </Card>
             <Card className="p-5 shadow-none transition hover:shadow-lift">
               <div className="text-sm font-medium text-text">Agency branding</div>
               <div className="mt-2 text-sm text-text-2">
-                Add logo + accent for a “built by your agency” client experience.
+                Add your logo and accent for a white-labeled client experience.
               </div>
             </Card>
           </div>
@@ -260,7 +215,7 @@ export default function HomePage() {
               </div>
 
               <div className="mt-4 text-xs text-text-3">
-                Evidence-by-prompt + provider breakdown available in-app and in PDFs.
+                Evidence by prompt and provider breakdown are available in-app and in PDFs.
               </div>
             </Card>
           </div>
@@ -274,10 +229,10 @@ export default function HomePage() {
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
                 <div className="text-xl font-semibold tracking-tight text-text">
-                  Start measuring AI visibility today.
+                  Start measuring AI visibility.
                 </div>
                 <div className="mt-2 text-sm text-text-2">
-                  Create a client, run a snapshot, and ship a report—all in one flow.
+                  Create a client, run a snapshot, and ship a report—in one flow.
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-3">

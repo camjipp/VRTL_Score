@@ -35,7 +35,7 @@ export function DomainSearchBar() {
     setError(null);
     const website = normalizeWebsite(value);
     if (!website) {
-      setError("Enter a website (e.g. example.com)");
+      setError("Enter a valid website");
       return;
     }
 
@@ -63,7 +63,7 @@ export function DomainSearchBar() {
           <Input
             className="border-0 bg-transparent px-0 py-0 text-base placeholder:text-text-3 focus-visible:ring-0"
             onChange={(e) => setValue(e.target.value)}
-            placeholder="Enter a client website (e.g. example.com)"
+            placeholder="Enter a client website"
             value={value}
           />
         </div>
