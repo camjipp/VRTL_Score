@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { DomainSearchBar } from "@/components/DomainSearchBar";
+import { LandingToolkits } from "@/components/LandingToolkits";
 import { Badge } from "@/components/ui/Badge";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
@@ -33,18 +34,47 @@ export default function HomePage() {
               </div>
             </div>
 
-            <h1 className="mt-6 text-4xl font-semibold tracking-tight text-text sm:text-6xl sm:leading-[1.06]">
-              Measure AI Visibility. Don’t Guess.
-            </h1>
-            <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-relaxed text-text-2">
+            <p className="mx-auto mt-6 max-w-2xl text-[17px] leading-relaxed text-text-2">
               Standardized prompts, structured evidence, and client-ready reports for agencies.
             </p>
 
-            <div className="mx-auto mt-6 text-sm text-text-2">
-              <span className="text-text-3">AI coverage</span>{" "}
-              <span className="text-text-3">·</span> ChatGPT <span className="text-text-3">·</span>{" "}
-              Gemini <span className="text-text-3">·</span> Claude{" "}
-              <span className="text-text-3">·</span> More
+            <div className="mx-auto mt-5 flex items-center justify-center gap-4 text-text-3">
+              <span className="text-sm">AI coverage</span>
+              <span className="h-4 w-px bg-border" />
+              <div className="flex items-center gap-3">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
+                  <span className="sr-only">ChatGPT</span>
+                  <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 3.8c2.2-1.3 5.1-.6 6.4 1.6 1.1 1.9.7 4.2-.7 5.7 1.7 1 2.5 3.2 1.7 5.1-1 2.5-4 3.7-6.4 2.5-.4-.2-.7-.4-1-.7-.4 2.3-2.4 4-4.8 4-2.7 0-4.9-2.2-4.9-4.9 0-2.2 1.5-4.1 3.5-4.7-1.5-1.7-1.8-4.2-.5-6.2 1.3-2.2 4.2-2.9 6.3-1.6Z"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
+                  <span className="sr-only">Gemini</span>
+                  <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 3l1.6 5 5 1.6-5 1.6-1.6 5-1.6-5-5-1.6 5-1.6L12 3Z" fill="currentColor" />
+                  </svg>
+                </span>
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
+                  <span className="sr-only">Claude</span>
+                  <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M16.5 8.2c-.9-1.1-2.3-1.9-4.1-1.9-3 0-5.4 2.4-5.4 5.4s2.4 5.4 5.4 5.4c1.8 0 3.2-.7 4.1-1.9"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </span>
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
+                  <span className="sr-only">More</span>
+                  <span className="text-sm font-semibold leading-none text-text-3">+</span>
+                </span>
+              </div>
             </div>
 
             {/* Centered search bar (Semrush-like) */}
@@ -64,31 +94,59 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* “One solution…” */}
+      {/* “One solution…” (Semrush-style) */}
       <section className="bg-bg">
         <div className="container-xl py-16">
-          <h2 className="text-2xl font-semibold tracking-tight text-text">One workflow. One score.</h2>
-          <p className="mt-2 max-w-2xl text-sm text-text-2">
-            VRTL Score shows how brands appear across major AI models—using the same prompts, every time.
-          </p>
+          <h2 className="text-2xl font-semibold tracking-tight text-text">One solution to win every search</h2>
+          <div className="mt-4 grid gap-6 lg:grid-cols-2 lg:items-start">
+            <div>
+              <ul className="space-y-3 text-sm text-text-2">
+                <li className="flex gap-3">
+                  <span className="mt-2 h-1.5 w-1.5 rounded-full bg-text-3" />
+                  Standardized prompts across major AI models
+                </li>
+                <li className="flex gap-3">
+                  <span className="mt-2 h-1.5 w-1.5 rounded-full bg-text-3" />
+                  Structured evidence tied directly to each score
+                </li>
+                <li className="flex gap-3">
+                  <span className="mt-2 h-1.5 w-1.5 rounded-full bg-text-3" />
+                  Client-ready reporting for agency delivery
+                </li>
+              </ul>
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <ButtonLink href="/app" variant="primary">
+                  Get insights
+                </ButtonLink>
+                <ButtonLink href="/pricing" variant="secondary">
+                  View pricing
+                </ButtonLink>
+              </div>
+            </div>
 
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <Card className="p-5 shadow-none transition hover:shadow-lift">
-              <div className="text-sm font-medium text-text">Standardized scoring</div>
-              <div className="mt-2 text-sm text-text-2">
-                Same prompts. Same schema. Comparable results across clients and time.
-              </div>
-            </Card>
-            <Card className="p-5 shadow-none transition hover:shadow-lift">
-              <div className="text-sm font-medium text-text">Evidence you can defend</div>
-              <div className="mt-2 text-sm text-text-2">
-                Structured extraction plus raw outputs, so conclusions hold up in client reviews.
-              </div>
-            </Card>
-            <Card className="p-5 shadow-none transition hover:shadow-lift">
-              <div className="text-sm font-medium text-text">Client-ready reporting</div>
-              <div className="mt-2 text-sm text-text-2">
-                Branded PDFs with scores, confidence, and evidence by prompt.
+            <Card className="p-6 shadow-none">
+              <div className="text-sm font-medium text-text">What you get</div>
+              <div className="mt-4 grid gap-3">
+                <div className="rounded-2xl border border-border bg-surface p-4">
+                  <div className="text-sm font-medium text-text">One workflow. One score.</div>
+                  <div className="mt-2 text-sm text-text-2">
+                    VRTL Score shows how brands appear across major AI models—using the same prompts, every time.
+                  </div>
+                </div>
+                <div className="grid gap-3 md:grid-cols-3">
+                  <div className="rounded-2xl border border-border bg-surface p-4">
+                    <div className="text-xs font-medium text-text-3">Standardized</div>
+                    <div className="mt-2 text-sm font-medium text-text">Scoring</div>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-surface p-4">
+                    <div className="text-xs font-medium text-text-3">Structured</div>
+                    <div className="mt-2 text-sm font-medium text-text">Evidence</div>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-surface p-4">
+                    <div className="text-xs font-medium text-text-3">Client-ready</div>
+                    <div className="mt-2 text-sm font-medium text-text">Reporting</div>
+                  </div>
+                </div>
               </div>
             </Card>
           </div>
@@ -108,52 +166,8 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Card className="p-5 shadow-none transition hover:shadow-lift">
-              <div className="text-sm font-medium text-text">Snapshot scoring</div>
-              <div className="mt-2 text-sm text-text-2">
-                Run the prompt pack and capture repeatable measurement runs.
-              </div>
-            </Card>
-            <Card className="p-5 shadow-none transition hover:shadow-lift">
-              <div className="text-sm font-medium text-text">Competitive analysis</div>
-              <div className="mt-2 text-sm text-text-2">
-                Track mentions and positioning versus a defined competitor set.
-              </div>
-            </Card>
-            <Card className="p-5 shadow-none transition hover:shadow-lift">
-              <div className="text-sm font-medium text-text">Provider breakdown</div>
-              <div className="mt-2 text-sm text-text-2">
-                See where scores come from across models.
-              </div>
-            </Card>
-            <Card className="p-5 shadow-none transition hover:shadow-lift">
-              <div className="text-sm font-medium text-text">Evidence by prompt</div>
-              <div className="mt-2 text-sm text-text-2">
-                Keep raw outputs tied directly to metrics.
-              </div>
-            </Card>
-            <Card className="p-5 shadow-none transition hover:shadow-lift">
-              <div className="text-sm font-medium text-text">Client reporting</div>
-              <div className="mt-2 text-sm text-text-2">
-                Generate a polished PDF the same day.
-              </div>
-            </Card>
-            <Card className="p-5 shadow-none transition hover:shadow-lift">
-              <div className="text-sm font-medium text-text">Agency branding</div>
-              <div className="mt-2 text-sm text-text-2">
-                Add your logo and accent for a white-labeled client experience.
-              </div>
-            </Card>
-          </div>
-
-          <div className="mt-10 flex flex-wrap items-center gap-3">
-            <ButtonLink href="/app" variant="primary">
-              Get insights
-            </ButtonLink>
-            <ButtonLink href="/pricing" variant="secondary">
-              View pricing
-            </ButtonLink>
+          <div className="mt-8">
+            <LandingToolkits />
           </div>
         </div>
       </section>
