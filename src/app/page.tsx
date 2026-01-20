@@ -18,16 +18,40 @@ export default function HomePage() {
         <div className="container-xl relative py-20">
           <div className="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between">
             <div className="max-w-2xl">
-              <Badge variant="accent">VRTL Score</Badge>
-              <h1 className="mt-5 text-4xl font-semibold tracking-tight text-text sm:text-6xl sm:leading-[1.06]">
-                Win <span className="marker-underline">AI visibility</span> for every client.
+              <div className="flex items-center gap-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  alt="VRTL"
+                  className="h-10 w-auto"
+                  src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
+                />
+                <div className="text-3xl font-semibold tracking-tight text-text sm:text-4xl">
+                  Score
+                </div>
+              </div>
+
+              <h1 className="mt-6 text-4xl font-semibold tracking-tight text-text sm:text-6xl sm:leading-[1.06]">
+                Win <span className="marker-underline">AI Search Visibility</span>
               </h1>
               <p className="mt-5 text-[17px] leading-relaxed text-text-2">
-                Run a standardized prompt pack, extract structured evidence, and ship a client-ready
-                report—fast.
+                Standardized prompt packs, structured evidence extraction, and client-ready reporting
+                for agencies.
               </p>
-              <div className="mt-4 text-sm text-text-2">
-                ChatGPT · Claude · Gemini · Perplexity &amp; more
+
+              <div className="mt-5 flex flex-wrap items-center gap-2 text-sm text-text-2">
+                <span className="text-text-3">Works across</span>
+                <span className="inline-flex items-center rounded-full border border-border bg-surface px-3 py-1 text-sm text-text">
+                  ChatGPT
+                </span>
+                <span className="inline-flex items-center rounded-full border border-border bg-surface px-3 py-1 text-sm text-text">
+                  Gemini
+                </span>
+                <span className="inline-flex items-center rounded-full border border-border bg-surface px-3 py-1 text-sm text-text">
+                  Claude
+                </span>
+                <span className="inline-flex items-center rounded-full border border-border bg-surface px-3 py-1 text-sm text-text-2">
+                  + more
+                </span>
               </div>
 
               <DomainSearchBar />
@@ -46,21 +70,13 @@ export default function HomePage() {
 
               <div className="mt-10">
                 <div className="text-xs font-medium uppercase tracking-wide text-text-3">
-                  Trusted by teams that ship
+                  Built for agency teams
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <span className="rounded-full border border-border bg-surface px-3 py-1 text-xs text-text-2">
-                    Agency ops
-                  </span>
-                  <span className="rounded-full border border-border bg-surface px-3 py-1 text-xs text-text-2">
-                    SEO leads
-                  </span>
-                  <span className="rounded-full border border-border bg-surface px-3 py-1 text-xs text-text-2">
-                    Strategy teams
-                  </span>
-                  <span className="rounded-full border border-border bg-surface px-3 py-1 text-xs text-text-2">
-                    Client services
-                  </span>
+                  <Badge variant="neutral">Client services</Badge>
+                  <Badge variant="neutral">SEO</Badge>
+                  <Badge variant="neutral">Strategy</Badge>
+                  <Badge variant="neutral">Ops</Badge>
                 </div>
               </div>
             </div>
