@@ -17,14 +17,17 @@ export default function HomePage() {
 
         <div className="container-xl relative py-20">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="flex items-center justify-center gap-4">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                alt="VRTL"
-                className="h-[116px] w-[280px] object-cover object-center sm:h-[140px] sm:w-[340px]"
-                src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
-              />
-              <div className="text-[104px] font-semibold leading-none tracking-tight text-text sm:text-[128px]">
+            <div className="flex items-end justify-center gap-2 sm:gap-3">
+              {/* Crop out the extra transparent padding baked into the PNG */}
+              <div className="h-[104px] w-[190px] overflow-hidden sm:h-[128px] sm:w-[230px]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  alt="VRTL"
+                  className="h-full w-full scale-[1.65] object-cover object-center"
+                  src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
+                />
+              </div>
+              <div className="text-[104px] font-semibold leading-[0.9] tracking-tight text-text sm:text-[128px]">
                 Score
               </div>
             </div>
@@ -39,17 +42,52 @@ export default function HomePage() {
 
             <div className="mx-auto mt-6 flex flex-wrap items-center justify-center gap-2 text-sm text-text-2">
               <span className="text-text-3">AI coverage:</span>
-              <span className="inline-flex items-center rounded-full border border-border bg-surface px-3 py-1 text-sm text-text">
+
+              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-sm text-text">
+                <span className="grid h-5 w-5 place-items-center rounded-full bg-bg-2">
+                  <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 3.8c2.2-1.3 5.1-.6 6.4 1.6 1.1 1.9.7 4.2-.7 5.7 1.7 1 2.5 3.2 1.7 5.1-1 2.5-4 3.7-6.4 2.5-.4-.2-.7-.4-1-.7-.4 2.3-2.4 4-4.8 4-2.7 0-4.9-2.2-4.9-4.9 0-2.2 1.5-4.1 3.5-4.7-1.5-1.7-1.8-4.2-.5-6.2 1.3-2.2 4.2-2.9 6.3-1.6Z"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
                 ChatGPT
               </span>
-              <span className="inline-flex items-center rounded-full border border-border bg-surface px-3 py-1 text-sm text-text">
+
+              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-sm text-text">
+                <span className="grid h-5 w-5 place-items-center rounded-full bg-bg-2">
+                  <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 3l1.6 5 5 1.6-5 1.6-1.6 5-1.6-5-5-1.6 5-1.6L12 3Z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </span>
                 Gemini
               </span>
-              <span className="inline-flex items-center rounded-full border border-border bg-surface px-3 py-1 text-sm text-text">
+
+              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-sm text-text">
+                <span className="grid h-5 w-5 place-items-center rounded-full bg-bg-2">
+                  <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M16.5 8.2c-.9-1.1-2.3-1.9-4.1-1.9-3 0-5.4 2.4-5.4 5.4s2.4 5.4 5.4 5.4c1.8 0 3.2-.7 4.1-1.9"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </span>
                 Claude
               </span>
-              <span className="inline-flex items-center rounded-full border border-border bg-surface px-3 py-1 text-sm text-text-2">
-                + more
+
+              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-sm text-text-2">
+                <span className="grid h-5 w-5 place-items-center rounded-full bg-bg-2 text-text-3">
+                  <span className="text-[11px] font-semibold leading-none">+</span>
+                </span>
+                more
               </span>
             </div>
 
