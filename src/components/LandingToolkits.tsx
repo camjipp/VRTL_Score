@@ -60,16 +60,17 @@ export function LandingToolkits() {
   const active = toolkits.find((t) => t.id === activeId) ?? toolkits[0]!;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
-      <div className="space-y-2">
+    <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
+      <div className="space-y-1">
         {toolkits.map((t) => {
           const isActive = t.id === activeId;
           return (
             <button
               key={t.id}
               className={cn(
-                "w-full rounded-2xl border border-border bg-surface px-4 py-3 text-left text-sm transition",
-                isActive ? "ring-2 ring-[rgb(var(--ring)/0.25)]" : "hover:bg-surface-2"
+                "w-full rounded-xl px-3 py-3 text-left text-sm transition",
+                "border border-transparent hover:border-border hover:bg-surface",
+                isActive && "border-border bg-surface"
               )}
               onClick={() => setActiveId(t.id)}
               type="button"
@@ -84,7 +85,7 @@ export function LandingToolkits() {
       <Card className="p-6 shadow-none">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="text-sm font-semibold tracking-tight text-text">{active.title}</div>
+            <div className="text-base font-semibold tracking-tight text-text">{active.title}</div>
             <div className="mt-2 text-sm text-text-2">{active.description}</div>
           </div>
           <ButtonLink href={active.ctaHref} size="sm" variant="primary">

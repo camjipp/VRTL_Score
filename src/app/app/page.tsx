@@ -28,7 +28,6 @@ type ClientRow = {
 export default function AppPage() {
   const supabase = getSupabaseBrowserClient();
 
-  const [agencyId, setAgencyId] = useState<string | null>(null);
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,7 +39,6 @@ export default function AppPage() {
         setError(null);
         const { agencyId } = await ensureOnboarded();
         if (cancelled) return;
-        setAgencyId(agencyId);
 
         const res = await supabase
           .from("clients")
@@ -66,20 +64,14 @@ export default function AppPage() {
     <main>
       <div className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Clients</h1>
-          <p className="mt-2 text-sm text-text-2">Create and manage clients for your agency.</p>
+          <div className="text-xs font-medium uppercase tracking-wide text-text-3">Workspace</div>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-text">Clients</h1>
+          <p className="mt-2 text-sm text-text-2">Create clients, run snapshots, and export reports.</p>
         </div>
         <ButtonLink href="/app/clients/new" variant="primary">
           New client
         </ButtonLink>
       </div>
-
-      {agencyId ? (
-        <div className="mt-3 flex items-center gap-2 text-xs text-text-2">
-          <span className="text-text-3">agency_id</span>
-          <Badge variant="neutral">{agencyId}</Badge>
-        </div>
-      ) : null}
 
       {loading ? <div className="mt-6 text-sm">Loading…</div> : null}
       {error ? (

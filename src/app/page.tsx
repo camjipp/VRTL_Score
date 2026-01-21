@@ -92,8 +92,10 @@ export default function HomePage() {
             <div className="mx-auto w-full max-w-[520px]">
               <Card className="p-6 shadow-none">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="text-xs font-medium text-text-3">AI visibility snapshot</div>
-                  <Badge variant="neutral">Preview</Badge>
+                  <div className="text-xs font-medium uppercase tracking-wide text-text-3">
+                    Snapshot preview
+                  </div>
+                  <Badge variant="neutral">Sample</Badge>
                 </div>
 
                 <div className="mt-4 rounded-2xl border border-border bg-surface-2 p-4">
@@ -140,9 +142,9 @@ export default function HomePage() {
 
             {/* Copy (right) */}
             <div>
-              <div className="text-xs font-medium uppercase tracking-wide text-text-3">One solution</div>
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-text sm:text-4xl">
-                One solution to win every search
+              <div className="text-xs font-medium uppercase tracking-wide text-text-3">Overview</div>
+              <h2 className="mt-3 text-4xl font-semibold tracking-tight text-text sm:text-5xl">
+                One system for AI visibility.
               </h2>
               <div className="mt-5 space-y-4 text-sm text-text-2">
                 <div className="flex gap-3">
@@ -200,11 +202,9 @@ export default function HomePage() {
         <div className="container-xl py-16">
           <div className="flex flex-col gap-2">
             <div className="text-xs font-medium uppercase tracking-wide text-text-3">Toolkits</div>
-            <h2 className="text-2xl font-semibold tracking-tight text-text">
-              Everything agencies need to ship AI visibility.
-            </h2>
+            <h2 className="text-3xl font-semibold tracking-tight text-text sm:text-4xl">Built for agencies.</h2>
             <p className="max-w-2xl text-sm text-text-2">
-              Run snapshots, benchmark competitors, and deliver reports—without ad-hoc analysis.
+              Snapshots, competitive context, and reporting—designed as a repeatable workflow.
             </p>
           </div>
 
@@ -219,27 +219,27 @@ export default function HomePage() {
         <div className="container-xl py-16">
           <div className="flex flex-col gap-2">
             <div className="text-xs font-medium uppercase tracking-wide text-text-3">Testimonials</div>
-            <h2 className="text-2xl font-semibold tracking-tight text-text">What agencies say</h2>
+            <h2 className="text-3xl font-semibold tracking-tight text-text sm:text-4xl">What teams say</h2>
             <p className="max-w-2xl text-sm text-text-2">
-              Short, factual feedback from teams using VRTL Score in real client work.
+              Short, factual feedback from teams using VRTL Score with real client accounts.
             </p>
           </div>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             <Card className="p-6 shadow-none">
-              <div className="text-sm text-text-2">
+              <div className="text-base leading-relaxed text-text">
                 “We finally have a repeatable way to measure AI visibility across accounts.”
               </div>
               <div className="mt-4 text-xs text-text-3">Agency lead</div>
             </Card>
             <Card className="p-6 shadow-none">
-              <div className="text-sm text-text-2">
+              <div className="text-base leading-relaxed text-text">
                 “The evidence trail makes client conversations easy—no hand-wavy conclusions.”
               </div>
               <div className="mt-4 text-xs text-text-3">Strategy director</div>
             </Card>
             <Card className="p-6 shadow-none">
-              <div className="text-sm text-text-2">
+              <div className="text-base leading-relaxed text-text">
                 “Scores and reports are consistent week to week. That’s the whole value.”
               </div>
               <div className="mt-4 text-xs text-text-3">Ops</div>
@@ -249,28 +249,27 @@ export default function HomePage() {
       </section>
 
       {/* Final CTA */}
-      <section className="bg-bg">
+      <section className="bg-[#080808] text-white">
         <div className="container-xl py-16">
-          <Card className="p-8 shadow-none">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div>
-                <div className="text-xl font-semibold tracking-tight text-text">
-                  Start measuring AI visibility.
-                </div>
-                <div className="mt-2 text-sm text-text-2">
-                  Create a client, run a snapshot, and ship a report—in one flow.
-                </div>
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <div className="text-xs font-medium uppercase tracking-wide text-white/60">Get started</div>
+              <div className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                Start measuring AI visibility.
               </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <ButtonLink href="/login" variant="primary">
-                  Create account
-                </ButtonLink>
-                <ButtonLink href="/app" variant="secondary">
-                  Open app
-                </ButtonLink>
+              <div className="mt-2 text-sm text-white/70">
+                Create a client, run a snapshot, and ship a report—in one flow.
               </div>
             </div>
-          </Card>
+            <div className="flex flex-wrap items-center gap-3">
+              <ButtonLink className="border border-white/15 bg-white/10 text-white hover:bg-white/15" href="/login" variant="secondary">
+                Create account
+              </ButtonLink>
+              <ButtonLink className="border border-white/15 bg-white/10 text-white hover:bg-white/15" href="/app" variant="secondary">
+                Open app
+              </ButtonLink>
+            </div>
+          </div>
         </div>
       </section>
     </main>
