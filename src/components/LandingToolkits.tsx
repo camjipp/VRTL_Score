@@ -60,52 +60,78 @@ export function LandingToolkits() {
   const active = toolkits.find((t) => t.id === activeId) ?? toolkits[0]!;
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
-      <div className="space-y-1">
+    <div className="space-y-6">
+      {/* Semrush-like pill selector */}
+      <div className="flex flex-wrap items-center gap-2">
         {toolkits.map((t) => {
           const isActive = t.id === activeId;
           return (
             <button
               key={t.id}
               className={cn(
-                "w-full rounded-xl px-3 py-3 text-left text-sm transition",
-                "border border-transparent hover:border-border hover:bg-surface",
-                isActive && "border-border bg-surface"
+                "rounded-full border px-4 py-2 text-sm transition",
+                isActive
+                  ? "border-border bg-accent text-white"
+                  : "border-border bg-surface text-text hover:bg-surface-2"
               )}
               onClick={() => setActiveId(t.id)}
               type="button"
             >
-              <div className="font-medium text-text">{t.label}</div>
-              <div className="mt-1 text-xs text-text-3">{t.description}</div>
+              {t.label}
             </button>
           );
         })}
       </div>
 
+      {/* Slideshow panel */}
       <Card className="p-6 shadow-none">
-        <div className="flex items-start justify-between gap-4">
+        <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
           <div>
-            <div className="text-base font-semibold tracking-tight text-text">{active.title}</div>
-            <div className="mt-2 text-sm text-text-2">{active.description}</div>
+            <div className="text-2xl font-semibold tracking-tight text-text">{active.title}</div>
+            <div className="mt-3 text-sm text-text-2">{active.description}</div>
+            <ul className="mt-5 space-y-2 text-sm text-text-2">
+              {active.bullets.map((b) => (
+                <li key={b} className="flex gap-3">
+                  <span className="mt-2 h-1.5 w-1.5 rounded-full bg-text-3" />
+                  <span>
+                    <span className="font-medium text-text">{b}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-6">
+              <ButtonLink href={active.ctaHref} variant="primary">
+                {active.ctaLabel}
+              </ButtonLink>
+            </div>
           </div>
-          <ButtonLink href={active.ctaHref} size="sm" variant="primary">
-            {active.ctaLabel}
-          </ButtonLink>
-        </div>
 
-        <div
-          key={active.id}
-          className="mt-6 rounded-2xl border border-border bg-surface-2 p-5 transition duration-300 ease-out motion-reduce:transition-none animate-in fade-in slide-in-from-bottom-1"
-        >
-          <div className="text-xs font-medium uppercase tracking-wide text-text-3">Included</div>
-          <ul className="mt-3 space-y-2 text-sm text-text-2">
-            {active.bullets.map((b) => (
-              <li key={b} className="flex gap-3">
-                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-text-3" />
-                {b}
-              </li>
-            ))}
-          </ul>
+          <div
+            key={active.id}
+            className="rounded-2xl border border-border bg-surface-2 p-6 transition duration-300 ease-out motion-reduce:transition-none animate-in fade-in slide-in-from-bottom-1"
+          >
+            <div className="text-xs font-medium uppercase tracking-wide text-text-3">Preview</div>
+            <div className="mt-4 rounded-2xl border border-border bg-surface p-5">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-medium text-text">Snapshot run</div>
+                <div className="text-xs text-text-3">~2 min</div>
+              </div>
+              <div className="mt-4 grid gap-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-text-2">Overall score</span>
+                  <span className="font-semibold text-text">82</span>
+                </div>
+                <div className="h-2 w-full rounded-full bg-bg">
+                  <div className="h-2 w-[70%] rounded-full bg-success/70" />
+                </div>
+                <div className="mt-3 flex items-center justify-between">
+                  <span className="text-text-2">Evidence</span>
+                  <span className="text-text-3">Attached</span>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 text-xs text-text-3">This is a sample panel for layout.</div>
+          </div>
         </div>
       </Card>
     </div>

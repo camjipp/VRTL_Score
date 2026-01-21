@@ -73,10 +73,6 @@ export default function HomePage() {
               <Link className="text-text-2 hover:text-text" href="/pricing">
                 See plans & pricing →
               </Link>
-              <span className="text-text-3">·</span>
-              <Link className="text-text-2 hover:text-text" href="/app">
-                Open the app
-              </Link>
             </div>
           </div>
         </div>
@@ -99,7 +95,10 @@ export default function HomePage() {
                 <div className="mt-4 rounded-2xl border border-border bg-surface-2 p-4">
                   <div className="flex items-center justify-between">
                     <div className="text-xs font-medium text-text-3">Overall score</div>
-                    <Badge variant="success">82</Badge>
+                    <div className="flex items-center gap-2">
+                      <div className="text-2xl font-semibold tracking-tight text-text">82</div>
+                      <Badge variant="success">Strong</Badge>
+                    </div>
                   </div>
                   <div className="mt-3 grid gap-2">
                     <div className="flex items-center justify-between text-xs">
@@ -107,14 +106,17 @@ export default function HomePage() {
                       <span className="text-text-3">7 / 10 prompts</span>
                     </div>
                     <div className="h-2 w-full rounded-full bg-bg">
-                      <div className="h-2 w-[70%] rounded-full bg-accent/70" />
+                      <div className="h-2 w-[70%] rounded-full bg-success/70" />
                     </div>
                     <div className="mt-2 flex items-center justify-between text-xs">
                       <span className="text-text-2">Confidence</span>
-                      <span className="text-text-3">High</span>
+                      <span className="inline-flex items-center gap-2 text-text-3">
+                        <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                        High
+                      </span>
                     </div>
                     <div className="h-2 w-full rounded-full bg-bg">
-                      <div className="h-2 w-[86%] rounded-full bg-accent/45" />
+                      <div className="h-2 w-[86%] rounded-full bg-success/40" />
                     </div>
                   </div>
                 </div>
@@ -144,45 +146,18 @@ export default function HomePage() {
               <h2 className="mt-3 text-4xl font-semibold tracking-tight text-text sm:text-5xl">
                 One system for AI visibility.
               </h2>
-              <div className="mt-5 space-y-4 text-sm text-text-2">
-                <div className="flex gap-3">
-                  <span className="mt-1.5 inline-flex h-6 w-6 items-center justify-center rounded-full border border-border bg-surface text-text-3">
-                    <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
-                      <path d="M12 3v6m0 6v6M3 12h6m6 0h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    </svg>
-                  </span>
-                  <div>
-                    <div className="font-medium text-text">Standardize measurement</div>
-                    <div className="mt-1 text-text-2">Same prompts. Same schema. Comparable results over time.</div>
-                  </div>
+              <div className="mt-6 grid gap-4">
+                <div className="rounded-2xl border border-border bg-surface p-5">
+                  <div className="text-sm font-semibold text-text">Standardized measurement</div>
+                  <div className="mt-2 text-sm text-text-2">Same prompts. Same schema. Comparable runs.</div>
                 </div>
-                <div className="flex gap-3">
-                  <span className="mt-1.5 inline-flex h-6 w-6 items-center justify-center rounded-full border border-border bg-surface text-text-3">
-                    <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M8 12l2.5 2.5L16 9"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </span>
-                  <div>
-                    <div className="font-medium text-text">Evidence-backed scoring</div>
-                    <div className="mt-1 text-text-2">Structured extraction plus raw outputs—so scores hold up.</div>
-                  </div>
+                <div className="rounded-2xl border border-border bg-surface p-5">
+                  <div className="text-sm font-semibold text-text">Evidence-backed scoring</div>
+                  <div className="mt-2 text-sm text-text-2">Scores tied to structured evidence + raw output.</div>
                 </div>
-                <div className="flex gap-3">
-                  <span className="mt-1.5 inline-flex h-6 w-6 items-center justify-center rounded-full border border-border bg-surface text-text-3">
-                    <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
-                      <path d="M7 7h10M7 12h10M7 17h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    </svg>
-                  </span>
-                  <div>
-                    <div className="font-medium text-text">Client-ready reporting</div>
-                    <div className="mt-1 text-text-2">Generate a clean PDF with scores, confidence, and evidence.</div>
-                  </div>
+                <div className="rounded-2xl border border-border bg-surface p-5">
+                  <div className="text-sm font-semibold text-text">Client-ready reporting</div>
+                  <div className="mt-2 text-sm text-text-2">Deliver the same day. Clean and consistent.</div>
                 </div>
               </div>
               <div className="mt-6 text-sm">
@@ -224,11 +199,17 @@ export default function HomePage() {
           </div>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <Card className="p-6 shadow-none">
-              <div className="text-base leading-relaxed text-text">
+            <Card className="p-8 shadow-none md:col-span-2">
+              <div className="text-xs font-medium uppercase tracking-wide text-text-3">Featured</div>
+              <div className="mt-4 text-2xl font-semibold leading-tight tracking-tight text-text">
                 “We finally have a repeatable way to measure AI visibility across accounts.”
               </div>
-              <div className="mt-4 text-xs text-text-3">Agency lead</div>
+              <div className="mt-6 flex items-center justify-between gap-3">
+                <div className="text-sm text-text-2">
+                  <span className="font-medium text-text">Agency lead</span> · Weekly reporting cadence
+                </div>
+                <Badge variant="success">82 avg</Badge>
+              </div>
             </Card>
             <Card className="p-6 shadow-none">
               <div className="text-base leading-relaxed text-text">
@@ -241,6 +222,12 @@ export default function HomePage() {
                 “Scores and reports are consistent week to week. That’s the whole value.”
               </div>
               <div className="mt-4 text-xs text-text-3">Ops</div>
+            </Card>
+            <Card className="p-6 shadow-none">
+              <div className="text-base leading-relaxed text-text">
+                “It’s the first time we can benchmark AI recommendations like we benchmark SEO.”
+              </div>
+              <div className="mt-4 text-xs text-text-3">Account director</div>
             </Card>
           </div>
         </div>
