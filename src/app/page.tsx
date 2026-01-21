@@ -23,7 +23,7 @@ export default function HomePage() {
               {/* Crop out the extra transparent padding baked into the PNG */}
               <div className="h-[118px] w-[260px] overflow-hidden -mr-4 sm:h-[148px] sm:w-[320px] sm:-mr-6">
                 <picture>
-                  <source media="(prefers-color-scheme: dark)" srcSet="/brand/VRTL_white_transparent.png" />
+                  <source media="(prefers-color-scheme: dark)" srcSet="/brand/White_VRTL.png" />
                   <img
                     alt="VRTL"
                     className="h-full w-full scale-[1.6] object-cover object-left"

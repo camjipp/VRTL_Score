@@ -9,7 +9,7 @@ export function SiteNav() {
         <nav className="flex h-16 items-center justify-between">
           <Link className="flex items-center gap-3" href="/">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img alt="VRTL" className="h-7 w-auto" src="/brand/VRTL_white_transparent.png" />
+            <img alt="VRTL" className="h-7 w-auto" src="/brand/White_VRTL.png" />
           </Link>
 
           <div className="flex items-center gap-5 text-sm">
