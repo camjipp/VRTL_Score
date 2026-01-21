@@ -42,19 +42,17 @@ export function DomainSearchBar() {
 
     const clientName = defaultClientNameFromWebsite(website);
 
+    // Build the final destination after onboarding
     const finalNextParams = new URLSearchParams();
     finalNextParams.set("website", website);
     if (clientName) finalNextParams.set("name", clientName);
     const finalNext = `/app/clients/new?${finalNextParams.toString()}`;
 
+    // Go directly to onboarding (which handles auth)
     const onboardingParams = new URLSearchParams();
     onboardingParams.set("website", website);
     onboardingParams.set("next", finalNext);
-    const onboardingNext = `/onboarding?${onboardingParams.toString()}`;
-
-    const loginParams = new URLSearchParams();
-    loginParams.set("next", onboardingNext);
-    router.push(`/login?${loginParams.toString()}`);
+    router.push(`/onboarding?${onboardingParams.toString()}`);
   }
 
   return (

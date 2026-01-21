@@ -59,7 +59,7 @@ export function SiteNav() {
             </Link>
             <Link
               className="rounded-full bg-text px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-text/20 transition-all hover:bg-text/90 hover:shadow-xl hover:shadow-text/25"
-              href="/app"
+              href="/onboarding"
             >
               Get started
             </Link>
@@ -115,7 +115,7 @@ export function SiteNav() {
               </Link>
               <Link
                 className="rounded-xl bg-text px-4 py-3.5 text-center text-base font-semibold text-white transition-all hover:bg-text/90"
-                href="/app"
+                href="/onboarding"
                 onClick={() => setMobileOpen(false)}
               >
                 Get started

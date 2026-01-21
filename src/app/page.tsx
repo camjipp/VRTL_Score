@@ -238,7 +238,7 @@ export default function HomePage() {
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <ButtonLink
                   className="rounded-xl bg-text px-8 py-4 text-base font-semibold text-white shadow-xl shadow-text/20 transition-all hover:bg-text/90 hover:shadow-2xl hover:shadow-text/30"
-                  href="/login"
+                  href="/onboarding"
                   variant="primary"
                 >
                   Start free trial

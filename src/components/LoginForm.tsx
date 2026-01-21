@@ -1,12 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { Alert, AlertDescription } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Alert, AlertDescription } from "@/components/ui/Alert";
 
 async function onboard(accessToken: string) {
   const res = await fetch("/api/onboard", {
@@ -28,7 +29,6 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -37,21 +37,14 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
     setError(null);
     setBusy(true);
     try {
-      const result =
-        mode === "signup"
-          ? await supabase.auth.signUp({ email, password })
-          : await supabase.auth.signInWithPassword({ email, password });
+      const result = await supabase.auth.signInWithPassword({ email, password });
 
       if (result.error) throw result.error;
 
       const session = result.data.session ?? (await supabase.auth.getSession()).data.session;
       const accessToken = session?.access_token;
       if (!accessToken) {
-        setError(
-          mode === "signup"
-            ? "Account created. Please confirm your email, then return and sign in."
-            : "Signed in but no session token was found. Please try again."
-        );
+        setError("Signed in but no session token was found. Please try again.");
         return;
       }
 
@@ -65,63 +58,89 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
   }
 
   return (
-    <>
-      <h1 className="text-2xl font-semibold tracking-tight text-text">Log in</h1>
-      <p className="mt-2 text-sm text-text-2">Use your email + password to access your workspace.</p>
+    <div className="w-full max-w-sm">
+      <h1 className="text-2xl font-bold tracking-tight text-text">Welcome back</h1>
+      <p className="mt-2 text-sm text-text-2">
+        Sign in to your account to continue.
+      </p>
 
-      <div className="mt-6 inline-flex w-full max-w-sm rounded-2xl border border-border bg-bg-2 p-1 text-sm">
-        <button
-          className={`flex-1 rounded-xl px-3 py-2 transition ${mode === "signin" ? "bg-surface font-semibold text-text" : "text-text-2 hover:bg-surface-2"}`}
-          onClick={() => setMode("signin")}
-          type="button"
-        >
-          Sign in
-        </button>
-        <button
-          className={`flex-1 rounded-xl px-3 py-2 transition ${mode === "signup" ? "bg-surface font-semibold text-text" : "text-text-2 hover:bg-surface-2"}`}
-          onClick={() => setMode("signup")}
-          type="button"
-        >
-          Sign up
-        </button>
-      </div>
-
-      <form className="mt-6 w-full max-w-sm space-y-4" onSubmit={handleSubmit}>
-        <label className="block text-sm">
-          <div className="mb-1 text-text-2">Email</div>
+      <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+        <div>
+          <label className="mb-2 block text-sm font-medium text-text">
+            Email
+          </label>
           <Input
             autoComplete="email"
+            className="h-12 rounded-xl text-base"
             onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@agency.com"
             required
             type="email"
             value={email}
           />
-        </label>
+        </div>
 
-        <label className="block text-sm">
-          <div className="mb-1 text-text-2">Password</div>
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <label className="text-sm font-medium text-text">
+              Password
+            </label>
+            <Link
+              className="text-xs text-text-3 hover:text-text"
+              href="/forgot-password"
+            >
+              Forgot password?
+            </Link>
+          </div>
           <Input
-            autoComplete={mode === "signup" ? "new-password" : "current-password"}
+            autoComplete="current-password"
+            className="h-12 rounded-xl text-base"
             minLength={8}
             onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
             required
             type="password"
             value={password}
           />
-        </label>
+        </div>
 
-        {error ? (
+        {error && (
           <Alert variant="danger">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
-        ) : null}
+        )}
 
-        <Button className="w-full" disabled={busy} type="submit" variant="primary">
-          {busy ? "Working..." : mode === "signup" ? "Create account" : "Sign in"}
+        <Button
+          className="h-12 w-full rounded-xl text-base"
+          disabled={busy}
+          type="submit"
+          variant="primary"
+        >
+          {busy ? (
+            <span className="flex items-center gap-2">
+              <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              Signing in...
+            </span>
+          ) : (
+            "Sign in"
+          )}
         </Button>
       </form>
-    </>
+
+      <div className="mt-8 text-center">
+        <p className="text-sm text-text-2">
+          Don&apos;t have an account?{" "}
+          <Link
+            className="font-medium text-text hover:underline"
+            href="/onboarding"
+          >
+            Get started free
+          </Link>
+        </p>
+      </div>
+    </div>
   );
 }
-
-
