@@ -3,7 +3,9 @@ import { NextResponse } from "next/server";
 import type { Extraction } from "@/lib/extraction/schema";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { PROMPT_PACK_VERSION, PROMPTS } from "@/lib/prompts/v1_core_10";
+import { runAnthropic } from "@/lib/llm/anthropic";
 import { runOpenAI } from "@/lib/llm/openai";
+import { runGemini } from "@/lib/llm/gemini";
 import { getEnabledProviders, type Provider } from "@/lib/llm/providers";
 import { scoreBalanced } from "@/lib/scoring/v1_balanced";
 
@@ -51,6 +53,22 @@ function openAiConcurrency(): number {
   const n = Number(raw);
   if (!Number.isFinite(n)) return 6;
   return Math.max(1, Math.min(10, Math.floor(n)));
+}
+
+function geminiConcurrency(): number {
+  const raw = process.env.SNAPSHOT_GEMINI_CONCURRENCY;
+  if (!raw) return 3;
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return 3;
+  return Math.max(1, Math.min(6, Math.floor(n)));
+}
+
+function anthropicConcurrency(): number {
+  const raw = process.env.SNAPSHOT_ANTHROPIC_CONCURRENCY;
+  if (!raw) return 3;
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return 3;
+  return Math.max(1, Math.min(6, Math.floor(n)));
 }
 
 function dailySnapshotLimit(): number | null {
@@ -112,6 +130,50 @@ async function runOpenAIWithRetry(args: Parameters<typeof runOpenAI>[0]) {
       if (attempt >= maxAttempts) break;
       const backoffMs = 250 * attempt;
       console.log("openai call failed; retrying", {
+        attempt,
+        maxAttempts,
+        backoffMs,
+        message: err instanceof Error ? err.message : String(err)
+      });
+      await sleepMs(backoffMs);
+    }
+  }
+  throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
+}
+
+async function runGeminiWithRetry(args: Parameters<typeof runGemini>[0]) {
+  const maxAttempts = Math.max(1, Number(process.env.SNAPSHOT_GEMINI_RETRIES ?? "2"));
+  let lastErr: unknown = null;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      return await runGemini(args);
+    } catch (err) {
+      lastErr = err;
+      if (attempt >= maxAttempts) break;
+      const backoffMs = 250 * attempt;
+      console.log("gemini call failed; retrying", {
+        attempt,
+        maxAttempts,
+        backoffMs,
+        message: err instanceof Error ? err.message : String(err)
+      });
+      await sleepMs(backoffMs);
+    }
+  }
+  throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
+}
+
+async function runAnthropicWithRetry(args: Parameters<typeof runAnthropic>[0]) {
+  const maxAttempts = Math.max(1, Number(process.env.SNAPSHOT_ANTHROPIC_RETRIES ?? "2"));
+  let lastErr: unknown = null;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      return await runAnthropic(args);
+    } catch (err) {
+      lastErr = err;
+      if (attempt >= maxAttempts) break;
+      const backoffMs = 250 * attempt;
+      console.log("anthropic call failed; retrying", {
         attempt,
         maxAttempts,
         backoffMs,
@@ -365,6 +427,28 @@ export async function POST(req: Request) {
         .eq("id", snapshotId);
       return NextResponse.json({ error: "OPENAI_API_KEY is missing" }, { status: 500 });
     }
+    if (providers.includes("anthropic") && !process.env.ANTHROPIC_API_KEY) {
+      await supabase
+        .from("snapshots")
+        .update({
+          status: "failed",
+          error: "ANTHROPIC_API_KEY is missing",
+          completed_at: new Date().toISOString()
+        })
+        .eq("id", snapshotId);
+      return NextResponse.json({ error: "ANTHROPIC_API_KEY is missing" }, { status: 500 });
+    }
+    if (providers.includes("gemini") && !process.env.GEMINI_API_KEY) {
+      await supabase
+        .from("snapshots")
+        .update({
+          status: "failed",
+          error: "GEMINI_API_KEY is missing",
+          completed_at: new Date().toISOString()
+        })
+        .eq("id", snapshotId);
+      return NextResponse.json({ error: "GEMINI_API_KEY is missing" }, { status: 500 });
+    }
 
     const byProviderExtractions: Record<Provider, Extraction[]> = {
       openai: [],
@@ -373,14 +457,19 @@ export async function POST(req: Request) {
     };
 
     for (const provider of providers) {
-      if (provider !== "openai") continue; // only OpenAI implemented
+      const concurrency =
+        provider === "openai"
+          ? openAiConcurrency()
+          : provider === "gemini"
+          ? geminiConcurrency()
+          : anthropicConcurrency();
 
       // Run prompts with limited concurrency to avoid Vercel timeouts while keeping load reasonable.
       await runWithConcurrency(
         PROMPTS.map((prompt, idx) => ({ prompt, idx })),
-        openAiConcurrency(),
+        concurrency,
         async ({ prompt, idx }) => {
-          console.log("before openai call", { promptKey: prompt.key });
+          console.log("before provider call", { provider, promptKey: prompt.key });
           let rawText = "";
           let parseOk = false;
           let parsedJson: unknown = null;
@@ -388,11 +477,25 @@ export async function POST(req: Request) {
           let latencyMs: number | null = null;
 
           try {
-            const result = await runOpenAIWithRetry({
-              system: SYSTEM_PROMPT,
-              prompt: buildPrompt(clientName, clientIndustry, competitorNames, prompt),
-              model: process.env.OPENAI_MODEL
-            });
+            const fullPrompt = buildPrompt(clientName, clientIndustry, competitorNames, prompt);
+            const result =
+              provider === "openai"
+                ? await runOpenAIWithRetry({
+                    system: SYSTEM_PROMPT,
+                    prompt: fullPrompt,
+                    model: process.env.OPENAI_MODEL
+                  })
+                : provider === "gemini"
+                ? await runGeminiWithRetry({
+                    system: SYSTEM_PROMPT,
+                    prompt: fullPrompt,
+                    model: process.env.GEMINI_MODEL
+                  })
+                : await runAnthropicWithRetry({
+                    system: SYSTEM_PROMPT,
+                    prompt: fullPrompt,
+                    model: process.env.ANTHROPIC_MODEL
+                  });
             rawText = result.rawText;
             modelUsed = result.modelUsed;
             latencyMs = result.latencyMs;
