@@ -194,58 +194,147 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          CTA — Bold gradient section
+          CTA — Split layout with preview
       ═══════════════════════════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden py-24">
-        {/* Gradient background */}
-        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[#080808] via-[#0f0f0f] to-[#1a1a1a]" />
-        
-        {/* Decorative elements */}
-        <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute -left-32 -top-32 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl" />
-          <div className="absolute -bottom-32 -right-32 h-64 w-64 rounded-full bg-violet-500/20 blur-3xl" />
-          <div className="absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-500/10 blur-3xl" />
-        </div>
+      <section className="relative overflow-hidden bg-bg py-20 md:py-28">
+        <div className="container-xl">
+          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+            {/* Left: Copy and CTA */}
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-600">
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+                Get started
+              </div>
+              
+              <h2 className="mt-6 text-4xl font-bold tracking-tight text-text md:text-5xl">
+                Your first report in
+                <span className="block text-gradient">under 5 minutes</span>
+              </h2>
+              
+              <p className="mt-6 text-lg text-text-2">
+                Add a client, run the snapshot, download the PDF. No setup complexity—just proof.
+              </p>
 
-        {/* Grid pattern overlay */}
-        <div
-          className="pointer-events-none absolute inset-0 -z-10 opacity-10"
-          style={{
-            backgroundImage: `linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)`,
-            backgroundSize: "64px 64px",
-          }}
-        />
+              {/* Quick benefits */}
+              <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                {[
+                  { icon: "⚡", text: "30-second client setup" },
+                  { icon: "🤖", text: "3 LLM providers queried" },
+                  { icon: "📊", text: "Instant scoring & evidence" },
+                  { icon: "📄", text: "One-click PDF export" },
+                ].map((item) => (
+                  <div key={item.text} className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-2 text-lg">
+                      {item.icon}
+                    </span>
+                    <span className="text-sm font-medium text-text">{item.text}</span>
+                  </div>
+                ))}
+              </div>
 
-        <div className="container-xl relative">
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
-              Start measuring
-              <br />
-              <span className="text-gradient">AI visibility</span>
-            </h2>
-            <p className="mx-auto mt-6 max-w-xl text-lg text-white/70">
-              Create your first client, run a snapshot, and ship a report—all in under 5 minutes.
-            </p>
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-              <ButtonLink
-                className="rounded-full bg-white px-8 py-4 text-base font-semibold text-[#080808] shadow-2xl transition-all hover:bg-white/90 hover:scale-105"
-                href="/login"
-                variant="primary"
-              >
-                Get started free
-              </ButtonLink>
-              <ButtonLink
-                className="rounded-full border border-white/20 bg-white/5 px-8 py-4 text-base font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/10"
-                href="/pricing"
-                variant="secondary"
-              >
-                View pricing
-              </ButtonLink>
+              {/* CTA buttons */}
+              <div className="mt-10 flex flex-wrap items-center gap-4">
+                <ButtonLink
+                  className="rounded-xl bg-text px-8 py-4 text-base font-semibold text-white shadow-xl shadow-text/20 transition-all hover:bg-text/90 hover:shadow-2xl hover:shadow-text/30"
+                  href="/login"
+                  variant="primary"
+                >
+                  Start free trial
+                </ButtonLink>
+                <ButtonLink
+                  className="rounded-xl border border-border bg-surface px-8 py-4 text-base font-semibold text-text transition-all hover:bg-surface-2"
+                  href="/pricing"
+                  variant="secondary"
+                >
+                  View pricing
+                </ButtonLink>
+              </div>
+
+              <p className="mt-4 text-sm text-text-3">
+                No credit card required · Cancel anytime
+              </p>
             </div>
-            <p className="mt-6 text-sm text-white/50">
-              No credit card required · 14-day free trial
-            </p>
+
+            {/* Right: Visual preview */}
+            <div className="relative">
+              {/* Decorative background */}
+              <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-emerald-500/10 via-violet-500/10 to-cyan-500/10 blur-2xl" />
+              
+              {/* Preview card */}
+              <div className="relative rounded-2xl border border-border bg-surface p-6 shadow-2xl">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 text-sm font-bold text-white">
+                      A
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-text">acme-agency.com</div>
+                      <div className="text-xs text-text-3">Snapshot · Just now</div>
+                    </div>
+                  </div>
+                  <div className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-600">
+                    Complete
+                  </div>
+                </div>
+
+                {/* Score display */}
+                <div className="mt-6 flex items-center justify-between rounded-xl bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 p-4">
+                  <div>
+                    <div className="text-xs font-medium uppercase tracking-wide text-text-3">Overall Score</div>
+                    <div className="mt-1 text-4xl font-bold text-text">82</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs text-text-3">Confidence</div>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                      <span className="text-sm font-medium text-emerald-600">High</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Provider breakdown */}
+                <div className="mt-4 grid grid-cols-3 gap-3">
+                  {[
+                    { name: "ChatGPT", score: 84 },
+                    { name: "Gemini", score: 79 },
+                    { name: "Claude", score: 83 },
+                  ].map((p) => (
+                    <div key={p.name} className="rounded-lg bg-surface-2 p-3 text-center">
+                      <div className="text-xs text-text-3">{p.name}</div>
+                      <div className="mt-1 text-lg font-semibold text-text">{p.score}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Action bar */}
+                <div className="mt-4 flex items-center justify-between rounded-lg border border-border bg-bg p-3">
+                  <span className="text-xs text-text-3">Ready for export</span>
+                  <button className="flex items-center gap-2 rounded-lg bg-text px-3 py-1.5 text-xs font-medium text-white">
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Download PDF
+                  </button>
+                </div>
+              </div>
+
+              {/* Floating badges */}
+              <div className="absolute -left-4 top-8 rounded-xl border border-border bg-surface px-4 py-2 shadow-lg">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🎯</span>
+                  <span className="text-xs font-medium text-text">7/10 prompts mentioned</span>
+                </div>
+              </div>
+              <div className="absolute -right-4 bottom-16 rounded-xl border border-border bg-surface px-4 py-2 shadow-lg">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">📈</span>
+                  <span className="text-xs font-medium text-text">+12 vs last month</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
