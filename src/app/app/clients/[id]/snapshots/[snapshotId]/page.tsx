@@ -621,7 +621,7 @@ export default function SnapshotDetailPage() {
               </div>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-5">
               <section className="space-y-6 scroll-mt-24" data-report-section id="overview">
                 {/* Overview */}
                 <div>
@@ -636,7 +636,7 @@ export default function SnapshotDetailPage() {
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div className="min-w-0">
                   <div className="inline-flex items-center gap-2 rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">
-                    Snapshot\n
+                    Snapshot
                     <span className="font-mono text-[11px] text-accent/80">{data.snapshot.id.slice(0, 8)}…</span>
                   </div>
                   <h1 className="mt-3 text-2xl font-bold tracking-tight text-text">
@@ -699,7 +699,7 @@ export default function SnapshotDetailPage() {
                 </div>
               </div>
 
-          {/* Dashboard */}\n
+          {/* Dashboard */}
           <div className="grid gap-4 lg:grid-cols-12">
             <div className="rounded-2xl border border-border bg-surface p-5 lg:col-span-4">
               <div className="flex items-center justify-between">
@@ -780,7 +780,7 @@ export default function SnapshotDetailPage() {
               </section>
 
           <section className="scroll-mt-24" data-report-section id="landscape">
-            {/* Top competitors */}\n
+            {/* Top competitors */}
             <div className="rounded-2xl border border-border bg-surface p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -802,14 +802,14 @@ export default function SnapshotDetailPage() {
               ) : null}
             </div>
 
-            <div className="mt-5">
+            <div className="mt-4">
               <CompetitorBars items={data.summary.top_competitors} />
             </div>
             </div>
           </section>
 
           <section className="scroll-mt-24" data-report-section id="action-plan">
-            {/* Action plan */}\n
+            {/* Action plan */}
             <div className="overflow-hidden rounded-2xl border border-border bg-surface">
             <div className="border-b border-border bg-surface-2/50 px-6 py-4">
               <h2 className="text-lg font-semibold text-text">Action plan</h2>
@@ -839,7 +839,7 @@ export default function SnapshotDetailPage() {
           </section>
 
           <section className="scroll-mt-24" data-report-section id="findings">
-            {/* Findings */}\n
+            {/* Findings */}
             <div className="overflow-hidden rounded-2xl border border-border bg-surface">
             <div className="border-b border-border bg-surface-2/50 px-6 py-4">
               <h2 className="text-lg font-semibold text-text">Findings</h2>
