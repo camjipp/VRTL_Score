@@ -3,8 +3,8 @@ import Link from "next/link";
 import { BigStats } from "@/components/BigStats";
 import { DomainSearchBar } from "@/components/DomainSearchBar";
 import { FeatureShowcase } from "@/components/FeatureShowcase";
+import { RotatingQuestions } from "@/components/RotatingQuestions";
 import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
-import { TrustLogos } from "@/components/TrustLogos";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 
 export default function HomePage() {
@@ -79,16 +79,18 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          TRUST LOGOS — Animated marquee right after hero
+          CLIENT QUESTIONS — What clients are asking (social proof)
       ═══════════════════════════════════════════════════════════════════ */}
-      <section className="border-b border-border bg-bg py-8">
+      <section className="bg-bg py-12 md:py-16">
         <div className="container-xl">
-          <div className="mb-5 text-center">
+          <div className="mb-8 text-center">
             <span className="text-xs font-medium uppercase tracking-widest text-text-3">
-              Trusted by leading agencies
+              Sound familiar?
             </span>
           </div>
-          <TrustLogos />
+          <div className="mx-auto max-w-4xl">
+            <RotatingQuestions />
+          </div>
         </div>
       </section>
 
