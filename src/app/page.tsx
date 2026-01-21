@@ -155,26 +155,30 @@ export default function HomePage() {
             <div>
               <div className="text-xs font-medium uppercase tracking-wide text-text-3">Overview</div>
               <h2 className="mt-3 text-4xl font-semibold tracking-tight text-text sm:text-5xl">
-                One system for AI visibility.
+                We sell proof.
               </h2>
               <div className="mt-6 grid gap-4">
                 <div className="rounded-2xl border border-border bg-surface p-5">
-                  <div className="text-sm font-semibold text-text">Standardized measurement</div>
-                  <div className="mt-2 text-sm text-text-2">Same prompts. Same schema. Comparable runs.</div>
+                  <div className="text-sm font-semibold text-text">Retention leverage</div>
+                  <div className="mt-2 text-sm text-text-2">
+                    Clients don’t churn when progress is visible month‑to‑month.
+                  </div>
                 </div>
                 <div className="rounded-2xl border border-border bg-surface p-5">
-                  <div className="text-sm font-semibold text-text">Evidence-backed scoring</div>
-                  <div className="mt-2 text-sm text-text-2">Scores tied to structured evidence + raw output.</div>
+                  <div className="text-sm font-semibold text-text">Credibility</div>
+                  <div className="mt-2 text-sm text-text-2">
+                    Scoring + structured evidence turns “AI visibility” into something concrete.
+                  </div>
                 </div>
                 <div className="rounded-2xl border border-border bg-surface p-5">
-                  <div className="text-sm font-semibold text-text">Client-ready reporting</div>
-                  <div className="mt-2 text-sm text-text-2">Deliver the same day. Clean and consistent.</div>
+                  <div className="text-sm font-semibold text-text">Time saved + consistency</div>
+                  <div className="mt-2 text-sm text-text-2">
+                    No ad‑hoc prompt testing. Push a button. Download the report.
+                  </div>
                 </div>
               </div>
-              <div className="mt-6 text-sm">
-                <Link className="text-text-2 hover:text-text" href="/app">
-                  Open the app →
-                </Link>
+              <div className="mt-6 text-sm text-text-2">
+                Standardized prompts across major LLMs → recommendation measurement → one‑click premium PDF.
               </div>
             </div>
           </div>
@@ -187,10 +191,10 @@ export default function HomePage() {
           <div className="flex flex-col gap-2">
             <div className="text-xs font-medium uppercase tracking-wide text-text-3">Features</div>
             <h2 className="text-3xl font-semibold tracking-tight text-text sm:text-4xl">
-              Built for repeatable client work.
+              A premium, repeatable reporting engine.
             </h2>
             <p className="max-w-2xl text-sm text-text-2">
-              Everything below exists to ship the same deliverable every week—without re-litigating the method.
+              Not “AI SEO.” Not “prompts.” Not “a dashboard.” Proof you can send to a client.
             </p>
           </div>
           <div className="mt-8">
@@ -204,8 +208,12 @@ export default function HomePage() {
         <div className="container-xl py-16">
           <div className="flex flex-col gap-2">
             <div className="text-xs font-medium uppercase tracking-wide text-text-3">Proof</div>
-            <h2 className="text-3xl font-semibold tracking-tight text-text sm:text-4xl">Numbers tell the story.</h2>
-            <p className="max-w-2xl text-sm text-text-2">A few outcomes agencies care about.</p>
+            <h2 className="text-3xl font-semibold tracking-tight text-text sm:text-4xl">
+              Make retainers feel justified.
+            </h2>
+            <p className="max-w-2xl text-sm text-text-2">
+              The report is the deliverable. The score and evidence make it real.
+            </p>
           </div>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">

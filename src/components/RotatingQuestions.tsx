@@ -14,22 +14,22 @@ const defaultQuestions: Question[] = [
   {
     label: "Client",
     time: "Just now",
-    text: "“I asked ChatGPT for recommendations and we didn’t show up. Can you prove it?”"
+    text: "“Can you prove we’re getting recommended more often in AI?”"
   },
   {
     label: "Client",
     time: "8 mins ago",
-    text: "“Why do competitors appear in Google Overviews and we don’t?”"
+    text: "“We need a monthly AI Visibility Report like we do for SEO. Can you ship it?”"
   },
   {
     label: "Client",
     time: "2 mins ago",
-    text: "“Our board asked about ‘AI search visibility’. Can we track it weekly?”"
+    text: "“Show me exactly where we show up vs competitors — with evidence.”"
   },
   {
     label: "Client",
     time: "Today",
-    text: "“Show me the evidence behind the score — not just a number.”"
+    text: "“We’re paying a retainer. What changed month-to-month? Prove progress.”"
   }
 ];
 

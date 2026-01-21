@@ -14,33 +14,33 @@ type BentoItem = {
 
 const items: BentoItem[] = [
   {
-    title: "Snapshot scoring",
-    description: "Standardized prompts that produce comparable runs.",
-    meta: "Repeatable measurement",
+    title: "Proof engine",
+    description: "Standardized prompts across major LLMs → structured evidence → a score you can defend.",
+    meta: "What agencies sell",
     size: "lg"
   },
   {
-    title: "Provider breakdown",
-    description: "See how the score changes across models and providers.",
-    meta: "ChatGPT · Gemini · Claude",
+    title: "Monthly reporting cadence",
+    description: "Run the same snapshot pack month-to-month and show progress without reinvention.",
+    meta: "Retention leverage",
     size: "md"
   },
   {
-    title: "Competitive context",
-    description: "Mentions and positioning versus your competitor set.",
-    meta: "Mentions + positioning",
+    title: "Recommended vs competitors",
+    description: "Measure whether the brand is mentioned and where it ranks against competitors.",
+    meta: "Credibility",
     size: "md"
   },
   {
-    title: "Evidence by prompt",
-    description: "Structured fields + raw excerpts tied to the score.",
-    meta: "Defensible deliverables",
+    title: "Evidence, not screenshots",
+    description: "No manual ChatGPT screenshots. Evidence is captured and tied to each prompt.",
+    meta: "Time saved",
     size: "md"
   },
   {
-    title: "Client-ready report",
-    description: "A PDF clients can scan in minutes.",
-    meta: "Executive summary → evidence",
+    title: "Premium PDF deliverable",
+    description: "A one-click AI Visibility Report agencies can brand and send.",
+    meta: "The product",
     size: "md"
   }
 ];
