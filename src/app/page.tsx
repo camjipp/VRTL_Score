@@ -3,6 +3,7 @@ import Link from "next/link";
 import { BigStats } from "@/components/BigStats";
 import { DomainSearchBar } from "@/components/DomainSearchBar";
 import { FeatureShowcase } from "@/components/FeatureShowcase";
+import { Footer } from "@/components/Footer";
 import { RotatingQuestions } from "@/components/RotatingQuestions";
 import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
 import { ButtonLink } from "@/components/ui/ButtonLink";
@@ -11,7 +12,7 @@ export default function HomePage() {
   return (
     <main>
       {/* ═══════════════════════════════════════════════════════════════════
-          HERO — Keep this section as-is (user loves it)
+          HERO — VRTL Score + Search bar
       ═══════════════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden border-b border-border bg-bg">
         <div className="pointer-events-none absolute inset-0">
@@ -69,6 +70,34 @@ export default function HomePage() {
             <div className="mx-auto mt-6 max-w-3xl">
               <DomainSearchBar />
             </div>
+
+            {/* Social proof */}
+            <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-8">
+              <div className="flex items-center gap-2">
+                <div className="flex -space-x-2">
+                  {["S", "M", "J", "A"].map((letter, i) => (
+                    <div
+                      key={letter}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-bg bg-gradient-to-br from-violet-500 to-emerald-500 text-xs font-bold text-white"
+                      style={{ zIndex: 4 - i }}
+                    >
+                      {letter}
+                    </div>
+                  ))}
+                </div>
+                <span className="text-sm text-text-2">
+                  <span className="font-semibold text-text">200+</span> agencies measuring AI visibility
+                </span>
+              </div>
+              <div className="hidden h-4 w-px bg-border sm:block" />
+              <div className="flex items-center gap-2 text-sm text-text-2">
+                <svg className="h-4 w-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                <span><span className="font-semibold text-text">5,000+</span> reports generated</span>
+              </div>
+            </div>
+
             <div className="mt-5 flex items-center justify-center gap-3 text-sm">
               <Link className="text-text-2 hover:text-text" href="/pricing">
                 See plans & pricing →
@@ -108,7 +137,7 @@ export default function HomePage() {
         <div className="container-xl">
           <div className="mb-12 text-center">
             <h2 className="text-3xl font-bold tracking-tight text-text md:text-4xl">
-              The scale to power your agency
+              Proof at scale
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-text-2">
               Real-time AI visibility measurement across the models that matter.
@@ -138,78 +167,6 @@ export default function HomePage() {
             </p>
           </div>
           <FeatureShowcase />
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════════════════
-          HOW IT WORKS — Clean 3-step process
-      ═══════════════════════════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden py-20">
-        <div className="container-xl">
-          <div className="mb-16 text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-text md:text-4xl">
-              Three steps to proof
-            </h2>
-            <p className="mx-auto mt-3 max-w-xl text-text-2">
-              Create a client, run a snapshot, send the report. That simple.
-            </p>
-          </div>
-
-          <div className="relative">
-            {/* Connecting line */}
-            <div className="absolute left-0 right-0 top-16 hidden h-0.5 bg-gradient-to-r from-transparent via-border to-transparent md:block" />
-
-            <div className="grid gap-8 md:grid-cols-3">
-              {[
-                {
-                  step: "01",
-                  title: "Add your client",
-                  description: "Enter the website URL and define competitors. Takes 30 seconds.",
-                  icon: (
-                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                  ),
-                },
-                {
-                  step: "02",
-                  title: "Run the snapshot",
-                  description: "We query ChatGPT, Gemini, and Claude with standardized prompts.",
-                  icon: (
-                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  ),
-                },
-                {
-                  step: "03",
-                  title: "Download the PDF",
-                  description: "Scores, evidence, recommendations—ready for client delivery.",
-                  icon: (
-                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  ),
-                },
-              ].map((item, i) => (
-                <div key={item.step} className="relative text-center">
-                  {/* Step number with icon */}
-                  <div className="relative mx-auto mb-6 flex h-32 w-32 items-center justify-center">
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-br from-text/5 to-text/10" />
-                    <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-surface shadow-xl">
-                      <div className="text-text">{item.icon}</div>
-                    </div>
-                    <div className="absolute -right-1 -top-1 flex h-8 w-8 items-center justify-center rounded-full bg-text text-xs font-bold text-white">
-                      {item.step}
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-semibold text-text">{item.title}</h3>
-                  <p className="mt-2 text-sm text-text-2">{item.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </section>
 
@@ -292,6 +249,11 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          FOOTER
+      ═══════════════════════════════════════════════════════════════════ */}
+      <Footer />
     </main>
   );
 }
