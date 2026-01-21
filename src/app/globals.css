@@ -38,6 +38,33 @@
   --muted: var(--text-3);
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Flip ink/paper for dark mode */
+    --bg: 8 8 8;
+    --bg-2: 14 14 14;
+    --surface: 18 18 18;
+    --surface-2: 24 24 24;
+    --border: 55 55 55;
+
+    --text: 250 249 246;
+    --text-2: 206 206 206;
+    --text-3: 160 160 160;
+
+    /* Accent flips to “paper” so primary actions stay visible */
+    --accent: 250 249 246;
+    --accent-2: 230 229 224;
+
+    /* Effects */
+    --ring: var(--accent);
+    --shadow-lift: 0 10px 26px rgba(0,0,0,0.55);
+  }
+
+  html {
+    color-scheme: dark;
+  }
+}
+
 html,
 body {
   height: 100%;
@@ -46,6 +73,10 @@ body {
 body {
   background: rgb(var(--bg));
   color: rgb(var(--text));
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 /* Controlled “marker underline” motif (logo-derived) */
