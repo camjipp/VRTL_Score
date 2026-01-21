@@ -53,7 +53,7 @@ export default function HomePage() {
                   <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-surface">
                     <span className="sr-only">Gemini</span>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt="" className="h-[17px] w-[17px]" src="/ai/gemini.svg" />
+                    <img alt="" className="h-[17px] w-[17px]" src="/ai/gemini.png" />
                   </span>
                   <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-surface">
                     <span className="sr-only">Claude</span>
