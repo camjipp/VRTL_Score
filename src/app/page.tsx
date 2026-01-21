@@ -85,58 +85,110 @@ export default function HomePage() {
       {/* “One solution…” (Semrush-style) */}
       <section className="bg-bg">
         <div className="container-xl py-16">
-          <h2 className="text-2xl font-semibold tracking-tight text-text">One solution to win every search</h2>
-          <div className="mt-4 grid gap-6 lg:grid-cols-2 lg:items-start">
-            <div>
-              <ul className="space-y-3 text-sm text-text-2">
-                <li className="flex gap-3">
-                  <span className="mt-2 h-1.5 w-1.5 rounded-full bg-text-3" />
-                  Standardized prompts across major AI models
-                </li>
-                <li className="flex gap-3">
-                  <span className="mt-2 h-1.5 w-1.5 rounded-full bg-text-3" />
-                  Structured evidence tied directly to each score
-                </li>
-                <li className="flex gap-3">
-                  <span className="mt-2 h-1.5 w-1.5 rounded-full bg-text-3" />
-                  Client-ready reporting for agency delivery
-                </li>
-              </ul>
-              <div className="mt-6 flex flex-wrap items-center gap-3">
-                <ButtonLink href="/app" variant="primary">
-                  Get insights
-                </ButtonLink>
-                <ButtonLink href="/pricing" variant="secondary">
-                  View pricing
-                </ButtonLink>
-              </div>
+          <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+            {/* Mock (left) */}
+            <div className="mx-auto w-full max-w-[520px]">
+              <Card className="p-6 shadow-none">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="text-xs font-medium text-text-3">AI visibility snapshot</div>
+                  <Badge variant="neutral">Preview</Badge>
+                </div>
+
+                <div className="mt-4 rounded-2xl border border-border bg-surface-2 p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="text-xs font-medium text-text-3">Overall score</div>
+                    <Badge variant="success">82</Badge>
+                  </div>
+                  <div className="mt-3 grid gap-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-text-2">Mentioned</span>
+                      <span className="text-text-3">7 / 10 prompts</span>
+                    </div>
+                    <div className="h-2 w-full rounded-full bg-bg">
+                      <div className="h-2 w-[70%] rounded-full bg-accent/70" />
+                    </div>
+                    <div className="mt-2 flex items-center justify-between text-xs">
+                      <span className="text-text-2">Confidence</span>
+                      <span className="text-text-3">High</span>
+                    </div>
+                    <div className="h-2 w-full rounded-full bg-bg">
+                      <div className="h-2 w-[86%] rounded-full bg-accent/45" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-border bg-surface p-4">
+                    <div className="text-xs text-text-3">Top mentions</div>
+                    <div className="mt-2 text-sm font-medium text-text">Competitors</div>
+                    <div className="mt-2 text-xs text-text-2">Competitor A · Competitor B · Competitor C</div>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-surface p-4">
+                    <div className="text-xs text-text-3">Providers</div>
+                    <div className="mt-2 text-sm font-medium text-text">Breakdown</div>
+                    <div className="mt-2 text-xs text-text-2">ChatGPT · Gemini · Claude · More</div>
+                  </div>
+                </div>
+
+                <div className="mt-4 text-xs text-text-3">
+                  Evidence and provider breakdown are included in-app and in PDFs.
+                </div>
+              </Card>
             </div>
 
-            <Card className="p-6 shadow-none">
-              <div className="text-sm font-medium text-text">What you get</div>
-              <div className="mt-4 grid gap-3">
-                <div className="rounded-2xl border border-border bg-surface p-4">
-                  <div className="text-sm font-medium text-text">One workflow. One score.</div>
-                  <div className="mt-2 text-sm text-text-2">
-                    VRTL Score shows how brands appear across major AI models—using the same prompts, every time.
+            {/* Copy (right) */}
+            <div>
+              <div className="text-xs font-medium uppercase tracking-wide text-text-3">One solution</div>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-text sm:text-4xl">
+                One solution to win every search
+              </h2>
+              <div className="mt-5 space-y-4 text-sm text-text-2">
+                <div className="flex gap-3">
+                  <span className="mt-1.5 inline-flex h-6 w-6 items-center justify-center rounded-full border border-border bg-surface text-text-3">
+                    <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                      <path d="M12 3v6m0 6v6M3 12h6m6 0h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                  </span>
+                  <div>
+                    <div className="font-medium text-text">Standardize measurement</div>
+                    <div className="mt-1 text-text-2">Same prompts. Same schema. Comparable results over time.</div>
                   </div>
                 </div>
-                <div className="grid gap-3 md:grid-cols-3">
-                  <div className="rounded-2xl border border-border bg-surface p-4">
-                    <div className="text-xs font-medium text-text-3">Standardized</div>
-                    <div className="mt-2 text-sm font-medium text-text">Scoring</div>
+                <div className="flex gap-3">
+                  <span className="mt-1.5 inline-flex h-6 w-6 items-center justify-center rounded-full border border-border bg-surface text-text-3">
+                    <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M8 12l2.5 2.5L16 9"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </span>
+                  <div>
+                    <div className="font-medium text-text">Evidence-backed scoring</div>
+                    <div className="mt-1 text-text-2">Structured extraction plus raw outputs—so scores hold up.</div>
                   </div>
-                  <div className="rounded-2xl border border-border bg-surface p-4">
-                    <div className="text-xs font-medium text-text-3">Structured</div>
-                    <div className="mt-2 text-sm font-medium text-text">Evidence</div>
-                  </div>
-                  <div className="rounded-2xl border border-border bg-surface p-4">
-                    <div className="text-xs font-medium text-text-3">Client-ready</div>
-                    <div className="mt-2 text-sm font-medium text-text">Reporting</div>
+                </div>
+                <div className="flex gap-3">
+                  <span className="mt-1.5 inline-flex h-6 w-6 items-center justify-center rounded-full border border-border bg-surface text-text-3">
+                    <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                      <path d="M7 7h10M7 12h10M7 17h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                  </span>
+                  <div>
+                    <div className="font-medium text-text">Client-ready reporting</div>
+                    <div className="mt-1 text-text-2">Generate a clean PDF with scores, confidence, and evidence.</div>
                   </div>
                 </div>
               </div>
-            </Card>
+              <div className="mt-6 text-sm">
+                <Link className="text-text-2 hover:text-text" href="/app">
+                  Open the app →
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -145,7 +197,7 @@ export default function HomePage() {
       <section className="bg-bg-2">
         <div className="container-xl py-16">
           <div className="flex flex-col gap-2">
-            <Badge variant="neutral">Toolkits</Badge>
+            <div className="text-xs font-medium uppercase tracking-wide text-text-3">Toolkits</div>
             <h2 className="text-2xl font-semibold tracking-tight text-text">
               Everything agencies need to ship AI visibility.
             </h2>
@@ -156,70 +208,6 @@ export default function HomePage() {
 
           <div className="mt-8">
             <LandingToolkits />
-          </div>
-        </div>
-      </section>
-
-      {/* Snapshot preview (moved down the page) */}
-      <section className="bg-bg">
-        <div className="container-xl py-16">
-          <div className="mx-auto max-w-5xl">
-            <div className="mb-6 flex items-end justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-text">A report clients trust.</h2>
-                <p className="mt-2 text-sm text-text-2">
-                  Scores, confidence, competitors, and evidence—organized in one place.
-                </p>
-              </div>
-              <Badge variant="neutral">Preview</Badge>
-            </div>
-
-            <Card className="p-6 shadow-none">
-              <div className="flex items-center justify-between gap-3">
-                <div className="text-sm font-medium text-text">Snapshot preview</div>
-                <Badge variant="neutral">Sample</Badge>
-              </div>
-
-              <div className="mt-4 rounded-2xl border border-border bg-surface-2 p-4">
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-medium text-text-3">Overall</div>
-                  <Badge variant="success">82</Badge>
-                </div>
-                <div className="mt-3 grid gap-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-text-2">Mentioned</span>
-                    <span className="text-text-3">7 / 10 prompts</span>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-bg">
-                    <div className="h-2 w-[70%] rounded-full bg-accent/70" />
-                  </div>
-                  <div className="mt-2 flex items-center justify-between text-xs">
-                    <span className="text-text-2">Confidence</span>
-                    <span className="text-text-3">High</span>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-bg">
-                    <div className="h-2 w-[86%] rounded-full bg-accent/45" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-border bg-surface p-4">
-                  <div className="text-xs text-text-3">Top mentions</div>
-                  <div className="mt-2 text-sm font-medium text-text">Competitors</div>
-                  <div className="mt-2 text-xs text-text-2">Competitor A · Competitor B · Competitor C</div>
-                </div>
-                <div className="rounded-2xl border border-border bg-surface p-4">
-                  <div className="text-xs text-text-3">Providers</div>
-                  <div className="mt-2 text-sm font-medium text-text">Breakdown</div>
-                  <div className="mt-2 text-xs text-text-2">OpenAI · Anthropic · Gemini</div>
-                </div>
-              </div>
-
-              <div className="mt-4 text-xs text-text-3">
-                Evidence by prompt and provider breakdown are available in-app and in PDFs.
-              </div>
-            </Card>
           </div>
         </div>
       </section>
