@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 
 import { DownloadPdfButton } from "@/components/DownloadPdfButton";
@@ -69,7 +70,7 @@ type InsightCard = {
 type ReportSection = {
   id: string;
   label: string;
-  icon: JSX.Element;
+  icon: ReactNode;
 };
 
 function formatDate(d?: string | null) {
@@ -718,10 +719,10 @@ export default function SnapshotDetailPage() {
             </div>
             <div className="p-6">
               <ol className="space-y-3">
-                {actionPlan.map((item, i) => (
-                  <li key={item} className="flex items-start gap-3">
+                {actionPlan.map((item, idx) => (
+                  <li key={`${idx}-${item}`} className="flex items-start gap-3">
                     <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-accent/10 text-xs font-bold text-accent">
-                      {i + 1}
+                      {idx + 1}
                     </div>
                     <div className="text-sm text-text-2">
                       <span className="text-text">{item}</span>
