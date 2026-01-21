@@ -1,7 +1,9 @@
 import Link from "next/link";
 
 import { DomainSearchBar } from "@/components/DomainSearchBar";
+import { LandingBento } from "@/components/LandingBento";
 import { LandingToolkits } from "@/components/LandingToolkits";
+import { RotatingQuestions } from "@/components/RotatingQuestions";
 import { Badge } from "@/components/ui/Badge";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
@@ -74,6 +76,15 @@ export default function HomePage() {
                 See plans & pricing →
               </Link>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Rotating questions (Rankett-inspired) */}
+      <section className="bg-bg">
+        <div className="container-xl py-10">
+          <div className="mx-auto max-w-3xl">
+            <RotatingQuestions />
           </div>
         </div>
       </section>
@@ -166,6 +177,90 @@ export default function HomePage() {
                 </Link>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Bento (Notion-inspired) */}
+      <section className="bg-bg" id="features">
+        <div className="container-xl py-16">
+          <div className="flex flex-col gap-2">
+            <div className="text-xs font-medium uppercase tracking-wide text-text-3">Features</div>
+            <h2 className="text-3xl font-semibold tracking-tight text-text sm:text-4xl">
+              Built for repeatable client work.
+            </h2>
+            <p className="max-w-2xl text-sm text-text-2">
+              Everything below exists to ship the same deliverable every week—without re-litigating the method.
+            </p>
+          </div>
+          <div className="mt-8">
+            <LandingBento />
+          </div>
+        </div>
+      </section>
+
+      {/* Proof (case studies + industries) */}
+      <section className="bg-bg-2" id="proof">
+        <div className="container-xl py-16">
+          <div className="flex flex-col gap-2">
+            <div className="text-xs font-medium uppercase tracking-wide text-text-3">Proof</div>
+            <h2 className="text-3xl font-semibold tracking-tight text-text sm:text-4xl">Numbers tell the story.</h2>
+            <p className="max-w-2xl text-sm text-text-2">A few outcomes agencies care about.</p>
+          </div>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            <Card className="p-6 shadow-none">
+              <div className="text-xs font-medium uppercase tracking-wide text-text-3">Case study</div>
+              <div className="mt-3 text-4xl font-semibold tracking-tight text-text">+340%</div>
+              <div className="mt-2 text-sm text-text-2">AI mentions in 90 days</div>
+              <div className="mt-4 text-xs text-text-3">Healthcare</div>
+            </Card>
+            <Card className="p-6 shadow-none">
+              <div className="text-xs font-medium uppercase tracking-wide text-text-3">Case study</div>
+              <div className="mt-3 text-4xl font-semibold tracking-tight text-text">Top 3</div>
+              <div className="mt-2 text-sm text-text-2">AI recommendations in 60 days</div>
+              <div className="mt-4 text-xs text-text-3">Legal</div>
+            </Card>
+            <Card className="p-6 shadow-none">
+              <div className="text-xs font-medium uppercase tracking-wide text-text-3">Case study</div>
+              <div className="mt-3 text-4xl font-semibold tracking-tight text-text">15 → 82</div>
+              <div className="mt-2 text-sm text-text-2">Visibility score lift in 75 days</div>
+              <div className="mt-4 text-xs text-text-3">Home services</div>
+            </Card>
+          </div>
+
+          <div className="mt-10 grid gap-4 md:grid-cols-2">
+            <Card className="p-6 shadow-none">
+              <div className="text-xs font-medium uppercase tracking-wide text-text-3">Industries we cover</div>
+              <div className="mt-4 grid grid-cols-2 gap-2 text-sm text-text-2 sm:grid-cols-3">
+                <div className="rounded-xl border border-border bg-surface px-3 py-2">Healthcare</div>
+                <div className="rounded-xl border border-border bg-surface px-3 py-2">Legal</div>
+                <div className="rounded-xl border border-border bg-surface px-3 py-2">Real estate</div>
+                <div className="rounded-xl border border-border bg-surface px-3 py-2">Home services</div>
+                <div className="rounded-xl border border-border bg-surface px-3 py-2">Finance</div>
+                <div className="rounded-xl border border-border bg-surface px-3 py-2">E‑commerce</div>
+              </div>
+              <div className="mt-4 text-xs text-text-3">If it’s searched, it can be measured.</div>
+            </Card>
+
+            <Card className="p-6 shadow-none">
+              <div className="text-xs font-medium uppercase tracking-wide text-text-3">Trust metrics</div>
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl border border-border bg-surface p-4">
+                  <div className="text-xs text-text-3">Providers</div>
+                  <div className="mt-2 text-lg font-semibold tracking-tight text-text">3+</div>
+                </div>
+                <div className="rounded-2xl border border-border bg-surface p-4">
+                  <div className="text-xs text-text-3">Prompt pack</div>
+                  <div className="mt-2 text-lg font-semibold tracking-tight text-text">v1</div>
+                </div>
+                <div className="rounded-2xl border border-border bg-surface p-4">
+                  <div className="text-xs text-text-3">Deliverable</div>
+                  <div className="mt-2 text-lg font-semibold tracking-tight text-text">PDF</div>
+                </div>
+              </div>
+              <div className="mt-4 text-xs text-text-3">Replace placeholders with real metrics when ready.</div>
+            </Card>
           </div>
         </div>
       </section>

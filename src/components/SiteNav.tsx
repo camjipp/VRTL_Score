@@ -24,11 +24,17 @@ export function SiteNav() {
               <Link className="text-white/75 hover:text-white" href="/#overview">
                 Overview
               </Link>
+              <Link className="text-white/75 hover:text-white" href="/#features">
+                Features
+              </Link>
               <Link className="text-white/75 hover:text-white" href="/#toolkits">
                 Toolkits
               </Link>
               <Link className="text-white/75 hover:text-white" href="/#report">
                 Report
+              </Link>
+              <Link className="text-white/75 hover:text-white" href="/#proof">
+                Proof
               </Link>
               <Link className="text-white/75 hover:text-white" href="/#testimonials">
                 Testimonials
