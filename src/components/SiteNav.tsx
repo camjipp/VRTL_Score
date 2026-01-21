@@ -21,23 +21,27 @@ export function SiteNav() {
 
   return (
     <header className="sticky top-0 z-50">
-      {/* Glassmorphism background */}
-      <div className="absolute inset-0 border-b border-white/10 bg-[#080808]/80 backdrop-blur-xl" />
+      {/* Light frosted glass background */}
+      <div className="absolute inset-0 border-b border-border/50 bg-bg/80 backdrop-blur-xl" />
 
       <div className="container-xl relative">
-        <nav className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <Link className="flex items-center gap-3 transition-opacity hover:opacity-80" href="/">
+        <nav className="flex h-20 items-center justify-between">
+          {/* Logo - much bigger */}
+          <Link className="flex items-center transition-transform hover:scale-[1.02]" href="/">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img alt="VRTL" className="h-8 w-auto" src="/brand/White_VRTL.png" />
+            <img 
+              alt="VRTL Score" 
+              className="h-12 w-auto md:h-14" 
+              src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png" 
+            />
           </Link>
 
-          {/* Desktop nav */}
-          <div className="hidden items-center gap-1 md:flex">
+          {/* Desktop nav - centered */}
+          <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 rounded-full border border-border/50 bg-surface/80 px-2 py-1.5 shadow-sm backdrop-blur-sm md:flex">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
-                className="rounded-lg px-4 py-2 text-sm font-medium text-white/70 transition-all hover:bg-white/5 hover:text-white"
+                className="rounded-full px-5 py-2 text-sm font-medium text-text-2 transition-all hover:bg-text/5 hover:text-text"
                 href={link.href}
               >
                 {link.label}
@@ -46,25 +50,24 @@ export function SiteNav() {
           </div>
 
           {/* Desktop CTA */}
-          <div className="hidden items-center gap-3 md:flex">
+          <div className="hidden items-center gap-4 md:flex">
             <Link
-              className="rounded-lg px-4 py-2 text-sm font-medium text-white/70 transition-all hover:text-white"
+              className="text-sm font-medium text-text-2 transition-colors hover:text-text"
               href="/login"
             >
               Log in
             </Link>
             <Link
-              className="group relative overflow-hidden rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-[#080808] transition-all hover:shadow-lg hover:shadow-white/20"
+              className="rounded-full bg-text px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-text/20 transition-all hover:bg-text/90 hover:shadow-xl hover:shadow-text/25"
               href="/app"
             >
-              <span className="relative z-10">Get started</span>
-              <div className="absolute inset-0 -z-0 bg-gradient-to-r from-emerald-400 via-cyan-400 to-violet-400 opacity-0 transition-opacity group-hover:opacity-100" />
+              Get started
             </Link>
           </div>
 
           {/* Mobile menu button */}
           <button
-            className="flex h-10 w-10 items-center justify-center rounded-lg text-white/70 transition-colors hover:bg-white/5 hover:text-white md:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface text-text transition-all hover:bg-surface-2 md:hidden"
             onClick={() => setMobileOpen(!mobileOpen)}
             type="button"
             aria-label="Toggle menu"
@@ -84,32 +87,34 @@ export function SiteNav() {
         {/* Mobile menu */}
         <div
           className={cn(
-            "absolute left-0 right-0 top-full overflow-hidden transition-all duration-300 ease-out md:hidden",
-            mobileOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+            "absolute left-4 right-4 top-full overflow-hidden rounded-2xl border border-border bg-surface shadow-xl transition-all duration-300 ease-out md:hidden",
+            mobileOpen ? "mt-2 max-h-96 opacity-100" : "max-h-0 opacity-0 border-0"
           )}
         >
-          <div className="border-t border-white/10 bg-[#080808]/95 px-6 py-4 backdrop-blur-xl">
+          <div className="p-4">
             <div className="flex flex-col gap-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
-                  className="rounded-lg px-4 py-3 text-sm font-medium text-white/70 transition-all hover:bg-white/5 hover:text-white"
+                  className="rounded-xl px-4 py-3.5 text-base font-medium text-text-2 transition-all hover:bg-surface-2 hover:text-text"
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
                 >
                   {link.label}
                 </Link>
               ))}
-              <hr className="my-2 border-white/10" />
+            </div>
+            <hr className="my-3 border-border" />
+            <div className="flex flex-col gap-2">
               <Link
-                className="rounded-lg px-4 py-3 text-sm font-medium text-white/70 transition-all hover:bg-white/5 hover:text-white"
+                className="rounded-xl px-4 py-3.5 text-center text-base font-medium text-text-2 transition-all hover:bg-surface-2 hover:text-text"
                 href="/login"
                 onClick={() => setMobileOpen(false)}
               >
                 Log in
               </Link>
               <Link
-                className="mt-2 rounded-lg bg-white px-4 py-3 text-center text-sm font-semibold text-[#080808] transition-all hover:bg-white/90"
+                className="rounded-xl bg-text px-4 py-3.5 text-center text-base font-semibold text-white transition-all hover:bg-text/90"
                 href="/app"
                 onClick={() => setMobileOpen(false)}
               >
