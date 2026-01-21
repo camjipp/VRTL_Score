@@ -22,14 +22,12 @@ export default function HomePage() {
             <div className="flex items-end justify-center gap-0">
               {/* Crop out the extra transparent padding baked into the PNG */}
               <div className="h-[118px] w-[260px] overflow-hidden -mr-4 sm:h-[148px] sm:w-[320px] sm:-mr-6">
-                <picture>
-                  <source media="(prefers-color-scheme: dark)" srcSet="/brand/White_VRTL.png" />
-                  <img
-                    alt="VRTL"
-                    className="h-full w-full scale-[1.6] object-cover object-left"
-                    src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
-                  />
-                </picture>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  alt="VRTL"
+                  className="h-full w-full scale-[1.6] object-cover object-left"
+                  src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
+                />
               </div>
               <div className="text-[88px] font-semibold leading-[0.9] tracking-tight text-text sm:text-[112px]">
                 Score
