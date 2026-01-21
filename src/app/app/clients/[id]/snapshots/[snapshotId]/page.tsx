@@ -57,6 +57,15 @@ type SnapshotApiResponse = {
   debug: { enabled: boolean; allowed: boolean; included: boolean };
 };
 
+type InsightCard = {
+  title: string;
+  severity: "high" | "medium" | "low";
+  problem: string;
+  why: string;
+  fixes: string[];
+  competitorFocus: string[];
+};
+
 function formatDate(d?: string | null) {
   if (!d) return "—";
   const dt = new Date(d);
@@ -118,6 +127,155 @@ function getCompetitorConfidence(count: number): CompetitorConfidence {
   return { level: "high", label: "High", message: null };
 }
 
+function dedupeKeepOrder(items: string[]) {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const x of items) {
+    const key = x.trim();
+    if (!key) continue;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(key);
+  }
+  return out;
+}
+
+function buildInsightCard(args: {
+  clientName: string;
+  response: SnapshotApiResponse["responses"][number];
+  topCompetitors: string[];
+}): InsightCard {
+  const { clientName, response: r } = args;
+  const competitorFocus = dedupeKeepOrder([...(r.competitors_mentioned ?? []), ...(args.topCompetitors ?? [])]).slice(
+    0,
+    3
+  );
+
+  const notMentioned = !r.client_mentioned;
+  const weakPosition =
+    r.client_mentioned &&
+    (r.client_position === "middle" || r.client_position === "bottom" || r.client_position === "not_mentioned");
+  const weakStrength =
+    r.client_mentioned &&
+    (r.recommendation_strength === "weak" || r.recommendation_strength === "none" || !r.recommendation_strength);
+  const lacksCitations = !r.has_sources_or_citations;
+  const tooGeneric = !r.has_specific_features;
+
+  // Choose a primary narrative: Problem -> Why -> Fixes
+  if (notMentioned) {
+    const comps = competitorFocus.length ? ` (often compared with ${competitorFocus.join(", ")})` : "";
+    return {
+      title: "Visibility gap",
+      severity: "high",
+      problem: `${clientName} isn’t being surfaced in AI answers${comps}.`,
+      why: "If you’re not mentioned, you’re not in the consideration set—competitors win mindshare by default.",
+      fixes: [
+        competitorFocus.length
+          ? `Publish comparison pages: “${clientName} vs ${competitorFocus[0]}”, plus an “Alternatives to ${competitorFocus[0]}” page.`
+          : "Publish comparison pages and “Alternatives to <top competitor>” pages to capture high-intent queries.",
+        "Add proof that models can cite: case studies, benchmarks, and third‑party mentions (press/reviews).",
+        "Clarify category + keywords: tighten the homepage H1, use-case pages, and internal linking around your core category terms."
+      ],
+      competitorFocus
+    };
+  }
+
+  if (weakPosition || weakStrength) {
+    return {
+      title: "Positioning needs sharpening",
+      severity: "medium",
+      problem: `${clientName} is mentioned, but it’s not consistently positioned as a top recommendation.`,
+      why: "AI answers favor brands with clear differentiation, concrete proof, and easy-to-compare feature language.",
+      fixes: [
+        "Strengthen differentiation: make your unique angle explicit (who it’s for, what you do better, and why now).",
+        competitorFocus.length
+          ? `Build “Why ${clientName}” + “${clientName} vs ${competitorFocus[0]}” pages with a clear comparison table.`
+          : "Build “Why <brand>” + “<brand> vs <competitor>” pages with a clear comparison table.",
+        "Add specific proof points (numbers, outcomes, testimonials) near the top of key pages."
+      ],
+      competitorFocus
+    };
+  }
+
+  if (lacksCitations) {
+    return {
+      title: "Needs citeable authority",
+      severity: "medium",
+      problem: "This signal lacks sources/citations, which reduces trust and repeatability.",
+      why: "Models tend to repeat information that is widely cited and consistent across reputable sources.",
+      fixes: [
+        "Publish a benchmark/report with concrete stats and a stable URL the model can reference.",
+        "Earn citations: PR placements, partner pages, directory listings, and review sites with consistent messaging.",
+        "Add structured data (Organization/Product/FAQ) and link to authoritative references where relevant."
+      ],
+      competitorFocus
+    };
+  }
+
+  if (tooGeneric) {
+    return {
+      title: "Too generic to win",
+      severity: "low",
+      problem: "The output stays high-level—specific features and differentiators aren’t coming through clearly.",
+      why: "Generic descriptions make you interchangeable, so the model won’t consistently choose you over alternatives.",
+      fixes: [
+        "Create feature pages (1 feature per page) with specifics: screenshots, workflows, limits, and integrations.",
+        "Create use-case pages with exact outcomes and examples (templates, playbooks, before/after).",
+        "Add an internal linking hub: “How it works” → feature pages → use cases → comparisons."
+      ],
+      competitorFocus
+    };
+  }
+
+  return {
+    title: "Strong signal",
+    severity: "low",
+    problem: `${clientName} shows up with solid positioning in this signal.`,
+    why: "Consistency across signals compounds—keep reinforcing the same proof points and language.",
+    fixes: [
+      "Double down: reuse the same positioning language across homepage, pricing, and core feature pages.",
+      "Add fresh proof quarterly (new case studies, metrics, integrations) to stay current.",
+      competitorFocus.length ? `Maintain comparison coverage vs ${competitorFocus.join(", ")}.` : "Maintain comparison coverage vs key competitors."
+    ],
+    competitorFocus
+  };
+}
+
+function buildActionPlan(args: {
+  clientName: string;
+  signalsTotal: number;
+  clientMentionedCount: number;
+  sourcesCount: number;
+  featuresCount: number;
+  topCompetitors: string[];
+}) {
+  const actions: string[] = [];
+  const { clientName, signalsTotal, clientMentionedCount, sourcesCount, featuresCount, topCompetitors } = args;
+
+  if (clientMentionedCount === 0) {
+    actions.push(
+      topCompetitors.length
+        ? `Increase visibility: publish “${clientName} vs ${topCompetitors[0]}” + “Alternatives to ${topCompetitors[0]}”.`
+        : `Increase visibility: publish comparison + alternatives pages for your top competitors.`
+    );
+  } else if (clientMentionedCount < Math.max(1, Math.ceil(signalsTotal * 0.5))) {
+    actions.push("Increase visibility: add category/use‑case pages and reinforce consistent language across the site.");
+  }
+
+  if (sourcesCount < Math.max(1, Math.ceil(signalsTotal * 0.3))) {
+    actions.push("Add citeable proof: publish a benchmark/report page + earn 3–5 third‑party citations (PR, partners, reviews).");
+  }
+
+  if (featuresCount < Math.max(1, Math.ceil(signalsTotal * 0.5))) {
+    actions.push("Add specificity: create feature pages + use‑case pages with screenshots, workflows, and measurable outcomes.");
+  }
+
+  // Always useful
+  actions.push("Sharpen positioning: make your differentiation explicit (who it’s for, what you do better, proof).");
+
+  return actions.slice(0, 3);
+}
+
 export default function SnapshotDetailPage() {
   const params = useParams<{ id: string; snapshotId: string }>();
   const clientId = useMemo(() => (typeof params?.id === "string" ? params.id : ""), [params]);
@@ -161,6 +319,19 @@ export default function SnapshotDetailPage() {
   const competitorConfidence = getCompetitorConfidence(data?.competitors?.length ?? 0);
   const providers = data?.snapshot.score_by_provider ?? null;
   const providerEntries = providers ? Object.entries(providers) : [];
+  const topCompetitorNames = data?.summary.top_competitors?.map((c) => c.name) ?? [];
+  const signalsTotal = data?.summary.responses_count ?? 0;
+  const scoredSignals = data?.responses?.filter((r) => r.parse_ok) ?? [];
+  const actionPlan = data
+    ? buildActionPlan({
+        clientName: data.client.name,
+        signalsTotal,
+        clientMentionedCount: data.summary.client_mentioned_count,
+        sourcesCount: data.summary.sources_count,
+        featuresCount: data.summary.specific_features_count,
+        topCompetitors: topCompetitorNames.slice(0, 3)
+      })
+    : [];
 
   return (
     <div>
@@ -293,8 +464,8 @@ export default function SnapshotDetailPage() {
                   <div className="text-lg font-bold text-text">{data.summary.client_mentioned_count}</div>
                 </div>
                 <div className="rounded-xl bg-surface-2 px-3 py-2 text-center">
-                  <div className="text-xs text-text-3">Competitors</div>
-                  <div className="text-lg font-bold text-text">{data.competitors.length}</div>
+                  <div className="text-xs text-text-3">Scored</div>
+                  <div className="text-lg font-bold text-text">{scoredSignals.length}</div>
                 </div>
               </div>
               <div className="mt-3 text-xs text-text-3">
@@ -358,17 +529,58 @@ export default function SnapshotDetailPage() {
             </div>
           </div>
 
+          {/* Action plan */}\n
+          <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+            <div className="border-b border-border bg-surface-2/50 px-6 py-4">
+              <h2 className="text-lg font-semibold text-text">Action plan</h2>
+              <p className="mt-1 text-sm text-text-2">Three high-impact fixes to improve visibility and recommendations.</p>
+            </div>
+            <div className="p-6">
+              <ol className="space-y-3">
+                {actionPlan.map((item, i) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-accent/10 text-xs font-bold text-accent">
+                      {i + 1}
+                    </div>
+                    <div className="text-sm text-text-2">
+                      <span className="text-text">{item}</span>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              {topCompetitorNames.length ? (
+                <div className="mt-4 text-xs text-text-3">
+                  Competitors to prioritize:{" "}
+                  <span className="text-text-2">{topCompetitorNames.slice(0, 3).join(", ")}</span>
+                </div>
+              ) : null}
+            </div>
+          </div>
+
           {/* Insights */}\n
           <div className="overflow-hidden rounded-2xl border border-border bg-surface">
             <div className="border-b border-border bg-surface-2/50 px-6 py-4">
               <h2 className="text-lg font-semibold text-text">Insights</h2>
               <p className="mt-1 text-sm text-text-2">
-                Clear, client-friendly takeaways (raw model output is hidden by default).
+                Each insight shows the problem, why it matters, and what to do next.
               </p>
             </div>
 
             <div className="divide-y divide-border">
-              {data.responses.map((r, idx) => (
+              {data.responses.map((r, idx) => {
+                const card = buildInsightCard({
+                  clientName: data.client.name,
+                  response: r,
+                  topCompetitors: topCompetitorNames
+                });
+                const severityPill =
+                  card.severity === "high"
+                    ? "bg-red-500/10 text-red-600"
+                    : card.severity === "medium"
+                      ? "bg-amber-500/10 text-amber-600"
+                      : "bg-slate-500/10 text-slate-500";
+
+                return (
                 <div key={r.id} className="px-6 py-5">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-2 text-sm text-text-2">
@@ -376,8 +588,9 @@ export default function SnapshotDetailPage() {
                         Insight {idx + 1}
                         <span className="text-text-3"> / {data.summary.responses_count}</span>
                       </span>
-                      <span className="text-text-3">·</span>
-                      <Badge variant={r.parse_ok ? "success" : "danger"}>{r.parse_ok ? "parsed" : "failed"}</Badge>
+                      <span className={cn("rounded-full px-2 py-1 text-xs font-medium", severityPill)}>
+                        {card.severity === "high" ? "High impact" : card.severity === "medium" ? "Medium" : "Low"}
+                      </span>
                       {r.client_mentioned ? (
                         <span className="inline-flex items-center gap-1 rounded-full bg-green-500/10 px-2 py-1 text-xs font-medium text-green-600">
                           <span className="h-1.5 w-1.5 rounded-full bg-green-500" /> Mentioned
@@ -391,46 +604,68 @@ export default function SnapshotDetailPage() {
                     <div className="text-xs text-text-3">{formatDate(r.created_at)}</div>
                   </div>
 
-                  <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                    <div className="rounded-xl bg-surface-2/60 px-4 py-3">
-                      <div className="text-xs text-text-3">Position</div>
-                      <div className="mt-1 text-sm font-medium text-text">{r.client_position ?? "—"}</div>
-                    </div>
-                    <div className="rounded-xl bg-surface-2/60 px-4 py-3">
-                      <div className="text-xs text-text-3">Strength</div>
-                      <div className="mt-1 text-sm font-medium text-text">{r.recommendation_strength ?? "—"}</div>
-                    </div>
-                    <div className="rounded-xl bg-surface-2/60 px-4 py-3">
-                      <div className="text-xs text-text-3">Signals</div>
-                      <div className="mt-1 flex flex-wrap gap-2">
-                        <span
-                          className={cn(
-                            "rounded-full px-2 py-0.5 text-xs font-medium",
-                            r.has_sources_or_citations ? "bg-blue-500/10 text-blue-600" : "bg-slate-500/10 text-slate-500"
-                          )}
-                        >
-                          {r.has_sources_or_citations ? "Has sources" : "No sources"}
-                        </span>
-                        <span
-                          className={cn(
-                            "rounded-full px-2 py-0.5 text-xs font-medium",
-                            r.has_specific_features ? "bg-purple-500/10 text-purple-600" : "bg-slate-500/10 text-slate-500"
-                          )}
-                        >
-                          {r.has_specific_features ? "Specific features" : "Generic"}
-                        </span>
-                      </div>
-                    </div>
+                  <div className="mt-3 flex items-center gap-2">
+                    <div className="text-base font-semibold text-text">{card.title}</div>
+                    {r.client_position ? (
+                      <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs font-medium text-text-2">
+                        Position: {r.client_position}
+                      </span>
+                    ) : null}
+                    {r.recommendation_strength ? (
+                      <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs font-medium text-text-2">
+                        Strength: {r.recommendation_strength}
+                      </span>
+                    ) : null}
+                    <span
+                      className={cn(
+                        "rounded-full px-2 py-0.5 text-xs font-medium",
+                        r.has_sources_or_citations ? "bg-blue-500/10 text-blue-600" : "bg-slate-500/10 text-slate-500"
+                      )}
+                    >
+                      {r.has_sources_or_citations ? "Citeable" : "No citations"}
+                    </span>
+                    <span
+                      className={cn(
+                        "rounded-full px-2 py-0.5 text-xs font-medium",
+                        r.has_specific_features ? "bg-purple-500/10 text-purple-600" : "bg-slate-500/10 text-slate-500"
+                      )}
+                    >
+                      {r.has_specific_features ? "Specific" : "Generic"}
+                    </span>
                   </div>
 
                   <div className="mt-3 text-sm text-text-2">
-                    <span className="font-medium text-text">Evidence:</span>{" "}
-                    {r.evidence_snippet ? r.evidence_snippet : "—"}
+                    <span className="font-medium text-text">Problem:</span> {card.problem}
                   </div>
 
-                  {r.competitors_mentioned.length ? (
+                  <div className="mt-2 text-sm text-text-2">
+                    <span className="font-medium text-text">Why it matters:</span> {card.why}
+                  </div>
+
+                  <div className="mt-3 rounded-xl bg-surface-2/60 px-4 py-3">
+                    <div className="text-xs font-medium text-text-3">Recommended fixes</div>
+                    <ul className="mt-2 space-y-1 text-sm text-text-2">
+                      {card.fixes.slice(0, 3).map((f) => (
+                        <li key={f} className="flex items-start gap-2">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                          <span>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {r.evidence_snippet ? (
+                    <div className="mt-3 rounded-xl border border-border bg-bg px-4 py-3 text-sm text-text-2">
+                      <div className="text-xs font-medium text-text-3">Evidence snippet</div>
+                      <div className="mt-1">“{r.evidence_snippet}”</div>
+                    </div>
+                  ) : null}
+
+                  {(r.competitors_mentioned.length || card.competitorFocus.length) ? (
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {r.competitors_mentioned.slice(0, 8).map((name) => (
+                      {dedupeKeepOrder([...(r.competitors_mentioned ?? []), ...card.competitorFocus])
+                        .slice(0, 8)
+                        .map((name) => (
                         <span
                           key={name}
                           className="rounded-full bg-surface-2 px-3 py-1 text-xs font-medium text-text-2"
@@ -463,7 +698,8 @@ export default function SnapshotDetailPage() {
                     </details>
                   ) : null}
                 </div>
-              ))}
+                );
+              })}
 
               {data.responses.length === 0 ? (
                 <div className="px-6 py-12 text-center text-sm text-text-2">No responses found.</div>
