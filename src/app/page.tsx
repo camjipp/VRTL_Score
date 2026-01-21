@@ -187,6 +187,115 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Report preview */}
+      <section className="bg-bg" id="report">
+        <div className="container-xl py-16">
+          <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+            <div>
+              <div className="text-xs font-medium uppercase tracking-wide text-text-3">Reporting</div>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-text sm:text-4xl">
+                A report clients can scan in minutes.
+              </h2>
+              <p className="mt-3 max-w-xl text-sm text-text-2">
+                Scores, confidence, provider breakdown, and evidence—laid out like a real deliverable.
+              </p>
+              <div className="mt-6 grid gap-3">
+                <div className="rounded-2xl border border-border bg-surface p-5">
+                  <div className="text-sm font-semibold text-text">Executive summary</div>
+                  <div className="mt-2 text-sm text-text-2">The headline score and the why behind it.</div>
+                </div>
+                <div className="rounded-2xl border border-border bg-surface p-5">
+                  <div className="text-sm font-semibold text-text">Evidence by prompt</div>
+                  <div className="mt-2 text-sm text-text-2">Snippets and structured fields for defensibility.</div>
+                </div>
+              </div>
+            </div>
+
+            {/* PDF-style mock page */}
+            <div className="mx-auto w-full max-w-[520px]">
+              <div className="rounded-2xl border border-border bg-surface shadow-lift">
+                <div className="border-b border-border px-6 py-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <div className="text-xs font-medium uppercase tracking-wide text-text-3">
+                        VRTL Score Report
+                      </div>
+                      <div className="mt-2 text-lg font-semibold tracking-tight text-text">Acme Agency</div>
+                      <div className="mt-1 text-xs text-text-3">client.com · 2026‑01‑21</div>
+                    </div>
+                    <Badge variant="neutral">PDF</Badge>
+                  </div>
+                </div>
+
+                <div className="px-6 py-6">
+                  <div className="grid gap-3">
+                    <div className="rounded-2xl border border-border bg-surface-2 p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs font-medium text-text-3">Overall score</div>
+                        <div className="text-3xl font-semibold tracking-tight text-text">82</div>
+                      </div>
+                      <div className="mt-3 text-xs text-text-3">Confidence: High</div>
+                      <div className="mt-3 h-2 w-full rounded-full bg-bg">
+                        <div className="h-2 w-[82%] rounded-full bg-success/70" />
+                      </div>
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-2xl border border-border bg-surface p-4">
+                        <div className="text-xs font-medium uppercase tracking-wide text-text-3">Providers</div>
+                        <div className="mt-3 space-y-2 text-xs">
+                          <div className="flex items-center justify-between">
+                            <span className="text-text-2">ChatGPT</span>
+                            <span className="font-medium text-text">84</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-text-2">Gemini</span>
+                            <span className="font-medium text-text">79</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-text-2">Claude</span>
+                            <span className="font-medium text-text">83</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="rounded-2xl border border-border bg-surface p-4">
+                        <div className="text-xs font-medium uppercase tracking-wide text-text-3">Evidence</div>
+                        <div className="mt-3 text-xs text-text-2">
+                          “Mentions Acme as a top recommendation for agencies…”
+                        </div>
+                        <div className="mt-3 text-[11px] text-text-3">Prompt #3 · recommendation: strong</div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-border bg-surface p-4">
+                      <div className="text-xs font-medium uppercase tracking-wide text-text-3">3 actions</div>
+                      <div className="mt-3 grid gap-2 text-xs text-text-2">
+                        <div className="flex gap-3">
+                          <span className="mt-2 h-1.5 w-1.5 rounded-full bg-text-3" />
+                          Add competitors to increase confidence
+                        </div>
+                        <div className="flex gap-3">
+                          <span className="mt-2 h-1.5 w-1.5 rounded-full bg-text-3" />
+                          Improve “top” placements across prompts
+                        </div>
+                        <div className="flex gap-3">
+                          <span className="mt-2 h-1.5 w-1.5 rounded-full bg-text-3" />
+                          Re-run after messaging changes
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 text-[11px] text-text-3">
+                    Preview only — generated PDFs include evidence by prompt and provider breakdown.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials */}
       <section className="bg-bg" id="testimonials">
         <div className="container-xl py-16">

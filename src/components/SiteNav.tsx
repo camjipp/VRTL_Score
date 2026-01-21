@@ -27,6 +27,9 @@ export function SiteNav() {
               <Link className="text-white/75 hover:text-white" href="/#toolkits">
                 Toolkits
               </Link>
+              <Link className="text-white/75 hover:text-white" href="/#report">
+                Report
+              </Link>
               <Link className="text-white/75 hover:text-white" href="/#testimonials">
                 Testimonials
               </Link>
