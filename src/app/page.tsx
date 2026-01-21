@@ -108,22 +108,6 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          CLIENT QUESTIONS — What clients are asking (social proof)
-      ═══════════════════════════════════════════════════════════════════ */}
-      <section className="bg-bg py-12 md:py-16">
-        <div className="container-xl">
-          <div className="mb-8 text-center">
-            <span className="text-xs font-medium uppercase tracking-widest text-text-3">
-              Sound familiar?
-            </span>
-          </div>
-          <div className="mx-auto max-w-4xl">
-            <RotatingQuestions />
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════════════════
           BIG STATS — Impressive numbers with color and animation
       ═══════════════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden py-20">
@@ -167,6 +151,22 @@ export default function HomePage() {
             </p>
           </div>
           <FeatureShowcase />
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          CLIENT QUESTIONS — What clients are asking (pain points)
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section className="bg-bg py-16 md:py-20">
+        <div className="container-xl">
+          <div className="mb-10 text-center">
+            <span className="text-xs font-medium uppercase tracking-widest text-text-3">
+              Sound familiar?
+            </span>
+          </div>
+          <div className="mx-auto max-w-4xl">
+            <RotatingQuestions />
+          </div>
         </div>
       </section>
 
