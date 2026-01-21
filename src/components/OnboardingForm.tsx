@@ -3,6 +3,11 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import { Alert, AlertDescription } from "@/components/ui/Alert";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
 import { ensureOnboarded } from "@/lib/onboard";
 
 function normalizeWebsite(input: string): string {
@@ -113,69 +118,74 @@ export function OnboardingForm() {
   }
 
   return (
-    <main className="bg-bg0">
+    <main className="bg-bg">
       <div className="container-xl py-14">
-        <div className="card-surface mx-auto max-w-2xl p-6">
-          <div className="badge">Onboarding</div>
-          <h1 className="mt-4 text-2xl font-semibold tracking-tight">Set up your agency</h1>
-          <p className="mt-2 text-sm text-text-2">
-            This will appear on your PDFs. You can always update this later in Settings.
-          </p>
+        <Card className="mx-auto max-w-2xl shadow-none">
+          <CardHeader>
+            <Badge variant="neutral" className="w-fit">
+              Onboarding
+            </Badge>
+            <CardTitle className="mt-3 text-2xl tracking-tight">Set up your agency</CardTitle>
+            <CardDescription>
+              This appears on PDFs and reports. You can update it later in Settings.
+            </CardDescription>
+          </CardHeader>
 
-          {website ? (
-            <div className="mt-4 rounded-lg border border-border/15 bg-bg1 p-3 text-sm">
-              <div className="text-xs text-muted">Starting with</div>
-              <div className="font-medium text-text">{website}</div>
-            </div>
-          ) : null}
-
-          {loading ? <div className="mt-6 text-sm">Loading…</div> : null}
-          {error ? (
-            <div className="mt-6 rounded-lg border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-700">
-              {error}
-            </div>
-          ) : null}
-
-          <form className="mt-6 space-y-4" onSubmit={finish}>
-            <label className="block text-sm">
-              <div className="mb-1 font-medium">Agency name</div>
-              <input
-                className="w-full rounded-lg border border-border/15 bg-bg1 px-3 py-2 text-text outline-none focus:ring-2 focus:ring-accent/30"
-                disabled={saving}
-                onChange={(e) => setAgencyName(e.target.value)}
-                placeholder="Acme Agency"
-                value={agencyName}
-              />
-            </label>
-
-            <label className="block text-sm">
-              <div className="mb-1 font-medium">Agency logo (optional)</div>
-              <input
-                accept="image/*"
-                disabled={saving}
-                onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)}
-                type="file"
-              />
-              <div className="mt-1 text-xs text-muted">
-                If you skip this, PDFs will still generate. Upload anytime in Settings.
+          <CardContent className="space-y-4">
+            {website ? (
+              <div className="rounded-2xl border border-border bg-surface-2 p-4 text-sm">
+                <div className="text-xs text-text-3">Starting with</div>
+                <div className="mt-1 font-medium text-text">{website}</div>
               </div>
-            </label>
+            ) : null}
 
-            <div className="flex flex-wrap gap-3 pt-2">
-              <button className="btn-primary" disabled={saving} type="submit">
-                {saving ? "Saving…" : "Continue"}
-              </button>
-              <button
-                className="btn-secondary"
-                disabled={saving}
-                onClick={() => router.replace(isInternalPath(nextPath) ? nextPath : "/app")}
-                type="button"
-              >
-                Skip for now
-              </button>
-            </div>
-          </form>
-        </div>
+            {loading ? <div className="text-sm text-text-2">Loading…</div> : null}
+            {error ? (
+              <Alert variant="danger">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            ) : null}
+
+            <form className="space-y-4" onSubmit={finish}>
+              <label className="block text-sm">
+                <div className="mb-1 font-medium text-text">Agency name</div>
+                <Input
+                  disabled={saving}
+                  onChange={(e) => setAgencyName(e.target.value)}
+                  placeholder="Acme Agency"
+                  value={agencyName}
+                />
+              </label>
+
+              <label className="block text-sm">
+                <div className="mb-1 font-medium text-text">Agency logo (optional)</div>
+                <Input
+                  accept="image/*"
+                  disabled={saving}
+                  onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)}
+                  type="file"
+                />
+                <div className="mt-1 text-xs text-text-3">
+                  If you skip this, PDFs will still generate. Upload anytime in Settings.
+                </div>
+              </label>
+
+              <div className="flex flex-wrap gap-3 pt-2">
+                <Button disabled={saving} type="submit" variant="primary">
+                  {saving ? "Saving…" : "Continue"}
+                </Button>
+                <Button
+                  disabled={saving}
+                  onClick={() => router.replace(isInternalPath(nextPath) ? nextPath : "/app")}
+                  type="button"
+                  variant="secondary"
+                >
+                  Skip for now
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </main>
   );

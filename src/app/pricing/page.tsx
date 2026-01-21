@@ -1,10 +1,18 @@
+import Link from "next/link";
+
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { ButtonLink } from "@/components/ui/ButtonLink";
+import { Card } from "@/components/ui/Card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableWrapper } from "@/components/ui/Table";
+
 function Check() {
   return (
-    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-accent/20 ring-1 ring-accent/40">
+    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-accent/10 ring-1 ring-border">
       <svg aria-hidden="true" fill="none" height="12" viewBox="0 0 24 24" width="12">
         <path
           d="M20 6L9 17l-5-5"
-          stroke="rgb(var(--text))"
+          stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth="2.5"
@@ -16,11 +24,11 @@ function Check() {
 
 function XMark() {
   return (
-    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-surface/40 ring-1 ring-border/60">
+    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-surface-2 ring-1 ring-border text-text-3">
       <svg aria-hidden="true" fill="none" height="12" viewBox="0 0 24 24" width="12">
         <path
           d="M6 6l12 12M18 6L6 18"
-          stroke="rgb(var(--muted))"
+          stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth="2.5"
@@ -32,54 +40,45 @@ function XMark() {
 
 export default function PricingPage() {
   return (
-    <main className="bg-bg0">
-      <section className="relative overflow-hidden border-b border-border/15">
-        <div className="pointer-events-none absolute inset-0 opacity-[0.12] mix-blend-multiply">
-          {/* Brand watermark */}
-          <div className="absolute right-[-120px] top-[-120px] rotate-[-8deg]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img alt="" src="/brand/Logo_2.png" style={{ width: 760 }} />
-          </div>
-        </div>
-
-        <div className="container-xl relative py-14">
-          <div className="badge">Plans & pricing</div>
-          <h1 className="mt-4 text-4xl font-semibold tracking-tight">Pricing built for agencies</h1>
+    <main className="bg-bg">
+      <section className="border-b border-border bg-bg">
+        <div className="container-xl py-14">
+          <Badge variant="neutral" className="w-fit">
+            Plans & pricing
+          </Badge>
+          <h1 className="mt-4 text-4xl font-semibold tracking-tight text-text">Pricing built for agencies</h1>
           <p className="mt-3 max-w-2xl text-sm text-text-2">
-            Modeled after modern B2B pricing pages (e.g. Semrush) while billing is still v1/manual.
-            When billing is enabled, non‑entitled agencies are redirected here.
+            Billing is still v1/manual. When billing is enabled, non‑entitled agencies are redirected here.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <div className="rounded-full border border-border/60 bg-surface/30 p-1 text-sm">
-              <button className="rounded-full bg-surface/70 px-3 py-1 text-text" type="button">
+            <div className="rounded-full border border-border bg-surface p-1 text-sm">
+              <button className="rounded-full bg-surface-2 px-3 py-1 text-text" type="button">
                 Monthly
               </button>
               <button className="rounded-full px-3 py-1 text-text-2 hover:text-text" type="button">
-                Yearly <span className="ml-1 text-xs text-muted">(save)</span>
+                Yearly <span className="ml-1 text-xs text-text-3">(save)</span>
               </button>
             </div>
-            <span className="text-xs text-muted">
-              Billing UI is present for design parity; checkout comes later.
-            </span>
+            <span className="text-xs text-text-3">Checkout comes later.</span>
           </div>
         </div>
       </section>
 
-      <section>
+      <section className="bg-bg">
         <div className="container-xl py-14">
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="card-surface p-6">
-              <div className="text-sm font-semibold">Starter</div>
+            <Card className="p-6 shadow-none">
+              <div className="text-sm font-semibold text-text">Starter</div>
               <div className="mt-1 text-sm text-text-2">For small agencies getting started.</div>
               <div className="mt-6 flex items-end gap-2">
-                <div className="text-4xl font-semibold tracking-tight">$—</div>
-                <div className="pb-1 text-sm text-muted">/mo</div>
+                <div className="text-4xl font-semibold tracking-tight text-text">$—</div>
+                <div className="pb-1 text-sm text-text-3">/mo</div>
               </div>
-              <div className="mt-2 text-xs text-muted">Request access (v1)</div>
-              <button className="btn-secondary mt-6 w-full" type="button">
+              <div className="mt-2 text-xs text-text-3">Request access (v1)</div>
+              <Button className="mt-6 w-full" type="button" variant="secondary">
                 Request access
-              </button>
+              </Button>
               <ul className="mt-6 space-y-3 text-sm text-text-2">
                 <li className="flex items-center gap-2">
                   <Check /> Branded PDF exports
@@ -91,22 +90,22 @@ export default function PricingPage() {
                   <Check /> Competitor context (up to 8)
                 </li>
               </ul>
-            </div>
+            </Card>
 
-            <div className="card-surface relative p-6 ring-1 ring-accent/40">
+            <Card className="relative p-6 shadow-none ring-1 ring-accent/25">
               <div className="absolute -top-3 left-6">
-                <span className="badge bg-accent/20 text-text">Most popular</span>
+                <Badge variant="accent">Most popular</Badge>
               </div>
-              <div className="text-sm font-semibold">Pro</div>
+              <div className="text-sm font-semibold text-text">Pro</div>
               <div className="mt-1 text-sm text-text-2">For teams running weekly reporting.</div>
               <div className="mt-6 flex items-end gap-2">
-                <div className="text-4xl font-semibold tracking-tight">$—</div>
-                <div className="pb-1 text-sm text-muted">/mo</div>
+                <div className="text-4xl font-semibold tracking-tight text-text">$—</div>
+                <div className="pb-1 text-sm text-text-3">/mo</div>
               </div>
-              <div className="mt-2 text-xs text-muted">Request access (v1)</div>
-              <button className="btn-primary mt-6 w-full" type="button">
+              <div className="mt-2 text-xs text-text-3">Request access (v1)</div>
+              <Button className="mt-6 w-full" type="button" variant="primary">
                 Request access
-              </button>
+              </Button>
               <ul className="mt-6 space-y-3 text-sm text-text-2">
                 <li className="flex items-center gap-2">
                   <Check /> Higher daily snapshot limits
@@ -118,19 +117,19 @@ export default function PricingPage() {
                   <Check /> Agency branding (logo + accent)
                 </li>
               </ul>
-            </div>
+            </Card>
 
-            <div className="card-surface p-6">
-              <div className="text-sm font-semibold">Enterprise</div>
+            <Card className="p-6 shadow-none">
+              <div className="text-sm font-semibold text-text">Enterprise</div>
               <div className="mt-1 text-sm text-text-2">Custom workflows + advanced controls.</div>
               <div className="mt-6 flex items-end gap-2">
-                <div className="text-4xl font-semibold tracking-tight">$—</div>
-                <div className="pb-1 text-sm text-muted">custom</div>
+                <div className="text-4xl font-semibold tracking-tight text-text">$—</div>
+                <div className="pb-1 text-sm text-text-3">custom</div>
               </div>
-              <div className="mt-2 text-xs text-muted">Talk to us</div>
-              <button className="btn-secondary mt-6 w-full" type="button">
+              <div className="mt-2 text-xs text-text-3">Talk to us</div>
+              <Button className="mt-6 w-full" type="button" variant="secondary">
                 Contact sales
-              </button>
+              </Button>
               <ul className="mt-6 space-y-3 text-sm text-text-2">
                 <li className="flex items-center gap-2">
                   <Check /> Custom prompt packs
@@ -142,115 +141,123 @@ export default function PricingPage() {
                   <Check /> Dedicated support
                 </li>
               </ul>
-            </div>
+            </Card>
           </div>
 
-          <div className="mt-12 card-surface p-6">
-            <div className="text-sm font-semibold">Compare plans</div>
-            <div className="mt-4 overflow-x-auto">
-              <table className="min-w-[720px] border-collapse text-sm">
-                <thead>
-                  <tr className="text-left text-text-2">
-                    <th className="border-b border-border/60 pb-3 pr-4">Feature</th>
-                    <th className="border-b border-border/60 pb-3 pr-4">Starter</th>
-                    <th className="border-b border-border/60 pb-3 pr-4">Pro</th>
-                    <th className="border-b border-border/60 pb-3 pr-4">Enterprise</th>
-                  </tr>
-                </thead>
-                <tbody className="text-text">
-                  <tr>
-                    <td className="border-b border-border/30 py-3 pr-4 text-text-2">
-                      Snapshot scoring + evidence
-                    </td>
-                    <td className="border-b border-border/30 py-3 pr-4">
-                      <Check />
-                    </td>
-                    <td className="border-b border-border/30 py-3 pr-4">
-                      <Check />
-                    </td>
-                    <td className="border-b border-border/30 py-3 pr-4">
-                      <Check />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="border-b border-border/30 py-3 pr-4 text-text-2">Branded PDF</td>
-                    <td className="border-b border-border/30 py-3 pr-4">
-                      <Check />
-                    </td>
-                    <td className="border-b border-border/30 py-3 pr-4">
-                      <Check />
-                    </td>
-                    <td className="border-b border-border/30 py-3 pr-4">
-                      <Check />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="border-b border-border/30 py-3 pr-4 text-text-2">
-                      Agency logo + accent
-                    </td>
-                    <td className="border-b border-border/30 py-3 pr-4">
-                      <XMark />
-                    </td>
-                    <td className="border-b border-border/30 py-3 pr-4">
-                      <Check />
-                    </td>
-                    <td className="border-b border-border/30 py-3 pr-4">
-                      <Check />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="border-b border-border/30 py-3 pr-4 text-text-2">
-                      Custom prompt packs
-                    </td>
-                    <td className="border-b border-border/30 py-3 pr-4">
-                      <XMark />
-                    </td>
-                    <td className="border-b border-border/30 py-3 pr-4">
-                      <XMark />
-                    </td>
-                    <td className="border-b border-border/30 py-3 pr-4">
-                      <Check />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+          <Card className="mt-12 p-6 shadow-none">
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-sm font-semibold text-text">Compare plans</div>
+              <ButtonLink href="/login" size="sm" variant="secondary">
+                Request access
+              </ButtonLink>
             </div>
 
-            <div className="mt-6 rounded-lg border border-border/60 bg-surface/30 p-4 text-sm text-text-2">
-              Access today: gated with <code className="text-text">BILLING_ENABLED</code> and{" "}
+            <div className="mt-4">
+              <TableWrapper>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Feature</TableHead>
+                      <TableHead>Starter</TableHead>
+                      <TableHead>Pro</TableHead>
+                      <TableHead>Enterprise</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="text-text-2">Snapshot scoring + evidence</TableCell>
+                      <TableCell>
+                        <Check />
+                      </TableCell>
+                      <TableCell>
+                        <Check />
+                      </TableCell>
+                      <TableCell>
+                        <Check />
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="text-text-2">Branded PDF</TableCell>
+                      <TableCell>
+                        <Check />
+                      </TableCell>
+                      <TableCell>
+                        <Check />
+                      </TableCell>
+                      <TableCell>
+                        <Check />
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="text-text-2">Agency logo + accent</TableCell>
+                      <TableCell>
+                        <XMark />
+                      </TableCell>
+                      <TableCell>
+                        <Check />
+                      </TableCell>
+                      <TableCell>
+                        <Check />
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="text-text-2">Custom prompt packs</TableCell>
+                      <TableCell>
+                        <XMark />
+                      </TableCell>
+                      <TableCell>
+                        <XMark />
+                      </TableCell>
+                      <TableCell>
+                        <Check />
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableWrapper>
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-border bg-surface-2 p-4 text-sm text-text-2">
+              Access today is gated with <code className="text-text">BILLING_ENABLED</code> and{" "}
               <code className="text-text">agencies.is_active</code>. Stripe checkout is a later phase.
             </div>
-          </div>
+          </Card>
 
           <div className="mt-12">
-            <div className="text-sm font-semibold">FAQ</div>
+            <div className="text-sm font-semibold text-text">FAQ</div>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <div className="card-surface p-5">
-                <div className="text-sm font-medium">Can I run without competitors?</div>
+              <Card className="p-5 shadow-none">
+                <div className="text-sm font-medium text-text">Can I run without competitors?</div>
                 <div className="mt-2 text-sm text-text-2">
                   Yes. Competitors improve confidence and comparative context, but snapshots still run.
                 </div>
-              </div>
-              <div className="card-surface p-5">
-                <div className="text-sm font-medium">Is Stripe required today?</div>
+              </Card>
+              <Card className="p-5 shadow-none">
+                <div className="text-sm font-medium text-text">Is Stripe required today?</div>
                 <div className="mt-2 text-sm text-text-2">
                   No. v1 uses agency activation and a paywall destination; Stripe can be added later.
                 </div>
-              </div>
-              <div className="card-surface p-5">
-                <div className="text-sm font-medium">What happens when billing is enabled?</div>
+              </Card>
+              <Card className="p-5 shadow-none">
+                <div className="text-sm font-medium text-text">What happens when billing is enabled?</div>
                 <div className="mt-2 text-sm text-text-2">
                   Non‑entitled agencies are redirected to this page. Admin can activate agencies from{" "}
                   <code className="text-text">/app/admin</code>.
                 </div>
-              </div>
-              <div className="card-surface p-5">
-                <div className="text-sm font-medium">Can we change plans later?</div>
+              </Card>
+              <Card className="p-5 shadow-none">
+                <div className="text-sm font-medium text-text">Can we change plans later?</div>
                 <div className="mt-2 text-sm text-text-2">
                   Absolutely. This UI is a design scaffold; pricing and entitlements will evolve.
                 </div>
-              </div>
+              </Card>
             </div>
+          </div>
+
+          <div className="mt-12 text-sm">
+            <Link className="text-text-2 hover:text-text" href="/">
+              ← Back to home
+            </Link>
           </div>
         </div>
       </section>
