@@ -3,7 +3,6 @@ import Link from "next/link";
 import { BigStats } from "@/components/BigStats";
 import { DomainSearchBar } from "@/components/DomainSearchBar";
 import { FeatureShowcase } from "@/components/FeatureShowcase";
-import { RotatingQuestions } from "@/components/RotatingQuestions";
 import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
 import { TrustLogos } from "@/components/TrustLogos";
 import { ButtonLink } from "@/components/ui/ButtonLink";
@@ -80,22 +79,11 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          CLIENT QUESTIONS — Social proof through relatable pain points
+          TRUST LOGOS — Animated marquee right after hero
       ═══════════════════════════════════════════════════════════════════ */}
-      <section className="bg-bg py-8">
+      <section className="border-b border-border bg-bg py-8">
         <div className="container-xl">
-          <div className="mx-auto max-w-3xl">
-            <RotatingQuestions />
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════════════════
-          TRUST LOGOS — Animated marquee (Semrush-style)
-      ═══════════════════════════════════════════════════════════════════ */}
-      <section className="border-y border-border bg-bg py-10">
-        <div className="container-xl">
-          <div className="mb-6 text-center">
+          <div className="mb-5 text-center">
             <span className="text-xs font-medium uppercase tracking-widest text-text-3">
               Trusted by leading agencies
             </span>
