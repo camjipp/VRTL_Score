@@ -17,15 +17,8 @@ export default function AppLayout({
   return (
     <AppAuthGate>
       <AppEntitlementGate>
-        <section className="bg-bg">
-          <div className="container-xl py-8">
-            <AppShell />
-            {children}
-          </div>
-        </section>
+        <AppShell>{children}</AppShell>
       </AppEntitlementGate>
     </AppAuthGate>
   );
 }
-
-
