@@ -4,28 +4,33 @@ import { ButtonLink } from "@/components/ui/ButtonLink";
 
 export function SiteNav() {
   return (
-    <header className="border-b border-border bg-bg/80 backdrop-blur">
+    <header className="border-b border-border bg-[#080808] text-white">
       <div className="container-xl">
         <nav className="flex h-16 items-center justify-between">
           <Link className="flex items-center gap-3" href="/">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img alt="VRTL Score" className="h-8 w-auto" src="/brand/Logo_2.png" />
-            <div className="leading-tight">
-              <div className="text-[15px] font-semibold tracking-tight text-text">
-                VRTL <span className="text-text-2">Score</span>
-              </div>
-              <div className="text-xs text-text-3">AI visibility for agencies</div>
-            </div>
+            <img alt="VRTL" className="h-8 w-auto" src="/brand/Logo_2.png" />
           </Link>
 
-          <div className="flex items-center gap-3 text-sm">
-            <Link className="text-text-2 hover:text-text" href="/pricing">
+          <div className="flex items-center gap-5 text-sm">
+            <Link className="text-white/80 hover:text-white" href="#toolkits">
+              Toolkits
+            </Link>
+            <Link className="text-white/80 hover:text-white" href="#testimonials">
+              Testimonials
+            </Link>
+            <Link className="text-white/80 hover:text-white" href="/pricing">
               Pricing
             </Link>
-            <Link className="text-text-2 hover:text-text" href="/login">
+            <Link className="text-white/80 hover:text-white" href="/login">
               Log in
             </Link>
-            <ButtonLink href="/app" size="sm" variant="primary">
+            <ButtonLink
+              className="border border-white/15 bg-white/10 text-white hover:bg-white/15"
+              href="/app"
+              size="sm"
+              variant="secondary"
+            >
               Open app
             </ButtonLink>
           </div>

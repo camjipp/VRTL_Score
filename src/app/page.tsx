@@ -194,7 +194,7 @@ export default function HomePage() {
       </section>
 
       {/* Toolkits-style grid */}
-      <section className="bg-bg-2">
+      <section className="bg-bg-2" id="toolkits">
         <div className="container-xl py-16">
           <div className="flex flex-col gap-2">
             <div className="text-xs font-medium uppercase tracking-wide text-text-3">Toolkits</div>
@@ -208,6 +208,40 @@ export default function HomePage() {
 
           <div className="mt-8">
             <LandingToolkits />
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="bg-bg" id="testimonials">
+        <div className="container-xl py-16">
+          <div className="flex flex-col gap-2">
+            <div className="text-xs font-medium uppercase tracking-wide text-text-3">Testimonials</div>
+            <h2 className="text-2xl font-semibold tracking-tight text-text">What agencies say</h2>
+            <p className="max-w-2xl text-sm text-text-2">
+              Short, factual feedback from teams using VRTL Score in real client work.
+            </p>
+          </div>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            <Card className="p-6 shadow-none">
+              <div className="text-sm text-text-2">
+                “We finally have a repeatable way to measure AI visibility across accounts.”
+              </div>
+              <div className="mt-4 text-xs text-text-3">Agency lead</div>
+            </Card>
+            <Card className="p-6 shadow-none">
+              <div className="text-sm text-text-2">
+                “The evidence trail makes client conversations easy—no hand-wavy conclusions.”
+              </div>
+              <div className="mt-4 text-xs text-text-3">Strategy director</div>
+            </Card>
+            <Card className="p-6 shadow-none">
+              <div className="text-sm text-text-2">
+                “Scores and reports are consistent week to week. That’s the whole value.”
+              </div>
+              <div className="mt-4 text-xs text-text-3">Ops</div>
+            </Card>
           </div>
         </div>
       </section>
