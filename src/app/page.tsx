@@ -1,20 +1,21 @@
 import Link from "next/link";
 
+import { BigStats } from "@/components/BigStats";
 import { DomainSearchBar } from "@/components/DomainSearchBar";
-import { LandingBento } from "@/components/LandingBento";
-import { LandingToolkits } from "@/components/LandingToolkits";
+import { FeatureShowcase } from "@/components/FeatureShowcase";
 import { RotatingQuestions } from "@/components/RotatingQuestions";
-import { Badge } from "@/components/ui/Badge";
+import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
+import { TrustLogos } from "@/components/TrustLogos";
 import { ButtonLink } from "@/components/ui/ButtonLink";
-import { Card } from "@/components/ui/Card";
 
 export default function HomePage() {
   return (
     <main>
-      {/* Hero (Semrush-One inspired) */}
+      {/* ═══════════════════════════════════════════════════════════════════
+          HERO — Keep this section as-is (user loves it)
+      ═══════════════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden border-b border-border bg-bg">
         <div className="pointer-events-none absolute inset-0">
-          {/* Editorial paper haze (accent is monochrome, so keep this subtle) */}
           <div className="absolute -top-48 left-1/2 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-text/5 blur-3xl" />
           <div className="absolute bottom-[-240px] right-[-140px] h-[520px] w-[520px] rounded-full bg-text/3 blur-3xl" />
         </div>
@@ -22,7 +23,6 @@ export default function HomePage() {
         <div className="container-xl relative py-16 sm:py-20">
           <div className="mx-auto max-w-3xl text-center">
             <div className="flex items-end justify-center gap-0">
-              {/* Crop out the extra transparent padding baked into the PNG */}
               <div className="h-[118px] w-[260px] overflow-hidden -mr-4 sm:h-[148px] sm:w-[320px] sm:-mr-6">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -67,7 +67,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Centered search bar (Semrush-like) */}
             <div className="mx-auto mt-6 max-w-3xl">
               <DomainSearchBar />
             </div>
@@ -80,398 +79,229 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Rotating questions (Rankett-inspired) */}
-      <section className="bg-bg">
-        <div className="container-xl py-10">
+      {/* ═══════════════════════════════════════════════════════════════════
+          CLIENT QUESTIONS — Social proof through relatable pain points
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section className="bg-bg py-8">
+        <div className="container-xl">
           <div className="mx-auto max-w-3xl">
             <RotatingQuestions />
           </div>
         </div>
       </section>
 
-      {/* “One solution…” (Semrush-style) */}
-      <section className="bg-bg" id="overview">
-        <div className="container-xl py-16">
-          <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
-            {/* Mock (left) */}
-            <div className="mx-auto w-full max-w-[520px]">
-              <Card className="p-6 shadow-none">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="text-xs font-medium uppercase tracking-wide text-text-3">
-                    Snapshot preview
-                  </div>
-                  <Badge variant="neutral">Sample</Badge>
-                </div>
-
-                <div className="mt-4 rounded-2xl border border-border bg-surface-2 p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="text-xs font-medium text-text-3">Overall score</div>
-                    <div className="flex items-center gap-2">
-                      <div className="text-2xl font-semibold tracking-tight text-text">82</div>
-                      <Badge variant="success">Strong</Badge>
-                    </div>
-                  </div>
-                  <div className="mt-3 grid gap-2">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-text-2">Mentioned</span>
-                      <span className="text-text-3">7 / 10 prompts</span>
-                    </div>
-                    <div className="h-2 w-full rounded-full bg-bg">
-                      <div className="h-2 w-[70%] rounded-full bg-success/70" />
-                    </div>
-                    <div className="mt-2 flex items-center justify-between text-xs">
-                      <span className="text-text-2">Confidence</span>
-                      <span className="inline-flex items-center gap-2 text-text-3">
-                        <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                        High
-                      </span>
-                    </div>
-                    <div className="h-2 w-full rounded-full bg-bg">
-                      <div className="h-2 w-[86%] rounded-full bg-success/40" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-border bg-surface p-4">
-                    <div className="text-xs text-text-3">Top mentions</div>
-                    <div className="mt-2 text-sm font-medium text-text">Competitors</div>
-                    <div className="mt-2 text-xs text-text-2">Competitor A · Competitor B · Competitor C</div>
-                  </div>
-                  <div className="rounded-2xl border border-border bg-surface p-4">
-                    <div className="text-xs text-text-3">Providers</div>
-                    <div className="mt-2 text-sm font-medium text-text">Breakdown</div>
-                    <div className="mt-2 text-xs text-text-2">ChatGPT · Gemini · Claude · More</div>
-                  </div>
-                </div>
-
-                <div className="mt-4 text-xs text-text-3">
-                  Evidence and provider breakdown are included in-app and in PDFs.
-                </div>
-              </Card>
-            </div>
-
-            {/* Copy (right) */}
-            <div>
-              <div className="text-xs font-medium uppercase tracking-wide text-text-3">Overview</div>
-              <h2 className="mt-3 text-4xl font-semibold tracking-tight text-text sm:text-5xl">
-                We sell proof.
-              </h2>
-              <div className="mt-6 grid gap-4">
-                <div className="rounded-2xl border border-border bg-surface p-5">
-                  <div className="text-sm font-semibold text-text">Retention leverage</div>
-                  <div className="mt-2 text-sm text-text-2">
-                    Clients don’t churn when progress is visible month‑to‑month.
-                  </div>
-                </div>
-                <div className="rounded-2xl border border-border bg-surface p-5">
-                  <div className="text-sm font-semibold text-text">Credibility</div>
-                  <div className="mt-2 text-sm text-text-2">
-                    Scoring + structured evidence turns “AI visibility” into something concrete.
-                  </div>
-                </div>
-                <div className="rounded-2xl border border-border bg-surface p-5">
-                  <div className="text-sm font-semibold text-text">Time saved + consistency</div>
-                  <div className="mt-2 text-sm text-text-2">
-                    No ad‑hoc prompt testing. Push a button. Download the report.
-                  </div>
-                </div>
-              </div>
-              <div className="mt-6 text-sm text-text-2">
-                Standardized prompts across major LLMs → recommendation measurement → one‑click premium PDF.
-              </div>
-            </div>
+      {/* ═══════════════════════════════════════════════════════════════════
+          TRUST LOGOS — Animated marquee (Semrush-style)
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section className="border-y border-border bg-bg py-10">
+        <div className="container-xl">
+          <div className="mb-6 text-center">
+            <span className="text-xs font-medium uppercase tracking-widest text-text-3">
+              Trusted by leading agencies
+            </span>
           </div>
+          <TrustLogos />
         </div>
       </section>
 
-      {/* Bento (Notion-inspired) */}
-      <section className="bg-bg" id="features">
-        <div className="container-xl py-16">
-          <div className="flex flex-col gap-2">
-            <div className="text-xs font-medium uppercase tracking-wide text-text-3">Features</div>
-            <h2 className="text-3xl font-semibold tracking-tight text-text sm:text-4xl">
-              A premium, repeatable reporting engine.
+      {/* ═══════════════════════════════════════════════════════════════════
+          BIG STATS — Impressive numbers with color and animation
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section className="relative overflow-hidden py-20">
+        {/* Gradient mesh background */}
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute -left-40 top-0 h-96 w-96 rounded-full bg-emerald-500/10 blur-3xl" />
+          <div className="absolute -right-40 bottom-0 h-96 w-96 rounded-full bg-violet-500/10 blur-3xl" />
+          <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-500/5 blur-3xl" />
+        </div>
+
+        <div className="container-xl">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-text md:text-4xl">
+              The scale to power your agency
             </h2>
-            <p className="max-w-2xl text-sm text-text-2">
-              Not “AI SEO.” Not “prompts.” Not “a dashboard.” Proof you can send to a client.
+            <p className="mx-auto mt-3 max-w-xl text-text-2">
+              Real-time AI visibility measurement across the models that matter.
             </p>
           </div>
-          <div className="mt-8">
-            <LandingBento />
-          </div>
+          <BigStats />
         </div>
       </section>
 
-      {/* Proof (case studies + industries) */}
-      <section className="bg-bg-2" id="proof">
-        <div className="container-xl py-16">
-          <div className="flex flex-col gap-2">
-            <div className="text-xs font-medium uppercase tracking-wide text-text-3">Proof</div>
-            <h2 className="text-3xl font-semibold tracking-tight text-text sm:text-4xl">
-              Make retainers feel justified.
+      {/* ═══════════════════════════════════════════════════════════════════
+          FEATURE SHOWCASE — Interactive tabs with colorful panels
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section className="bg-bg-2 py-20" id="features">
+        <div className="container-xl">
+          <div className="mb-12">
+            <div className="inline-flex items-center gap-2 rounded-full bg-violet-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-violet-600">
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Features
+            </div>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-text md:text-4xl">
+              Everything you need to prove AI visibility
             </h2>
-            <p className="max-w-2xl text-sm text-text-2">
-              The report is the deliverable. The score and evidence make it real.
+            <p className="mt-3 max-w-2xl text-text-2">
+              From snapshot scoring to PDF reports—a complete toolkit for measuring and demonstrating progress.
             </p>
           </div>
-
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <Card className="p-6 shadow-none">
-              <div className="text-xs font-medium uppercase tracking-wide text-text-3">Case study</div>
-              <div className="mt-3 text-4xl font-semibold tracking-tight text-text">+340%</div>
-              <div className="mt-2 text-sm text-text-2">AI mentions in 90 days</div>
-              <div className="mt-4 text-xs text-text-3">Healthcare</div>
-            </Card>
-            <Card className="p-6 shadow-none">
-              <div className="text-xs font-medium uppercase tracking-wide text-text-3">Case study</div>
-              <div className="mt-3 text-4xl font-semibold tracking-tight text-text">Top 3</div>
-              <div className="mt-2 text-sm text-text-2">AI recommendations in 60 days</div>
-              <div className="mt-4 text-xs text-text-3">Legal</div>
-            </Card>
-            <Card className="p-6 shadow-none">
-              <div className="text-xs font-medium uppercase tracking-wide text-text-3">Case study</div>
-              <div className="mt-3 text-4xl font-semibold tracking-tight text-text">15 → 82</div>
-              <div className="mt-2 text-sm text-text-2">Visibility score lift in 75 days</div>
-              <div className="mt-4 text-xs text-text-3">Home services</div>
-            </Card>
-          </div>
-
-          <div className="mt-10 grid gap-4 md:grid-cols-2">
-            <Card className="p-6 shadow-none">
-              <div className="text-xs font-medium uppercase tracking-wide text-text-3">Industries we cover</div>
-              <div className="mt-4 grid grid-cols-2 gap-2 text-sm text-text-2 sm:grid-cols-3">
-                <div className="rounded-xl border border-border bg-surface px-3 py-2">Healthcare</div>
-                <div className="rounded-xl border border-border bg-surface px-3 py-2">Legal</div>
-                <div className="rounded-xl border border-border bg-surface px-3 py-2">Real estate</div>
-                <div className="rounded-xl border border-border bg-surface px-3 py-2">Home services</div>
-                <div className="rounded-xl border border-border bg-surface px-3 py-2">Finance</div>
-                <div className="rounded-xl border border-border bg-surface px-3 py-2">E‑commerce</div>
-              </div>
-              <div className="mt-4 text-xs text-text-3">If it’s searched, it can be measured.</div>
-            </Card>
-
-            <Card className="p-6 shadow-none">
-              <div className="text-xs font-medium uppercase tracking-wide text-text-3">Trust metrics</div>
-              <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-border bg-surface p-4">
-                  <div className="text-xs text-text-3">Providers</div>
-                  <div className="mt-2 text-lg font-semibold tracking-tight text-text">3+</div>
-                </div>
-                <div className="rounded-2xl border border-border bg-surface p-4">
-                  <div className="text-xs text-text-3">Prompt pack</div>
-                  <div className="mt-2 text-lg font-semibold tracking-tight text-text">v1</div>
-                </div>
-                <div className="rounded-2xl border border-border bg-surface p-4">
-                  <div className="text-xs text-text-3">Deliverable</div>
-                  <div className="mt-2 text-lg font-semibold tracking-tight text-text">PDF</div>
-                </div>
-              </div>
-              <div className="mt-4 text-xs text-text-3">Replace placeholders with real metrics when ready.</div>
-            </Card>
-          </div>
+          <FeatureShowcase />
         </div>
       </section>
 
-      {/* Toolkits-style grid */}
-      <section className="bg-bg-2" id="toolkits">
-        <div className="container-xl py-16">
-          <div className="flex flex-col gap-2">
-            <div className="text-xs font-medium uppercase tracking-wide text-text-3">Toolkits</div>
-            <h2 className="text-3xl font-semibold tracking-tight text-text sm:text-4xl">Built for agencies.</h2>
-            <p className="max-w-2xl text-sm text-text-2">
-              Snapshots, competitive context, and reporting—designed as a repeatable workflow.
+      {/* ═══════════════════════════════════════════════════════════════════
+          HOW IT WORKS — Clean 3-step process
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section className="relative overflow-hidden py-20">
+        <div className="container-xl">
+          <div className="mb-16 text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-text md:text-4xl">
+              Three steps to proof
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-text-2">
+              Create a client, run a snapshot, send the report. That simple.
             </p>
           </div>
 
-          <div className="mt-8">
-            <LandingToolkits />
-          </div>
-        </div>
-      </section>
+          <div className="relative">
+            {/* Connecting line */}
+            <div className="absolute left-0 right-0 top-16 hidden h-0.5 bg-gradient-to-r from-transparent via-border to-transparent md:block" />
 
-      {/* Report preview */}
-      <section className="bg-bg" id="report">
-        <div className="container-xl py-16">
-          <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
-            <div>
-              <div className="text-xs font-medium uppercase tracking-wide text-text-3">Reporting</div>
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-text sm:text-4xl">
-                A report clients can scan in minutes.
-              </h2>
-              <p className="mt-3 max-w-xl text-sm text-text-2">
-                Scores, confidence, provider breakdown, and evidence—laid out like a real deliverable.
-              </p>
-              <div className="mt-6 grid gap-3">
-                <div className="rounded-2xl border border-border bg-surface p-5">
-                  <div className="text-sm font-semibold text-text">Executive summary</div>
-                  <div className="mt-2 text-sm text-text-2">The headline score and the why behind it.</div>
-                </div>
-                <div className="rounded-2xl border border-border bg-surface p-5">
-                  <div className="text-sm font-semibold text-text">Evidence by prompt</div>
-                  <div className="mt-2 text-sm text-text-2">Snippets and structured fields for defensibility.</div>
-                </div>
-              </div>
-            </div>
-
-            {/* PDF-style mock page */}
-            <div className="mx-auto w-full max-w-[520px]">
-              <div className="rounded-2xl border border-border bg-surface shadow-lift">
-                <div className="border-b border-border px-6 py-5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <div className="text-xs font-medium uppercase tracking-wide text-text-3">
-                        VRTL Score Report
-                      </div>
-                      <div className="mt-2 text-lg font-semibold tracking-tight text-text">Acme Agency</div>
-                      <div className="mt-1 text-xs text-text-3">client.com · 2026‑01‑21</div>
+            <div className="grid gap-8 md:grid-cols-3">
+              {[
+                {
+                  step: "01",
+                  title: "Add your client",
+                  description: "Enter the website URL and define competitors. Takes 30 seconds.",
+                  icon: (
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                  ),
+                },
+                {
+                  step: "02",
+                  title: "Run the snapshot",
+                  description: "We query ChatGPT, Gemini, and Claude with standardized prompts.",
+                  icon: (
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  ),
+                },
+                {
+                  step: "03",
+                  title: "Download the PDF",
+                  description: "Scores, evidence, recommendations—ready for client delivery.",
+                  icon: (
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  ),
+                },
+              ].map((item, i) => (
+                <div key={item.step} className="relative text-center">
+                  {/* Step number with icon */}
+                  <div className="relative mx-auto mb-6 flex h-32 w-32 items-center justify-center">
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-br from-text/5 to-text/10" />
+                    <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-surface shadow-xl">
+                      <div className="text-text">{item.icon}</div>
                     </div>
-                    <Badge variant="neutral">PDF</Badge>
-                  </div>
-                </div>
-
-                <div className="px-6 py-6">
-                  <div className="grid gap-3">
-                    <div className="rounded-2xl border border-border bg-surface-2 p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="text-xs font-medium text-text-3">Overall score</div>
-                        <div className="text-3xl font-semibold tracking-tight text-text">82</div>
-                      </div>
-                      <div className="mt-3 text-xs text-text-3">Confidence: High</div>
-                      <div className="mt-3 h-2 w-full rounded-full bg-bg">
-                        <div className="h-2 w-[82%] rounded-full bg-success/70" />
-                      </div>
-                    </div>
-
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="rounded-2xl border border-border bg-surface p-4">
-                        <div className="text-xs font-medium uppercase tracking-wide text-text-3">Providers</div>
-                        <div className="mt-3 space-y-2 text-xs">
-                          <div className="flex items-center justify-between">
-                            <span className="text-text-2">ChatGPT</span>
-                            <span className="font-medium text-text">84</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-text-2">Gemini</span>
-                            <span className="font-medium text-text">79</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-text-2">Claude</span>
-                            <span className="font-medium text-text">83</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="rounded-2xl border border-border bg-surface p-4">
-                        <div className="text-xs font-medium uppercase tracking-wide text-text-3">Evidence</div>
-                        <div className="mt-3 text-xs text-text-2">
-                          “Mentions Acme as a top recommendation for agencies…”
-                        </div>
-                        <div className="mt-3 text-[11px] text-text-3">Prompt #3 · recommendation: strong</div>
-                      </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-border bg-surface p-4">
-                      <div className="text-xs font-medium uppercase tracking-wide text-text-3">3 actions</div>
-                      <div className="mt-3 grid gap-2 text-xs text-text-2">
-                        <div className="flex gap-3">
-                          <span className="mt-2 h-1.5 w-1.5 rounded-full bg-text-3" />
-                          Add competitors to increase confidence
-                        </div>
-                        <div className="flex gap-3">
-                          <span className="mt-2 h-1.5 w-1.5 rounded-full bg-text-3" />
-                          Improve “top” placements across prompts
-                        </div>
-                        <div className="flex gap-3">
-                          <span className="mt-2 h-1.5 w-1.5 rounded-full bg-text-3" />
-                          Re-run after messaging changes
-                        </div>
-                      </div>
+                    <div className="absolute -right-1 -top-1 flex h-8 w-8 items-center justify-center rounded-full bg-text text-xs font-bold text-white">
+                      {item.step}
                     </div>
                   </div>
-
-                  <div className="mt-5 text-[11px] text-text-3">
-                    Preview only — generated PDFs include evidence by prompt and provider breakdown.
-                  </div>
+                  <h3 className="text-xl font-semibold text-text">{item.title}</h3>
+                  <p className="mt-2 text-sm text-text-2">{item.description}</p>
                 </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="bg-bg" id="testimonials">
-        <div className="container-xl py-16">
-          <div className="flex flex-col gap-2">
-            <div className="text-xs font-medium uppercase tracking-wide text-text-3">Testimonials</div>
-            <h2 className="text-3xl font-semibold tracking-tight text-text sm:text-4xl">What teams say</h2>
-            <p className="max-w-2xl text-sm text-text-2">
-              Short, factual feedback from teams using VRTL Score with real client accounts.
+      {/* ═══════════════════════════════════════════════════════════════════
+          TESTIMONIALS — Dynamic carousel with dark theme
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section className="py-20" id="testimonials">
+        <div className="container-xl">
+          <div className="mb-12 text-center">
+            <div className="inline-flex items-center gap-2 rounded-full bg-amber-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-amber-600">
+              <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              Testimonials
+            </div>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-text md:text-4xl">
+              Trusted by agency teams
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-text-2">
+              Hear from teams using VRTL Score to measure and prove AI visibility.
             </p>
           </div>
-
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <Card className="p-8 shadow-none md:col-span-2">
-              <div className="text-xs font-medium uppercase tracking-wide text-text-3">Featured</div>
-              <div className="mt-4 text-2xl font-semibold leading-tight tracking-tight text-text">
-                “We finally have a repeatable way to measure AI visibility across accounts.”
-              </div>
-              <div className="mt-6 flex items-center justify-between gap-3">
-                <div className="text-sm text-text-2">
-                  <span className="font-medium text-text">Agency lead</span> · Weekly reporting cadence
-                </div>
-                <Badge variant="success">82 avg</Badge>
-              </div>
-            </Card>
-            <Card className="p-6 shadow-none">
-              <div className="text-base leading-relaxed text-text">
-                “The evidence trail makes client conversations easy—no hand-wavy conclusions.”
-              </div>
-              <div className="mt-4 text-xs text-text-3">Strategy director</div>
-            </Card>
-            <Card className="p-6 shadow-none">
-              <div className="text-base leading-relaxed text-text">
-                “Scores and reports are consistent week to week. That’s the whole value.”
-              </div>
-              <div className="mt-4 text-xs text-text-3">Ops</div>
-            </Card>
-            <Card className="p-6 shadow-none">
-              <div className="text-base leading-relaxed text-text">
-                “It’s the first time we can benchmark AI recommendations like we benchmark SEO.”
-              </div>
-              <div className="mt-4 text-xs text-text-3">Account director</div>
-            </Card>
-          </div>
+          <TestimonialsCarousel />
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="bg-[#080808] text-white">
-        <div className="container-xl py-16">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <div className="text-xs font-medium uppercase tracking-wide text-white/60">Get started</div>
-              <div className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-                Start measuring AI visibility.
-              </div>
-              <div className="mt-2 text-sm text-white/70">
-                Create a client, run a snapshot, and ship a report—in one flow.
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <ButtonLink className="border border-white/15 bg-white/10 text-white hover:bg-white/15" href="/login" variant="secondary">
-                Create account
+      {/* ═══════════════════════════════════════════════════════════════════
+          CTA — Bold gradient section
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section className="relative overflow-hidden py-24">
+        {/* Gradient background */}
+        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[#080808] via-[#0f0f0f] to-[#1a1a1a]" />
+        
+        {/* Decorative elements */}
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute -left-32 -top-32 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl" />
+          <div className="absolute -bottom-32 -right-32 h-64 w-64 rounded-full bg-violet-500/20 blur-3xl" />
+          <div className="absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-500/10 blur-3xl" />
+        </div>
+
+        {/* Grid pattern overlay */}
+        <div
+          className="pointer-events-none absolute inset-0 -z-10 opacity-10"
+          style={{
+            backgroundImage: `linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)`,
+            backgroundSize: "64px 64px",
+          }}
+        />
+
+        <div className="container-xl relative">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
+              Start measuring
+              <br />
+              <span className="text-gradient">AI visibility</span>
+            </h2>
+            <p className="mx-auto mt-6 max-w-xl text-lg text-white/70">
+              Create your first client, run a snapshot, and ship a report—all in under 5 minutes.
+            </p>
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+              <ButtonLink
+                className="rounded-full bg-white px-8 py-4 text-base font-semibold text-[#080808] shadow-2xl transition-all hover:bg-white/90 hover:scale-105"
+                href="/login"
+                variant="primary"
+              >
+                Get started free
               </ButtonLink>
-              <ButtonLink className="border border-white/15 bg-white/10 text-white hover:bg-white/15" href="/app" variant="secondary">
-                Open app
+              <ButtonLink
+                className="rounded-full border border-white/20 bg-white/5 px-8 py-4 text-base font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/10"
+                href="/pricing"
+                variant="secondary"
+              >
+                View pricing
               </ButtonLink>
             </div>
+            <p className="mt-6 text-sm text-white/50">
+              No credit card required · 14-day free trial
+            </p>
           </div>
         </div>
       </section>
     </main>
   );
 }
-
-
-
