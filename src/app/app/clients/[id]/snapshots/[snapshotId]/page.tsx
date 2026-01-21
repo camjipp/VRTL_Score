@@ -73,6 +73,91 @@ type ReportSection = {
   icon: ReactNode;
 };
 
+function clamp01(n: number) {
+  return Math.max(0, Math.min(1, n));
+}
+
+function pct(n: number, d: number) {
+  if (!d) return 0;
+  return Math.round((n / d) * 100);
+}
+
+function Donut({
+  value,
+  label,
+  sublabel,
+  color = "#2563eb"
+}: {
+  value: number; // 0..1
+  label: string;
+  sublabel?: string;
+  color?: string;
+}) {
+  const v = clamp01(value);
+  const r = 18;
+  const c = 2 * Math.PI * r;
+  const dash = c * v;
+  return (
+    <div className="flex items-center gap-3">
+      <svg aria-hidden className="h-12 w-12" viewBox="0 0 48 48">
+        <circle cx="24" cy="24" r={r} fill="none" stroke="rgba(148,163,184,0.35)" strokeWidth="6" />
+        <circle
+          cx="24"
+          cy="24"
+          r={r}
+          fill="none"
+          stroke={color}
+          strokeWidth="6"
+          strokeLinecap="round"
+          strokeDasharray={`${dash} ${c - dash}`}
+          transform="rotate(-90 24 24)"
+        />
+      </svg>
+      <div>
+        <div className="text-sm font-semibold text-text">{label}</div>
+        {sublabel ? <div className="text-xs text-text-3">{sublabel}</div> : null}
+      </div>
+    </div>
+  );
+}
+
+function SimpleBar({
+  label,
+  value,
+  max,
+  colorClass
+}: {
+  label: string;
+  value: number;
+  max: number;
+  colorClass: string;
+}) {
+  const w = max > 0 ? Math.max(0, Math.min(1, value / max)) : 0;
+  return (
+    <div className="grid grid-cols-12 items-center gap-3">
+      <div className="col-span-3 truncate text-xs text-text-3">{label}</div>
+      <div className="col-span-7">
+        <div className="h-2 w-full rounded-full bg-surface-2">
+          <div className={cn("h-2 rounded-full", colorClass)} style={{ width: `${Math.round(w * 100)}%` }} />
+        </div>
+      </div>
+      <div className="col-span-2 text-right text-xs font-semibold text-text">{value}</div>
+    </div>
+  );
+}
+
+function CompetitorBars({ items }: { items: Array<{ name: string; count: number }> }) {
+  const max = Math.max(1, ...items.map((i) => i.count));
+  return (
+    <div className="space-y-2">
+      {items.slice(0, 8).map((c) => (
+        <SimpleBar key={c.name} label={c.name} value={c.count} max={max} colorClass="bg-accent" />
+      ))}
+      {items.length === 0 ? <div className="text-sm text-text-3">No competitor mentions found.</div> : null}
+    </div>
+  );
+}
+
 function formatDate(d?: string | null) {
   if (!d) return "—";
   const dt = new Date(d);
@@ -614,15 +699,29 @@ export default function SnapshotDetailPage() {
                 </div>
               </div>
 
-          {/* Summary grid */}\n
-          <div className="grid gap-4 lg:grid-cols-3">
-            <div className="rounded-2xl border border-border bg-surface p-5">
-              <div className="text-sm font-medium text-text-2">Overall score</div>
-              <div className={cn("mt-2 text-4xl font-bold", getScoreColor(data.snapshot.vrtl_score))}>
+          {/* Dashboard */}\n
+          <div className="grid gap-4 lg:grid-cols-12">
+            <div className="rounded-2xl border border-border bg-surface p-5 lg:col-span-4">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-medium text-text-2">VRTL Score</div>
+                <Badge variant={scoreVariant(data.snapshot.vrtl_score)}>
+                  {data.snapshot.vrtl_score == null ? "—" : data.snapshot.vrtl_score}
+                </Badge>
+              </div>
+              <div className={cn("mt-3 text-5xl font-bold tracking-tight", getScoreColor(data.snapshot.vrtl_score))}>
                 {data.snapshot.vrtl_score ?? "—"}
               </div>
-              <div className="mt-2 inline-flex items-center gap-2 text-xs text-text-3">
-                <span className={cn("h-2 w-2 rounded-full", competitorConfidence.level === "high" ? "bg-green-500" : competitorConfidence.level === "medium" ? "bg-amber-500" : "bg-red-500")} />
+              <div className="mt-2 flex items-center gap-2 text-xs text-text-3">
+                <span
+                  className={cn(
+                    "h-2 w-2 rounded-full",
+                    competitorConfidence.level === "high"
+                      ? "bg-green-500"
+                      : competitorConfidence.level === "medium"
+                        ? "bg-amber-500"
+                        : "bg-red-500"
+                  )}
+                />
                 Confidence: {competitorConfidence.label}
               </div>
               {competitorConfidence.message ? (
@@ -630,41 +729,52 @@ export default function SnapshotDetailPage() {
               ) : null}
             </div>
 
-            <div className="rounded-2xl border border-border bg-surface p-5">
-              <div className="text-sm font-medium text-text-2">Signals analyzed</div>
-              <div className="mt-3 grid grid-cols-3 gap-2">
-                <div className="rounded-xl bg-surface-2 px-3 py-2 text-center">
-                  <div className="text-xs text-text-3">Signals</div>
-                  <div className="text-lg font-bold text-text">{data.summary.responses_count}</div>
+            <div className="rounded-2xl border border-border bg-surface p-5 lg:col-span-4">
+              <div className="text-sm font-medium text-text-2">Coverage</div>
+              <div className="mt-3 grid gap-3">
+                <Donut
+                  value={data.summary.responses_count ? data.summary.client_mentioned_count / data.summary.responses_count : 0}
+                  label={`${pct(data.summary.client_mentioned_count, data.summary.responses_count)}% mention rate`}
+                  sublabel={`${data.summary.client_mentioned_count} of ${data.summary.responses_count} signals`}
+                  color="#22c55e"
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <Donut
+                    value={data.summary.responses_count ? data.summary.sources_count / data.summary.responses_count : 0}
+                    label={`${pct(data.summary.sources_count, data.summary.responses_count)}% citeable`}
+                    sublabel="Has sources"
+                    color="#2563eb"
+                  />
+                  <Donut
+                    value={data.summary.responses_count ? data.summary.specific_features_count / data.summary.responses_count : 0}
+                    label={`${pct(data.summary.specific_features_count, data.summary.responses_count)}% specific`}
+                    sublabel="Has feature detail"
+                    color="#a855f7"
+                  />
                 </div>
-                <div className="rounded-xl bg-surface-2 px-3 py-2 text-center">
-                  <div className="text-xs text-text-3">Mentions</div>
-                  <div className="text-lg font-bold text-text">{data.summary.client_mentioned_count}</div>
-                </div>
-                <div className="rounded-xl bg-surface-2 px-3 py-2 text-center">
-                  <div className="text-xs text-text-3">Scored</div>
-                  <div className="text-lg font-bold text-text">{scoredSignals.length}</div>
-                </div>
-              </div>
-              <div className="mt-3 text-xs text-text-3">
-                Sources in {data.summary.sources_count} · Specific features in {data.summary.specific_features_count}
               </div>
             </div>
 
-            <div className="rounded-2xl border border-border bg-surface p-5">
-              <div className="text-sm font-medium text-text-2">Providers</div>
-              {providerEntries.length ? (
-                <div className="mt-3 grid grid-cols-3 gap-2">
-                  {providerEntries.map(([provider, score]) => (
-                    <div key={provider} className={cn("rounded-xl px-3 py-2 text-center", getScoreBg(score))}>
-                      <div className="text-xs text-text-3 capitalize">{provider}</div>
-                      <div className={cn("text-lg font-bold", getScoreColor(score))}>{score}</div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="mt-3 text-sm text-text-3">—</div>
-              )}
+            <div className="rounded-2xl border border-border bg-surface p-5 lg:col-span-4">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-medium text-text-2">Provider scores</div>
+                <div className="text-xs text-text-3">{providerEntries.length ? `${providerEntries.length} providers` : "—"}</div>
+              </div>
+              <div className="mt-3 space-y-2">
+                {providerEntries.length ? (
+                  providerEntries.map(([provider, score]) => (
+                    <SimpleBar
+                      key={provider}
+                      label={provider}
+                      value={score}
+                      max={100}
+                      colorClass={score >= 80 ? "bg-green-500" : score >= 50 ? "bg-amber-500" : "bg-red-500"}
+                    />
+                  ))
+                ) : (
+                  <div className="text-sm text-text-3">—</div>
+                )}
+              </div>
             </div>
           </div>
               </section>
@@ -675,7 +785,7 @@ export default function SnapshotDetailPage() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-lg font-semibold text-text">Competitive landscape</h2>
-                <p className="mt-1 text-sm text-text-2">Most frequently mentioned alternatives in this snapshot.</p>
+                <p className="mt-1 text-sm text-text-2">Top competitors mentioned (bar chart).</p>
               </div>
               {data.client.website ? (
                 <a
@@ -692,20 +802,8 @@ export default function SnapshotDetailPage() {
               ) : null}
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              {data.summary.top_competitors.length ? (
-                data.summary.top_competitors.map((c) => (
-                  <span
-                    key={c.name}
-                    className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-2 px-3 py-1 text-sm text-text"
-                  >
-                    {c.name}
-                    <span className="rounded-full bg-bg px-2 py-0.5 text-xs text-text-2">{c.count}</span>
-                  </span>
-                ))
-              ) : (
-                <span className="text-sm text-text-3">No competitor mentions found in responses.</span>
-              )}
+            <div className="mt-5">
+              <CompetitorBars items={data.summary.top_competitors} />
             </div>
             </div>
           </section>
@@ -745,9 +843,7 @@ export default function SnapshotDetailPage() {
             <div className="overflow-hidden rounded-2xl border border-border bg-surface">
             <div className="border-b border-border bg-surface-2/50 px-6 py-4">
               <h2 className="text-lg font-semibold text-text">Findings</h2>
-              <p className="mt-1 text-sm text-text-2">
-                Each finding includes the problem and recommended fixes.
-              </p>
+              <p className="mt-1 text-sm text-text-2">Short takeaways. Expand only if you need the details.</p>
             </div>
 
             <div className="divide-y divide-border">
@@ -765,13 +861,10 @@ export default function SnapshotDetailPage() {
                       : "bg-slate-500/10 text-slate-500";
 
                 return (
-                <div key={r.id} className="px-6 py-5">
+                <div key={r.id} className="px-6 py-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-2 text-sm text-text-2">
-                      <span className="rounded-lg bg-surface-2 px-2 py-1 text-xs font-medium text-text-2">
-                        Insight {idx + 1}
-                        <span className="text-text-3"> / {data.summary.responses_count}</span>
-                      </span>
+                      <span className="rounded-lg bg-surface-2 px-2 py-1 text-xs font-medium text-text-2">#{idx + 1}</span>
                       <span className={cn("rounded-full px-2 py-1 text-xs font-medium", severityPill)}>
                         {card.severity === "high" ? "High impact" : card.severity === "medium" ? "Medium" : "Low"}
                       </span>
@@ -788,62 +881,78 @@ export default function SnapshotDetailPage() {
                     <div className="text-xs text-text-3">{formatDate(r.created_at)}</div>
                   </div>
 
-                  <div className="mt-3 flex items-center gap-2">
-                    <div className="text-base font-semibold text-text">{card.title}</div>
-                    {r.client_position ? (
-                      <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs font-medium text-text-2">
-                        Position: {r.client_position}
-                      </span>
-                    ) : null}
-                    {r.recommendation_strength ? (
-                      <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs font-medium text-text-2">
-                        Strength: {r.recommendation_strength}
-                      </span>
-                    ) : null}
-                    <span
-                      className={cn(
-                        "rounded-full px-2 py-0.5 text-xs font-medium",
-                        r.has_sources_or_citations ? "bg-blue-500/10 text-blue-600" : "bg-slate-500/10 text-slate-500"
-                      )}
-                    >
-                      {r.has_sources_or_citations ? "Citeable" : "No citations"}
-                    </span>
-                    <span
-                      className={cn(
-                        "rounded-full px-2 py-0.5 text-xs font-medium",
-                        r.has_specific_features ? "bg-purple-500/10 text-purple-600" : "bg-slate-500/10 text-slate-500"
-                      )}
-                    >
-                      {r.has_specific_features ? "Specific" : "Generic"}
-                    </span>
-                  </div>
+                  <details className="mt-3">
+                    <summary className="cursor-pointer select-none">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <div className="text-base font-semibold text-text">{card.title}</div>
+                          <div className="mt-1 text-sm text-text-2">{card.problem}</div>
+                        </div>
+                        <span className="text-xs font-medium text-accent underline underline-offset-4">
+                          View recommendations
+                        </span>
+                      </div>
+                    </summary>
 
-                  <div className="mt-3 text-sm text-text-2">
-                    <span className="font-medium text-text">Problem:</span> {card.problem}
-                  </div>
+                    <div className="mt-3 grid gap-3 lg:grid-cols-12">
+                      <div className="lg:col-span-7">
+                        <div className="rounded-xl bg-surface-2/60 px-4 py-3">
+                          <div className="text-xs font-medium text-text-3">Recommended fixes</div>
+                          <ul className="mt-2 space-y-1 text-sm text-text-2">
+                            {card.fixes.slice(0, 3).map((f) => (
+                              <li key={f} className="flex items-start gap-2">
+                                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                                <span>{f}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className="mt-2 text-sm text-text-2">
+                          <span className="font-medium text-text">Why it matters:</span> {card.why}
+                        </div>
+                      </div>
 
-                  <div className="mt-2 text-sm text-text-2">
-                    <span className="font-medium text-text">Why it matters:</span> {card.why}
-                  </div>
-
-                  <div className="mt-3 rounded-xl bg-surface-2/60 px-4 py-3">
-                    <div className="text-xs font-medium text-text-3">Recommended fixes</div>
-                    <ul className="mt-2 space-y-1 text-sm text-text-2">
-                      {card.fixes.slice(0, 3).map((f) => (
-                        <li key={f} className="flex items-start gap-2">
-                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-                          <span>{f}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {r.evidence_snippet ? (
-                    <div className="mt-3 rounded-xl border border-border bg-bg px-4 py-3 text-sm text-text-2">
-                      <div className="text-xs font-medium text-text-3">Evidence snippet</div>
-                      <div className="mt-1">“{r.evidence_snippet}”</div>
+                      <div className="lg:col-span-5">
+                        <div className="rounded-xl border border-border bg-bg px-4 py-3">
+                          <div className="text-xs font-medium text-text-3">Signals</div>
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {r.client_position ? (
+                              <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs font-medium text-text-2">
+                                Position: {r.client_position}
+                              </span>
+                            ) : null}
+                            {r.recommendation_strength ? (
+                              <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs font-medium text-text-2">
+                                Strength: {r.recommendation_strength}
+                              </span>
+                            ) : null}
+                            <span
+                              className={cn(
+                                "rounded-full px-2 py-0.5 text-xs font-medium",
+                                r.has_sources_or_citations ? "bg-blue-500/10 text-blue-600" : "bg-slate-500/10 text-slate-500"
+                              )}
+                            >
+                              {r.has_sources_or_citations ? "Citeable" : "No citations"}
+                            </span>
+                            <span
+                              className={cn(
+                                "rounded-full px-2 py-0.5 text-xs font-medium",
+                                r.has_specific_features ? "bg-purple-500/10 text-purple-600" : "bg-slate-500/10 text-slate-500"
+                              )}
+                            >
+                              {r.has_specific_features ? "Specific" : "Generic"}
+                            </span>
+                          </div>
+                          {r.evidence_snippet ? (
+                            <div className="mt-3 text-sm text-text-2">
+                              <div className="text-xs font-medium text-text-3">Evidence</div>
+                              <div className="mt-1">“{r.evidence_snippet}”</div>
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
                     </div>
-                  ) : null}
+                  </details>
 
                   {(r.competitors_mentioned.length || card.competitorFocus.length) ? (
                     <div className="mt-3 flex flex-wrap gap-2">
