@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -64,6 +64,12 @@ type InsightCard = {
   why: string;
   fixes: string[];
   competitorFocus: string[];
+};
+
+type ReportSection = {
+  id: string;
+  label: string;
+  icon: JSX.Element;
 };
 
 function formatDate(d?: string | null) {
@@ -288,6 +294,7 @@ export default function SnapshotDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showDebug, setShowDebug] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>("overview");
 
   async function load(nextShowDebug = showDebug) {
     setLoading(true);
@@ -316,6 +323,28 @@ export default function SnapshotDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientId, snapshotId]);
 
+  useEffect(() => {
+    if (loading) return;
+    if (typeof window === "undefined") return;
+    const sections = Array.from(document.querySelectorAll<HTMLElement>("[data-report-section]"));
+    if (!sections.length) return;
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => (b.intersectionRatio ?? 0) - (a.intersectionRatio ?? 0));
+        const top = visible[0]?.target as HTMLElement | undefined;
+        const id = top?.id;
+        if (id) setActiveSection(id);
+      },
+      { root: null, threshold: [0.15, 0.25, 0.4, 0.6] }
+    );
+
+    sections.forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
+  }, [loading, data?.snapshot?.id]);
+
   const competitorConfidence = getCompetitorConfidence(data?.competitors?.length ?? 0);
   const providers = data?.snapshot.score_by_provider ?? null;
   const providerEntries = providers ? Object.entries(providers) : [];
@@ -333,17 +362,73 @@ export default function SnapshotDetailPage() {
       })
     : [];
 
-  return (
-    <div>
-      <Link
-        href={`/app/clients/${clientId}`}
-        className="inline-flex items-center gap-2 text-sm text-text-2 transition-colors hover:text-text"
-      >
+  const reportSections: ReportSection[] = data
+    ? [
+        {
+          id: "overview",
+          label: "Overview",
+          icon: (
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v18h18" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M7 14l3-3 3 3 5-6" />
+            </svg>
+          )
+        },
+        {
+          id: "action-plan",
+          label: "Action plan",
+          icon: (
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          )
+        },
+        {
+          id: "landscape",
+          label: "Landscape",
+          icon: (
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 7.5h16.5M3.75 12h16.5M3.75 16.5h16.5" />
+            </svg>
+          )
+        },
+        {
+          id: "findings",
+          label: "Findings",
+          icon: (
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+            </svg>
+          )
+        },
+        {
+          id: "providers",
+          label: "Providers",
+          icon: (
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v18h16.5V3H3.75z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 7.5h9M7.5 12h9M7.5 16.5h9" />
+            </svg>
+          )
+        }
+      ]
+    : [];
+
+  if (data?.debug.allowed) {
+    reportSections.push({
+      id: "debug",
+      label: "Debug",
+      icon: (
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3v2.25M14.25 3v2.25M4.5 9h15M6.75 9V21h10.5V9" />
         </svg>
-        Back to client
-      </Link>
+      )
+    });
+  }
+
+  return (
+    <div className="mt-2">
 
       {loading ? (
         <div className="mt-6 space-y-4">
@@ -365,11 +450,103 @@ export default function SnapshotDetailPage() {
       ) : null}
 
       {!loading && data ? (
-        <div className="mt-6 space-y-6">
-          {/* Header */}\n
-          <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-            <div className="relative h-2 bg-gradient-to-r from-accent via-purple-500 to-pink-500" />
-            <div className="p-6">
+        <div className="mt-6 grid gap-6 lg:grid-cols-12">
+          <aside className="hidden lg:block lg:col-span-3">
+            <div className="sticky top-6 overflow-hidden rounded-2xl border border-border bg-surface">
+              <div className="border-b border-border bg-surface-2/50 px-5 py-4">
+                <div className="text-xs font-medium uppercase tracking-wide text-text-3">Report</div>
+                <div className="mt-1 text-sm font-semibold text-text">{data.client.name}</div>
+                <div className="mt-1 text-xs text-text-3">
+                  Snapshot <span className="font-mono">{data.snapshot.id.slice(0, 8)}…</span>
+                </div>
+              </div>
+
+              <nav className="p-2">
+                {reportSections.map((s) => {
+                  const active = activeSection === s.id;
+                  return (
+                    <a
+                      key={s.id}
+                      href={`#${s.id}`}
+                      className={cn(
+                        "flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors",
+                        active ? "bg-accent/10 text-accent" : "text-text-2 hover:bg-surface-2"
+                      )}
+                    >
+                      <span className={cn(active ? "text-accent" : "text-text-3")}>{s.icon}</span>
+                      <span className="font-medium">{s.label}</span>
+                    </a>
+                  );
+                })}
+              </nav>
+
+              <div className="border-t border-border p-4">
+                <Link
+                  href={`/app/clients/${clientId}`}
+                  className="inline-flex items-center gap-2 text-sm text-text-2 hover:text-text"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                  </svg>
+                  Back to client
+                </Link>
+              </div>
+            </div>
+          </aside>
+
+          <section className="lg:col-span-9">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="text-sm text-text-2">
+                <Link href="/app" className="hover:text-text">
+                  Reports
+                </Link>{" "}
+                <span className="text-text-3">/</span>{" "}
+                <Link href={`/app/clients/${clientId}`} className="hover:text-text">
+                  {data.client.name}
+                </Link>{" "}
+                <span className="text-text-3">/</span> <span className="text-text">AI Visibility Report</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <DownloadPdfButton snapshotId={data.snapshot.id} />
+                {data.debug.allowed ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = !showDebug;
+                      setShowDebug(next);
+                      void load(next);
+                    }}
+                    className={cn(
+                      "rounded-xl border px-4 py-2 text-sm font-medium transition-colors",
+                      showDebug
+                        ? "border-red-500/30 bg-red-500/10 text-red-600 hover:bg-red-500/15"
+                        : "border-border text-text-2 hover:bg-surface-2"
+                    )}
+                    title={
+                      data.debug.enabled
+                        ? "Show internal debug fields (prompts/raw model output)"
+                        : "Enable VRTL_ENABLE_DEBUG_RESPONSES=1 to allow debug"
+                    }
+                    disabled={!data.debug.enabled}
+                  >
+                    {showDebug ? "Hide debug" : "Show debug"}
+                  </button>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <section className="space-y-6 scroll-mt-24" data-report-section id="overview">
+                {/* Overview */}
+                <div>
+                  <h2 className="text-lg font-semibold text-text">Overview</h2>
+                  <p className="mt-1 text-sm text-text-2">Key metrics, confidence, and coverage.</p>
+                </div>
+
+                {/* Header */}
+              <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+                <div className="relative h-2 bg-gradient-to-r from-accent via-purple-500 to-pink-500" />
+                <div className="p-6">
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div className="min-w-0">
                   <div className="inline-flex items-center gap-2 rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">
@@ -433,8 +610,8 @@ export default function SnapshotDetailPage() {
                   </Alert>
                 </div>
               ) : null}
-            </div>
-          </div>
+                </div>
+              </div>
 
           {/* Summary grid */}\n
           <div className="grid gap-4 lg:grid-cols-3">
@@ -489,9 +666,11 @@ export default function SnapshotDetailPage() {
               )}
             </div>
           </div>
+              </section>
 
-          {/* Top competitors */}\n
-          <div className="rounded-2xl border border-border bg-surface p-6">
+          <section className="scroll-mt-24" data-report-section id="landscape">
+            {/* Top competitors */}\n
+            <div className="rounded-2xl border border-border bg-surface p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-lg font-semibold text-text">Competitive landscape</h2>
@@ -527,10 +706,12 @@ export default function SnapshotDetailPage() {
                 <span className="text-sm text-text-3">No competitor mentions found in responses.</span>
               )}
             </div>
-          </div>
+            </div>
+          </section>
 
-          {/* Action plan */}\n
-          <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+          <section className="scroll-mt-24" data-report-section id="action-plan">
+            {/* Action plan */}\n
+            <div className="overflow-hidden rounded-2xl border border-border bg-surface">
             <div className="border-b border-border bg-surface-2/50 px-6 py-4">
               <h2 className="text-lg font-semibold text-text">Action plan</h2>
               <p className="mt-1 text-sm text-text-2">Three high-impact fixes to improve visibility and recommendations.</p>
@@ -555,14 +736,16 @@ export default function SnapshotDetailPage() {
                 </div>
               ) : null}
             </div>
-          </div>
+            </div>
+          </section>
 
-          {/* Insights */}\n
-          <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+          <section className="scroll-mt-24" data-report-section id="findings">
+            {/* Findings */}\n
+            <div className="overflow-hidden rounded-2xl border border-border bg-surface">
             <div className="border-b border-border bg-surface-2/50 px-6 py-4">
-              <h2 className="text-lg font-semibold text-text">Insights</h2>
+              <h2 className="text-lg font-semibold text-text">Findings</h2>
               <p className="mt-1 text-sm text-text-2">
-                Each insight shows the problem, why it matters, and what to do next.
+                Each finding includes the problem and recommended fixes.
               </p>
             </div>
 
@@ -705,7 +888,82 @@ export default function SnapshotDetailPage() {
                 <div className="px-6 py-12 text-center text-sm text-text-2">No responses found.</div>
               ) : null}
             </div>
-          </div>
+            </div>
+          </section>
+
+          <section className="scroll-mt-24" data-report-section id="providers">
+            <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+              <div className="border-b border-border bg-surface-2/50 px-6 py-4">
+                <h2 className="text-lg font-semibold text-text">Providers</h2>
+                <p className="mt-1 text-sm text-text-2">
+                  Provider scores help you spot consistency issues (one provider can be stricter than another).
+                </p>
+              </div>
+              <div className="p-6">
+                {providerEntries.length ? (
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    {providerEntries.map(([provider, score]) => (
+                      <div
+                        key={provider}
+                        className={cn("rounded-2xl border border-border bg-bg p-4", getScoreBg(score))}
+                      >
+                        <div className="text-xs font-medium text-text-3 capitalize">{provider}</div>
+                        <div className={cn("mt-1 text-2xl font-bold", getScoreColor(score))}>{score}</div>
+                        <div className="mt-2 text-xs text-text-3">
+                          {score >= 80 ? "Strong visibility" : score >= 50 ? "Mixed visibility" : "Weak visibility"}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm text-text-2">No provider scores available.</div>
+                )}
+              </div>
+            </div>
+          </section>
+
+          {data.debug.allowed ? (
+            <section className="scroll-mt-24" data-report-section id="debug">
+              <div className="overflow-hidden rounded-2xl border border-red-500/20 bg-red-500/5">
+                <div className="border-b border-red-500/20 px-6 py-4">
+                  <h2 className="text-lg font-semibold text-red-600">Debug (internal)</h2>
+                  <p className="mt-1 text-sm text-red-600/80">
+                    Raw outputs are hidden by default. Enable debug to view prompts/raw text inside each finding.
+                  </p>
+                </div>
+                <div className="p-6">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = !showDebug;
+                        setShowDebug(next);
+                        void load(next);
+                      }}
+                      className={cn(
+                        "rounded-xl border px-4 py-2 text-sm font-medium transition-colors",
+                        showDebug
+                          ? "border-red-500/30 bg-red-500/10 text-red-600 hover:bg-red-500/15"
+                          : "border-border bg-white/5 text-text-2 hover:bg-white/10"
+                      )}
+                      disabled={!data.debug.enabled}
+                      title={
+                        data.debug.enabled
+                          ? "Toggle internal debug fields"
+                          : "Enable VRTL_ENABLE_DEBUG_RESPONSES=1 to allow debug"
+                      }
+                    >
+                      {showDebug ? "Disable debug" : "Enable debug"}
+                    </button>
+                    <div className="text-xs text-text-3">Keep this off for client-facing screenshots.</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          ) : null}
+
+            </div>
+          </section>
         </div>
       ) : null}
     </div>
