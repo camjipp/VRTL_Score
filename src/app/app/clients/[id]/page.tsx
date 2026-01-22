@@ -59,73 +59,123 @@ function getScoreColor(score: number | null): string {
   return "text-red-600";
 }
 
-function ScoreGauge({ score, size = "large" }: { score: number | null; size?: "large" | "small" }) {
-  const sizeClasses = size === "large" ? "h-32 w-32" : "h-16 w-16";
-  const r = size === "large" ? 56 : 28;
-  const viewBox = size === "large" ? "0 0 128 128" : "0 0 64 64";
-  const center = size === "large" ? 64 : 32;
-  const strokeW = size === "large" ? 10 : 5;
-  const fontSize = size === "large" ? "text-4xl" : "text-lg";
+function getScoreBg(score: number | null): string {
+  if (score === null) return "from-gray-100 to-gray-200";
+  if (score >= 80) return "from-emerald-50 to-emerald-100";
+  if (score >= 50) return "from-amber-50 to-amber-100";
+  return "from-red-50 to-red-100";
+}
 
-  if (score === null) {
-    return (
-      <div className={cn("relative flex items-center justify-center", sizeClasses)}>
-        <svg className={sizeClasses} viewBox={viewBox}>
-          <circle cx={center} cy={center} r={r} fill="none" stroke="rgb(var(--border))" strokeWidth={strokeW} />
-        </svg>
-        <span className={cn("absolute font-bold text-text-3", fontSize)}>—</span>
-      </div>
-    );
-  }
+function getScoreRing(score: number | null): string {
+  if (score === null) return "#e5e5e5";
+  if (score >= 80) return "#059669";
+  if (score >= 50) return "#d97706";
+  return "#dc2626";
+}
 
-  const color = score >= 80 ? "#059669" : score >= 50 ? "#d97706" : "#dc2626";
-  const pct = score / 100;
+// Big animated score circle
+function BigScoreCircle({ score }: { score: number | null }) {
+  const r = 70;
   const c = 2 * Math.PI * r;
+  const pct = score !== null ? score / 100 : 0;
   const dash = c * pct;
+  const color = getScoreRing(score);
 
   return (
-    <div className={cn("relative flex items-center justify-center", sizeClasses)}>
-      <svg className={cn(sizeClasses, "-rotate-90")} viewBox={viewBox}>
-        <circle cx={center} cy={center} r={r} fill="none" stroke="rgb(var(--border))" strokeWidth={strokeW} />
+    <div className="relative flex items-center justify-center">
+      <svg className="h-44 w-44 -rotate-90" viewBox="0 0 160 160">
+        {/* Background ring */}
         <circle
-          cx={center}
-          cy={center}
+          cx="80"
+          cy="80"
+          r={r}
+          fill="none"
+          stroke="#f3f4f6"
+          strokeWidth="12"
+        />
+        {/* Progress ring */}
+        <circle
+          cx="80"
+          cy="80"
           r={r}
           fill="none"
           stroke={color}
-          strokeWidth={strokeW}
+          strokeWidth="12"
           strokeLinecap="round"
           strokeDasharray={`${dash} ${c - dash}`}
+          className="transition-all duration-1000 ease-out"
         />
       </svg>
-      <span className={cn("absolute font-bold", fontSize)} style={{ color }}>{score}</span>
+      <div className="absolute flex flex-col items-center">
+        <span className="text-5xl font-bold" style={{ color }}>
+          {score ?? "—"}
+        </span>
+        <span className="text-sm text-text-3">VRTL Score</span>
+      </div>
     </div>
   );
 }
 
-function MetricCard({
-  label,
-  value,
-  sublabel,
-  color = "default"
-}: {
-  label: string;
-  value: string | number;
-  sublabel?: string;
-  color?: "default" | "success" | "warning" | "danger";
-}) {
-  const colorClasses = {
-    default: "text-text",
-    success: "text-emerald-600",
-    warning: "text-amber-600",
-    danger: "text-red-600"
-  };
+// Mini sparkline-style trend indicator
+function TrendIndicator({ snapshots }: { snapshots: SnapshotRow[] }) {
+  const scores = snapshots
+    .slice(0, 5)
+    .map((s) => s.vrtl_score)
+    .filter((s): s is number => s !== null)
+    .reverse();
+
+  if (scores.length < 2) {
+    return <span className="text-xs text-text-3">Not enough data</span>;
+  }
+
+  const min = Math.min(...scores);
+  const max = Math.max(...scores);
+  const range = max - min || 1;
+  const points = scores.map((s, i) => {
+    const x = (i / (scores.length - 1)) * 60;
+    const y = 20 - ((s - min) / range) * 16;
+    return `${x},${y}`;
+  }).join(" ");
+
+  const trend = scores[scores.length - 1] - scores[0];
+  const trendColor = trend > 0 ? "#059669" : trend < 0 ? "#dc2626" : "#6b7280";
 
   return (
-    <div className="rounded-xl border border-border bg-surface p-4">
-      <div className="text-xs font-medium text-text-3">{label}</div>
-      <div className={cn("mt-1 text-2xl font-bold", colorClasses[color])}>{value}</div>
-      {sublabel && <div className="mt-0.5 text-xs text-text-3">{sublabel}</div>}
+    <div className="flex items-center gap-2">
+      <svg className="h-6 w-16" viewBox="0 0 60 24">
+        <polyline
+          points={points}
+          fill="none"
+          stroke={trendColor}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      <span className={cn("text-xs font-medium", trend > 0 ? "text-emerald-600" : trend < 0 ? "text-red-600" : "text-text-3")}>
+        {trend > 0 ? `+${trend}` : trend}
+      </span>
+    </div>
+  );
+}
+
+// Provider score bar with icon
+function ProviderBar({ provider, score }: { provider: string; score: number }) {
+  const color = score >= 80 ? "bg-emerald-500" : score >= 50 ? "bg-amber-500" : "bg-red-500";
+  const bgColor = score >= 80 ? "bg-emerald-50" : score >= 50 ? "bg-amber-50" : "bg-red-50";
+
+  return (
+    <div className={cn("rounded-xl p-3", bgColor)}>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-medium capitalize text-text">{provider}</span>
+        <span className={cn("text-lg font-bold", getScoreColor(score))}>{score}</span>
+      </div>
+      <div className="h-2 rounded-full bg-white/50">
+        <div
+          className={cn("h-2 rounded-full transition-all duration-500", color)}
+          style={{ width: `${score}%` }}
+        />
+      </div>
     </div>
   );
 }
@@ -283,8 +333,6 @@ export default function ClientDetailPage() {
     }
   }
 
-  const competitorConfidence = competitors.length >= 3 ? "high" : competitors.length > 0 ? "medium" : "low";
-
   async function addCompetitor(e: React.FormEvent) {
     e.preventDefault();
     if (!agencyId || competitors.length >= 8) return;
@@ -323,6 +371,10 @@ export default function ClientDetailPage() {
   }
 
   const providers = snapshot?.score_by_provider ? Object.entries(snapshot.score_by_provider) : [];
+  const competitorConfidence = competitors.length >= 3 ? "high" : competitors.length > 0 ? "medium" : "low";
+  const avgScore = snapshots.length > 0
+    ? Math.round(snapshots.filter(s => s.vrtl_score !== null).reduce((a, s) => a + (s.vrtl_score ?? 0), 0) / snapshots.filter(s => s.vrtl_score !== null).length) || null
+    : null;
 
   return (
     <div className="space-y-6">
@@ -336,10 +388,10 @@ export default function ClientDetailPage() {
       {/* Loading */}
       {loading && (
         <div className="space-y-4">
-          <div className="h-24 animate-pulse rounded-2xl bg-surface-2" />
+          <div className="h-32 animate-pulse rounded-2xl bg-surface-2" />
           <div className="grid gap-4 lg:grid-cols-3">
-            <div className="h-64 animate-pulse rounded-2xl bg-surface-2" />
-            <div className="h-64 animate-pulse rounded-2xl bg-surface-2 lg:col-span-2" />
+            <div className="h-80 animate-pulse rounded-2xl bg-surface-2" />
+            <div className="h-80 animate-pulse rounded-2xl bg-surface-2 lg:col-span-2" />
           </div>
         </div>
       )}
@@ -363,222 +415,275 @@ export default function ClientDetailPage() {
 
       {client && (
         <>
-          {/* Client header card */}
-          <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-            <div className="h-1.5 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500" />
-            <div className="p-6">
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-                <div className="flex items-start gap-4">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 text-xl font-bold text-white">
-                    {client.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-bold text-text">{client.name}</h1>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-text-2">
-                      {client.website && (
-                        <a
-                          href={client.website}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center gap-1 hover:text-accent"
-                        >
-                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
-                          </svg>
-                          {client.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
-                        </a>
-                      )}
-                      <span className="rounded-lg bg-surface-2 px-2 py-0.5 text-xs capitalize">
-                        {client.industry.replace(/_/g, " ")}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Run snapshot button */}
-                <div className="flex items-center gap-3">
-                  {snapshot?.status === "running" && (
-                    <button
-                      onClick={resetRunningSnapshot}
-                      disabled={running}
-                      className="rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:bg-surface-2 hover:text-text"
-                    >
-                      Reset
-                    </button>
-                  )}
-                  <button
-                    onClick={runSnapshot}
-                    disabled={running}
-                    className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-2 disabled:opacity-50"
-                  >
-                    {running ? (
-                      <>
-                        <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          {/* Hero header */}
+          <div className={cn("relative overflow-hidden rounded-3xl bg-gradient-to-br p-8", getScoreBg(snapshot?.vrtl_score ?? null))}>
+            {/* Decorative elements */}
+            <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/20 blur-3xl" />
+            <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-white/30 blur-2xl" />
+            
+            <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex items-center gap-6">
+                {/* Score circle */}
+                <BigScoreCircle score={snapshot?.vrtl_score ?? null} />
+                
+                {/* Client info */}
+                <div>
+                  <h1 className="text-3xl font-bold text-text">{client.name}</h1>
+                  <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-text-2">
+                    {client.website && (
+                      <a
+                        href={client.website}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-1.5 rounded-full bg-white/50 px-3 py-1 hover:bg-white/70"
+                      >
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
                         </svg>
-                        Running...
-                      </>
-                    ) : (
-                      <>
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
-                        </svg>
-                        Run Snapshot
-                      </>
+                        {client.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+                      </a>
                     )}
-                  </button>
+                    <span className="rounded-full bg-white/50 px-3 py-1 capitalize">
+                      {client.industry.replace(/_/g, " ")}
+                    </span>
+                  </div>
+                  
+                  {/* Trend */}
+                  {snapshots.length > 1 && (
+                    <div className="mt-3 flex items-center gap-2">
+                      <span className="text-xs text-text-3">Trend:</span>
+                      <TrendIndicator snapshots={snapshots} />
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {runError && (
-                <div className="mt-4">
-                  <Alert variant="danger">
-                    <AlertDescription>{runError}</AlertDescription>
-                  </Alert>
-                </div>
-              )}
+              {/* Actions */}
+              <div className="flex flex-col gap-3">
+                {snapshot?.status === "running" && (
+                  <button
+                    onClick={resetRunningSnapshot}
+                    disabled={running}
+                    className="rounded-xl border border-text/10 bg-white/50 px-5 py-2.5 text-sm font-medium text-text-2 transition-all hover:bg-white/70"
+                  >
+                    Reset
+                  </button>
+                )}
+                <button
+                  onClick={runSnapshot}
+                  disabled={running}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-accent/25 transition-all hover:bg-accent-2 hover:shadow-xl disabled:opacity-50"
+                >
+                  {running ? (
+                    <>
+                      <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Running...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+                      </svg>
+                      Run Snapshot
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
+
+            {runError && (
+              <div className="relative mt-4">
+                <Alert variant="danger">
+                  <AlertDescription>{runError}</AlertDescription>
+                </Alert>
+              </div>
+            )}
           </div>
 
           {/* Stats row */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <MetricCard
-              label="VRTL Score"
-              value={snapshot?.vrtl_score ?? "—"}
-              color={typeof snapshot?.vrtl_score === "number" ? (snapshot.vrtl_score >= 80 ? "success" : snapshot.vrtl_score >= 50 ? "warning" : "danger") : "default"}
-              sublabel="AI visibility score"
-            />
-            <MetricCard
-              label="Competitors"
-              value={competitors.length}
-              sublabel={`${8 - competitors.length} slots remaining`}
-            />
-            <MetricCard
-              label="Snapshots"
-              value={snapshots.length}
-              sublabel="Total runs"
-            />
-            <MetricCard
-              label="Confidence"
-              value={competitorConfidence === "high" ? "High" : competitorConfidence === "medium" ? "Medium" : "Low"}
-              color={competitorConfidence === "high" ? "success" : competitorConfidence === "medium" ? "warning" : "danger"}
-              sublabel={competitors.length >= 3 ? "3+ competitors" : "Add more competitors"}
-            />
+            <div className="rounded-2xl border border-border bg-surface p-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100 text-purple-600">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-text">{competitors.length}</div>
+                  <div className="text-xs text-text-3">Competitors</div>
+                </div>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-border bg-surface p-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-text">{snapshots.length}</div>
+                  <div className="text-xs text-text-3">Snapshots</div>
+                </div>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-border bg-surface p-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className={cn("text-2xl font-bold", getScoreColor(avgScore))}>{avgScore ?? "—"}</div>
+                  <div className="text-xs text-text-3">Avg Score</div>
+                </div>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-border bg-surface p-5">
+              <div className="flex items-center gap-3">
+                <div className={cn(
+                  "flex h-10 w-10 items-center justify-center rounded-xl",
+                  competitorConfidence === "high" ? "bg-emerald-100 text-emerald-600" :
+                  competitorConfidence === "medium" ? "bg-amber-100 text-amber-600" :
+                  "bg-red-100 text-red-600"
+                )}>
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className={cn(
+                    "text-2xl font-bold capitalize",
+                    competitorConfidence === "high" ? "text-emerald-600" :
+                    competitorConfidence === "medium" ? "text-amber-600" :
+                    "text-red-600"
+                  )}>
+                    {competitorConfidence}
+                  </div>
+                  <div className="text-xs text-text-3">Confidence</div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Main content */}
           <div className="grid gap-6 lg:grid-cols-3">
-            {/* Score + providers */}
+            {/* Left column - Provider scores */}
             <div className="space-y-6">
-              {/* Score card */}
-              <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-                <div className="border-b border-border px-5 py-4">
-                  <h2 className="font-semibold text-text">VRTL Score</h2>
-                  <p className="text-xs text-text-3">Overall AI visibility</p>
-                </div>
-                <div className="flex flex-col items-center p-6">
-                  <ScoreGauge score={snapshot?.vrtl_score ?? null} />
-                  <div className="mt-4 text-center">
-                    <div className={cn("text-sm font-medium", getScoreColor(snapshot?.vrtl_score ?? null))}>
-                      {typeof snapshot?.vrtl_score === "number"
-                        ? snapshot.vrtl_score >= 80
-                          ? "Strong visibility"
-                          : snapshot.vrtl_score >= 50
-                            ? "Moderate visibility"
-                            : "Weak visibility"
-                        : "No data yet"
-                      }
-                    </div>
-                    {snapshot?.status && (
-                      <div className="mt-2">
-                        <Badge variant={statusVariant(snapshot.status)}>{snapshot.status}</Badge>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
               {/* Provider scores */}
               {providers.length > 0 && (
-                <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-                  <div className="border-b border-border px-5 py-4">
-                    <h2 className="font-semibold text-text">By Provider</h2>
-                  </div>
-                  <div className="p-4 space-y-3">
+                <div className="rounded-2xl border border-border bg-surface p-5">
+                  <h2 className="mb-4 font-semibold text-text">Score by Provider</h2>
+                  <div className="space-y-3">
                     {providers.map(([provider, score]) => (
-                      <div key={provider} className="flex items-center justify-between">
-                        <span className="text-sm capitalize text-text-2">{provider}</span>
-                        <div className="flex items-center gap-2">
-                          <div className="h-2 w-24 overflow-hidden rounded-full bg-surface-2">
-                            <div
-                              className={cn(
-                                "h-full rounded-full",
-                                score >= 80 ? "bg-emerald-500" : score >= 50 ? "bg-amber-500" : "bg-red-500"
-                              )}
-                              style={{ width: `${score}%` }}
-                            />
-                          </div>
-                          <span className={cn("text-sm font-bold", getScoreColor(score))}>{score}</span>
-                        </div>
-                      </div>
+                      <ProviderBar key={provider} provider={provider} score={score} />
                     ))}
                   </div>
                 </div>
               )}
+
+              {/* Quick stats */}
+              {snapshot && (
+                <div className="rounded-2xl border border-border bg-surface p-5">
+                  <h2 className="mb-4 font-semibold text-text">Latest Snapshot</h2>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-text-3">Status</span>
+                      <Badge variant={statusVariant(snapshot.status)}>{snapshot.status}</Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-text-3">Date</span>
+                      <span className="text-text">{new Date(snapshot.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-text-3">Providers</span>
+                      <span className="text-text">{providers.length}</span>
+                    </div>
+                  </div>
+                  <Link
+                    href={`/app/clients/${clientId}/snapshots/${snapshot.id}`}
+                    className="mt-4 block rounded-xl bg-surface-2 py-2.5 text-center text-sm font-medium text-text transition-colors hover:bg-border"
+                  >
+                    View Full Report →
+                  </Link>
+                </div>
+              )}
             </div>
 
-            {/* Competitors + Snapshots */}
+            {/* Right column - Competitors + History */}
             <div className="space-y-6 lg:col-span-2">
               {/* Competitors */}
-              <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+              <div className="rounded-2xl border border-border bg-surface">
                 <div className="flex items-center justify-between border-b border-border px-5 py-4">
                   <div>
                     <h2 className="font-semibold text-text">Competitors</h2>
-                    <p className="text-xs text-text-3">{competitors.length}/8 added</p>
+                    <p className="text-xs text-text-3">{competitors.length}/8 tracked · {8 - competitors.length} slots available</p>
                   </div>
                   <div className={cn(
-                    "flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
-                    competitorConfidence === "high" ? "bg-emerald-500/10 text-emerald-600" :
-                    competitorConfidence === "medium" ? "bg-amber-500/10 text-amber-600" :
-                    "bg-red-500/10 text-red-600"
+                    "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium",
+                    competitorConfidence === "high" ? "bg-emerald-100 text-emerald-700" :
+                    competitorConfidence === "medium" ? "bg-amber-100 text-amber-700" :
+                    "bg-red-100 text-red-700"
                   )}>
                     <span className={cn(
-                      "h-1.5 w-1.5 rounded-full",
+                      "h-2 w-2 rounded-full",
                       competitorConfidence === "high" ? "bg-emerald-500" :
                       competitorConfidence === "medium" ? "bg-amber-500" :
                       "bg-red-500"
                     )} />
-                    {competitorConfidence === "high" ? "High" : competitorConfidence === "medium" ? "Medium" : "Low"} confidence
+                    {competitorConfidence === "high" ? "High confidence" : competitorConfidence === "medium" ? "Add more" : "Low confidence"}
                   </div>
                 </div>
 
-                <div className="p-4">
+                <div className="p-5">
                   {competitors.length > 0 ? (
-                    <div className="space-y-2">
-                      {competitors.map((c) => (
-                        <div key={c.id} className="group flex items-center justify-between rounded-xl bg-surface-2 px-4 py-3 transition-colors hover:bg-surface-2/80">
-                          <div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {competitors.map((c, idx) => (
+                        <div
+                          key={c.id}
+                          className="group relative flex items-center gap-3 rounded-xl border border-border bg-surface-2 p-4 transition-colors hover:border-text/20"
+                        >
+                          <div className={cn(
+                            "flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold text-white",
+                            idx % 4 === 0 ? "bg-gradient-to-br from-blue-500 to-cyan-500" :
+                            idx % 4 === 1 ? "bg-gradient-to-br from-purple-500 to-pink-500" :
+                            idx % 4 === 2 ? "bg-gradient-to-br from-amber-500 to-orange-500" :
+                            "bg-gradient-to-br from-emerald-500 to-teal-500"
+                          )}>
+                            {c.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="min-w-0 flex-1">
                             <div className="font-medium text-text">{c.name}</div>
-                            <div className="text-xs text-text-3">
+                            <div className="truncate text-xs text-text-3">
                               {c.website ? c.website.replace(/^https?:\/\//, "") : "No website"}
                             </div>
                           </div>
                           <button
                             onClick={() => deleteCompetitor(c.id)}
                             disabled={busy}
-                            className="rounded-lg p-2 text-text-3 opacity-0 transition-all hover:bg-red-500/10 hover:text-red-600 group-hover:opacity-100"
+                            className="absolute right-2 top-2 rounded-lg p-1.5 text-text-3 opacity-0 transition-all hover:bg-red-100 hover:text-red-600 group-hover:opacity-100"
                           >
                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                           </button>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="rounded-xl border border-dashed border-border py-8 text-center">
-                      <p className="text-sm text-text-2">No competitors yet</p>
+                    <div className="rounded-xl border-2 border-dashed border-border py-8 text-center">
+                      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-surface-2">
+                        <svg className="h-6 w-6 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                        </svg>
+                      </div>
+                      <p className="text-sm font-medium text-text">No competitors yet</p>
                       <p className="mt-1 text-xs text-text-3">Add competitors for better analysis</p>
                     </div>
                   )}
@@ -607,7 +712,7 @@ export default function ClientDetailPage() {
                       <button
                         type="submit"
                         disabled={busy || !newName.trim()}
-                        className="rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-2 disabled:opacity-50"
+                        className="rounded-xl bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-2 disabled:opacity-50"
                       >
                         Add
                       </button>
@@ -617,7 +722,7 @@ export default function ClientDetailPage() {
               </div>
 
               {/* Snapshot history */}
-              <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+              <div className="rounded-2xl border border-border bg-surface">
                 <div className="border-b border-border px-5 py-4">
                   <h2 className="font-semibold text-text">Snapshot History</h2>
                   <p className="text-xs text-text-3">Recent analysis runs</p>
@@ -632,7 +737,16 @@ export default function ClientDetailPage() {
                         className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-surface-2"
                       >
                         <div className="flex items-center gap-4">
-                          <ScoreGauge score={s.vrtl_score} size="small" />
+                          <div className={cn(
+                            "flex h-12 w-12 items-center justify-center rounded-xl text-lg font-bold",
+                            s.vrtl_score !== null
+                              ? s.vrtl_score >= 80 ? "bg-emerald-100 text-emerald-600"
+                              : s.vrtl_score >= 50 ? "bg-amber-100 text-amber-600"
+                              : "bg-red-100 text-red-600"
+                              : "bg-gray-100 text-gray-400"
+                          )}>
+                            {s.vrtl_score ?? "—"}
+                          </div>
                           <div>
                             <div className="flex items-center gap-2">
                               <Badge variant={statusVariant(s.status)}>{s.status}</Badge>
