@@ -28,10 +28,23 @@ export default function AdminPage() {
   useEffect(() => {
     async function load() {
       try {
-        const { role } = await ensureOnboarded();
-        setRole(role);
+        const { agencyId } = await ensureOnboarded();
 
-        if (role !== "admin" && role !== "owner") {
+        // Get the user's role from agency_members
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("Not authenticated");
+
+        const { data: membership } = await supabase
+          .from("agency_members")
+          .select("role")
+          .eq("user_id", user.id)
+          .eq("agency_id", agencyId)
+          .maybeSingle();
+
+        const userRole = membership?.role ?? null;
+        setRole(userRole);
+
+        if (userRole !== "admin" && userRole !== "owner") {
           setLoading(false);
           return;
         }
