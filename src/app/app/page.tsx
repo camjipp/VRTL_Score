@@ -221,8 +221,8 @@ export default function AppPage() {
       {/* Loading state */}
       {loading && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-32 animate-pulse rounded-2xl bg-white/5" />
+          {[...Array(4)].map((_, idx) => (
+            <div key={idx} className="h-32 animate-pulse rounded-2xl bg-white/5" />
           ))}
         </div>
       )}

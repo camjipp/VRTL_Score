@@ -446,7 +446,7 @@ export default function ClientDetailPage() {
             <MetricCard
               label="VRTL Score"
               value={snapshot?.vrtl_score ?? "—"}
-              color={snapshot?.vrtl_score !== null ? (snapshot.vrtl_score >= 80 ? "success" : snapshot.vrtl_score >= 50 ? "warning" : "danger") : "default"}
+              color={typeof snapshot?.vrtl_score === "number" ? (snapshot.vrtl_score >= 80 ? "success" : snapshot.vrtl_score >= 50 ? "warning" : "danger") : "default"}
               sublabel="AI visibility score"
             />
             <MetricCard
