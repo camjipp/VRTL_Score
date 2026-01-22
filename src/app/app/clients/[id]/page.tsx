@@ -481,7 +481,7 @@ export default function ClientDetailPage() {
                   <ScoreGauge score={snapshot?.vrtl_score ?? null} />
                   <div className="mt-4 text-center">
                     <div className={cn("text-sm font-medium", getScoreColor(snapshot?.vrtl_score ?? null))}>
-                      {snapshot?.vrtl_score !== null
+                      {typeof snapshot?.vrtl_score === "number"
                         ? snapshot.vrtl_score >= 80
                           ? "Strong visibility"
                           : snapshot.vrtl_score >= 50
