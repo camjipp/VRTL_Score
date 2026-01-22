@@ -115,35 +115,6 @@ function MetricCard({
   );
 }
 
-function MiniScoreGauge({ score }: { score: number | null }) {
-  if (score === null) return <span className="text-white/40">—</span>;
-  
-  const color = score >= 80 ? "#22c55e" : score >= 50 ? "#f59e0b" : "#ef4444";
-  const pct = score / 100;
-  const r = 16;
-  const c = 2 * Math.PI * r;
-  const dash = c * pct;
-
-  return (
-    <div className="relative flex h-10 w-10 items-center justify-center">
-      <svg className="h-10 w-10 -rotate-90" viewBox="0 0 40 40">
-        <circle cx="20" cy="20" r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4" />
-        <circle
-          cx="20"
-          cy="20"
-          r={r}
-          fill="none"
-          stroke={color}
-          strokeWidth="4"
-          strokeLinecap="round"
-          strokeDasharray={`${dash} ${c - dash}`}
-        />
-      </svg>
-      <span className="absolute text-xs font-bold text-white">{score}</span>
-    </div>
-  );
-}
-
 export default function AppPage() {
   const supabase = getSupabaseBrowserClient();
 
@@ -360,7 +331,7 @@ export default function AppPage() {
                 {/* No search results */}
                 {clients.length > 0 && filteredClients.length === 0 && (
                   <div className="py-12 text-center">
-                    <p className="text-white/50">No clients match "{searchQuery}"</p>
+                    <p className="text-white/50">No clients match &quot;{searchQuery}&quot;</p>
                     <button
                       onClick={() => setSearchQuery("")}
                       className="mt-2 text-sm text-white/70 hover:text-white hover:underline"

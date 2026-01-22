@@ -59,13 +59,6 @@ function getScoreColor(score: number | null): string {
   return "text-red-400";
 }
 
-function getScoreBg(score: number | null): string {
-  if (score === null) return "bg-white/5";
-  if (score >= 80) return "bg-emerald-500/10";
-  if (score >= 50) return "bg-amber-500/10";
-  return "bg-red-500/10";
-}
-
 function ScoreGauge({ score, size = "large" }: { score: number | null; size?: "large" | "small" }) {
   const sizeClasses = size === "large" ? "h-32 w-32" : "h-16 w-16";
   const r = size === "large" ? 56 : 28;
