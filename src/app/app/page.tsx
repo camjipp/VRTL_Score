@@ -58,59 +58,38 @@ function MetricCard({
   label,
   value,
   sublabel,
-  trend,
   icon,
   color = "default"
 }: {
   label: string;
   value: string | number;
   sublabel?: string;
-  trend?: { value: number; label: string };
   icon: React.ReactNode;
   color?: "default" | "success" | "warning" | "danger";
 }) {
   const colorClasses = {
-    default: "text-white",
-    success: "text-emerald-400",
-    warning: "text-amber-400",
-    danger: "text-red-400"
+    default: "text-text",
+    success: "text-emerald-600",
+    warning: "text-amber-600",
+    danger: "text-red-600"
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-white/5 bg-[#161616] p-5 transition-all hover:border-white/10 hover:bg-[#1a1a1a]">
+    <div className="group relative overflow-hidden rounded-2xl border border-border bg-surface p-5 transition-all hover:shadow-lg">
       <div className="flex items-start justify-between">
         <div>
-          <div className="text-sm font-medium text-white/50">{label}</div>
+          <div className="text-sm font-medium text-text-2">{label}</div>
           <div className={cn("mt-2 text-3xl font-bold tracking-tight", colorClasses[color])}>
             {value}
           </div>
           {sublabel && (
-            <div className="mt-1 text-xs text-white/40">{sublabel}</div>
-          )}
-          {trend && (
-            <div className={cn(
-              "mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
-              trend.value >= 0 ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"
-            )}>
-              {trend.value >= 0 ? (
-                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
-                </svg>
-              ) : (
-                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                </svg>
-              )}
-              {trend.label}
-            </div>
+            <div className="mt-1 text-xs text-text-3">{sublabel}</div>
           )}
         </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 text-white/40">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-2 text-text-3">
           {icon}
         </div>
       </div>
-      {/* Subtle gradient overlay on hover */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
     </div>
   );
 }
@@ -195,14 +174,14 @@ export default function AppPage() {
       {/* Page header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Dashboard</h1>
-          <p className="mt-1 text-sm text-white/50">
+          <h1 className="text-2xl font-bold tracking-tight text-text">Dashboard</h1>
+          <p className="mt-1 text-sm text-text-2">
             Overview of your AI visibility and competitive analysis.
           </p>
         </div>
         <Link
           href="/app/clients/new"
-          className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-black transition-all hover:bg-white/90"
+          className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-2"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -222,7 +201,7 @@ export default function AppPage() {
       {loading && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, idx) => (
-            <div key={idx} className="h-32 animate-pulse rounded-2xl bg-white/5" />
+            <div key={idx} className="h-32 animate-pulse rounded-2xl bg-surface-2" />
           ))}
         </div>
       )}
@@ -280,15 +259,15 @@ export default function AppPage() {
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Clients list */}
             <div className="lg:col-span-2">
-              <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
-                <div className="flex items-center justify-between border-b border-white/5 px-5 py-4">
+              <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+                <div className="flex items-center justify-between border-b border-border px-5 py-4">
                   <div>
-                    <h2 className="font-semibold text-white">Clients</h2>
-                    <p className="text-xs text-white/40">{clients.length} total</p>
+                    <h2 className="font-semibold text-text">Clients</h2>
+                    <p className="text-xs text-text-3">{clients.length} total</p>
                   </div>
                   <div className="relative">
                     <svg
-                      className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40"
+                      className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-3"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -301,7 +280,7 @@ export default function AppPage() {
                       placeholder="Search..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="h-8 w-40 rounded-lg border border-white/10 bg-white/5 pl-9 pr-3 text-sm text-white placeholder:text-white/40 focus:border-white/20 focus:outline-none"
+                      className="h-8 w-40 rounded-lg border border-border bg-surface-2 pl-9 pr-3 text-sm text-text placeholder:text-text-3 focus:border-accent focus:outline-none"
                     />
                   </div>
                 </div>
@@ -309,16 +288,16 @@ export default function AppPage() {
                 {/* Empty state */}
                 {clients.length === 0 && (
                   <div className="flex flex-col items-center justify-center py-16">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/5">
-                      <svg className="h-6 w-6 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-2">
+                      <svg className="h-6 w-6 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
                       </svg>
                     </div>
-                    <h3 className="mt-4 font-semibold text-white">No clients yet</h3>
-                    <p className="mt-1 text-sm text-white/50">Create your first client to get started</p>
+                    <h3 className="mt-4 font-semibold text-text">No clients yet</h3>
+                    <p className="mt-1 text-sm text-text-2">Create your first client to get started</p>
                     <Link
                       href="/app/clients/new"
-                      className="mt-4 inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-white/90"
+                      className="mt-4 inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-2"
                     >
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -331,10 +310,10 @@ export default function AppPage() {
                 {/* No search results */}
                 {clients.length > 0 && filteredClients.length === 0 && (
                   <div className="py-12 text-center">
-                    <p className="text-white/50">No clients match &quot;{searchQuery}&quot;</p>
+                    <p className="text-text-2">No clients match &quot;{searchQuery}&quot;</p>
                     <button
                       onClick={() => setSearchQuery("")}
-                      className="mt-2 text-sm text-white/70 hover:text-white hover:underline"
+                      className="mt-2 text-sm text-accent hover:underline"
                     >
                       Clear search
                     </button>
@@ -343,12 +322,12 @@ export default function AppPage() {
 
                 {/* Client rows */}
                 {filteredClients.length > 0 && (
-                  <div className="divide-y divide-white/5">
+                  <div className="divide-y divide-border">
                     {filteredClients.map((client) => (
                       <Link
                         key={client.id}
                         href={`/app/clients/${client.id}`}
-                        className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-white/[0.02]"
+                        className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-surface-2"
                       >
                         <div className="flex items-center gap-4">
                           <div
@@ -360,15 +339,15 @@ export default function AppPage() {
                             {getInitials(client.name)}
                           </div>
                           <div>
-                            <div className="font-medium text-white">{client.name}</div>
-                            <div className="flex items-center gap-2 text-xs text-white/40">
+                            <div className="font-medium text-text">{client.name}</div>
+                            <div className="flex items-center gap-2 text-xs text-text-3">
                               <span className="capitalize">{client.industry.replace(/_/g, " ")}</span>
                               <span>·</span>
                               <span>{formatDate(client.created_at)}</span>
                             </div>
                           </div>
                         </div>
-                        <svg className="h-5 w-5 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <svg className="h-5 w-5 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                         </svg>
                       </Link>
@@ -381,16 +360,16 @@ export default function AppPage() {
             {/* Quick actions & recent activity */}
             <div className="space-y-6">
               {/* Quick actions */}
-              <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
-                <div className="border-b border-white/5 px-5 py-4">
-                  <h2 className="font-semibold text-white">Quick Actions</h2>
+              <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+                <div className="border-b border-border px-5 py-4">
+                  <h2 className="font-semibold text-text">Quick Actions</h2>
                 </div>
                 <div className="p-4 space-y-2">
                   <Link
                     href="/app/clients/new"
-                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/5 hover:text-white"
+                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-text-2 transition-colors hover:bg-surface-2 hover:text-text"
                   >
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                       </svg>
@@ -399,9 +378,9 @@ export default function AppPage() {
                   </Link>
                   <Link
                     href="/app/settings"
-                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/5 hover:text-white"
+                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-text-2 transition-colors hover:bg-surface-2 hover:text-text"
                   >
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500/10 text-purple-400">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500/10 text-purple-600">
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
                       </svg>
@@ -413,16 +392,16 @@ export default function AppPage() {
 
               {/* Recent clients */}
               {recentClients.length > 0 && (
-                <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
-                  <div className="border-b border-white/5 px-5 py-4">
-                    <h2 className="font-semibold text-white">Recent Clients</h2>
+                <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+                  <div className="border-b border-border px-5 py-4">
+                    <h2 className="font-semibold text-text">Recent Clients</h2>
                   </div>
                   <div className="p-3 space-y-1">
                     {recentClients.map((client) => (
                       <Link
                         key={client.id}
                         href={`/app/clients/${client.id}`}
-                        className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-white/5"
+                        className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-surface-2"
                       >
                         <div
                           className={cn(
@@ -433,8 +412,8 @@ export default function AppPage() {
                           {getInitials(client.name)}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="truncate text-sm font-medium text-white">{client.name}</div>
-                          <div className="text-xs text-white/40">{formatDate(client.created_at)}</div>
+                          <div className="truncate text-sm font-medium text-text">{client.name}</div>
+                          <div className="text-xs text-text-3">{formatDate(client.created_at)}</div>
                         </div>
                       </Link>
                     ))}
@@ -444,27 +423,27 @@ export default function AppPage() {
 
               {/* Getting started (if no clients) */}
               {clients.length === 0 && (
-                <div className="overflow-hidden rounded-2xl border border-dashed border-white/10 bg-gradient-to-br from-white/[0.02] to-transparent p-6">
+                <div className="overflow-hidden rounded-2xl border border-dashed border-border bg-surface-2/50 p-6">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10">
-                    <svg className="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <svg className="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                     </svg>
                   </div>
-                  <h3 className="mt-4 font-semibold text-white">Getting Started</h3>
-                  <p className="mt-2 text-sm text-white/50">
+                  <h3 className="mt-4 font-semibold text-text">Getting Started</h3>
+                  <p className="mt-2 text-sm text-text-2">
                     Create your first client to run AI visibility snapshots and competitive analysis reports.
                   </p>
-                  <ol className="mt-4 space-y-2 text-sm text-white/60">
+                  <ol className="mt-4 space-y-2 text-sm text-text-2">
                     <li className="flex items-center gap-2">
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-xs font-medium text-white">1</span>
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-surface-2 text-xs font-medium text-text">1</span>
                       Add a client
                     </li>
                     <li className="flex items-center gap-2">
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-xs font-medium text-white">2</span>
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-surface-2 text-xs font-medium text-text">2</span>
                       Add competitors
                     </li>
                     <li className="flex items-center gap-2">
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-xs font-medium text-white">3</span>
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-surface-2 text-xs font-medium text-text">3</span>
                       Run a snapshot
                     </li>
                   </ol>

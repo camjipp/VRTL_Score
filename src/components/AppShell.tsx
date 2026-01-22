@@ -64,8 +64,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [busy, setBusy] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [agency, setAgency] = useState<Agency | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
     async function loadAgency() {
@@ -110,16 +108,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#0d0d0d]">
+    <div className="flex min-h-screen bg-bg">
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-64 transform flex-col bg-[#0a0a0a] transition-transform duration-300 ease-out lg:relative lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 flex w-64 transform flex-col border-r border-border bg-surface transition-transform duration-300 ease-out lg:relative lg:translate-x-0",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         {/* Logo + Agency */}
-        <div className="flex h-16 items-center gap-3 border-b border-white/5 px-4">
+        <div className="flex h-16 items-center gap-3 border-b border-border px-4">
           <Link href="/app" className="flex items-center gap-3">
             {agency?.logo_url ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -129,7 +127,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 className="h-8 w-8 rounded-lg object-cover"
               />
             ) : (
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-accent to-purple-600">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   alt="VRTL"
@@ -139,17 +137,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-semibold text-white">
+              <div className="truncate text-sm font-semibold text-text">
                 {agency?.name || "VRTL Score"}
               </div>
-              <div className="text-xs text-white/40">Workspace</div>
+              <div className="text-xs text-text-3">Workspace</div>
             </div>
           </Link>
         </div>
 
         {/* Main nav */}
         <nav className="flex-1 space-y-1 p-3">
-          <div className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-white/30">
+          <div className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-text-3">
             Main
           </div>
           {mainNavItems.map((item) => {
@@ -164,25 +162,25 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 className={cn(
                   "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
                   active
-                    ? "bg-white/10 text-white"
-                    : "text-white/50 hover:bg-white/5 hover:text-white"
+                    ? "bg-accent/10 text-accent"
+                    : "text-text-2 hover:bg-surface-2 hover:text-text"
                 )}
               >
                 <span className={cn(
                   "transition-colors",
-                  active ? "text-white" : "text-white/40 group-hover:text-white/70"
+                  active ? "text-accent" : "text-text-3 group-hover:text-text-2"
                 )}>
                   {item.icon}
                 </span>
                 {item.label}
                 {active && (
-                  <span className="ml-auto h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  <span className="ml-auto h-1.5 w-1.5 rounded-full bg-accent" />
                 )}
               </Link>
             );
           })}
 
-          <div className="mb-2 mt-6 px-3 text-[10px] font-semibold uppercase tracking-wider text-white/30">
+          <div className="mb-2 mt-6 px-3 text-[10px] font-semibold uppercase tracking-wider text-text-3">
             Account
           </div>
           {bottomNavItems.map((item) => {
@@ -195,13 +193,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 className={cn(
                   "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
                   active
-                    ? "bg-white/10 text-white"
-                    : "text-white/50 hover:bg-white/5 hover:text-white"
+                    ? "bg-accent/10 text-accent"
+                    : "text-text-2 hover:bg-surface-2 hover:text-text"
                 )}
               >
                 <span className={cn(
                   "transition-colors",
-                  active ? "text-white" : "text-white/40 group-hover:text-white/70"
+                  active ? "text-accent" : "text-text-3 group-hover:text-text-2"
                 )}>
                   {item.icon}
                 </span>
@@ -212,13 +210,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* Bottom section */}
-        <div className="border-t border-white/5 p-3">
+        <div className="border-t border-border p-3">
           <button
             onClick={logout}
             disabled={busy}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/50 transition-all hover:bg-white/5 hover:text-white"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-text-2 transition-all hover:bg-surface-2 hover:text-text"
           >
-            <svg className="h-5 w-5 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <svg className="h-5 w-5 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
             </svg>
             {busy ? "Signing out..." : "Sign out"}
@@ -226,9 +224,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           <Link
             href="/"
-            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/50 transition-all hover:bg-white/5 hover:text-white"
+            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-text-2 transition-all hover:bg-surface-2 hover:text-text"
           >
-            <svg className="h-5 w-5 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <svg className="h-5 w-5 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
             </svg>
             Back to home
@@ -239,7 +237,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Overlay for mobile */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -247,11 +245,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Main content wrapper */}
       <div className="flex flex-1 flex-col">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-white/5 bg-[#0d0d0d]/95 px-4 backdrop-blur-md lg:px-6">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-border bg-surface/95 px-4 backdrop-blur-md lg:px-6">
           {/* Mobile menu button */}
           <button
             onClick={() => setSidebarOpen(true)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-white/60 hover:bg-white/5 hover:text-white lg:hidden"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-text-2 hover:bg-surface-2 hover:text-text lg:hidden"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -262,7 +260,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="relative flex-1 max-w-md">
             <div className="relative">
               <svg
-                className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40"
+                className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-3"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -273,13 +271,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <input
                 type="text"
                 placeholder="Search clients, reports..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setSearchOpen(true)}
-                onBlur={() => setTimeout(() => setSearchOpen(false), 200)}
-                className="h-9 w-full rounded-lg border border-white/10 bg-white/5 pl-9 pr-4 text-sm text-white placeholder:text-white/40 focus:border-white/20 focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-white/20"
+                className="h-9 w-full rounded-lg border border-border bg-surface-2 pl-9 pr-4 text-sm text-text placeholder:text-text-3 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/20"
               />
-              <kbd className="absolute right-3 top-1/2 hidden -translate-y-1/2 rounded border border-white/10 bg-white/5 px-1.5 py-0.5 text-[10px] font-medium text-white/40 sm:block">
+              <kbd className="absolute right-3 top-1/2 hidden -translate-y-1/2 rounded border border-border bg-surface px-1.5 py-0.5 text-[10px] font-medium text-text-3 sm:block">
                 ⌘K
               </kbd>
             </div>
@@ -288,29 +282,29 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {/* Right side actions */}
           <div className="flex items-center gap-2">
             {/* Help */}
-            <button className="flex h-9 w-9 items-center justify-center rounded-lg text-white/60 hover:bg-white/5 hover:text-white">
+            <button className="flex h-9 w-9 items-center justify-center rounded-lg text-text-2 hover:bg-surface-2 hover:text-text">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
               </svg>
             </button>
 
             {/* Notifications */}
-            <button className="relative flex h-9 w-9 items-center justify-center rounded-lg text-white/60 hover:bg-white/5 hover:text-white">
+            <button className="relative flex h-9 w-9 items-center justify-center rounded-lg text-text-2 hover:bg-surface-2 hover:text-text">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
               </svg>
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-accent" />
             </button>
 
             {/* Divider */}
-            <div className="mx-1 h-6 w-px bg-white/10" />
+            <div className="mx-1 h-6 w-px bg-border" />
 
             {/* User menu */}
-            <button className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-white/5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-xs font-bold text-white">
+            <button className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-surface-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-xs font-bold text-white">
                 {agency?.name?.charAt(0) || "V"}
               </div>
-              <svg className="h-4 w-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <svg className="h-4 w-4 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
               </svg>
             </button>
@@ -318,7 +312,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto bg-[#111111]">
+        <main className="flex-1 overflow-auto bg-bg">
           <div className="mx-auto max-w-7xl p-6">
             {children}
           </div>

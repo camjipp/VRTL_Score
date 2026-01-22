@@ -93,14 +93,14 @@ function ScoreGauge({ score, size = "large" }: { score: number | null; size?: "l
     return (
       <div className={cn("relative flex items-center justify-center", sizeClasses)}>
         <svg className={sizeClasses} viewBox={viewBox}>
-          <circle cx={center} cy={center} r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={strokeW} />
+          <circle cx={center} cy={center} r={r} fill="none" stroke="rgb(var(--border))" strokeWidth={strokeW} />
         </svg>
-        <span className={cn("absolute font-bold text-white/40", fontSize)}>—</span>
+        <span className={cn("absolute font-bold text-text-3", fontSize)}>—</span>
       </div>
     );
   }
 
-  const color = score >= 80 ? "#22c55e" : score >= 50 ? "#f59e0b" : "#ef4444";
+  const color = score >= 80 ? "#059669" : score >= 50 ? "#d97706" : "#dc2626";
   const pctVal = score / 100;
   const c = 2 * Math.PI * r;
   const dash = c * pctVal;
@@ -108,7 +108,7 @@ function ScoreGauge({ score, size = "large" }: { score: number | null; size?: "l
   return (
     <div className={cn("relative flex items-center justify-center", sizeClasses)}>
       <svg className={cn(sizeClasses, "-rotate-90")} viewBox={viewBox}>
-        <circle cx={center} cy={center} r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={strokeW} />
+        <circle cx={center} cy={center} r={r} fill="none" stroke="rgb(var(--border))" strokeWidth={strokeW} />
         <circle
           cx={center}
           cy={center}
@@ -133,7 +133,7 @@ function Donut({ value, label, sublabel, color = "#2563eb" }: { value: number; l
   return (
     <div className="flex items-center gap-3">
       <svg aria-hidden className="h-10 w-10" viewBox="0 0 40 40">
-        <circle cx="20" cy="20" r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="5" />
+        <circle cx="20" cy="20" r={r} fill="none" stroke="rgb(var(--border))" strokeWidth="5" />
         <circle
           cx="20"
           cy="20"
@@ -147,8 +147,8 @@ function Donut({ value, label, sublabel, color = "#2563eb" }: { value: number; l
         />
       </svg>
       <div>
-        <div className="text-sm font-semibold text-white">{label}</div>
-        {sublabel && <div className="text-xs text-white/40">{sublabel}</div>}
+        <div className="text-sm font-semibold text-text">{label}</div>
+        {sublabel && <div className="text-xs text-text-3">{sublabel}</div>}
       </div>
     </div>
   );
@@ -158,13 +158,13 @@ function SimpleBar({ label, value, max, colorClass }: { label: string; value: nu
   const w = max > 0 ? Math.max(0, Math.min(1, value / max)) : 0;
   return (
     <div className="flex items-center gap-3">
-      <div className="w-20 truncate text-xs text-white/50">{label}</div>
+      <div className="w-20 truncate text-xs text-text-3">{label}</div>
       <div className="flex-1">
-        <div className="h-2 w-full rounded-full bg-white/10">
+        <div className="h-2 w-full rounded-full bg-surface-2">
           <div className={cn("h-2 rounded-full", colorClass)} style={{ width: `${Math.round(w * 100)}%` }} />
         </div>
       </div>
-      <div className="w-8 text-right text-xs font-semibold text-white">{value}</div>
+      <div className="w-8 text-right text-xs font-semibold text-text">{value}</div>
     </div>
   );
 }
@@ -176,7 +176,7 @@ function CompetitorBars({ items }: { items: Array<{ name: string; count: number 
       {items.slice(0, 6).map((c) => (
         <SimpleBar key={c.name} label={c.name} value={c.count} max={max} colorClass="bg-purple-500" />
       ))}
-      {items.length === 0 && <div className="text-sm text-white/40">No competitor mentions found.</div>}
+      {items.length === 0 && <div className="text-sm text-text-3">No competitor mentions found.</div>}
     </div>
   );
 }
@@ -197,10 +197,10 @@ function statusVariant(status: string | null | undefined): BadgeVariant {
 }
 
 function getScoreColor(score: number | null): string {
-  if (score === null) return "text-white/40";
-  if (score >= 80) return "text-emerald-400";
-  if (score >= 50) return "text-amber-400";
-  return "text-red-400";
+  if (score === null) return "text-text-3";
+  if (score >= 80) return "text-emerald-600";
+  if (score >= 50) return "text-amber-600";
+  return "text-red-600";
 }
 
 function dedupeKeepOrder(items: string[]) {
@@ -407,19 +407,19 @@ export default function SnapshotDetailPage() {
     <div className="space-y-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm">
-        <Link href="/app" className="text-white/50 hover:text-white">Dashboard</Link>
-        <span className="text-white/30">/</span>
-        <Link href={`/app/clients/${clientId}`} className="text-white/50 hover:text-white">{data?.client?.name || "Client"}</Link>
-        <span className="text-white/30">/</span>
-        <span className="text-white">Report</span>
+        <Link href="/app" className="text-text-2 hover:text-text">Dashboard</Link>
+        <span className="text-text-3">/</span>
+        <Link href={`/app/clients/${clientId}`} className="text-text-2 hover:text-text">{data?.client?.name || "Client"}</Link>
+        <span className="text-text-3">/</span>
+        <span className="text-text">Report</span>
       </div>
 
       {loading && (
         <div className="space-y-4">
-          <div className="h-24 animate-pulse rounded-2xl bg-white/5" />
+          <div className="h-24 animate-pulse rounded-2xl bg-surface-2" />
           <div className="grid gap-4 lg:grid-cols-3">
-            <div className="h-64 animate-pulse rounded-2xl bg-white/5" />
-            <div className="h-64 animate-pulse rounded-2xl bg-white/5 lg:col-span-2" />
+            <div className="h-64 animate-pulse rounded-2xl bg-surface-2" />
+            <div className="h-64 animate-pulse rounded-2xl bg-surface-2 lg:col-span-2" />
           </div>
         </div>
       )}
@@ -434,15 +434,15 @@ export default function SnapshotDetailPage() {
         <div className="grid gap-6 lg:grid-cols-12">
           {/* Sidebar TOC */}
           <aside className="hidden lg:block lg:col-span-3">
-            <div className="sticky top-20 overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
+            <div className="sticky top-20 overflow-hidden rounded-2xl border border-border bg-surface">
               {/* Logo + client */}
-              <div className="border-b border-white/5 p-4">
+              <div className="border-b border-border p-4">
                 <div className="flex items-center gap-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/brand/VRTL_Solo.png" alt="VRTL" className="h-8 w-8" />
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-semibold text-white">{data.client.name}</div>
-                    <div className="text-xs text-white/40">AI Visibility Report</div>
+                    <div className="truncate text-sm font-semibold text-text">{data.client.name}</div>
+                    <div className="text-xs text-text-3">AI Visibility Report</div>
                   </div>
                 </div>
               </div>
@@ -457,10 +457,10 @@ export default function SnapshotDetailPage() {
                       href={`#${s.id}`}
                       className={cn(
                         "flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors",
-                        active ? "bg-white/10 text-white" : "text-white/50 hover:bg-white/5 hover:text-white"
+                        active ? "bg-accent/10 text-accent" : "text-text-2 hover:bg-surface-2 hover:text-text"
                       )}
                     >
-                      <span className={cn(active ? "text-white" : "text-white/40")}>{s.icon}</span>
+                      <span className={cn(active ? "text-accent" : "text-text-3")}>{s.icon}</span>
                       <span className="font-medium">{s.label}</span>
                     </a>
                   );
@@ -468,7 +468,7 @@ export default function SnapshotDetailPage() {
               </nav>
 
               {/* Actions */}
-              <div className="border-t border-white/5 p-3">
+              <div className="border-t border-border p-3">
                 <DownloadPdfButton snapshotId={data.snapshot.id} />
               </div>
             </div>
@@ -477,17 +477,17 @@ export default function SnapshotDetailPage() {
           {/* Main content */}
           <section className="space-y-6 lg:col-span-9">
             {/* Header card */}
-            <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
+            <div className="overflow-hidden rounded-2xl border border-border bg-surface">
               <div className="h-1.5 bg-gradient-to-r from-emerald-500 via-purple-500 to-pink-500" />
               <div className="p-6">
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                   <div>
                     <div className="flex items-center gap-2">
                       <Badge variant={statusVariant(data.snapshot.status)}>{data.snapshot.status}</Badge>
-                      <span className="text-xs text-white/40">ID: {data.snapshot.id.slice(0, 8)}…</span>
+                      <span className="text-xs text-text-3">ID: {data.snapshot.id.slice(0, 8)}…</span>
                     </div>
-                    <h1 className="mt-2 text-2xl font-bold text-white">{data.client.name}</h1>
-                    <div className="mt-1 text-sm text-white/50">
+                    <h1 className="mt-2 text-2xl font-bold text-text">{data.client.name}</h1>
+                    <div className="mt-1 text-sm text-text-2">
                       Completed {formatDate(data.snapshot.completed_at)}
                     </div>
                   </div>
@@ -499,7 +499,7 @@ export default function SnapshotDetailPage() {
                         onClick={() => { setShowDebug(!showDebug); void load(!showDebug); }}
                         className={cn(
                           "rounded-xl border px-4 py-2 text-sm font-medium transition-colors",
-                          showDebug ? "border-red-500/30 bg-red-500/10 text-red-400" : "border-white/10 text-white/60 hover:bg-white/5"
+                          showDebug ? "border-red-500/30 bg-red-500/10 text-red-600" : "border-border text-text-2 hover:bg-surface-2"
                         )}
                       >
                         {showDebug ? "Hide debug" : "Debug"}
@@ -520,12 +520,12 @@ export default function SnapshotDetailPage() {
 
             {/* Overview section */}
             <section id="overview" data-report-section className="scroll-mt-20 space-y-4">
-              <h2 className="text-lg font-semibold text-white">Overview</h2>
+              <h2 className="text-lg font-semibold text-text">Overview</h2>
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {/* Score card */}
-                <div className="rounded-2xl border border-white/5 bg-[#161616] p-5">
-                  <div className="text-sm font-medium text-white/50">VRTL Score</div>
+                <div className="rounded-2xl border border-border bg-surface p-5">
+                  <div className="text-sm font-medium text-text-2">VRTL Score</div>
                   <div className="mt-3 flex items-center gap-4">
                     <ScoreGauge score={data.snapshot.vrtl_score} />
                     <div>
@@ -534,43 +534,43 @@ export default function SnapshotDetailPage() {
                           ? data.snapshot.vrtl_score >= 80 ? "Strong" : data.snapshot.vrtl_score >= 50 ? "Moderate" : "Weak"
                           : "No data"}
                       </div>
-                      <div className="mt-1 text-xs text-white/40">AI visibility</div>
+                      <div className="mt-1 text-xs text-text-3">AI visibility</div>
                     </div>
                   </div>
                 </div>
 
                 {/* Coverage card */}
-                <div className="rounded-2xl border border-white/5 bg-[#161616] p-5">
-                  <div className="text-sm font-medium text-white/50">Coverage</div>
+                <div className="rounded-2xl border border-border bg-surface p-5">
+                  <div className="text-sm font-medium text-text-2">Coverage</div>
                   <div className="mt-3 space-y-3">
                     <Donut
                       value={signalsTotal ? data.summary.client_mentioned_count / signalsTotal : 0}
                       label={`${pct(data.summary.client_mentioned_count, signalsTotal)}% mention rate`}
                       sublabel={`${data.summary.client_mentioned_count}/${signalsTotal} signals`}
-                      color="#22c55e"
+                      color="#059669"
                     />
                     <div className="flex gap-4">
                       <Donut
                         value={signalsTotal ? data.summary.sources_count / signalsTotal : 0}
                         label={`${pct(data.summary.sources_count, signalsTotal)}%`}
                         sublabel="Citeable"
-                        color="#3b82f6"
+                        color="#2563eb"
                       />
                       <Donut
                         value={signalsTotal ? data.summary.specific_features_count / signalsTotal : 0}
                         label={`${pct(data.summary.specific_features_count, signalsTotal)}%`}
                         sublabel="Specific"
-                        color="#a855f7"
+                        color="#7c3aed"
                       />
                     </div>
                   </div>
                 </div>
 
                 {/* Providers card */}
-                <div className="rounded-2xl border border-white/5 bg-[#161616] p-5">
+                <div className="rounded-2xl border border-border bg-surface p-5">
                   <div className="flex items-center justify-between">
-                    <div className="text-sm font-medium text-white/50">Providers</div>
-                    <div className="text-xs text-white/40">{providerEntries.length} total</div>
+                    <div className="text-sm font-medium text-text-2">Providers</div>
+                    <div className="text-xs text-text-3">{providerEntries.length} total</div>
                   </div>
                   <div className="mt-3 space-y-2">
                     {providerEntries.length > 0 ? (
@@ -584,7 +584,7 @@ export default function SnapshotDetailPage() {
                         />
                       ))
                     ) : (
-                      <div className="text-sm text-white/40">No provider data</div>
+                      <div className="text-sm text-text-3">No provider data</div>
                     )}
                   </div>
                 </div>
@@ -593,25 +593,25 @@ export default function SnapshotDetailPage() {
 
             {/* Action plan section */}
             <section id="action-plan" data-report-section className="scroll-mt-20">
-              <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
-                <div className="border-b border-white/5 px-5 py-4">
-                  <h2 className="font-semibold text-white">Action Plan</h2>
-                  <p className="text-xs text-white/40">Top 3 fixes to improve AI visibility</p>
+              <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+                <div className="border-b border-border px-5 py-4">
+                  <h2 className="font-semibold text-text">Action Plan</h2>
+                  <p className="text-xs text-text-3">Top 3 fixes to improve AI visibility</p>
                 </div>
                 <div className="p-5">
                   <ol className="space-y-3">
                     {actionPlan.map((item, idx) => (
                       <li key={idx} className="flex items-start gap-3">
-                        <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-xs font-bold text-emerald-400">
+                        <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-xs font-bold text-emerald-600">
                           {idx + 1}
                         </div>
-                        <div className="text-sm text-white/80">{item}</div>
+                        <div className="text-sm text-text-2">{item}</div>
                       </li>
                     ))}
                   </ol>
                   {topCompetitorNames.length > 0 && (
-                    <div className="mt-4 text-xs text-white/40">
-                      Focus competitors: <span className="text-white/60">{topCompetitorNames.slice(0, 3).join(", ")}</span>
+                    <div className="mt-4 text-xs text-text-3">
+                      Focus competitors: <span className="text-text-2">{topCompetitorNames.slice(0, 3).join(", ")}</span>
                     </div>
                   )}
                 </div>
@@ -620,10 +620,10 @@ export default function SnapshotDetailPage() {
 
             {/* Landscape section */}
             <section id="landscape" data-report-section className="scroll-mt-20">
-              <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
-                <div className="border-b border-white/5 px-5 py-4">
-                  <h2 className="font-semibold text-white">Competitive Landscape</h2>
-                  <p className="text-xs text-white/40">How often competitors are mentioned</p>
+              <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+                <div className="border-b border-border px-5 py-4">
+                  <h2 className="font-semibold text-text">Competitive Landscape</h2>
+                  <p className="text-xs text-text-3">How often competitors are mentioned</p>
                 </div>
                 <div className="p-5">
                   <CompetitorBars items={data.summary.top_competitors} />
@@ -633,43 +633,43 @@ export default function SnapshotDetailPage() {
 
             {/* Findings section */}
             <section id="findings" data-report-section className="scroll-mt-20">
-              <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
-                <div className="border-b border-white/5 px-5 py-4">
-                  <h2 className="font-semibold text-white">Findings</h2>
-                  <p className="text-xs text-white/40">{data.responses.length} signals analyzed</p>
+              <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+                <div className="border-b border-border px-5 py-4">
+                  <h2 className="font-semibold text-text">Findings</h2>
+                  <p className="text-xs text-text-3">{data.responses.length} signals analyzed</p>
                 </div>
-                <div className="divide-y divide-white/5">
+                <div className="divide-y divide-border">
                   {data.responses.map((r, idx) => {
                     const card = buildInsightCard({ clientName: data.client.name, response: r, topCompetitors: topCompetitorNames });
-                    const severityColor = card.severity === "high" ? "text-red-400 bg-red-500/10" : card.severity === "medium" ? "text-amber-400 bg-amber-500/10" : "text-white/50 bg-white/5";
+                    const severityColor = card.severity === "high" ? "text-red-600 bg-red-500/10" : card.severity === "medium" ? "text-amber-600 bg-amber-500/10" : "text-text-2 bg-surface-2";
 
                     return (
                       <details key={r.id} className="group">
-                        <summary className="flex cursor-pointer items-center justify-between px-5 py-4 hover:bg-white/[0.02]">
+                        <summary className="flex cursor-pointer items-center justify-between px-5 py-4 hover:bg-surface-2">
                           <div className="flex items-center gap-3">
-                            <span className="rounded-lg bg-white/5 px-2 py-1 text-xs font-medium text-white/60">#{idx + 1}</span>
+                            <span className="rounded-lg bg-surface-2 px-2 py-1 text-xs font-medium text-text-2">#{idx + 1}</span>
                             <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", severityColor)}>
                               {card.severity === "high" ? "High" : card.severity === "medium" ? "Medium" : "Low"}
                             </span>
-                            <span className="font-medium text-white">{card.title}</span>
+                            <span className="font-medium text-text">{card.title}</span>
                             {r.client_mentioned && (
-                              <span className="flex items-center gap-1 text-xs text-emerald-400">
+                              <span className="flex items-center gap-1 text-xs text-emerald-600">
                                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Mentioned
                               </span>
                             )}
                           </div>
-                          <svg className="h-5 w-5 text-white/30 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <svg className="h-5 w-5 text-text-3 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                           </svg>
                         </summary>
-                        <div className="border-t border-white/5 bg-white/[0.01] px-5 py-4">
-                          <p className="text-sm text-white/70">{card.problem}</p>
-                          <p className="mt-2 text-xs text-white/50"><strong className="text-white/60">Why:</strong> {card.why}</p>
+                        <div className="border-t border-border bg-surface-2/50 px-5 py-4">
+                          <p className="text-sm text-text-2">{card.problem}</p>
+                          <p className="mt-2 text-xs text-text-3"><strong className="text-text-2">Why:</strong> {card.why}</p>
                           <div className="mt-3">
-                            <div className="text-xs font-medium text-white/50">Recommended fixes</div>
+                            <div className="text-xs font-medium text-text-3">Recommended fixes</div>
                             <ul className="mt-2 space-y-1.5">
                               {card.fixes.map((f, i) => (
-                                <li key={i} className="flex items-start gap-2 text-sm text-white/60">
+                                <li key={i} className="flex items-start gap-2 text-sm text-text-2">
                                   <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
                                   {f}
                                 </li>
@@ -677,15 +677,15 @@ export default function SnapshotDetailPage() {
                             </ul>
                           </div>
                           {r.evidence_snippet && (
-                            <div className="mt-3 rounded-lg bg-white/5 p-3 text-xs text-white/50">
-                              <strong className="text-white/60">Evidence:</strong> &quot;{r.evidence_snippet}&quot;
+                            <div className="mt-3 rounded-lg bg-surface-2 p-3 text-xs text-text-3">
+                              <strong className="text-text-2">Evidence:</strong> &quot;{r.evidence_snippet}&quot;
                             </div>
                           )}
                           {showDebug && (r.prompt_text || r.raw_text) && (
                             <details className="mt-3 rounded-lg border border-red-500/20 bg-red-500/5 p-3">
-                              <summary className="cursor-pointer text-xs font-medium text-red-400">Debug details</summary>
-                              {r.prompt_text && <div className="mt-2 text-xs text-white/50"><strong className="text-red-400/80">Prompt:</strong> {r.prompt_text}</div>}
-                              {r.raw_text && <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap text-xs text-white/50">{r.raw_text}</pre>}
+                              <summary className="cursor-pointer text-xs font-medium text-red-600">Debug details</summary>
+                              {r.prompt_text && <div className="mt-2 text-xs text-text-3"><strong className="text-red-600/80">Prompt:</strong> {r.prompt_text}</div>}
+                              {r.raw_text && <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap text-xs text-text-3">{r.raw_text}</pre>}
                             </details>
                           )}
                         </div>
@@ -693,7 +693,7 @@ export default function SnapshotDetailPage() {
                     );
                   })}
                   {data.responses.length === 0 && (
-                    <div className="py-12 text-center text-sm text-white/40">No findings available.</div>
+                    <div className="py-12 text-center text-sm text-text-3">No findings available.</div>
                   )}
                 </div>
               </div>
@@ -701,26 +701,26 @@ export default function SnapshotDetailPage() {
 
             {/* Providers section */}
             <section id="providers" data-report-section className="scroll-mt-20">
-              <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
-                <div className="border-b border-white/5 px-5 py-4">
-                  <h2 className="font-semibold text-white">Provider Scores</h2>
-                  <p className="text-xs text-white/40">How you score across different AI providers</p>
+              <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+                <div className="border-b border-border px-5 py-4">
+                  <h2 className="font-semibold text-text">Provider Scores</h2>
+                  <p className="text-xs text-text-3">How you score across different AI providers</p>
                 </div>
                 <div className="p-5">
                   {providerEntries.length > 0 ? (
                     <div className="grid gap-3 sm:grid-cols-3">
                       {providerEntries.map(([provider, score]) => (
-                        <div key={provider} className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
-                          <div className="text-xs font-medium capitalize text-white/50">{provider}</div>
+                        <div key={provider} className="rounded-xl border border-border bg-surface-2 p-4">
+                          <div className="text-xs font-medium capitalize text-text-3">{provider}</div>
                           <div className={cn("mt-1 text-2xl font-bold", getScoreColor(score))}>{score}</div>
-                          <div className="mt-1 text-xs text-white/40">
+                          <div className="mt-1 text-xs text-text-3">
                             {score >= 80 ? "Strong" : score >= 50 ? "Moderate" : "Weak"}
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-sm text-white/40">No provider scores available.</div>
+                    <div className="text-sm text-text-3">No provider scores available.</div>
                   )}
                 </div>
               </div>
@@ -731,8 +731,8 @@ export default function SnapshotDetailPage() {
               <section id="debug" data-report-section className="scroll-mt-20">
                 <div className="overflow-hidden rounded-2xl border border-red-500/20 bg-red-500/5">
                   <div className="border-b border-red-500/20 px-5 py-4">
-                    <h2 className="font-semibold text-red-400">Debug (internal)</h2>
-                    <p className="text-xs text-red-400/60">Enable to view prompts/raw output in findings</p>
+                    <h2 className="font-semibold text-red-600">Debug (internal)</h2>
+                    <p className="text-xs text-red-600/60">Enable to view prompts/raw output in findings</p>
                   </div>
                   <div className="p-5">
                     <button
@@ -740,12 +740,12 @@ export default function SnapshotDetailPage() {
                       onClick={() => { setShowDebug(!showDebug); void load(!showDebug); }}
                       className={cn(
                         "rounded-xl border px-4 py-2 text-sm font-medium transition-colors",
-                        showDebug ? "border-red-500/30 bg-red-500/10 text-red-400" : "border-white/10 bg-white/5 text-white/60 hover:bg-white/10"
+                        showDebug ? "border-red-500/30 bg-red-500/10 text-red-600" : "border-border bg-surface-2 text-text-2 hover:bg-surface-2/80"
                       )}
                     >
                       {showDebug ? "Disable debug" : "Enable debug"}
                     </button>
-                    <p className="mt-2 text-xs text-white/40">Keep off for client-facing screenshots.</p>
+                    <p className="mt-2 text-xs text-text-3">Keep off for client-facing screenshots.</p>
                   </div>
                 </div>
               </section>

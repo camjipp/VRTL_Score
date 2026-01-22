@@ -53,10 +53,10 @@ function errorMessage(e: unknown): string {
 }
 
 function getScoreColor(score: number | null): string {
-  if (score === null) return "text-white/40";
-  if (score >= 80) return "text-emerald-400";
-  if (score >= 50) return "text-amber-400";
-  return "text-red-400";
+  if (score === null) return "text-text-3";
+  if (score >= 80) return "text-emerald-600";
+  if (score >= 50) return "text-amber-600";
+  return "text-red-600";
 }
 
 function ScoreGauge({ score, size = "large" }: { score: number | null; size?: "large" | "small" }) {
@@ -71,14 +71,14 @@ function ScoreGauge({ score, size = "large" }: { score: number | null; size?: "l
     return (
       <div className={cn("relative flex items-center justify-center", sizeClasses)}>
         <svg className={sizeClasses} viewBox={viewBox}>
-          <circle cx={center} cy={center} r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={strokeW} />
+          <circle cx={center} cy={center} r={r} fill="none" stroke="rgb(var(--border))" strokeWidth={strokeW} />
         </svg>
-        <span className={cn("absolute font-bold text-white/40", fontSize)}>—</span>
+        <span className={cn("absolute font-bold text-text-3", fontSize)}>—</span>
       </div>
     );
   }
 
-  const color = score >= 80 ? "#22c55e" : score >= 50 ? "#f59e0b" : "#ef4444";
+  const color = score >= 80 ? "#059669" : score >= 50 ? "#d97706" : "#dc2626";
   const pct = score / 100;
   const c = 2 * Math.PI * r;
   const dash = c * pct;
@@ -86,7 +86,7 @@ function ScoreGauge({ score, size = "large" }: { score: number | null; size?: "l
   return (
     <div className={cn("relative flex items-center justify-center", sizeClasses)}>
       <svg className={cn(sizeClasses, "-rotate-90")} viewBox={viewBox}>
-        <circle cx={center} cy={center} r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={strokeW} />
+        <circle cx={center} cy={center} r={r} fill="none" stroke="rgb(var(--border))" strokeWidth={strokeW} />
         <circle
           cx={center}
           cy={center}
@@ -115,17 +115,17 @@ function MetricCard({
   color?: "default" | "success" | "warning" | "danger";
 }) {
   const colorClasses = {
-    default: "text-white",
-    success: "text-emerald-400",
-    warning: "text-amber-400",
-    danger: "text-red-400"
+    default: "text-text",
+    success: "text-emerald-600",
+    warning: "text-amber-600",
+    danger: "text-red-600"
   };
 
   return (
-    <div className="rounded-xl border border-white/5 bg-[#1a1a1a] p-4">
-      <div className="text-xs font-medium text-white/40">{label}</div>
+    <div className="rounded-xl border border-border bg-surface p-4">
+      <div className="text-xs font-medium text-text-3">{label}</div>
       <div className={cn("mt-1 text-2xl font-bold", colorClasses[color])}>{value}</div>
-      {sublabel && <div className="mt-0.5 text-xs text-white/40">{sublabel}</div>}
+      {sublabel && <div className="mt-0.5 text-xs text-text-3">{sublabel}</div>}
     </div>
   );
 }
@@ -328,18 +328,18 @@ export default function ClientDetailPage() {
     <div className="space-y-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm">
-        <Link href="/app" className="text-white/50 hover:text-white">Dashboard</Link>
-        <span className="text-white/30">/</span>
-        <span className="text-white">{client?.name || "Client"}</span>
+        <Link href="/app" className="text-text-2 hover:text-text">Dashboard</Link>
+        <span className="text-text-3">/</span>
+        <span className="text-text">{client?.name || "Client"}</span>
       </div>
 
       {/* Loading */}
       {loading && (
         <div className="space-y-4">
-          <div className="h-24 animate-pulse rounded-2xl bg-white/5" />
+          <div className="h-24 animate-pulse rounded-2xl bg-surface-2" />
           <div className="grid gap-4 lg:grid-cols-3">
-            <div className="h-64 animate-pulse rounded-2xl bg-white/5" />
-            <div className="h-64 animate-pulse rounded-2xl bg-white/5 lg:col-span-2" />
+            <div className="h-64 animate-pulse rounded-2xl bg-surface-2" />
+            <div className="h-64 animate-pulse rounded-2xl bg-surface-2 lg:col-span-2" />
           </div>
         </div>
       )}
@@ -353,9 +353,9 @@ export default function ClientDetailPage() {
 
       {/* Not found */}
       {!loading && !error && !client && (
-        <div className="rounded-2xl border border-white/5 bg-[#161616] py-16 text-center">
-          <p className="text-white/50">Client not found (or not in your agency).</p>
-          <Link href="/app" className="mt-4 inline-block text-sm text-white/70 hover:text-white hover:underline">
+        <div className="rounded-2xl border border-border bg-surface py-16 text-center">
+          <p className="text-text-2">Client not found (or not in your agency).</p>
+          <Link href="/app" className="mt-4 inline-block text-sm text-accent hover:underline">
             Back to dashboard
           </Link>
         </div>
@@ -364,7 +364,7 @@ export default function ClientDetailPage() {
       {client && (
         <>
           {/* Client header card */}
-          <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
+          <div className="overflow-hidden rounded-2xl border border-border bg-surface">
             <div className="h-1.5 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500" />
             <div className="p-6">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
@@ -373,14 +373,14 @@ export default function ClientDetailPage() {
                     {client.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <h1 className="text-2xl font-bold text-white">{client.name}</h1>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-white/50">
+                    <h1 className="text-2xl font-bold text-text">{client.name}</h1>
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-text-2">
                       {client.website && (
                         <a
                           href={client.website}
                           target="_blank"
                           rel="noreferrer"
-                          className="flex items-center gap-1 hover:text-white"
+                          className="flex items-center gap-1 hover:text-accent"
                         >
                           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
@@ -388,7 +388,7 @@ export default function ClientDetailPage() {
                           {client.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
                         </a>
                       )}
-                      <span className="rounded-lg bg-white/5 px-2 py-0.5 text-xs capitalize">
+                      <span className="rounded-lg bg-surface-2 px-2 py-0.5 text-xs capitalize">
                         {client.industry.replace(/_/g, " ")}
                       </span>
                     </div>
@@ -401,7 +401,7 @@ export default function ClientDetailPage() {
                     <button
                       onClick={resetRunningSnapshot}
                       disabled={running}
-                      className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/5 hover:text-white"
+                      className="rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:bg-surface-2 hover:text-text"
                     >
                       Reset
                     </button>
@@ -409,7 +409,7 @@ export default function ClientDetailPage() {
                   <button
                     onClick={runSnapshot}
                     disabled={running}
-                    className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-black transition-all hover:bg-white/90 disabled:opacity-50"
+                    className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-2 disabled:opacity-50"
                   >
                     {running ? (
                       <>
@@ -472,10 +472,10 @@ export default function ClientDetailPage() {
             {/* Score + providers */}
             <div className="space-y-6">
               {/* Score card */}
-              <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
-                <div className="border-b border-white/5 px-5 py-4">
-                  <h2 className="font-semibold text-white">VRTL Score</h2>
-                  <p className="text-xs text-white/40">Overall AI visibility</p>
+              <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+                <div className="border-b border-border px-5 py-4">
+                  <h2 className="font-semibold text-text">VRTL Score</h2>
+                  <p className="text-xs text-text-3">Overall AI visibility</p>
                 </div>
                 <div className="flex flex-col items-center p-6">
                   <ScoreGauge score={snapshot?.vrtl_score ?? null} />
@@ -501,16 +501,16 @@ export default function ClientDetailPage() {
 
               {/* Provider scores */}
               {providers.length > 0 && (
-                <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
-                  <div className="border-b border-white/5 px-5 py-4">
-                    <h2 className="font-semibold text-white">By Provider</h2>
+                <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+                  <div className="border-b border-border px-5 py-4">
+                    <h2 className="font-semibold text-text">By Provider</h2>
                   </div>
                   <div className="p-4 space-y-3">
                     {providers.map(([provider, score]) => (
                       <div key={provider} className="flex items-center justify-between">
-                        <span className="text-sm capitalize text-white/70">{provider}</span>
+                        <span className="text-sm capitalize text-text-2">{provider}</span>
                         <div className="flex items-center gap-2">
-                          <div className="h-2 w-24 overflow-hidden rounded-full bg-white/10">
+                          <div className="h-2 w-24 overflow-hidden rounded-full bg-surface-2">
                             <div
                               className={cn(
                                 "h-full rounded-full",
@@ -531,17 +531,17 @@ export default function ClientDetailPage() {
             {/* Competitors + Snapshots */}
             <div className="space-y-6 lg:col-span-2">
               {/* Competitors */}
-              <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
-                <div className="flex items-center justify-between border-b border-white/5 px-5 py-4">
+              <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+                <div className="flex items-center justify-between border-b border-border px-5 py-4">
                   <div>
-                    <h2 className="font-semibold text-white">Competitors</h2>
-                    <p className="text-xs text-white/40">{competitors.length}/8 added</p>
+                    <h2 className="font-semibold text-text">Competitors</h2>
+                    <p className="text-xs text-text-3">{competitors.length}/8 added</p>
                   </div>
                   <div className={cn(
                     "flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
-                    competitorConfidence === "high" ? "bg-emerald-500/10 text-emerald-400" :
-                    competitorConfidence === "medium" ? "bg-amber-500/10 text-amber-400" :
-                    "bg-red-500/10 text-red-400"
+                    competitorConfidence === "high" ? "bg-emerald-500/10 text-emerald-600" :
+                    competitorConfidence === "medium" ? "bg-amber-500/10 text-amber-600" :
+                    "bg-red-500/10 text-red-600"
                   )}>
                     <span className={cn(
                       "h-1.5 w-1.5 rounded-full",
@@ -557,17 +557,17 @@ export default function ClientDetailPage() {
                   {competitors.length > 0 ? (
                     <div className="space-y-2">
                       {competitors.map((c) => (
-                        <div key={c.id} className="group flex items-center justify-between rounded-xl bg-white/[0.02] px-4 py-3 transition-colors hover:bg-white/[0.04]">
+                        <div key={c.id} className="group flex items-center justify-between rounded-xl bg-surface-2 px-4 py-3 transition-colors hover:bg-surface-2/80">
                           <div>
-                            <div className="font-medium text-white">{c.name}</div>
-                            <div className="text-xs text-white/40">
+                            <div className="font-medium text-text">{c.name}</div>
+                            <div className="text-xs text-text-3">
                               {c.website ? c.website.replace(/^https?:\/\//, "") : "No website"}
                             </div>
                           </div>
                           <button
                             onClick={() => deleteCompetitor(c.id)}
                             disabled={busy}
-                            className="rounded-lg p-2 text-white/30 opacity-0 transition-all hover:bg-red-500/10 hover:text-red-400 group-hover:opacity-100"
+                            className="rounded-lg p-2 text-text-3 opacity-0 transition-all hover:bg-red-500/10 hover:text-red-600 group-hover:opacity-100"
                           >
                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
@@ -577,9 +577,9 @@ export default function ClientDetailPage() {
                       ))}
                     </div>
                   ) : (
-                    <div className="rounded-xl border border-dashed border-white/10 py-8 text-center">
-                      <p className="text-sm text-white/50">No competitors yet</p>
-                      <p className="mt-1 text-xs text-white/30">Add competitors for better analysis</p>
+                    <div className="rounded-xl border border-dashed border-border py-8 text-center">
+                      <p className="text-sm text-text-2">No competitors yet</p>
+                      <p className="mt-1 text-xs text-text-3">Add competitors for better analysis</p>
                     </div>
                   )}
 
@@ -593,20 +593,21 @@ export default function ClientDetailPage() {
                         onChange={(e) => setNewName(e.target.value)}
                         required
                         disabled={busy}
-                        className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-white/20 focus:outline-none"
+                        className="flex-1 rounded-xl border border-border bg-surface-2 px-4 py-2.5 text-sm text-text placeholder:text-text-3 focus:border-accent focus:outline-none"
                       />
                       <input
-                        type="text"
-                        placeholder="Website (optional)"
+                        type="url"
+                        placeholder="https://competitor.com"
                         value={newWebsite}
                         onChange={(e) => setNewWebsite(e.target.value)}
+                        required
                         disabled={busy}
-                        className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-white/20 focus:outline-none"
+                        className="flex-1 rounded-xl border border-border bg-surface-2 px-4 py-2.5 text-sm text-text placeholder:text-text-3 focus:border-accent focus:outline-none"
                       />
                       <button
                         type="submit"
                         disabled={busy || !newName.trim()}
-                        className="rounded-xl bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/20 disabled:opacity-50"
+                        className="rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-2 disabled:opacity-50"
                       >
                         Add
                       </button>
@@ -616,19 +617,19 @@ export default function ClientDetailPage() {
               </div>
 
               {/* Snapshot history */}
-              <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
-                <div className="border-b border-white/5 px-5 py-4">
-                  <h2 className="font-semibold text-white">Snapshot History</h2>
-                  <p className="text-xs text-white/40">Recent analysis runs</p>
+              <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+                <div className="border-b border-border px-5 py-4">
+                  <h2 className="font-semibold text-text">Snapshot History</h2>
+                  <p className="text-xs text-text-3">Recent analysis runs</p>
                 </div>
 
                 {snapshots.length > 0 ? (
-                  <div className="divide-y divide-white/5">
+                  <div className="divide-y divide-border">
                     {snapshots.map((s) => (
                       <Link
                         key={s.id}
                         href={`/app/clients/${clientId}/snapshots/${s.id}`}
-                        className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-white/[0.02]"
+                        className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-surface-2"
                       >
                         <div className="flex items-center gap-4">
                           <ScoreGauge score={s.vrtl_score} size="small" />
@@ -636,17 +637,17 @@ export default function ClientDetailPage() {
                             <div className="flex items-center gap-2">
                               <Badge variant={statusVariant(s.status)}>{s.status}</Badge>
                               {s.score_by_provider && (
-                                <span className="text-xs text-white/40">
+                                <span className="text-xs text-text-3">
                                   {Object.keys(s.score_by_provider).length} providers
                                 </span>
                               )}
                             </div>
-                            <div className="mt-1 text-sm text-white/50">
+                            <div className="mt-1 text-sm text-text-2">
                               {new Date(s.created_at).toLocaleString()}
                             </div>
                           </div>
                         </div>
-                        <svg className="h-5 w-5 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <svg className="h-5 w-5 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                         </svg>
                       </Link>
@@ -654,8 +655,8 @@ export default function ClientDetailPage() {
                   </div>
                 ) : (
                   <div className="py-12 text-center">
-                    <p className="text-sm text-white/50">No snapshots yet</p>
-                    <p className="mt-1 text-xs text-white/30">Run your first snapshot to get started</p>
+                    <p className="text-sm text-text-2">No snapshots yet</p>
+                    <p className="mt-1 text-xs text-text-3">Run your first snapshot to get started</p>
                   </div>
                 )}
               </div>
