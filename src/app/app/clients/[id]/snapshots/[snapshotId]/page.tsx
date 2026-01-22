@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 
 import { DownloadPdfButton } from "@/components/DownloadPdfButton";
@@ -64,12 +63,6 @@ type InsightCard = {
   why: string;
   fixes: string[];
   competitorFocus: string[];
-};
-
-type ReportSection = {
-  id: string;
-  label: string;
-  icon: ReactNode;
 };
 
 function pct(n: number, d: number) {
@@ -363,7 +356,6 @@ export default function SnapshotDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showDebug, setShowDebug] = useState(false);
-  const [activeSection, setActiveSection] = useState<string>("overview");
 
   async function load(nextShowDebug = showDebug) {
     setLoading(true);
@@ -389,23 +381,6 @@ export default function SnapshotDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientId, snapshotId]);
 
-  useEffect(() => {
-    if (loading || typeof window === "undefined") return;
-    const sections = Array.from(document.querySelectorAll<HTMLElement>("[data-report-section]"));
-    if (!sections.length) return;
-
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.filter((e) => e.isIntersecting).sort((a, b) => (b.intersectionRatio ?? 0) - (a.intersectionRatio ?? 0));
-        const id = (visible[0]?.target as HTMLElement | undefined)?.id;
-        if (id) setActiveSection(id);
-      },
-      { root: null, threshold: [0.15, 0.25, 0.4, 0.6] }
-    );
-    sections.forEach((el) => obs.observe(el));
-    return () => obs.disconnect();
-  }, [loading, data?.snapshot?.id]);
-
   const providers = data?.snapshot.score_by_provider ?? null;
   const providerEntries = providers ? Object.entries(providers) : [];
   const topCompetitorNames = data?.summary.top_competitors?.map((c) => c.name) ?? [];
@@ -428,22 +403,8 @@ export default function SnapshotDetailPage() {
     return acc;
   }, {} as Record<string, number>) ?? {};
 
-  const reportSections: ReportSection[] = data
-    ? [
-        { id: "overview", label: "Overview", icon: <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 3v18h18" /><path strokeLinecap="round" strokeLinejoin="round" d="M7 14l3-3 3 3 5-6" /></svg> },
-        { id: "action-plan", label: "Action Plan", icon: <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> },
-        { id: "landscape", label: "Landscape", icon: <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 7.5h16.5M3.75 12h16.5M3.75 16.5h16.5" /></svg> },
-        { id: "findings", label: "Findings", icon: <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg> },
-        { id: "providers", label: "Providers", icon: <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v18h16.5V3H3.75zM7.5 7.5h9M7.5 12h9M7.5 16.5h9" /></svg> }
-      ]
-    : [];
-
-  if (data?.debug.allowed) {
-    reportSections.push({ id: "debug", label: "Debug", icon: <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" /></svg> });
-  }
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm">
         <Link href="/app" className="text-text-2 hover:text-text">Dashboard</Link>
@@ -456,10 +417,10 @@ export default function SnapshotDetailPage() {
       {loading && (
         <div className="space-y-4">
           <div className="h-64 animate-pulse rounded-3xl bg-surface-2" />
-          <div className="grid gap-4 lg:grid-cols-3">
-            <div className="h-48 animate-pulse rounded-2xl bg-surface-2" />
-            <div className="h-48 animate-pulse rounded-2xl bg-surface-2" />
-            <div className="h-48 animate-pulse rounded-2xl bg-surface-2" />
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="h-32 animate-pulse rounded-2xl bg-surface-2" />
+            <div className="h-32 animate-pulse rounded-2xl bg-surface-2" />
+            <div className="h-32 animate-pulse rounded-2xl bg-surface-2" />
           </div>
         </div>
       )}
@@ -471,354 +432,284 @@ export default function SnapshotDetailPage() {
       )}
 
       {!loading && data && (
-        <div className="grid gap-6 lg:grid-cols-12">
-          {/* Sidebar */}
-          <aside className="hidden lg:block lg:col-span-3">
-            <div className="sticky top-20 space-y-4">
-              {/* Logo card */}
-              <div className="overflow-hidden rounded-2xl border border-border bg-surface p-4">
-                <div className="flex items-center gap-3">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/brand/VRTL_Solo.png" alt="VRTL" className="h-10 w-10" />
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-semibold text-text">{data.client.name}</div>
-                    <div className="text-xs text-text-3">AI Visibility Report</div>
-                  </div>
+        <div className="space-y-8">
+          {/* Hero section */}
+          <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-slate-50 to-slate-100 p-8">
+            <div className="flex flex-col items-center gap-8 lg:flex-row lg:items-start">
+              {/* Score */}
+              <HeroScoreGauge score={data.snapshot.vrtl_score} />
+
+              {/* Info + metrics */}
+              <div className="flex-1 text-center lg:text-left">
+                <div className="flex items-center justify-center gap-2 lg:justify-start">
+                  <Badge variant={statusVariant(data.snapshot.status)}>{data.snapshot.status}</Badge>
+                  <span className="text-xs text-text-3">ID: {data.snapshot.id.slice(0, 8)}…</span>
+                </div>
+                <h1 className="mt-3 text-3xl font-bold text-text">{data.client.name}</h1>
+                <p className="mt-1 text-sm text-text-2">
+                  Completed {formatDate(data.snapshot.completed_at)}
+                </p>
+
+                {/* Metric donuts */}
+                <div className="mt-6 flex items-center justify-center gap-8 lg:justify-start">
+                  <MetricDonut
+                    value={data.summary.client_mentioned_count}
+                    total={signalsTotal}
+                    label="Mention rate"
+                    color="#059669"
+                  />
+                  <MetricDonut
+                    value={data.summary.sources_count}
+                    total={signalsTotal}
+                    label="Citeable"
+                    color="#2563eb"
+                  />
+                  <MetricDonut
+                    value={data.summary.specific_features_count}
+                    total={signalsTotal}
+                    label="Specific"
+                    color="#7c3aed"
+                  />
                 </div>
               </div>
-
-              {/* Nav */}
-              <nav className="rounded-2xl border border-border bg-surface p-2">
-                {reportSections.map((s) => {
-                  const active = activeSection === s.id;
-                  return (
-                    <a
-                      key={s.id}
-                      href={`#${s.id}`}
-                      className={cn(
-                        "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors",
-                        active ? "bg-accent text-white" : "text-text-2 hover:bg-surface-2 hover:text-text"
-                      )}
-                    >
-                      <span>{s.icon}</span>
-                      <span className="font-medium">{s.label}</span>
-                    </a>
-                  );
-                })}
-              </nav>
 
               {/* Actions */}
-              <div className="rounded-2xl border border-border bg-surface p-3">
+              <div className="flex flex-col gap-3">
                 <DownloadPdfButton snapshotId={data.snapshot.id} />
-              </div>
-            </div>
-          </aside>
-
-          {/* Main content */}
-          <section className="space-y-8 lg:col-span-9">
-            {/* Hero section */}
-            <section id="overview" data-report-section className="scroll-mt-20">
-              <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-slate-50 to-slate-100 p-8">
-                <div className="flex flex-col items-center gap-8 lg:flex-row lg:items-start">
-                  {/* Score */}
-                  <HeroScoreGauge score={data.snapshot.vrtl_score} />
-
-                  {/* Info + metrics */}
-                  <div className="flex-1 text-center lg:text-left">
-                    <div className="flex items-center justify-center gap-2 lg:justify-start">
-                      <Badge variant={statusVariant(data.snapshot.status)}>{data.snapshot.status}</Badge>
-                      <span className="text-xs text-text-3">ID: {data.snapshot.id.slice(0, 8)}…</span>
-                    </div>
-                    <h1 className="mt-3 text-3xl font-bold text-text">{data.client.name}</h1>
-                    <p className="mt-1 text-sm text-text-2">
-                      Completed {formatDate(data.snapshot.completed_at)}
-                    </p>
-
-                    {/* Metric donuts */}
-                    <div className="mt-6 flex items-center justify-center gap-8 lg:justify-start">
-                      <MetricDonut
-                        value={data.summary.client_mentioned_count}
-                        total={signalsTotal}
-                        label="Mention rate"
-                        color="#059669"
-                      />
-                      <MetricDonut
-                        value={data.summary.sources_count}
-                        total={signalsTotal}
-                        label="Citeable"
-                        color="#2563eb"
-                      />
-                      <MetricDonut
-                        value={data.summary.specific_features_count}
-                        total={signalsTotal}
-                        label="Specific"
-                        color="#7c3aed"
-                      />
-                    </div>
-
-                    {/* Quick actions for mobile */}
-                    <div className="mt-6 flex items-center justify-center gap-3 lg:hidden">
-                      <DownloadPdfButton snapshotId={data.snapshot.id} />
-                      {data.debug.allowed && (
-                        <button
-                          type="button"
-                          onClick={() => { setShowDebug(!showDebug); void load(!showDebug); }}
-                          className={cn(
-                            "rounded-xl border px-4 py-2 text-sm font-medium transition-colors",
-                            showDebug ? "border-red-200 bg-red-50 text-red-600" : "border-border bg-surface text-text-2"
-                          )}
-                        >
-                          {showDebug ? "Hide debug" : "Debug"}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Desktop debug button */}
-                  {data.debug.allowed && (
-                    <div className="hidden lg:block">
-                      <button
-                        type="button"
-                        onClick={() => { setShowDebug(!showDebug); void load(!showDebug); }}
-                        className={cn(
-                          "rounded-xl border px-4 py-2 text-sm font-medium transition-colors",
-                          showDebug ? "border-red-200 bg-red-50 text-red-600" : "border-border bg-white text-text-2 hover:bg-surface-2"
-                        )}
-                      >
-                        {showDebug ? "Hide debug" : "Debug"}
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {data.snapshot.error && (
-                  <div className="mt-6">
-                    <Alert variant="danger">
-                      <AlertDescription>Error: {data.snapshot.error}</AlertDescription>
-                    </Alert>
-                  </div>
-                )}
-              </div>
-
-              {/* Insight summary cards */}
-              <div className="mt-6 grid gap-4 sm:grid-cols-3">
-                <div className="rounded-2xl bg-red-50 p-5 ring-1 ring-red-100">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-100 text-red-600">
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-red-700">{insightCounts.high || 0}</div>
-                      <div className="text-xs text-red-600">High priority</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="rounded-2xl bg-amber-50 p-5 ring-1 ring-amber-100">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-amber-700">{insightCounts.medium || 0}</div>
-                      <div className="text-xs text-amber-600">Medium priority</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="rounded-2xl bg-emerald-50 p-5 ring-1 ring-emerald-100">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-emerald-700">{insightCounts.low || 0}</div>
-                      <div className="text-xs text-emerald-600">Low / strong</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* Action plan */}
-            <section id="action-plan" data-report-section className="scroll-mt-20">
-              <div className="rounded-2xl border border-border bg-surface p-6">
-                <div className="mb-6">
-                  <h2 className="text-xl font-bold text-text">Action Plan</h2>
-                  <p className="text-sm text-text-3">Top fixes to improve AI visibility</p>
-                </div>
-                <div className="space-y-4">
-                  {actionPlan.map((item, idx) => (
-                    <div key={idx} className="flex items-start gap-4 rounded-xl bg-surface-2 p-4">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-600">
-                        {idx + 1}
-                      </div>
-                      <div className="text-sm text-text">{item}</div>
-                    </div>
-                  ))}
-                </div>
-                {topCompetitorNames.length > 0 && (
-                  <div className="mt-4 text-xs text-text-3">
-                    Focus competitors: <span className="font-medium text-text-2">{topCompetitorNames.slice(0, 3).join(", ")}</span>
-                  </div>
-                )}
-              </div>
-            </section>
-
-            {/* Competitive landscape */}
-            <section id="landscape" data-report-section className="scroll-mt-20">
-              <div className="rounded-2xl border border-border bg-surface p-6">
-                <div className="mb-6">
-                  <h2 className="text-xl font-bold text-text">Competitive Landscape</h2>
-                  <p className="text-sm text-text-3">How often competitors are mentioned in AI responses</p>
-                </div>
-                {data.summary.top_competitors.length > 0 ? (
-                  <div className="space-y-3">
-                    {data.summary.top_competitors.slice(0, 6).map((c, idx) => (
-                      <CompetitorBar
-                        key={c.name}
-                        name={c.name}
-                        count={c.count}
-                        max={Math.max(...data.summary.top_competitors.map((x) => x.count))}
-                        rank={idx}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="py-8 text-center text-sm text-text-3">No competitor mentions found</div>
-                )}
-              </div>
-            </section>
-
-            {/* Findings */}
-            <section id="findings" data-report-section className="scroll-mt-20">
-              <div className="rounded-2xl border border-border bg-surface">
-                <div className="border-b border-border p-6">
-                  <h2 className="text-xl font-bold text-text">Findings</h2>
-                  <p className="text-sm text-text-3">{data.responses.length} signals analyzed</p>
-                </div>
-                <div className="divide-y divide-border">
-                  {data.responses.map((r, idx) => {
-                    const card = buildInsightCard({ clientName: data.client.name, response: r, topCompetitors: topCompetitorNames });
-                    const severityStyles = {
-                      high: { badge: "bg-red-100 text-red-700", icon: "bg-red-50 text-red-600" },
-                      medium: { badge: "bg-amber-100 text-amber-700", icon: "bg-amber-50 text-amber-600" },
-                      low: { badge: "bg-emerald-100 text-emerald-700", icon: "bg-emerald-50 text-emerald-600" }
-                    };
-                    const styles = severityStyles[card.severity];
-
-                    return (
-                      <details key={r.id} className="group">
-                        <summary className="flex cursor-pointer items-center justify-between p-5 hover:bg-surface-2">
-                          <div className="flex items-center gap-4">
-                            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-2 text-sm font-bold text-text-3">
-                              {idx + 1}
-                            </span>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className={cn("rounded-full px-2.5 py-1 text-xs font-medium", styles.badge)}>
-                                  {card.severity === "high" ? "High" : card.severity === "medium" ? "Medium" : "Low"}
-                                </span>
-                                <span className="font-medium text-text">{card.title}</span>
-                              </div>
-                              {r.client_mentioned && (
-                                <span className="mt-1 inline-flex items-center gap-1 text-xs text-emerald-600">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Client mentioned
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <svg className="h-5 w-5 text-text-3 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                          </svg>
-                        </summary>
-                        <div className="border-t border-border bg-surface-2/50 p-5">
-                          <div className="grid gap-4 lg:grid-cols-2">
-                            <div>
-                              <h4 className="text-sm font-medium text-text">Problem</h4>
-                              <p className="mt-1 text-sm text-text-2">{card.problem}</p>
-                              <h4 className="mt-3 text-sm font-medium text-text">Why it matters</h4>
-                              <p className="mt-1 text-sm text-text-2">{card.why}</p>
-                            </div>
-                            <div>
-                              <h4 className="text-sm font-medium text-text">Fixes</h4>
-                              <ul className="mt-2 space-y-2">
-                                {card.fixes.map((f, i) => (
-                                  <li key={i} className="flex items-start gap-2 text-sm text-text-2">
-                                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-                                    {f}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </div>
-                          {r.evidence_snippet && (
-                            <div className="mt-4 rounded-xl bg-surface-2 p-4 text-sm text-text-2">
-                              <strong className="text-text">Evidence:</strong> &quot;{r.evidence_snippet}&quot;
-                            </div>
-                          )}
-                          {showDebug && (r.prompt_text || r.raw_text) && (
-                            <details className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4">
-                              <summary className="cursor-pointer text-sm font-medium text-red-600">Debug details</summary>
-                              {r.prompt_text && <div className="mt-2 text-xs text-text-3"><strong className="text-red-600">Prompt:</strong> {r.prompt_text}</div>}
-                              {r.raw_text && <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap text-xs text-text-3">{r.raw_text}</pre>}
-                            </details>
-                          )}
-                        </div>
-                      </details>
-                    );
-                  })}
-                  {data.responses.length === 0 && (
-                    <div className="py-12 text-center text-sm text-text-3">No findings available.</div>
-                  )}
-                </div>
-              </div>
-            </section>
-
-            {/* Providers */}
-            <section id="providers" data-report-section className="scroll-mt-20">
-              <div className="rounded-2xl border border-border bg-surface p-6">
-                <div className="mb-6">
-                  <h2 className="text-xl font-bold text-text">Provider Scores</h2>
-                  <p className="text-sm text-text-3">How you score across different AI providers</p>
-                </div>
-                {providerEntries.length > 0 ? (
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {providerEntries.map(([provider, score]) => (
-                      <ProviderCard key={provider} provider={provider} score={score} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="py-8 text-center text-sm text-text-3">No provider scores available.</div>
-                )}
-              </div>
-            </section>
-
-            {/* Debug */}
-            {data.debug.allowed && (
-              <section id="debug" data-report-section className="scroll-mt-20">
-                <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
-                  <h2 className="text-xl font-bold text-red-700">Debug (internal)</h2>
-                  <p className="text-sm text-red-600/70">Enable to view prompts/raw output in findings</p>
+                {data.debug.allowed && (
                   <button
                     type="button"
                     onClick={() => { setShowDebug(!showDebug); void load(!showDebug); }}
                     className={cn(
-                      "mt-4 rounded-xl border px-4 py-2 text-sm font-medium transition-colors",
-                      showDebug ? "border-red-300 bg-red-100 text-red-700" : "border-red-200 bg-white text-red-600 hover:bg-red-100"
+                      "rounded-xl border px-4 py-2 text-sm font-medium transition-colors",
+                      showDebug ? "border-red-200 bg-red-50 text-red-600" : "border-border bg-white text-text-2 hover:bg-surface-2"
                     )}
                   >
-                    {showDebug ? "Disable debug" : "Enable debug"}
+                    {showDebug ? "Hide debug" : "Debug"}
                   </button>
-                  <p className="mt-2 text-xs text-red-600/60">Keep off for client-facing screenshots.</p>
-                </div>
-              </section>
+                )}
+              </div>
+            </div>
+
+            {data.snapshot.error && (
+              <div className="mt-6">
+                <Alert variant="danger">
+                  <AlertDescription>Error: {data.snapshot.error}</AlertDescription>
+                </Alert>
+              </div>
             )}
-          </section>
+          </div>
+
+          {/* Insight summary cards */}
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="rounded-2xl bg-red-50 p-5 ring-1 ring-red-100">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-100 text-red-600">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-red-700">{insightCounts.high || 0}</div>
+                  <div className="text-xs text-red-600">High priority</div>
+                </div>
+              </div>
+            </div>
+            <div className="rounded-2xl bg-amber-50 p-5 ring-1 ring-amber-100">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-amber-700">{insightCounts.medium || 0}</div>
+                  <div className="text-xs text-amber-600">Medium priority</div>
+                </div>
+              </div>
+            </div>
+            <div className="rounded-2xl bg-emerald-50 p-5 ring-1 ring-emerald-100">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-emerald-700">{insightCounts.low || 0}</div>
+                  <div className="text-xs text-emerald-600">Low / strong</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Action plan */}
+          <div className="rounded-2xl border border-border bg-surface p-6">
+            <div className="mb-6">
+              <h2 className="text-xl font-bold text-text">Action Plan</h2>
+              <p className="text-sm text-text-3">Top fixes to improve AI visibility</p>
+            </div>
+            <div className="space-y-4">
+              {actionPlan.map((item, idx) => (
+                <div key={idx} className="flex items-start gap-4 rounded-xl bg-surface-2 p-4">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-600">
+                    {idx + 1}
+                  </div>
+                  <div className="text-sm text-text">{item}</div>
+                </div>
+              ))}
+            </div>
+            {topCompetitorNames.length > 0 && (
+              <div className="mt-4 text-xs text-text-3">
+                Focus competitors: <span className="font-medium text-text-2">{topCompetitorNames.slice(0, 3).join(", ")}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Two column layout for landscape + providers */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            {/* Competitive landscape */}
+            <div className="rounded-2xl border border-border bg-surface p-6">
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-text">Competitive Landscape</h2>
+                <p className="text-sm text-text-3">How often competitors appear in AI responses</p>
+              </div>
+              {data.summary.top_competitors.length > 0 ? (
+                <div className="space-y-3">
+                  {data.summary.top_competitors.slice(0, 6).map((c, idx) => (
+                    <CompetitorBar
+                      key={c.name}
+                      name={c.name}
+                      count={c.count}
+                      max={Math.max(...data.summary.top_competitors.map((x) => x.count))}
+                      rank={idx}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="py-8 text-center text-sm text-text-3">No competitor mentions found</div>
+              )}
+            </div>
+
+            {/* Providers */}
+            <div className="rounded-2xl border border-border bg-surface p-6">
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-text">Provider Scores</h2>
+                <p className="text-sm text-text-3">Performance across AI providers</p>
+              </div>
+              {providerEntries.length > 0 ? (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {providerEntries.map(([provider, score]) => (
+                    <ProviderCard key={provider} provider={provider} score={score} />
+                  ))}
+                </div>
+              ) : (
+                <div className="py-8 text-center text-sm text-text-3">No provider scores available</div>
+              )}
+            </div>
+          </div>
+
+          {/* Findings */}
+          <div className="rounded-2xl border border-border bg-surface">
+            <div className="border-b border-border p-6">
+              <h2 className="text-xl font-bold text-text">Findings</h2>
+              <p className="text-sm text-text-3">{data.responses.length} signals analyzed</p>
+            </div>
+            <div className="divide-y divide-border">
+              {data.responses.map((r, idx) => {
+                const card = buildInsightCard({ clientName: data.client.name, response: r, topCompetitors: topCompetitorNames });
+                const severityStyles = {
+                  high: { badge: "bg-red-100 text-red-700", icon: "bg-red-50 text-red-600" },
+                  medium: { badge: "bg-amber-100 text-amber-700", icon: "bg-amber-50 text-amber-600" },
+                  low: { badge: "bg-emerald-100 text-emerald-700", icon: "bg-emerald-50 text-emerald-600" }
+                };
+                const styles = severityStyles[card.severity];
+
+                return (
+                  <details key={r.id} className="group">
+                    <summary className="flex cursor-pointer items-center justify-between p-5 hover:bg-surface-2">
+                      <div className="flex items-center gap-4">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-2 text-sm font-bold text-text-3">
+                          {idx + 1}
+                        </span>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className={cn("rounded-full px-2.5 py-1 text-xs font-medium", styles.badge)}>
+                              {card.severity === "high" ? "High" : card.severity === "medium" ? "Medium" : "Low"}
+                            </span>
+                            <span className="font-medium text-text">{card.title}</span>
+                          </div>
+                          {r.client_mentioned && (
+                            <span className="mt-1 inline-flex items-center gap-1 text-xs text-emerald-600">
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Client mentioned
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <svg className="h-5 w-5 text-text-3 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                      </svg>
+                    </summary>
+                    <div className="border-t border-border bg-surface-2/50 p-5">
+                      <div className="grid gap-4 lg:grid-cols-2">
+                        <div>
+                          <h4 className="text-sm font-medium text-text">Problem</h4>
+                          <p className="mt-1 text-sm text-text-2">{card.problem}</p>
+                          <h4 className="mt-3 text-sm font-medium text-text">Why it matters</h4>
+                          <p className="mt-1 text-sm text-text-2">{card.why}</p>
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-medium text-text">Fixes</h4>
+                          <ul className="mt-2 space-y-2">
+                            {card.fixes.map((f, i) => (
+                              <li key={i} className="flex items-start gap-2 text-sm text-text-2">
+                                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                                {f}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                      {r.evidence_snippet && (
+                        <div className="mt-4 rounded-xl bg-surface-2 p-4 text-sm text-text-2">
+                          <strong className="text-text">Evidence:</strong> &quot;{r.evidence_snippet}&quot;
+                        </div>
+                      )}
+                      {showDebug && (r.prompt_text || r.raw_text) && (
+                        <details className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4">
+                          <summary className="cursor-pointer text-sm font-medium text-red-600">Debug details</summary>
+                          {r.prompt_text && <div className="mt-2 text-xs text-text-3"><strong className="text-red-600">Prompt:</strong> {r.prompt_text}</div>}
+                          {r.raw_text && <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap text-xs text-text-3">{r.raw_text}</pre>}
+                        </details>
+                      )}
+                    </div>
+                  </details>
+                );
+              })}
+              {data.responses.length === 0 && (
+                <div className="py-12 text-center text-sm text-text-3">No findings available.</div>
+              )}
+            </div>
+          </div>
+
+          {/* Debug section */}
+          {data.debug.allowed && (
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
+              <h2 className="text-xl font-bold text-red-700">Debug (internal)</h2>
+              <p className="text-sm text-red-600/70">Enable to view prompts/raw output in findings</p>
+              <button
+                type="button"
+                onClick={() => { setShowDebug(!showDebug); void load(!showDebug); }}
+                className={cn(
+                  "mt-4 rounded-xl border px-4 py-2 text-sm font-medium transition-colors",
+                  showDebug ? "border-red-300 bg-red-100 text-red-700" : "border-red-200 bg-white text-red-600 hover:bg-red-100"
+                )}
+              >
+                {showDebug ? "Disable debug" : "Enable debug"}
+              </button>
+              <p className="mt-2 text-xs text-red-600/60">Keep off for client-facing screenshots.</p>
+            </div>
+          )}
         </div>
       )}
     </div>
