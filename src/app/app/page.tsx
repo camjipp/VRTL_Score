@@ -16,6 +16,12 @@ type ClientRow = {
   created_at: string;
 };
 
+type SnapshotStats = {
+  total: number;
+  completed: number;
+  avgScore: number | null;
+};
+
 function getIndustryColor(industry: string) {
   const colors: Record<string, string> = {
     default: "from-slate-500 to-slate-600",
@@ -45,14 +51,104 @@ function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
-    year: "numeric",
   });
+}
+
+function MetricCard({
+  label,
+  value,
+  sublabel,
+  trend,
+  icon,
+  color = "default"
+}: {
+  label: string;
+  value: string | number;
+  sublabel?: string;
+  trend?: { value: number; label: string };
+  icon: React.ReactNode;
+  color?: "default" | "success" | "warning" | "danger";
+}) {
+  const colorClasses = {
+    default: "text-white",
+    success: "text-emerald-400",
+    warning: "text-amber-400",
+    danger: "text-red-400"
+  };
+
+  return (
+    <div className="group relative overflow-hidden rounded-2xl border border-white/5 bg-[#161616] p-5 transition-all hover:border-white/10 hover:bg-[#1a1a1a]">
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="text-sm font-medium text-white/50">{label}</div>
+          <div className={cn("mt-2 text-3xl font-bold tracking-tight", colorClasses[color])}>
+            {value}
+          </div>
+          {sublabel && (
+            <div className="mt-1 text-xs text-white/40">{sublabel}</div>
+          )}
+          {trend && (
+            <div className={cn(
+              "mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
+              trend.value >= 0 ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"
+            )}>
+              {trend.value >= 0 ? (
+                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                </svg>
+              ) : (
+                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+              )}
+              {trend.label}
+            </div>
+          )}
+        </div>
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 text-white/40">
+          {icon}
+        </div>
+      </div>
+      {/* Subtle gradient overlay on hover */}
+      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+    </div>
+  );
+}
+
+function MiniScoreGauge({ score }: { score: number | null }) {
+  if (score === null) return <span className="text-white/40">—</span>;
+  
+  const color = score >= 80 ? "#22c55e" : score >= 50 ? "#f59e0b" : "#ef4444";
+  const pct = score / 100;
+  const r = 16;
+  const c = 2 * Math.PI * r;
+  const dash = c * pct;
+
+  return (
+    <div className="relative flex h-10 w-10 items-center justify-center">
+      <svg className="h-10 w-10 -rotate-90" viewBox="0 0 40 40">
+        <circle cx="20" cy="20" r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4" />
+        <circle
+          cx="20"
+          cy="20"
+          r={r}
+          fill="none"
+          stroke={color}
+          strokeWidth="4"
+          strokeLinecap="round"
+          strokeDasharray={`${dash} ${c - dash}`}
+        />
+      </svg>
+      <span className="absolute text-xs font-bold text-white">{score}</span>
+    </div>
+  );
 }
 
 export default function AppPage() {
   const supabase = getSupabaseBrowserClient();
 
   const [clients, setClients] = useState<ClientRow[]>([]);
+  const [stats, setStats] = useState<SnapshotStats>({ total: 0, completed: 0, avgScore: null });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -65,6 +161,7 @@ export default function AppPage() {
         const { agencyId } = await ensureOnboarded();
         if (cancelled) return;
 
+        // Load clients
         const res = await supabase
           .from("clients")
           .select("id,name,website,industry,created_at")
@@ -72,7 +169,35 @@ export default function AppPage() {
           .order("created_at", { ascending: false });
 
         if (res.error) throw res.error;
-        if (!cancelled) setClients((res.data ?? []) as ClientRow[]);
+        const clientList = (res.data ?? []) as ClientRow[];
+        if (!cancelled) setClients(clientList);
+
+        // Load snapshot stats
+        if (clientList.length > 0) {
+          const clientIds = clientList.map(c => c.id);
+          const { data: snapshots } = await supabase
+            .from("snapshots")
+            .select("id, status, vrtl_score")
+            .in("client_id", clientIds);
+          
+          if (snapshots) {
+            const completed = snapshots.filter(s => s.status === "completed" || s.status === "success");
+            const scores = completed
+              .map(s => s.vrtl_score)
+              .filter((s): s is number => typeof s === "number");
+            const avgScore = scores.length > 0 
+              ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+              : null;
+            
+            if (!cancelled) {
+              setStats({
+                total: snapshots.length,
+                completed: completed.length,
+                avgScore
+              });
+            }
+          }
+        }
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : String(e));
       } finally {
@@ -92,196 +217,291 @@ export default function AppPage() {
       (c.website && c.website.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
+  const recentClients = clients.slice(0, 5);
+
   return (
-    <div>
-      {/* Header */}
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+    <div className="space-y-8">
+      {/* Page header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">
-            <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-            </svg>
-            Workspace
-          </div>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-text">Clients</h1>
-          <p className="mt-2 text-text-2">
-            Manage your clients, run competitive analysis, and generate reports.
+          <h1 className="text-2xl font-bold tracking-tight text-white">Dashboard</h1>
+          <p className="mt-1 text-sm text-white/50">
+            Overview of your AI visibility and competitive analysis.
           </p>
         </div>
         <Link
           href="/app/clients/new"
-          className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-accent/25 transition-all hover:bg-accent-2 hover:shadow-xl hover:shadow-accent/30"
+          className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-black transition-all hover:bg-white/90"
         >
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
           New client
         </Link>
       </div>
 
-      {/* Search & Stats */}
-      <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative max-w-sm flex-1">
-          <svg
-            className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-text-3"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-            />
-          </svg>
-          <input
-            type="text"
-            placeholder="Search clients..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-xl border border-border bg-surface-2 py-3 pl-12 pr-4 text-sm text-text placeholder:text-text-3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-          />
-        </div>
-        <div className="flex items-center gap-3 text-sm text-text-2">
-          <span className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-green-500" />
-            {clients.length} total clients
-          </span>
-        </div>
-      </div>
+      {/* Error state */}
+      {error && (
+        <Alert variant="danger">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
       {/* Loading state */}
       {loading && (
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[...Array(3)].map((_, i) => (
-            <div
-              key={i}
-              className="h-48 animate-pulse rounded-2xl bg-surface-2"
-            />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-32 animate-pulse rounded-2xl bg-white/5" />
           ))}
         </div>
       )}
 
-      {/* Error state */}
-      {error && (
-        <div className="mt-8">
-          <Alert variant="danger">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        </div>
-      )}
-
-      {/* Empty state */}
-      {!loading && !error && clients.length === 0 && (
-        <div className="mt-12 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-surface-2/50 py-16">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-accent/10">
-            <svg className="h-8 w-8 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-            </svg>
-          </div>
-          <h3 className="mt-4 text-lg font-semibold text-text">No clients yet</h3>
-          <p className="mt-2 max-w-sm text-center text-sm text-text-2">
-            Create your first client to start running competitive analysis snapshots and generating reports.
-          </p>
-          <Link
-            href="/app/clients/new"
-            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-2"
-          >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            Create your first client
-          </Link>
-        </div>
-      )}
-
-      {/* No search results */}
-      {!loading && !error && clients.length > 0 && filteredClients.length === 0 && (
-        <div className="mt-8 rounded-2xl border border-border bg-surface-2/50 py-12 text-center">
-          <p className="text-text-2">No clients match &quot;{searchQuery}&quot;</p>
-          <button
-            onClick={() => setSearchQuery("")}
-            className="mt-2 text-sm text-accent hover:underline"
-          >
-            Clear search
-          </button>
-        </div>
-      )}
-
-      {/* Client cards */}
-      {!loading && !error && filteredClients.length > 0 && (
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredClients.map((client, index) => (
-            <Link
-              key={client.id}
-              href={`/app/clients/${client.id}`}
-              className={cn(
-                "group relative overflow-hidden rounded-2xl border border-border bg-surface p-6 transition-all duration-300",
-                "hover:border-accent/30 hover:shadow-xl hover:shadow-accent/5",
-                "animate-fade-up"
-              )}
-              style={{ animationDelay: `${index * 50}ms` }}
-            >
-              {/* Industry gradient bar */}
-              <div
-                className={cn(
-                  "absolute inset-x-0 top-0 h-1 bg-gradient-to-r",
-                  getIndustryColor(client.industry)
-                )}
-              />
-
-              {/* Content */}
-              <div className="flex items-start gap-4">
-                {/* Avatar */}
-                <div
-                  className={cn(
-                    "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-sm font-bold text-white",
-                    getIndustryColor(client.industry)
-                  )}
-                >
-                  {getInitials(client.name)}
-                </div>
-
-                {/* Info */}
-                <div className="min-w-0 flex-1">
-                  <h3 className="truncate text-lg font-semibold text-text group-hover:text-accent">
-                    {client.name}
-                  </h3>
-                  <p className="mt-1 truncate text-sm text-text-2">
-                    {client.website ? (
-                      <span className="flex items-center gap-1">
-                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-                        </svg>
-                        {client.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
-                      </span>
-                    ) : (
-                      "No website"
-                    )}
-                  </p>
-                </div>
-              </div>
-
-              {/* Bottom info */}
-              <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
-                <span className="inline-flex items-center rounded-lg bg-surface-2 px-2.5 py-1 text-xs font-medium capitalize text-text-2">
-                  {client.industry.replace(/_/g, " ")}
-                </span>
-                <span className="text-xs text-text-3">
-                  Added {formatDate(client.created_at)}
-                </span>
-              </div>
-
-              {/* Hover arrow */}
-              <div className="absolute bottom-6 right-6 flex h-8 w-8 items-center justify-center rounded-lg bg-accent/10 text-accent opacity-0 transition-opacity group-hover:opacity-100">
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+      {!loading && !error && (
+        <>
+          {/* Metric cards */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <MetricCard
+              label="Total Clients"
+              value={clients.length}
+              sublabel="Active accounts"
+              icon={
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
                 </svg>
+              }
+            />
+            <MetricCard
+              label="Total Snapshots"
+              value={stats.total}
+              sublabel={`${stats.completed} completed`}
+              icon={
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" />
+                </svg>
+              }
+            />
+            <MetricCard
+              label="Avg. VRTL Score"
+              value={stats.avgScore ?? "—"}
+              sublabel="Across all clients"
+              color={stats.avgScore !== null ? (stats.avgScore >= 80 ? "success" : stats.avgScore >= 50 ? "warning" : "danger") : "default"}
+              icon={
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                </svg>
+              }
+            />
+            <MetricCard
+              label="AI Visibility"
+              value={stats.avgScore !== null && stats.avgScore >= 50 ? "Good" : stats.avgScore !== null ? "Needs work" : "—"}
+              sublabel="Overall health"
+              color={stats.avgScore !== null ? (stats.avgScore >= 80 ? "success" : stats.avgScore >= 50 ? "warning" : "danger") : "default"}
+              icon={
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              }
+            />
+          </div>
+
+          {/* Main content grid */}
+          <div className="grid gap-6 lg:grid-cols-3">
+            {/* Clients list */}
+            <div className="lg:col-span-2">
+              <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
+                <div className="flex items-center justify-between border-b border-white/5 px-5 py-4">
+                  <div>
+                    <h2 className="font-semibold text-white">Clients</h2>
+                    <p className="text-xs text-white/40">{clients.length} total</p>
+                  </div>
+                  <div className="relative">
+                    <svg
+                      className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                    </svg>
+                    <input
+                      type="text"
+                      placeholder="Search..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="h-8 w-40 rounded-lg border border-white/10 bg-white/5 pl-9 pr-3 text-sm text-white placeholder:text-white/40 focus:border-white/20 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Empty state */}
+                {clients.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-16">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/5">
+                      <svg className="h-6 w-6 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                      </svg>
+                    </div>
+                    <h3 className="mt-4 font-semibold text-white">No clients yet</h3>
+                    <p className="mt-1 text-sm text-white/50">Create your first client to get started</p>
+                    <Link
+                      href="/app/clients/new"
+                      className="mt-4 inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-white/90"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                      </svg>
+                      Create client
+                    </Link>
+                  </div>
+                )}
+
+                {/* No search results */}
+                {clients.length > 0 && filteredClients.length === 0 && (
+                  <div className="py-12 text-center">
+                    <p className="text-white/50">No clients match "{searchQuery}"</p>
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="mt-2 text-sm text-white/70 hover:text-white hover:underline"
+                    >
+                      Clear search
+                    </button>
+                  </div>
+                )}
+
+                {/* Client rows */}
+                {filteredClients.length > 0 && (
+                  <div className="divide-y divide-white/5">
+                    {filteredClients.map((client) => (
+                      <Link
+                        key={client.id}
+                        href={`/app/clients/${client.id}`}
+                        className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-white/[0.02]"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div
+                            className={cn(
+                              "flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br text-sm font-bold text-white",
+                              getIndustryColor(client.industry)
+                            )}
+                          >
+                            {getInitials(client.name)}
+                          </div>
+                          <div>
+                            <div className="font-medium text-white">{client.name}</div>
+                            <div className="flex items-center gap-2 text-xs text-white/40">
+                              <span className="capitalize">{client.industry.replace(/_/g, " ")}</span>
+                              <span>·</span>
+                              <span>{formatDate(client.created_at)}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <svg className="h-5 w-5 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                        </svg>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
-            </Link>
-          ))}
-        </div>
+            </div>
+
+            {/* Quick actions & recent activity */}
+            <div className="space-y-6">
+              {/* Quick actions */}
+              <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
+                <div className="border-b border-white/5 px-5 py-4">
+                  <h2 className="font-semibold text-white">Quick Actions</h2>
+                </div>
+                <div className="p-4 space-y-2">
+                  <Link
+                    href="/app/clients/new"
+                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/5 hover:text-white"
+                  >
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                      </svg>
+                    </div>
+                    Add new client
+                  </Link>
+                  <Link
+                    href="/app/settings"
+                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/5 hover:text-white"
+                  >
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500/10 text-purple-400">
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                      </svg>
+                    </div>
+                    Agency settings
+                  </Link>
+                </div>
+              </div>
+
+              {/* Recent clients */}
+              {recentClients.length > 0 && (
+                <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
+                  <div className="border-b border-white/5 px-5 py-4">
+                    <h2 className="font-semibold text-white">Recent Clients</h2>
+                  </div>
+                  <div className="p-3 space-y-1">
+                    {recentClients.map((client) => (
+                      <Link
+                        key={client.id}
+                        href={`/app/clients/${client.id}`}
+                        className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-white/5"
+                      >
+                        <div
+                          className={cn(
+                            "flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br text-xs font-bold text-white",
+                            getIndustryColor(client.industry)
+                          )}
+                        >
+                          {getInitials(client.name)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-sm font-medium text-white">{client.name}</div>
+                          <div className="text-xs text-white/40">{formatDate(client.created_at)}</div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Getting started (if no clients) */}
+              {clients.length === 0 && (
+                <div className="overflow-hidden rounded-2xl border border-dashed border-white/10 bg-gradient-to-br from-white/[0.02] to-transparent p-6">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10">
+                    <svg className="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                    </svg>
+                  </div>
+                  <h3 className="mt-4 font-semibold text-white">Getting Started</h3>
+                  <p className="mt-2 text-sm text-white/50">
+                    Create your first client to run AI visibility snapshots and competitive analysis reports.
+                  </p>
+                  <ol className="mt-4 space-y-2 text-sm text-white/60">
+                    <li className="flex items-center gap-2">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-xs font-medium text-white">1</span>
+                      Add a client
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-xs font-medium text-white">2</span>
+                      Add competitors
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-xs font-medium text-white">3</span>
+                      Run a snapshot
+                    </li>
+                  </ol>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

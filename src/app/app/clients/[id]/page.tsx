@@ -36,18 +36,6 @@ type SnapshotRow = {
   error?: string | null;
 };
 
-type ResponseRow = {
-  id: string;
-  parsed_json: { competitors_mentioned?: string[] } | null;
-  parse_ok: boolean | null;
-};
-
-type CompetitorConfidence = {
-  level: "low" | "medium" | "high";
-  label: "Low" | "Medium" | "High";
-  message: string | null;
-};
-
 function errorMessage(e: unknown): string {
   if (e instanceof Error) return e.message;
   if (typeof e === "string") return e;
@@ -64,36 +52,89 @@ function errorMessage(e: unknown): string {
   return "Unknown error";
 }
 
-function getCompetitorConfidence(count: number): CompetitorConfidence {
-  if (count <= 0) {
-    return {
-      level: "low",
-      label: "Low",
-      message: "Competitive scoring disabled — add 3+ competitors for full comparison."
-    };
-  }
-  if (count < 3) {
-    return {
-      level: "medium",
-      label: "Medium",
-      message: "Competitive scoring limited — add 1–2 more competitors for best results."
-    };
-  }
-  return { level: "high", label: "High", message: null };
-}
-
 function getScoreColor(score: number | null): string {
-  if (score === null) return "text-text-3";
-  if (score >= 80) return "text-green-500";
-  if (score >= 50) return "text-amber-500";
-  return "text-red-500";
+  if (score === null) return "text-white/40";
+  if (score >= 80) return "text-emerald-400";
+  if (score >= 50) return "text-amber-400";
+  return "text-red-400";
 }
 
 function getScoreBg(score: number | null): string {
-  if (score === null) return "bg-surface-2";
-  if (score >= 80) return "bg-green-500/10";
+  if (score === null) return "bg-white/5";
+  if (score >= 80) return "bg-emerald-500/10";
   if (score >= 50) return "bg-amber-500/10";
   return "bg-red-500/10";
+}
+
+function ScoreGauge({ score, size = "large" }: { score: number | null; size?: "large" | "small" }) {
+  const sizeClasses = size === "large" ? "h-32 w-32" : "h-16 w-16";
+  const r = size === "large" ? 56 : 28;
+  const viewBox = size === "large" ? "0 0 128 128" : "0 0 64 64";
+  const center = size === "large" ? 64 : 32;
+  const strokeW = size === "large" ? 10 : 5;
+  const fontSize = size === "large" ? "text-4xl" : "text-lg";
+
+  if (score === null) {
+    return (
+      <div className={cn("relative flex items-center justify-center", sizeClasses)}>
+        <svg className={sizeClasses} viewBox={viewBox}>
+          <circle cx={center} cy={center} r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={strokeW} />
+        </svg>
+        <span className={cn("absolute font-bold text-white/40", fontSize)}>—</span>
+      </div>
+    );
+  }
+
+  const color = score >= 80 ? "#22c55e" : score >= 50 ? "#f59e0b" : "#ef4444";
+  const pct = score / 100;
+  const c = 2 * Math.PI * r;
+  const dash = c * pct;
+
+  return (
+    <div className={cn("relative flex items-center justify-center", sizeClasses)}>
+      <svg className={cn(sizeClasses, "-rotate-90")} viewBox={viewBox}>
+        <circle cx={center} cy={center} r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={strokeW} />
+        <circle
+          cx={center}
+          cy={center}
+          r={r}
+          fill="none"
+          stroke={color}
+          strokeWidth={strokeW}
+          strokeLinecap="round"
+          strokeDasharray={`${dash} ${c - dash}`}
+        />
+      </svg>
+      <span className={cn("absolute font-bold", fontSize)} style={{ color }}>{score}</span>
+    </div>
+  );
+}
+
+function MetricCard({
+  label,
+  value,
+  sublabel,
+  color = "default"
+}: {
+  label: string;
+  value: string | number;
+  sublabel?: string;
+  color?: "default" | "success" | "warning" | "danger";
+}) {
+  const colorClasses = {
+    default: "text-white",
+    success: "text-emerald-400",
+    warning: "text-amber-400",
+    danger: "text-red-400"
+  };
+
+  return (
+    <div className="rounded-xl border border-white/5 bg-[#1a1a1a] p-4">
+      <div className="text-xs font-medium text-white/40">{label}</div>
+      <div className={cn("mt-1 text-2xl font-bold", colorClasses[color])}>{value}</div>
+      {sublabel && <div className="mt-0.5 text-xs text-white/40">{sublabel}</div>}
+    </div>
+  );
 }
 
 export default function ClientDetailPage() {
@@ -105,18 +146,10 @@ export default function ClientDetailPage() {
   function statusVariant(status: string | null | undefined): BadgeVariant {
     const s = String(status ?? "").toLowerCase();
     if (!s) return "neutral";
-    if (s.includes("complete") || s.includes("success") || s.includes("succeed")) return "success";
+    if (s.includes("complete") || s.includes("success")) return "success";
     if (s.includes("fail") || s.includes("error") || s.includes("cancel")) return "danger";
-    if (s.includes("running") || s.includes("queued") || s.includes("pending") || s.includes("processing"))
-      return "warning";
+    if (s.includes("running") || s.includes("queued") || s.includes("pending")) return "warning";
     return "neutral";
-  }
-
-  function scoreVariant(score: number | null | undefined): BadgeVariant {
-    if (typeof score !== "number") return "neutral";
-    if (score >= 80) return "success";
-    if (score >= 50) return "warning";
-    return "danger";
   }
 
   const [agencyId, setAgencyId] = useState<string | null>(null);
@@ -130,7 +163,6 @@ export default function ClientDetailPage() {
   const [busy, setBusy] = useState(false);
 
   const [snapshot, setSnapshot] = useState<SnapshotRow | null>(null);
-  const [responses, setResponses] = useState<ResponseRow[]>([]);
   const [snapshots, setSnapshots] = useState<SnapshotRow[]>([]);
   const [running, setRunning] = useState(false);
   const [runError, setRunError] = useState<string | null>(null);
@@ -165,25 +197,9 @@ export default function ClientDetailPage() {
     if (!snapsRes.error && snapsRes.data) {
       const rows = snapsRes.data as SnapshotRow[];
       setSnapshots(rows);
-
-      const latest = rows[0] ?? null;
-      setSnapshot(latest);
-
-      if (!latest) {
-        setResponses([]);
-        return;
-      }
-
-      const respRes = await supabase
-        .from("responses")
-        .select("id,parsed_json,parse_ok")
-        .eq("snapshot_id", latest.id);
-      if (!respRes.error && respRes.data) {
-        setResponses(respRes.data as ResponseRow[]);
-      }
+      setSnapshot(rows[0] ?? null);
     } else {
       setSnapshot(null);
-      setResponses([]);
       setSnapshots([]);
     }
   }
@@ -206,9 +222,7 @@ export default function ClientDetailPage() {
       }
     }
     load();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientId]);
 
@@ -222,19 +236,13 @@ export default function ClientDetailPage() {
         if (!cancelled) setError(errorMessage(e));
       });
     }, 5000);
-    return () => {
-      cancelled = true;
-      window.clearInterval(t);
-    };
+    return () => { cancelled = true; window.clearInterval(t); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agencyId, snapshot?.status]);
 
   async function resetRunningSnapshot() {
-    if (!clientId) return;
-    if (!agencyId) return;
-    const ok = window.confirm(
-      "Reset the currently running snapshot? This marks it as failed so you can run again."
-    );
+    if (!clientId || !agencyId) return;
+    const ok = window.confirm("Reset the currently running snapshot? This marks it as failed so you can run again.");
     if (!ok) return;
 
     setRunError(null);
@@ -243,17 +251,10 @@ export default function ClientDetailPage() {
       const { accessToken } = await ensureOnboarded();
       const res = await fetch("/api/snapshots/reset", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({ clientId })
       });
-
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || `Reset failed (${res.status})`);
-      }
+      if (!res.ok) throw new Error(await res.text());
       await refresh(agencyId);
     } catch (e) {
       setRunError(errorMessage(e));
@@ -270,20 +271,16 @@ export default function ClientDetailPage() {
       const { accessToken } = await ensureOnboarded();
       const res = await fetch("/api/snapshots/run", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({ clientId })
       });
       if (!res.ok) {
-        const contentType = res.headers.get("content-type") ?? "";
-        if (contentType.includes("application/json")) {
-          const json = (await res.json()) as { error?: string; [k: string]: unknown };
-          throw new Error(json.error ? String(json.error) : `Snapshot failed (${res.status})`);
+        const ct = res.headers.get("content-type") ?? "";
+        if (ct.includes("application/json")) {
+          const json = await res.json();
+          throw new Error(json.error || `Failed (${res.status})`);
         }
-        const text = await res.text();
-        throw new Error(text || `Snapshot failed (${res.status})`);
+        throw new Error(await res.text());
       }
       await refresh(agencyId ?? "");
     } catch (e) {
@@ -293,20 +290,11 @@ export default function ClientDetailPage() {
     }
   }
 
-  const competitorMentions = Array.from(
-    new Set(
-      responses
-        .filter((r) => r.parse_ok && r.parsed_json?.competitors_mentioned)
-        .flatMap((r) => r.parsed_json?.competitors_mentioned ?? [])
-    )
-  );
-
-  const competitorConfidence = getCompetitorConfidence(competitors.length);
+  const competitorConfidence = competitors.length >= 3 ? "high" : competitors.length > 0 ? "medium" : "low";
 
   async function addCompetitor(e: React.FormEvent) {
     e.preventDefault();
-    if (!agencyId) return;
-    if (competitors.length >= 8) return;
+    if (!agencyId || competitors.length >= 8) return;
     setBusy(true);
     setError(null);
     try {
@@ -341,230 +329,94 @@ export default function ClientDetailPage() {
     }
   }
 
+  const providers = snapshot?.score_by_provider ? Object.entries(snapshot.score_by_provider) : [];
+
   return (
-    <div>
-      {/* Back link */}
-      <Link
-        href="/app"
-        className="inline-flex items-center gap-2 text-sm text-text-2 transition-colors hover:text-text"
-      >
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-        </svg>
-        Back to clients
-      </Link>
+    <div className="space-y-6">
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 text-sm">
+        <Link href="/app" className="text-white/50 hover:text-white">Dashboard</Link>
+        <span className="text-white/30">/</span>
+        <span className="text-white">{client?.name || "Client"}</span>
+      </div>
 
       {/* Loading */}
       {loading && (
-        <div className="mt-8 space-y-4">
-          <div className="h-32 animate-pulse rounded-2xl bg-surface-2" />
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="h-64 animate-pulse rounded-2xl bg-surface-2" />
-            <div className="h-64 animate-pulse rounded-2xl bg-surface-2" />
+        <div className="space-y-4">
+          <div className="h-24 animate-pulse rounded-2xl bg-white/5" />
+          <div className="grid gap-4 lg:grid-cols-3">
+            <div className="h-64 animate-pulse rounded-2xl bg-white/5" />
+            <div className="h-64 animate-pulse rounded-2xl bg-white/5 lg:col-span-2" />
           </div>
         </div>
       )}
 
       {/* Error */}
       {error && (
-        <div className="mt-6">
-          <Alert variant="danger">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        </div>
+        <Alert variant="danger">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {/* Not found */}
       {!loading && !error && !client && (
-        <div className="mt-8 rounded-2xl border border-border bg-surface-2/50 py-12 text-center">
-          <p className="text-text-2">Client not found (or not in your agency).</p>
+        <div className="rounded-2xl border border-white/5 bg-[#161616] py-16 text-center">
+          <p className="text-white/50">Client not found (or not in your agency).</p>
+          <Link href="/app" className="mt-4 inline-block text-sm text-white/70 hover:text-white hover:underline">
+            Back to dashboard
+          </Link>
         </div>
       )}
 
       {client && (
         <>
-          {/* Client header */}
-          <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-surface">
-            <div className="relative h-2 bg-gradient-to-r from-accent via-purple-500 to-pink-500" />
+          {/* Client header card */}
+          <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
+            <div className="h-1.5 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500" />
             <div className="p-6">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                 <div className="flex items-start gap-4">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-purple-500 text-lg font-bold text-white">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 text-xl font-bold text-white">
                     {client.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <h1 className="text-2xl font-bold text-text">{client.name}</h1>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-text-2">
+                    <h1 className="text-2xl font-bold text-white">{client.name}</h1>
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-white/50">
                       {client.website && (
-                        <span className="flex items-center gap-1">
+                        <a
+                          href={client.website}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center gap-1 hover:text-white"
+                        >
                           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
                           </svg>
-                          {client.website.replace(/^https?:\/\//, "")}
-                        </span>
+                          {client.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+                        </a>
                       )}
-                      <span className="inline-flex items-center rounded-lg bg-surface-2 px-2 py-0.5 text-xs font-medium capitalize">
+                      <span className="rounded-lg bg-white/5 px-2 py-0.5 text-xs capitalize">
                         {client.industry.replace(/_/g, " ")}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Quick stats */}
-                <div className="flex gap-4 sm:gap-6">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-text">{competitors.length}</div>
-                    <div className="text-xs text-text-3">Competitors</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-text">{snapshots.length}</div>
-                    <div className="text-xs text-text-3">Snapshots</div>
-                  </div>
-                  {snapshot?.vrtl_score !== null && snapshot?.vrtl_score !== undefined && (
-                    <div className="text-center">
-                      <div className={cn("text-2xl font-bold", getScoreColor(snapshot.vrtl_score))}>
-                        {snapshot.vrtl_score}
-                      </div>
-                      <div className="text-xs text-text-3">VRTL Score</div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Main content grid */}
-          <div className="mt-6 grid gap-6 lg:grid-cols-2">
-            {/* Competitors card */}
-            <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-              <div className="flex items-center justify-between border-b border-border bg-surface-2/50 px-6 py-4">
+                {/* Run snapshot button */}
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10 text-purple-500">
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h2 className="font-semibold text-text">Competitors</h2>
-                    <p className="text-xs text-text-3">{competitors.length}/8 added</p>
-                  </div>
-                </div>
-                <div className={cn(
-                  "flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
-                  competitorConfidence.level === "high" ? "bg-green-500/10 text-green-600" :
-                  competitorConfidence.level === "medium" ? "bg-amber-500/10 text-amber-600" :
-                  "bg-red-500/10 text-red-600"
-                )}>
-                  <span className={cn(
-                    "h-2 w-2 rounded-full",
-                    competitorConfidence.level === "high" ? "bg-green-500" :
-                    competitorConfidence.level === "medium" ? "bg-amber-500" :
-                    "bg-red-500"
-                  )} />
-                  {competitorConfidence.label} confidence
-                </div>
-              </div>
-
-              <div className="p-6">
-                {/* Competitor list */}
-                {competitors.length > 0 ? (
-                  <div className="space-y-2">
-                    {competitors.map((c) => (
-                      <div
-                        key={c.id}
-                        className="group flex items-center justify-between rounded-xl bg-surface-2/50 px-4 py-3"
-                      >
-                        <div>
-                          <div className="font-medium text-text">{c.name}</div>
-                          <div className="text-xs text-text-3">
-                            {c.website ? c.website.replace(/^https?:\/\//, "") : "No website"}
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => deleteCompetitor(c.id)}
-                          disabled={busy}
-                          className="rounded-lg p-2 text-text-3 opacity-0 transition-all hover:bg-red-500/10 hover:text-red-500 group-hover:opacity-100"
-                        >
-                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                          </svg>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="rounded-xl border-2 border-dashed border-border py-6 text-center">
-                    <p className="text-sm text-text-2">No competitors yet</p>
-                    <p className="mt-1 text-xs text-text-3">Add competitors to improve scoring accuracy</p>
-                  </div>
-                )}
-
-                {/* Add competitor form */}
-                {competitors.length < 8 && (
-                  <form className="mt-4 space-y-3" onSubmit={addCompetitor}>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <input
-                        type="text"
-                        placeholder="Competitor name"
-                        value={newName}
-                        onChange={(e) => setNewName(e.target.value)}
-                        required
-                        disabled={busy}
-                        className="rounded-xl border border-border bg-bg px-4 py-2.5 text-sm text-text placeholder:text-text-3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Website (optional)"
-                        value={newWebsite}
-                        onChange={(e) => setNewWebsite(e.target.value)}
-                        disabled={busy}
-                        className="rounded-xl border border-border bg-bg px-4 py-2.5 text-sm text-text placeholder:text-text-3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-                      />
-                    </div>
+                  {snapshot?.status === "running" && (
                     <button
-                      type="submit"
-                      disabled={busy || !newName.trim()}
-                      className="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-purple-700 disabled:opacity-50"
+                      onClick={resetRunningSnapshot}
+                      disabled={running}
+                      className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/5 hover:text-white"
                     >
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                      </svg>
-                      {busy ? "Adding..." : "Add competitor"}
+                      Reset
                     </button>
-                  </form>
-                )}
-
-                {competitors.length >= 8 && (
-                  <div className="mt-4 rounded-xl bg-amber-500/10 px-4 py-3 text-sm text-amber-600">
-                    Maximum of 8 competitors reached
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Snapshot card */}
-            <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-              <div className="flex items-center justify-between border-b border-border bg-surface-2/50 px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-accent">
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h2 className="font-semibold text-text">Latest Snapshot</h2>
-                    <p className="text-xs text-text-3">AI-powered competitive analysis</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-6">
-                {/* Run controls */}
-                <div className="flex flex-wrap items-center gap-3">
+                  )}
                   <button
                     onClick={runSnapshot}
                     disabled={running}
-                    className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-accent/25 transition-all hover:bg-accent-2 hover:shadow-xl hover:shadow-accent/30 disabled:opacity-50"
+                    className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-black transition-all hover:bg-white/90 disabled:opacity-50"
                   >
                     {running ? (
                       <>
@@ -583,136 +435,239 @@ export default function ClientDetailPage() {
                       </>
                     )}
                   </button>
-                  {snapshot?.status === "running" && (
-                    <button
-                      onClick={resetRunningSnapshot}
-                      disabled={running}
-                      className="rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:bg-surface-2"
-                    >
-                      Reset
-                    </button>
-                  )}
+                </div>
+              </div>
+
+              {runError && (
+                <div className="mt-4">
+                  <Alert variant="danger">
+                    <AlertDescription>{runError}</AlertDescription>
+                  </Alert>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Stats row */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <MetricCard
+              label="VRTL Score"
+              value={snapshot?.vrtl_score ?? "—"}
+              color={snapshot?.vrtl_score !== null ? (snapshot.vrtl_score >= 80 ? "success" : snapshot.vrtl_score >= 50 ? "warning" : "danger") : "default"}
+              sublabel="AI visibility score"
+            />
+            <MetricCard
+              label="Competitors"
+              value={competitors.length}
+              sublabel={`${8 - competitors.length} slots remaining`}
+            />
+            <MetricCard
+              label="Snapshots"
+              value={snapshots.length}
+              sublabel="Total runs"
+            />
+            <MetricCard
+              label="Confidence"
+              value={competitorConfidence === "high" ? "High" : competitorConfidence === "medium" ? "Medium" : "Low"}
+              color={competitorConfidence === "high" ? "success" : competitorConfidence === "medium" ? "warning" : "danger"}
+              sublabel={competitors.length >= 3 ? "3+ competitors" : "Add more competitors"}
+            />
+          </div>
+
+          {/* Main content */}
+          <div className="grid gap-6 lg:grid-cols-3">
+            {/* Score + providers */}
+            <div className="space-y-6">
+              {/* Score card */}
+              <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
+                <div className="border-b border-white/5 px-5 py-4">
+                  <h2 className="font-semibold text-white">VRTL Score</h2>
+                  <p className="text-xs text-white/40">Overall AI visibility</p>
+                </div>
+                <div className="flex flex-col items-center p-6">
+                  <ScoreGauge score={snapshot?.vrtl_score ?? null} />
+                  <div className="mt-4 text-center">
+                    <div className={cn("text-sm font-medium", getScoreColor(snapshot?.vrtl_score ?? null))}>
+                      {snapshot?.vrtl_score !== null
+                        ? snapshot.vrtl_score >= 80
+                          ? "Strong visibility"
+                          : snapshot.vrtl_score >= 50
+                            ? "Moderate visibility"
+                            : "Weak visibility"
+                        : "No data yet"
+                      }
+                    </div>
+                    {snapshot?.status && (
+                      <div className="mt-2">
+                        <Badge variant={statusVariant(snapshot.status)}>{snapshot.status}</Badge>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Provider scores */}
+              {providers.length > 0 && (
+                <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
+                  <div className="border-b border-white/5 px-5 py-4">
+                    <h2 className="font-semibold text-white">By Provider</h2>
+                  </div>
+                  <div className="p-4 space-y-3">
+                    {providers.map(([provider, score]) => (
+                      <div key={provider} className="flex items-center justify-between">
+                        <span className="text-sm capitalize text-white/70">{provider}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="h-2 w-24 overflow-hidden rounded-full bg-white/10">
+                            <div
+                              className={cn(
+                                "h-full rounded-full",
+                                score >= 80 ? "bg-emerald-500" : score >= 50 ? "bg-amber-500" : "bg-red-500"
+                              )}
+                              style={{ width: `${score}%` }}
+                            />
+                          </div>
+                          <span className={cn("text-sm font-bold", getScoreColor(score))}>{score}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Competitors + Snapshots */}
+            <div className="space-y-6 lg:col-span-2">
+              {/* Competitors */}
+              <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
+                <div className="flex items-center justify-between border-b border-white/5 px-5 py-4">
+                  <div>
+                    <h2 className="font-semibold text-white">Competitors</h2>
+                    <p className="text-xs text-white/40">{competitors.length}/8 added</p>
+                  </div>
+                  <div className={cn(
+                    "flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
+                    competitorConfidence === "high" ? "bg-emerald-500/10 text-emerald-400" :
+                    competitorConfidence === "medium" ? "bg-amber-500/10 text-amber-400" :
+                    "bg-red-500/10 text-red-400"
+                  )}>
+                    <span className={cn(
+                      "h-1.5 w-1.5 rounded-full",
+                      competitorConfidence === "high" ? "bg-emerald-500" :
+                      competitorConfidence === "medium" ? "bg-amber-500" :
+                      "bg-red-500"
+                    )} />
+                    {competitorConfidence === "high" ? "High" : competitorConfidence === "medium" ? "Medium" : "Low"} confidence
+                  </div>
                 </div>
 
-                {runError && (
-                  <div className="mt-4">
-                    <Alert variant="danger">
-                      <AlertDescription>{runError}</AlertDescription>
-                    </Alert>
-                  </div>
-                )}
-
-                {competitorConfidence.message && (
-                  <div className="mt-4 rounded-xl bg-amber-500/10 px-4 py-3 text-sm">
-                    <div className="font-medium text-amber-600">Confidence: {competitorConfidence.label}</div>
-                    <div className="mt-1 text-amber-600/80">{competitorConfidence.message}</div>
-                  </div>
-                )}
-
-                {/* Latest snapshot result */}
-                {snapshot ? (
-                  <div className="mt-6">
-                    <div className="flex items-center gap-2 text-sm text-text-2">
-                      <Badge variant={statusVariant(snapshot.status)}>{snapshot.status}</Badge>
-                      <span>·</span>
-                      <span>
-                        {snapshot.completed_at
-                          ? new Date(snapshot.completed_at).toLocaleString()
-                          : snapshot.started_at
-                          ? `Started ${new Date(snapshot.started_at).toLocaleString()}`
-                          : new Date(snapshot.created_at).toLocaleString()}
-                      </span>
-                    </div>
-
-                    {snapshot.vrtl_score !== null && (
-                      <div className={cn("mt-4 rounded-xl p-4", getScoreBg(snapshot.vrtl_score))}>
-                        <div className="text-sm font-medium text-text-2">VRTL Score</div>
-                        <div className={cn("text-4xl font-bold", getScoreColor(snapshot.vrtl_score))}>
-                          {snapshot.vrtl_score}
-                        </div>
-                      </div>
-                    )}
-
-                    {snapshot.score_by_provider && Object.keys(snapshot.score_by_provider).length > 0 && (
-                      <div className="mt-4">
-                        <div className="text-sm font-medium text-text-2">By Provider</div>
-                        <div className="mt-2 grid grid-cols-3 gap-2">
-                          {Object.entries(snapshot.score_by_provider).map(([provider, score]) => (
-                            <div key={provider} className="rounded-lg bg-surface-2 px-3 py-2 text-center">
-                              <div className="text-xs text-text-3 capitalize">{provider}</div>
-                              <div className={cn("font-bold", getScoreColor(score))}>{score}</div>
+                <div className="p-4">
+                  {competitors.length > 0 ? (
+                    <div className="space-y-2">
+                      {competitors.map((c) => (
+                        <div key={c.id} className="group flex items-center justify-between rounded-xl bg-white/[0.02] px-4 py-3 transition-colors hover:bg-white/[0.04]">
+                          <div>
+                            <div className="font-medium text-white">{c.name}</div>
+                            <div className="text-xs text-white/40">
+                              {c.website ? c.website.replace(/^https?:\/\//, "") : "No website"}
                             </div>
-                          ))}
+                          </div>
+                          <button
+                            onClick={() => deleteCompetitor(c.id)}
+                            disabled={busy}
+                            className="rounded-lg p-2 text-white/30 opacity-0 transition-all hover:bg-red-500/10 hover:text-red-400 group-hover:opacity-100"
+                          >
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                            </svg>
+                          </button>
                         </div>
-                      </div>
-                    )}
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-dashed border-white/10 py-8 text-center">
+                      <p className="text-sm text-white/50">No competitors yet</p>
+                      <p className="mt-1 text-xs text-white/30">Add competitors for better analysis</p>
+                    </div>
+                  )}
 
-                    {competitorMentions.length > 0 && (
-                      <div className="mt-4 text-sm">
-                        <span className="font-medium text-text-2">Competitors mentioned:</span>{" "}
-                        <span className="text-text-3">{competitorMentions.join(", ")}</span>
-                      </div>
-                    )}
+                  {/* Add competitor form */}
+                  {competitors.length < 8 && (
+                    <form className="mt-4 flex gap-2" onSubmit={addCompetitor}>
+                      <input
+                        type="text"
+                        placeholder="Competitor name"
+                        value={newName}
+                        onChange={(e) => setNewName(e.target.value)}
+                        required
+                        disabled={busy}
+                        className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-white/20 focus:outline-none"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Website (optional)"
+                        value={newWebsite}
+                        onChange={(e) => setNewWebsite(e.target.value)}
+                        disabled={busy}
+                        className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-white/20 focus:outline-none"
+                      />
+                      <button
+                        type="submit"
+                        disabled={busy || !newName.trim()}
+                        className="rounded-xl bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/20 disabled:opacity-50"
+                      >
+                        Add
+                      </button>
+                    </form>
+                  )}
+                </div>
+              </div>
 
-                    {snapshot.error && (
-                      <div className="mt-4">
-                        <Alert variant="danger">
-                          <AlertDescription>Error: {snapshot.error}</AlertDescription>
-                        </Alert>
-                      </div>
-                    )}
+              {/* Snapshot history */}
+              <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
+                <div className="border-b border-white/5 px-5 py-4">
+                  <h2 className="font-semibold text-white">Snapshot History</h2>
+                  <p className="text-xs text-white/40">Recent analysis runs</p>
+                </div>
+
+                {snapshots.length > 0 ? (
+                  <div className="divide-y divide-white/5">
+                    {snapshots.map((s) => (
+                      <Link
+                        key={s.id}
+                        href={`/app/clients/${clientId}/snapshots/${s.id}`}
+                        className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-white/[0.02]"
+                      >
+                        <div className="flex items-center gap-4">
+                          <ScoreGauge score={s.vrtl_score} size="small" />
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={statusVariant(s.status)}>{s.status}</Badge>
+                              {s.score_by_provider && (
+                                <span className="text-xs text-white/40">
+                                  {Object.keys(s.score_by_provider).length} providers
+                                </span>
+                              )}
+                            </div>
+                            <div className="mt-1 text-sm text-white/50">
+                              {new Date(s.created_at).toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
+                        <svg className="h-5 w-5 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                        </svg>
+                      </Link>
+                    ))}
                   </div>
                 ) : (
-                  <div className="mt-6 rounded-xl border-2 border-dashed border-border py-6 text-center">
-                    <p className="text-sm text-text-2">No snapshots yet</p>
-                    <p className="mt-1 text-xs text-text-3">Run your first snapshot to get competitive insights</p>
+                  <div className="py-12 text-center">
+                    <p className="text-sm text-white/50">No snapshots yet</p>
+                    <p className="mt-1 text-xs text-white/30">Run your first snapshot to get started</p>
                   </div>
                 )}
               </div>
             </div>
           </div>
-
-          {/* Snapshot history */}
-          {snapshots.length > 0 && (
-            <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-surface">
-              <div className="border-b border-border bg-surface-2/50 px-6 py-4">
-                <h2 className="font-semibold text-text">Snapshot History</h2>
-              </div>
-              <div className="divide-y divide-border">
-                {snapshots.map((s) => (
-                  <Link
-                    key={s.id}
-                    href={`/app/clients/${clientId}/snapshots/${s.id}`}
-                    className="flex items-center justify-between px-6 py-4 transition-colors hover:bg-surface-2/50"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl", getScoreBg(s.vrtl_score))}>
-                        <span className={cn("text-lg font-bold", getScoreColor(s.vrtl_score))}>
-                          {s.vrtl_score ?? "—"}
-                        </span>
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant={statusVariant(s.status)}>{s.status}</Badge>
-                          {s.score_by_provider && (
-                            <span className="text-xs text-text-3">
-                              {Object.keys(s.score_by_provider).length} providers
-                            </span>
-                          )}
-                        </div>
-                        <div className="mt-1 text-sm text-text-2">
-                          {new Date(s.created_at).toLocaleString()}
-                        </div>
-                      </div>
-                    </div>
-                    <svg className="h-5 w-5 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                    </svg>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
         </>
       )}
     </div>

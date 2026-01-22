@@ -84,203 +84,152 @@ export default function AdminPage() {
   const inactiveCount = agencies.filter((a) => !a.is_active).length;
 
   return (
-    <div>
+    <div className="space-y-6">
       {/* Header */}
       <div>
-        <div className="inline-flex items-center gap-2 rounded-full bg-red-500/10 px-3 py-1 text-xs font-medium text-red-500">
+        <div className="inline-flex items-center gap-2 rounded-full bg-red-500/10 px-3 py-1 text-xs font-medium text-red-400">
           <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
           </svg>
           Internal Only
         </div>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight text-text">Admin Panel</h1>
-        <p className="mt-2 text-text-2">
-          Manage agency access and paywall entitlements.
-        </p>
+        <h1 className="mt-2 text-2xl font-bold tracking-tight text-white">Admin Panel</h1>
+        <p className="mt-1 text-sm text-white/50">Manage agency access and entitlements.</p>
       </div>
 
       {/* Stats */}
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-border bg-surface p-5">
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="rounded-2xl border border-white/5 bg-[#161616] p-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-accent">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 text-white/60">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
               </svg>
             </div>
             <div>
-              <div className="text-2xl font-bold text-text">{agencies.length}</div>
-              <div className="text-sm text-text-3">Total Agencies</div>
+              <div className="text-2xl font-bold text-white">{agencies.length}</div>
+              <div className="text-xs text-white/40">Total Agencies</div>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border bg-surface p-5">
+        <div className="rounded-2xl border border-white/5 bg-[#161616] p-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/10 text-green-500">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <div>
-              <div className="text-2xl font-bold text-text">{activeCount}</div>
-              <div className="text-sm text-text-3">Active</div>
+              <div className="text-2xl font-bold text-white">{activeCount}</div>
+              <div className="text-xs text-white/40">Active</div>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border bg-surface p-5">
+        <div className="rounded-2xl border border-white/5 bg-[#161616] p-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
               </svg>
             </div>
             <div>
-              <div className="text-2xl font-bold text-text">{inactiveCount}</div>
-              <div className="text-sm text-text-3">Inactive</div>
+              <div className="text-2xl font-bold text-white">{inactiveCount}</div>
+              <div className="text-xs text-white/40">Inactive</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Search */}
-      <div className="mt-8">
-        <div className="relative max-w-sm">
-          <svg
-            className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-text-3"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-            />
-          </svg>
-          <input
-            type="text"
-            placeholder="Search agencies..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-xl border border-border bg-surface-2 py-3 pl-12 pr-4 text-sm text-text placeholder:text-text-3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-          />
-        </div>
+      <div className="relative max-w-sm">
+        <svg
+          className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={1.5}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+        </svg>
+        <input
+          type="text"
+          placeholder="Search agencies..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-white/40 focus:border-white/20 focus:outline-none"
+        />
       </div>
 
       {/* Error */}
       {error && (
-        <div className="mt-6">
-          <Alert variant="danger">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        </div>
+        <Alert variant="danger">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {/* Loading */}
       {loading && (
-        <div className="mt-6 space-y-3">
+        <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-20 animate-pulse rounded-2xl bg-surface-2" />
+            <div key={i} className="h-20 animate-pulse rounded-2xl bg-white/5" />
           ))}
         </div>
       )}
 
       {/* Agency list */}
       {!loading && (
-        <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-surface">
-          <div className="border-b border-border bg-surface-2/50 px-6 py-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-accent">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
-                </svg>
-              </div>
-              <div>
-                <h2 className="font-semibold text-text">All Agencies</h2>
-                <p className="text-xs text-text-3">Toggle access for paywall entitlement</p>
-              </div>
-            </div>
+        <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#161616]">
+          <div className="border-b border-white/5 px-5 py-4">
+            <h2 className="font-semibold text-white">All Agencies</h2>
+            <p className="text-xs text-white/40">Toggle access for paywall entitlement</p>
           </div>
 
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-white/5">
             {filteredAgencies.map((agency) => (
               <div
                 key={agency.id}
-                className="flex items-center justify-between px-6 py-4 transition-colors hover:bg-surface-2/30"
+                className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-white/[0.02]"
               >
                 <div className="flex items-center gap-4">
                   <div className={cn(
-                    "flex h-12 w-12 items-center justify-center rounded-xl text-lg font-bold text-white",
-                    agency.is_active
-                      ? "bg-gradient-to-br from-green-500 to-emerald-600"
-                      : "bg-gradient-to-br from-slate-400 to-slate-500"
+                    "flex h-10 w-10 items-center justify-center rounded-xl text-sm font-bold text-white",
+                    agency.is_active ? "bg-gradient-to-br from-emerald-500 to-teal-600" : "bg-white/10"
                   )}>
                     {agency.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <div className="font-semibold text-text">{agency.name}</div>
+                      <span className="font-medium text-white">{agency.name}</span>
                       <span className={cn(
                         "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
-                        agency.is_active
-                          ? "bg-green-500/10 text-green-600"
-                          : "bg-slate-500/10 text-slate-500"
+                        agency.is_active ? "bg-emerald-500/10 text-emerald-400" : "bg-white/5 text-white/40"
                       )}>
-                        <span className={cn(
-                          "h-1.5 w-1.5 rounded-full",
-                          agency.is_active ? "bg-green-500" : "bg-slate-400"
-                        )} />
+                        <span className={cn("h-1.5 w-1.5 rounded-full", agency.is_active ? "bg-emerald-500" : "bg-white/40")} />
                         {agency.is_active ? "Active" : "Inactive"}
                       </span>
                     </div>
-                    <div className="mt-1 font-mono text-xs text-text-3">{agency.id}</div>
-                    {agency.created_at && (
-                      <div className="text-xs text-text-3">
-                        Created {new Date(agency.created_at).toLocaleDateString()}
-                      </div>
-                    )}
+                    <div className="mt-0.5 font-mono text-xs text-white/30">{agency.id.slice(0, 8)}…</div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div>
                   {agency.is_active ? (
                     <button
                       onClick={() => setActive(agency.id, false)}
                       disabled={busyId === agency.id}
-                      className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-medium text-text-2 transition-colors hover:bg-surface-2 disabled:opacity-50"
+                      className="rounded-xl border border-white/10 px-4 py-2 text-sm font-medium text-white/60 transition-colors hover:bg-white/5 hover:text-white disabled:opacity-50"
                     >
-                      {busyId === agency.id ? (
-                        <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                        </svg>
-                      ) : (
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                        </svg>
-                      )}
-                      Deactivate
+                      {busyId === agency.id ? "..." : "Deactivate"}
                     </button>
                   ) : (
                     <button
                       onClick={() => setActive(agency.id, true)}
                       disabled={busyId === agency.id}
-                      className="inline-flex items-center gap-2 rounded-xl bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:opacity-50"
+                      className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-500 disabled:opacity-50"
                     >
-                      {busyId === agency.id ? (
-                        <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                        </svg>
-                      ) : (
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      )}
-                      Activate
+                      {busyId === agency.id ? "..." : "Activate"}
                     </button>
                   )}
                 </div>
@@ -288,19 +237,14 @@ export default function AdminPage() {
             ))}
 
             {filteredAgencies.length === 0 && (
-              <div className="px-6 py-12 text-center">
+              <div className="py-12 text-center">
                 {searchQuery ? (
                   <>
-                    <p className="text-text-2">No agencies match &quot;{searchQuery}&quot;</p>
-                    <button
-                      onClick={() => setSearchQuery("")}
-                      className="mt-2 text-sm text-accent hover:underline"
-                    >
-                      Clear search
-                    </button>
+                    <p className="text-white/50">No agencies match &quot;{searchQuery}&quot;</p>
+                    <button onClick={() => setSearchQuery("")} className="mt-2 text-sm text-white/70 hover:text-white hover:underline">Clear search</button>
                   </>
                 ) : (
-                  <p className="text-text-2">No agencies found.</p>
+                  <p className="text-white/50">No agencies found.</p>
                 )}
               </div>
             )}
@@ -308,19 +252,18 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Info card */}
-      <div className="mt-6 rounded-2xl border border-border bg-surface-2/50 p-6">
-        <div className="flex items-start gap-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      {/* Info */}
+      <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
+        <div className="flex items-start gap-3">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
             </svg>
           </div>
           <div>
-            <h3 className="font-semibold text-text">Admin Notice</h3>
-            <p className="mt-1 text-sm text-text-2">
-              This page is for internal use only. Activating an agency gives them access to the app and all features.
-              Deactivating an agency will prevent them from logging in until reactivated.
+            <p className="text-sm font-medium text-white/70">Admin Notice</p>
+            <p className="mt-0.5 text-xs text-white/50">
+              Activating an agency gives them full access. Deactivating prevents login until reactivated.
             </p>
           </div>
         </div>
