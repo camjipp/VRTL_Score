@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/cn";
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 function Check({ className }: { className?: string }) {
   return (
@@ -23,6 +25,7 @@ function Check({ className }: { className?: string }) {
 
 const plans = [
   {
+    id: "starter" as const,
     name: "Starter",
     description: "For small agencies getting started with AI visibility.",
     monthlyPrice: 149,
@@ -40,6 +43,7 @@ const plans = [
     popular: false,
   },
   {
+    id: "growth" as const,
     name: "Growth",
     description: "For real agencies running weekly reporting.",
     monthlyPrice: 399,
@@ -58,6 +62,7 @@ const plans = [
     popular: true,
   },
   {
+    id: "pro" as const,
     name: "Pro",
     description: "For larger agencies and power users.",
     monthlyPrice: 799,
@@ -121,7 +126,66 @@ const faqs = [
 ];
 
 export default function PricingPage() {
+  const router = useRouter();
   const [isAnnual, setIsAnnual] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  // Check if user is logged in
+  useEffect(() => {
+    const supabase = getSupabaseBrowserClient();
+    supabase.auth.getSession().then(({ data }) => {
+      setIsLoggedIn(!!data.session);
+    });
+  }, []);
+
+  async function handleCheckout(planId: "starter" | "growth" | "pro") {
+    if (!isLoggedIn) {
+      // Not logged in - go to onboarding first
+      router.push(`/onboarding?plan=${planId}&interval=${isAnnual ? "annual" : "monthly"}`);
+      return;
+    }
+
+    setLoadingPlan(planId);
+    try {
+      const supabase = getSupabaseBrowserClient();
+      const { data } = await supabase.auth.getSession();
+      const accessToken = data.session?.access_token;
+
+      if (!accessToken) {
+        router.push("/onboarding");
+        return;
+      }
+
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          planId,
+          interval: isAnnual ? "annual" : "monthly",
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        alert(error.error || "Checkout failed");
+        return;
+      }
+
+      const { url } = await res.json();
+      if (url) {
+        window.location.href = url;
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setLoadingPlan(null);
+    }
+  }
 
   return (
     <main className="min-h-screen bg-bg">
@@ -182,6 +246,7 @@ export default function PricingPage() {
             {plans.map((plan) => {
               const price = isAnnual ? plan.yearlyPrice : plan.monthlyPrice;
               const monthlyEquivalent = isAnnual ? Math.round(plan.yearlyPrice / 12) : plan.monthlyPrice;
+              const isLoading = loadingPlan === plan.id;
 
               return (
                 <div
@@ -228,17 +293,29 @@ export default function PricingPage() {
                     )}
                   </div>
 
-                  <Link
-                    href="/onboarding"
+                  <button
+                    type="button"
+                    onClick={() => handleCheckout(plan.id)}
+                    disabled={isLoading}
                     className={cn(
-                      "flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold transition-all",
+                      "flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold transition-all disabled:opacity-50",
                       plan.popular
                         ? "bg-accent text-white shadow-lg shadow-accent/25 hover:bg-accent-2 hover:shadow-xl"
                         : "bg-surface-2 text-text hover:bg-border"
                     )}
                   >
-                    {plan.cta}
-                  </Link>
+                    {isLoading ? (
+                      <span className="flex items-center gap-2">
+                        <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        Loading...
+                      </span>
+                    ) : (
+                      plan.cta
+                    )}
+                  </button>
 
                   <div className="my-6 h-px bg-border" />
 
@@ -360,12 +437,14 @@ export default function PricingPage() {
           <h2 className="text-2xl font-bold text-text">Ready to dominate AI search?</h2>
           <p className="mt-2 text-text-2">Start your 7-day free trial. Cancel anytime before it ends.</p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Link
-              href="/onboarding"
-              className="rounded-xl bg-accent px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-accent/25 transition-all hover:bg-accent-2 hover:shadow-xl"
+            <button
+              type="button"
+              onClick={() => handleCheckout("growth")}
+              disabled={loadingPlan === "growth"}
+              className="rounded-xl bg-accent px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-accent/25 transition-all hover:bg-accent-2 hover:shadow-xl disabled:opacity-50"
             >
-              Start free trial
-            </Link>
+              {loadingPlan === "growth" ? "Loading..." : "Start free trial"}
+            </button>
             <Link
               href="/"
               className="text-sm font-medium text-text-2 hover:text-text"

@@ -15,11 +15,13 @@
   },
   "dependencies": {
     "@sparticuz/chromium": "^141.0.0",
+    "@stripe/stripe-js": "^8.6.4",
     "@supabase/supabase-js": "^2.49.1",
     "next": "^15.1.4",
     "puppeteer-core": "^24.23.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "stripe": "^20.2.0",
     "zod": "^3.24.4"
   },
   "devDependencies": {
