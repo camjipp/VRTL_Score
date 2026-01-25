@@ -121,7 +121,7 @@ const faqs = [
 ];
 
 export default function PricingPage() {
-  const [isAnnual, setIsAnnual] = useState(false);
+  const [isAnnual, setIsAnnual] = useState(true);
 
   return (
     <main className="min-h-screen bg-bg">
