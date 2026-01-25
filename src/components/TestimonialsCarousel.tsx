@@ -139,7 +139,7 @@ export function TestimonialsCarousel({ className }: { className?: string }) {
         {testimonials
           .filter((_, i) => i !== activeIndex)
           .slice(0, 3)
-          .map((t, i) => (
+          .map((t) => (
             <button
               key={t.author}
               onClick={() =>
