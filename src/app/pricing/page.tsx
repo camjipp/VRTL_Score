@@ -32,7 +32,7 @@ const plans = [
       "Up to 5 active clients",
       "Unlimited snapshots",
       "PDF report export",
-      "All AI providers (GPT, Claude, Gemini)",
+      "All leading AI providers included",
       "Basic branding",
       "Email support",
     ],
@@ -104,7 +104,7 @@ const faqs = [
   },
   {
     question: "What AI providers are included?",
-    answer: "All plans include access to OpenAI GPT-4, Anthropic Claude, and Google Gemini for comprehensive AI visibility analysis.",
+    answer: "All plans include access to the leading AI models for comprehensive visibility analysis. We continuously add new providers as they emerge.",
   },
   {
     question: "Do you offer refunds?",
@@ -139,7 +139,7 @@ export default function PricingPage() {
             Pricing built for agencies
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-text-2">
-            Become the go-to expert for AI visibility. Track, report, and improve how your clients show up in ChatGPT, Claude, and Gemini.
+            Become the go-to expert for AI visibility. Track, report, and improve how your clients rank across the leading AI models.
           </p>
 
           {/* Billing toggle */}
