@@ -253,7 +253,7 @@ export default function HomePage() {
               </div>
 
               <p className="mt-4 text-sm text-text-3">
-                No credit card required · Cancel anytime
+                7-day free trial · Cancel anytime
               </p>
             </div>
 

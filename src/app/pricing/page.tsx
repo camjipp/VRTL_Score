@@ -96,7 +96,7 @@ const comparisonFeatures = [
 const faqs = [
   {
     question: "What's included in the free trial?",
-    answer: "All plans include a 7-day free trial with full access to features. No credit card required to start.",
+    answer: "All plans include a 7-day free trial with full access to features. You'll enter your card at signup, but won't be charged until the trial ends. Cancel anytime.",
   },
   {
     question: "Can I change plans later?",
@@ -358,7 +358,7 @@ export default function PricingPage() {
       <section className="border-t border-border bg-surface-2">
         <div className="mx-auto max-w-4xl px-6 py-16 text-center">
           <h2 className="text-2xl font-bold text-text">Ready to dominate AI search?</h2>
-          <p className="mt-2 text-text-2">Start your 7-day free trial. No credit card required.</p>
+          <p className="mt-2 text-text-2">Start your 7-day free trial. Cancel anytime before it ends.</p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
               href="/onboarding"

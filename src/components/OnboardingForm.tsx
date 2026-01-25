@@ -208,7 +208,7 @@ export function OnboardingForm() {
                   Start tracking AI visibility
                 </h1>
                 <p className="mt-3 text-lg text-text-2">
-                  See how your clients rank across leading AI models. No credit card required.
+                  See how your clients rank across leading AI models. Try free for 7 days.
                 </p>
               </div>
 
