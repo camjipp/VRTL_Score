@@ -112,7 +112,7 @@ export function RotatingQuestions({
         {questions
           .filter((_, i) => i !== activeIdx)
           .slice(0, 3)
-          .map((q, i) => (
+          .map((q) => (
             <button
               key={q.text}
               onClick={() => setActiveIdx(questions.findIndex((x) => x.text === q.text))}

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 
 // Disable body parsing - Stripe needs raw body for webhook verification
@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const rawBody = await getRawBody(req);
+    const stripe = getStripe();
     event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
   } catch (err) {
     console.error("Webhook signature verification failed:", err);

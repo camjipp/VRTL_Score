@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { stripe, PLANS, PlanId, BillingInterval } from "@/lib/stripe";
+import { getStripe, PLANS, PlanId, BillingInterval } from "@/lib/stripe";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(req: NextRequest) {
@@ -54,6 +54,7 @@ export async function POST(req: NextRequest) {
     const price = interval === "annual" ? plan.annualPrice : plan.monthlyPrice;
 
     // Get or create Stripe customer
+    const stripe = getStripe();
     let customerId = agency.stripe_customer_id;
     if (!customerId) {
       const customer = await stripe.customers.create({
