@@ -358,142 +358,204 @@ export function OnboardingForm() {
 
         {/* Step 2: Agency setup */}
         {isAuthenticated === true && (
-          <div className="mx-auto max-w-2xl">
-            <div className="mb-8 text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h1 className="text-2xl font-bold tracking-tight text-text sm:text-3xl">
-                Account created! One more step.
-              </h1>
-              <p className="mt-2 text-text-2">
-                Set up your agency branding for reports. You can change this anytime.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-xl sm:p-8">
-              {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-text/20 border-t-text" />
+          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+            {/* Left: Form */}
+            <div>
+              <div className="mb-8">
+                <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-700">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Account created
                 </div>
-              ) : (
-                <form className="space-y-6" onSubmit={finishSetup}>
-                  {error && (
-                    <Alert variant="danger">
-                      <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                  )}
+                <h1 className="mt-4 text-3xl font-bold tracking-tight text-text sm:text-4xl">
+                  Make it yours
+                </h1>
+                <p className="mt-3 text-lg text-text-2">
+                  Add your branding so every report looks like it came from your agency.
+                </p>
+              </div>
 
-                  {/* Agency name */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-text">Agency name</label>
-                    <Input
-                      className="h-12 rounded-xl text-base"
-                      disabled={saving}
-                      onChange={(e) => setAgencyName(e.target.value)}
-                      placeholder="Acme Agency"
-                      value={agencyName}
-                    />
-                    <p className="mt-2 text-xs text-text-3">This appears in the header of your reports</p>
+              <div className="rounded-2xl border border-border bg-white p-6 shadow-xl sm:p-8">
+                {loading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-text/20 border-t-text" />
                   </div>
+                ) : (
+                  <form className="space-y-6" onSubmit={finishSetup}>
+                    {error && (
+                      <Alert variant="danger">
+                        <AlertDescription>{error}</AlertDescription>
+                      </Alert>
+                    )}
 
-                  {/* Logo upload */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-text">
-                      Agency logo <span className="font-normal text-text-3">(optional)</span>
-                    </label>
-                    <div
-                      className={cn(
-                        "relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 transition-colors",
-                        logoPreview
-                          ? "border-emerald-500/50 bg-emerald-500/5"
-                          : "border-border hover:border-text/30 hover:bg-surface-2"
-                      )}
-                      onClick={() => document.getElementById("logo-input")?.click()}
-                    >
-                      {logoPreview ? (
-                        <div className="relative">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={logoPreview} alt="Logo preview" className="h-16 w-auto object-contain" />
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); setLogoFile(null); }}
-                            className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-md hover:bg-red-600"
-                          >
-                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-2">
-                            <svg className="h-6 w-6 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                            </svg>
-                          </div>
-                          <p className="mt-3 text-sm text-text-2">
-                            <span className="font-medium text-text">Click to upload</span> or drag and drop
-                          </p>
-                          <p className="mt-1 text-xs text-text-3">PNG, JPG up to 2MB · Transparent PNG recommended</p>
-                        </>
-                      )}
-                      <input
-                        id="logo-input"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
+                    {/* Agency name */}
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-text">Agency name</label>
+                      <Input
+                        className="h-12 rounded-xl text-base"
                         disabled={saving}
-                        onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)}
+                        onChange={(e) => setAgencyName(e.target.value)}
+                        placeholder="Acme Agency"
+                        value={agencyName}
                       />
                     </div>
-                  </div>
 
-                  {/* Preview */}
-                  <div className="rounded-xl border border-border bg-surface-2 p-4">
-                    <div className="mb-2 text-xs font-medium text-text-3">Report preview</div>
-                    <div className="rounded-lg border border-border bg-white p-4">
-                      <div className="flex items-center gap-3">
-                        {logoPreview ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={logoPreview} alt="Logo" className="h-8 w-auto object-contain" />
-                        ) : (
-                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-text/10 to-text/5 text-sm font-bold text-text">
-                            {agencyName ? agencyName.charAt(0).toUpperCase() : "A"}
-                          </div>
+                    {/* Logo upload */}
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-text">
+                        Agency logo <span className="font-normal text-text-3">(optional)</span>
+                      </label>
+                      <div
+                        className={cn(
+                          "relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 transition-colors",
+                          logoPreview
+                            ? "border-emerald-500/50 bg-emerald-500/5"
+                            : "border-border hover:border-text/30 hover:bg-surface-2"
                         )}
-                        <div>
-                          <div className="text-sm font-semibold text-text">{agencyName || "Your Agency"}</div>
-                          <div className="text-xs text-text-3">AI Visibility Report</div>
-                        </div>
+                        onClick={() => document.getElementById("logo-input")?.click()}
+                      >
+                        {logoPreview ? (
+                          <div className="relative">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={logoPreview} alt="Logo preview" className="h-16 w-auto object-contain" />
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); setLogoFile(null); }}
+                              className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-md hover:bg-red-600"
+                            >
+                              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-2">
+                              <svg className="h-6 w-6 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                              </svg>
+                            </div>
+                            <p className="mt-3 text-sm text-text-2">
+                              <span className="font-medium text-text">Click to upload</span>
+                            </p>
+                            <p className="mt-1 text-xs text-text-3">PNG or JPG · Transparent PNG works best</p>
+                          </>
+                        )}
+                        <input
+                          id="logo-input"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          disabled={saving}
+                          onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)}
+                        />
                       </div>
                     </div>
-                  </div>
 
-                  {/* Buttons */}
-                  <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+                    {/* CTA */}
                     <Button
-                      className="h-12 flex-1 rounded-xl text-base shadow-lg shadow-accent/20"
+                      className="h-12 w-full rounded-xl text-base shadow-lg shadow-accent/20"
                       disabled={saving || !agencyName.trim()}
                       type="submit"
                       variant="primary"
                     >
-                      {saving ? "Saving..." : "Go to dashboard →"}
+                      {saving ? "Saving..." : "Continue to dashboard →"}
                     </Button>
-                    <Button
-                      className="h-12 rounded-xl text-base"
+
+                    <button
+                      type="button"
                       disabled={saving}
                       onClick={() => router.replace(isInternalPath(nextPath) ? nextPath : "/app")}
-                      type="button"
-                      variant="secondary"
+                      className="w-full text-center text-sm text-text-3 hover:text-text"
                     >
                       Skip for now
-                    </Button>
+                    </button>
+                  </form>
+                )}
+              </div>
+            </div>
+
+            {/* Right: Live Preview */}
+            <div className="hidden lg:block">
+              <div className="sticky top-8">
+                <div className="mb-4 text-sm font-medium text-text-3">Live preview</div>
+                
+                {/* Report mockup */}
+                <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-2xl">
+                  {/* Report header */}
+                  <div className="border-b border-border bg-surface-2/50 p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {logoPreview ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={logoPreview} alt="Logo" className="h-10 w-auto object-contain" />
+                        ) : (
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-emerald-500 text-lg font-bold text-white">
+                            {agencyName ? agencyName.charAt(0).toUpperCase() : "A"}
+                          </div>
+                        )}
+                        <div>
+                          <div className="font-semibold text-text">{agencyName || "Your Agency"}</div>
+                          <div className="text-xs text-text-3">AI Visibility Report</div>
+                        </div>
+                      </div>
+                      <div className="text-right text-xs text-text-3">
+                        <div>January 2026</div>
+                        <div>client-website.com</div>
+                      </div>
+                    </div>
                   </div>
-                </form>
-              )}
+
+                  {/* Report content mockup */}
+                  <div className="p-6">
+                    {/* Score section */}
+                    <div className="flex items-center gap-6">
+                      <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 text-3xl font-bold text-white shadow-lg">
+                        82
+                      </div>
+                      <div>
+                        <div className="text-sm text-text-3">Overall VRTL Score</div>
+                        <div className="mt-1 text-xl font-semibold text-text">Strong visibility</div>
+                        <div className="mt-1 flex items-center gap-2 text-sm text-emerald-600">
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                          </svg>
+                          +8 from last month
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Fake content lines */}
+                    <div className="mt-6 space-y-3">
+                      <div className="h-3 w-full rounded bg-surface-2" />
+                      <div className="h-3 w-4/5 rounded bg-surface-2" />
+                      <div className="h-3 w-3/4 rounded bg-surface-2" />
+                    </div>
+
+                    {/* Provider bars */}
+                    <div className="mt-6 grid grid-cols-3 gap-3">
+                      {[
+                        { name: "ChatGPT", score: 85, color: "bg-emerald-500" },
+                        { name: "Gemini", score: 79, color: "bg-violet-500" },
+                        { name: "Claude", score: 82, color: "bg-amber-500" },
+                      ].map((p) => (
+                        <div key={p.name} className="rounded-lg bg-surface-2 p-3">
+                          <div className="text-xs text-text-3">{p.name}</div>
+                          <div className="mt-1 text-lg font-semibold text-text">{p.score}</div>
+                          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-border">
+                            <div className={cn("h-full rounded-full", p.color)} style={{ width: `${p.score}%` }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <p className="mt-4 text-center text-xs text-text-3">
+                  This is how your reports will look to clients
+                </p>
+              </div>
             </div>
           </div>
         )}
