@@ -1,0 +1,22 @@
+{
+  "name": "VRTL Score",
+  "short_name": "VRTL",
+  "description": "AI Visibility for Agencies",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#faf9f6",
+  "theme_color": "#080808",
+  "icons": [
+    {
+      "src": "/brand/VRTL_Solo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/brand/VRTL_Solo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+
