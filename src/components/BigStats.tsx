@@ -11,7 +11,7 @@ type Stat = {
 };
 
 const stats: Stat[] = [
-  { value: "10", suffix: "K+", label: "prompts run", sublabel: "monthly" },
+  { value: "10", suffix: "+", label: "signals analyzed", sublabel: "per snapshot" },
   { value: "3", suffix: "+", label: "LLM providers", sublabel: "ChatGPT, Gemini, Claude" },
   { value: "30", suffix: "s", label: "avg report time", sublabel: "one-click PDF" },
   { value: "100", suffix: "%", label: "evidence captured", sublabel: "no screenshots" },

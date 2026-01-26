@@ -301,11 +301,8 @@ export function OnboardingForm() {
             {/* Right: Benefits */}
             <div className="hidden lg:block">
               <div className="sticky top-8">
-                <div className="mb-6 inline-flex items-center gap-2 text-sm text-text-3">
-                  <svg className="h-4 w-4 text-emerald-500" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
-                  Trusted by 200+ agencies
+                <div className="mb-6 text-sm font-medium text-text-3">
+                  What you&apos;ll get
                 </div>
 
                 <div className="space-y-4">
@@ -341,22 +338,16 @@ export function OnboardingForm() {
                   ))}
                 </div>
 
-                <div className="mt-8 rounded-2xl bg-slate-900 p-6 text-white">
+                <div className="mt-8 rounded-2xl bg-emerald-50 p-6">
                   <div className="flex items-start gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/10 text-xl">
-                      💬
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-lg">
+                      ⚡
                     </div>
                     <div>
-                      <p className="text-sm leading-relaxed text-slate-300">
-                        &quot;VRTL Score helped us show clients exactly how they rank in AI search. It&apos;s become our secret weapon for retention.&quot;
+                      <div className="font-semibold text-text">Get your first report in under 5 minutes</div>
+                      <p className="mt-1 text-sm text-text-2">
+                        Add a client, run a snapshot, download the PDF. No complex setup required.
                       </p>
-                      <div className="mt-3 flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500" />
-                        <div>
-                          <div className="text-sm font-medium">Sarah Chen</div>
-                          <div className="text-xs text-slate-400">Founder, GrowthSEO Agency</div>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>

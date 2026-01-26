@@ -5,7 +5,6 @@ import { DomainSearchBar } from "@/components/DomainSearchBar";
 import { FeatureShowcase } from "@/components/FeatureShowcase";
 import { Footer } from "@/components/Footer";
 import { RotatingQuestions } from "@/components/RotatingQuestions";
-import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 
 export default function HomePage() {
@@ -71,32 +70,10 @@ export default function HomePage() {
               <DomainSearchBar />
             </div>
 
-            {/* Social proof */}
-            <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-8">
-              <div className="flex items-center gap-2">
-                <div className="flex -space-x-2">
-                  {["S", "M", "J", "A"].map((letter, i) => (
-                    <div
-                      key={letter}
-                      className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-bg bg-gradient-to-br from-violet-500 to-emerald-500 text-xs font-bold text-white"
-                      style={{ zIndex: 4 - i }}
-                    >
-                      {letter}
-                    </div>
-                  ))}
-                </div>
-                <span className="text-sm text-text-2">
-                  <span className="font-semibold text-text">200+</span> agencies measuring AI visibility
-                </span>
-              </div>
-              <div className="hidden h-4 w-px bg-border sm:block" />
-              <div className="flex items-center gap-2 text-sm text-text-2">
-                <svg className="h-4 w-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-                <span><span className="font-semibold text-text">5,000+</span> reports generated</span>
-              </div>
-            </div>
+            {/* Tagline */}
+            <p className="mt-8 text-sm text-text-2">
+              Built for agencies who want to lead in AI search.
+            </p>
 
             <div className="mt-5 flex items-center justify-center gap-3 text-sm">
               <Link className="text-text-2 hover:text-text" href="/pricing">
@@ -121,10 +98,10 @@ export default function HomePage() {
         <div className="container-xl">
           <div className="mb-12 text-center">
             <h2 className="text-3xl font-bold tracking-tight text-text md:text-4xl">
-              Proof at scale
+              Built for speed and clarity
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-text-2">
-              Real-time AI visibility measurement across the models that matter.
+              Get from client onboarding to branded PDF in under a minute.
             </p>
           </div>
           <BigStats />
@@ -171,25 +148,70 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          TESTIMONIALS — Dynamic carousel with dark theme
+          WHY AGENCIES CHOOSE — Benefit cards
       ═══════════════════════════════════════════════════════════════════ */}
-      <section className="py-20" id="testimonials">
+      <section className="py-20" id="benefits">
         <div className="container-xl">
           <div className="mb-12 text-center">
             <div className="inline-flex items-center gap-2 rounded-full bg-amber-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-amber-600">
               <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
-              Testimonials
+              Why VRTL Score
             </div>
             <h2 className="mt-4 text-3xl font-bold tracking-tight text-text md:text-4xl">
-              Trusted by agency teams
+              Why agencies choose VRTL Score
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-text-2">
-              Hear from teams using VRTL Score to measure and prove AI visibility.
+              The tools you need to measure, report, and prove AI visibility to clients.
             </p>
           </div>
-          <TestimonialsCarousel />
+          
+          {/* Benefit cards grid */}
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                icon: "🎯",
+                title: "Repeatable measurement",
+                description: "Run the same prompts across AI models every time. Compare results month over month with consistency.",
+                color: "emerald",
+              },
+              {
+                icon: "📋",
+                title: "Evidence-backed reports",
+                description: "Every score comes with the actual AI responses. No black boxes—show clients exactly what LLMs say.",
+                color: "violet",
+              },
+              {
+                icon: "⚡",
+                title: "Client-ready in seconds",
+                description: "One-click PDF export with your branding. Professional reports without the manual work.",
+                color: "amber",
+              },
+              {
+                icon: "📈",
+                title: "Track progress over time",
+                description: "Compare snapshots to show improvement. Prove the value of your SEO and content work.",
+                color: "cyan",
+              },
+            ].map((benefit) => (
+              <div
+                key={benefit.title}
+                className="group relative overflow-hidden rounded-2xl border border-border bg-surface p-6 transition-all hover:border-text/20 hover:shadow-lg"
+              >
+                <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl text-2xl ${
+                  benefit.color === "emerald" ? "bg-emerald-500/10" :
+                  benefit.color === "violet" ? "bg-violet-500/10" :
+                  benefit.color === "amber" ? "bg-amber-500/10" :
+                  "bg-cyan-500/10"
+                }`}>
+                  {benefit.icon}
+                </div>
+                <h3 className="text-lg font-semibold text-text">{benefit.title}</h3>
+                <p className="mt-2 text-sm text-text-2">{benefit.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
