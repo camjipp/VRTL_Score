@@ -30,12 +30,12 @@ export default function AdminPage() {
       try {
         const { agencyId } = await ensureOnboarded();
 
-        // Get the user's role from agency_members
+        // Get the user's role from agency_users
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error("Not authenticated");
 
         const { data: membership } = await supabase
-          .from("agency_members")
+          .from("agency_users")
           .select("role")
           .eq("user_id", user.id)
           .eq("agency_id", agencyId)

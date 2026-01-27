@@ -171,6 +171,11 @@ function PricingContent() {
 
       if (!res.ok) {
         const error = await res.json();
+        // If no agency, redirect to complete onboarding
+        if (error.code === "NO_AGENCY") {
+          router.push("/onboarding");
+          return;
+        }
         alert(error.error || "Checkout failed");
         return;
       }

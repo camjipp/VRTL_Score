@@ -21,13 +21,13 @@ export async function POST(req: NextRequest) {
 
     // Get agency
     const { data: membership } = await supabase
-      .from("agency_members")
+      .from("agency_users")
       .select("agency_id")
       .eq("user_id", user.id)
       .single();
 
     if (!membership) {
-      return NextResponse.json({ error: "No agency found" }, { status: 400 });
+      return NextResponse.json({ error: "No agency found", code: "NO_AGENCY" }, { status: 400 });
     }
 
     // Get agency details

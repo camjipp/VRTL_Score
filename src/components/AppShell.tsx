@@ -71,7 +71,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       if (!user) return;
       
       const { data: membership } = await supabase
-        .from("agency_members")
+        .from("agency_users")
         .select("agency_id")
         .eq("user_id", user.id)
         .maybeSingle();
@@ -176,7 +176,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 {active && (
                   <span className="ml-auto h-1.5 w-1.5 rounded-full bg-accent" />
                 )}
-              </Link>
+          </Link>
             );
           })}
 
@@ -204,7 +204,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   {item.icon}
                 </span>
                 {item.label}
-              </Link>
+          </Link>
             );
           })}
         </nav>
@@ -213,7 +213,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="border-t border-border p-3">
           <button
             onClick={logout}
-            disabled={busy}
+          disabled={busy}
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-text-2 transition-all hover:bg-surface-2 hover:text-text"
           >
             <svg className="h-5 w-5 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
