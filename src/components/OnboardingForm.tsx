@@ -40,6 +40,19 @@ async function onboardApi(accessToken: string) {
   return (await res.json()) as { agency_id: string };
 }
 
+const goalOptions = [
+  { id: "reporting", label: "Client reporting & retention", icon: "📊" },
+  { id: "competitive", label: "Competitive intelligence", icon: "🔍" },
+  { id: "service", label: "Adding AI visibility as a service", icon: "🚀" },
+  { id: "exploring", label: "Just exploring", icon: "👀" },
+];
+
+const sizeOptions = [
+  { id: "small", label: "1-5 clients", desc: "Getting started" },
+  { id: "medium", label: "6-20 clients", desc: "Growing agency" },
+  { id: "large", label: "20+ clients", desc: "Established agency" },
+];
+
 export function OnboardingForm() {
   const router = useRouter();
   const sp = useSearchParams();
@@ -59,9 +72,16 @@ export function OnboardingForm() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Progressive setup steps
+  const [setupStep, setSetupStep] = useState(1);
   const [agencyName, setAgencyName] = useState("");
+  const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+
+  const totalSetupSteps = 4;
 
   // Check auth on mount
   useEffect(() => {
@@ -129,8 +149,7 @@ export function OnboardingForm() {
   }
 
   // Finish agency setup
-  async function finishSetup(e: React.FormEvent) {
-    e.preventDefault();
+  async function finishSetup() {
     setSaving(true);
     setError(null);
     try {
@@ -147,7 +166,13 @@ export function OnboardingForm() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`
         },
-        body: JSON.stringify({ name, brand_accent: null })
+        body: JSON.stringify({ 
+          name, 
+          brand_accent: null,
+          // Store survey data as metadata (optional - could add these columns later)
+          // goal: selectedGoal,
+          // team_size: selectedSize,
+        })
       });
       if (!upd.ok) throw new Error(await upd.text());
 
@@ -178,9 +203,6 @@ export function OnboardingForm() {
       setSaving(false);
     }
   }
-
-  // Determine current step
-  const currentStep = isAuthenticated === null ? 0 : isAuthenticated ? 2 : 1;
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-surface to-bg">
@@ -307,26 +329,10 @@ export function OnboardingForm() {
 
                 <div className="space-y-4">
                   {[
-                    { 
-                      icon: "📊", 
-                      title: "AI Visibility Scores", 
-                      desc: "Measure how often your clients are recommended by leading AI models." 
-                    },
-                    { 
-                      icon: "🔍", 
-                      title: "Competitive Intelligence", 
-                      desc: "See who's winning the AI recommendation battle in your client's space." 
-                    },
-                    { 
-                      icon: "📄", 
-                      title: "Client-Ready Reports", 
-                      desc: "Generate branded PDFs that prove your SEO value to clients." 
-                    },
-                    { 
-                      icon: "📈", 
-                      title: "Track Progress", 
-                      desc: "Compare snapshots over time to show measurable improvement." 
-                    },
+                    { icon: "📊", title: "AI Visibility Scores", desc: "Measure how often your clients are recommended by leading AI models." },
+                    { icon: "🔍", title: "Competitive Intelligence", desc: "See who's winning the AI recommendation battle in your client's space." },
+                    { icon: "📄", title: "Client-Ready Reports", desc: "Generate branded PDFs that prove your SEO value to clients." },
+                    { icon: "📈", title: "Track Progress", desc: "Compare snapshots over time to show measurable improvement." },
                   ].map((item) => (
                     <div key={item.title} className="flex gap-4 rounded-2xl border border-border bg-white p-5">
                       <span className="text-2xl">{item.icon}</span>
@@ -337,86 +343,207 @@ export function OnboardingForm() {
                     </div>
                   ))}
                 </div>
-
-                <div className="mt-8 rounded-2xl bg-emerald-50 p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-lg">
-                      ⚡
-                    </div>
-                    <div>
-                      <div className="font-semibold text-text">Get your first report in under 5 minutes</div>
-                      <p className="mt-1 text-sm text-text-2">
-                        Add a client, run a snapshot, download the PDF. No complex setup required.
-                      </p>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Step 2: Agency setup */}
+        {/* Progressive Setup Flow */}
         {isAuthenticated === true && (
-          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
-            {/* Left: Form */}
-            <div>
-              <div className="mb-8">
-                <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-700">
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  Account created
-                </div>
-                <h1 className="mt-4 text-3xl font-bold tracking-tight text-text sm:text-4xl">
-                  Make it yours
-                </h1>
-                <p className="mt-3 text-lg text-text-2">
-                  Add your branding so every report looks like it came from your agency.
-                </p>
+          <div className="mx-auto max-w-xl">
+            {loading ? (
+              <div className="flex min-h-[60vh] items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-text/20 border-t-text" />
               </div>
-
-              <div className="rounded-2xl border border-border bg-white p-6 shadow-xl sm:p-8">
-                {loading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-text/20 border-t-text" />
+            ) : (
+              <>
+                {/* Progress indicator */}
+                <div className="mb-8">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-text-3">Step {setupStep} of {totalSetupSteps}</span>
+                    <button
+                      type="button"
+                      onClick={() => finishSetup()}
+                      className="text-sm text-text-3 hover:text-text"
+                    >
+                      Skip setup
+                    </button>
                   </div>
-                ) : (
-                  <form className="space-y-6" onSubmit={finishSetup}>
-                    {error && (
-                      <Alert variant="danger">
-                        <AlertDescription>{error}</AlertDescription>
-                      </Alert>
-                    )}
+                  <div className="mt-2 h-1 overflow-hidden rounded-full bg-border">
+                    <div 
+                      className="h-full rounded-full bg-emerald-500 transition-all duration-300"
+                      style={{ width: `${(setupStep / totalSetupSteps) * 100}%` }}
+                    />
+                  </div>
+                </div>
 
-                    {/* Agency name */}
-                    <div>
-                      <label className="mb-2 block text-sm font-medium text-text">Agency name</label>
+                {error && (
+                  <Alert variant="danger" className="mb-6">
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+
+                {/* Step 1: Agency Name */}
+                {setupStep === 1 && (
+                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                    <div className="mb-8 text-center">
+                      <span className="text-4xl">👋</span>
+                      <h1 className="mt-4 text-2xl font-bold text-text sm:text-3xl">
+                        What&apos;s your agency called?
+                      </h1>
+                      <p className="mt-2 text-text-2">
+                        This will appear on all your client reports.
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-border bg-white p-6 shadow-xl sm:p-8">
                       <Input
-                        className="h-12 rounded-xl text-base"
-                        disabled={saving}
+                        autoFocus
+                        className="h-14 rounded-xl text-center text-lg"
                         onChange={(e) => setAgencyName(e.target.value)}
                         placeholder="Acme Agency"
                         value={agencyName}
                       />
+                      <Button
+                        className="mt-6 h-12 w-full rounded-xl text-base"
+                        disabled={!agencyName.trim()}
+                        onClick={() => setSetupStep(2)}
+                        type="button"
+                        variant="primary"
+                      >
+                        Continue →
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 2: What brings you here */}
+                {setupStep === 2 && (
+                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                    <div className="mb-8 text-center">
+                      <span className="text-4xl">🎯</span>
+                      <h1 className="mt-4 text-2xl font-bold text-text sm:text-3xl">
+                        What brings you to VRTL Score?
+                      </h1>
+                      <p className="mt-2 text-text-2">
+                        This helps us tailor your experience.
+                      </p>
                     </div>
 
-                    {/* Logo upload - compact inline */}
-                    <div>
-                      <label className="mb-2 block text-sm font-medium text-text">
-                        Logo <span className="font-normal text-text-3">(optional)</span>
-                      </label>
-                      <div className="flex items-center gap-4">
+                    <div className="space-y-3">
+                      {goalOptions.map((option) => (
+                        <button
+                          key={option.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedGoal(option.id);
+                            setTimeout(() => setSetupStep(3), 200);
+                          }}
+                          className={cn(
+                            "flex w-full items-center gap-4 rounded-2xl border-2 bg-white p-5 text-left transition-all",
+                            selectedGoal === option.id
+                              ? "border-emerald-500 bg-emerald-50"
+                              : "border-border hover:border-text/20 hover:shadow-md"
+                          )}
+                        >
+                          <span className="text-2xl">{option.icon}</span>
+                          <span className="font-medium text-text">{option.label}</span>
+                          {selectedGoal === option.id && (
+                            <svg className="ml-auto h-5 w-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setSetupStep(1)}
+                      className="mt-6 w-full text-center text-sm text-text-3 hover:text-text"
+                    >
+                      ← Back
+                    </button>
+                  </div>
+                )}
+
+                {/* Step 3: Team size */}
+                {setupStep === 3 && (
+                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                    <div className="mb-8 text-center">
+                      <span className="text-4xl">📈</span>
+                      <h1 className="mt-4 text-2xl font-bold text-text sm:text-3xl">
+                        How many clients do you manage?
+                      </h1>
+                      <p className="mt-2 text-text-2">
+                        We&apos;ll recommend the right plan for you.
+                      </p>
+                    </div>
+
+                    <div className="space-y-3">
+                      {sizeOptions.map((option) => (
+                        <button
+                          key={option.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedSize(option.id);
+                            setTimeout(() => setSetupStep(4), 200);
+                          }}
+                          className={cn(
+                            "flex w-full items-center justify-between rounded-2xl border-2 bg-white p-5 text-left transition-all",
+                            selectedSize === option.id
+                              ? "border-emerald-500 bg-emerald-50"
+                              : "border-border hover:border-text/20 hover:shadow-md"
+                          )}
+                        >
+                          <div>
+                            <div className="font-medium text-text">{option.label}</div>
+                            <div className="text-sm text-text-3">{option.desc}</div>
+                          </div>
+                          {selectedSize === option.id && (
+                            <svg className="h-5 w-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setSetupStep(2)}
+                      className="mt-6 w-full text-center text-sm text-text-3 hover:text-text"
+                    >
+                      ← Back
+                    </button>
+                  </div>
+                )}
+
+                {/* Step 4: Logo (optional) */}
+                {setupStep === 4 && (
+                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                    <div className="mb-8 text-center">
+                      <span className="text-4xl">✨</span>
+                      <h1 className="mt-4 text-2xl font-bold text-text sm:text-3xl">
+                        Add your logo
+                      </h1>
+                      <p className="mt-2 text-text-2">
+                        Make your reports look professional. You can skip this for now.
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-border bg-white p-6 shadow-xl sm:p-8">
+                      <div className="flex flex-col items-center">
                         {logoPreview ? (
                           <div className="relative">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={logoPreview} alt="Logo preview" className="h-12 w-12 rounded-xl object-contain bg-surface-2 p-1" />
+                            <img src={logoPreview} alt="Logo preview" className="h-24 w-24 rounded-2xl object-contain bg-surface-2 p-2" />
                             <button
                               type="button"
                               onClick={() => setLogoFile(null)}
-                              className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow hover:bg-red-600"
+                              className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow hover:bg-red-600"
                             >
-                              <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                               </svg>
                             </button>
@@ -425,141 +552,80 @@ export function OnboardingForm() {
                           <button
                             type="button"
                             onClick={() => document.getElementById("logo-input")?.click()}
-                            className="flex h-12 w-12 items-center justify-center rounded-xl border-2 border-dashed border-border bg-surface-2 text-text-3 transition-colors hover:border-text/30 hover:bg-surface-2/80"
+                            className="flex h-24 w-24 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-surface-2 text-text-3 transition-colors hover:border-text/30 hover:bg-surface-2/80"
                           >
-                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                             </svg>
                           </button>
                         )}
-                        <div className="text-sm text-text-3">
-                          {logoPreview ? (
-                            <button
-                              type="button"
-                              onClick={() => document.getElementById("logo-input")?.click()}
-                              className="text-accent hover:underline"
-                            >
-                              Change logo
-                            </button>
-                          ) : (
-                            <span>Add your agency logo for reports</span>
-                          )}
-                        </div>
                         <input
                           id="logo-input"
                           type="file"
                           accept="image/*"
                           className="hidden"
-                          disabled={saving}
                           onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)}
                         />
+                        
+                        {!logoPreview && (
+                          <p className="mt-4 text-sm text-text-3">PNG or JPG · Transparent works best</p>
+                        )}
+
+                        {logoPreview && (
+                          <button
+                            type="button"
+                            onClick={() => document.getElementById("logo-input")?.click()}
+                            className="mt-4 text-sm text-accent hover:underline"
+                          >
+                            Change logo
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="mt-8 flex flex-col gap-3">
+                        <Button
+                          className="h-12 w-full rounded-xl text-base"
+                          disabled={saving}
+                          onClick={() => finishSetup()}
+                          type="button"
+                          variant="primary"
+                        >
+                          {saving ? (
+                            <span className="flex items-center gap-2">
+                              <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                              </svg>
+                              Setting up...
+                            </span>
+                          ) : (
+                            "Launch dashboard 🚀"
+                          )}
+                        </Button>
+                        {!logoPreview && (
+                          <button
+                            type="button"
+                            disabled={saving}
+                            onClick={() => finishSetup()}
+                            className="text-sm text-text-3 hover:text-text"
+                          >
+                            Skip for now
+                          </button>
+                        )}
                       </div>
                     </div>
-
-                    {/* CTA */}
-                    <Button
-                      className="h-12 w-full rounded-xl text-base shadow-lg shadow-accent/20"
-                      disabled={saving || !agencyName.trim()}
-                      type="submit"
-                      variant="primary"
-                    >
-                      {saving ? "Saving..." : "Continue to dashboard →"}
-                    </Button>
 
                     <button
                       type="button"
-                      disabled={saving}
-                      onClick={() => router.replace(isInternalPath(nextPath) ? nextPath : "/app")}
-                      className="w-full text-center text-sm text-text-3 hover:text-text"
+                      onClick={() => setSetupStep(3)}
+                      className="mt-6 w-full text-center text-sm text-text-3 hover:text-text"
                     >
-                      Skip for now
+                      ← Back
                     </button>
-                  </form>
+                  </div>
                 )}
-              </div>
-            </div>
-
-            {/* Right: Live Preview */}
-            <div className="hidden lg:block">
-              <div className="sticky top-8">
-                <div className="mb-4 text-sm font-medium text-text-3">Live preview</div>
-                
-                {/* Report mockup */}
-                <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-2xl">
-                  {/* Report header */}
-                  <div className="border-b border-border bg-surface-2/50 p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        {logoPreview ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={logoPreview} alt="Logo" className="h-10 w-auto object-contain" />
-                        ) : (
-                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-emerald-500 text-lg font-bold text-white">
-                            {agencyName ? agencyName.charAt(0).toUpperCase() : "A"}
-                          </div>
-                        )}
-                        <div>
-                          <div className="font-semibold text-text">{agencyName || "Your Agency"}</div>
-                          <div className="text-xs text-text-3">AI Visibility Report</div>
-                        </div>
-                      </div>
-                      <div className="text-right text-xs text-text-3">
-                        <div>January 2026</div>
-                        <div>client-website.com</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Report content mockup */}
-                  <div className="p-6">
-                    {/* Score section */}
-                    <div className="flex items-center gap-6">
-                      <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 text-3xl font-bold text-white shadow-lg">
-                        82
-                      </div>
-                      <div>
-                        <div className="text-sm text-text-3">Overall VRTL Score</div>
-                        <div className="mt-1 text-xl font-semibold text-text">Strong visibility</div>
-                        <div className="mt-1 flex items-center gap-2 text-sm text-emerald-600">
-                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                          </svg>
-                          +8 from last month
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Fake content lines */}
-                    <div className="mt-6 space-y-3">
-                      <div className="h-3 w-full rounded bg-surface-2" />
-                      <div className="h-3 w-4/5 rounded bg-surface-2" />
-                      <div className="h-3 w-3/4 rounded bg-surface-2" />
-                    </div>
-
-                    {/* Provider bars */}
-                    <div className="mt-6 grid grid-cols-3 gap-3">
-                      {[
-                        { name: "ChatGPT", score: 85, color: "bg-emerald-500" },
-                        { name: "Gemini", score: 79, color: "bg-violet-500" },
-                        { name: "Claude", score: 82, color: "bg-amber-500" },
-                      ].map((p) => (
-                        <div key={p.name} className="rounded-lg bg-surface-2 p-3">
-                          <div className="text-xs text-text-3">{p.name}</div>
-                          <div className="mt-1 text-lg font-semibold text-text">{p.score}</div>
-                          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-border">
-                            <div className={cn("h-full rounded-full", p.color)} style={{ width: `${p.score}%` }} />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <p className="mt-4 text-center text-xs text-text-3">
-                  This is how your reports will look to clients
-                </p>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         )}
       </div>
