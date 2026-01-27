@@ -401,47 +401,50 @@ export function OnboardingForm() {
                       />
                     </div>
 
-                    {/* Logo upload */}
+                    {/* Logo upload - compact inline */}
                     <div>
                       <label className="mb-2 block text-sm font-medium text-text">
-                        Agency logo <span className="font-normal text-text-3">(optional)</span>
+                        Logo <span className="font-normal text-text-3">(optional)</span>
                       </label>
-                      <div
-                        className={cn(
-                          "relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 transition-colors",
-                          logoPreview
-                            ? "border-emerald-500/50 bg-emerald-500/5"
-                            : "border-border hover:border-text/30 hover:bg-surface-2"
-                        )}
-                        onClick={() => document.getElementById("logo-input")?.click()}
-                      >
+                      <div className="flex items-center gap-4">
                         {logoPreview ? (
                           <div className="relative">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={logoPreview} alt="Logo preview" className="h-16 w-auto object-contain" />
+                            <img src={logoPreview} alt="Logo preview" className="h-12 w-12 rounded-xl object-contain bg-surface-2 p-1" />
                             <button
                               type="button"
-                              onClick={(e) => { e.stopPropagation(); setLogoFile(null); }}
-                              className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-md hover:bg-red-600"
+                              onClick={() => setLogoFile(null)}
+                              className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow hover:bg-red-600"
                             >
-                              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                              <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                               </svg>
                             </button>
                           </div>
                         ) : (
-                          <>
-                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-2">
-                              <svg className="h-6 w-6 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                              </svg>
-                            </div>
-                            <p className="mt-3 text-sm text-text-2">
-                              <span className="font-medium text-text">Click to upload</span>
-                            </p>
-                            <p className="mt-1 text-xs text-text-3">PNG or JPG · Transparent PNG works best</p>
-                          </>
+                          <button
+                            type="button"
+                            onClick={() => document.getElementById("logo-input")?.click()}
+                            className="flex h-12 w-12 items-center justify-center rounded-xl border-2 border-dashed border-border bg-surface-2 text-text-3 transition-colors hover:border-text/30 hover:bg-surface-2/80"
+                          >
+                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                          </button>
                         )}
+                        <div className="text-sm text-text-3">
+                          {logoPreview ? (
+                            <button
+                              type="button"
+                              onClick={() => document.getElementById("logo-input")?.click()}
+                              className="text-accent hover:underline"
+                            >
+                              Change logo
+                            </button>
+                          ) : (
+                            <span>Add your agency logo for reports</span>
+                          )}
+                        </div>
                         <input
                           id="logo-input"
                           type="file"
