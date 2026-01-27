@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
 import { cn } from "@/lib/cn";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -39,8 +39,6 @@ const plans = [
       "Basic branding",
       "Email support",
     ],
-    cta: "Start free trial",
-    popular: false,
   },
   {
     id: "growth" as const,
@@ -58,8 +56,7 @@ const plans = [
       "Competitor tracking (up to 8 per client)",
       "Priority support",
     ],
-    cta: "Start free trial",
-    popular: true,
+    recommended: true,
   },
   {
     id: "pro" as const,
@@ -78,8 +75,6 @@ const plans = [
       "Team seats (coming soon)",
       "Dedicated account manager",
     ],
-    cta: "Start free trial",
-    popular: false,
   },
 ];
 
@@ -125,11 +120,17 @@ const faqs = [
   },
 ];
 
-export default function PricingPage() {
+function PricingContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isAnnual, setIsAnnual] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+
+  // Check if this is a paywall context (user came from onboarding)
+  const nextParam = searchParams.get("next");
+  const isPaywall = !!nextParam && isLoggedIn;
 
   // Check if user is logged in
   useEffect(() => {
@@ -141,7 +142,6 @@ export default function PricingPage() {
 
   async function handleCheckout(planId: "starter" | "growth" | "pro") {
     if (!isLoggedIn) {
-      // Not logged in - go to onboarding first
       router.push(`/onboarding?plan=${planId}&interval=${isAnnual ? "annual" : "monthly"}`);
       return;
     }
@@ -187,6 +187,154 @@ export default function PricingPage() {
     }
   }
 
+  // Paywall mode - clean, focused plan selection
+  if (isPaywall) {
+    return (
+      <main className="min-h-screen bg-gradient-to-b from-surface to-bg">
+        <div className="mx-auto max-w-4xl px-6 py-12 md:py-20">
+          {/* Header */}
+          <div className="mb-10 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-2xl">
+              🎉
+            </div>
+            <h1 className="text-2xl font-bold text-text sm:text-3xl">
+              Choose your plan
+            </h1>
+            <p className="mt-2 text-text-2">
+              Start your 7-day free trial. Cancel anytime.
+            </p>
+          </div>
+
+          {/* Billing toggle */}
+          <div className="mb-8 flex items-center justify-center gap-3">
+            <div className="relative inline-flex items-center rounded-full bg-surface-2 p-1">
+              <button
+                type="button"
+                onClick={() => setIsAnnual(false)}
+                className={cn(
+                  "relative rounded-full px-4 py-1.5 text-sm font-medium transition-all",
+                  !isAnnual ? "bg-white text-text shadow-sm" : "text-text-2 hover:text-text"
+                )}
+              >
+                Monthly
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsAnnual(true)}
+                className={cn(
+                  "relative rounded-full px-4 py-1.5 text-sm font-medium transition-all",
+                  isAnnual ? "bg-white text-text shadow-sm" : "text-text-2 hover:text-text"
+                )}
+              >
+                Annual
+              </button>
+            </div>
+            {isAnnual && (
+              <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700">
+                Save 2 months
+              </span>
+            )}
+          </div>
+
+          {/* Plan cards - compact */}
+          <div className="grid gap-4 md:grid-cols-3">
+            {plans.map((plan) => {
+              const monthlyEquivalent = isAnnual ? Math.round(plan.yearlyPrice / 12) : plan.monthlyPrice;
+              const isSelected = selectedPlan === plan.id;
+              const isRecommended = plan.recommended && !selectedPlan;
+              const isLoading = loadingPlan === plan.id;
+
+  return (
+                <button
+                  key={plan.id}
+                  type="button"
+                  onClick={() => setSelectedPlan(plan.id)}
+                  className={cn(
+                    "relative flex flex-col rounded-2xl border-2 bg-white p-5 text-left transition-all",
+                    isSelected
+                      ? "border-emerald-500 ring-2 ring-emerald-500/20 shadow-lg"
+                      : isRecommended
+                        ? "border-accent/50 shadow-md"
+                        : "border-border hover:border-text/20 hover:shadow-md"
+                  )}
+                >
+                  {/* Badge */}
+                  {(isSelected || isRecommended) && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <span className={cn(
+                        "inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold text-white shadow",
+                        isSelected ? "bg-emerald-500" : "bg-accent"
+                      )}>
+                        {isSelected ? (
+                          <>
+                            <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                            Selected
+                          </>
+                        ) : "Recommended"}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="mb-3">
+                    <h3 className="font-semibold text-text">{plan.name}</h3>
+                    <p className="mt-1 text-xs text-text-3">{plan.clients === 50 ? "50+" : plan.clients} clients</p>
+                  </div>
+
+                  <div className="mb-4">
+                    <span className="text-3xl font-bold text-text">${monthlyEquivalent}</span>
+                    <span className="text-sm text-text-3">/mo</span>
+                  </div>
+
+                  <ul className="flex-1 space-y-2">
+                    {plan.features.slice(0, 4).map((feature) => (
+                      <li key={feature} className="flex items-start gap-2 text-xs text-text-2">
+                        <Check className="mt-0.5 h-4 w-4 shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                    {plan.features.length > 4 && (
+                      <li className="text-xs text-text-3">
+                        +{plan.features.length - 4} more features
+                      </li>
+                    )}
+                  </ul>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* CTA */}
+          <div className="mt-8 text-center">
+            <button
+              type="button"
+              onClick={() => handleCheckout((selectedPlan || "growth") as "starter" | "growth" | "pro")}
+              disabled={!!loadingPlan}
+              className="inline-flex h-12 items-center justify-center rounded-xl bg-accent px-8 text-base font-semibold text-white shadow-lg shadow-accent/25 transition-all hover:bg-accent-2 hover:shadow-xl disabled:opacity-50"
+            >
+              {loadingPlan ? (
+                <span className="flex items-center gap-2">
+                  <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+      </svg>
+                  Processing...
+    </span>
+              ) : (
+                `Start free trial with ${plans.find(p => p.id === (selectedPlan || "growth"))?.name}`
+              )}
+            </button>
+            <p className="mt-4 text-sm text-text-3">
+              7-day free trial · Cancel anytime · No charge until trial ends
+            </p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // Regular pricing page
   return (
     <main className="min-h-screen bg-bg">
       {/* Hero */}
@@ -253,12 +401,12 @@ export default function PricingPage() {
                   key={plan.name}
                   className={cn(
                     "relative flex flex-col rounded-3xl border bg-surface p-8 transition-all",
-                    plan.popular
+                    plan.recommended
                       ? "border-accent ring-2 ring-accent/20 shadow-xl scale-[1.02]"
                       : "border-border hover:border-text/20 hover:shadow-lg"
                   )}
                 >
-                  {plan.popular && (
+                  {plan.recommended && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-1.5 text-sm font-semibold text-white shadow-lg">
                         <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
@@ -272,7 +420,7 @@ export default function PricingPage() {
                   <div className="mb-6">
                     <h3 className="text-xl font-bold text-text">{plan.name}</h3>
                     <p className="mt-2 text-sm text-text-2">{plan.description}</p>
-                  </div>
+              </div>
 
                   <div className="mb-6">
                     <div className="flex items-baseline gap-2">
@@ -280,7 +428,7 @@ export default function PricingPage() {
                         ${monthlyEquivalent}
                       </span>
                       <span className="text-text-3">/month</span>
-                    </div>
+              </div>
                     {isAnnual && (
                       <p className="mt-2 text-sm text-text-3">
                         ${price.toLocaleString()} billed annually
@@ -291,7 +439,7 @@ export default function PricingPage() {
                         Save ${(plan.monthlyPrice * 12 - plan.yearlyPrice).toLocaleString()}/year with annual
                       </p>
                     )}
-                  </div>
+              </div>
 
                   <button
                     type="button"
@@ -299,7 +447,7 @@ export default function PricingPage() {
                     disabled={isLoading}
                     className={cn(
                       "flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold transition-all disabled:opacity-50",
-                      plan.popular
+                      plan.recommended
                         ? "bg-accent text-white shadow-lg shadow-accent/25 hover:bg-accent-2 hover:shadow-xl"
                         : "bg-surface-2 text-text hover:bg-border"
                     )}
@@ -313,7 +461,7 @@ export default function PricingPage() {
                         Loading...
                       </span>
                     ) : (
-                      plan.cta
+                      "Start free trial"
                     )}
                   </button>
 
@@ -328,16 +476,16 @@ export default function PricingPage() {
                     <span className="text-sm font-semibold text-text">
                       Up to {plan.clients === 50 ? "50+" : plan.clients} clients
                     </span>
-                  </div>
+              </div>
 
                   <ul className="flex-1 space-y-3">
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex items-start gap-3 text-sm text-text-2">
                         <Check className="mt-0.5 shrink-0" />
                         <span>{feature}</span>
-                      </li>
+                </li>
                     ))}
-                  </ul>
+              </ul>
                 </div>
               );
             })}
@@ -360,7 +508,7 @@ export default function PricingPage() {
               </a>
             </div>
           </div>
-        </div>
+            </div>
       </section>
 
       {/* Comparison table */}
@@ -410,8 +558,8 @@ export default function PricingPage() {
                 </tbody>
               </table>
             </div>
-          </div>
-        </div>
+                </div>
+                </div>
       </section>
 
       {/* FAQ */}
@@ -425,7 +573,7 @@ export default function PricingPage() {
               <div key={faq.question} className="rounded-2xl border border-border bg-surface p-6">
                 <h3 className="font-semibold text-text">{faq.question}</h3>
                 <p className="mt-2 text-sm text-text-2">{faq.answer}</p>
-              </div>
+                </div>
             ))}
           </div>
         </div>
@@ -455,5 +603,17 @@ export default function PricingPage() {
         </div>
       </section>
     </main>
+  );
+}
+
+export default function PricingPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-text/20 border-t-text" />
+      </div>
+    }>
+      <PricingContent />
+    </Suspense>
   );
 }
