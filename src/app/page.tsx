@@ -1,11 +1,10 @@
 import Link from "next/link";
 
-import { ClientChatBubbles } from "@/components/ClientChatBubbles";
-import { CompetitorBenchmark } from "@/components/CompetitorBenchmark";
+import { BigStats } from "@/components/BigStats";
 import { DomainSearchBar } from "@/components/DomainSearchBar";
 import { FeatureShowcase } from "@/components/FeatureShowcase";
 import { Footer } from "@/components/Footer";
-import { IndustryMarquee } from "@/components/IndustryMarquee";
+import { RotatingQuestions } from "@/components/RotatingQuestions";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 
 export default function HomePage() {
@@ -15,318 +14,336 @@ export default function HomePage() {
       <section className="relative overflow-hidden border-b border-border bg-bg">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -top-48 left-1/2 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-text/5 blur-3xl" />
+          <div className="absolute bottom-[-240px] right-[-140px] h-[520px] w-[520px] rounded-full bg-text/3 blur-3xl" />
         </div>
 
-        <div className="container-xl relative py-20 md:py-28">
-          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
-            {/* Left: Copy */}
-            <div>
-              <div className="flex items-end gap-0">
-                <div className="h-[90px] w-[200px] overflow-hidden -mr-3 md:h-[118px] md:w-[260px] md:-mr-4">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    alt="VRTL"
-                    className="h-full w-full scale-[1.6] object-cover object-left"
-                    src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
-                  />
-                </div>
-                <div className="text-[68px] font-semibold leading-[0.9] tracking-tight text-text md:text-[88px]">
-                  Score
-                </div>
+        <div className="container-xl relative py-16 sm:py-20">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="flex items-end justify-center gap-0">
+              <div className="h-[118px] w-[260px] overflow-hidden -mr-4 sm:h-[148px] sm:w-[320px] sm:-mr-6">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  alt="VRTL"
+                  className="h-full w-full scale-[1.6] object-cover object-left"
+                  src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
+                />
               </div>
-
-              <p className="mt-6 text-xl text-text-2 md:text-2xl">
-                Know exactly how AI recommends your clients.
-              </p>
-
-              <div className="mt-8 max-w-md">
-                <DomainSearchBar />
+              <div className="text-[88px] font-semibold leading-[0.9] tracking-tight text-text sm:text-[112px]">
+                Score
               </div>
+            </div>
 
-              <div className="mt-6 flex items-center gap-4">
+            <div className="mx-auto mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-3">
+              <div className="text-[26px] font-semibold leading-[1.06] tracking-tight text-text sm:text-[31px]">
+                AI visibility, measured.
+              </div>
+              <div className="inline-flex items-center gap-2">
                 <div className="inline-flex items-center -space-x-2">
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
+                  <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-surface">
+                    <span className="sr-only">ChatGPT</span>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt="ChatGPT" className="h-4 w-4" src="/ai/icons8-chatgpt.svg" />
+                    <img alt="" className="h-[17px] w-[17px]" src="/ai/icons8-chatgpt.svg" />
                   </span>
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
+                  <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-surface">
+                    <span className="sr-only">Google</span>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt="Claude" className="h-4 w-4" src="/ai/icons8-claude.svg" />
+                    <img alt="" className="h-[17px] w-[17px]" src="/ai/icons8-google-48.svg" />
                   </span>
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
+                  <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-surface">
+                    <span className="sr-only">Gemini</span>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt="Gemini" className="h-4 w-4" src="/ai/gemini.png" />
+                    <img alt="" className="h-[17px] w-[17px]" src="/ai/gemini.png" />
+                  </span>
+                  <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-surface">
+                    <span className="sr-only">Claude</span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img alt="" className="h-[17px] w-[17px]" src="/ai/icons8-claude.svg" />
                   </span>
                 </div>
-                <span className="text-sm text-text-3">ChatGPT, Claude, Gemini & more</span>
+                <span className="text-sm text-text-3">&amp; more</span>
               </div>
             </div>
 
-            {/* Right: Dashboard Preview */}
-            <div className="relative hidden lg:block">
-              <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-emerald-500/10 via-transparent to-violet-500/10 blur-2xl" />
-              
-              <div className="relative rounded-2xl border border-border bg-surface p-5 shadow-2xl">
-                {/* Header */}
-                <div className="flex items-center justify-between border-b border-border pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500 text-sm font-bold text-white">
-                      A
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-text">acme-dental.com</div>
-                      <div className="text-xs text-text-3">Latest snapshot</div>
-                    </div>
-                  </div>
-                  <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600">
-                    Live
-                  </span>
-                </div>
+            <div className="mx-auto mt-6 max-w-3xl">
+              <DomainSearchBar />
+            </div>
 
-                {/* Score */}
-                <div className="mt-4 flex items-center gap-6">
-                  <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/10 to-cyan-500/10">
-                    <span className="text-3xl font-bold text-text">82</span>
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-xs font-medium uppercase tracking-wide text-text-3">AI Visibility Score</div>
-                    <div className="mt-1 text-sm text-emerald-600">+12 from last month</div>
-                  </div>
-                </div>
+            {/* Tagline */}
+            <p className="mt-8 text-sm text-text-2">
+              Built for agencies who want to lead in AI search.
+            </p>
 
-                {/* Mini benchmark */}
-                <div className="mt-4 space-y-2">
-                  {[
-                    { name: "Your client", score: 82, color: "bg-emerald-500" },
-                    { name: "Competitor", score: 54, color: "bg-text/20" },
-                  ].map((item) => (
-                    <div key={item.name} className="flex items-center gap-3">
-                      <span className="w-20 text-xs text-text-3">{item.name}</span>
-                      <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-2">
-                        <div className={`h-full rounded-full ${item.color}`} style={{ width: `${item.score}%` }} />
-                      </div>
-                      <span className="w-8 text-right text-xs font-medium text-text-2">{item.score}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Action */}
-                <div className="mt-4 flex items-center justify-between rounded-lg border border-border bg-bg p-3">
-                  <span className="text-xs text-text-3">Report ready</span>
-                  <span className="flex items-center gap-1.5 text-xs font-medium text-text">
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Download PDF
-                  </span>
-                </div>
-              </div>
+            <div className="mt-5 flex items-center justify-center gap-3 text-sm">
+              <Link className="text-text-2 hover:text-text" href="/pricing">
+                See plans & pricing →
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* INDUSTRY MARQUEE */}
-      <section className="border-b border-border bg-bg py-6">
-        <div className="mb-3 text-center">
-          <span className="text-xs font-medium uppercase tracking-widest text-text-3">
-            Trusted across industries
-          </span>
+      {/* BIG STATS */}
+      <section className="relative overflow-hidden py-20">
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute -left-40 top-0 h-96 w-96 rounded-full bg-emerald-500/10 blur-3xl" />
+          <div className="absolute -right-40 bottom-0 h-96 w-96 rounded-full bg-violet-500/10 blur-3xl" />
+          <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-500/5 blur-3xl" />
         </div>
-        <IndustryMarquee />
-      </section>
 
-      {/* THE PROBLEM: Client Messages */}
-      <section className="py-20 md:py-28">
         <div className="container-xl">
-          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
-            {/* Left: Copy */}
-            <div>
-              <span className="text-xs font-medium uppercase tracking-widest text-red-500">
-                The problem
-              </span>
-              <h2 className="mt-4 text-3xl font-bold tracking-tight text-text md:text-4xl">
-                Your clients are asking questions you can&apos;t answer yet
-              </h2>
-              <p className="mt-4 text-lg text-text-2">
-                AI search is changing how customers find businesses. Your clients want to know where they stand. Do you have the data?
-              </p>
-              
-              <div className="mt-8">
-                <ButtonLink
-                  className="rounded-xl bg-text px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-text/90"
-                  href="/onboarding"
-                  variant="primary"
-                >
-                  Run a free audit
-                </ButtonLink>
-              </div>
-            </div>
-
-            {/* Right: Chat bubbles */}
-            <div>
-              <ClientChatBubbles />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* THE SOLUTION: 3-Step Process */}
-      <section className="bg-bg-2 py-20 md:py-28">
-        <div className="container-xl">
-          <div className="mb-16 text-center">
-            <span className="text-xs font-medium uppercase tracking-widest text-emerald-600">
-              How it works
-            </span>
-            <h2 className="mt-4 text-3xl font-bold tracking-tight text-text md:text-4xl">
-              From question to proof in three steps
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-text md:text-4xl">
+              Built for speed and clarity
             </h2>
+            <p className="mx-auto mt-3 max-w-xl text-text-2">
+              Get from client onboarding to branded PDF in under a minute.
+            </p>
           </div>
-
-          <div className="grid gap-8 md:grid-cols-3">
-            {[
-              {
-                step: "01",
-                title: "Add your client",
-                description: "Enter their website and competitors. Takes 30 seconds.",
-                icon: (
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                  </svg>
-                ),
-              },
-              {
-                step: "02",
-                title: "Run the snapshot",
-                description: "We query ChatGPT, Claude, and Gemini with real prompts.",
-                icon: (
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-                  </svg>
-                ),
-              },
-              {
-                step: "03",
-                title: "Share the report",
-                description: "Download a branded PDF with scores, evidence, and next steps.",
-                icon: (
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                  </svg>
-                ),
-              },
-            ].map((item) => (
-              <div key={item.step} className="relative">
-                <div className="rounded-2xl border border-border bg-surface p-8">
-                  <div className="mb-6 flex items-center justify-between">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600">
-                      {item.icon}
-                    </div>
-                    <span className="text-4xl font-bold text-text/10">{item.step}</span>
-                  </div>
-                  <h3 className="text-lg font-semibold text-text">{item.title}</h3>
-                  <p className="mt-2 text-sm text-text-2">{item.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <BigStats />
         </div>
       </section>
 
-      {/* COMPETITOR BENCHMARK */}
-      <section className="py-20 md:py-28">
+      {/* FEATURE SHOWCASE */}
+      <section className="bg-bg-2 py-20" id="features">
         <div className="container-xl">
-          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
-            {/* Left: Benchmark visualization */}
-            <div className="order-2 lg:order-1">
-              <div className="rounded-2xl border border-border bg-surface p-8">
-                <div className="mb-6">
-                  <div className="text-xs font-medium uppercase tracking-wide text-text-3">AI Visibility Ranking</div>
-                  <div className="mt-1 text-sm text-text-2">How your client compares</div>
-                </div>
-                <CompetitorBenchmark />
-              </div>
-            </div>
-
-            {/* Right: Copy */}
-            <div className="order-1 lg:order-2">
-              <span className="text-xs font-medium uppercase tracking-widest text-violet-600">
-                Competitive analysis
-              </span>
-              <h2 className="mt-4 text-3xl font-bold tracking-tight text-text md:text-4xl">
-                Show clients exactly where they rank
-              </h2>
-              <p className="mt-4 text-lg text-text-2">
-                No more guesswork. See how your client stacks up against competitors in AI search results, with real data from real queries.
-              </p>
-              <ul className="mt-6 space-y-3">
-                {[
-                  "Side-by-side competitor comparison",
-                  "Track ranking changes over time",
-                  "Evidence from actual AI responses",
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-3 text-text-2">
-                    <svg className="h-5 w-5 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                    </svg>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FEATURES */}
-      <section className="bg-bg-2 py-20 md:py-28" id="features">
-        <div className="container-xl">
-          <div className="mb-16">
-            <span className="text-xs font-medium uppercase tracking-widest text-violet-600">
+          <div className="mb-12">
+            <div className="inline-flex items-center gap-2 rounded-full bg-violet-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-violet-600">
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
               Features
-            </span>
+            </div>
             <h2 className="mt-4 text-3xl font-bold tracking-tight text-text md:text-4xl">
               Everything you need to prove AI visibility
             </h2>
-            <p className="mt-4 max-w-2xl text-lg text-text-2">
-              From snapshot scoring to PDF reports. Built for agencies who need to show results.
+            <p className="mt-3 max-w-2xl text-text-2">
+              From snapshot scoring to PDF reports. A complete toolkit for measuring and demonstrating progress.
             </p>
           </div>
           <FeatureShowcase />
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20 md:py-28">
+      {/* CLIENT QUESTIONS */}
+      <section className="bg-bg py-16 md:py-20">
         <div className="container-xl">
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-text md:text-4xl">
-              Ready to answer your clients?
-            </h2>
-            <p className="mt-4 text-lg text-text-2">
-              Get your first AI visibility report in under 5 minutes. No credit card required to start.
-            </p>
+          <div className="mb-10 text-center">
+            <span className="text-xs font-medium uppercase tracking-widest text-text-3">
+              Sound familiar?
+            </span>
+          </div>
+          <div className="mx-auto max-w-4xl">
+            <RotatingQuestions />
+          </div>
+        </div>
+      </section>
 
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-              <ButtonLink
-                className="rounded-xl bg-text px-8 py-4 text-base font-semibold text-white shadow-xl shadow-text/20 transition-all hover:bg-text/90"
-                href="/onboarding"
-                variant="primary"
+      {/* WHY AGENCIES CHOOSE */}
+      <section className="py-20" id="benefits">
+        <div className="container-xl">
+          <div className="mb-12 text-center">
+            <div className="inline-flex items-center gap-2 rounded-full bg-amber-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-amber-600">
+              <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              Why VRTL Score
+            </div>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-text md:text-4xl">
+              Why agencies choose VRTL Score
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-text-2">
+              The tools you need to measure, report, and prove AI visibility to clients.
+            </p>
+          </div>
+          
+          {/* Benefit cards grid */}
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                icon: "🎯",
+                title: "Repeatable measurement",
+                description: "Run the same prompts across AI models every time. Compare results month over month with consistency.",
+                color: "emerald",
+              },
+              {
+                icon: "📋",
+                title: "Evidence-backed reports",
+                description: "Every score comes with the actual AI responses. No black boxes. Show clients exactly what LLMs say.",
+                color: "violet",
+              },
+              {
+                icon: "⚡",
+                title: "Client-ready in seconds",
+                description: "One-click PDF export with your branding. Professional reports without the manual work.",
+                color: "amber",
+              },
+              {
+                icon: "📈",
+                title: "Track progress over time",
+                description: "Compare snapshots to show improvement. Prove the value of your SEO and content work.",
+                color: "cyan",
+              },
+            ].map((benefit) => (
+              <div
+                key={benefit.title}
+                className="group relative overflow-hidden rounded-2xl border border-border bg-surface p-6 transition-all hover:border-text/20 hover:shadow-lg"
               >
-                Run a free audit
-              </ButtonLink>
-              <ButtonLink
-                className="rounded-xl border border-border bg-surface px-8 py-4 text-base font-semibold text-text transition-all hover:bg-surface-2"
-                href="/pricing"
-                variant="secondary"
-              >
-                See pricing
-              </ButtonLink>
+                <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl text-2xl ${
+                  benefit.color === "emerald" ? "bg-emerald-500/10" :
+                  benefit.color === "violet" ? "bg-violet-500/10" :
+                  benefit.color === "amber" ? "bg-amber-500/10" :
+                  "bg-cyan-500/10"
+                }`}>
+                  {benefit.icon}
+                </div>
+                <h3 className="text-lg font-semibold text-text">{benefit.title}</h3>
+                <p className="mt-2 text-sm text-text-2">{benefit.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="relative overflow-hidden bg-bg py-20 md:py-28">
+        <div className="container-xl">
+          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+            {/* Left: Copy and CTA */}
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-600">
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+                Get started
+              </div>
+              
+              <h2 className="mt-6 text-4xl font-bold tracking-tight text-text md:text-5xl">
+                Your first report in
+                <span className="block text-gradient">under 5 minutes</span>
+              </h2>
+              
+              <p className="mt-6 text-lg text-text-2">
+                Add a client, run the snapshot, download the PDF. No setup complexity, just proof.
+              </p>
+
+              {/* Quick benefits */}
+              <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                {[
+                  { icon: "⚡", text: "30-second client setup" },
+                  { icon: "🤖", text: "3 LLM providers queried" },
+                  { icon: "📊", text: "Instant scoring & evidence" },
+                  { icon: "📄", text: "One-click PDF export" },
+                ].map((item) => (
+                  <div key={item.text} className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-2 text-lg">
+                      {item.icon}
+                    </span>
+                    <span className="text-sm font-medium text-text">{item.text}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* CTA buttons */}
+              <div className="mt-10 flex flex-wrap items-center gap-4">
+                <ButtonLink
+                  className="rounded-xl bg-text px-8 py-4 text-base font-semibold text-white shadow-xl shadow-text/20 transition-all hover:bg-text/90 hover:shadow-2xl hover:shadow-text/30"
+                  href="/onboarding"
+                  variant="primary"
+                >
+                  Start free trial
+                </ButtonLink>
+                <ButtonLink
+                  className="rounded-xl border border-border bg-surface px-8 py-4 text-base font-semibold text-text transition-all hover:bg-surface-2"
+                  href="/pricing"
+                  variant="secondary"
+                >
+                  View pricing
+                </ButtonLink>
+              </div>
+
+              <p className="mt-4 text-sm text-text-3">
+                7-day free trial · Cancel anytime
+              </p>
             </div>
 
-            <p className="mt-6 text-sm text-text-3">
-              7-day free trial · Cancel anytime
-            </p>
+            {/* Right: Visual preview */}
+            <div className="relative">
+              {/* Decorative background */}
+              <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-emerald-500/10 via-violet-500/10 to-cyan-500/10 blur-2xl" />
+              
+              {/* Preview card */}
+              <div className="relative rounded-2xl border border-border bg-surface p-6 shadow-2xl">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 text-sm font-bold text-white">
+                      A
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-text">acme-agency.com</div>
+                      <div className="text-xs text-text-3">Snapshot · Just now</div>
+                    </div>
+                  </div>
+                  <div className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-600">
+                    Complete
+                  </div>
+                </div>
+
+                {/* Score display */}
+                <div className="mt-6 flex items-center justify-between rounded-xl bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 p-4">
+                  <div>
+                    <div className="text-xs font-medium uppercase tracking-wide text-text-3">Overall Score</div>
+                    <div className="mt-1 text-4xl font-bold text-text">82</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs text-text-3">Confidence</div>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                      <span className="text-sm font-medium text-emerald-600">High</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Provider breakdown */}
+                <div className="mt-4 grid grid-cols-3 gap-3">
+                  {[
+                    { name: "ChatGPT", score: 84 },
+                    { name: "Gemini", score: 79 },
+                    { name: "Claude", score: 83 },
+                  ].map((p) => (
+                    <div key={p.name} className="rounded-lg bg-surface-2 p-3 text-center">
+                      <div className="text-xs text-text-3">{p.name}</div>
+                      <div className="mt-1 text-lg font-semibold text-text">{p.score}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Action bar */}
+                <div className="mt-4 flex items-center justify-between rounded-lg border border-border bg-bg p-3">
+                  <span className="text-xs text-text-3">Ready for export</span>
+                  <button className="flex items-center gap-2 rounded-lg bg-text px-3 py-1.5 text-xs font-medium text-white">
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Download PDF
+                  </button>
+                </div>
+              </div>
+
+              {/* Floating badges */}
+              <div className="absolute -left-4 top-8 rounded-xl border border-border bg-surface px-4 py-2 shadow-lg">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🎯</span>
+                  <span className="text-xs font-medium text-text">7/10 prompts mentioned</span>
+                </div>
+              </div>
+              <div className="absolute -right-4 bottom-16 rounded-xl border border-border bg-surface px-4 py-2 shadow-lg">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">📈</span>
+                  <span className="text-xs font-medium text-text">+12 vs last month</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -335,3 +352,4 @@ export default function HomePage() {
     </main>
   );
 }
+
