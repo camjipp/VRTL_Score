@@ -124,7 +124,7 @@ export default function HomePage() {
               Everything you need to prove AI visibility
             </h2>
             <p className="mt-3 max-w-2xl text-text-2">
-              From snapshot scoring to PDF reports—a complete toolkit for measuring and demonstrating progress.
+              From snapshot scoring to PDF reports. A complete toolkit for measuring and demonstrating progress.
             </p>
           </div>
           <FeatureShowcase />
@@ -179,7 +179,7 @@ export default function HomePage() {
               {
                 icon: "📋",
                 title: "Evidence-backed reports",
-                description: "Every score comes with the actual AI responses. No black boxes—show clients exactly what LLMs say.",
+                description: "Every score comes with the actual AI responses. No black boxes. Show clients exactly what LLMs say.",
                 color: "violet",
               },
               {
@@ -236,7 +236,7 @@ export default function HomePage() {
               </h2>
               
               <p className="mt-6 text-lg text-text-2">
-                Add a client, run the snapshot, download the PDF. No setup complexity—just proof.
+                Add a client, run the snapshot, download the PDF. No setup complexity, just proof.
               </p>
 
               {/* Quick benefits */}

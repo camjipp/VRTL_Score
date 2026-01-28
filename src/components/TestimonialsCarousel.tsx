@@ -20,7 +20,7 @@ const testimonials: Testimonial[] = [
     metricLabel: "avg score",
   },
   {
-    quote: "The evidence trail makes client conversations easy—no more hand-wavy conclusions about 'AI presence.' It's all documented.",
+    quote: "The evidence trail makes client conversations easy. No more hand-wavy conclusions about 'AI presence.' It's all documented.",
     author: "Marcus Webb",
     role: "Strategy Lead",
     metric: "+340%",

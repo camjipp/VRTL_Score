@@ -123,7 +123,7 @@ const features: Feature[] = [
     ),
     label: "PDF Reports",
     title: "Client-ready reports in 30 seconds",
-    description: "Generate polished PDF reports with your branding. Evidence, scores, and recommendations—all in one doc.",
+    description: "Generate polished PDF reports with your branding. Evidence, scores, and recommendations, all in one doc.",
     bullets: ["Custom agency branding", "Executive summaries", "Actionable recommendations"],
     color: "cyan",
     preview: (

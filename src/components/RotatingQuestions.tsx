@@ -21,7 +21,7 @@ const defaultQuestions: Question[] = [
     role: "Series B Startup",
   },
   {
-    text: "Show me exactly where we show up vs competitors — with evidence.",
+    text: "Show me exactly where we show up vs competitors. With evidence.",
     author: "CMO",
     role: "E-commerce Brand",
   },
