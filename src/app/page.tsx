@@ -43,12 +43,16 @@ export default function HomePage() {
   return (
     <main className="bg-[#FAFAF8]">
       {/* HERO */}
-      <section className="relative overflow-hidden">
-        <div className="mx-auto max-w-6xl px-6 pb-16 pt-16 md:pb-20 md:pt-20">
+      <section className="relative overflow-hidden border-b border-border bg-bg">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute -top-48 left-1/2 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-text/5 blur-3xl" />
+          <div className="absolute bottom-[-240px] right-[-140px] h-[520px] w-[520px] rounded-full bg-text/3 blur-3xl" />
+        </div>
+
+        <div className="container-xl relative py-16 sm:py-20">
           <div className="mx-auto max-w-3xl text-center">
-            {/* Logo + wordmark */}
             <div className="flex items-end justify-center gap-0">
-              <div className="h-[100px] w-[220px] overflow-hidden -mr-3 sm:h-[130px] sm:w-[280px] sm:-mr-5">
+              <div className="h-[118px] w-[260px] overflow-hidden -mr-4 sm:h-[148px] sm:w-[320px] sm:-mr-6">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   alt="VRTL"
@@ -56,53 +60,53 @@ export default function HomePage() {
                   src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
                 />
               </div>
-              <span className="text-[72px] font-semibold leading-[0.9] tracking-tight text-[#0A0A0A] sm:text-[96px]">
+              <div className="text-[88px] font-semibold leading-[0.9] tracking-tight text-text sm:text-[112px]">
                 Score
-              </span>
+              </div>
             </div>
 
-            {/* Subtitle */}
-            <p className="mx-auto mt-6 max-w-xl text-lg text-[#666] sm:text-xl">
-              VRTL Score measures how your clients appear in AI search, generates proof, and creates reports they can actually use.
-            </p>
-
-            {/* AI provider icons */}
-            <div className="mt-6 flex items-center justify-center gap-1">
-              {[
-                { src: "/ai/icons8-chatgpt.svg", alt: "ChatGPT" },
-                { src: "/ai/icons8-google-48.svg", alt: "Google" },
-                { src: "/ai/gemini.png", alt: "Gemini" },
-                { src: "/ai/icons8-claude.svg", alt: "Claude" },
-              ].map((icon) => (
-                <span
-                  key={icon.alt}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-[#E5E5E5] bg-white"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img alt={icon.alt} className="h-4 w-4" src={icon.src} />
-                </span>
-              ))}
-              <span className="ml-2 text-sm text-[#999]">& more</span>
+            <div className="mx-auto mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-3">
+              <div className="text-[26px] font-semibold leading-[1.06] tracking-tight text-text sm:text-[31px]">
+                AI visibility, measured.
+              </div>
+              <div className="inline-flex items-center gap-2">
+                <div className="inline-flex items-center -space-x-2">
+                  <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-surface">
+                    <span className="sr-only">ChatGPT</span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img alt="" className="h-[17px] w-[17px]" src="/ai/icons8-chatgpt.svg" />
+                  </span>
+                  <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-surface">
+                    <span className="sr-only">Google</span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img alt="" className="h-[17px] w-[17px]" src="/ai/icons8-google-48.svg" />
+                  </span>
+                  <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-surface">
+                    <span className="sr-only">Gemini</span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img alt="" className="h-[17px] w-[17px]" src="/ai/gemini.png" />
+                  </span>
+                  <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-surface">
+                    <span className="sr-only">Claude</span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img alt="" className="h-[17px] w-[17px]" src="/ai/icons8-claude.svg" />
+                  </span>
+                </div>
+                <span className="text-sm text-text-3">&amp; more</span>
+              </div>
             </div>
 
-            {/* Search bar */}
-            <div className="mx-auto mt-8 max-w-xl">
+            <div className="mx-auto mt-6 max-w-3xl">
               <DomainSearchBar />
             </div>
 
-            {/* CTA buttons */}
-            <div className="mt-6 flex items-center justify-center gap-4">
-              <Link
-                href="/onboarding"
-                className="inline-flex h-11 items-center justify-center rounded-lg bg-[#0A0A0A] px-6 text-sm font-medium text-white transition-all hover:bg-[#1A1A1A] hover:scale-[1.02]"
-              >
-                Start free trial
-              </Link>
-              <Link
-                href="/pricing"
-                className="inline-flex h-11 items-center justify-center rounded-lg border border-[#E5E5E5] bg-white px-6 text-sm font-medium text-[#0A0A0A] transition-all hover:bg-[#F5F5F5]"
-              >
-                View pricing
+            <p className="mt-8 text-sm text-text-2">
+              Built for agencies who want to lead in AI search.
+            </p>
+
+            <div className="mt-5 flex items-center justify-center gap-3 text-sm">
+              <Link className="text-text-2 hover:text-text" href="/pricing">
+                See plans & pricing →
               </Link>
             </div>
           </div>
