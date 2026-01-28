@@ -193,7 +193,7 @@ export function OnboardingForm() {
         headers: { Authorization: `Bearer ${accessToken}` }
       });
       if (!ent.ok && ent.status === 403) {
-        router.replace(`/pricing?next=${encodeURIComponent(isInternalPath(nextPath) ? nextPath : "/app")}`);
+        router.replace(`/app/plans`);
         return;
       }
 

@@ -105,7 +105,7 @@ export function AppEntitlementGate({ children }: Props) {
 
         // If not entitled and not from checkout, redirect immediately
         if (!isCheckoutSuccess) {
-          router.replace(`/pricing?next=${encodeURIComponent(pathname ?? "/app")}`);
+          router.replace(`/app/plans`);
           return;
         }
 
@@ -126,7 +126,7 @@ export function AppEntitlementGate({ children }: Props) {
         setReady(true);
         hasChecked.current = true;
       } else if (!cancelled) {
-        router.replace(`/pricing?next=${encodeURIComponent(pathname ?? "/app")}`);
+        router.replace(`/app/plans`);
       }
     }
 
