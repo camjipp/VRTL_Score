@@ -126,42 +126,154 @@ export default function HomePage() {
         <div className="container-xl">
           {/* How it works */}
           <div className="mb-16">
-            <div className="mb-8 text-center">
-              <h2 className="text-2xl font-bold tracking-tight text-text md:text-3xl">
+            <div className="mb-10 text-center">
+              <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-600">
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Simple process
+              </span>
+              <h2 className="mt-4 text-2xl font-bold tracking-tight text-text md:text-3xl">
                 How it works
               </h2>
             </div>
-            <div className="grid gap-6 md:grid-cols-3">
-              {[
-                { step: "1", title: "Add your client", desc: "Enter their website and competitors. Takes 30 seconds." },
-                { step: "2", title: "Run the snapshot", desc: "We query ChatGPT, Claude, and Gemini with real prompts." },
-                { step: "3", title: "Share the report", desc: "Download a branded PDF with scores and evidence." },
-              ].map((item) => (
-                <div key={item.step} className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-lg font-bold text-emerald-600">
-                    {item.step}
+
+            {/* Steps with connecting line */}
+            <div className="relative">
+              {/* Connecting line (desktop) */}
+              <div className="pointer-events-none absolute left-0 right-0 top-12 hidden h-0.5 bg-gradient-to-r from-transparent via-border to-transparent md:block" />
+
+              <div className="grid gap-8 md:grid-cols-3 md:gap-6">
+                {[
+                  { 
+                    step: "1", 
+                    title: "Add your client", 
+                    desc: "Enter their website and competitors. Takes 30 seconds.",
+                    icon: (
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                      </svg>
+                    ),
+                  },
+                  { 
+                    step: "2", 
+                    title: "Run the snapshot", 
+                    desc: "We query ChatGPT, Claude, and Gemini with industry-specific prompts.",
+                    icon: (
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                      </svg>
+                    ),
+                  },
+                  { 
+                    step: "3", 
+                    title: "Share the report", 
+                    desc: "Download a branded PDF with scores, evidence, and next steps.",
+                    icon: (
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75l3 3m0 0l3-3m-3 3v-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    ),
+                  },
+                ].map((item, i) => (
+                  <div key={item.step} className="relative text-center">
+                    {/* Step circle */}
+                    <div className="relative mx-auto mb-4 flex h-24 w-24 items-center justify-center">
+                      {/* Outer ring */}
+                      <div className="absolute inset-0 rounded-full border-2 border-dashed border-emerald-500/30" />
+                      {/* Inner circle */}
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/20">
+                        {item.icon}
+                      </div>
+                      {/* Step number badge */}
+                      <div className="absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-surface bg-text text-xs font-bold text-white">
+                        {item.step}
+                      </div>
+                    </div>
+
+                    <h3 className="text-lg font-semibold text-text">{item.title}</h3>
+                    <p className="mx-auto mt-2 max-w-[240px] text-sm text-text-2">{item.desc}</p>
+
+                    {/* Arrow (mobile) */}
+                    {i < 2 && (
+                      <div className="my-4 flex justify-center md:hidden">
+                        <svg className="h-6 w-6 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" />
+                        </svg>
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-text">{item.title}</h3>
-                    <p className="mt-1 text-sm text-text-2">{item.desc}</p>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Why VRTL */}
+          {/* Why VRTL - Enhanced cards */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {[
-              { icon: "🎯", title: "Repeatable measurement", desc: "Run the same prompts every time. Compare month over month." },
-              { icon: "📋", title: "Evidence-backed", desc: "Every score comes with actual AI responses. No black boxes." },
-              { icon: "⚡", title: "Client-ready fast", desc: "One-click PDF export with your branding." },
-              { icon: "📈", title: "Track progress", desc: "Compare snapshots to show improvement over time." },
+              { 
+                icon: (
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                  </svg>
+                ),
+                title: "Repeatable", 
+                desc: "Run the same prompts every time. Compare month over month.",
+                color: "emerald",
+              },
+              { 
+                icon: (
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                  </svg>
+                ),
+                title: "Evidence-backed", 
+                desc: "Every score comes with actual AI responses. No black boxes.",
+                color: "violet",
+              },
+              { 
+                icon: (
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                  </svg>
+                ),
+                title: "Client-ready fast", 
+                desc: "One-click PDF export with your branding.",
+                color: "amber",
+              },
+              { 
+                icon: (
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                  </svg>
+                ),
+                title: "Track progress", 
+                desc: "Compare snapshots to show improvement over time.",
+                color: "cyan",
+              },
             ].map((b) => (
-              <div key={b.title} className="rounded-xl border border-border bg-surface p-5">
-                <span className="text-2xl">{b.icon}</span>
-                <h3 className="mt-3 font-semibold text-text">{b.title}</h3>
-                <p className="mt-1 text-sm text-text-2">{b.desc}</p>
+              <div 
+                key={b.title} 
+                className="group relative overflow-hidden rounded-2xl border border-border bg-surface p-5 transition-all hover:shadow-lg"
+              >
+                {/* Gradient glow on hover */}
+                <div className={`pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100 ${
+                  b.color === "emerald" ? "bg-gradient-to-br from-emerald-500/5 to-transparent" :
+                  b.color === "violet" ? "bg-gradient-to-br from-violet-500/5 to-transparent" :
+                  b.color === "amber" ? "bg-gradient-to-br from-amber-500/5 to-transparent" :
+                  "bg-gradient-to-br from-cyan-500/5 to-transparent"
+                }`} />
+
+                <div className={`relative mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl ${
+                  b.color === "emerald" ? "bg-emerald-500/10 text-emerald-600" :
+                  b.color === "violet" ? "bg-violet-500/10 text-violet-600" :
+                  b.color === "amber" ? "bg-amber-500/10 text-amber-600" :
+                  "bg-cyan-500/10 text-cyan-600"
+                }`}>
+                  {b.icon}
+                </div>
+                <h3 className="relative font-semibold text-text">{b.title}</h3>
+                <p className="relative mt-1 text-sm text-text-2">{b.desc}</p>
               </div>
             ))}
           </div>
