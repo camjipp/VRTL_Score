@@ -6,32 +6,19 @@ import { useEffect, useState } from "react";
 import { ensureOnboarded } from "@/lib/onboard";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { Alert, AlertDescription } from "@/components/ui/Alert";
-import { cn } from "@/lib/cn";
 
 type Agency = {
   id: string;
   name: string;
   logo_url: string | null;
-  accent_color: string | null;
 };
 
-const ACCENT_COLORS = [
-  { name: "Black", value: "#000000" },
-  { name: "Blue", value: "#2563eb" },
-  { name: "Purple", value: "#7c3aed" },
-  { name: "Pink", value: "#db2777" },
-  { name: "Red", value: "#dc2626" },
-  { name: "Orange", value: "#ea580c" },
-  { name: "Green", value: "#059669" },
-  { name: "Teal", value: "#0d9488" },
-];
 
 export default function SettingsPage() {
   const supabase = getSupabaseBrowserClient();
 
   const [agency, setAgency] = useState<Agency | null>(null);
   const [name, setName] = useState("");
-  const [accentColor, setAccentColor] = useState("#000000");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
@@ -46,7 +33,7 @@ export default function SettingsPage() {
         const { agencyId } = await ensureOnboarded();
         const { data, error: err } = await supabase
           .from("agencies")
-          .select("id, name, logo_url, accent_color")
+          .select("id, name, logo_url")
           .eq("id", agencyId)
           .maybeSingle();
         if (err) throw err;
@@ -54,7 +41,6 @@ export default function SettingsPage() {
           const a = data as Agency;
           setAgency(a);
           setName(a.name);
-          setAccentColor(a.accent_color || "#000000");
           if (a.logo_url) setLogoPreview(a.logo_url);
         }
       } catch (e: unknown) {
@@ -106,13 +92,12 @@ export default function SettingsPage() {
         .update({
           name,
           logo_url,
-          accent_color: accentColor,
         })
         .eq("id", agency.id);
       if (updateErr) throw updateErr;
 
       setSuccess(true);
-      setAgency({ ...agency, name, logo_url, accent_color: accentColor });
+      setAgency({ ...agency, name, logo_url });
       setLogoFile(null);
     } catch (e: unknown) {
       const err = e as { message?: string };
@@ -185,36 +170,6 @@ export default function SettingsPage() {
                 />
               </div>
 
-              {/* Accent color */}
-              <div>
-                <label className="block text-sm font-medium text-text">
-                  Brand Color
-                </label>
-                <p className="text-sm text-text-3">Used for buttons and accents</p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {ACCENT_COLORS.map((color) => (
-                    <button
-                      key={color.value}
-                      type="button"
-                      onClick={() => setAccentColor(color.value)}
-                      className={cn(
-                        "flex h-10 w-10 items-center justify-center rounded-xl border-2 transition-all",
-                        accentColor === color.value
-                          ? "border-accent scale-110"
-                          : "border-transparent hover:scale-105"
-                      )}
-                      style={{ backgroundColor: color.value }}
-                      title={color.name}
-                    >
-                      {accentColor === color.value && (
-                        <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                        </svg>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
           </div>
 
