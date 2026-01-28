@@ -109,16 +109,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* MINI CHAT BUBBLES (subtle pain points) */}
-      <section className="border-y border-border bg-bg-2 py-10">
-        <div className="container-xl">
-          <div className="mb-6 text-center">
-            <span className="text-xs font-medium uppercase tracking-widest text-text-3">
-              Sound familiar?
-            </span>
-          </div>
-          <MiniChatBubbles />
-        </div>
+      {/* MINI CHAT BUBBLES (subtle pain points - marquee) */}
+      <section className="border-y border-border bg-bg-2 py-4">
+        <MiniChatBubbles />
       </section>
 
       {/* HOW IT WORKS + WHY VRTL (combined) */}
