@@ -6,7 +6,9 @@ const AI_PROVIDERS = [
   { name: "ChatGPT", icon: "/ai/icons8-chatgpt.svg" },
   { name: "Claude", icon: "/ai/icons8-claude.svg" },
   { name: "Gemini", icon: "/ai/gemini.png" },
-  { name: "Google AI", icon: "/ai/icons8-google-48.svg" },
+  { name: "Perplexity", icon: "/ai/perplexity.svg" },
+  { name: "Grok", icon: "/ai/grok.svg" },
+  { name: "DeepSeek", icon: "/ai/deepseek.svg" },
 ];
 
 export function TrustLogos({ className }: { className?: string }) {
