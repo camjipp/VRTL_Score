@@ -30,29 +30,40 @@ export type ReportData = {
   }>;
 };
 
+function getScoreColor(score: number | null): string {
+  if (score === null) return "#64748b";
+  if (score >= 70) return "#059669";
+  if (score >= 40) return "#d97706";
+  return "#dc2626";
+}
+
+function getScoreLabel(score: number | null): string {
+  if (score === null) return "No data";
+  if (score >= 70) return "Strong";
+  if (score >= 40) return "Moderate";
+  return "Needs work";
+}
+
 export function renderReportHtml(data: ReportData): string {
-  const {
-    agency,
-    client,
-    snapshot,
-    competitors,
-    responses
-  } = data;
+  const { agency, client, snapshot, competitors, responses } = data;
 
+  const accentColor = agency.brand_accent || "#6366f1";
+  const score = snapshot.vrtl_score;
+  const scoreColor = getScoreColor(score);
+  const scoreLabel = getScoreLabel(score);
   const competitorCount = competitors.length;
-  const confidence =
-    competitorCount === 0
-      ? { label: "Low", message: "Competitive analysis disabled — add 3+ competitors for full comparison." }
-      : competitorCount < 3
-      ? { label: "Medium", message: "Competitive analysis limited — add 1–2 more competitors for best results." }
-      : { label: "High", message: null };
 
+  // Calculate stats
   let clientMentioned = 0;
+  let topPosition = 0;
+  let strongRec = 0;
   const competitorMentionCounts = new Map<string, number>();
 
   for (const r of responses) {
     const pj = r.parsed_json;
-    if (pj?.client_mentioned) clientMentioned += 1;
+    if (pj?.client_mentioned) clientMentioned++;
+    if (pj?.client_position === "top") topPosition++;
+    if (pj?.recommendation_strength === "strong") strongRec++;
     if (Array.isArray(pj?.competitors_mentioned)) {
       for (const name of pj.competitors_mentioned) {
         competitorMentionCounts.set(name, (competitorMentionCounts.get(name) ?? 0) + 1);
@@ -64,230 +75,628 @@ export function renderReportHtml(data: ReportData): string {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
 
-  const providerTable = snapshot.score_by_provider
-    ? `<table class="table">
-        <thead><tr><th>Provider</th><th>Score</th></tr></thead>
-        <tbody>
-          ${Object.entries(snapshot.score_by_provider)
-            .sort((a, b) => a[0].localeCompare(b[0]))
-            .map(([k, v]) => `<tr><td>${escapeHtml(k)}</td><td>${v}</td></tr>`)
-            .join("")}
-        </tbody>
-      </table>`
-    : `<div class="muted">—</div>`;
+  // Provider bars
+  const providerBarsHtml = snapshot.score_by_provider
+    ? Object.entries(snapshot.score_by_provider)
+        .sort((a, b) => b[1] - a[1])
+        .map(([provider, provScore]) => {
+          const pct = Math.max(0, Math.min(100, Number.isFinite(provScore) ? provScore : 0));
+          const barColor = getScoreColor(pct);
+          return `
+            <div class="provider-row">
+              <div class="provider-name">${escapeHtml(provider)}</div>
+              <div class="provider-bar-track">
+                <div class="provider-bar-fill" style="width: ${pct}%; background: ${barColor};"></div>
+              </div>
+              <div class="provider-score" style="color: ${barColor};">${pct}</div>
+            </div>
+          `;
+        }).join("")
+    : '<div class="muted">No provider data available</div>';
 
-  const providerBars = snapshot.score_by_provider
-    ? `<div class="bars">
-        ${Object.entries(snapshot.score_by_provider)
-          .sort((a, b) => a[0].localeCompare(b[0]))
-          .map(([k, v]) => {
-            const pct = Math.max(0, Math.min(100, Number.isFinite(v) ? v : 0));
-            return `<div class="barRow">
-              <div class="barLabel">${escapeHtml(k)}</div>
-              <div class="barTrack"><div class="barFill" style="width:${pct}%"></div></div>
-              <div class="barValue">${pct}</div>
-            </div>`;
-          })
-          .join("")}
-      </div>`
-    : `<div class="muted">—</div>`;
-
-  const competitorMentionsTable = `<table class="table">
-    <thead><tr><th>Competitor</th><th>Mentions</th></tr></thead>
-    <tbody>
-      ${
-        topCompetitors.length
-          ? topCompetitors
-              .map(([name, count]) => `<tr><td>${escapeHtml(name)}</td><td>${count}</td></tr>`)
-              .join("")
-          : "<tr><td class='muted' colspan='2'>None</td></tr>"
-      }
-    </tbody>
-  </table>`;
-
-  const score = snapshot.vrtl_score ?? null;
-  const actions: Array<{ title: string; detail: string }> = [];
-  if (competitorCount < 3) {
-    actions.push({
-      title: "Add 3+ competitors",
-      detail: "This improves competitive comparisons and makes the score more reliable."
-    });
+  // Key insights
+  const insights: string[] = [];
+  if (clientMentioned > 0) {
+    insights.push(`${client.name} was mentioned in ${clientMentioned} of ${responses.length} AI responses`);
   }
-  if (score !== null && score < 50) {
-    actions.push({
-      title: "Improve positioning in AI recommendations",
-      detail: "Aim for more ‘top’ placements and stronger recommendations across prompts."
-    });
-  } else {
-    actions.push({
-      title: "Maintain coverage & credibility",
-      detail: "Keep sources/citations and concrete feature evidence present in responses."
-    });
+  if (topPosition > 0) {
+    insights.push(`Achieved top positioning in ${topPosition} response${topPosition > 1 ? "s" : ""}`);
   }
-  actions.push({
-    title: "Re-run after key changes",
-    detail: "Re-run snapshots after changing messaging, website content, or competitor set."
-  });
-  const actionsHtml = `<div class="row">
-    ${actions.slice(0, 3).map((a) => `<div class="card">
-      <div class="cardTitle">${escapeHtml(a.title)}</div>
-      <div class="text-sm muted">${escapeHtml(a.detail)}</div>
-    </div>`).join("")}
-  </div>`;
+  if (strongRec > 0) {
+    insights.push(`Received strong recommendations ${strongRec} time${strongRec > 1 ? "s" : ""}`);
+  }
+  if (topCompetitors.length > 0) {
+    insights.push(`Top competitor mentioned: ${topCompetitors[0][0]} (${topCompetitors[0][1]}x)`);
+  }
 
-  const responseBlocks = responses
-    .map((r, idx) => {
-      const pj = r.parsed_json;
-      const snippet =
-        pj?.evidence_snippet ??
-        (r.raw_text ? truncate(r.raw_text, 180) : "No evidence available");
-      return `<div class="card">
-        <div class="cardTop">
-          <div class="muted text-xs">Prompt #${r.prompt_ordinal ?? idx + 1}</div>
-          <div class="pill small">${pj?.client_position ?? "—"}</div>
-          <div class="pill small">${pj?.recommendation_strength ?? "—"}</div>
-          <div class="pill small">${pj?.client_mentioned ? "mentioned" : "not mentioned"}</div>
-        </div>
-        <div class="promptTitle">${escapeHtml(r.prompt_text ?? "Prompt")}</div>
-        <div class="text-sm muted">Competitors mentioned: ${
-          pj?.competitors_mentioned && pj.competitors_mentioned.length
-            ? pj.competitors_mentioned.map(escapeHtml).join(", ")
-            : "—"
-        }</div>
-        <div class="evidence">
-          <div class="evidenceLabel">Evidence</div>
-          <div class="evidenceText">${escapeHtml(snippet)}</div>
-        </div>
-      </div>`;
-    })
-    .join("");
+  // Actions
+  const actions = [
+    score !== null && score < 50 
+      ? { title: "Improve AI positioning", desc: "Focus on content that clearly demonstrates your client's unique value proposition" }
+      : { title: "Maintain strong visibility", desc: "Continue creating high-quality, authoritative content" },
+    { title: "Monitor competitor activity", desc: "Track how competitors are being recommended and adjust strategy" },
+    { title: "Regular snapshots", desc: "Run weekly snapshots to track progress and identify trends" }
+  ];
 
   return `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8" />
   <style>
-    :root { --accent: ${agency.brand_accent || "#0f172a"}; }
-    html, body { margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #0f172a; font-size: 13px; line-height: 1.35; }
-    h1,h2,h3 { margin: 0 0 10px; letter-spacing: -0.01em; }
-    h2 { font-size: 16px; }
-    .muted { color: #64748b; }
-    .pill { display: inline-block; padding: 4px 8px; margin: 2px 6px 2px 0; border: 1px solid #e2e8f0; border-radius: 999px; font-size: 12px; background: #fff; }
-    .pill.small { font-size: 11px; padding: 3px 8px; }
-    .card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin: 10px 0; background: #fff; }
-    .section { margin: 18px 0; page-break-inside: avoid; }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-    .warn { background: #fef9c3; border: 1px solid #fcd34d; padding: 10px; border-radius: 6px; }
-    .row { display: flex; gap: 12px; flex-wrap: wrap; }
-    .col { flex: 1 1 220px; }
-    .cover { border: 1px solid #e2e8f0; border-radius: 16px; padding: 22px; margin: 0 0 18px; background: linear-gradient(180deg, rgba(15,23,42,0.02), rgba(15,23,42,0.00)); page-break-after: always; }
-    .coverTitle { font-size: 30px; font-weight: 900; letter-spacing: -0.03em; }
-    .coverSub { margin-top: 10px; }
-    .coverMeta { margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; }
-    .metaItem { border-top: 1px solid #e2e8f0; padding-top: 8px; }
-    .scoreGrid { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; }
-    .scoreBlock { border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; background: #ffffff; }
-    .scoreLabel { font-size: 12px; color: #64748b; }
-    .scoreValue { font-size: 38px; font-weight: 900; color: var(--accent); letter-spacing: -0.02em; }
-    .table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-    .table th, .table td { border: 1px solid #e2e8f0; padding: 8px; text-align: left; font-size: 12px; }
-    .table th { background: #f8fafc; }
-    .cardTitle { font-weight: 700; margin-bottom: 6px; }
-    .footer { margin-top: 18px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; }
-    .promptTitle { font-weight: 800; margin: 6px 0 8px; }
-    .cardTop { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .evidence { margin-top: 10px; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px; background: rgba(15,23,42,0.02); }
-    .evidenceLabel { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
-    .evidenceText { font-size: 13px; }
-    .bars { margin-top: 10px; display: grid; gap: 8px; }
-    .barRow { display: grid; grid-template-columns: 120px 1fr 34px; align-items: center; gap: 10px; }
-    .barLabel { font-size: 12px; color: #0f172a; }
-    .barTrack { height: 10px; border: 1px solid #e2e8f0; background: #fff; border-radius: 999px; overflow: hidden; }
-    .barFill { height: 100%; background: linear-gradient(90deg, var(--accent), rgba(15,23,42,0.30)); }
-    .barValue { text-align: right; font-size: 12px; color: #0f172a; font-variant-numeric: tabular-nums; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    
+    :root {
+      --accent: ${accentColor};
+      --score-color: ${scoreColor};
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    html, body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 11px;
+      line-height: 1.5;
+      color: #1e293b;
+      background: #fff;
+    }
+    
+    /* Cover Page */
+    .cover {
+      min-height: 100vh;
+      padding: 48px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+      color: white;
+      page-break-after: always;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .cover::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 80%;
+      height: 200%;
+      background: radial-gradient(ellipse, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+    }
+    
+    .cover-content {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .cover-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 80px;
+    }
+    
+    .cover-logo img {
+      max-height: 48px;
+      max-width: 180px;
+    }
+    
+    .cover-date {
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    
+    .cover-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 16px;
+    }
+    
+    .cover-client {
+      font-size: 48px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 24px;
+    }
+    
+    .cover-subtitle {
+      font-size: 16px;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 60px;
+    }
+    
+    .cover-score-section {
+      display: flex;
+      align-items: flex-end;
+      gap: 40px;
+    }
+    
+    .cover-score {
+      text-align: center;
+    }
+    
+    .cover-score-value {
+      font-size: 120px;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      line-height: 1;
+      background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .cover-score-label {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.6);
+      margin-top: 8px;
+    }
+    
+    .cover-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      flex: 1;
+    }
+    
+    .cover-stat {
+      padding: 20px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+    }
+    
+    .cover-stat-value {
+      font-size: 28px;
+      font-weight: 700;
+    }
+    
+    .cover-stat-label {
+      font-size: 11px;
+      color: rgba(255,255,255,0.6);
+      margin-top: 4px;
+    }
+    
+    .cover-footer {
+      position: absolute;
+      bottom: 48px;
+      left: 48px;
+      right: 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .cover-agency {
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+    }
+    
+    .cover-powered {
+      font-size: 10px;
+      color: rgba(255,255,255,0.4);
+    }
+    
+    /* Content Pages */
+    .page {
+      padding: 40px 48px;
+      page-break-after: always;
+    }
+    
+    .page:last-child {
+      page-break-after: avoid;
+    }
+    
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+    
+    .page-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    
+    .page-subtitle {
+      font-size: 11px;
+      color: #64748b;
+    }
+    
+    /* Score Overview */
+    .score-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    
+    .score-main {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+    }
+    
+    .score-main-value {
+      font-size: 72px;
+      font-weight: 900;
+      color: var(--score-color);
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    
+    .score-main-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--score-color);
+      margin-top: 8px;
+    }
+    
+    .score-main-sublabel {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    
+    .providers-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 24px;
+    }
+    
+    .providers-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 16px;
+    }
+    
+    .provider-row {
+      display: grid;
+      grid-template-columns: 80px 1fr 40px;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .provider-name {
+      font-size: 11px;
+      font-weight: 500;
+      color: #475569;
+    }
+    
+    .provider-bar-track {
+      height: 8px;
+      background: #f1f5f9;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .provider-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    
+    .provider-score {
+      font-size: 12px;
+      font-weight: 700;
+      text-align: right;
+    }
+    
+    /* Key Insights */
+    .insights-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    
+    .insight-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px;
+      background: #f8fafc;
+      border-radius: 12px;
+    }
+    
+    .insight-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent), #818cf8);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .insight-icon svg {
+      width: 16px;
+      height: 16px;
+      fill: white;
+    }
+    
+    .insight-text {
+      font-size: 11px;
+      color: #334155;
+      line-height: 1.5;
+    }
+    
+    /* Actions */
+    .actions-section {
+      margin-bottom: 32px;
+    }
+    
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 16px;
+    }
+    
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    
+    .action-card {
+      padding: 20px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+    }
+    
+    .action-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: var(--accent);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    
+    .action-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+    
+    .action-desc {
+      font-size: 10px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+    
+    /* Competitor Table */
+    .table-section {
+      margin-bottom: 32px;
+    }
+    
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .data-table th {
+      text-align: left;
+      padding: 12px 16px;
+      background: #f8fafc;
+      font-size: 10px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .data-table td {
+      padding: 14px 16px;
+      font-size: 11px;
+      color: #334155;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .mention-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .mention-bar-track {
+      flex: 1;
+      height: 6px;
+      background: #f1f5f9;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    
+    .mention-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 3px;
+    }
+    
+    /* Footer */
+    .page-footer {
+      margin-top: auto;
+      padding-top: 24px;
+      border-top: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      color: #94a3b8;
+    }
+    
+    .muted {
+      color: #94a3b8;
+    }
+    
+    /* Utilities */
+    .text-center { text-align: center; }
+    .mb-4 { margin-bottom: 16px; }
+    .mb-8 { margin-bottom: 32px; }
   </style>
 </head>
 <body>
+  <!-- Cover Page -->
   <div class="cover">
-    <div class="header">
+    <div class="cover-content">
+      <div class="cover-header">
+        ${agency.brand_logo_url 
+          ? `<div class="cover-logo"><img src="${escapeHtml(agency.brand_logo_url)}" alt="${escapeHtml(agency.name)}" /></div>`
+          : `<div class="cover-logo" style="font-size: 18px; font-weight: 700;">${escapeHtml(agency.name)}</div>`
+        }
+        <div class="cover-date">${formatDate(snapshot.created_at)}</div>
+      </div>
+      
+      <div class="cover-title">AI Visibility Report</div>
+      <div class="cover-client">${escapeHtml(client.name)}</div>
+      <div class="cover-subtitle">${client.website ? escapeHtml(client.website) : "AI visibility analysis and recommendations"}</div>
+      
+      <div class="cover-score-section">
+        <div class="cover-score">
+          <div class="cover-score-value">${score ?? "—"}</div>
+          <div class="cover-score-label">VRTL Score</div>
+        </div>
+        
+        <div class="cover-stats">
+          <div class="cover-stat">
+            <div class="cover-stat-value">${responses.length}</div>
+            <div class="cover-stat-label">AI Signals Analyzed</div>
+          </div>
+          <div class="cover-stat">
+            <div class="cover-stat-value">${clientMentioned}</div>
+            <div class="cover-stat-label">Times Mentioned</div>
+          </div>
+          <div class="cover-stat">
+            <div class="cover-stat-value">${competitorCount}</div>
+            <div class="cover-stat-label">Competitors Tracked</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="cover-footer">
+        <div class="cover-agency">Prepared by ${escapeHtml(agency.name)}</div>
+        <div class="cover-powered">Powered by VRTL Score</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Score Overview Page -->
+  <div class="page">
+    <div class="page-header">
       <div>
-        <div class="muted text-sm">${formatDate(snapshot.created_at)}</div>
-        <div class="coverTitle">VRTL Score Report</div>
-        <div class="coverSub">
-          <div><strong>${escapeHtml(client.name)}</strong></div>
-          <div class="muted">${escapeHtml(agency.name)}${client.website ? ` · ${escapeHtml(client.website)}` : ""}</div>
-        </div>
-        <div class="coverMeta">
-          <div class="metaItem">
-            <div class="muted text-xs">Snapshot</div>
-            <div class="text-sm">${escapeHtml(snapshot.id)}</div>
-          </div>
-          <div class="metaItem">
-            <div class="muted text-xs">Prompt pack</div>
-            <div class="text-sm">${escapeHtml(snapshot.prompt_pack_version ?? "—")}</div>
-          </div>
-          <div class="metaItem">
-            <div class="muted text-xs">Status</div>
-            <div class="text-sm">${escapeHtml(snapshot.status)}</div>
-          </div>
-          <div class="metaItem">
-            <div class="muted text-xs">Completed</div>
-            <div class="text-sm">${snapshot.completed_at ? formatDate(snapshot.completed_at) : "—"}</div>
-          </div>
-        </div>
-      </div>
-      ${agency.brand_logo_url ? `<img src="${escapeHtml(agency.brand_logo_url)}" alt="logo" style="max-height:54px;">` : ""}
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="scoreGrid">
-      <div class="scoreBlock">
-        <div class="scoreLabel">VRTL Score</div>
-        <div class="scoreValue">${snapshot.vrtl_score ?? "—"}</div>
-        <div class="muted text-sm">Confidence: ${confidence.label}</div>
-      </div>
-      <div class="scoreBlock">
-        <div class="scoreLabel">Provider comparison</div>
-        ${providerBars}
-      </div>
-      <div class="scoreBlock">
-        <div class="scoreLabel">Coverage</div>
-        <div class="text-sm">Client mentioned in <strong>${clientMentioned}</strong> response(s)</div>
-        <div class="muted text-sm">Competitors in set: ${competitorCount}</div>
+        <div class="page-title">Score Overview</div>
+        <div class="page-subtitle">How ${escapeHtml(client.name)} performs across AI models</div>
       </div>
     </div>
-    ${
-      confidence.message
-        ? `<div class="warn"><strong>Score confidence: ${confidence.label}</strong> — ${confidence.message}</div>`
-        : ""
-    }
-  </div>
-
-  <div class="section">
-    <h2>Provider details</h2>
-    ${providerTable}
-  </div>
-
-  <div class="section">
-    <h2>Competitor mentions</h2>
-    <div class="muted text-sm">Top competitors mentioned across prompts</div>
-    ${competitorMentionsTable}
-  </div>
-
-  <div class="section">
-    <h2>3 actions</h2>
-    ${actionsHtml}
-  </div>
-
-  <div class="section">
-    <h2>Evidence by prompt</h2>
-    ${responseBlocks || "<div class='muted'>No responses.</div>"}
-  </div>
-
-  <div class="footer">
-    Prepared by ${escapeHtml(agency.name)}
+    
+    <div class="score-grid">
+      <div class="score-main">
+        <div class="score-main-value">${score ?? "—"}</div>
+        <div class="score-main-label">${scoreLabel}</div>
+        <div class="score-main-sublabel">Overall VRTL Score</div>
+      </div>
+      
+      <div class="providers-card">
+        <div class="providers-title">Performance by AI Provider</div>
+        ${providerBarsHtml}
+      </div>
+    </div>
+    
+    ${insights.length > 0 ? `
+    <div class="section-title">Key Insights</div>
+    <div class="insights-grid">
+      ${insights.map(insight => `
+        <div class="insight-card">
+          <div class="insight-icon">
+            <svg viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/></svg>
+          </div>
+          <div class="insight-text">${escapeHtml(insight)}</div>
+        </div>
+      `).join("")}
+    </div>
+    ` : ""}
+    
+    <div class="actions-section">
+      <div class="section-title">Recommended Actions</div>
+      <div class="actions-grid">
+        ${actions.map((action, idx) => `
+          <div class="action-card">
+            <div class="action-number">${idx + 1}</div>
+            <div class="action-title">${escapeHtml(action.title)}</div>
+            <div class="action-desc">${escapeHtml(action.desc)}</div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+    
+    ${topCompetitors.length > 0 ? `
+    <div class="table-section">
+      <div class="section-title">Competitor Landscape</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Competitor</th>
+            <th>AI Mentions</th>
+            <th style="width: 40%">Visibility</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${topCompetitors.map(([name, count]) => {
+            const maxCount = topCompetitors[0][1];
+            const pct = Math.round((count / maxCount) * 100);
+            return `
+              <tr>
+                <td>${escapeHtml(name)}</td>
+                <td>${count}</td>
+                <td>
+                  <div class="mention-bar">
+                    <div class="mention-bar-track">
+                      <div class="mention-bar-fill" style="width: ${pct}%"></div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>
+    ` : ""}
+    
+    <div class="page-footer">
+      <div>${escapeHtml(client.name)} · AI Visibility Report</div>
+      <div>${escapeHtml(agency.name)}</div>
+    </div>
   </div>
 </body>
 </html>`;
@@ -295,31 +704,23 @@ export function renderReportHtml(data: ReportData): string {
 
 function formatDate(d: string) {
   const dt = new Date(d);
-  return Number.isNaN(dt.getTime()) ? d : dt.toLocaleString();
+  if (Number.isNaN(dt.getTime())) return d;
+  return dt.toLocaleDateString("en-US", { 
+    year: "numeric", 
+    month: "long", 
+    day: "numeric" 
+  });
 }
 
 function escapeHtml(str: string) {
   return str.replace(/[&<>"']/g, (ch) => {
     switch (ch) {
-      case "&":
-        return "&amp;";
-      case "<":
-        return "&lt;";
-      case ">":
-        return "&gt;";
-      case '"':
-        return "&quot;";
-      case "'":
-        return "&#39;";
-      default:
-        return ch;
+      case "&": return "&amp;";
+      case "<": return "&lt;";
+      case ">": return "&gt;";
+      case '"': return "&quot;";
+      case "'": return "&#39;";
+      default: return ch;
     }
   });
 }
-
-function truncate(str: string, len: number) {
-  if (str.length <= len) return str;
-  return `${str.slice(0, len)}…`;
-}
-
-
