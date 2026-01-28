@@ -18,7 +18,7 @@ type Agency = {
 export default function AdminPage() {
   const supabase = getSupabaseBrowserClient();
 
-  const [role, setRole] = useState<string | null>(null);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,23 +28,25 @@ export default function AdminPage() {
   useEffect(() => {
     async function load() {
       try {
-        const { agencyId } = await ensureOnboarded();
+        await ensureOnboarded();
 
-        // Get the user's role from agency_users
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error("Not authenticated");
+        // Check if super admin
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) throw new Error("Not authenticated");
 
-        const { data: membership } = await supabase
-          .from("agency_users")
-          .select("role")
-          .eq("user_id", user.id)
-          .eq("agency_id", agencyId)
-          .maybeSingle();
+        const adminCheck = await fetch("/api/admin/check", {
+          headers: { Authorization: `Bearer ${session.access_token}` }
+        });
+        
+        if (!adminCheck.ok) {
+          setLoading(false);
+          return;
+        }
+        
+        const { isAdmin } = await adminCheck.json();
+        setIsSuperAdmin(isAdmin);
 
-        const userRole = membership?.role ?? null;
-        setRole(userRole);
-
-        if (userRole !== "admin" && userRole !== "owner") {
+        if (!isAdmin) {
           setLoading(false);
           return;
         }
@@ -127,7 +129,7 @@ export default function AdminPage() {
       )}
 
       {/* Not authorized */}
-      {!loading && role !== "admin" && role !== "owner" && (
+      {!loading && !isSuperAdmin && (
         <div className="rounded-2xl border border-border bg-surface py-16 text-center">
           <div className="flex justify-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
@@ -145,7 +147,7 @@ export default function AdminPage() {
       )}
 
       {/* Admin content */}
-      {!loading && (role === "admin" || role === "owner") && (
+      {!loading && isSuperAdmin && (
         <>
           {/* Stats */}
           <div className="grid gap-4 sm:grid-cols-3">

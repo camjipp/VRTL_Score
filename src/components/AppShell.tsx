@@ -20,16 +20,31 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [busy, setBusy] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [agency, setAgency] = useState<Agency | null>(null);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   useEffect(() => {
-    async function loadAgency() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+    async function loadData() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
       
+      // Check if super admin
+      try {
+        const res = await fetch("/api/admin/check", {
+          headers: { Authorization: `Bearer ${session.access_token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setIsSuperAdmin(data.isAdmin);
+        }
+      } catch {
+        // Ignore errors
+      }
+      
+      // Load agency
       const { data: membership } = await supabase
         .from("agency_users")
         .select("agency_id")
-        .eq("user_id", user.id)
+        .eq("user_id", session.user.id)
         .maybeSingle();
       
       if (!membership?.agency_id) return;
@@ -44,7 +59,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         setAgency(agencyData as Agency);
       }
     }
-    loadAgency();
+    loadData();
   }, [supabase]);
 
   async function logout() {
@@ -115,21 +130,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             Settings
           </Link>
 
-          <Link
-            href="/app/admin"
-            onClick={() => setSidebarOpen(false)}
-            className={cn(
-              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
-              isActive("/app/admin")
-                ? "bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 text-emerald-700"
-                : "text-text-2 hover:bg-surface-2 hover:text-text"
-            )}
-          >
-            <svg className={cn("h-5 w-5", isActive("/app/admin") ? "text-emerald-600" : "text-text-3")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-            </svg>
-            Admin
-          </Link>
+          {isSuperAdmin && (
+            <Link
+              href="/app/admin"
+              onClick={() => setSidebarOpen(false)}
+              className={cn(
+                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
+                isActive("/app/admin")
+                  ? "bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 text-emerald-700"
+                  : "text-text-2 hover:bg-surface-2 hover:text-text"
+              )}
+            >
+              <svg className={cn("h-5 w-5", isActive("/app/admin") ? "text-emerald-600" : "text-text-3")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+              </svg>
+              Admin
+            </Link>
+          )}
         </nav>
 
         {/* Agency + logout */}
