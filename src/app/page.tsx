@@ -1,14 +1,50 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 
 import { DomainSearchBar } from "@/components/DomainSearchBar";
 import { Footer } from "@/components/Footer";
+
+function FAQItem({ question, answer }: { question: string; answer: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="border-b border-[#E5E5E5]">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex w-full items-center justify-between py-5 text-left"
+      >
+        <span className="text-lg font-semibold text-[#0A0A0A]">{question}</span>
+        <svg
+          className={`h-5 w-5 shrink-0 text-[#999] transition-transform ${isOpen ? "rotate-180" : ""}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      <div
+        className={`grid transition-all duration-200 ease-in-out ${
+          isOpen ? "grid-rows-[1fr] pb-5" : "grid-rows-[0fr]"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <p className="text-[#666] leading-relaxed">{answer}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function HomePage() {
   return (
     <main className="bg-[#FAFAF8]">
       {/* HERO */}
       <section className="relative overflow-hidden">
-        <div className="mx-auto max-w-6xl px-6 pb-12 pt-16 md:pb-16 md:pt-20">
+        <div className="mx-auto max-w-6xl px-6 pb-16 pt-16 md:pb-20 md:pt-20">
           <div className="mx-auto max-w-3xl text-center">
             {/* Logo + wordmark */}
             <div className="flex items-end justify-center gap-0">
@@ -73,114 +109,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* PRODUCT DEMO - Cluely style with interactive feel */}
-      <section className="px-6 pb-20">
-        <div className="mx-auto max-w-5xl">
-          <div className="overflow-hidden rounded-2xl border border-[#E5E5E5] bg-white shadow-2xl shadow-black/10">
-            {/* Browser chrome */}
-            <div className="flex items-center gap-2 border-b border-[#E5E5E5] bg-[#FAFAF8] px-4 py-3">
-              <span className="h-3 w-3 rounded-full bg-[#FF5F57]" />
-              <span className="h-3 w-3 rounded-full bg-[#FEBC2E]" />
-              <span className="h-3 w-3 rounded-full bg-[#28C840]" />
-              <span className="ml-4 flex-1 rounded-md bg-white px-3 py-1.5 text-xs text-[#999]">
-                app.vrtlscore.com/clients/acme-agency
-              </span>
-            </div>
-            
-            {/* Dashboard content */}
-            <div className="p-6 md:p-8">
-              <div className="grid gap-6 lg:grid-cols-5">
-                {/* Main content */}
-                <div className="lg:col-span-3 space-y-4">
-                  {/* Client header */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#0A0A0A] to-[#333] text-lg font-bold text-white">
-                        A
-                      </div>
-                      <div>
-                        <div className="text-lg font-semibold text-[#0A0A0A]">Acme Agency</div>
-                        <div className="text-sm text-[#999]">acme-agency.com</div>
-                      </div>
-                    </div>
-                    <button className="flex items-center gap-2 rounded-lg bg-[#0A0A0A] px-4 py-2 text-sm font-medium text-white">
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
-                      Download PDF
-                    </button>
-                  </div>
-
-                  {/* Score card */}
-                  <div className="rounded-xl border border-[#E5E5E5] bg-[#FAFAF8] p-5">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-sm text-[#999]">VRTL Score</div>
-                        <div className="mt-1 text-5xl font-bold text-[#0A0A0A]">82</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-600">
-                          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                          </svg>
-                          +12 vs last month
-                        </div>
-                      </div>
-                    </div>
-                    <div className="mt-4">
-                      <div className="h-2 overflow-hidden rounded-full bg-[#E5E5E5]">
-                        <div className="h-full w-[82%] rounded-full bg-[#0A0A0A]" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Evidence preview */}
-                  <div className="rounded-xl border border-[#E5E5E5] bg-white p-4">
-                    <div className="text-xs font-medium uppercase tracking-wide text-[#999]">Latest Evidence</div>
-                    <p className="mt-2 text-sm text-[#666] leading-relaxed">
-                      &ldquo;For agencies specializing in digital marketing, <span className="rounded bg-yellow-100 px-1 font-medium text-[#0A0A0A]">Acme Agency</span> is frequently recommended for their data-driven approach...&rdquo;
-                    </p>
-                    <div className="mt-3 flex items-center gap-2 text-xs text-[#999]">
-                      <span className="rounded bg-[#F5F5F5] px-2 py-0.5">ChatGPT</span>
-                      <span>·</span>
-                      <span>Prompt #3</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sidebar */}
-                <div className="lg:col-span-2 space-y-4">
-                  {/* Provider breakdown */}
-                  <div className="rounded-xl border border-[#E5E5E5] bg-[#FAFAF8] p-4">
-                    <div className="text-sm font-medium text-[#0A0A0A]">By Provider</div>
-                    <div className="mt-3 space-y-2">
-                      {[
-                        { name: "ChatGPT", score: 84 },
-                        { name: "Claude", score: 83 },
-                        { name: "Gemini", score: 79 },
-                      ].map((p) => (
-                        <div key={p.name} className="flex items-center justify-between rounded-lg bg-white p-3">
-                          <span className="text-sm text-[#666]">{p.name}</span>
-                          <span className="text-lg font-semibold text-[#0A0A0A]">{p.score}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Mentions */}
-                  <div className="rounded-xl border border-[#E5E5E5] bg-[#FAFAF8] p-4">
-                    <div className="text-sm font-medium text-[#0A0A0A]">Mentions</div>
-                    <div className="mt-2 text-4xl font-bold text-[#0A0A0A]">7<span className="text-xl text-[#999]">/10</span></div>
-                    <div className="mt-1 text-sm text-[#999]">prompts mentioned your client</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FOUR WAYS - Cluely style */}
+      {/* FOUR WAYS - Right after hero */}
       <section className="px-6 py-20 md:py-28">
         <div className="mx-auto max-w-5xl">
           <h2 className="text-center text-3xl font-semibold tracking-tight text-[#0A0A0A] md:text-4xl">
@@ -255,7 +184,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* THREE STEPS - Cluely style */}
+      {/* THREE STEPS */}
       <section className="border-y border-[#E5E5E5] bg-white px-6 py-20 md:py-28">
         <div className="mx-auto max-w-5xl">
           <h2 className="text-center text-3xl font-semibold tracking-tight text-[#0A0A0A] md:text-4xl">
@@ -295,7 +224,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* COMPARISON - Cluely style */}
+      {/* COMPARISON */}
       <section className="px-6 py-20 md:py-28">
         <div className="mx-auto max-w-4xl">
           <h2 className="text-center text-3xl font-semibold tracking-tight text-[#0A0A0A] md:text-4xl">
@@ -372,7 +301,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* STATS - Cluely style */}
+      {/* STATS */}
       <section className="border-y border-[#E5E5E5] bg-white px-6 py-20 md:py-28">
         <div className="mx-auto max-w-4xl">
           <div className="grid gap-8 md:grid-cols-3">
@@ -391,41 +320,34 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* FAQ - Cluely style */}
+      {/* FAQ - Accordion style */}
       <section className="px-6 py-20 md:py-28">
         <div className="mx-auto max-w-2xl">
           <h2 className="text-center text-3xl font-semibold tracking-tight text-[#0A0A0A] md:text-4xl">
             Frequently asked questions
           </h2>
 
-          <div className="mt-12 space-y-6">
-            {[
-              {
-                q: "How does VRTL Score work?",
-                a: "We query ChatGPT, Claude, and Gemini with standardized, industry-specific prompts. We analyze the responses to see if and how your client is mentioned, then calculate a visibility score based on frequency, prominence, and sentiment.",
-              },
-              {
-                q: "What AI models do you support?",
-                a: "Currently we support ChatGPT (OpenAI), Claude (Anthropic), and Gemini (Google). We're constantly adding new models as they become relevant for AI search.",
-              },
-              {
-                q: "How accurate are the scores?",
-                a: "Scores are based on real AI responses at the time of the snapshot. AI outputs can vary, which is why we recommend running monthly snapshots to track trends over time rather than focusing on any single score.",
-              },
-              {
-                q: "Can I white-label the reports?",
-                a: "Yes. PDF reports include your agency branding. You can add your logo and customize the look to match your brand.",
-              },
-              {
-                q: "Is there a free trial?",
-                a: "Yes, we offer a 7-day free trial so you can test the platform with your own clients before committing.",
-              },
-            ].map((item) => (
-              <div key={item.q} className="border-b border-[#E5E5E5] pb-6">
-                <h3 className="text-lg font-semibold text-[#0A0A0A]">{item.q}</h3>
-                <p className="mt-2 text-[#666] leading-relaxed">{item.a}</p>
-              </div>
-            ))}
+          <div className="mt-12">
+            <FAQItem
+              question="How does VRTL Score work?"
+              answer="We query ChatGPT, Claude, and Gemini with standardized, industry-specific prompts. We analyze the responses to see if and how your client is mentioned, then calculate a visibility score based on frequency, prominence, and sentiment."
+            />
+            <FAQItem
+              question="What AI models do you support?"
+              answer="Currently we support ChatGPT (OpenAI), Claude (Anthropic), and Gemini (Google). We're constantly adding new models as they become relevant for AI search."
+            />
+            <FAQItem
+              question="How accurate are the scores?"
+              answer="Scores are based on real AI responses at the time of the snapshot. AI outputs can vary, which is why we recommend running monthly snapshots to track trends over time rather than focusing on any single score."
+            />
+            <FAQItem
+              question="Can I white-label the reports?"
+              answer="Yes. PDF reports include your agency branding. You can add your logo and customize the look to match your brand."
+            />
+            <FAQItem
+              question="Is there a free trial?"
+              answer="Yes, we offer a 7-day free trial so you can test the platform with your own clients before committing."
+            />
           </div>
         </div>
       </section>
