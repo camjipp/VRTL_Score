@@ -107,7 +107,8 @@ export function OnboardingForm() {
       const json = (await res.json()) as AgencySettings;
       setAgencyName(json.name && json.name !== "New Agency" ? json.name : "");
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      const err = e as { message?: string };
+      setError(err?.message || String(e));
     } finally {
       setLoading(false);
     }

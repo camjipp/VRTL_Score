@@ -57,8 +57,9 @@ export default function SettingsPage() {
           setAccentColor(a.accent_color || "#000000");
           if (a.logo_url) setLogoPreview(a.logo_url);
         }
-      } catch (e) {
-        setError(e instanceof Error ? e.message : String(e));
+      } catch (e: unknown) {
+        const err = e as { message?: string };
+        setError(err?.message || String(e));
       } finally {
         setLoading(false);
       }
@@ -113,8 +114,9 @@ export default function SettingsPage() {
       setSuccess(true);
       setAgency({ ...agency, name, logo_url, accent_color: accentColor });
       setLogoFile(null);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+    } catch (e: unknown) {
+      const err = e as { message?: string };
+      setError(err?.message || String(e));
     } finally {
       setSaving(false);
     }

@@ -45,7 +45,8 @@ export function DownloadPdfButton({ snapshotId, className }: DownloadPdfButtonPr
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      const err = e as { message?: string };
+      setError(err?.message || String(e));
     } finally {
       setBusy(false);
     }

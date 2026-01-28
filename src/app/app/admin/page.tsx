@@ -58,8 +58,9 @@ export default function AdminPage() {
 
         if (err) throw err;
         setAgencies((data ?? []) as Agency[]);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : String(e));
+      } catch (e: unknown) {
+        const err = e as { message?: string };
+        setError(err?.message || String(e));
       } finally {
         setLoading(false);
       }
@@ -78,8 +79,9 @@ export default function AdminPage() {
       setAgencies((prev) =>
         prev.map((a) => (a.id === id ? { ...a, is_active: !currentActive } : a))
       );
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+    } catch (e: unknown) {
+      const err = e as { message?: string };
+      setError(err?.message || String(e));
     } finally {
       setBusy(false);
     }

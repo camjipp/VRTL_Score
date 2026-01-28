@@ -398,7 +398,8 @@ export default function AppPage() {
           }
         }
       } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e.message : String(e));
+        const err = e as { message?: string };
+          if (!cancelled) setError(err?.message || String(e));
       } finally {
         if (!cancelled) setLoading(false);
       }

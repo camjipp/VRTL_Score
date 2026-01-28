@@ -368,7 +368,8 @@ export default function SnapshotDetailPage() {
       if (!res.ok) throw new Error(await res.text());
       setData((await res.json()) as SnapshotApiResponse);
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      const err = e as { message?: string };
+      setError(err?.message || String(e));
       setData(null);
     } finally {
       setLoading(false);
