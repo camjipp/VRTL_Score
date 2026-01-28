@@ -2,38 +2,45 @@
 
 import { cn } from "@/lib/cn";
 
-// Placeholder company names - replace with actual client logos when available
-const logos = [
-  "Dentsu",
-  "Omnicom",
-  "WPP",
-  "Publicis",
-  "IPG",
-  "Havas",
-  "Stagwell",
-  "Accenture Song",
+const AI_PROVIDERS = [
+  { name: "ChatGPT", icon: "/ai/icons8-chatgpt.svg" },
+  { name: "Claude", icon: "/ai/icons8-claude.svg" },
+  { name: "Gemini", icon: "/ai/gemini.png" },
+  { name: "Google AI", icon: "/ai/icons8-google-48.svg" },
 ];
 
 export function TrustLogos({ className }: { className?: string }) {
   return (
-    <div className={cn("relative overflow-hidden", className)}>
+    <div className={cn("relative overflow-hidden py-4", className)}>
+      {/* Header text */}
+      <div className="mb-4 text-center">
+        <span className="text-xs font-medium uppercase tracking-widest text-text-3">
+          Tracking visibility across
+        </span>
+      </div>
+
       {/* Fade edges */}
-      <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-24 bg-gradient-to-r from-bg to-transparent" />
-      <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-24 bg-gradient-to-l from-bg to-transparent" />
+      <div className="pointer-events-none absolute bottom-0 left-0 z-10 h-14 w-24 bg-gradient-to-r from-bg to-transparent" />
+      <div className="pointer-events-none absolute bottom-0 right-0 z-10 h-14 w-24 bg-gradient-to-l from-bg to-transparent" />
 
       {/* Scrolling track */}
-      <div className="flex animate-marquee items-center gap-12">
-        {[...logos, ...logos].map((name, i) => (
+      <div className="flex animate-marquee items-center gap-10">
+        {[...AI_PROVIDERS, ...AI_PROVIDERS, ...AI_PROVIDERS, ...AI_PROVIDERS].map((provider, i) => (
           <div
-            key={`${name}-${i}`}
-            className="flex shrink-0 items-center gap-3 text-text-3 transition-colors hover:text-text"
+            key={`${provider.name}-${i}`}
+            className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-100"
           >
-            {/* Placeholder icon */}
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface border border-border">
-              <span className="text-xs font-bold">{name.charAt(0)}</span>
+            {/* Logo */}
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface p-1.5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                alt={provider.name}
+                src={provider.icon}
+                className="h-full w-full object-contain"
+              />
             </div>
-            <span className="whitespace-nowrap text-sm font-medium tracking-tight">
-              {name}
+            <span className="whitespace-nowrap text-sm font-medium text-text-2">
+              {provider.name}
             </span>
           </div>
         ))}
@@ -41,4 +48,3 @@ export function TrustLogos({ className }: { className?: string }) {
     </div>
   );
 }
-

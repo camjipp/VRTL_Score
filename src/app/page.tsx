@@ -5,6 +5,7 @@ import { DomainSearchBar } from "@/components/DomainSearchBar";
 import { FeatureShowcase } from "@/components/FeatureShowcase";
 import { Footer } from "@/components/Footer";
 import { RotatingQuestions } from "@/components/RotatingQuestions";
+import { TrustLogos } from "@/components/TrustLogos";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 
 export default function HomePage() {
@@ -35,45 +36,18 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="mx-auto mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-3">
-              <div className="text-[26px] font-semibold leading-[1.06] tracking-tight text-text sm:text-[31px]">
-                AI visibility, measured.
-              </div>
-              <div className="inline-flex items-center gap-2">
-                <div className="inline-flex items-center -space-x-2">
-                  <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-surface">
-                    <span className="sr-only">ChatGPT</span>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt="" className="h-[17px] w-[17px]" src="/ai/icons8-chatgpt.svg" />
-                  </span>
-                  <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-surface">
-                    <span className="sr-only">Google</span>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt="" className="h-[17px] w-[17px]" src="/ai/icons8-google-48.svg" />
-                  </span>
-                  <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-surface">
-                    <span className="sr-only">Gemini</span>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt="" className="h-[17px] w-[17px]" src="/ai/gemini.png" />
-                  </span>
-                  <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-surface">
-                    <span className="sr-only">Claude</span>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt="" className="h-[17px] w-[17px]" src="/ai/icons8-claude.svg" />
-                  </span>
-                </div>
-                <span className="text-sm text-text-3">&amp; more</span>
-              </div>
-            </div>
+            <p className="mx-auto mt-6 text-[26px] font-semibold leading-[1.06] tracking-tight text-text sm:text-[31px]">
+              AI visibility, measured.
+            </p>
 
             <div className="mx-auto mt-6 max-w-3xl">
               <DomainSearchBar />
             </div>
 
-            {/* Tagline */}
-            <p className="mt-8 text-sm text-text-2">
-              Built for agencies who want to lead in AI search.
-            </p>
+            {/* AI Provider Logos */}
+            <div className="mt-8">
+              <TrustLogos />
+            </div>
 
             <div className="mt-5 flex items-center justify-center gap-3 text-sm">
               <Link className="text-text-2 hover:text-text" href="/pricing">
