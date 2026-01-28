@@ -90,13 +90,6 @@ export function DownloadPdfButton({ snapshotId, className }: DownloadPdfButtonPr
         <span className="relative">
           {busy ? "Generating report..." : success ? "Downloaded!" : "Download PDF Report"}
         </span>
-
-        {/* Badge */}
-        {!busy && !success && (
-          <span className="relative rounded-full bg-white/20 px-2 py-0.5 text-xs font-medium backdrop-blur-sm">
-            FREE
-          </span>
-        )}
       </button>
 
       {/* Subtext */}
