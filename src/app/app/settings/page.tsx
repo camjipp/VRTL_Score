@@ -4,45 +4,42 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { ensureOnboarded } from "@/lib/onboard";
-import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { Alert, AlertDescription } from "@/components/ui/Alert";
 
-type Agency = {
-  id: string;
+type AgencySettings = {
+  agency_id: string;
   name: string;
-  logo_url: string | null;
+  brand_logo_url?: string | null;
+  brand_accent?: string | null;
 };
 
-
 export default function SettingsPage() {
-  const supabase = getSupabaseBrowserClient();
-
-  const [agency, setAgency] = useState<Agency | null>(null);
+  const [settings, setSettings] = useState<AgencySettings | null>(null);
   const [name, setName] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     async function load() {
       try {
-        const { agencyId } = await ensureOnboarded();
-        const { data, error: err } = await supabase
-          .from("agencies")
-          .select("id, name, logo_url")
-          .eq("id", agencyId)
-          .maybeSingle();
-        if (err) throw err;
-        if (data) {
-          const a = data as Agency;
-          setAgency(a);
-          setName(a.name);
-          if (a.logo_url) setLogoPreview(a.logo_url);
+        const { accessToken } = await ensureOnboarded();
+        const res = await fetch("/api/agency/settings", {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || "Failed to load settings");
         }
+        const data = (await res.json()) as AgencySettings;
+        setSettings(data);
+        setName(data.name);
+        if (data.brand_logo_url) setLogoPreview(data.brand_logo_url);
       } catch (e: unknown) {
         const err = e as { message?: string };
         setError(err?.message || String(e));
@@ -51,7 +48,7 @@ export default function SettingsPage() {
       }
     }
     load();
-  }, [supabase]);
+  }, []);
 
   function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -60,45 +57,75 @@ export default function SettingsPage() {
     setLogoPreview(URL.createObjectURL(file));
   }
 
+  async function uploadLogo() {
+    if (!logoFile) return;
+
+    setUploadingLogo(true);
+    setError(null);
+
+    try {
+      const { accessToken } = await ensureOnboarded();
+      const formData = new FormData();
+      formData.append("file", logoFile);
+
+      const res = await fetch("/api/agency/logo", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}` },
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to upload logo");
+      }
+
+      const data = await res.json();
+      setLogoPreview(data.url);
+      setLogoFile(null);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (e: unknown) {
+      const err = e as { message?: string };
+      setError(err?.message || String(e));
+    } finally {
+      setUploadingLogo(false);
+    }
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    if (!agency) return;
+    if (!settings) return;
 
     setSaving(true);
     setError(null);
     setSuccess(false);
 
     try {
-      let logo_url = agency.logo_url;
+      const { accessToken } = await ensureOnboarded();
+
+      // Save name
+      const res = await fetch("/api/agency/settings", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to save settings");
+      }
 
       // Upload logo if changed
       if (logoFile) {
-        const ext = logoFile.name.split(".").pop() || "png";
-        const path = `${agency.id}/logo.${ext}`;
-        const { error: uploadErr } = await supabase.storage
-          .from("agency-logos")
-          .upload(path, logoFile, { upsert: true });
-        if (uploadErr) throw uploadErr;
-
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("agency-logos").getPublicUrl(path);
-        logo_url = publicUrl;
+        await uploadLogo();
       }
 
-      // Update agency
-      const { error: updateErr } = await supabase
-        .from("agencies")
-        .update({
-          name,
-          logo_url,
-        })
-        .eq("id", agency.id);
-      if (updateErr) throw updateErr;
-
       setSuccess(true);
-      setAgency({ ...agency, name, logo_url });
-      setLogoFile(null);
+      setSettings({ ...settings, name });
+      setTimeout(() => setSuccess(false), 3000);
     } catch (e: unknown) {
       const err = e as { message?: string };
       setError(err?.message || String(e));
@@ -146,7 +173,7 @@ export default function SettingsPage() {
         </Alert>
       )}
 
-      {!loading && agency && (
+      {!loading && settings && (
         <form onSubmit={handleSave} className="space-y-6">
           {/* Agency info */}
           <div className="overflow-hidden rounded-2xl border border-border bg-surface">
@@ -169,7 +196,6 @@ export default function SettingsPage() {
                   placeholder="Your Agency Name"
                 />
               </div>
-
             </div>
           </div>
 
@@ -225,16 +251,16 @@ export default function SettingsPage() {
           <div className="flex justify-end">
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || uploadingLogo}
               className="inline-flex items-center gap-2 rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-accent-2 disabled:opacity-50"
             >
-              {saving ? (
+              {saving || uploadingLogo ? (
                 <>
                   <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                   </svg>
-                  Saving...
+                  {uploadingLogo ? "Uploading logo..." : "Saving..."}
                 </>
               ) : (
                 "Save changes"

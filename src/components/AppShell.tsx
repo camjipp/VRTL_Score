@@ -10,7 +10,7 @@ import { cn } from "@/lib/cn";
 type Agency = {
   id: string;
   name: string;
-  logo_url: string | null;
+  brand_logo_url?: string | null;
 };
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -49,14 +49,30 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       
       if (!membership?.agency_id) return;
       
-      const { data: agencyData } = await supabase
+      // Try with brand_logo_url first, fall back to just id,name if column doesn't exist
+      let agencyData: Agency | null = null;
+      const { data: fullData, error: fullErr } = await supabase
         .from("agencies")
-        .select("id, name, logo_url")
+        .select("id, name, brand_logo_url")
         .eq("id", membership.agency_id)
         .maybeSingle();
       
+      if (fullErr) {
+        // Column might not exist, try without it
+        const { data: basicData } = await supabase
+          .from("agencies")
+          .select("id, name")
+          .eq("id", membership.agency_id)
+          .maybeSingle();
+        if (basicData) {
+          agencyData = { id: basicData.id, name: basicData.name };
+        }
+      } else if (fullData) {
+        agencyData = fullData as Agency;
+      }
+      
       if (agencyData) {
-        setAgency(agencyData as Agency);
+        setAgency(agencyData);
       }
     }
     loadData();
@@ -153,9 +169,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="border-t border-border p-3 space-y-1">
           {agency && (
             <div className="flex items-center gap-3 rounded-xl bg-surface-2/50 px-3 py-2.5">
-              {agency.logo_url ? (
+              {agency.brand_logo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={agency.logo_url} alt="" className="h-8 w-8 rounded-lg object-cover" />
+                <img src={agency.brand_logo_url} alt="" className="h-8 w-8 rounded-lg object-cover" />
               ) : (
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 text-sm font-bold text-white">
                   {agency.name.charAt(0)}
