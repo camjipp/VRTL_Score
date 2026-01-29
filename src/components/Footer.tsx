@@ -19,7 +19,7 @@ const footerLinks = {
 
 export function Footer() {
   return (
-    <footer className="border-t border-border bg-bg">
+    <footer className="bg-[#0A0A0A]">
       <div className="container-xl py-16">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand column */}
@@ -28,11 +28,12 @@ export function Footer() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 alt="VRTL Score"
-                className="h-10 w-auto"
+                className="h-10 w-auto drop-shadow-[0_0_1px_rgba(255,255,255,0.8)]"
+                style={{ filter: "drop-shadow(0 0 1px white) drop-shadow(0 0 2px rgba(255,255,255,0.5))" }}
                 src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
               />
             </Link>
-            <p className="mt-4 max-w-xs text-sm text-text-2">
+            <p className="mt-4 max-w-xs text-sm text-white/60">
               AI visibility measurement for agencies. Prove your value with scores, evidence, and premium reports.
             </p>
             <div className="mt-6 flex items-center gap-4">
@@ -41,7 +42,7 @@ export function Footer() {
                 href="https://twitter.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-2 text-text-3 transition-colors hover:bg-surface hover:text-text"
+                className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-white/60 transition-colors hover:bg-white/20 hover:text-white"
                 aria-label="Twitter"
               >
                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
@@ -53,7 +54,7 @@ export function Footer() {
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-2 text-text-3 transition-colors hover:bg-surface hover:text-text"
+                className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-white/60 transition-colors hover:bg-white/20 hover:text-white"
                 aria-label="LinkedIn"
               >
                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
@@ -65,13 +66,13 @@ export function Footer() {
 
           {/* Product links */}
           <div>
-            <h3 className="text-sm font-semibold text-text">Product</h3>
+            <h3 className="text-sm font-semibold text-white">Product</h3>
             <ul className="mt-4 space-y-3">
               {footerLinks.product.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-text-2 transition-colors hover:text-text"
+                    className="text-sm text-white/60 transition-colors hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -82,13 +83,13 @@ export function Footer() {
 
           {/* Company links */}
           <div>
-            <h3 className="text-sm font-semibold text-text">Company</h3>
+            <h3 className="text-sm font-semibold text-white">Company</h3>
             <ul className="mt-4 space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-text-2 transition-colors hover:text-text"
+                    className="text-sm text-white/60 transition-colors hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -99,13 +100,13 @@ export function Footer() {
 
           {/* Legal links */}
           <div>
-            <h3 className="text-sm font-semibold text-text">Legal</h3>
+            <h3 className="text-sm font-semibold text-white">Legal</h3>
             <ul className="mt-4 space-y-3">
               {footerLinks.legal.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-text-2 transition-colors hover:text-text"
+                    className="text-sm text-white/60 transition-colors hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -116,11 +117,11 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 md:flex-row">
-          <p className="text-sm text-text-3">
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 md:flex-row">
+          <p className="text-sm text-white/40">
             © {new Date().getFullYear()} VRTL Score. All rights reserved.
           </p>
-          <div className="flex items-center gap-6 text-sm text-text-3">
+          <div className="flex items-center gap-6 text-sm text-white/40">
             <span>Made for agencies who prove their worth</span>
           </div>
         </div>

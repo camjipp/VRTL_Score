@@ -1,43 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 import { DomainSearchBar } from "@/components/DomainSearchBar";
 import { Footer } from "@/components/Footer";
-
-/* ─────────────────────────────────────────────────────────────
-   ROTATING WORD COMPONENT
-───────────────────────────────────────────────────────────────*/
-function RotatingWord() {
-  const words = ["found", "recommended", "cited", "trusted"];
-  const [index, setIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsAnimating(true);
-      setTimeout(() => {
-        setIndex((prev) => (prev + 1) % words.length);
-        setIsAnimating(false);
-      }, 200);
-    }, 2500);
-    return () => clearInterval(interval);
-  }, [words.length]);
-
-  return (
-    <span className="relative inline-block">
-      <span
-        className={`inline-block text-emerald-600 transition-all duration-200 ${
-          isAnimating ? "opacity-0 translate-y-2" : "opacity-100 translate-y-0"
-        }`}
-      >
-        {words[index]}
-      </span>
-      <span className="absolute bottom-0 left-0 right-0 h-1 bg-emerald-500/30 rounded-full" />
-    </span>
-  );
-}
 
 /* ─────────────────────────────────────────────────────────────
    FAQ ACCORDION
@@ -175,30 +142,23 @@ export default function HomePage() {
               </span>
             </div>
 
-            {/* Hero headline with rotating word */}
-            <h1 className="mx-auto mt-6 max-w-2xl text-2xl font-medium text-[#0A0A0A] sm:text-3xl md:text-4xl">
-              When people ask AI, your clients get{" "}
-              <RotatingWord />
-            </h1>
-
-            {/* Subtext */}
-            <p className="mx-auto mt-4 max-w-xl text-lg text-[#666]">
-              The AI visibility platform for agencies. Monitor, measure, and prove how clients appear across ChatGPT, Claude, Gemini, and more.
-            </p>
-
-            {/* AI model icons */}
-            <div className="mx-auto mt-6 flex flex-wrap items-center justify-center gap-2">
-              {AI_MODELS.slice(0, 4).map((model) => (
-                <span
-                  key={model.name}
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-[#E5E5E5] bg-white"
-                  title={model.name}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img alt={model.name} className="h-5 w-5" src={model.icon} />
-                </span>
-              ))}
-              <span className="text-sm text-[#999]">& more</span>
+            {/* Tagline + AI icons */}
+            <div className="mx-auto mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+              <span className="text-xl font-medium text-[#0A0A0A] sm:text-2xl">
+                AI visibility, measured.
+              </span>
+              <div className="flex items-center gap-1">
+                {AI_MODELS.slice(0, 4).map((model) => (
+                  <span
+                    key={model.name}
+                    className="flex h-8 w-8 items-center justify-center rounded-full border border-[#E5E5E5] bg-white"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img alt={model.name} className="h-4 w-4" src={model.icon} />
+                  </span>
+                ))}
+                <span className="ml-1 text-sm text-[#999]">& more</span>
+              </div>
             </div>
 
             {/* Search bar */}
