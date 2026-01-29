@@ -89,15 +89,28 @@ export default function AdminPage() {
 
         // Build user list from agency_users
         const userList: UserWithAgency[] = (agencyUsers ?? []).map((au) => {
-          const agency = au.agencies as Agency | null;
+          // Supabase returns the relation as an object, cast through unknown first
+          const agencyData = au.agencies as unknown as {
+            id: string;
+            name: string;
+            is_active: boolean;
+            created_at: string;
+            plan?: string;
+            clients?: { count: number }[];
+          } | null;
+          
           return {
             id: au.user_id,
             email: "", // We can't get this from client-side
-            created_at: agency?.created_at ?? "",
-            agency: agency ? {
-              ...agency,
+            created_at: agencyData?.created_at ?? "",
+            agency: agencyData ? {
+              id: agencyData.id,
+              name: agencyData.name,
               owner_id: au.user_id,
-              clients: agency.clients as { count: number }[]
+              is_active: agencyData.is_active,
+              created_at: agencyData.created_at,
+              plan: agencyData.plan,
+              clients: agencyData.clients
             } : null
           };
         });
