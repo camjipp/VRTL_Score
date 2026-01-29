@@ -111,11 +111,11 @@ export function Footer() {
           </div>
 
           {/* Logo on right - desktop only */}
-          <div className="hidden lg:flex lg:items-start">
+          <div className="hidden lg:flex lg:items-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               alt="VRTL Score"
-              className="h-20 w-auto opacity-80"
+              className="h-32 w-auto xl:h-40"
               src="/brand/White_VRTL.png"
             />
           </div>
@@ -187,7 +187,7 @@ export function Footer() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 alt="VRTL Score"
-                className="h-10 w-auto opacity-60"
+                className="h-16 w-auto"
                 src="/brand/White_VRTL.png"
               />
             </div>
