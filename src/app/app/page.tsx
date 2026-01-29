@@ -94,8 +94,8 @@ function ProviderCard({ name, score, icon, rank }: { name: string; score: number
 function EmptyState() {
   return (
     <div className="mx-auto max-w-2xl py-16 text-center">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#1a1a1a] border border-[#333]">
-        <svg className="h-8 w-8 text-[#666]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30">
+        <svg className="h-8 w-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
         </svg>
       </div>
@@ -105,7 +105,7 @@ function EmptyState() {
       </p>
       <Link
         href="/app/clients/new"
-        className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-medium text-[#0A0A0A] transition-colors hover:bg-[#f0f0f0]"
+        className="mt-8 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-6 py-3 text-sm font-medium text-[#0a0a0a] transition-all hover:opacity-90"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -156,7 +156,7 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
         </div>
         <Link
           href="/app/clients/new"
-          className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-[#0A0A0A] transition-colors hover:bg-[#f0f0f0]"
+          className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-2.5 text-sm font-medium text-[#0a0a0a] transition-all hover:opacity-90"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -183,7 +183,7 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
                 {stats.avgScore !== null && (
                   <span className={cn(
                     "flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
-                    trendUp ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
+                    trendUp ? "bg-emerald-500/20 text-emerald-300" : "bg-red-500/20 text-red-300"
                   )}>
                     <svg className={cn("h-3 w-3", !trendUp && "rotate-180")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
@@ -272,7 +272,7 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
 
           <Link 
             href="#" 
-            className="mt-4 flex items-center justify-center gap-2 text-xs text-[#888] hover:text-white transition-colors"
+            className="mt-4 flex items-center justify-center gap-2 text-xs text-emerald-400 hover:text-emerald-300 transition-colors"
           >
             View detailed breakdown
             <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -301,7 +301,7 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
               placeholder="Search clients..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 w-56 rounded-lg border border-[#333] bg-[#262626] pl-9 pr-3 text-sm text-white placeholder:text-[#666] focus:border-[#555] focus:outline-none"
+              className="h-9 w-56 rounded-lg border border-[#333] bg-[#262626] pl-9 pr-3 text-sm text-white placeholder:text-[#666] focus:border-emerald-500/50 focus:outline-none focus:ring-1 focus:ring-emerald-500/20"
             />
           </div>
         </div>
@@ -332,7 +332,7 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
               className="grid grid-cols-[1fr,120px,100px,80px] items-center gap-4 px-5 py-4 transition-colors hover:bg-[#262626]"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500 text-sm font-medium text-white">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-400 text-sm font-medium text-[#0a0a0a]">
                   {getInitials(client.name)}
                 </div>
                 <div className="min-w-0">
