@@ -356,6 +356,58 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
+          BUILT FOR
+      ═══════════════════════════════════════════════════════ */}
+      <section className="border-y border-[#E5E5E5] bg-white px-6 py-12 md:py-16">
+        <div className="mx-auto max-w-4xl">
+          <p className="text-center text-sm font-medium text-[#999] mb-8">Built for</p>
+          <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+            {[
+              {
+                title: "Digital Agencies",
+                icon: (
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5" />
+                  </svg>
+                ),
+              },
+              {
+                title: "SEO Consultants",
+                icon: (
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                  </svg>
+                ),
+              },
+              {
+                title: "Growth Teams",
+                icon: (
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                  </svg>
+                ),
+              },
+              {
+                title: "PR Agencies",
+                icon: (
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+                  </svg>
+                ),
+              },
+            ].map((item) => (
+              <div key={item.title} className="flex flex-col items-center text-center">
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[#FAFAF8] text-[#0A0A0A]">
+                  {item.icon}
+                </div>
+                <span className="text-sm font-medium text-[#0A0A0A]">{item.title}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
           STATS BANNER
       ═══════════════════════════════════════════════════════ */}
       <section className="bg-[#0A0A0A] px-6 py-16 md:py-20">
