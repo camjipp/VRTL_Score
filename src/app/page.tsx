@@ -339,7 +339,7 @@ export default function HomePage() {
             Ready to show your clients how AI sees them?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-[#666]">
-            Get your first report in under 5 minutes. No credit card required.
+            Get your first report in under 5 minutes.
           </p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
