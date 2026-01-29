@@ -68,35 +68,40 @@ export default function AdminPage() {
           return;
         }
 
-        // Fetch agencies with client counts
-        const { data: agencies, error: agenciesErr } = await supabase
-          .from("agencies")
+        // Fetch agency_users with their agencies and client counts
+        const { data: agencyUsers, error: agencyUsersErr } = await supabase
+          .from("agency_users")
           .select(`
-            id, 
-            name, 
-            owner_id, 
-            is_active, 
-            created_at, 
-            plan,
-            clients(count)
+            user_id,
+            role,
+            agencies (
+              id, 
+              name, 
+              is_active, 
+              created_at, 
+              plan,
+              clients(count)
+            )
           `)
           .order("created_at", { ascending: false });
 
-        if (agenciesErr) throw agenciesErr;
+        if (agencyUsersErr) throw agencyUsersErr;
 
-        // Build user list from agencies (since we can't list all auth users from client)
-        const userList: UserWithAgency[] = (agencies ?? []).map((agency) => ({
-          id: agency.owner_id,
-          email: "", // We'll need to get this from a different source
-          created_at: agency.created_at,
-          agency: {
-            ...agency,
-            clients: agency.clients as { count: number }[]
-          } as Agency
-        }));
+        // Build user list from agency_users
+        const userList: UserWithAgency[] = (agencyUsers ?? []).map((au) => {
+          const agency = au.agencies as Agency | null;
+          return {
+            id: au.user_id,
+            email: "", // We can't get this from client-side
+            created_at: agency?.created_at ?? "",
+            agency: agency ? {
+              ...agency,
+              owner_id: au.user_id,
+              clients: agency.clients as { count: number }[]
+            } : null
+          };
+        });
 
-        // For now, show agencies as the primary view
-        // We can enhance this later with a separate users API
         setUsers(userList);
       } catch (e: unknown) {
         const err = e as { message?: string };

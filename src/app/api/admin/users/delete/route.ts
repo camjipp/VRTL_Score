@@ -53,12 +53,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Find the agency owned by this user
-    const { data: agency } = await supabaseAdmin
-      .from("agencies")
-      .select("id")
-      .eq("owner_id", userId)
+    // Find the agency owned by this user (through agency_users table)
+    const { data: agencyUser } = await supabaseAdmin
+      .from("agency_users")
+      .select("agency_id")
+      .eq("user_id", userId)
       .maybeSingle();
+    
+    const agency = agencyUser ? { id: agencyUser.agency_id } : null;
 
     if (agency) {
       // Delete all related data in order (respecting foreign keys)
@@ -107,7 +109,13 @@ export async function POST(req: NextRequest) {
           .eq("agency_id", agency.id);
       }
 
-      // 7. Delete the agency
+      // 7. Delete the agency_user relationship
+      await supabaseAdmin
+        .from("agency_users")
+        .delete()
+        .eq("user_id", userId);
+
+      // 8. Delete the agency
       await supabaseAdmin
         .from("agencies")
         .delete()
