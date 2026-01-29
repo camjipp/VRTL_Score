@@ -124,101 +124,6 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-
-          {/* Dashboard Preview */}
-          <div className="mx-auto mt-16 max-w-5xl">
-            <div className="relative rounded-2xl border border-[#E5E5E5] bg-white p-2 shadow-2xl shadow-black/10">
-              {/* Browser chrome */}
-              <div className="flex items-center gap-2 border-b border-[#E5E5E5] px-4 py-3">
-                <div className="flex gap-1.5">
-                  <div className="h-3 w-3 rounded-full bg-[#FF5F57]" />
-                  <div className="h-3 w-3 rounded-full bg-[#FFBD2E]" />
-                  <div className="h-3 w-3 rounded-full bg-[#28CA41]" />
-                </div>
-                <div className="ml-4 flex-1 rounded-lg bg-[#F5F5F5] px-4 py-1.5 text-xs text-[#999]">
-                  app.vrtlscore.com/clients/acme-corp
-                </div>
-              </div>
-              
-              {/* Dashboard content */}
-              <div className="p-6">
-                <div className="grid gap-6 lg:grid-cols-3">
-                  {/* Left - Main score */}
-                  <div className="lg:col-span-2 space-y-6">
-                    {/* Header */}
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-xl font-semibold text-[#0A0A0A]">Acme Corporation</h3>
-                        <p className="text-sm text-[#999]">acme.com • Last updated 2 hours ago</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
-                          <span className="text-3xl font-bold text-white">78</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Model scores */}
-                    <div className="grid grid-cols-3 gap-4">
-                      {[
-                        { name: "ChatGPT", score: 85, icon: "/ai/icons8-chatgpt.svg", trend: "+3" },
-                        { name: "Claude", score: 72, icon: "/ai/icons8-claude.svg", trend: "+7" },
-                        { name: "Gemini", score: 68, icon: "/ai/gemini.png", trend: "-2" },
-                      ].map((model) => (
-                        <div key={model.name} className="rounded-xl border border-[#E5E5E5] bg-[#FAFAF8] p-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={model.icon} alt={model.name} className="h-5 w-5" />
-                            <span className="text-sm font-medium text-[#0A0A0A]">{model.name}</span>
-                          </div>
-                          <div className="flex items-end justify-between">
-                            <span className="text-2xl font-bold text-[#0A0A0A]">{model.score}</span>
-                            <span className={`text-xs font-medium ${model.trend.startsWith('+') ? 'text-emerald-600' : 'text-red-500'}`}>
-                              {model.trend}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Sample response */}
-                    <div className="rounded-xl border border-[#E5E5E5] bg-white p-4">
-                      <div className="flex items-center gap-2 mb-3">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/ai/icons8-chatgpt.svg" alt="ChatGPT" className="h-4 w-4" />
-                        <span className="text-xs font-medium text-[#999]">Sample Response</span>
-                        <span className="ml-auto rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">Mentioned</span>
-                      </div>
-                      <p className="text-sm text-[#666] leading-relaxed">
-                        &quot;For enterprise software solutions, I&apos;d recommend <span className="bg-emerald-100 text-emerald-700 px-1 rounded font-medium">Acme Corporation</span> as they offer comprehensive tools with excellent customer support...&quot;
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Right - Competitors */}
-                  <div className="space-y-4">
-                    <h4 className="text-sm font-semibold text-[#0A0A0A]">Competitive Ranking</h4>
-                    <div className="space-y-2">
-                      {[
-                        { rank: 1, name: "Acme Corp", score: 78, isClient: true },
-                        { rank: 2, name: "Competitor A", score: 72, isClient: false },
-                        { rank: 3, name: "Competitor B", score: 65, isClient: false },
-                        { rank: 4, name: "Competitor C", score: 58, isClient: false },
-                      ].map((item) => (
-                        <div key={item.name} className={`flex items-center gap-3 rounded-lg p-3 ${item.isClient ? 'bg-emerald-50 border border-emerald-200' : 'bg-[#FAFAF8]'}`}>
-                          <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white ${item.isClient ? 'bg-emerald-500' : 'bg-[#999]'}`}>
-                            {item.rank}
-                          </span>
-                          <span className={`flex-1 text-sm font-medium ${item.isClient ? 'text-emerald-700' : 'text-[#666]'}`}>{item.name}</span>
-                          <span className="text-sm font-bold text-[#0A0A0A]">{item.score}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -422,37 +327,33 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* CTA within features section */}
-          <div className="mt-16 text-center">
-            <div className="inline-flex flex-col items-center gap-4 sm:flex-row">
-              <Link
-                href="/onboarding"
-                className="inline-flex h-12 items-center justify-center rounded-xl bg-[#0A0A0A] px-8 text-base font-medium text-white transition-all hover:bg-[#1a1a1a] hover:scale-[1.02]"
-              >
-                Start your free trial
-              </Link>
-              <span className="text-sm text-[#999]">No credit card required</span>
-            </div>
-          </div>
         </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          AI MODELS STRIP
+          CTA SECTION
       ═══════════════════════════════════════════════════════ */}
-      <section className="border-y border-[#E5E5E5] bg-white px-6 py-12 md:py-16">
-        <div className="mx-auto max-w-4xl text-center">
-          <p className="text-sm font-medium text-[#999] mb-8">
-            VRTL Score works across leading LLMs including:
+      <section className="bg-[#FAFAF8] px-6 py-20 md:py-24">
+        <div className="mx-auto max-w-3xl text-center">
+          <h2 className="text-3xl font-semibold tracking-tight text-[#0A0A0A] md:text-4xl">
+            Ready to show your clients how AI sees them?
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-lg text-[#666]">
+            Get your first report in under 5 minutes. No credit card required.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
-            {AI_MODELS.map((model) => (
-              <div key={model.name} className="flex items-center gap-2 opacity-70 hover:opacity-100 transition-opacity">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={model.icon} alt={model.name} className="h-8 w-8" />
-                <span className="text-sm font-medium text-[#0A0A0A]">{model.name}</span>
-              </div>
-            ))}
+          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+            <Link
+              href="/onboarding"
+              className="inline-flex h-12 items-center justify-center rounded-xl bg-[#0A0A0A] px-8 text-base font-medium text-white transition-all hover:bg-[#1a1a1a] hover:scale-[1.02]"
+            >
+              Start free trial
+            </Link>
+            <Link
+              href="/pricing"
+              className="inline-flex h-12 items-center justify-center rounded-xl border border-[#E5E5E5] bg-white px-8 text-base font-medium text-[#0A0A0A] transition-all hover:border-[#0A0A0A]/20 hover:bg-[#FAFAF8]"
+            >
+              View pricing
+            </Link>
           </div>
         </div>
       </section>
