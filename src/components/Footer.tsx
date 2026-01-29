@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 const footerLinks = {
@@ -33,15 +35,30 @@ const footerLinks = {
 export function Footer() {
   return (
     <footer className="bg-[#0A0A0A]">
-      <div className="mx-auto max-w-7xl px-6 py-12 lg:py-16">
+      {/* Add animation keyframes */}
+      <style jsx>{`
+        @keyframes glow-pulse {
+          0%, 100% {
+            filter: drop-shadow(0 0 8px rgba(255,255,255,0.9)) drop-shadow(0 0 20px rgba(255,255,255,0.6)) drop-shadow(0 0 40px rgba(255,255,255,0.3));
+          }
+          50% {
+            filter: drop-shadow(0 0 12px rgba(255,255,255,1)) drop-shadow(0 0 30px rgba(255,255,255,0.8)) drop-shadow(0 0 60px rgba(255,255,255,0.5));
+          }
+        }
+        .logo-glow {
+          animation: glow-pulse 3s ease-in-out infinite;
+        }
+      `}</style>
+
+      <div className="mx-auto max-w-7xl px-6 pt-16 pb-12 lg:pt-20 lg:pb-16">
         {/* Links columns - top section */}
-        <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-4">
           {/* Company */}
           <div>
             <h3 className="text-sm font-semibold text-white">
               Company
             </h3>
-            <ul className="mt-4 space-y-3">
+            <ul className="mt-5 space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.href + link.label}>
                   <Link
@@ -60,7 +77,7 @@ export function Footer() {
             <h3 className="text-sm font-semibold text-white">
               Features
             </h3>
-            <ul className="mt-4 space-y-3">
+            <ul className="mt-5 space-y-3">
               {footerLinks.features.map((link) => (
                 <li key={link.href + link.label}>
                   <Link
@@ -79,7 +96,7 @@ export function Footer() {
             <h3 className="text-sm font-semibold text-white">
               Models
             </h3>
-            <ul className="mt-4 space-y-3">
+            <ul className="mt-5 space-y-3">
               {footerLinks.models.map((link) => (
                 <li key={link.href + link.label}>
                   <Link
@@ -98,7 +115,7 @@ export function Footer() {
             <h3 className="text-sm font-semibold text-white">
               Resources
             </h3>
-            <ul className="mt-4 space-y-3">
+            <ul className="mt-5 space-y-3">
               {footerLinks.resources.map((link) => (
                 <li key={link.href + link.label}>
                   <Link
@@ -114,17 +131,17 @@ export function Footer() {
         </div>
 
         {/* Bottom section - social, copyright, and BIG VRTL logo */}
-        <div className="mt-16 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+        <div className="mt-20 flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
           {/* Left side - social + copyright */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-5">
             {/* Social links */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {/* LinkedIn */}
               <a
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 text-white/60 transition-all hover:border-white/60 hover:bg-white/10 hover:text-white"
                 aria-label="LinkedIn"
               >
                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
@@ -136,7 +153,7 @@ export function Footer() {
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 text-white/60 transition-all hover:border-white/60 hover:bg-white/10 hover:text-white"
                 aria-label="Instagram"
               >
                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
@@ -148,7 +165,7 @@ export function Footer() {
                 href="https://youtube.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 text-white/60 transition-all hover:border-white/60 hover:bg-white/10 hover:text-white"
                 aria-label="YouTube"
               >
                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
@@ -160,7 +177,7 @@ export function Footer() {
                 href="https://tiktok.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 text-white/60 transition-all hover:border-white/60 hover:bg-white/10 hover:text-white"
                 aria-label="TikTok"
               >
                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
@@ -175,13 +192,12 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Right side - HUGE VRTL logo */}
+          {/* Right side - HUGE VRTL logo with animated glow */}
           <div className="flex justify-end">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               alt="VRTL Score"
-              className="h-32 w-auto md:h-40 lg:h-48 xl:h-56"
-              style={{ filter: "drop-shadow(0 0 3px rgba(255,255,255,0.3)) drop-shadow(0 0 8px rgba(255,255,255,0.2))" }}
+              className="logo-glow h-36 w-auto md:h-44 lg:h-52 xl:h-60"
               src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
             />
           </div>
