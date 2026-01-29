@@ -43,16 +43,12 @@ export default function HomePage() {
   return (
     <main className="bg-[#FAFAF8]">
       {/* HERO */}
-      <section className="relative overflow-hidden border-b border-border bg-bg">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-48 left-1/2 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-text/5 blur-3xl" />
-          <div className="absolute bottom-[-240px] right-[-140px] h-[520px] w-[520px] rounded-full bg-text/3 blur-3xl" />
-        </div>
-
-        <div className="container-xl relative py-16 sm:py-20">
+      <section className="relative overflow-hidden bg-[#FAFAF8]">
+        <div className="mx-auto max-w-6xl px-6 pb-8 pt-12 sm:pb-10 sm:pt-16">
           <div className="mx-auto max-w-3xl text-center">
+            {/* Logo + wordmark */}
             <div className="flex items-end justify-center gap-0">
-              <div className="h-[118px] w-[260px] overflow-hidden -mr-4 sm:h-[148px] sm:w-[320px] sm:-mr-6">
+              <div className="h-[100px] w-[220px] overflow-hidden -mr-3 sm:h-[130px] sm:w-[280px] sm:-mr-5">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   alt="VRTL"
@@ -60,61 +56,58 @@ export default function HomePage() {
                   src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
                 />
               </div>
-              <div className="text-[88px] font-semibold leading-[0.9] tracking-tight text-text sm:text-[112px]">
+              <span className="text-[72px] font-semibold leading-[0.9] tracking-tight text-[#0A0A0A] sm:text-[96px]">
                 Score
-              </div>
+              </span>
             </div>
 
-            <div className="mx-auto mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-3">
-              <div className="text-[26px] font-semibold leading-[1.06] tracking-tight text-text sm:text-[31px]">
+            {/* Tagline + AI icons */}
+            <div className="mx-auto mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+              <span className="text-xl font-medium text-[#0A0A0A] sm:text-2xl">
                 AI visibility, measured.
-              </div>
-              <div className="inline-flex items-center gap-2">
-                <div className="inline-flex items-center -space-x-2">
-                  <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-surface">
-                    <span className="sr-only">ChatGPT</span>
+              </span>
+              <div className="flex items-center gap-1">
+                {[
+                  { src: "/ai/icons8-chatgpt.svg", alt: "ChatGPT" },
+                  { src: "/ai/icons8-google-48.svg", alt: "Google" },
+                  { src: "/ai/gemini.png", alt: "Gemini" },
+                  { src: "/ai/icons8-claude.svg", alt: "Claude" },
+                ].map((icon) => (
+                  <span
+                    key={icon.alt}
+                    className="flex h-8 w-8 items-center justify-center rounded-full border border-[#E5E5E5] bg-white"
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt="" className="h-[17px] w-[17px]" src="/ai/icons8-chatgpt.svg" />
+                    <img alt={icon.alt} className="h-4 w-4" src={icon.src} />
                   </span>
-                  <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-surface">
-                    <span className="sr-only">Google</span>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt="" className="h-[17px] w-[17px]" src="/ai/icons8-google-48.svg" />
-                  </span>
-                  <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-surface">
-                    <span className="sr-only">Gemini</span>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt="" className="h-[17px] w-[17px]" src="/ai/gemini.png" />
-                  </span>
-                  <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-surface">
-                    <span className="sr-only">Claude</span>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt="" className="h-[17px] w-[17px]" src="/ai/icons8-claude.svg" />
-                  </span>
-                </div>
-                <span className="text-sm text-text-3">&amp; more</span>
+                ))}
+                <span className="ml-1 text-sm text-[#999]">& more</span>
               </div>
             </div>
 
-            <div className="mx-auto mt-6 max-w-3xl">
+            {/* Search bar */}
+            <div className="mx-auto mt-6 max-w-xl">
               <DomainSearchBar />
             </div>
 
-            <p className="mt-8 text-sm text-text-2">
-              Built for agencies who want to lead in AI search.
-            </p>
-
-            <div className="mt-5 flex items-center justify-center gap-3 text-sm">
-              <Link className="text-text-2 hover:text-text" href="/pricing">
-                See plans & pricing →
+            {/* Links */}
+            <div className="mt-5 flex items-center justify-center gap-4 text-sm">
+              <Link
+                href="/onboarding"
+                className="font-medium text-[#0A0A0A] underline decoration-[#0A0A0A]/20 underline-offset-4 hover:decoration-[#0A0A0A]"
+              >
+                Start free trial
+              </Link>
+              <Link href="/pricing" className="text-[#666] hover:text-[#0A0A0A]">
+                View pricing
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FOUR WAYS - Right after hero */}
-      <section className="px-6 py-20 md:py-28">
+      {/* FOUR WAYS */}
+      <section className="bg-[#FAFAF8] px-6 pt-8 pb-20 md:pt-10 md:pb-28">
         <div className="mx-auto max-w-5xl">
           <h2 className="text-center text-3xl font-semibold tracking-tight text-[#0A0A0A] md:text-4xl">
             Four ways we prove AI visibility
