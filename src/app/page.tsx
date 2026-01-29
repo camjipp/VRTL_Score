@@ -147,17 +147,18 @@ export default function HomePage() {
               <span className="text-xl font-medium text-[#0A0A0A] sm:text-2xl">
                 AI visibility, measured.
               </span>
-              <div className="flex items-center gap-1">
-                {AI_MODELS.slice(0, 4).map((model) => (
+              <div className="flex items-center">
+                {AI_MODELS.slice(0, 4).map((model, i) => (
                   <span
                     key={model.name}
-                    className="flex h-8 w-8 items-center justify-center rounded-full border border-[#E5E5E5] bg-white"
+                    className="flex h-8 w-8 items-center justify-center rounded-full border border-[#E5E5E5] bg-white -ml-2 first:ml-0"
+                    style={{ zIndex: 4 - i }}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img alt={model.name} className="h-4 w-4" src={model.icon} />
                   </span>
                 ))}
-                <span className="ml-1 text-sm text-[#999]">& more</span>
+                <span className="ml-2 text-sm text-[#999]">& more</span>
               </div>
             </div>
 
