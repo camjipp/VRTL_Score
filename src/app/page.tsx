@@ -1,38 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 import { DomainSearchBar } from "@/components/DomainSearchBar";
 import { Footer } from "@/components/Footer";
-
-// Rotating words - just returns the animated text
-function RotatingWordText() {
-  const words = ["measured.", "proven.", "reported."];
-  const [index, setIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsAnimating(true);
-      setTimeout(() => {
-        setIndex((prev) => (prev + 1) % words.length);
-        setIsAnimating(false);
-      }, 200);
-    }, 2500);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <span
-      className={`inline-block transition-all duration-200 ${
-        isAnimating ? "translate-y-1 opacity-0" : "translate-y-0 opacity-100"
-      }`}
-    >
-      {words[index]}
-    </span>
-  );
-}
 
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -89,19 +61,11 @@ export default function HomePage() {
               </span>
             </div>
 
-            {/* Tagline with rotating word + AI icons on same line */}
+            {/* Tagline + AI icons */}
             <div className="mx-auto mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
-              <h1 className="text-xl font-medium sm:text-2xl">
-                <span className="text-[#0A0A0A]">AI visibility,</span>{" "}
-                <span className="inline-block w-[120px] text-left sm:w-[145px]">
-                  <span
-                    style={{ fontFamily: "'Permanent Marker', cursive" }}
-                    className="text-[#0A0A0A]"
-                  >
-                    <RotatingWordText />
-                  </span>
-                </span>
-              </h1>
+              <span className="text-xl font-medium text-[#0A0A0A] sm:text-2xl">
+                AI visibility, measured.
+              </span>
               <div className="flex items-center gap-1">
                 {[
                   { src: "/ai/icons8-chatgpt.svg", alt: "ChatGPT" },
