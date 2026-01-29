@@ -68,29 +68,25 @@ export default function AdminPage() {
           return;
         }
 
-        // Fetch agency_users with their agencies and client counts
-        const { data: agencyUsers, error: agencyUsersErr } = await supabase
-          .from("agency_users")
-          .select(`
-            user_id,
-            role,
-            agencies (
-              id, 
-              name, 
-              is_active, 
-              created_at, 
-              plan,
-              clients(count)
-            )
-          `)
-          .order("created_at", { ascending: false });
-
-        if (agencyUsersErr) throw agencyUsersErr;
-
-        // Build user list from agency_users
-        const userList: UserWithAgency[] = (agencyUsers ?? []).map((au) => {
-          // Supabase returns the relation as an object, cast through unknown first
-          const agencyData = au.agencies as unknown as {
+        // Fetch all users via admin API (bypasses RLS)
+        const usersRes = await fetch("/api/admin/users", {
+          headers: { Authorization: `Bearer ${session.access_token}` }
+        });
+        
+        if (!usersRes.ok) {
+          const data = await usersRes.json();
+          throw new Error(data.error || "Failed to fetch users");
+        }
+        
+        const { users: usersData } = await usersRes.json();
+        
+        // Map to our type
+        const userList: UserWithAgency[] = (usersData ?? []).map((u: {
+          id: string;
+          email: string;
+          role: string;
+          created_at: string;
+          agency: {
             id: string;
             name: string;
             is_active: boolean;
@@ -98,22 +94,15 @@ export default function AdminPage() {
             plan?: string;
             clients?: { count: number }[];
           } | null;
-          
-          return {
-            id: au.user_id,
-            email: "", // We can't get this from client-side
-            created_at: agencyData?.created_at ?? "",
-            agency: agencyData ? {
-              id: agencyData.id,
-              name: agencyData.name,
-              owner_id: au.user_id,
-              is_active: agencyData.is_active,
-              created_at: agencyData.created_at,
-              plan: agencyData.plan,
-              clients: agencyData.clients
-            } : null
-          };
-        });
+        }) => ({
+          id: u.id,
+          email: u.email,
+          created_at: u.created_at,
+          agency: u.agency ? {
+            ...u.agency,
+            owner_id: u.id
+          } : null
+        }));
 
         setUsers(userList);
       } catch (e: unknown) {
@@ -311,8 +300,19 @@ export default function AdminPage() {
                         {user.agency?.name.charAt(0).toUpperCase() ?? "?"}
                       </div>
                       <div>
-                        <div className="font-medium text-[#0A0A0A]">{user.agency?.name ?? "No Agency"}</div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-[#0A0A0A]">{user.agency?.name ?? "No Agency"}</span>
+                          {user.id === currentUserId && (
+                            <span className="rounded bg-[#0A0A0A] px-1.5 py-0.5 text-[10px] font-medium text-white">YOU</span>
+                          )}
+                        </div>
                         <div className="flex items-center gap-2 text-xs text-[#999]">
+                          {user.email && (
+                            <>
+                              <span className="text-[#666]">{user.email}</span>
+                              <span>·</span>
+                            </>
+                          )}
                           <span className={cn(
                             "flex items-center gap-1",
                             user.agency?.is_active ? "text-emerald-600" : "text-[#999]"
@@ -329,12 +329,6 @@ export default function AdminPage() {
                           <span className="capitalize">{user.agency?.plan ?? "free"}</span>
                           <span>·</span>
                           <span>{new Date(user.created_at).toLocaleDateString()}</span>
-                          {user.id === currentUserId && (
-                            <>
-                              <span>·</span>
-                              <span className="rounded bg-[#0A0A0A] px-1.5 py-0.5 text-[10px] font-medium text-white">YOU</span>
-                            </>
-                          )}
                         </div>
                       </div>
                     </div>
