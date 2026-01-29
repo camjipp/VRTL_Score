@@ -101,6 +101,11 @@ export default function HomePage() {
               </div>
             </div>
 
+            {/* Value prop subtitle */}
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-[#666] leading-relaxed">
+              Unlock AI search growth, own how LLMs talk about your clients, and capture demand on ChatGPT, Gemini, and more—reaching billions who use AI daily.
+            </p>
+
             {/* Search bar */}
             <div className="mx-auto mt-8 max-w-xl">
               <DomainSearchBar />
@@ -119,20 +124,6 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
-          ABOUT US / VALUE PROP (Goodie-style)
-      ═══════════════════════════════════════════════════════ */}
-      <section className="bg-[#FAFAF8] px-6 py-16 md:py-24">
-        <div className="mx-auto max-w-4xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-widest text-[#999]">
-            About Us
-          </p>
-          <h2 className="mt-6 text-2xl font-medium tracking-tight text-[#0A0A0A] md:text-3xl lg:text-4xl leading-relaxed max-w-3xl mx-auto">
-            Unlock AI search growth, own how LLMs talk about your clients, and capture demand on ChatGPT, Gemini, and more—reaching billions who use AI daily.
-          </h2>
         </div>
       </section>
 
