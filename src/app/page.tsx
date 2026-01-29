@@ -522,34 +522,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════
-          FINAL CTA
-      ═══════════════════════════════════════════════════════ */}
-      <section className="bg-[#0A0A0A] px-6 py-20 md:py-28">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">
-            Ready to prove AI visibility?
-          </h2>
-          <p className="mt-4 text-lg text-white/70">
-            Join agencies using VRTL Score to win more business.
-          </p>
-          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Link
-              href="/onboarding"
-              className="inline-flex h-12 items-center justify-center rounded-xl bg-white px-8 text-base font-medium text-[#0A0A0A] transition-all hover:bg-[#F5F5F5] hover:scale-[1.02]"
-            >
-              Start free trial
-            </Link>
-            <Link
-              href="/pricing"
-              className="inline-flex h-12 items-center justify-center rounded-xl border border-white/20 bg-transparent px-8 text-base font-medium text-white transition-all hover:bg-white/10"
-            >
-              View pricing
-            </Link>
-          </div>
-        </div>
-      </section>
-
       <Footer />
     </main>
   );

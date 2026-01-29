@@ -7,7 +7,6 @@ const footerLinks = {
     { label: "About Us", href: "/about" },
     { label: "Pricing", href: "/pricing" },
     { label: "Blog", href: "/blog" },
-    { label: "Contact", href: "/contact" },
     { label: "Privacy Policy", href: "/privacy" },
     { label: "Terms of Service", href: "/terms" },
   ],
@@ -29,111 +28,103 @@ const footerLinks = {
   resources: [
     { label: "How It Works", href: "/#how-it-works" },
     { label: "FAQ", href: "/#faq" },
+    { label: "What is AI Visibility?", href: "/#faq" },
+    { label: "AI Search Optimization", href: "/#features" },
   ],
 };
 
 export function Footer() {
   return (
     <footer className="bg-[#0A0A0A]">
-      {/* Add animation keyframes */}
-      <style jsx>{`
-        @keyframes glow-pulse {
-          0%, 100% {
-            filter: drop-shadow(0 0 8px rgba(255,255,255,0.9)) drop-shadow(0 0 20px rgba(255,255,255,0.6)) drop-shadow(0 0 40px rgba(255,255,255,0.3));
-          }
-          50% {
-            filter: drop-shadow(0 0 12px rgba(255,255,255,1)) drop-shadow(0 0 30px rgba(255,255,255,0.8)) drop-shadow(0 0 60px rgba(255,255,255,0.5));
-          }
-        }
-        .logo-glow {
-          animation: glow-pulse 3s ease-in-out infinite;
-        }
-      `}</style>
+      <div className="mx-auto max-w-7xl px-6 pt-16 pb-8 lg:pt-20">
+        {/* Main footer grid - links on left, logo on right */}
+        <div className="flex flex-col gap-12 lg:flex-row lg:justify-between">
+          {/* Links columns - 4 columns */}
+          <div className="grid flex-1 grid-cols-2 gap-8 sm:grid-cols-4 lg:gap-10">
+            {/* Company */}
+            <div>
+              <h3 className="text-sm font-semibold text-white">Company</h3>
+              <ul className="mt-4 space-y-2.5">
+                {footerLinks.company.map((link) => (
+                  <li key={link.href + link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-white/50 transition-colors hover:text-white"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-      <div className="mx-auto max-w-7xl px-6 pt-16 pb-12 lg:pt-20 lg:pb-16">
-        {/* Links columns - top section */}
-        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-4">
-          {/* Company */}
-          <div>
-            <h3 className="text-sm font-semibold text-white">
-              Company
-            </h3>
-            <ul className="mt-5 space-y-3">
-              {footerLinks.company.map((link) => (
-                <li key={link.href + link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-white/50 transition-colors hover:text-white"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            {/* Features */}
+            <div>
+              <h3 className="text-sm font-semibold text-white">Features</h3>
+              <ul className="mt-4 space-y-2.5">
+                {footerLinks.features.map((link) => (
+                  <li key={link.href + link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-white/50 transition-colors hover:text-white"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Models */}
+            <div>
+              <h3 className="text-sm font-semibold text-white">Models</h3>
+              <ul className="mt-4 space-y-2.5">
+                {footerLinks.models.map((link) => (
+                  <li key={link.href + link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-white/50 transition-colors hover:text-white"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Resources */}
+            <div>
+              <h3 className="text-sm font-semibold text-white">Resources</h3>
+              <ul className="mt-4 space-y-2.5">
+                {footerLinks.resources.map((link) => (
+                  <li key={link.href + link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-white/50 transition-colors hover:text-white"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
 
-          {/* Features */}
-          <div>
-            <h3 className="text-sm font-semibold text-white">
-              Features
-            </h3>
-            <ul className="mt-5 space-y-3">
-              {footerLinks.features.map((link) => (
-                <li key={link.href + link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-white/50 transition-colors hover:text-white"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Models */}
-          <div>
-            <h3 className="text-sm font-semibold text-white">
-              Models
-            </h3>
-            <ul className="mt-5 space-y-3">
-              {footerLinks.models.map((link) => (
-                <li key={link.href + link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-white/50 transition-colors hover:text-white"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Resources */}
-          <div>
-            <h3 className="text-sm font-semibold text-white">
-              Resources
-            </h3>
-            <ul className="mt-5 space-y-3">
-              {footerLinks.resources.map((link) => (
-                <li key={link.href + link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-white/50 transition-colors hover:text-white"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          {/* Logo on right - desktop only */}
+          <div className="hidden lg:flex lg:items-start">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              alt="VRTL Score"
+              className="h-20 w-auto opacity-80"
+              src="/brand/White_VRTL.png"
+            />
           </div>
         </div>
 
-        {/* Bottom section - social, copyright, and BIG VRTL logo */}
-        <div className="mt-20 flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
-          {/* Left side - social + copyright */}
-          <div className="flex flex-col gap-5">
+        {/* Divider */}
+        <div className="mt-12 border-t border-white/10 pt-8">
+          {/* Bottom row - social + copyright */}
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             {/* Social links */}
             <div className="flex items-center gap-2">
               {/* LinkedIn */}
@@ -141,7 +132,7 @@ export function Footer() {
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 text-white/60 transition-all hover:border-white/60 hover:bg-white/10 hover:text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-white/40 transition-all hover:bg-white/10 hover:text-white"
                 aria-label="LinkedIn"
               >
                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
@@ -153,7 +144,7 @@ export function Footer() {
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 text-white/60 transition-all hover:border-white/60 hover:bg-white/10 hover:text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-white/40 transition-all hover:bg-white/10 hover:text-white"
                 aria-label="Instagram"
               >
                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
@@ -165,7 +156,7 @@ export function Footer() {
                 href="https://youtube.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 text-white/60 transition-all hover:border-white/60 hover:bg-white/10 hover:text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-white/40 transition-all hover:bg-white/10 hover:text-white"
                 aria-label="YouTube"
               >
                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
@@ -177,7 +168,7 @@ export function Footer() {
                 href="https://tiktok.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 text-white/60 transition-all hover:border-white/60 hover:bg-white/10 hover:text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-white/40 transition-all hover:bg-white/10 hover:text-white"
                 aria-label="TikTok"
               >
                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
@@ -188,18 +179,18 @@ export function Footer() {
 
             {/* Copyright */}
             <p className="text-sm text-white/40">
-              © {new Date().getFullYear()} VRTL Score &nbsp;&nbsp; All Rights Reserved
+              © {new Date().getFullYear()} VRTL Score &nbsp;•&nbsp; All Rights Reserved
             </p>
-          </div>
 
-          {/* Right side - HUGE VRTL logo with animated glow */}
-          <div className="flex justify-end">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              alt="VRTL Score"
-              className="logo-glow h-36 w-auto md:h-44 lg:h-52 xl:h-60"
-              src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
-            />
+            {/* Mobile logo */}
+            <div className="lg:hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                alt="VRTL Score"
+                className="h-10 w-auto opacity-60"
+                src="/brand/White_VRTL.png"
+              />
+            </div>
           </div>
         </div>
       </div>
