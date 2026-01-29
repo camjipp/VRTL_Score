@@ -338,9 +338,6 @@ export default function HomePage() {
           <h2 className="text-3xl font-semibold tracking-tight text-[#0A0A0A] md:text-4xl">
             Ready to show your clients how AI sees them?
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-[#666]">
-            Get your first report in under 5 minutes.
-          </p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
               href="/onboarding"
