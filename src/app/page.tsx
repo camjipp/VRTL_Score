@@ -6,9 +6,9 @@ import { useState, useEffect } from "react";
 import { DomainSearchBar } from "@/components/DomainSearchBar";
 import { Footer } from "@/components/Footer";
 
-// Rotating words component - painted/brush style font, fixed width so "AI visibility," never moves
-function RotatingWord() {
-  const words = ["measured", "proven", "reported"];
+// Rotating words - just returns the animated text
+function RotatingWordText() {
+  const words = ["measured.", "proven.", "reported."];
   const [index, setIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -24,15 +24,12 @@ function RotatingWord() {
   }, []);
 
   return (
-    <span className="inline-block w-[140px] text-left sm:w-[170px]">
-      <span
-        style={{ fontFamily: "'Permanent Marker', cursive" }}
-        className={`inline-block text-[#0A0A0A] transition-all duration-200 ${
-          isAnimating ? "translate-y-1 opacity-0" : "translate-y-0 opacity-100"
-        }`}
-      >
-        {words[index]}.
-      </span>
+    <span
+      className={`inline-block transition-all duration-200 ${
+        isAnimating ? "translate-y-1 opacity-0" : "translate-y-0 opacity-100"
+      }`}
+    >
+      {words[index]}
     </span>
   );
 }
@@ -92,34 +89,36 @@ export default function HomePage() {
               </span>
             </div>
 
-            {/* Tagline with rotating word - matches Score font */}
-            <h1 className="mx-auto mt-6 text-2xl sm:text-3xl">
-              <span className="text-[#666]">AI visibility,</span>{" "}
-              <RotatingWord />
-            </h1>
-
-            {/* Subtext */}
-            <p className="mx-auto mt-4 max-w-md text-[#999]">
-              Track how your clients rank across ChatGPT, Claude, and Gemini.
-            </p>
-
-            {/* AI model icons */}
-            <div className="mt-5 flex items-center justify-center gap-1">
-              {[
-                { src: "/ai/icons8-chatgpt.svg", alt: "ChatGPT" },
-                { src: "/ai/icons8-google-48.svg", alt: "Google" },
-                { src: "/ai/gemini.png", alt: "Gemini" },
-                { src: "/ai/icons8-claude.svg", alt: "Claude" },
-              ].map((icon) => (
-                <span
-                  key={icon.alt}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-[#E5E5E5] bg-white"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img alt={icon.alt} className="h-4 w-4" src={icon.src} />
+            {/* Tagline with rotating word + AI icons on same line */}
+            <div className="mx-auto mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+              <h1 className="text-xl font-medium sm:text-2xl">
+                <span className="text-[#0A0A0A]">AI visibility,</span>{" "}
+                <span className="inline-block w-[120px] text-left sm:w-[145px]">
+                  <span
+                    style={{ fontFamily: "'Permanent Marker', cursive" }}
+                    className="text-[#0A0A0A]"
+                  >
+                    <RotatingWordText />
+                  </span>
                 </span>
-              ))}
-              <span className="ml-2 text-sm text-[#999]">& more</span>
+              </h1>
+              <div className="flex items-center gap-1">
+                {[
+                  { src: "/ai/icons8-chatgpt.svg", alt: "ChatGPT" },
+                  { src: "/ai/icons8-google-48.svg", alt: "Google" },
+                  { src: "/ai/gemini.png", alt: "Gemini" },
+                  { src: "/ai/icons8-claude.svg", alt: "Claude" },
+                ].map((icon) => (
+                  <span
+                    key={icon.alt}
+                    className="flex h-8 w-8 items-center justify-center rounded-full border border-[#E5E5E5] bg-white"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img alt={icon.alt} className="h-4 w-4" src={icon.src} />
+                  </span>
+                ))}
+                <span className="ml-1 text-sm text-[#999]">& more</span>
+              </div>
             </div>
 
             {/* Search bar */}
