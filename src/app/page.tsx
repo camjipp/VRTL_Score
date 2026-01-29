@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { DomainSearchBar } from "@/components/DomainSearchBar";
 import { Footer } from "@/components/Footer";
 
-// Rotating words component - painted/brush style font
+// Rotating words component - painted/brush style font, fixed width so "AI visibility," never moves
 function RotatingWord() {
   const words = ["measured", "proven", "reported"];
   const [index, setIndex] = useState(0);
@@ -24,13 +24,15 @@ function RotatingWord() {
   }, []);
 
   return (
-    <span
-      style={{ fontFamily: "'Permanent Marker', cursive" }}
-      className={`inline-block text-[#0A0A0A] transition-all duration-200 ${
-        isAnimating ? "translate-y-1 opacity-0" : "translate-y-0 opacity-100"
-      }`}
-    >
-      {words[index]}.
+    <span className="inline-block w-[140px] text-left sm:w-[170px]">
+      <span
+        style={{ fontFamily: "'Permanent Marker', cursive" }}
+        className={`inline-block text-[#0A0A0A] transition-all duration-200 ${
+          isAnimating ? "translate-y-1 opacity-0" : "translate-y-0 opacity-100"
+        }`}
+      >
+        {words[index]}.
+      </span>
     </span>
   );
 }
