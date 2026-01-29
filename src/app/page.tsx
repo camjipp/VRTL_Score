@@ -137,36 +137,20 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          THE FUTURE OF SEARCH (Goodie-style - text focused)
+          THE FUTURE OF SEARCH + FEATURE CARDS (Goodie-style)
       ═══════════════════════════════════════════════════════ */}
-      <section className="border-y border-[#E5E5E5] bg-white px-6 py-20 md:py-28">
-        <div className="mx-auto max-w-4xl">
-          <p className="text-sm font-semibold uppercase tracking-widest text-[#999]">
-            The Future of Search
-          </p>
-          <h2 className="mt-4 text-4xl font-semibold tracking-tight text-[#0A0A0A] md:text-5xl lg:text-6xl leading-[1.1]">
-            The New Frontier for<br />Agency Growth
-          </h2>
-          <p className="mt-8 text-xl text-[#666] leading-relaxed max-w-3xl">
-            LLM visibility is the new digital shelf where brands rush to get surfaced. AI Answer Engines are used by billions daily to shape perspectives, help make buying decisions, and answer questions about your clients&apos; brands and industries.
-          </p>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
-          FEATURE CARDS (Goodie-style - Large with Visuals)
-      ═══════════════════════════════════════════════════════ */}
-      <section className="bg-[#FAFAF8] px-6 py-20 md:py-28">
+      <section className="border-t border-[#E5E5E5] bg-white px-6 py-20 md:py-28">
         <div className="mx-auto max-w-6xl">
-          <div className="text-center mb-16">
-            <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600">
-              Platform Features
+          {/* Section Header - Future of Search */}
+          <div className="mb-16">
+            <p className="text-sm font-semibold uppercase tracking-widest text-[#999]">
+              The Future of Search
             </p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-[#0A0A0A] md:text-4xl lg:text-5xl">
-              Everything you need to prove AI visibility
+            <h2 className="mt-4 text-4xl font-semibold tracking-tight text-[#0A0A0A] md:text-5xl lg:text-6xl leading-[1.1]">
+              The New Frontier for<br />Agency Growth
             </h2>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-[#666] leading-relaxed">
-              Built for agencies who want to lead in AI search optimization. Monitor, analyze, and optimize your clients&apos; presence across every major AI platform.
+            <p className="mt-8 text-xl text-[#666] leading-relaxed max-w-3xl">
+              LLM visibility is the new digital shelf where brands rush to get surfaced. AI Answer Engines are used by billions daily to shape perspectives, help make buying decisions, and answer questions about your clients&apos; brands and industries.
             </p>
           </div>
 
