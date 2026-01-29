@@ -150,7 +150,6 @@ export function renderReportHtml(data: ReportData): string {
       mentioned: pj?.client_mentioned ? "Yes" : "No",
       position: pj?.client_position || "—",
       strength: pj?.recommendation_strength || "—",
-      sentiment: pj?.sentiment || "—",
     };
   });
 
@@ -644,7 +643,6 @@ export function renderReportHtml(data: ReportData): string {
           <th>Mentioned</th>
           <th>Position</th>
           <th>Strength</th>
-          <th>Sentiment</th>
         </tr>
       </thead>
       <tbody>
@@ -654,7 +652,6 @@ export function renderReportHtml(data: ReportData): string {
             <td class="${row.mentioned === "Yes" ? "status-yes" : "status-no"}">${row.mentioned}</td>
             <td>${escapeHtml(row.position)}</td>
             <td>${escapeHtml(row.strength)}</td>
-            <td>${escapeHtml(row.sentiment)}</td>
           </tr>
         `).join("")}
       </tbody>
