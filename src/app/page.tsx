@@ -6,9 +6,9 @@ import { useState, useEffect } from "react";
 import { DomainSearchBar } from "@/components/DomainSearchBar";
 import { Footer } from "@/components/Footer";
 
-// Rotating words component
+// Rotating words component - word at the END so layout doesn't shift
 function RotatingWord() {
-  const words = ["found", "recommended", "cited", "trusted"];
+  const words = ["found", "recommended", "cited", "chosen"];
   const [index, setIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -24,16 +24,12 @@ function RotatingWord() {
   }, []);
 
   return (
-    <span className="relative inline-block min-w-[180px] sm:min-w-[220px]">
-      <span
-        className={`inline-block transition-all duration-200 ${
-          isAnimating ? "translate-y-2 opacity-0" : "translate-y-0 opacity-100"
-        }`}
-      >
-        <span className="bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">
-          {words[index]}
-        </span>
-      </span>
+    <span
+      className={`inline-block font-semibold text-[#0A0A0A] underline decoration-emerald-500 decoration-[3px] underline-offset-4 transition-all duration-200 ${
+        isAnimating ? "translate-y-1 opacity-0" : "translate-y-0 opacity-100"
+      }`}
+    >
+      {words[index]}
     </span>
   );
 }
@@ -93,14 +89,14 @@ export default function HomePage() {
               </span>
             </div>
 
-            {/* Punchier tagline with rotating word */}
-            <h1 className="mx-auto mt-6 text-2xl font-medium text-[#0A0A0A] sm:text-3xl">
-              Get your clients <RotatingWord /> by AI
+            {/* Punchier tagline - rotating word at the END */}
+            <h1 className="mx-auto mt-6 text-2xl text-[#666] sm:text-3xl">
+              When people ask AI, your clients get <RotatingWord />
             </h1>
 
             {/* Subtext */}
-            <p className="mx-auto mt-3 max-w-lg text-[#666]">
-              Track, report, and prove AI visibility across ChatGPT, Claude, Gemini, and more.
+            <p className="mx-auto mt-4 max-w-md text-[#999]">
+              Track and prove AI visibility across ChatGPT, Claude, and Gemini.
             </p>
 
             {/* AI model icons */}
