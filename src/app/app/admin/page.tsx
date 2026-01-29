@@ -11,28 +11,45 @@ import { cn } from "@/lib/cn";
 type Agency = {
   id: string;
   name: string;
+  owner_id: string;
   is_active: boolean;
   created_at: string;
+  plan?: string;
+  clients?: { count: number }[];
+  snapshots_count?: number;
+};
+
+type UserWithAgency = {
+  id: string;
+  email: string;
+  created_at: string;
+  agency: Agency | null;
 };
 
 export default function AdminPage() {
   const supabase = getSupabaseBrowserClient();
 
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-  const [agencies, setAgencies] = useState<Agency[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [users, setUsers] = useState<UserWithAgency[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   useEffect(() => {
-    async function load() {
+  async function load() {
       try {
         await ensureOnboarded();
 
         // Check if super admin
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) throw new Error("Not authenticated");
+
+        setCurrentUserId(session.user.id);
+        setAccessToken(session.access_token);
 
         const adminCheck = await fetch("/api/admin/check", {
           headers: { Authorization: `Bearer ${session.access_token}` }
@@ -51,13 +68,36 @@ export default function AdminPage() {
           return;
         }
 
-        const { data, error: err } = await supabase
+        // Fetch agencies with client counts
+        const { data: agencies, error: agenciesErr } = await supabase
           .from("agencies")
-          .select("id, name, is_active, created_at")
+          .select(`
+            id, 
+            name, 
+            owner_id, 
+            is_active, 
+            created_at, 
+            plan,
+            clients(count)
+          `)
           .order("created_at", { ascending: false });
 
-        if (err) throw err;
-        setAgencies((data ?? []) as Agency[]);
+        if (agenciesErr) throw agenciesErr;
+
+        // Build user list from agencies (since we can't list all auth users from client)
+        const userList: UserWithAgency[] = (agencies ?? []).map((agency) => ({
+          id: agency.owner_id,
+          email: "", // We'll need to get this from a different source
+          created_at: agency.created_at,
+          agency: {
+            ...agency,
+            clients: agency.clients as { count: number }[]
+          } as Agency
+        }));
+
+        // For now, show agencies as the primary view
+        // We can enhance this later with a separate users API
+        setUsers(userList);
       } catch (e: unknown) {
         const err = e as { message?: string };
         setError(err?.message || String(e));
@@ -68,16 +108,20 @@ export default function AdminPage() {
     load();
   }, [supabase]);
 
-  async function toggleAgency(id: string, currentActive: boolean) {
+  async function toggleAgency(agencyId: string, currentActive: boolean) {
     setBusy(true);
     try {
       const { error: err } = await supabase
         .from("agencies")
         .update({ is_active: !currentActive })
-        .eq("id", id);
+        .eq("id", agencyId);
       if (err) throw err;
-      setAgencies((prev) =>
-        prev.map((a) => (a.id === id ? { ...a, is_active: !currentActive } : a))
+      setUsers((prev) =>
+        prev.map((u) => 
+          u.agency?.id === agencyId 
+            ? { ...u, agency: { ...u.agency!, is_active: !currentActive } } 
+            : u
+        )
       );
     } catch (e: unknown) {
       const err = e as { message?: string };
@@ -87,62 +131,94 @@ export default function AdminPage() {
     }
   }
 
-  const filteredAgencies = agencies.filter((a) =>
-    a.name.toLowerCase().includes(searchQuery.toLowerCase())
+  async function deleteUser(userId: string) {
+    if (!accessToken) return;
+
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/users/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({ userId })
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to delete user");
+      }
+
+      // Remove from local state
+      setUsers((prev) => prev.filter((u) => u.id !== userId));
+      setDeleteConfirm(null);
+    } catch (e: unknown) {
+      const err = e as { message?: string };
+      setError(err?.message || String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const filteredUsers = users.filter((u) =>
+    u.agency?.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const activeCount = agencies.filter((a) => a.is_active).length;
-  const inactiveCount = agencies.filter((a) => !a.is_active).length;
+  const activeCount = users.filter((u) => u.agency?.is_active).length;
+  const inactiveCount = users.filter((u) => !u.agency?.is_active).length;
+  const totalClients = users.reduce((acc, u) => acc + (u.agency?.clients?.[0]?.count ?? 0), 0);
 
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm">
-        <Link href="/app" className="text-text-2 hover:text-text">Dashboard</Link>
-        <span className="text-text-3">/</span>
-        <span className="text-text">Admin</span>
+        <Link href="/app" className="text-[#666] hover:text-[#0A0A0A]">Dashboard</Link>
+        <span className="text-[#999]">/</span>
+        <span className="text-[#0A0A0A]">Admin</span>
       </div>
 
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-text">Admin Panel</h1>
-        <p className="mt-1 text-sm text-text-2">
-          Manage agencies and system settings.
+        <h1 className="text-2xl font-bold tracking-tight text-[#0A0A0A]">Admin Panel</h1>
+        <p className="mt-1 text-sm text-[#666]">
+          Manage users, agencies, and system settings.
         </p>
       </div>
 
       {/* Loading */}
       {loading && (
         <div className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-3">
-            {[...Array(3)].map((_, idx) => (
-              <div key={idx} className="h-24 animate-pulse rounded-2xl bg-surface-2" />
+          <div className="grid gap-4 sm:grid-cols-4">
+            {[...Array(4)].map((_, idx) => (
+              <div key={idx} className="h-24 animate-pulse rounded-xl bg-[#F5F5F5]" />
             ))}
           </div>
-          <div className="h-64 animate-pulse rounded-2xl bg-surface-2" />
+          <div className="h-64 animate-pulse rounded-xl bg-[#F5F5F5]" />
         </div>
       )}
 
       {/* Error */}
       {error && (
-        <Alert variant="danger">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+          <Alert variant="danger">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
       )}
 
       {/* Not authorized */}
       {!loading && !isSuperAdmin && (
-        <div className="rounded-2xl border border-border bg-surface py-16 text-center">
+        <div className="rounded-xl border border-[#E5E5E5] bg-white py-16 text-center">
           <div className="flex justify-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50">
               <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
               </svg>
             </div>
           </div>
-          <h2 className="mt-4 font-semibold text-text">Access Denied</h2>
-          <p className="mt-1 text-sm text-text-2">You need admin privileges to view this page.</p>
-          <Link href="/app" className="mt-4 inline-block text-sm text-accent hover:underline">
+          <h2 className="mt-4 font-semibold text-[#0A0A0A]">Access Denied</h2>
+          <p className="mt-1 text-sm text-[#666]">You need admin privileges to view this page.</p>
+          <Link href="/app" className="mt-4 inline-block text-sm text-[#0A0A0A] hover:underline">
             Back to dashboard
           </Link>
         </div>
@@ -152,31 +228,35 @@ export default function AdminPage() {
       {!loading && isSuperAdmin && (
         <>
           {/* Stats */}
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl border border-border bg-surface p-5">
-              <div className="text-sm font-medium text-text-2">Total Agencies</div>
-              <div className="mt-2 text-3xl font-bold text-text">{agencies.length}</div>
+          <div className="grid gap-4 sm:grid-cols-4">
+            <div className="rounded-xl border border-[#E5E5E5] bg-white p-5">
+              <div className="text-sm font-medium text-[#666]">Total Users</div>
+              <div className="mt-2 text-3xl font-bold text-[#0A0A0A]">{users.length}</div>
             </div>
-            <div className="rounded-2xl border border-border bg-surface p-5">
-              <div className="text-sm font-medium text-text-2">Active</div>
+            <div className="rounded-xl border border-[#E5E5E5] bg-white p-5">
+              <div className="text-sm font-medium text-[#666]">Active</div>
               <div className="mt-2 text-3xl font-bold text-emerald-600">{activeCount}</div>
             </div>
-            <div className="rounded-2xl border border-border bg-surface p-5">
-              <div className="text-sm font-medium text-text-2">Inactive</div>
-              <div className="mt-2 text-3xl font-bold text-text-3">{inactiveCount}</div>
+            <div className="rounded-xl border border-[#E5E5E5] bg-white p-5">
+              <div className="text-sm font-medium text-[#666]">Inactive</div>
+              <div className="mt-2 text-3xl font-bold text-[#999]">{inactiveCount}</div>
+            </div>
+            <div className="rounded-xl border border-[#E5E5E5] bg-white p-5">
+              <div className="text-sm font-medium text-[#666]">Total Clients</div>
+              <div className="mt-2 text-3xl font-bold text-[#0A0A0A]">{totalClients}</div>
             </div>
           </div>
 
-          {/* Agencies list */}
-          <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-            <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          {/* Users/Agencies list */}
+          <div className="overflow-hidden rounded-xl border border-[#E5E5E5] bg-white">
+            <div className="flex items-center justify-between border-b border-[#E5E5E5] px-5 py-4">
               <div>
-                <h2 className="font-semibold text-text">Agencies</h2>
-                <p className="text-xs text-text-3">{agencies.length} total</p>
+                <h2 className="font-semibold text-[#0A0A0A]">Users & Agencies</h2>
+                <p className="text-xs text-[#999]">{users.length} total users</p>
               </div>
               <div className="relative">
                 <svg
-                  className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-3"
+                  className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#999]"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -186,71 +266,128 @@ export default function AdminPage() {
                 </svg>
                 <input
                   type="text"
-                  placeholder="Search agencies..."
+                  placeholder="Search..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-9 w-48 rounded-lg border border-border bg-surface-2 pl-9 pr-3 text-sm text-text placeholder:text-text-3 focus:border-accent focus:outline-none"
+                  className="h-9 w-48 rounded-lg border border-[#E5E5E5] bg-[#FAFAF8] pl-9 pr-3 text-sm text-[#0A0A0A] placeholder:text-[#999] focus:border-[#0A0A0A] focus:outline-none"
                 />
               </div>
             </div>
 
-            {filteredAgencies.length === 0 ? (
+            {filteredUsers.length === 0 ? (
               <div className="py-12 text-center">
-                <p className="text-text-2">No agencies found</p>
+                <p className="text-[#666]">No users found</p>
               </div>
             ) : (
-              <div className="divide-y divide-border">
-                {filteredAgencies.map((agency) => (
+              <div className="divide-y divide-[#E5E5E5]">
+                {filteredUsers.map((user) => (
                   <div
-                    key={agency.id}
-                    className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-surface-2"
+                    key={user.id}
+                    className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-[#FAFAF8]"
                   >
                     <div className="flex items-center gap-4">
                       <div className={cn(
-                        "flex h-10 w-10 items-center justify-center rounded-xl text-sm font-bold text-white",
-                        agency.is_active
-                          ? "bg-gradient-to-br from-emerald-500 to-teal-500"
-                          : "bg-gradient-to-br from-gray-400 to-gray-500"
+                        "flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold text-white",
+                        user.agency?.is_active ? "bg-[#0A0A0A]" : "bg-[#999]"
                       )}>
-                        {agency.name.charAt(0).toUpperCase()}
+                        {user.agency?.name.charAt(0).toUpperCase() ?? "?"}
                       </div>
                       <div>
-                        <div className="font-medium text-text">{agency.name}</div>
-                        <div className="flex items-center gap-2 text-xs text-text-3">
+                        <div className="font-medium text-[#0A0A0A]">{user.agency?.name ?? "No Agency"}</div>
+                        <div className="flex items-center gap-2 text-xs text-[#999]">
                           <span className={cn(
                             "flex items-center gap-1",
-                            agency.is_active ? "text-emerald-600" : "text-text-3"
+                            user.agency?.is_active ? "text-emerald-600" : "text-[#999]"
                           )}>
                             <span className={cn(
                               "h-1.5 w-1.5 rounded-full",
-                              agency.is_active ? "bg-emerald-500" : "bg-gray-400"
+                              user.agency?.is_active ? "bg-emerald-500" : "bg-[#ccc]"
                             )} />
-                            {agency.is_active ? "Active" : "Inactive"}
+                            {user.agency?.is_active ? "Active" : "Inactive"}
                           </span>
                           <span>·</span>
-                          <span>{new Date(agency.created_at).toLocaleDateString()}</span>
+                          <span>{user.agency?.clients?.[0]?.count ?? 0} clients</span>
+                          <span>·</span>
+                          <span className="capitalize">{user.agency?.plan ?? "free"}</span>
+                          <span>·</span>
+                          <span>{new Date(user.created_at).toLocaleDateString()}</span>
+                          {user.id === currentUserId && (
+                            <>
+                              <span>·</span>
+                              <span className="rounded bg-[#0A0A0A] px-1.5 py-0.5 text-[10px] font-medium text-white">YOU</span>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
-                    <button
-                      onClick={() => toggleAgency(agency.id, agency.is_active)}
-                      disabled={busy}
-                      className={cn(
-                        "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
-                        agency.is_active
-                          ? "bg-red-500/10 text-red-600 hover:bg-red-500/20"
-                          : "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20"
+                    <div className="flex items-center gap-2">
+                      {user.agency && (
+                        <button
+                          onClick={() => toggleAgency(user.agency!.id, user.agency!.is_active)}
+                          disabled={busy}
+                          className={cn(
+                            "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
+                            user.agency.is_active
+                              ? "bg-amber-50 text-amber-600 hover:bg-amber-100"
+                              : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
+                          )}
+                        >
+                          {user.agency.is_active ? "Deactivate" : "Activate"}
+                        </button>
                       )}
-                    >
-                      {agency.is_active ? "Deactivate" : "Activate"}
-                    </button>
+                      {user.id !== currentUserId && (
+                        <>
+                          {deleteConfirm === user.id ? (
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => deleteUser(user.id)}
+                                disabled={busy}
+                                className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+                              >
+                                {busy ? "Deleting..." : "Confirm"}
+                              </button>
+                              <button
+                                onClick={() => setDeleteConfirm(null)}
+                                disabled={busy}
+                                className="rounded-lg bg-[#F5F5F5] px-3 py-1.5 text-xs font-medium text-[#666] transition-colors hover:bg-[#E5E5E5]"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setDeleteConfirm(user.id)}
+                              disabled={busy}
+                              className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-100"
+                            >
+                              Delete
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
             )}
           </div>
+
+          {/* Danger zone info */}
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+            <div className="flex items-start gap-3">
+              <svg className="h-5 w-5 text-red-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+              </svg>
+              <div>
+                <h3 className="font-medium text-red-800">Important</h3>
+                <p className="mt-1 text-sm text-red-700">
+                  Deleting a user will permanently remove their account, agency, all clients, competitors, and snapshot data. This action cannot be undone.
+                </p>
+              </div>
+            </div>
+          </div>
         </>
       )}
-    </div>
+      </div>
   );
 }
