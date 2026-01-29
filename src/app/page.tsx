@@ -1,10 +1,42 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { DomainSearchBar } from "@/components/DomainSearchBar";
 import { Footer } from "@/components/Footer";
+
+// Rotating words component
+function RotatingWord() {
+  const words = ["found", "recommended", "cited", "trusted"];
+  const [index, setIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsAnimating(true);
+      setTimeout(() => {
+        setIndex((prev) => (prev + 1) % words.length);
+        setIsAnimating(false);
+      }, 200);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <span className="relative inline-block min-w-[180px] sm:min-w-[220px]">
+      <span
+        className={`inline-block transition-all duration-200 ${
+          isAnimating ? "translate-y-2 opacity-0" : "translate-y-0 opacity-100"
+        }`}
+      >
+        <span className="bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">
+          {words[index]}
+        </span>
+      </span>
+    </span>
+  );
+}
 
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -61,45 +93,50 @@ export default function HomePage() {
               </span>
             </div>
 
-            {/* Tagline + AI icons */}
-            <div className="mx-auto mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
-              <span className="text-xl font-medium text-[#0A0A0A] sm:text-2xl">
-                AI visibility, measured.
-              </span>
-              <div className="flex items-center gap-1">
-                {[
-                  { src: "/ai/icons8-chatgpt.svg", alt: "ChatGPT" },
-                  { src: "/ai/icons8-google-48.svg", alt: "Google" },
-                  { src: "/ai/gemini.png", alt: "Gemini" },
-                  { src: "/ai/icons8-claude.svg", alt: "Claude" },
-                ].map((icon) => (
-                  <span
-                    key={icon.alt}
-                    className="flex h-8 w-8 items-center justify-center rounded-full border border-[#E5E5E5] bg-white"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt={icon.alt} className="h-4 w-4" src={icon.src} />
-                  </span>
-                ))}
-                <span className="ml-1 text-sm text-[#999]">& more</span>
-              </div>
+            {/* Punchier tagline with rotating word */}
+            <h1 className="mx-auto mt-6 text-2xl font-medium text-[#0A0A0A] sm:text-3xl">
+              Get your clients <RotatingWord /> by AI
+            </h1>
+
+            {/* Subtext */}
+            <p className="mx-auto mt-3 max-w-lg text-[#666]">
+              Track, report, and prove AI visibility across ChatGPT, Claude, Gemini, and more.
+            </p>
+
+            {/* AI model icons */}
+            <div className="mt-5 flex items-center justify-center gap-1">
+              {[
+                { src: "/ai/icons8-chatgpt.svg", alt: "ChatGPT" },
+                { src: "/ai/icons8-google-48.svg", alt: "Google" },
+                { src: "/ai/gemini.png", alt: "Gemini" },
+                { src: "/ai/icons8-claude.svg", alt: "Claude" },
+              ].map((icon) => (
+                <span
+                  key={icon.alt}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-[#E5E5E5] bg-white"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img alt={icon.alt} className="h-4 w-4" src={icon.src} />
+                </span>
+              ))}
+              <span className="ml-2 text-sm text-[#999]">& more</span>
             </div>
 
             {/* Search bar */}
-            <div className="mx-auto mt-6 max-w-xl">
+            <div className="mx-auto mt-8 max-w-xl">
               <DomainSearchBar />
             </div>
 
-            {/* Links */}
-            <div className="mt-5 flex items-center justify-center gap-4 text-sm">
+            {/* CTAs */}
+            <div className="mt-6 flex items-center justify-center gap-4">
               <Link
                 href="/onboarding"
-                className="font-medium text-[#0A0A0A] underline decoration-[#0A0A0A]/20 underline-offset-4 hover:decoration-[#0A0A0A]"
+                className="rounded-lg bg-[#0A0A0A] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1a1a1a]"
               >
                 Start free trial
               </Link>
-              <Link href="/pricing" className="text-[#666] hover:text-[#0A0A0A]">
-                View pricing
+              <Link href="/pricing" className="text-sm text-[#666] hover:text-[#0A0A0A]">
+                View pricing →
               </Link>
             </div>
           </div>
