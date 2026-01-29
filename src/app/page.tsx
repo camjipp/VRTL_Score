@@ -426,65 +426,22 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          HOW IT WORKS + STATS (Combined)
+          STATS BANNER
       ═══════════════════════════════════════════════════════ */}
-      <section className="border-y border-[#E5E5E5] bg-white px-6 py-20 md:py-28">
+      <section className="bg-[#0A0A0A] px-6 py-16 md:py-20">
         <div className="mx-auto max-w-5xl">
-          <div className="text-center mb-16">
-            <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600">
-              How It Works
-            </p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-[#0A0A0A] md:text-4xl">
-              Client-ready reports in 3 steps
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl text-lg text-[#666]">
-              The fastest way to prove AI visibility to your clients.
-            </p>
-          </div>
-
-          <div className="grid gap-8 md:grid-cols-3 mb-20">
+          <div className="grid gap-8 md:grid-cols-3">
             {[
-              {
-                step: "1",
-                title: "Add your client",
-                description: "Enter their website and up to 4 competitors. Takes less than a minute.",
-              },
-              {
-                step: "2",
-                title: "Run a snapshot",
-                description: "We query ChatGPT, Claude, and Gemini with industry-specific prompts.",
-              },
-              {
-                step: "3",
-                title: "Get your report",
-                description: "Download a branded PDF with scores, evidence, and recommendations.",
-              },
-            ].map((item) => (
-              <div key={item.step} className="text-center">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#0A0A0A] text-2xl font-bold text-white">
-                  {item.step}
-                </div>
-                <h3 className="mt-4 text-xl font-semibold text-[#0A0A0A]">{item.title}</h3>
-                <p className="mt-2 text-[#666]">{item.description}</p>
+              { value: "3+", label: "AI Models", sublabel: "ChatGPT, Claude, Gemini, and more" },
+              { value: "10", label: "Prompts", sublabel: "Industry-specific queries per snapshot" },
+              { value: "<5min", label: "To Report", sublabel: "From client onboarding to PDF" },
+            ].map((stat, i) => (
+              <div key={stat.label} className={`text-center ${i < 2 ? 'md:border-r md:border-white/10' : ''}`}>
+                <div className="text-5xl font-bold text-white md:text-6xl">{stat.value}</div>
+                <div className="mt-2 text-lg font-medium text-white">{stat.label}</div>
+                <div className="mt-1 text-sm text-white/60">{stat.sublabel}</div>
               </div>
             ))}
-          </div>
-
-          {/* Stats Banner */}
-          <div className="rounded-3xl bg-[#0A0A0A] px-8 py-12 md:px-12">
-            <div className="grid gap-8 md:grid-cols-3">
-              {[
-                { value: "3+", label: "AI Models", sublabel: "ChatGPT, Claude, Gemini, and more" },
-                { value: "10", label: "Prompts", sublabel: "Industry-specific queries per snapshot" },
-                { value: "<5min", label: "To Report", sublabel: "From client onboarding to PDF" },
-              ].map((stat, i) => (
-                <div key={stat.label} className={`text-center ${i < 2 ? 'md:border-r md:border-white/10' : ''}`}>
-                  <div className="text-5xl font-bold text-white">{stat.value}</div>
-                  <div className="mt-2 text-lg font-medium text-white">{stat.label}</div>
-                  <div className="mt-1 text-sm text-white/60">{stat.sublabel}</div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </section>
