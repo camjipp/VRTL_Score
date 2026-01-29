@@ -123,104 +123,33 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          ABOUT US / VALUE PROP
+          ABOUT US / VALUE PROP (Goodie-style)
       ═══════════════════════════════════════════════════════ */}
       <section className="bg-[#FAFAF8] px-6 py-16 md:py-24">
         <div className="mx-auto max-w-4xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600">
-            About VRTL Score
+          <p className="text-sm font-semibold uppercase tracking-widest text-[#999]">
+            About Us
           </p>
-          <h2 className="mt-4 text-3xl font-semibold tracking-tight text-[#0A0A0A] md:text-4xl lg:text-5xl leading-tight">
-            Prove AI visibility to your clients.<br className="hidden sm:block" />
-            Win more business. Retain accounts longer.
+          <h2 className="mt-6 text-2xl font-medium tracking-tight text-[#0A0A0A] md:text-3xl lg:text-4xl leading-relaxed max-w-3xl mx-auto">
+            Unlock AI search growth, own how LLMs talk about your clients, and capture demand on ChatGPT, Gemini, and more—reaching billions who use AI daily.
           </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-[#666] leading-relaxed">
-            AI search is reshaping how brands get discovered. Your clients need to know how they appear in ChatGPT, Claude, and Gemini. VRTL Score gives you the data to show them—and the reports to prove your value.
-          </p>
         </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          THE FUTURE OF SEARCH
+          THE FUTURE OF SEARCH (Goodie-style - text focused)
       ═══════════════════════════════════════════════════════ */}
       <section className="border-y border-[#E5E5E5] bg-white px-6 py-20 md:py-28">
-        <div className="mx-auto max-w-6xl">
-          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
-            {/* Left - Content */}
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-widest text-[#999]">
-                The Future of Search
-              </p>
-              <h2 className="mt-4 text-3xl font-semibold tracking-tight text-[#0A0A0A] md:text-4xl leading-tight">
-                The New Frontier for<br />Agency Growth
-              </h2>
-              <p className="mt-6 text-lg text-[#666] leading-relaxed">
-                Billions of people use AI daily to make buying decisions, research brands, and find recommendations. LLM visibility is the new digital shelf where brands compete to be surfaced.
-              </p>
-              <p className="mt-4 text-lg text-[#666] leading-relaxed">
-                Agencies that can measure and optimize AI visibility will win the next decade. VRTL Score gives you the tools to lead this transformation for your clients.
-              </p>
-              <div className="mt-8 flex items-center gap-4">
-                <Link
-                  href="/onboarding"
-                  className="rounded-lg bg-[#0A0A0A] px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-[#1a1a1a]"
-                >
-                  Get started
-                </Link>
-                <Link href="/pricing" className="text-sm font-medium text-[#0A0A0A] hover:text-[#666] transition-colors">
-                  Learn more →
-                </Link>
-              </div>
-            </div>
-
-            {/* Right - Visual */}
-            <div className="relative">
-              <div className="rounded-2xl border border-[#E5E5E5] bg-[#FAFAF8] p-6">
-                {/* Mock dashboard preview */}
-                <div className="space-y-4">
-                  {/* Score header */}
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-sm text-[#999]">AI Visibility Score</div>
-                      <div className="text-4xl font-bold text-[#0A0A0A]">78</div>
-                    </div>
-                    <div className="h-16 w-16 rounded-full border-4 border-emerald-500 flex items-center justify-center">
-                      <span className="text-lg font-bold text-emerald-600">B+</span>
-                    </div>
-                  </div>
-                  
-                  {/* Model breakdown */}
-                  <div className="space-y-2">
-                    {[
-                      { name: "ChatGPT", score: 85, color: "bg-emerald-500" },
-                      { name: "Claude", score: 72, color: "bg-blue-500" },
-                      { name: "Gemini", score: 68, color: "bg-purple-500" },
-                    ].map((model) => (
-                      <div key={model.name} className="flex items-center gap-3">
-                        <span className="w-16 text-sm text-[#666]">{model.name}</span>
-                        <div className="flex-1 h-2 bg-[#E5E5E5] rounded-full overflow-hidden">
-                          <div
-                            className={`h-full ${model.color} rounded-full transition-all`}
-                            style={{ width: `${model.score}%` }}
-                          />
-                        </div>
-                        <span className="w-8 text-sm font-medium text-[#0A0A0A]">{model.score}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Competitive position */}
-                  <div className="pt-4 border-t border-[#E5E5E5]">
-                    <div className="text-sm text-[#999] mb-2">Competitive Ranking</div>
-                    <div className="flex items-center gap-2">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#0A0A0A] text-xs font-bold text-white">2</span>
-                      <span className="text-sm font-medium text-[#0A0A0A]">of 5 competitors</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="mx-auto max-w-4xl">
+          <p className="text-sm font-semibold uppercase tracking-widest text-[#999]">
+            The Future of Search
+          </p>
+          <h2 className="mt-4 text-4xl font-semibold tracking-tight text-[#0A0A0A] md:text-5xl lg:text-6xl leading-[1.1]">
+            The New Frontier for<br />Agency Growth
+          </h2>
+          <p className="mt-8 text-xl text-[#666] leading-relaxed max-w-3xl">
+            LLM visibility is the new digital shelf where brands rush to get surfaced. AI Answer Engines are used by billions daily to shape perspectives, help make buying decisions, and answer questions about your clients&apos; brands and industries.
+          </p>
         </div>
       </section>
 
@@ -421,6 +350,26 @@ export default function HomePage() {
               <h3 className="text-2xl font-semibold text-[#0A0A0A]">Branded PDF Reports</h3>
               <p className="mt-3 text-[#666] leading-relaxed">Generate polished, client-ready reports in seconds. Professional deliverables with your agency branding that prove the value of your AI optimization work.</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          AI MODELS STRIP
+      ═══════════════════════════════════════════════════════ */}
+      <section className="border-y border-[#E5E5E5] bg-white px-6 py-12 md:py-16">
+        <div className="mx-auto max-w-4xl text-center">
+          <p className="text-sm font-medium text-[#999] mb-8">
+            VRTL Score works across leading LLMs including:
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
+            {AI_MODELS.map((model) => (
+              <div key={model.name} className="flex items-center gap-2 opacity-70 hover:opacity-100 transition-opacity">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={model.icon} alt={model.name} className="h-8 w-8" />
+                <span className="text-sm font-medium text-[#0A0A0A]">{model.name}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
