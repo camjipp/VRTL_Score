@@ -71,17 +71,17 @@ function MiniAreaChart({ data, color = "#10b981" }: { data: number[]; color?: st
 
 // Provider score card
 function ProviderCard({ name, score, icon, rank }: { name: string; score: number | null; icon: string; rank: number }) {
-  const scoreColor = score !== null && score >= 70 ? "text-emerald-500" : 
-                     score !== null && score >= 40 ? "text-amber-500" : "text-red-500";
+  const scoreColor = score !== null && score >= 70 ? "text-emerald-600" : 
+                     score !== null && score >= 40 ? "text-amber-600" : "text-red-600";
   
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-[#333] bg-[#1a1a1a] p-4">
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#262626]">
+    <div className="flex items-center gap-3 rounded-xl border border-[#E5E5E5] bg-white p-4">
+      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#F5F5F5]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={icon} alt={name} className="h-5 w-5" />
       </div>
       <div className="flex-1">
-        <div className="text-xs text-[#888]">#{rank} {name}</div>
+        <div className="text-xs text-[#999]">#{rank} {name}</div>
         <div className={cn("text-lg font-semibold", scoreColor)}>
           {score !== null ? score.toFixed(1) : "—"}
         </div>
@@ -94,18 +94,18 @@ function ProviderCard({ name, score, icon, rank }: { name: string; score: number
 function EmptyState() {
   return (
     <div className="mx-auto max-w-2xl py-16 text-center">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30">
-        <svg className="h-8 w-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 border border-emerald-500/20">
+        <svg className="h-8 w-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
         </svg>
       </div>
-      <h1 className="mt-6 text-2xl font-semibold text-white">Add your first client</h1>
-      <p className="mt-2 text-[#888]">
+      <h1 className="mt-6 text-2xl font-semibold text-[#0A0A0A]">Add your first client</h1>
+      <p className="mt-2 text-[#666]">
         Track how AI models recommend your clients across ChatGPT, Claude, and Gemini.
       </p>
       <Link
         href="/app/clients/new"
-        className="mt-8 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-6 py-3 text-sm font-medium text-[#0a0a0a] transition-all hover:opacity-90"
+        className="mt-8 inline-flex items-center gap-2 rounded-xl bg-[#0A0A0A] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#1a1a1a]"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -120,10 +120,10 @@ function EmptyState() {
           { step: "02", title: "Run snapshot", desc: "We query AI models with industry prompts" },
           { step: "03", title: "Get report", desc: "Download a branded PDF with scores" },
         ].map((item) => (
-          <div key={item.step} className="rounded-xl border border-[#333] bg-[#1a1a1a] p-5">
-            <div className="text-sm font-medium text-[#555]">{item.step}</div>
-            <div className="mt-2 font-semibold text-white">{item.title}</div>
-            <div className="mt-1 text-sm text-[#888]">{item.desc}</div>
+          <div key={item.step} className="rounded-xl border border-[#E5E5E5] bg-white p-5">
+            <div className="text-sm font-medium text-[#999]">{item.step}</div>
+            <div className="mt-2 font-semibold text-[#0A0A0A]">{item.title}</div>
+            <div className="mt-1 text-sm text-[#666]">{item.desc}</div>
           </div>
         ))}
       </div>
@@ -151,12 +151,12 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-white">AI Visibility</h1>
-          <p className="mt-1 text-sm text-[#888]">Monitor how AI models recommend your clients</p>
+          <h1 className="text-2xl font-semibold text-[#0A0A0A]">AI Visibility</h1>
+          <p className="mt-1 text-sm text-[#666]">Monitor how AI models recommend your clients</p>
         </div>
         <Link
           href="/app/clients/new"
-          className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-2.5 text-sm font-medium text-[#0a0a0a] transition-all hover:opacity-90"
+          className="inline-flex items-center gap-2 rounded-lg bg-[#0A0A0A] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1a1a1a]"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -168,22 +168,22 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
       {/* Main stats grid */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Big score card */}
-        <div className="lg:col-span-2 rounded-xl border border-[#333] bg-[#1a1a1a] p-6">
+        <div className="lg:col-span-2 rounded-xl border border-[#E5E5E5] bg-white p-6">
           <div className="flex items-start justify-between">
             <div>
-              <div className="text-sm text-[#888]">Average VRTL Score</div>
+              <div className="text-sm text-[#666]">Average VRTL Score</div>
               <div className="mt-2 flex items-baseline gap-3">
                 <span className={cn(
                   "text-5xl font-bold",
-                  stats.avgScore !== null && stats.avgScore >= 70 ? "text-emerald-400" :
-                  stats.avgScore !== null && stats.avgScore >= 40 ? "text-amber-400" : "text-white"
+                  stats.avgScore !== null && stats.avgScore >= 70 ? "text-emerald-600" :
+                  stats.avgScore !== null && stats.avgScore >= 40 ? "text-amber-600" : "text-[#0A0A0A]"
                 )}>
                   {stats.avgScore?.toFixed(1) ?? "—"}
                 </span>
                 {stats.avgScore !== null && (
                   <span className={cn(
                     "flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
-                    trendUp ? "bg-emerald-500/20 text-emerald-300" : "bg-red-500/20 text-red-300"
+                    trendUp ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
                   )}>
                     <svg className={cn("h-3 w-3", !trendUp && "rotate-180")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
@@ -194,7 +194,7 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
               </div>
             </div>
             <div className="text-right">
-              <div className="text-xs text-[#666]">Displaying data from all time</div>
+              <div className="text-xs text-[#999]">Displaying data from all time</div>
             </div>
           </div>
           
@@ -207,24 +207,24 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
                        stats.avgScore !== null && stats.avgScore >= 40 ? "#f59e0b" : "#ef4444"} 
               />
             ) : (
-              <div className="flex h-16 items-center justify-center text-sm text-[#555]">
+              <div className="flex h-16 items-center justify-center text-sm text-[#999]">
                 Run more snapshots to see trends
               </div>
             )}
           </div>
 
           {/* Quick stats */}
-          <div className="mt-6 grid grid-cols-3 gap-4 border-t border-[#333] pt-6">
+          <div className="mt-6 grid grid-cols-3 gap-4 border-t border-[#E5E5E5] pt-6">
             <div>
-              <div className="text-xs text-[#666]">Total Clients</div>
-              <div className="mt-1 text-2xl font-semibold text-white">{clients.length}</div>
+              <div className="text-xs text-[#999]">Total Clients</div>
+              <div className="mt-1 text-2xl font-semibold text-[#0A0A0A]">{clients.length}</div>
             </div>
             <div>
-              <div className="text-xs text-[#666]">Snapshots</div>
-              <div className="mt-1 text-2xl font-semibold text-white">{stats.completed}</div>
+              <div className="text-xs text-[#999]">Snapshots</div>
+              <div className="mt-1 text-2xl font-semibold text-[#0A0A0A]">{stats.completed}</div>
             </div>
             <div>
-              <div className="text-xs text-[#666]">AI Models</div>
+              <div className="text-xs text-[#999]">AI Models</div>
               <div className="mt-1 flex items-center gap-1">
                 {[
                   { src: "/ai/icons8-chatgpt.svg", alt: "ChatGPT" },
@@ -233,7 +233,7 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
                 ].map((icon) => (
                   <span
                     key={icon.alt}
-                    className="flex h-7 w-7 items-center justify-center rounded-full border border-[#333] bg-[#262626]"
+                    className="flex h-7 w-7 items-center justify-center rounded-full border border-[#E5E5E5] bg-[#FAFAF8]"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img alt={icon.alt} className="h-4 w-4" src={icon.src} />
@@ -245,9 +245,9 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
         </div>
 
         {/* Provider breakdown */}
-        <div className="rounded-xl border border-[#333] bg-[#1a1a1a] p-6">
-          <div className="text-sm font-medium text-white">Score by Provider</div>
-          <p className="mt-1 text-xs text-[#666]">How your clients rank across AI models</p>
+        <div className="rounded-xl border border-[#E5E5E5] bg-white p-6">
+          <div className="text-sm font-medium text-[#0A0A0A]">Score by Provider</div>
+          <p className="mt-1 text-xs text-[#999]">How your clients rank across AI models</p>
           
           <div className="mt-4 space-y-3">
             <ProviderCard 
@@ -272,7 +272,7 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
 
           <Link 
             href="#" 
-            className="mt-4 flex items-center justify-center gap-2 text-xs text-emerald-400 hover:text-emerald-300 transition-colors"
+            className="mt-4 flex items-center justify-center gap-2 text-xs text-emerald-600 hover:text-emerald-700 transition-colors"
           >
             View detailed breakdown
             <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -283,12 +283,12 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
       </div>
 
       {/* Clients table */}
-      <div className="rounded-xl border border-[#333] bg-[#1a1a1a]">
-        <div className="flex items-center justify-between border-b border-[#333] px-5 py-4">
-          <h2 className="font-semibold text-white">All Clients</h2>
+      <div className="rounded-xl border border-[#E5E5E5] bg-white">
+        <div className="flex items-center justify-between border-b border-[#E5E5E5] px-5 py-4">
+          <h2 className="font-semibold text-[#0A0A0A]">All Clients</h2>
           <div className="relative">
             <svg
-              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#666]"
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#999]"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -301,13 +301,13 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
               placeholder="Search clients..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 w-56 rounded-lg border border-[#333] bg-[#262626] pl-9 pr-3 text-sm text-white placeholder:text-[#666] focus:border-emerald-500/50 focus:outline-none focus:ring-1 focus:ring-emerald-500/20"
+              className="h-9 w-56 rounded-lg border border-[#E5E5E5] bg-[#FAFAF8] pl-9 pr-3 text-sm text-[#0A0A0A] placeholder:text-[#999] focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/20"
             />
           </div>
         </div>
 
         {/* Table header */}
-        <div className="grid grid-cols-[1fr,120px,100px,80px] gap-4 border-b border-[#333] bg-[#151515] px-5 py-3 text-xs font-medium uppercase tracking-wide text-[#666]">
+        <div className="grid grid-cols-[1fr,120px,100px,80px] gap-4 border-b border-[#E5E5E5] bg-[#FAFAF8] px-5 py-3 text-xs font-medium uppercase tracking-wide text-[#999]">
           <div>Client</div>
           <div>Industry</div>
           <div>Added</div>
@@ -315,11 +315,11 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
         </div>
 
         {/* Table body */}
-        <div className="divide-y divide-[#333]">
+        <div className="divide-y divide-[#E5E5E5]">
           {filteredClients.length === 0 && searchQuery && (
             <div className="py-12 text-center">
-              <p className="text-[#888]">No clients match &quot;{searchQuery}&quot;</p>
-              <button onClick={() => setSearchQuery("")} className="mt-2 text-sm text-white underline">
+              <p className="text-[#666]">No clients match &quot;{searchQuery}&quot;</p>
+              <button onClick={() => setSearchQuery("")} className="mt-2 text-sm text-[#0A0A0A] underline">
                 Clear search
               </button>
             </div>
@@ -329,23 +329,23 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
             <Link
               key={client.id}
               href={`/app/clients/${client.id}`}
-              className="grid grid-cols-[1fr,120px,100px,80px] items-center gap-4 px-5 py-4 transition-colors hover:bg-[#262626]"
+              className="grid grid-cols-[1fr,120px,100px,80px] items-center gap-4 px-5 py-4 transition-colors hover:bg-[#FAFAF8]"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-400 text-sm font-medium text-[#0a0a0a]">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500 text-sm font-medium text-white">
                   {getInitials(client.name)}
                 </div>
                 <div className="min-w-0">
-                  <div className="font-medium text-white">{client.name}</div>
+                  <div className="font-medium text-[#0A0A0A]">{client.name}</div>
                   {client.website && (
-                    <div className="truncate text-xs text-[#666]">{client.website.replace(/^https?:\/\//, "")}</div>
+                    <div className="truncate text-xs text-[#999]">{client.website.replace(/^https?:\/\//, "")}</div>
                   )}
                 </div>
               </div>
-              <div className="text-sm text-[#888] capitalize">{client.industry.replace(/_/g, " ")}</div>
-              <div className="text-sm text-[#888]">{formatDate(client.created_at)}</div>
+              <div className="text-sm text-[#666] capitalize">{client.industry.replace(/_/g, " ")}</div>
+              <div className="text-sm text-[#666]">{formatDate(client.created_at)}</div>
               <div className="text-right">
-                <span className="inline-flex items-center gap-1 text-sm text-[#888]">
+                <span className="inline-flex items-center gap-1 text-sm text-[#666]">
                   View
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
@@ -415,9 +415,9 @@ export default function AppPage() {
   }, [supabase]);
 
   if (loading) {
-    return (
+  return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500/20 border-t-emerald-500" />
       </div>
     );
   }
@@ -425,19 +425,19 @@ export default function AppPage() {
   if (error) {
     return (
       <div className="mx-auto max-w-md py-16 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/20">
-          <svg className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+          <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
           </svg>
         </div>
-        <h2 className="text-lg font-semibold text-white">Something went wrong</h2>
-        <p className="mt-2 text-sm text-[#888]">{error}</p>
-        <button onClick={() => window.location.reload()} className="mt-4 text-sm font-medium text-white underline">
+        <h2 className="text-lg font-semibold text-[#0A0A0A]">Something went wrong</h2>
+        <p className="mt-2 text-sm text-[#666]">{error}</p>
+        <button onClick={() => window.location.reload()} className="mt-4 text-sm font-medium text-[#0A0A0A] underline">
           Try again
         </button>
       </div>
-    );
-  }
+  );
+}
 
   if (clients.length === 0) {
     return <EmptyState />;
