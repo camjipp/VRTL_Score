@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { DomainSearchBar } from "@/components/DomainSearchBar";
 import { Footer } from "@/components/Footer";
 
-// Rotating words component - matches "Score" font styling
+// Rotating words component - painted/brush style font
 function RotatingWord() {
   const words = ["measured", "proven", "reported"];
   const [index, setIndex] = useState(0);
@@ -25,7 +25,8 @@ function RotatingWord() {
 
   return (
     <span
-      className={`inline-block font-semibold tracking-tight text-[#0A0A0A] transition-all duration-200 ${
+      style={{ fontFamily: "'Permanent Marker', cursive" }}
+      className={`inline-block text-[#0A0A0A] transition-all duration-200 ${
         isAnimating ? "translate-y-1 opacity-0" : "translate-y-0 opacity-100"
       }`}
     >
