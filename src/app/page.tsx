@@ -83,7 +83,7 @@ export default function HomePage() {
 
             {/* Tagline + AI icons */}
             <div className="mx-auto mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
-              <span className="text-xl font-medium text-[#0A0A0A] sm:text-2xl">
+              <span className="text-xl font-bold text-[#0A0A0A] sm:text-2xl">
                 AI visibility, measured.
               </span>
               <div className="flex items-center">
@@ -102,7 +102,7 @@ export default function HomePage() {
             </div>
 
             {/* Value prop subtitle */}
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-[#666] leading-relaxed">
+            <p className="mx-auto mt-3 max-w-2xl text-base text-[#666] leading-relaxed sm:text-lg">
               Unlock AI search growth, own how LLMs talk about your clients, and capture demand on ChatGPT, Gemini, and more—reaching billions who use AI daily.
             </p>
 
