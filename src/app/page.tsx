@@ -6,9 +6,9 @@ import { useState, useEffect } from "react";
 import { DomainSearchBar } from "@/components/DomainSearchBar";
 import { Footer } from "@/components/Footer";
 
-// Rotating words component - word at the END so layout doesn't shift
+// Rotating words component - matches "Score" font styling
 function RotatingWord() {
-  const words = ["found", "recommended", "cited", "chosen"];
+  const words = ["measured", "proven", "reported"];
   const [index, setIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -25,11 +25,11 @@ function RotatingWord() {
 
   return (
     <span
-      className={`inline-block font-semibold text-[#0A0A0A] underline decoration-emerald-500 decoration-[3px] underline-offset-4 transition-all duration-200 ${
+      className={`inline-block font-semibold tracking-tight text-[#0A0A0A] transition-all duration-200 ${
         isAnimating ? "translate-y-1 opacity-0" : "translate-y-0 opacity-100"
       }`}
     >
-      {words[index]}
+      {words[index]}.
     </span>
   );
 }
@@ -89,14 +89,15 @@ export default function HomePage() {
               </span>
             </div>
 
-            {/* Punchier tagline - rotating word at the END */}
-            <h1 className="mx-auto mt-6 text-2xl text-[#666] sm:text-3xl">
-              When people ask AI, your clients get <RotatingWord />
+            {/* Tagline with rotating word - matches Score font */}
+            <h1 className="mx-auto mt-6 text-2xl sm:text-3xl">
+              <span className="text-[#666]">AI visibility,</span>{" "}
+              <RotatingWord />
             </h1>
 
             {/* Subtext */}
             <p className="mx-auto mt-4 max-w-md text-[#999]">
-              Track and prove AI visibility across ChatGPT, Claude, and Gemini.
+              Track how your clients rank across ChatGPT, Claude, and Gemini.
             </p>
 
             {/* AI model icons */}
