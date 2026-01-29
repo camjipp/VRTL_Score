@@ -473,10 +473,10 @@ export default function HomePage() {
       ═══════════════════════════════════════════════════════ */}
       <section className="border-t border-[#E5E5E5] bg-white">
         {/* Questions Marquee - Goodie style */}
-        <div className="overflow-hidden py-10 md:py-14">
+        <div className="overflow-hidden py-6 md:py-10">
           <div className="flex animate-marquee whitespace-nowrap">
             {Array.from({ length: 30 }).map((_, i) => (
-              <span key={i} className="mx-8 text-5xl font-bold text-[#0A0A0A] md:text-6xl lg:text-7xl">
+              <span key={i} className="mx-10 text-6xl font-black text-[#0A0A0A] md:text-7xl lg:text-8xl xl:text-9xl">
                 Questions?
               </span>
             ))}
