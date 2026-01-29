@@ -491,16 +491,29 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
+          QUESTIONS MARQUEE
+      ═══════════════════════════════════════════════════════ */}
+      <section className="border-t border-[#E5E5E5] bg-[#FAFAF8] py-8 overflow-hidden">
+        <div className="flex animate-marquee whitespace-nowrap">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <span key={i} className="mx-6 text-4xl font-bold text-[#0A0A0A]/10 md:text-5xl">
+              Questions?
+            </span>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
           FAQ
       ═══════════════════════════════════════════════════════ */}
-      <section className="border-t border-[#E5E5E5] bg-white px-6 py-20 md:py-28">
+      <section className="bg-white px-6 py-20 md:py-28">
         <div className="mx-auto max-w-2xl">
           <div className="text-center mb-12">
             <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600">
               FAQ
             </p>
             <h2 className="mt-4 text-3xl font-semibold tracking-tight text-[#0A0A0A] md:text-4xl">
-              Questions? We have answers.
+              We have the answers.
             </h2>
           </div>
 
