@@ -59,11 +59,11 @@ function getScoreColor(score: number | null): string {
   return "text-red-600";
 }
 
-function getScoreBg(score: number | null): string {
-  if (score === null) return "from-gray-100 to-gray-200";
-  if (score >= 80) return "from-emerald-50 to-emerald-100";
-  if (score >= 50) return "from-amber-50 to-amber-100";
-  return "from-red-50 to-red-100";
+function getScoreBorder(score: number | null): string {
+  if (score === null) return "border-[#E5E5E5]";
+  if (score >= 80) return "border-emerald-200";
+  if (score >= 50) return "border-amber-200";
+  return "border-red-200";
 }
 
 function getScoreRing(score: number | null): string {
@@ -162,15 +162,14 @@ function TrendIndicator({ snapshots }: { snapshots: SnapshotRow[] }) {
 // Provider score bar with icon
 function ProviderBar({ provider, score }: { provider: string; score: number }) {
   const color = score >= 80 ? "bg-emerald-500" : score >= 50 ? "bg-amber-500" : "bg-red-500";
-  const bgColor = score >= 80 ? "bg-emerald-50" : score >= 50 ? "bg-amber-50" : "bg-red-50";
 
   return (
-    <div className={cn("rounded-xl p-3", bgColor)}>
+    <div className="rounded-xl border border-[#E5E5E5] bg-[#FAFAF8] p-3">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium capitalize text-text">{provider}</span>
+        <span className="text-sm font-medium capitalize text-[#0A0A0A]">{provider}</span>
         <span className={cn("text-lg font-bold", getScoreColor(score))}>{score}</span>
       </div>
-      <div className="h-2 rounded-full bg-white/50">
+      <div className="h-2 rounded-full bg-[#E5E5E5]">
         <div
           className={cn("h-2 rounded-full transition-all duration-500", color)}
           style={{ width: `${score}%` }}
@@ -380,34 +379,34 @@ export default function ClientDetailPage() {
     <div className="space-y-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm">
-        <Link href="/app" className="text-text-2 hover:text-text">Dashboard</Link>
-        <span className="text-text-3">/</span>
-        <span className="text-text">{client?.name || "Client"}</span>
+        <Link href="/app" className="text-[#666] hover:text-[#0A0A0A]">Dashboard</Link>
+        <span className="text-[#999]">/</span>
+        <span className="text-[#0A0A0A]">{client?.name || "Client"}</span>
       </div>
 
       {/* Loading */}
       {loading && (
         <div className="space-y-4">
-          <div className="h-32 animate-pulse rounded-2xl bg-surface-2" />
+          <div className="h-32 animate-pulse rounded-xl bg-[#F5F5F5]" />
           <div className="grid gap-4 lg:grid-cols-3">
-            <div className="h-80 animate-pulse rounded-2xl bg-surface-2" />
-            <div className="h-80 animate-pulse rounded-2xl bg-surface-2 lg:col-span-2" />
+            <div className="h-80 animate-pulse rounded-xl bg-[#F5F5F5]" />
+            <div className="h-80 animate-pulse rounded-xl bg-[#F5F5F5] lg:col-span-2" />
           </div>
         </div>
       )}
 
       {/* Error */}
       {error && (
-        <Alert variant="danger">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+          <Alert variant="danger">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
       )}
 
       {/* Not found */}
       {!loading && !error && !client && (
-        <div className="rounded-2xl border border-border bg-surface py-16 text-center">
-          <p className="text-text-2">Client not found (or not in your agency).</p>
-          <Link href="/app" className="mt-4 inline-block text-sm text-accent hover:underline">
+        <div className="rounded-xl border border-[#E5E5E5] bg-white py-16 text-center">
+          <p className="text-[#666]">Client not found (or not in your agency).</p>
+          <Link href="/app" className="mt-4 inline-block text-sm text-[#0A0A0A] hover:underline">
             Back to dashboard
           </Link>
         </div>
@@ -416,26 +415,22 @@ export default function ClientDetailPage() {
       {client && (
         <>
           {/* Hero header */}
-          <div className={cn("relative overflow-hidden rounded-3xl bg-gradient-to-br p-8", getScoreBg(snapshot?.vrtl_score ?? null))}>
-            {/* Decorative elements */}
-            <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/20 blur-3xl" />
-            <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-white/30 blur-2xl" />
-            
-            <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className={cn("rounded-2xl border bg-white p-6", getScoreBorder(snapshot?.vrtl_score ?? null))}>
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-center gap-6">
                 {/* Score circle */}
                 <BigScoreCircle score={snapshot?.vrtl_score ?? null} />
                 
                 {/* Client info */}
                 <div>
-                  <h1 className="text-3xl font-bold text-text">{client.name}</h1>
-                  <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-text-2">
+                  <h1 className="text-2xl font-bold text-[#0A0A0A]">{client.name}</h1>
+                  <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-[#666]">
                     {client.website && (
                       <a
                         href={client.website}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex items-center gap-1.5 rounded-full bg-white/50 px-3 py-1 hover:bg-white/70"
+                        className="flex items-center gap-1.5 rounded-lg border border-[#E5E5E5] bg-[#FAFAF8] px-3 py-1 hover:bg-[#F5F5F5]"
                       >
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
@@ -443,7 +438,7 @@ export default function ClientDetailPage() {
                         {client.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
                       </a>
                     )}
-                    <span className="rounded-full bg-white/50 px-3 py-1 capitalize">
+                    <span className="rounded-lg border border-[#E5E5E5] bg-[#FAFAF8] px-3 py-1 capitalize">
                       {client.industry.replace(/_/g, " ")}
                     </span>
                   </div>
@@ -451,7 +446,7 @@ export default function ClientDetailPage() {
                   {/* Trend */}
                   {snapshots.length > 1 && (
                     <div className="mt-3 flex items-center gap-2">
-                      <span className="text-xs text-text-3">Trend:</span>
+                      <span className="text-xs text-[#999]">Trend:</span>
                       <TrendIndicator snapshots={snapshots} />
                     </div>
                   )}
@@ -464,7 +459,7 @@ export default function ClientDetailPage() {
                   <button
                     onClick={resetRunningSnapshot}
                     disabled={running}
-                    className="rounded-xl border border-text/10 bg-white/50 px-5 py-2.5 text-sm font-medium text-text-2 transition-all hover:bg-white/70"
+                    className="rounded-lg border border-[#E5E5E5] bg-white px-5 py-2.5 text-sm font-medium text-[#666] transition-all hover:bg-[#F5F5F5]"
                   >
                     Reset
                   </button>
@@ -472,7 +467,7 @@ export default function ClientDetailPage() {
                 <button
                   onClick={runSnapshot}
                   disabled={running}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-accent/25 transition-all hover:bg-accent-2 hover:shadow-xl disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0A0A0A] px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-[#1a1a1a] disabled:opacity-50"
                 >
                   {running ? (
                     <>
@@ -495,7 +490,7 @@ export default function ClientDetailPage() {
             </div>
 
             {runError && (
-              <div className="relative mt-4">
+              <div className="mt-4">
                 <Alert variant="danger">
                   <AlertDescription>{runError}</AlertDescription>
                 </Alert>
@@ -505,35 +500,35 @@ export default function ClientDetailPage() {
 
           {/* Stats row */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-2xl border border-border bg-surface p-5">
+            <div className="rounded-xl border border-[#E5E5E5] bg-white p-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100 text-purple-600">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#F5F5F5] text-[#666]">
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
                   </svg>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-text">{competitors.length}</div>
-                  <div className="text-xs text-text-3">Competitors</div>
+                  <div className="text-2xl font-bold text-[#0A0A0A]">{competitors.length}</div>
+                  <div className="text-xs text-[#999]">Competitors</div>
                 </div>
               </div>
             </div>
-            <div className="rounded-2xl border border-border bg-surface p-5">
+            <div className="rounded-xl border border-[#E5E5E5] bg-white p-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#F5F5F5] text-[#666]">
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
                   </svg>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-text">{snapshots.length}</div>
-                  <div className="text-xs text-text-3">Snapshots</div>
+                  <div className="text-2xl font-bold text-[#0A0A0A]">{snapshots.length}</div>
+                  <div className="text-xs text-[#999]">Snapshots</div>
                 </div>
               </div>
             </div>
-            <div className="rounded-2xl border border-border bg-surface p-5">
+            <div className="rounded-xl border border-[#E5E5E5] bg-white p-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#F5F5F5] text-[#666]">
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -541,17 +536,17 @@ export default function ClientDetailPage() {
                 </div>
                 <div>
                   <div className={cn("text-2xl font-bold", getScoreColor(avgScore))}>{avgScore ?? "—"}</div>
-                  <div className="text-xs text-text-3">Avg Score</div>
+                  <div className="text-xs text-[#999]">Avg Score</div>
                 </div>
               </div>
             </div>
-            <div className="rounded-2xl border border-border bg-surface p-5">
+            <div className="rounded-xl border border-[#E5E5E5] bg-white p-4">
               <div className="flex items-center gap-3">
                 <div className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-xl",
-                  competitorConfidence === "high" ? "bg-emerald-100 text-emerald-600" :
-                  competitorConfidence === "medium" ? "bg-amber-100 text-amber-600" :
-                  "bg-red-100 text-red-600"
+                  "flex h-10 w-10 items-center justify-center rounded-lg",
+                  competitorConfidence === "high" ? "bg-emerald-50 text-emerald-600" :
+                  competitorConfidence === "medium" ? "bg-amber-50 text-amber-600" :
+                  "bg-red-50 text-red-600"
                 )}>
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
@@ -566,7 +561,7 @@ export default function ClientDetailPage() {
                   )}>
                     {competitorConfidence}
                   </div>
-                  <div className="text-xs text-text-3">Confidence</div>
+                  <div className="text-xs text-[#999]">Confidence</div>
                 </div>
               </div>
             </div>
@@ -578,8 +573,8 @@ export default function ClientDetailPage() {
             <div className="space-y-6">
               {/* Provider scores */}
               {providers.length > 0 && (
-                <div className="rounded-2xl border border-border bg-surface p-5">
-                  <h2 className="mb-4 font-semibold text-text">Score by Provider</h2>
+                <div className="rounded-xl border border-[#E5E5E5] bg-white p-5">
+                  <h2 className="mb-4 font-semibold text-[#0A0A0A]">Score by Provider</h2>
                   <div className="space-y-3">
                     {providers.map(([provider, score]) => (
                       <ProviderBar key={provider} provider={provider} score={score} />
@@ -590,25 +585,25 @@ export default function ClientDetailPage() {
 
               {/* Quick stats */}
               {snapshot && (
-                <div className="rounded-2xl border border-border bg-surface p-5">
-                  <h2 className="mb-4 font-semibold text-text">Latest Snapshot</h2>
+                <div className="rounded-xl border border-[#E5E5E5] bg-white p-5">
+                  <h2 className="mb-4 font-semibold text-[#0A0A0A]">Latest Snapshot</h2>
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-text-3">Status</span>
+                      <span className="text-[#999]">Status</span>
                       <Badge variant={statusVariant(snapshot.status)}>{snapshot.status}</Badge>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-text-3">Date</span>
-                      <span className="text-text">{new Date(snapshot.created_at).toLocaleDateString()}</span>
+                      <span className="text-[#999]">Date</span>
+                      <span className="text-[#0A0A0A]">{new Date(snapshot.created_at).toLocaleDateString()}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-text-3">Providers</span>
-                      <span className="text-text">{providers.length}</span>
+                      <span className="text-[#999]">Providers</span>
+                      <span className="text-[#0A0A0A]">{providers.length}</span>
                     </div>
                   </div>
                   <Link
                     href={`/app/clients/${clientId}/snapshots/${snapshot.id}`}
-                    className="mt-4 block rounded-xl bg-surface-2 py-2.5 text-center text-sm font-medium text-text transition-colors hover:bg-border"
+                    className="mt-4 block rounded-lg bg-[#0A0A0A] py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-[#1a1a1a]"
                   >
                     View Full Report →
                   </Link>
@@ -619,17 +614,17 @@ export default function ClientDetailPage() {
             {/* Right column - Competitors + History */}
             <div className="space-y-6 lg:col-span-2">
               {/* Competitors */}
-              <div className="rounded-2xl border border-border bg-surface">
-                <div className="flex items-center justify-between border-b border-border px-5 py-4">
+              <div className="rounded-xl border border-[#E5E5E5] bg-white">
+                <div className="flex items-center justify-between border-b border-[#E5E5E5] px-5 py-4">
                   <div>
-                    <h2 className="font-semibold text-text">Competitors</h2>
-                    <p className="text-xs text-text-3">{competitors.length}/8 tracked · {8 - competitors.length} slots available</p>
+                    <h2 className="font-semibold text-[#0A0A0A]">Competitors</h2>
+                    <p className="text-xs text-[#999]">{competitors.length}/8 tracked · {8 - competitors.length} slots available</p>
                   </div>
                   <div className={cn(
-                    "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium",
-                    competitorConfidence === "high" ? "bg-emerald-100 text-emerald-700" :
-                    competitorConfidence === "medium" ? "bg-amber-100 text-amber-700" :
-                    "bg-red-100 text-red-700"
+                    "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium",
+                    competitorConfidence === "high" ? "bg-emerald-50 text-emerald-700" :
+                    competitorConfidence === "medium" ? "bg-amber-50 text-amber-700" :
+                    "bg-red-50 text-red-700"
                   )}>
                     <span className={cn(
                       "h-2 w-2 rounded-full",
@@ -644,30 +639,24 @@ export default function ClientDetailPage() {
                 <div className="p-5">
                   {competitors.length > 0 ? (
                     <div className="grid gap-3 sm:grid-cols-2">
-                      {competitors.map((c, idx) => (
+                      {competitors.map((c) => (
                         <div
                           key={c.id}
-                          className="group relative flex items-center gap-3 rounded-xl border border-border bg-surface-2 p-4 transition-colors hover:border-text/20"
+                          className="group relative flex items-center gap-3 rounded-lg border border-[#E5E5E5] bg-[#FAFAF8] p-4 transition-colors hover:border-[#ccc]"
                         >
-                          <div className={cn(
-                            "flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold text-white",
-                            idx % 4 === 0 ? "bg-gradient-to-br from-blue-500 to-cyan-500" :
-                            idx % 4 === 1 ? "bg-gradient-to-br from-purple-500 to-pink-500" :
-                            idx % 4 === 2 ? "bg-gradient-to-br from-amber-500 to-orange-500" :
-                            "bg-gradient-to-br from-emerald-500 to-teal-500"
-                          )}>
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0A0A0A] text-sm font-bold text-white">
                             {c.name.charAt(0).toUpperCase()}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <div className="font-medium text-text">{c.name}</div>
-                            <div className="truncate text-xs text-text-3">
+                            <div className="font-medium text-[#0A0A0A]">{c.name}</div>
+                            <div className="truncate text-xs text-[#999]">
                               {c.website ? c.website.replace(/^https?:\/\//, "") : "No website"}
                             </div>
                           </div>
                           <button
                             onClick={() => deleteCompetitor(c.id)}
                             disabled={busy}
-                            className="absolute right-2 top-2 rounded-lg p-1.5 text-text-3 opacity-0 transition-all hover:bg-red-100 hover:text-red-600 group-hover:opacity-100"
+                            className="absolute right-2 top-2 rounded-lg p-1.5 text-[#999] opacity-0 transition-all hover:bg-red-50 hover:text-red-600 group-hover:opacity-100"
                           >
                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -677,14 +666,14 @@ export default function ClientDetailPage() {
                       ))}
                     </div>
                   ) : (
-                    <div className="rounded-xl border-2 border-dashed border-border py-8 text-center">
-                      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-surface-2">
-                        <svg className="h-6 w-6 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <div className="rounded-lg border-2 border-dashed border-[#E5E5E5] py-8 text-center">
+                      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#F5F5F5]">
+                        <svg className="h-6 w-6 text-[#999]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
                         </svg>
                       </div>
-                      <p className="text-sm font-medium text-text">No competitors yet</p>
-                      <p className="mt-1 text-xs text-text-3">Add competitors for better analysis</p>
+                      <p className="text-sm font-medium text-[#0A0A0A]">No competitors yet</p>
+                      <p className="mt-1 text-xs text-[#999]">Add competitors for better analysis</p>
                     </div>
                   )}
 
@@ -698,7 +687,7 @@ export default function ClientDetailPage() {
                         onChange={(e) => setNewName(e.target.value)}
                         required
                         disabled={busy}
-                        className="flex-1 rounded-xl border border-border bg-surface-2 px-4 py-2.5 text-sm text-text placeholder:text-text-3 focus:border-accent focus:outline-none"
+                        className="flex-1 rounded-lg border border-[#E5E5E5] bg-[#FAFAF8] px-4 py-2.5 text-sm text-[#0A0A0A] placeholder:text-[#999] focus:border-[#0A0A0A] focus:outline-none"
                       />
                       <input
                         type="url"
@@ -707,12 +696,12 @@ export default function ClientDetailPage() {
                         onChange={(e) => setNewWebsite(e.target.value)}
                         required
                         disabled={busy}
-                        className="flex-1 rounded-xl border border-border bg-surface-2 px-4 py-2.5 text-sm text-text placeholder:text-text-3 focus:border-accent focus:outline-none"
+                        className="flex-1 rounded-lg border border-[#E5E5E5] bg-[#FAFAF8] px-4 py-2.5 text-sm text-[#0A0A0A] placeholder:text-[#999] focus:border-[#0A0A0A] focus:outline-none"
                       />
                       <button
                         type="submit"
                         disabled={busy || !newName.trim()}
-                        className="rounded-xl bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-2 disabled:opacity-50"
+                        className="rounded-lg bg-[#0A0A0A] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1a1a1a] disabled:opacity-50"
                       >
                         Add
                       </button>
@@ -722,28 +711,28 @@ export default function ClientDetailPage() {
               </div>
 
               {/* Snapshot history */}
-              <div className="rounded-2xl border border-border bg-surface">
-                <div className="border-b border-border px-5 py-4">
-                  <h2 className="font-semibold text-text">Snapshot History</h2>
-                  <p className="text-xs text-text-3">Recent analysis runs</p>
+              <div className="rounded-xl border border-[#E5E5E5] bg-white">
+                <div className="border-b border-[#E5E5E5] px-5 py-4">
+                  <h2 className="font-semibold text-[#0A0A0A]">Snapshot History</h2>
+                  <p className="text-xs text-[#999]">Recent analysis runs</p>
                 </div>
 
                 {snapshots.length > 0 ? (
-                  <div className="divide-y divide-border">
+                  <div className="divide-y divide-[#E5E5E5]">
                     {snapshots.map((s) => (
                       <Link
                         key={s.id}
                         href={`/app/clients/${clientId}/snapshots/${s.id}`}
-                        className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-surface-2"
+                        className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-[#FAFAF8]"
                       >
                         <div className="flex items-center gap-4">
                           <div className={cn(
-                            "flex h-12 w-12 items-center justify-center rounded-xl text-lg font-bold",
+                            "flex h-12 w-12 items-center justify-center rounded-lg text-lg font-bold",
                             s.vrtl_score !== null
-                              ? s.vrtl_score >= 80 ? "bg-emerald-100 text-emerald-600"
-                              : s.vrtl_score >= 50 ? "bg-amber-100 text-amber-600"
-                              : "bg-red-100 text-red-600"
-                              : "bg-gray-100 text-gray-400"
+                              ? s.vrtl_score >= 80 ? "bg-emerald-50 text-emerald-600"
+                              : s.vrtl_score >= 50 ? "bg-amber-50 text-amber-600"
+                              : "bg-red-50 text-red-600"
+                              : "bg-[#F5F5F5] text-[#999]"
                           )}>
                             {s.vrtl_score ?? "—"}
                           </div>
@@ -751,17 +740,17 @@ export default function ClientDetailPage() {
                             <div className="flex items-center gap-2">
                               <Badge variant={statusVariant(s.status)}>{s.status}</Badge>
                               {s.score_by_provider && (
-                                <span className="text-xs text-text-3">
+                                <span className="text-xs text-[#999]">
                                   {Object.keys(s.score_by_provider).length} providers
                                 </span>
                               )}
                             </div>
-                            <div className="mt-1 text-sm text-text-2">
+                            <div className="mt-1 text-sm text-[#666]">
                               {new Date(s.created_at).toLocaleString()}
                             </div>
                           </div>
                         </div>
-                        <svg className="h-5 w-5 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <svg className="h-5 w-5 text-[#999]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                         </svg>
                       </Link>
@@ -769,8 +758,8 @@ export default function ClientDetailPage() {
                   </div>
                 ) : (
                   <div className="py-12 text-center">
-                    <p className="text-sm text-text-2">No snapshots yet</p>
-                    <p className="mt-1 text-xs text-text-3">Run your first snapshot to get started</p>
+                    <p className="text-sm text-[#666]">No snapshots yet</p>
+                    <p className="mt-1 text-xs text-[#999]">Run your first snapshot to get started</p>
                   </div>
                 )}
               </div>
@@ -778,6 +767,6 @@ export default function ClientDetailPage() {
           </div>
         </>
       )}
-    </div>
+        </div>
   );
 }
