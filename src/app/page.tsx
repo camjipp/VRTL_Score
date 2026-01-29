@@ -320,28 +320,6 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          AI MODELS STRIP
-      ═══════════════════════════════════════════════════════ */}
-      <section className="border-y border-[#E5E5E5] bg-white px-6 py-12">
-        <div className="mx-auto max-w-4xl">
-          <p className="text-center text-sm font-medium uppercase tracking-widest text-[#999] mb-8">
-            VRTL Score works across leading AI models
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
-            {AI_MODELS.map((model) => (
-              <div key={model.name} className="flex items-center gap-2.5 opacity-70 hover:opacity-100 transition-opacity">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-[#E5E5E5] bg-[#FAFAF8] p-2">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img alt={model.name} src={model.icon} className="h-full w-full object-contain" />
-                </div>
-                <span className="text-sm font-medium text-[#666]">{model.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
           HOW IT WORKS (3 Steps)
       ═══════════════════════════════════════════════════════ */}
       <section className="bg-[#FAFAF8] px-6 py-20 md:py-28">
@@ -491,31 +469,28 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          QUESTIONS MARQUEE
+          FAQ (with Questions marquee)
       ═══════════════════════════════════════════════════════ */}
-      <section className="border-t border-[#E5E5E5] bg-[#FAFAF8] py-8 overflow-hidden">
-        <div className="flex animate-marquee whitespace-nowrap">
-          {Array.from({ length: 20 }).map((_, i) => (
-            <span key={i} className="mx-6 text-4xl font-bold text-[#0A0A0A]/10 md:text-5xl">
-              Questions?
-            </span>
-          ))}
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
-          FAQ
-      ═══════════════════════════════════════════════════════ */}
-      <section className="bg-white px-6 py-20 md:py-28">
-        <div className="mx-auto max-w-2xl">
-          <div className="text-center mb-12">
-            <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600">
-              FAQ
-            </p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-[#0A0A0A] md:text-4xl">
-              We have the answers.
-            </h2>
+      <section className="border-t border-[#E5E5E5] bg-white">
+        {/* Questions Marquee - Goodie style */}
+        <div className="overflow-hidden py-10 md:py-14">
+          <div className="flex animate-marquee whitespace-nowrap">
+            {Array.from({ length: 30 }).map((_, i) => (
+              <span key={i} className="mx-8 text-5xl font-bold text-[#0A0A0A] md:text-6xl lg:text-7xl">
+                Questions?
+              </span>
+            ))}
           </div>
+        </div>
+
+        {/* FAQ Content */}
+        <div className="px-6 pb-20 pt-8 md:pb-28 md:pt-12">
+          <div className="mx-auto max-w-2xl">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-semibold tracking-tight text-[#0A0A0A] md:text-4xl">
+                We have the answers.
+              </h2>
+            </div>
 
           <div>
             <FAQItem
@@ -542,6 +517,7 @@ export default function HomePage() {
               question="Is there a free trial?"
               answer="Yes, we offer a 7-day free trial so you can test the platform with your own clients before committing."
             />
+          </div>
           </div>
         </div>
       </section>
