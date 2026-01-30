@@ -798,9 +798,6 @@ export function renderReportHtml(data: ReportData): string {
       <tr><td>Prompt Pack Version</td><td>${snapshot.prompt_pack_version || "v1_core"}</td></tr>
     </table>
     
-    <div class="disclaimer no-break">
-      <strong>Note:</strong> LLM outputs can vary slightly between runs. This report prioritizes repeatability via fixed prompts and structured scoring. Results reflect AI model behavior at time of snapshot and may change as models are updated.
-    </div>
     
     <div class="page-footer">
       <span>${escapeHtml(client.name)} — AI Visibility Report</span>
