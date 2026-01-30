@@ -354,6 +354,33 @@ export function renderReportHtml(data: ReportData): string {
     .method-item { }
     .method-label { font-size: 8px; color: #94a3b8; margin-bottom: 2px; }
     .method-value { font-size: 10px; color: #0f172a; font-weight: 500; }
+    
+    /* Cover Charts */
+    .cover-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
+    .chart-box { padding: 16px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; }
+    .chart-title { font-size: 10px; font-weight: 700; color: #0f172a; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .chart-icon { font-size: 12px; }
+    
+    .pillar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .pillar-row:last-child { margin-bottom: 0; }
+    .pillar-label { width: 70px; font-size: 9px; color: #475569; }
+    .pillar-bar { flex: 1; height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden; }
+    .pillar-fill { height: 100%; border-radius: 5px; }
+    .pillar-fill.green { background: linear-gradient(90deg, #10b981, #34d399); }
+    .pillar-fill.yellow { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .pillar-fill.red { background: linear-gradient(90deg, #ef4444, #f87171); }
+    .pillar-value { width: 32px; font-size: 10px; font-weight: 700; color: #0f172a; text-align: right; }
+    
+    .comp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .comp-row:last-child { margin-bottom: 0; }
+    .comp-name { width: 80px; font-size: 9px; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .comp-name.client { font-weight: 700; color: #0f172a; }
+    .comp-bar { flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+    .comp-fill { height: 100%; border-radius: 4px; }
+    .comp-fill.client { background: var(--accent); }
+    .comp-fill.other { background: #94a3b8; }
+    .comp-val { width: 24px; font-size: 9px; color: #64748b; text-align: right; }
+    .comp-val.client { font-weight: 700; color: #0f172a; }
   </style>
 </head>
 <body>
@@ -398,6 +425,61 @@ export function renderReportHtml(data: ReportData): string {
               <div class="scope-label">AI Models</div>
             </div>
           </div>
+        </div>
+      </div>
+      
+      <!-- Cover Charts -->
+      <div class="cover-charts no-break">
+        <!-- Visibility Breakdown -->
+        <div class="chart-box">
+          <div class="chart-title"><span class="chart-icon">📊</span> Visibility Breakdown</div>
+          <div class="pillar-row">
+            <div class="pillar-label">Presence</div>
+            <div class="pillar-bar">
+              <div class="pillar-fill ${metrics.mentionRate >= 70 ? 'green' : metrics.mentionRate >= 40 ? 'yellow' : 'red'}" style="width: ${metrics.mentionRate}%"></div>
+            </div>
+            <div class="pillar-value">${metrics.mentionRate}%</div>
+          </div>
+          <div class="pillar-row">
+            <div class="pillar-label">Positioning</div>
+            <div class="pillar-bar">
+              <div class="pillar-fill ${metrics.topPositionRate >= 70 ? 'green' : metrics.topPositionRate >= 40 ? 'yellow' : 'red'}" style="width: ${metrics.topPositionRate}%"></div>
+            </div>
+            <div class="pillar-value">${metrics.topPositionRate}%</div>
+          </div>
+          <div class="pillar-row">
+            <div class="pillar-label">Authority</div>
+            <div class="pillar-bar">
+              <div class="pillar-fill ${metrics.citationRate >= 50 ? 'green' : metrics.citationRate >= 20 ? 'yellow' : 'red'}" style="width: ${Math.max(metrics.citationRate, 5)}%"></div>
+            </div>
+            <div class="pillar-value">${metrics.citationRate}%</div>
+          </div>
+        </div>
+        
+        <!-- Competitive Benchmarking -->
+        <div class="chart-box">
+          <div class="chart-title"><span class="chart-icon">⚔️</span> Competitive Benchmarking</div>
+          <div class="comp-row">
+            <div class="comp-name client">${escapeHtml(client.name.length > 12 ? client.name.slice(0, 12) + '…' : client.name)}</div>
+            <div class="comp-bar">
+              <div class="comp-fill client" style="width: ${metrics.mentionRate}%"></div>
+            </div>
+            <div class="comp-val client">${metrics.mentioned}</div>
+          </div>
+          ${metrics.competitorStats.slice(0, 3).map(c => {
+            const pct = Math.round((c.mentions / metrics.total) * 100);
+            return `
+          <div class="comp-row">
+            <div class="comp-name">${escapeHtml(c.name.length > 12 ? c.name.slice(0, 12) + '…' : c.name)}</div>
+            <div class="comp-bar">
+              <div class="comp-fill other" style="width: ${pct}%"></div>
+            </div>
+            <div class="comp-val">${c.mentions}</div>
+          </div>`;
+          }).join("")}
+          ${metrics.competitorStats.length === 0 ? `
+          <div style="font-size: 9px; color: #64748b; padding: 8px 0;">No competitors detected in AI responses</div>
+          ` : ""}
         </div>
       </div>
     </div>
