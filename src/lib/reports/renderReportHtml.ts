@@ -32,1005 +32,757 @@ export type ReportData = {
 
 function getScoreStatus(score: number | null): { label: string; color: string; bg: string } {
   if (score === null) return { label: "No Data", color: "#64748b", bg: "#f1f5f9" };
-  if (score >= 70) return { label: "Strong", color: "#059669", bg: "#ecfdf5" };
-  if (score >= 40) return { label: "Moderate", color: "#d97706", bg: "#fffbeb" };
-  return { label: "Needs Work", color: "#dc2626", bg: "#fef2f2" };
+  if (score >= 70) return { label: "Strong", color: "#059669", bg: "#d1fae5" };
+  if (score >= 40) return { label: "Moderate", color: "#d97706", bg: "#fef3c7" };
+  return { label: "Needs Work", color: "#dc2626", bg: "#fee2e2" };
 }
 
-function getConfidence(responses: ReportData["responses"]): { level: string; color: string; description: string } {
+function getConfidence(responses: ReportData["responses"]): { level: string; color: string } {
   const valid = responses.filter(r => r.parsed_json !== null).length;
   const ratio = valid / Math.max(responses.length, 1);
   
-  if (ratio >= 0.8 && responses.length >= 8) {
-    return { level: "High", color: "#059669", description: "Strong data coverage" };
-  } else if (ratio >= 0.5 && responses.length >= 5) {
-    return { level: "Medium", color: "#d97706", description: "Moderate coverage" };
-  }
-  return { level: "Low", color: "#dc2626", description: "Limited data" };
+  if (ratio >= 0.8 && responses.length >= 8) return { level: "High", color: "#059669" };
+  if (ratio >= 0.5 && responses.length >= 5) return { level: "Medium", color: "#d97706" };
+  return { level: "Low", color: "#dc2626" };
 }
 
-function generateFindings(data: ReportData): Array<{ title: string; value: string; status: "good" | "warning" | "bad"; detail: string }> {
-  const { client, responses } = data;
-  const findings: Array<{ title: string; value: string; status: "good" | "warning" | "bad"; detail: string }> = [];
+export function renderReportHtml(data: ReportData): string {
+  const { agency, client, snapshot, competitors, responses } = data;
   
-  let mentioned = 0;
-  let topPosition = 0;
-  let strongRec = 0;
+  const accentColor = agency.brand_accent || "#4f46e5";
+  const score = snapshot.vrtl_score;
+  const scoreStatus = getScoreStatus(score);
+  const confidence = getConfidence(responses);
+  
+  // Calculate metrics
+  let mentioned = 0, topPosition = 0, strongRec = 0;
+  const competitorMentions = new Map<string, number>();
   
   for (const r of responses) {
     const pj = r.parsed_json;
     if (pj?.client_mentioned) mentioned++;
     if (pj?.client_position === "top") topPosition++;
     if (pj?.recommendation_strength === "strong") strongRec++;
-  }
-  
-  const total = responses.length;
-  const mentionRate = total > 0 ? Math.round((mentioned / total) * 100) : 0;
-  const topRate = mentioned > 0 ? Math.round((topPosition / mentioned) * 100) : 0;
-  
-  // Finding 1: Mention Rate
-  findings.push({
-    title: "AI Mention Rate",
-    value: `${mentionRate}%`,
-    status: mentionRate >= 60 ? "good" : mentionRate >= 30 ? "warning" : "bad",
-    detail: `${client.name} was mentioned in ${mentioned} of ${total} AI responses tested.`
-  });
-  
-  // Finding 2: Top Position Rate
-  if (mentioned > 0) {
-    findings.push({
-      title: "Top Position Rate",
-      value: `${topRate}%`,
-      status: topRate >= 50 ? "good" : topRate >= 20 ? "warning" : "bad",
-      detail: `When mentioned, ${client.name} achieved top positioning ${topPosition} time${topPosition !== 1 ? "s" : ""}.`
-    });
-  }
-  
-  // Finding 3: Strong Recommendations
-  findings.push({
-    title: "Strong Recommendations",
-    value: `${strongRec}`,
-    status: strongRec >= 3 ? "good" : strongRec >= 1 ? "warning" : "bad",
-    detail: strongRec > 0 
-      ? `AI models gave ${client.name} a strong recommendation ${strongRec} time${strongRec !== 1 ? "s" : ""}.`
-      : `No strong recommendations received. Focus on demonstrating clear value propositions.`
-  });
-  
-  return findings;
-}
-
-function generateActions(data: ReportData): Array<{ action: string; why: string }> {
-  const score = data.snapshot.vrtl_score;
-  const actions: Array<{ action: string; why: string }> = [];
-  
-  if (score === null || score < 40) {
-    actions.push({
-      action: "Audit existing content for AI-friendly structure",
-      why: "AI models favor well-structured, authoritative content with clear headings and factual claims."
-    });
-    actions.push({
-      action: "Build topic authority with comprehensive guides",
-      why: "Creating in-depth content on your core topics signals expertise to AI models."
-    });
-  } else if (score < 70) {
-    actions.push({
-      action: "Expand content coverage to related topics",
-      why: "Broadening your content footprint increases chances of AI mentions across more queries."
-    });
-    actions.push({
-      action: "Add structured data and clear product/service descriptions",
-      why: "Explicit, machine-readable information helps AI models accurately represent your offerings."
-    });
-  } else {
-    actions.push({
-      action: "Maintain content freshness with regular updates",
-      why: "AI models often prefer recently updated content. Keep your key pages current."
-    });
-    actions.push({
-      action: "Monitor competitor movements monthly",
-      why: "Strong positions can erode if competitors improve their AI visibility."
-    });
-  }
-  
-  actions.push({
-    action: "Run follow-up snapshots in 30 days",
-    why: "Track progress and identify trends over time to refine your strategy."
-  });
-  
-  return actions;
-}
-
-export function renderReportHtml(data: ReportData): string {
-  const { agency, client, snapshot, competitors, responses } = data;
-  
-  const accentColor = agency.brand_accent || "#6366f1";
-  const score = snapshot.vrtl_score;
-  const scoreStatus = getScoreStatus(score);
-  const confidence = getConfidence(responses);
-  const findings = generateFindings(data);
-  const actions = generateActions(data);
-  
-  // Models tested
-  const models = snapshot.score_by_provider ? Object.keys(snapshot.score_by_provider) : [];
-  
-  // Competitor mentions
-  const competitorMentions = new Map<string, number>();
-  for (const r of responses) {
-    if (Array.isArray(r.parsed_json?.competitors_mentioned)) {
-      for (const name of r.parsed_json.competitors_mentioned) {
+    if (Array.isArray(pj?.competitors_mentioned)) {
+      for (const name of pj.competitors_mentioned) {
         competitorMentions.set(name, (competitorMentions.get(name) ?? 0) + 1);
       }
     }
   }
-  const topCompetitors = Array.from(competitorMentions.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
+  
+  const total = responses.length;
+  const mentionRate = total > 0 ? Math.round((mentioned / total) * 100) : 0;
+  const models = snapshot.score_by_provider ? Object.keys(snapshot.score_by_provider) : [];
+  const topCompetitors = Array.from(competitorMentions.entries()).sort((a, b) => b[1] - a[1]).slice(0, 4);
 
   return `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8" />
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-    
-    :root {
-      --accent: ${accentColor};
-      --text-primary: #0f172a;
-      --text-secondary: #475569;
-      --text-muted: #94a3b8;
-      --border: #e2e8f0;
-      --bg-subtle: #f8fafc;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
     html, body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      font-size: 11px;
-      line-height: 1.6;
-      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-size: 10px;
+      line-height: 1.5;
+      color: #1e293b;
       background: #fff;
     }
     
+    /* Fixed page sizing for A4 */
     .page {
-      padding: 56px 64px;
-      min-height: 100vh;
+      width: 210mm;
+      min-height: 297mm;
+      padding: 20mm 20mm 25mm 20mm;
       page-break-after: always;
       position: relative;
     }
     
     .page:last-child { page-break-after: avoid; }
     
-    /* Cover Page */
-    .cover {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      background: linear-gradient(180deg, var(--bg-subtle) 0%, #fff 100%);
-    }
+    /* Prevent breaking inside elements */
+    .no-break { page-break-inside: avoid; break-inside: avoid; }
+    
+    /* === PAGE 1: COVER === */
+    .cover { background: #f8fafc; }
     
     .cover-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
+      margin-bottom: 24px;
     }
     
-    .cover-logo img {
-      max-height: 40px;
-      max-width: 160px;
-    }
+    .logo { font-size: 13px; font-weight: 700; color: #0f172a; }
+    .logo img { max-height: 32px; }
     
-    .cover-logo-text {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
+    .date { font-size: 9px; color: #64748b; text-align: right; }
     
-    .cover-meta {
-      text-align: right;
+    .cover-body { margin-top: 32px; }
+    
+    .report-type {
       font-size: 10px;
-      color: var(--text-muted);
-    }
-    
-    .cover-main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 80px 0;
-    }
-    
-    .cover-label {
-      font-size: 11px;
       font-weight: 600;
-      color: var(--accent);
+      color: ${accentColor};
       text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 16px;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
     }
     
-    .cover-title {
-      font-size: 42px;
-      font-weight: 800;
-      color: var(--text-primary);
-      letter-spacing: -0.03em;
+    .client-name {
+      font-size: 32px;
+      font-weight: 700;
+      color: #0f172a;
       line-height: 1.1;
-      margin-bottom: 12px;
+      margin-bottom: 4px;
     }
     
-    .cover-subtitle {
-      font-size: 14px;
-      color: var(--text-secondary);
-    }
+    .client-url { font-size: 11px; color: #64748b; }
     
-    .cover-score-section {
-      margin-top: 48px;
-      display: flex;
-      align-items: flex-end;
-      gap: 48px;
-    }
-    
-    .cover-score {
+    /* Score display */
+    .score-box {
+      margin-top: 32px;
+      padding: 24px;
       background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 32px 48px;
-      text-align: center;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      display: inline-block;
     }
     
-    .cover-score-value {
-      font-size: 72px;
-      font-weight: 800;
-      color: var(--text-primary);
-      letter-spacing: -0.03em;
+    .score-number {
+      font-size: 64px;
+      font-weight: 700;
+      color: #0f172a;
       line-height: 1;
     }
     
-    .cover-score-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-top: 8px;
-    }
-    
-    .cover-score-status {
-      display: inline-block;
-      margin-top: 12px;
-      padding: 6px 16px;
-      border-radius: 100px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-    
-    .cover-meta-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-    }
-    
-    .cover-meta-item {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-    }
-    
-    .cover-meta-value {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-    
-    .cover-meta-label {
+    .score-label {
       font-size: 10px;
-      color: var(--text-muted);
+      color: #64748b;
       margin-top: 4px;
     }
     
-    .cover-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-top: 24px;
-      border-top: 1px solid var(--border);
+    .score-badge {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 4px 12px;
+      border-radius: 4px;
       font-size: 10px;
-      color: var(--text-muted);
+      font-weight: 600;
     }
     
-    /* Page Header */
+    /* Key stats grid */
+    .stats-row {
+      display: flex;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    
+    .stat-box {
+      flex: 1;
+      padding: 16px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    
+    .stat-value { font-size: 20px; font-weight: 700; color: #0f172a; }
+    .stat-label { font-size: 9px; color: #64748b; margin-top: 2px; }
+    
+    /* Cover footer */
+    .cover-footer {
+      position: absolute;
+      bottom: 20mm;
+      left: 20mm;
+      right: 20mm;
+      display: flex;
+      justify-content: space-between;
+      font-size: 8px;
+      color: #94a3b8;
+      padding-top: 12px;
+      border-top: 1px solid #e2e8f0;
+    }
+    
+    /* === CONTENT PAGES === */
     .page-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 40px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e2e8f0;
+      margin-bottom: 20px;
     }
     
-    .page-header-left {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
+    .page-title { font-size: 9px; font-weight: 600; color: ${accentColor}; text-transform: uppercase; letter-spacing: 0.06em; }
+    .page-num { font-size: 9px; color: #94a3b8; }
     
-    .page-section {
-      font-size: 10px;
-      font-weight: 600;
-      color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-    
-    .page-client {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    
-    .page-number {
-      font-size: 10px;
-      color: var(--text-muted);
-    }
-    
-    /* Section Title */
     .section-title {
-      font-size: 20px;
+      font-size: 16px;
       font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 8px;
+      color: #0f172a;
+      margin-bottom: 6px;
     }
     
-    .section-subtitle {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-bottom: 32px;
-    }
-    
-    /* Findings Cards */
-    .findings-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin-bottom: 48px;
-    }
-    
-    .finding-card {
-      background: var(--bg-subtle);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
-    }
-    
-    .finding-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
+    .section-desc {
+      font-size: 10px;
+      color: #64748b;
       margin-bottom: 16px;
     }
     
-    .finding-title {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-secondary);
+    /* Findings cards - 2 column */
+    .findings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
     }
     
-    .finding-status {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
+    .finding {
+      padding: 14px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
     }
     
-    .finding-status.good { background: #059669; }
-    .finding-status.warning { background: #d97706; }
-    .finding-status.bad { background: #dc2626; }
-    
-    .finding-value {
-      font-size: 32px;
-      font-weight: 800;
-      color: var(--text-primary);
-      letter-spacing: -0.02em;
+    .finding-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 8px;
     }
     
-    .finding-detail {
-      font-size: 11px;
-      color: var(--text-secondary);
-      line-height: 1.5;
+    .finding-label { font-size: 9px; color: #64748b; }
+    
+    .finding-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
     }
     
-    /* Actions */
-    .actions-section {
-      background: var(--bg-subtle);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 32px;
+    .dot-good { background: #10b981; }
+    .dot-warn { background: #f59e0b; }
+    .dot-bad { background: #ef4444; }
+    
+    .finding-value { font-size: 24px; font-weight: 700; color: #0f172a; }
+    .finding-detail { font-size: 9px; color: #64748b; margin-top: 4px; line-height: 1.4; }
+    
+    /* Actions list */
+    .actions-box {
+      padding: 16px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      border-left: 3px solid ${accentColor};
+      margin-bottom: 20px;
     }
     
     .actions-title {
-      font-size: 14px;
+      font-size: 11px;
       font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 24px;
+      color: #0f172a;
+      margin-bottom: 12px;
+    }
+    
+    .action {
+      display: flex;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .action:last-child { border-bottom: none; }
+    
+    .action-num {
+      width: 20px;
+      height: 20px;
+      background: ${accentColor};
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .action-text { font-size: 10px; color: #1e293b; line-height: 1.4; }
+    .action-why { font-size: 9px; color: #64748b; margin-top: 2px; }
+    
+    /* Model scores */
+    .models-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    
+    .model-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+    }
+    
+    .model-score { font-size: 18px; font-weight: 700; color: #0f172a; min-width: 32px; }
+    .model-name { font-size: 10px; color: #475569; }
+    
+    .model-bar {
+      flex: 1;
+      height: 4px;
+      background: #e2e8f0;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    
+    .model-fill { height: 100%; background: ${accentColor}; border-radius: 2px; }
+    
+    /* Evidence table */
+    .evidence-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9px;
+    }
+    
+    .evidence-table th {
+      text-align: left;
+      padding: 10px 8px;
+      background: #f1f5f9;
+      font-weight: 600;
+      color: #475569;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .evidence-table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: top;
+    }
+    
+    .evidence-table tr:nth-child(even) td { background: #fafafa; }
+    
+    .prompt-text { max-width: 200px; line-height: 1.4; }
+    
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 8px;
+      font-weight: 600;
+    }
+    
+    .badge-yes { background: #d1fae5; color: #065f46; }
+    .badge-no { background: #fee2e2; color: #991b1b; }
+    
+    /* Competitors */
+    .comp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9px;
+      margin-top: 16px;
+    }
+    
+    .comp-table th {
+      text-align: left;
+      padding: 8px;
+      background: #f1f5f9;
+      font-weight: 600;
+      color: #475569;
+    }
+    
+    .comp-table td { padding: 8px; border-bottom: 1px solid #f1f5f9; }
+    
+    .comp-bar {
       display: flex;
       align-items: center;
       gap: 8px;
     }
     
-    .actions-title::before {
-      content: '';
-      width: 4px;
-      height: 20px;
-      background: var(--accent);
-      border-radius: 2px;
-    }
-    
-    .action-item {
-      display: grid;
-      grid-template-columns: 32px 1fr;
-      gap: 16px;
-      padding: 16px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    
-    .action-item:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-    }
-    
-    .action-number {
-      width: 32px;
-      height: 32px;
-      background: var(--accent);
-      color: #fff;
-      font-size: 12px;
-      font-weight: 700;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .action-content {}
-    
-    .action-text {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 4px;
-    }
-    
-    .action-why {
-      font-size: 11px;
-      color: var(--text-secondary);
-    }
-    
-    /* Provider Scores */
-    .providers-section {
-      margin-top: 48px;
-    }
-    
-    .providers-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-    }
-    
-    .provider-card {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 16px 20px;
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-    }
-    
-    .provider-score {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--text-primary);
-      min-width: 48px;
-    }
-    
-    .provider-info {
+    .comp-track {
       flex: 1;
-    }
-    
-    .provider-name {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    
-    .provider-bar {
       height: 6px;
-      background: var(--border);
+      background: #e2e8f0;
       border-radius: 3px;
-      margin-top: 6px;
       overflow: hidden;
     }
     
-    .provider-bar-fill {
-      height: 100%;
-      background: var(--accent);
-      border-radius: 3px;
-    }
+    .comp-fill { height: 100%; background: #64748b; border-radius: 3px; }
+    .comp-count { font-weight: 600; min-width: 20px; }
     
-    /* Evidence Table */
-    .evidence-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    
-    .evidence-table th {
-      text-align: left;
-      padding: 14px 16px;
-      background: var(--bg-subtle);
-      font-size: 10px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border-bottom: 1px solid var(--border);
-    }
-    
-    .evidence-table td {
-      padding: 16px;
-      font-size: 11px;
-      color: var(--text-primary);
-      border-bottom: 1px solid var(--border);
-      vertical-align: top;
-    }
-    
-    .evidence-table tr:nth-child(even) td {
-      background: var(--bg-subtle);
-    }
-    
-    .evidence-table tr:last-child td {
-      border-bottom: none;
-    }
-    
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 100px;
-      font-size: 10px;
-      font-weight: 600;
-    }
-    
-    .status-badge.yes {
-      background: #ecfdf5;
-      color: #059669;
-    }
-    
-    .status-badge.no {
-      background: #fef2f2;
-      color: #dc2626;
-    }
-    
-    .status-badge::before {
-      content: '';
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: currentColor;
-    }
-    
-    .prompt-cell {
-      max-width: 280px;
-      line-height: 1.5;
-    }
-    
-    /* Competitors */
-    .competitors-section {
-      margin-top: 48px;
-    }
-    
-    .competitors-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    
-    .competitors-table th {
-      text-align: left;
-      padding: 12px 16px;
-      background: var(--bg-subtle);
-      font-size: 10px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    
-    .competitors-table td {
-      padding: 14px 16px;
-      font-size: 11px;
-      border-bottom: 1px solid var(--border);
-    }
-    
-    .competitor-bar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .competitor-bar-track {
-      flex: 1;
-      height: 8px;
-      background: var(--border);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    
-    .competitor-bar-fill {
-      height: 100%;
-      background: var(--text-secondary);
-      border-radius: 4px;
-    }
-    
-    .competitor-count {
-      font-weight: 600;
-      min-width: 24px;
-    }
-    
-    /* Raw Data */
-    .raw-section {
-      margin-top: 32px;
-    }
-    
+    /* Appendix */
     .raw-item {
-      margin-bottom: 24px;
-      padding: 20px;
-      background: var(--bg-subtle);
-      border: 1px solid var(--border);
-      border-radius: 10px;
+      margin-bottom: 16px;
+      padding: 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
     }
     
     .raw-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
     
-    .raw-label {
-      font-size: 10px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    
-    .raw-meta {
-      font-size: 10px;
-      color: var(--text-muted);
-    }
+    .raw-label { font-size: 9px; font-weight: 600; color: #475569; }
+    .raw-status { font-size: 8px; color: #64748b; }
     
     .raw-text {
-      font-size: 10px;
-      color: var(--text-secondary);
-      line-height: 1.7;
+      font-size: 9px;
+      color: #475569;
+      line-height: 1.5;
       white-space: pre-wrap;
       word-break: break-word;
     }
     
     /* Methodology */
-    .methodology-section {
-      background: var(--bg-subtle);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 32px;
-      margin-top: 48px;
+    .method-box {
+      padding: 16px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      margin-top: 20px;
     }
     
-    .methodology-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 16px;
-    }
-    
-    .methodology-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 24px;
-    }
-    
-    .methodology-item {
+    .method-title {
       font-size: 11px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 12px;
     }
     
-    .methodology-label {
-      color: var(--text-muted);
-      margin-bottom: 4px;
+    .method-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
     }
     
-    .methodology-value {
-      color: var(--text-primary);
-      font-weight: 500;
-    }
+    .method-item {}
+    .method-label { font-size: 8px; color: #94a3b8; margin-bottom: 2px; }
+    .method-value { font-size: 10px; color: #1e293b; }
     
-    /* Page Footer */
+    /* Page footer */
     .page-footer {
       position: absolute;
-      bottom: 56px;
-      left: 64px;
-      right: 64px;
+      bottom: 15mm;
+      left: 20mm;
+      right: 20mm;
       display: flex;
       justify-content: space-between;
-      font-size: 9px;
-      color: var(--text-muted);
-      padding-top: 16px;
-      border-top: 1px solid var(--border);
+      font-size: 8px;
+      color: #94a3b8;
     }
   </style>
 </head>
 <body>
-  <!-- Page 1: Cover -->
+  <!-- PAGE 1: COVER -->
   <div class="page cover">
     <div class="cover-header">
       ${agency.brand_logo_url 
-        ? `<div class="cover-logo"><img src="${escapeHtml(agency.brand_logo_url)}" alt="${escapeHtml(agency.name)}" /></div>`
-        : `<div class="cover-logo-text">${escapeHtml(agency.name)}</div>`
+        ? `<div class="logo"><img src="${escapeHtml(agency.brand_logo_url)}" alt="" /></div>`
+        : `<div class="logo">${escapeHtml(agency.name)}</div>`
       }
-      <div class="cover-meta">
-        <div>${formatDate(snapshot.created_at)}</div>
-        <div>Snapshot ${snapshot.id.slice(0, 8)}</div>
+      <div class="date">
+        ${formatDate(snapshot.created_at)}<br/>
+        ID: ${snapshot.id.slice(0, 8)}
       </div>
     </div>
     
-    <div class="cover-main">
-      <div class="cover-label">AI Visibility Report</div>
-      <div class="cover-title">${escapeHtml(client.name)}</div>
-      ${client.website ? `<div class="cover-subtitle">${escapeHtml(client.website)}</div>` : ""}
+    <div class="cover-body">
+      <div class="report-type">AI Visibility Report</div>
+      <div class="client-name">${escapeHtml(client.name)}</div>
+      ${client.website ? `<div class="client-url">${escapeHtml(client.website)}</div>` : ""}
       
-      <div class="cover-score-section">
-        <div class="cover-score">
-          <div class="cover-score-value">${score ?? "—"}</div>
-          <div class="cover-score-label">VRTL Score</div>
-          <div class="cover-score-status" style="background: ${scoreStatus.bg}; color: ${scoreStatus.color};">
-            ${scoreStatus.label}
-          </div>
+      <div class="score-box">
+        <div class="score-number">${score ?? "—"}</div>
+        <div class="score-label">VRTL Score</div>
+        <div class="score-badge" style="background: ${scoreStatus.bg}; color: ${scoreStatus.color};">
+          ${scoreStatus.label}
         </div>
-        
-        <div class="cover-meta-grid">
-          <div class="cover-meta-item">
-            <div class="cover-meta-value" style="color: ${confidence.color}">${confidence.level}</div>
-            <div class="cover-meta-label">Confidence Level</div>
-          </div>
-          <div class="cover-meta-item">
-            <div class="cover-meta-value">${responses.length}</div>
-            <div class="cover-meta-label">Prompts Tested</div>
-          </div>
-          <div class="cover-meta-item">
-            <div class="cover-meta-value">${models.length}</div>
-            <div class="cover-meta-label">AI Models</div>
-          </div>
+      </div>
+      
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-value" style="color: ${confidence.color}">${confidence.level}</div>
+          <div class="stat-label">Confidence</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value">${mentionRate}%</div>
+          <div class="stat-label">Mention Rate</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value">${total}</div>
+          <div class="stat-label">Prompts Tested</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value">${models.length}</div>
+          <div class="stat-label">AI Models</div>
         </div>
       </div>
     </div>
     
     <div class="cover-footer">
-      <div>Confidential — Prepared for ${escapeHtml(client.name)}</div>
-      <div>Powered by VRTL Score</div>
+      <span>Confidential — Prepared for ${escapeHtml(client.name)}</span>
+      <span>Powered by VRTL Score</span>
     </div>
   </div>
   
-  <!-- Page 2: Key Findings -->
+  <!-- PAGE 2: KEY FINDINGS -->
   <div class="page">
     <div class="page-header">
-      <div class="page-header-left">
-        <span class="page-section">Key Findings</span>
-        <span class="page-client">${escapeHtml(client.name)}</span>
-      </div>
-      <div class="page-number">Page 2</div>
+      <span class="page-title">Key Findings</span>
+      <span class="page-num">Page 2</span>
     </div>
     
     <div class="section-title">Performance Summary</div>
-    <div class="section-subtitle">How ${escapeHtml(client.name)} performs across AI answer engines</div>
+    <div class="section-desc">How ${escapeHtml(client.name)} performs across AI answer engines</div>
     
-    <div class="findings-grid">
-      ${findings.map(f => `
-        <div class="finding-card">
-          <div class="finding-header">
-            <div class="finding-title">${escapeHtml(f.title)}</div>
-            <div class="finding-status ${f.status}"></div>
-          </div>
-          <div class="finding-value">${escapeHtml(f.value)}</div>
-          <div class="finding-detail">${escapeHtml(f.detail)}</div>
+    <div class="findings-grid no-break">
+      <div class="finding">
+        <div class="finding-top">
+          <span class="finding-label">AI Mention Rate</span>
+          <span class="finding-dot ${mentionRate >= 60 ? "dot-good" : mentionRate >= 30 ? "dot-warn" : "dot-bad"}"></span>
         </div>
-      `).join("")}
-    </div>
-    
-    <div class="actions-section">
-      <div class="actions-title">Recommended Actions</div>
-      ${actions.map((a, i) => `
-        <div class="action-item">
-          <div class="action-number">${i + 1}</div>
-          <div class="action-content">
-            <div class="action-text">${escapeHtml(a.action)}</div>
-            <div class="action-why">${escapeHtml(a.why)}</div>
-          </div>
-        </div>
-      `).join("")}
-    </div>
-    
-    ${snapshot.score_by_provider && Object.keys(snapshot.score_by_provider).length > 0 ? `
-    <div class="providers-section">
-      <div class="section-title" style="font-size: 14px; margin-bottom: 16px;">Score by AI Model</div>
-      <div class="providers-grid">
-        ${Object.entries(snapshot.score_by_provider)
-          .sort((a, b) => b[1] - a[1])
-          .map(([provider, provScore]) => {
-            const pct = Math.max(0, Math.min(100, Number.isFinite(provScore) ? provScore : 0));
-            return `
-              <div class="provider-card">
-                <div class="provider-score">${pct}</div>
-                <div class="provider-info">
-                  <div class="provider-name">${escapeHtml(provider)}</div>
-                  <div class="provider-bar">
-                    <div class="provider-bar-fill" style="width: ${pct}%"></div>
-                  </div>
-                </div>
-              </div>
-            `;
-          }).join("")}
+        <div class="finding-value">${mentionRate}%</div>
+        <div class="finding-detail">Mentioned in ${mentioned} of ${total} AI responses</div>
       </div>
+      
+      <div class="finding">
+        <div class="finding-top">
+          <span class="finding-label">Top Positioning</span>
+          <span class="finding-dot ${topPosition >= 3 ? "dot-good" : topPosition >= 1 ? "dot-warn" : "dot-bad"}"></span>
+        </div>
+        <div class="finding-value">${topPosition}</div>
+        <div class="finding-detail">Times ranked first when mentioned</div>
+      </div>
+      
+      <div class="finding">
+        <div class="finding-top">
+          <span class="finding-label">Strong Recommendations</span>
+          <span class="finding-dot ${strongRec >= 3 ? "dot-good" : strongRec >= 1 ? "dot-warn" : "dot-bad"}"></span>
+        </div>
+        <div class="finding-value">${strongRec}</div>
+        <div class="finding-detail">Strong endorsements from AI models</div>
+      </div>
+      
+      <div class="finding">
+        <div class="finding-top">
+          <span class="finding-label">Competitors Tracked</span>
+          <span class="finding-dot dot-good"></span>
+        </div>
+        <div class="finding-value">${competitors.length}</div>
+        <div class="finding-detail">Competitors monitored in this analysis</div>
+      </div>
+    </div>
+    
+    <div class="actions-box no-break">
+      <div class="actions-title">What To Do Next</div>
+      ${score === null || score < 40 ? `
+        <div class="action">
+          <span class="action-num">1</span>
+          <div>
+            <div class="action-text">Audit content for AI-friendly structure</div>
+            <div class="action-why">AI models favor well-structured content with clear headings and factual claims.</div>
+          </div>
+        </div>
+        <div class="action">
+          <span class="action-num">2</span>
+          <div>
+            <div class="action-text">Build topic authority with comprehensive guides</div>
+            <div class="action-why">In-depth content on core topics signals expertise to AI models.</div>
+          </div>
+        </div>
+      ` : score < 70 ? `
+        <div class="action">
+          <span class="action-num">1</span>
+          <div>
+            <div class="action-text">Expand content coverage to related topics</div>
+            <div class="action-why">Broader content footprint increases AI mentions across more queries.</div>
+          </div>
+        </div>
+        <div class="action">
+          <span class="action-num">2</span>
+          <div>
+            <div class="action-text">Add structured data and clear descriptions</div>
+            <div class="action-why">Machine-readable info helps AI accurately represent your offerings.</div>
+          </div>
+        </div>
+      ` : `
+        <div class="action">
+          <span class="action-num">1</span>
+          <div>
+            <div class="action-text">Maintain content freshness with regular updates</div>
+            <div class="action-why">AI models prefer recently updated content. Keep key pages current.</div>
+          </div>
+        </div>
+        <div class="action">
+          <span class="action-num">2</span>
+          <div>
+            <div class="action-text">Monitor competitor movements monthly</div>
+            <div class="action-why">Strong positions can erode if competitors improve their AI visibility.</div>
+          </div>
+        </div>
+      `}
+      <div class="action">
+        <span class="action-num">3</span>
+        <div>
+          <div class="action-text">Run follow-up snapshot in 30 days</div>
+          <div class="action-why">Track progress and identify trends over time.</div>
+        </div>
+      </div>
+    </div>
+    
+    ${models.length > 0 ? `
+    <div class="section-title" style="font-size: 12px; margin-top: 20px; margin-bottom: 12px;">Score by AI Model</div>
+    <div class="models-grid no-break">
+      ${Object.entries(snapshot.score_by_provider || {})
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 4)
+        .map(([provider, provScore]) => {
+          const pct = Math.max(0, Math.min(100, Number.isFinite(provScore) ? provScore : 0));
+          return `
+            <div class="model-item">
+              <div class="model-score">${pct}</div>
+              <div style="flex: 1;">
+                <div class="model-name">${escapeHtml(provider)}</div>
+                <div class="model-bar"><div class="model-fill" style="width: ${pct}%"></div></div>
+              </div>
+            </div>
+          `;
+        }).join("")}
     </div>
     ` : ""}
     
     <div class="page-footer">
-      <div>Confidential — ${escapeHtml(client.name)}</div>
-      <div>${escapeHtml(agency.name)}</div>
+      <span>${escapeHtml(client.name)} — AI Visibility Report</span>
+      <span>${escapeHtml(agency.name)}</span>
     </div>
   </div>
   
-  <!-- Page 3: Evidence -->
+  <!-- PAGE 3: EVIDENCE -->
   <div class="page">
     <div class="page-header">
-      <div class="page-header-left">
-        <span class="page-section">Evidence</span>
-        <span class="page-client">${escapeHtml(client.name)}</span>
-      </div>
-      <div class="page-number">Page 3</div>
+      <span class="page-title">Evidence</span>
+      <span class="page-num">Page 3</span>
     </div>
     
     <div class="section-title">Detailed Results</div>
-    <div class="section-subtitle">Individual prompt analysis showing mention status and positioning</div>
+    <div class="section-desc">Individual prompt analysis showing mention status and positioning</div>
     
     <table class="evidence-table">
       <thead>
         <tr>
-          <th style="width: 50%">Prompt</th>
+          <th style="width: 45%">Prompt</th>
           <th>Mentioned</th>
           <th>Position</th>
           <th>Strength</th>
         </tr>
       </thead>
       <tbody>
-        ${responses.map((r, idx) => {
+        ${responses.slice(0, 10).map((r, idx) => {
           const pj = r.parsed_json;
-          const mentioned = pj?.client_mentioned ? "Yes" : "No";
-          const position = pj?.client_position || "—";
-          const strength = pj?.recommendation_strength || "—";
+          const isMentioned = pj?.client_mentioned;
           return `
             <tr>
-              <td class="prompt-cell">${escapeHtml(truncate(r.prompt_text || `Prompt ${r.prompt_ordinal ?? idx + 1}`, 120))}</td>
-              <td><span class="status-badge ${mentioned === "Yes" ? "yes" : "no"}">${mentioned}</span></td>
-              <td>${escapeHtml(position)}</td>
-              <td>${escapeHtml(strength)}</td>
+              <td class="prompt-text">${escapeHtml(truncate(r.prompt_text || `Prompt ${r.prompt_ordinal ?? idx + 1}`, 80))}</td>
+              <td><span class="badge ${isMentioned ? "badge-yes" : "badge-no"}">${isMentioned ? "Yes" : "No"}</span></td>
+              <td>${escapeHtml(pj?.client_position || "—")}</td>
+              <td>${escapeHtml(pj?.recommendation_strength || "—")}</td>
             </tr>
           `;
         }).join("")}
       </tbody>
     </table>
+    ${responses.length > 10 ? `<div style="font-size: 8px; color: #94a3b8; margin-top: 8px;">+ ${responses.length - 10} more prompts not shown</div>` : ""}
     
     ${topCompetitors.length > 0 ? `
-    <div class="competitors-section">
-      <div class="section-title" style="font-size: 14px; margin-bottom: 16px;">Top Competitors Mentioned</div>
-      <table class="competitors-table">
-        <thead>
-          <tr>
-            <th style="width: 40%">Competitor</th>
-            <th>Mentions</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${topCompetitors.map(([name, count]) => {
-            const maxCount = topCompetitors[0][1];
-            const pct = Math.round((count / maxCount) * 100);
-            return `
-              <tr>
-                <td>${escapeHtml(name)}</td>
-                <td>
-                  <div class="competitor-bar">
-                    <div class="competitor-bar-track">
-                      <div class="competitor-bar-fill" style="width: ${pct}%"></div>
-                    </div>
-                    <span class="competitor-count">${count}</span>
-                  </div>
-                </td>
-              </tr>
-            `;
-          }).join("")}
-        </tbody>
-      </table>
-    </div>
+    <div class="section-title" style="font-size: 12px; margin-top: 24px; margin-bottom: 8px;">Top Competitors Mentioned</div>
+    <table class="comp-table">
+      <thead><tr><th style="width: 40%">Competitor</th><th>AI Mentions</th></tr></thead>
+      <tbody>
+        ${topCompetitors.map(([name, count]) => {
+          const max = topCompetitors[0][1];
+          const pct = Math.round((count / max) * 100);
+          return `
+            <tr>
+              <td>${escapeHtml(name)}</td>
+              <td>
+                <div class="comp-bar">
+                  <div class="comp-track"><div class="comp-fill" style="width: ${pct}%"></div></div>
+                  <span class="comp-count">${count}</span>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join("")}
+      </tbody>
+    </table>
     ` : ""}
     
     <div class="page-footer">
-      <div>Confidential — ${escapeHtml(client.name)}</div>
-      <div>${escapeHtml(agency.name)}</div>
+      <span>${escapeHtml(client.name)} — AI Visibility Report</span>
+      <span>${escapeHtml(agency.name)}</span>
     </div>
   </div>
   
-  <!-- Page 4: Raw Data & Methodology -->
+  <!-- PAGE 4: APPENDIX -->
   <div class="page">
     <div class="page-header">
-      <div class="page-header-left">
-        <span class="page-section">Appendix</span>
-        <span class="page-client">${escapeHtml(client.name)}</span>
+      <span class="page-title">Appendix</span>
+      <span class="page-num">Page 4</span>
+    </div>
+    
+    <div class="section-title">Sample AI Outputs</div>
+    <div class="section-desc">Raw responses for transparency. Full data available upon request.</div>
+    
+    ${responses.slice(0, 2).map((r, idx) => `
+      <div class="raw-item no-break">
+        <div class="raw-header">
+          <span class="raw-label">Prompt ${r.prompt_ordinal ?? idx + 1}</span>
+          <span class="raw-status">${r.parsed_json?.client_mentioned ? "✓ Mentioned" : "✗ Not mentioned"}</span>
+        </div>
+        <div class="raw-text">${escapeHtml(truncate(r.raw_text || "No response captured", 350))}</div>
       </div>
-      <div class="page-number">Page 4</div>
-    </div>
+    `).join("")}
     
-    <div class="section-title">Raw AI Outputs</div>
-    <div class="section-subtitle">Sample responses for transparency. Full data available upon request.</div>
-    
-    <div class="raw-section">
-      ${responses.slice(0, 3).map((r, idx) => `
-        <div class="raw-item">
-          <div class="raw-header">
-            <div class="raw-label">Prompt ${r.prompt_ordinal ?? idx + 1}</div>
-            <div class="raw-meta">${r.parsed_json?.client_mentioned ? "✓ Mentioned" : "✗ Not mentioned"}</div>
-          </div>
-          <div class="raw-text">${escapeHtml(truncate(r.raw_text || "No response captured", 400))}</div>
+    <div class="method-box no-break">
+      <div class="method-title">Methodology</div>
+      <div class="method-grid">
+        <div class="method-item">
+          <div class="method-label">Report Generated</div>
+          <div class="method-value">${formatDate(snapshot.created_at)}</div>
         </div>
-      `).join("")}
-      
-      ${responses.length > 3 ? `
-        <div style="font-size: 11px; color: var(--text-muted); margin-top: 16px;">
-          + ${responses.length - 3} additional responses not shown
+        <div class="method-item">
+          <div class="method-label">Snapshot ID</div>
+          <div class="method-value">${snapshot.id.slice(0, 16)}...</div>
         </div>
-      ` : ""}
-    </div>
-    
-    <div class="methodology-section">
-      <div class="methodology-title">Methodology</div>
-      <div class="methodology-grid">
-        <div class="methodology-item">
-          <div class="methodology-label">Data Collection</div>
-          <div class="methodology-value">${formatDate(snapshot.created_at)}</div>
+        <div class="method-item">
+          <div class="method-label">Models Tested</div>
+          <div class="method-value">${models.length > 0 ? models.join(", ") : "—"}</div>
         </div>
-        <div class="methodology-item">
-          <div class="methodology-label">Snapshot ID</div>
-          <div class="methodology-value">${snapshot.id}</div>
+        <div class="method-item">
+          <div class="method-label">Prompts Analyzed</div>
+          <div class="method-value">${total}</div>
         </div>
-        <div class="methodology-item">
-          <div class="methodology-label">Models Tested</div>
-          <div class="methodology-value">${models.length > 0 ? models.join(", ") : "—"}</div>
+        <div class="method-item">
+          <div class="method-label">Competitors Tracked</div>
+          <div class="method-value">${competitors.length}</div>
         </div>
-        <div class="methodology-item">
-          <div class="methodology-label">Competitors Tracked</div>
-          <div class="methodology-value">${competitors.length}</div>
-        </div>
-        <div class="methodology-item">
-          <div class="methodology-label">Prompt Pack</div>
-          <div class="methodology-value">${snapshot.prompt_pack_version || "Standard"}</div>
-        </div>
-        <div class="methodology-item">
-          <div class="methodology-label">Confidence</div>
-          <div class="methodology-value">${confidence.level} — ${confidence.description}</div>
+        <div class="method-item">
+          <div class="method-label">Confidence Level</div>
+          <div class="method-value">${confidence.level}</div>
         </div>
       </div>
     </div>
     
     <div class="page-footer">
-      <div>Confidential — ${escapeHtml(client.name)}</div>
-      <div>${escapeHtml(agency.name)}</div>
+      <span>${escapeHtml(client.name)} — AI Visibility Report</span>
+      <span>${escapeHtml(agency.name)}</span>
     </div>
   </div>
 </body>
@@ -1040,11 +792,7 @@ export function renderReportHtml(data: ReportData): string {
 function formatDate(d: string) {
   const dt = new Date(d);
   if (Number.isNaN(dt.getTime())) return d;
-  return dt.toLocaleDateString("en-US", { 
-    year: "numeric", 
-    month: "long", 
-    day: "numeric" 
-  });
+  return dt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 }
 
 function escapeHtml(str: string) {
