@@ -30,6 +30,24 @@ export type ReportData = {
   }>;
 };
 
+// Insight area categories (obscures actual prompt content)
+const INSIGHT_AREAS = [
+  "Brand Discovery",
+  "Value Proposition", 
+  "Market Positioning",
+  "Product Features",
+  "Social Proof",
+  "Industry Authority",
+  "Competitive Context",
+  "Purchase Intent",
+  "Trust Signals",
+  "Recommendation Query"
+];
+
+function getInsightArea(index: number): string {
+  return INSIGHT_AREAS[index % INSIGHT_AREAS.length];
+}
+
 // Score tier system
 function getScoreTier(score: number | null): { tier: string; label: string; color: string } {
   if (score === null) return { tier: "Unknown", label: "No data available", color: "#64748b" };
@@ -41,15 +59,14 @@ function getScoreTier(score: number | null): { tier: string; label: string; colo
 
 // Calculate all metrics from responses
 function calculateMetrics(data: ReportData) {
-  const { client, responses, competitors } = data;
+  const { responses, competitors } = data;
   const total = responses.length || 1;
   
   let mentioned = 0, topPosition = 0, strongRec = 0, hasCitations = 0, hasFeatures = 0;
-  const competitorData = new Map<string, { mentions: number; positions: number[]; strongCount: number }>();
+  const competitorData = new Map<string, { mentions: number; topCount: number }>();
   
-  // Initialize competitor tracking
   for (const c of competitors) {
-    competitorData.set(c.name, { mentions: 0, positions: [], strongCount: 0 });
+    competitorData.set(c.name, { mentions: 0, topCount: 0 });
   }
   
   for (const r of responses) {
@@ -62,54 +79,19 @@ function calculateMetrics(data: ReportData) {
     if (pj.has_sources_or_citations) hasCitations++;
     if (pj.has_specific_features) hasFeatures++;
     
-    // Track competitor data
     if (Array.isArray(pj.competitors_mentioned)) {
       for (const name of pj.competitors_mentioned) {
-        const existing = competitorData.get(name) || { mentions: 0, positions: [], strongCount: 0 };
+        const existing = competitorData.get(name) || { mentions: 0, topCount: 0 };
         existing.mentions++;
-        // Estimate position based on client position (simplified)
-        if (pj.client_position === "top") existing.positions.push(2);
-        else if (pj.client_position === "middle") existing.positions.push(2);
-        else existing.positions.push(1);
         competitorData.set(name, existing);
       }
     }
   }
   
-  // Calculate competitor stats
   const competitorStats = Array.from(competitorData.entries())
-    .map(([name, data]) => ({
-      name,
-      mentions: data.mentions,
-      avgPosition: data.positions.length > 0 
-        ? (data.positions.reduce((a, b) => a + b, 0) / data.positions.length).toFixed(1)
-        : "—",
-      strongCount: data.strongCount
-    }))
+    .map(([name, data]) => ({ name, mentions: data.mentions }))
     .filter(c => c.mentions > 0)
     .sort((a, b) => b.mentions - a.mentions);
-  
-  // Calculate client's average position (1 = top, 2 = middle, 3 = bottom)
-  let clientAvgPosition = 0;
-  let positionCount = 0;
-  for (const r of responses) {
-    const pj = r.parsed_json;
-    if (pj?.client_mentioned) {
-      if (pj.client_position === "top") { clientAvgPosition += 1; positionCount++; }
-      else if (pj.client_position === "middle") { clientAvgPosition += 2; positionCount++; }
-      else if (pj.client_position === "bottom") { clientAvgPosition += 3; positionCount++; }
-    }
-  }
-  const avgPosition = positionCount > 0 ? (clientAvgPosition / positionCount).toFixed(1) : "—";
-  
-  // Count prompts where client beats competitors
-  let promptsWon = 0;
-  for (const r of responses) {
-    const pj = r.parsed_json;
-    if (pj?.client_mentioned && pj.client_position === "top") {
-      promptsWon++;
-    }
-  }
   
   return {
     total,
@@ -122,8 +104,6 @@ function calculateMetrics(data: ReportData) {
     hasCitations,
     citationRate: Math.round((hasCitations / total) * 100),
     hasFeatures,
-    avgPosition,
-    promptsWon,
     competitorStats
   };
 }
@@ -132,7 +112,6 @@ function calculateMetrics(data: ReportData) {
 function generateNarrative(data: ReportData, metrics: ReturnType<typeof calculateMetrics>): string {
   const { client } = data;
   const score = data.snapshot.vrtl_score;
-  const tier = getScoreTier(score);
   
   if (score === null) {
     return `This report establishes a baseline for ${client.name}'s AI visibility.`;
@@ -140,7 +119,6 @@ function generateNarrative(data: ReportData, metrics: ReturnType<typeof calculat
   
   const parts: string[] = [];
   
-  // Mention consistency
   if (metrics.mentionRate >= 80) {
     parts.push(`${client.name} is consistently recognized across AI models`);
   } else if (metrics.mentionRate >= 50) {
@@ -149,14 +127,12 @@ function generateNarrative(data: ReportData, metrics: ReturnType<typeof calculat
     parts.push(`${client.name} has limited visibility in AI responses`);
   }
   
-  // Positioning
   if (metrics.topPositionRate >= 50) {
     parts.push("with strong top positioning");
   } else if (metrics.topPosition > 0) {
     parts.push("with occasional top positioning");
   }
   
-  // Authority
   if (metrics.strongRecRate >= 50) {
     parts.push("and receives strong recommendations");
   }
@@ -166,26 +142,25 @@ function generateNarrative(data: ReportData, metrics: ReturnType<typeof calculat
 
 // Generate verdict, wins, and risks
 function generateVerdict(data: ReportData, metrics: ReturnType<typeof calculateMetrics>) {
-  const { client } = data;
   const tier = getScoreTier(data.snapshot.vrtl_score);
   
   const wins: string[] = [];
   const risks: string[] = [];
   
-  if (metrics.mentionRate >= 70) wins.push("Consistent brand mentions");
-  if (metrics.topPositionRate >= 50) wins.push("Strong top positioning");
-  if (metrics.strongRecRate >= 50) wins.push("Frequent strong recommendations");
-  if (metrics.citationRate >= 30) wins.push("Authority citations present");
+  if (metrics.mentionRate >= 70) wins.push("Consistent brand recognition");
+  if (metrics.topPositionRate >= 50) wins.push("Strong positioning in results");
+  if (metrics.strongRecRate >= 50) wins.push("Frequent recommendations");
+  if (metrics.citationRate >= 30) wins.push("Authority signals present");
   
-  if (metrics.mentionRate < 50) risks.push("Low mention consistency");
-  if (metrics.topPositionRate < 30) risks.push("Weak positioning vs competitors");
-  if (metrics.citationRate === 0) risks.push("No citations detected — authority gap");
+  if (metrics.mentionRate < 50) risks.push("Low visibility consistency");
+  if (metrics.topPositionRate < 30) risks.push("Weak competitive positioning");
+  if (metrics.citationRate === 0) risks.push("No authority citations detected");
   if (metrics.competitorStats.length > 0 && metrics.competitorStats[0].mentions >= metrics.mentioned) {
-    risks.push("Competitors appearing alongside or above");
+    risks.push("Competitors gaining visibility");
   }
   
-  if (wins.length === 0) wins.push("Baseline established for tracking");
-  if (risks.length === 0) risks.push("Monitor for competitor movements");
+  if (wins.length === 0) wins.push("Baseline established");
+  if (risks.length === 0) risks.push("Monitor competitor activity");
   
   return { verdict: tier.label, wins: wins.slice(0, 3), risks: risks.slice(0, 2) };
 }
@@ -231,15 +206,13 @@ export function renderReportHtml(data: ReportData): string {
     .page:last-child { page-break-after: avoid; }
     .no-break { page-break-inside: avoid; break-inside: avoid; }
     
-    /* ===== TYPOGRAPHY ===== */
-    .h1 { font-size: 28px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; }
+    /* Typography */
     .h2 { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 12px; }
     .h3 { font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
-    .label { font-size: 9px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; }
     .body { font-size: 11px; color: #475569; line-height: 1.6; }
     .small { font-size: 9px; color: #64748b; }
     
-    /* ===== COMPONENTS ===== */
+    /* Components */
     .kpi-card {
       padding: 16px;
       background: #f8fafc;
@@ -248,7 +221,6 @@ export function renderReportHtml(data: ReportData): string {
     }
     .kpi-value { font-size: 28px; font-weight: 800; color: #0f172a; line-height: 1; }
     .kpi-label { font-size: 9px; color: #64748b; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
-    .kpi-note { font-size: 9px; color: #94a3b8; margin-top: 4px; }
     
     .pill {
       display: inline-block;
@@ -263,52 +235,28 @@ export function renderReportHtml(data: ReportData): string {
     .pill-gray { background: #f1f5f9; color: #475569; }
     .pill-accent { background: var(--accent); color: #fff; }
     
-    .divider { height: 1px; background: #e2e8f0; margin: 16px 0; }
-    
-    /* ===== COVER PAGE ===== */
+    /* Cover */
     .cover { background: linear-gradient(180deg, #fafafa 0%, #fff 50%); }
-    
     .cover-header { display: flex; justify-content: space-between; align-items: flex-start; }
     .cover-logo img { max-height: 32px; }
     .cover-logo-text { font-size: 14px; font-weight: 700; color: #0f172a; }
-    
     .cover-main { padding: 48px 0; }
     .cover-type { font-size: 11px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
     .cover-client { font-size: 36px; font-weight: 800; color: #0f172a; line-height: 1.1; }
     .cover-url { font-size: 12px; color: #64748b; margin-top: 4px; }
     
-    .score-hero {
-      margin-top: 32px;
-      display: flex;
-      align-items: flex-start;
-      gap: 24px;
-    }
-    
+    .score-hero { margin-top: 32px; display: flex; align-items: flex-start; gap: 24px; }
     .score-ring {
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
+      width: 140px; height: 140px; border-radius: 50%;
       background: conic-gradient(var(--score) calc(${score ?? 0} * 3.6deg), #e2e8f0 0);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
-    
     .score-ring-inner {
-      width: 110px;
-      height: 110px;
-      border-radius: 50%;
-      background: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      width: 110px; height: 110px; border-radius: 50%; background: #fff;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
-    
     .score-number { font-size: 42px; font-weight: 800; color: #0f172a; line-height: 1; }
     .score-max { font-size: 14px; color: #94a3b8; }
-    
     .score-meta { flex: 1; }
     .score-tier { font-size: 14px; font-weight: 700; color: var(--score); margin-bottom: 4px; }
     .score-narrative { font-size: 11px; color: #475569; line-height: 1.6; margin-bottom: 16px; }
@@ -319,67 +267,37 @@ export function renderReportHtml(data: ReportData): string {
     .scope-label { font-size: 8px; color: #64748b; margin-top: 2px; }
     
     .cover-footer {
-      position: absolute;
-      bottom: 16mm;
-      left: 16mm;
-      right: 16mm;
-      display: flex;
-      justify-content: space-between;
-      font-size: 8px;
-      color: #94a3b8;
-      padding-top: 12px;
-      border-top: 1px solid #e2e8f0;
+      position: absolute; bottom: 16mm; left: 16mm; right: 16mm;
+      display: flex; justify-content: space-between;
+      font-size: 8px; color: #94a3b8;
+      padding-top: 12px; border-top: 1px solid #e2e8f0;
     }
     
-    /* ===== PAGE HEADERS ===== */
+    /* Page headers/footers */
     .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 10px;
-      border-bottom: 2px solid #0f172a;
-      margin-bottom: 20px;
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 10px; border-bottom: 2px solid #0f172a; margin-bottom: 20px;
     }
     .page-title { font-size: 10px; font-weight: 700; color: #0f172a; text-transform: uppercase; letter-spacing: 0.06em; }
     .page-num { font-size: 9px; color: #94a3b8; }
-    
     .page-footer {
-      position: absolute;
-      bottom: 12mm;
-      left: 16mm;
-      right: 16mm;
-      display: flex;
-      justify-content: space-between;
-      font-size: 8px;
-      color: #94a3b8;
+      position: absolute; bottom: 12mm; left: 16mm; right: 16mm;
+      display: flex; justify-content: space-between; font-size: 8px; color: #94a3b8;
     }
     
-    /* ===== EXECUTIVE SUMMARY ===== */
+    /* Verdict */
     .verdict-box {
-      padding: 20px;
-      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-      border: 1px solid #e2e8f0;
-      border-left: 4px solid var(--accent);
-      border-radius: 0 8px 8px 0;
-      margin-bottom: 20px;
+      padding: 20px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid #e2e8f0; border-left: 4px solid var(--accent);
+      border-radius: 0 8px 8px 0; margin-bottom: 20px;
     }
-    
     .verdict-title { font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 12px; }
-    
     .verdict-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    
     .verdict-section h4 { font-size: 10px; font-weight: 600; color: #64748b; margin-bottom: 8px; }
     .verdict-item { display: flex; align-items: center; gap: 6px; font-size: 10px; color: #334155; padding: 4px 0; }
-    .verdict-icon { font-size: 10px; }
     
-    .rubric-box {
-      padding: 14px;
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      margin-bottom: 20px;
-    }
-    
+    /* Rubric */
+    .rubric-box { padding: 14px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 20px; }
     .rubric-title { font-size: 10px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
     .rubric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
     .rubric-item { text-align: center; padding: 8px; border-radius: 4px; }
@@ -387,8 +305,7 @@ export function renderReportHtml(data: ReportData): string {
     .rubric-score { font-size: 11px; font-weight: 700; color: #0f172a; }
     .rubric-label { font-size: 8px; color: #64748b; }
     
-    .metrics-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
-    
+    /* Insight cards */
     .insight-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
     .insight-card { padding: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; }
     .insight-icon { font-size: 16px; margin-bottom: 8px; }
@@ -396,7 +313,7 @@ export function renderReportHtml(data: ReportData): string {
     .insight-value { font-size: 20px; font-weight: 800; color: #0f172a; }
     .insight-note { font-size: 9px; color: #64748b; margin-top: 4px; }
     
-    /* ===== MODELS ===== */
+    /* Models */
     .models-section { margin-top: 20px; }
     .model-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
     .model-row:last-child { border-bottom: none; }
@@ -406,89 +323,37 @@ export function renderReportHtml(data: ReportData): string {
     .model-score { width: 40px; font-size: 14px; font-weight: 700; color: #0f172a; text-align: right; }
     .model-pending { color: #94a3b8; font-size: 11px; }
     
-    /* ===== ACTION PLAN ===== */
-    .action-box {
-      padding: 16px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      margin-top: 20px;
-    }
+    /* Action plan */
+    .action-box { padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 20px; }
     .action-title { font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 12px; }
     .action-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
     .action-item { display: flex; gap: 10px; padding: 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; }
     .action-week { font-size: 9px; font-weight: 700; color: var(--accent); min-width: 50px; }
     .action-text { font-size: 10px; color: #334155; }
     
-    /* ===== EVIDENCE TABLE ===== */
+    /* Evidence table */
     .summary-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
-    
     .evidence-table { width: 100%; border-collapse: collapse; font-size: 9px; }
     .evidence-table th {
-      text-align: left;
-      padding: 10px 8px;
-      background: #f1f5f9;
-      font-weight: 600;
-      color: #475569;
-      border-bottom: 1px solid #e2e8f0;
+      text-align: left; padding: 10px 8px; background: #f1f5f9;
+      font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0;
     }
-    .evidence-table td {
-      padding: 10px 8px;
-      border-bottom: 1px solid #f1f5f9;
-      vertical-align: middle;
-    }
+    .evidence-table td { padding: 10px 8px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
     .evidence-table tr:nth-child(even) td { background: #fafafa; }
     
-    .prompt-text { max-width: 180px; line-height: 1.4; }
-    
-    /* ===== COMPETITIVE ===== */
-    .comp-header { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-    
+    /* Competitive */
     .comp-table { width: 100%; border-collapse: collapse; font-size: 10px; }
-    .comp-table th {
-      text-align: left;
-      padding: 10px 12px;
-      background: #f1f5f9;
-      font-weight: 600;
-      color: #475569;
-    }
+    .comp-table th { text-align: left; padding: 10px 12px; background: #f1f5f9; font-weight: 600; color: #475569; }
     .comp-table td { padding: 12px; border-bottom: 1px solid #e2e8f0; }
     
-    .position-bar { display: flex; align-items: center; gap: 8px; }
-    .position-track { width: 60px; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
-    .position-fill { height: 100%; background: #64748b; border-radius: 3px; }
-    
-    /* ===== APPENDIX ===== */
-    .code-box {
-      padding: 12px;
-      background: #1e293b;
-      border-radius: 6px;
-      margin-bottom: 16px;
-      overflow: hidden;
-    }
-    .code-header { font-size: 9px; color: #94a3b8; margin-bottom: 8px; }
-    .code-content {
-      font-family: 'Monaco', 'Menlo', monospace;
-      font-size: 8px;
-      color: #e2e8f0;
-      white-space: pre-wrap;
-      word-break: break-all;
-      line-height: 1.5;
-    }
-    
-    .method-table { width: 100%; border-collapse: collapse; font-size: 10px; }
-    .method-table td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; }
-    .method-table td:first-child { width: 40%; color: #64748b; font-weight: 500; }
-    
-    .disclaimer {
-      padding: 12px;
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      border-radius: 6px;
-      font-size: 9px;
-      color: #92400e;
-      margin-top: 16px;
-    }
+    /* Methodology */
+    .method-box { padding: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 24px; }
+    .method-title { font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 12px; }
+    .method-text { font-size: 10px; color: #475569; line-height: 1.7; margin-bottom: 16px; }
+    .method-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .method-item { }
+    .method-label { font-size: 8px; color: #94a3b8; margin-bottom: 2px; }
+    .method-value { font-size: 10px; color: #0f172a; font-weight: 500; }
   </style>
 </head>
 <body>
@@ -521,16 +386,16 @@ export function renderReportHtml(data: ReportData): string {
           
           <div class="scope-grid">
             <div class="scope-item">
-              <div class="scope-value">${models.length > 0 ? models.map(m => m[0]).join(", ") : "OpenAI"}</div>
-              <div class="scope-label">Models Tested</div>
+              <div class="scope-value">${metrics.total}</div>
+              <div class="scope-label">Discovery Scenarios</div>
             </div>
             <div class="scope-item">
               <div class="scope-value">${competitors.length}</div>
-              <div class="scope-label">Competitors</div>
+              <div class="scope-label">Competitors Tracked</div>
             </div>
             <div class="scope-item">
-              <div class="scope-value">${snapshot.prompt_pack_version || "v1_core"}</div>
-              <div class="scope-label">Prompt Pack</div>
+              <div class="scope-value">${models.length || 1}</div>
+              <div class="scope-label">AI Models</div>
             </div>
           </div>
         </div>
@@ -539,7 +404,7 @@ export function renderReportHtml(data: ReportData): string {
     
     <div class="cover-footer">
       <span>Confidential — Prepared for ${escapeHtml(client.name)}</span>
-      <span>Powered by VRTL Score • ID: ${snapshot.id.slice(0, 8)}</span>
+      <span>Powered by VRTL Score</span>
     </div>
   </div>
   
@@ -550,22 +415,20 @@ export function renderReportHtml(data: ReportData): string {
       <span class="page-num">Page 2</span>
     </div>
     
-    <!-- Verdict Box -->
     <div class="verdict-box no-break">
       <div class="verdict-title">Snapshot Verdict: ${verdict}</div>
       <div class="verdict-grid">
         <div class="verdict-section">
           <h4>✓ Wins</h4>
-          ${wins.map(w => `<div class="verdict-item"><span class="verdict-icon">●</span> ${escapeHtml(w)}</div>`).join("")}
+          ${wins.map(w => `<div class="verdict-item"><span>●</span> ${escapeHtml(w)}</div>`).join("")}
         </div>
         <div class="verdict-section">
           <h4>⚠ Risks</h4>
-          ${risks.map(r => `<div class="verdict-item"><span class="verdict-icon">●</span> ${escapeHtml(r)}</div>`).join("")}
+          ${risks.map(r => `<div class="verdict-item"><span>●</span> ${escapeHtml(r)}</div>`).join("")}
         </div>
       </div>
     </div>
     
-    <!-- Score Rubric -->
     <div class="rubric-box no-break">
       <div class="rubric-title">What the VRTL Score Means</div>
       <div class="rubric-grid">
@@ -588,29 +451,27 @@ export function renderReportHtml(data: ReportData): string {
       </div>
     </div>
     
-    <!-- Key Metrics -->
     <div class="insight-cards no-break">
       <div class="insight-card">
         <div class="insight-icon">👁</div>
         <div class="insight-title">Visibility</div>
         <div class="insight-value">${metrics.mentionRate}%</div>
-        <div class="insight-note">Coverage: ${metrics.mentioned}/${metrics.total} prompts</div>
+        <div class="insight-note">Recognized in ${metrics.mentioned}/${metrics.total} scenarios</div>
       </div>
       <div class="insight-card">
         <div class="insight-icon">🎯</div>
         <div class="insight-title">Positioning</div>
         <div class="insight-value">${metrics.topPositionRate}%</div>
-        <div class="insight-note">Top position: ${metrics.topPosition}/${metrics.total}</div>
+        <div class="insight-note">Top position in ${metrics.topPosition}/${metrics.total}</div>
       </div>
       <div class="insight-card">
         <div class="insight-icon">🏆</div>
         <div class="insight-title">Authority</div>
         <div class="insight-value">${metrics.citationRate}%</div>
-        <div class="insight-note">Citations: ${metrics.hasCitations}/${metrics.total}</div>
+        <div class="insight-note">Citations in ${metrics.hasCitations}/${metrics.total}</div>
       </div>
     </div>
     
-    <!-- Score by Model -->
     <div class="models-section no-break">
       <div class="h3">Score by AI Model</div>
       ${models.length > 0 ? models.map(([name, val]) => `
@@ -622,17 +483,16 @@ export function renderReportHtml(data: ReportData): string {
       `).join("") : ""}
       <div class="model-row">
         <div class="model-name">Anthropic</div>
-        <div class="model-bar"><div class="model-fill" style="width: 0%; background: #e2e8f0;"></div></div>
+        <div class="model-bar"></div>
         <div class="model-pending">—</div>
       </div>
       <div class="model-row">
         <div class="model-name">Gemini</div>
-        <div class="model-bar"><div class="model-fill" style="width: 0%; background: #e2e8f0;"></div></div>
+        <div class="model-bar"></div>
         <div class="model-pending">—</div>
       </div>
     </div>
     
-    <!-- 30-Day Action Plan -->
     <div class="action-box no-break">
       <div class="action-title">30-Day Action Plan</div>
       <div class="action-grid">
@@ -668,7 +528,7 @@ export function renderReportHtml(data: ReportData): string {
       <span class="page-num">Page 3</span>
     </div>
     
-    <div class="h2">Prompt Outcomes Summary</div>
+    <div class="h2">Performance Summary</div>
     <div class="summary-row no-break">
       <div class="kpi-card">
         <div class="kpi-value">${metrics.topPosition}/${metrics.total}</div>
@@ -684,15 +544,15 @@ export function renderReportHtml(data: ReportData): string {
       </div>
       <div class="kpi-card">
         <div class="kpi-value">${metrics.hasFeatures}/${metrics.total}</div>
-        <div class="kpi-label">Features Extracted</div>
+        <div class="kpi-label">Features</div>
       </div>
     </div>
     
-    <div class="h3" style="margin-top: 16px;">Detailed Results</div>
+    <div class="h3" style="margin-top: 16px;">Insight Area Breakdown</div>
     <table class="evidence-table">
       <thead>
         <tr>
-          <th>Prompt</th>
+          <th>Insight Area</th>
           <th>Mentioned</th>
           <th>Position</th>
           <th>Strength</th>
@@ -700,49 +560,45 @@ export function renderReportHtml(data: ReportData): string {
         </tr>
       </thead>
       <tbody>
-        ${responses.slice(0, 8).map((r, idx) => {
+        ${responses.slice(0, 10).map((r, idx) => {
           const pj = r.parsed_json;
           const compCount = pj?.competitors_mentioned?.length ?? 0;
           return `
             <tr>
-              <td class="prompt-text">${escapeHtml(truncate(r.prompt_text || `Prompt ${idx + 1}`, 60))}</td>
+              <td>${escapeHtml(getInsightArea(idx))}</td>
               <td><span class="pill ${pj?.client_mentioned ? 'pill-green' : 'pill-red'}">${pj?.client_mentioned ? 'Yes' : 'No'}</span></td>
               <td><span class="pill ${pj?.client_position === 'top' ? 'pill-accent' : 'pill-gray'}">${pj?.client_position || '—'}</span></td>
               <td>${pj?.recommendation_strength || '—'}</td>
-              <td>${compCount > 0 ? compCount : '—'}</td>
+              <td>${compCount > 0 ? `${compCount} shown` : 'None'}</td>
             </tr>
           `;
         }).join("")}
       </tbody>
     </table>
-    ${responses.length > 8 ? `<div class="small" style="margin-top: 8px;">+ ${responses.length - 8} more prompts</div>` : ''}
     
     ${metrics.competitorStats.length > 0 ? `
     <div class="h3" style="margin-top: 24px;">Competitive Comparison</div>
     <table class="comp-table no-break">
       <thead>
         <tr>
-          <th>Competitor</th>
-          <th>Mentions</th>
-          <th>Avg Position</th>
+          <th>Brand</th>
+          <th>Visibility</th>
           <th>vs ${escapeHtml(client.name)}</th>
         </tr>
       </thead>
       <tbody>
         <tr style="background: #f0fdf4;">
           <td><strong>${escapeHtml(client.name)}</strong></td>
-          <td><strong>${metrics.mentioned}/${metrics.total}</strong></td>
-          <td><strong>${metrics.avgPosition}</strong></td>
+          <td><strong>${metrics.mentioned}/${metrics.total} scenarios</strong></td>
           <td>—</td>
         </tr>
         ${metrics.competitorStats.slice(0, 4).map(c => {
-          const clientWins = metrics.topPosition > c.mentions ? 'Winning' : c.mentions > metrics.mentioned ? 'Behind' : 'Tied';
+          const status = metrics.mentioned > c.mentions ? 'Ahead' : c.mentions > metrics.mentioned ? 'Behind' : 'Tied';
           return `
             <tr>
               <td>${escapeHtml(c.name)}</td>
-              <td>${c.mentions}/${metrics.total}</td>
-              <td>${c.avgPosition}</td>
-              <td><span class="pill ${clientWins === 'Winning' ? 'pill-green' : clientWins === 'Behind' ? 'pill-red' : 'pill-yellow'}">${clientWins}</span></td>
+              <td>${c.mentions}/${metrics.total} scenarios</td>
+              <td><span class="pill ${status === 'Ahead' ? 'pill-green' : status === 'Behind' ? 'pill-red' : 'pill-yellow'}">${status}</span></td>
             </tr>
           `;
         }).join("")}
@@ -750,8 +606,8 @@ export function renderReportHtml(data: ReportData): string {
     </table>
     ` : `
     <div style="margin-top: 24px; padding: 16px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;" class="no-break">
-      <div class="h3" style="color: #166534; margin-bottom: 4px;">No Competitors Detected in AI Responses</div>
-      <div class="body" style="color: #15803d;">This is a competitive advantage. ${escapeHtml(client.name)} has clear space in AI results.</div>
+      <div class="h3" style="color: #166534; margin-bottom: 4px;">No Competitor Mentions Detected</div>
+      <div class="body" style="color: #15803d;">${escapeHtml(client.name)} has clear positioning in AI results without competitor overlap.</div>
     </div>
     `}
     
@@ -761,43 +617,59 @@ export function renderReportHtml(data: ReportData): string {
     </div>
   </div>
   
-  <!-- PAGE 4: APPENDIX -->
+  <!-- PAGE 4: METHODOLOGY -->
   <div class="page">
     <div class="page-header">
-      <span class="page-title">Appendix</span>
+      <span class="page-title">Methodology</span>
       <span class="page-num">Page 4</span>
     </div>
     
-    <div class="h2">Extraction Samples</div>
-    <div class="small" style="margin-bottom: 16px;">Structured output for auditability. Full response logs available upon request.</div>
+    <div class="h2">How VRTL Score Works</div>
     
-    ${responses.slice(0, 2).map((r, idx) => {
-      const pj = r.parsed_json;
-      if (!pj) return '';
-      return `
-        <div class="code-box no-break">
-          <div class="code-header">Prompt ${r.prompt_ordinal ?? idx + 1} — ${pj.client_mentioned ? '✓ Mentioned' : '✗ Not mentioned'}</div>
-          <div class="code-content">{
-  "client_mentioned": ${pj.client_mentioned},
-  "client_position": "${pj.client_position}",
-  "recommendation_strength": "${pj.recommendation_strength}",
-  "has_sources_or_citations": ${pj.has_sources_or_citations},
-  "competitors_mentioned": ${JSON.stringify(pj.competitors_mentioned || [])}
-}</div>
+    <div class="method-box no-break">
+      <div class="method-title">Scoring Methodology</div>
+      <div class="method-text">
+        VRTL Score analyzes AI responses across a standardized set of brand discovery, positioning, authority, and competitive scenarios designed to simulate real-world AI search behavior. Each snapshot evaluates multiple structured discovery scenarios to measure how AI models perceive and recommend your brand.
+      </div>
+      <div class="method-text">
+        The score combines three core signals: <strong>Presence</strong> (how consistently the brand appears), <strong>Positioning</strong> (where the brand ranks relative to alternatives), and <strong>Authority</strong> (whether AI cites trusted sources when mentioning the brand).
+      </div>
+    </div>
+    
+    <div class="method-box no-break" style="margin-top: 16px;">
+      <div class="method-title">Snapshot Details</div>
+      <div class="method-grid">
+        <div class="method-item">
+          <div class="method-label">Report Generated</div>
+          <div class="method-value">${formatDate(snapshot.created_at)}</div>
         </div>
-      `;
-    }).join("")}
+        <div class="method-item">
+          <div class="method-label">Snapshot ID</div>
+          <div class="method-value">${snapshot.id.slice(0, 12)}...</div>
+        </div>
+        <div class="method-item">
+          <div class="method-label">Discovery Scenarios</div>
+          <div class="method-value">${metrics.total} evaluated</div>
+        </div>
+        <div class="method-item">
+          <div class="method-label">AI Models</div>
+          <div class="method-value">${models.length > 0 ? models.map(m => m[0]).join(", ") : "OpenAI"}</div>
+        </div>
+        <div class="method-item">
+          <div class="method-label">Competitors Tracked</div>
+          <div class="method-value">${competitors.length}</div>
+        </div>
+        <div class="method-item">
+          <div class="method-label">Confidence</div>
+          <div class="method-value">${metrics.mentionRate >= 80 ? 'High' : metrics.mentionRate >= 50 ? 'Medium' : 'Low'}</div>
+        </div>
+      </div>
+    </div>
     
-    <div class="h3" style="margin-top: 24px;">Methodology</div>
-    <table class="method-table no-break">
-      <tr><td>Report Generated</td><td>${formatDate(snapshot.created_at)}</td></tr>
-      <tr><td>Snapshot ID</td><td>${snapshot.id}</td></tr>
-      <tr><td>Models Tested</td><td>${models.length > 0 ? models.map(m => m[0]).join(", ") : "OpenAI"}</td></tr>
-      <tr><td>Prompts Analyzed</td><td>${metrics.total}</td></tr>
-      <tr><td>Competitors Tracked</td><td>${competitors.length}</td></tr>
-      <tr><td>Prompt Pack Version</td><td>${snapshot.prompt_pack_version || "v1_core"}</td></tr>
-    </table>
-    
+    <div style="margin-top: 32px; text-align: center;" class="no-break">
+      <div class="small" style="margin-bottom: 8px;">Questions about this report?</div>
+      <div style="font-size: 12px; font-weight: 600; color: #0f172a;">Contact ${escapeHtml(agency.name)}</div>
+    </div>
     
     <div class="page-footer">
       <span>${escapeHtml(client.name)} — AI Visibility Report</span>
@@ -825,8 +697,4 @@ function escapeHtml(str: string) {
       default: return ch;
     }
   });
-}
-
-function truncate(str: string, len: number): string {
-  return str.length > len ? str.slice(0, len - 1) + "…" : str;
 }
