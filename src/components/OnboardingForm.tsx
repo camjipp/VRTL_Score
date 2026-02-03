@@ -67,6 +67,7 @@ export function OnboardingForm() {
   const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
   const [authBusy, setAuthBusy] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
 
   // Agency setup state
   const [loading, setLoading] = useState(false);
@@ -129,9 +130,23 @@ export function OnboardingForm() {
   async function handleSignUp(e: React.FormEvent) {
     e.preventDefault();
     setAuthError(null);
+    if (!legalAccepted) {
+      setAuthError("Please agree to the Terms of Service and Privacy Policy to continue.");
+      return;
+    }
     setAuthBusy(true);
     try {
-      const result = await supabase.auth.signUp({ email, password });
+      const result = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            legal_accepted_at: new Date().toISOString(),
+            legal_tos_version: "1.1",
+            legal_privacy_version: "1.1"
+          }
+        }
+      });
       if (result.error) throw result.error;
 
       const session = result.data.session ?? (await supabase.auth.getSession()).data.session;
@@ -282,6 +297,27 @@ export function OnboardingForm() {
                     />
                   </div>
 
+                  <label className="flex items-start gap-3 rounded-xl border border-border bg-surface-2 px-4 py-3 text-sm text-text-2">
+                    <input
+                      checked={legalAccepted}
+                      className="mt-0.5 h-4 w-4 rounded border-border text-accent accent-black"
+                      disabled={authBusy}
+                      onChange={(e) => setLegalAccepted(e.target.checked)}
+                      type="checkbox"
+                    />
+                    <span className="leading-relaxed">
+                      I agree to the{" "}
+                      <Link className="font-medium text-text underline underline-offset-4" href="/terms" target="_blank">
+                        Terms of Service
+                      </Link>{" "}
+                      and{" "}
+                      <Link className="font-medium text-text underline underline-offset-4" href="/privacy" target="_blank">
+                        Privacy Policy
+                      </Link>
+                      .
+                    </span>
+                  </label>
+
                   {authError && (
                     <Alert variant={authError.includes("confirm") ? "warning" : "danger"}>
                       <AlertDescription>{authError}</AlertDescription>
@@ -290,7 +326,7 @@ export function OnboardingForm() {
 
                   <Button
                     className="h-12 w-full rounded-xl text-base shadow-lg shadow-accent/20"
-                    disabled={authBusy}
+                    disabled={authBusy || !legalAccepted}
                     type="submit"
                     variant="primary"
                   >
@@ -315,10 +351,6 @@ export function OnboardingForm() {
                   </p>
                 </form>
               </div>
-
-              <p className="mt-6 text-center text-xs text-text-3">
-                By signing up, you agree to our Terms of Service and Privacy Policy.
-              </p>
             </div>
 
             {/* Right: Benefits */}
