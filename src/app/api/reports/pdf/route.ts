@@ -225,9 +225,21 @@ export async function GET(req: Request) {
       printBackground: true,
       margin: { top: "20mm", right: "15mm", bottom: "20mm", left: "15mm" }
     });
-    const filename = `VRTLScore_${clientRes.data.name.replace(/\s+/g, "_")}_${new Date()
-      .toISOString()
-      .slice(0, 10)}.pdf`;
+    const safePart = (value: string) =>
+      value
+        .normalize("NFKD")
+        .replace(/[^\w\s-]+/g, "")
+        .trim()
+        .replace(/[\s_-]+/g, "_")
+        .replace(/^_+|_+$/g, "");
+
+    const clientPart = safePart(clientRes.data.name || "Client").slice(0, 48) || "Client";
+    const datePart = new Date(snapshotRes.data.created_at as string).toISOString().slice(0, 10);
+    const snapPart = String(snapshotRes.data.id).slice(0, 8);
+
+    // Professional + sortable + still traceable.
+    // Example: AI_Visibility_Report_Nike_2026-02-03_Snap-82ac5704.pdf
+    const filename = `AI_Visibility_Report_${clientPart}_${datePart}_Snap-${snapPart}.pdf`;
     const body = Buffer.from(pdfBuffer);
     return new NextResponse(body, {
       status: 200,

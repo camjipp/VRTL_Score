@@ -134,12 +134,12 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl">
           {/* Section Header - Future of Search */}
           <div className="mb-16">
-            <p className="text-sm font-semibold uppercase tracking-widest text-[#999]">
-              The Future of Search
-            </p>
+              <p className="text-sm font-semibold uppercase tracking-widest text-[#999]">
+                The Future of Search
+              </p>
             <h2 className="mt-4 text-4xl font-semibold tracking-tight text-[#0A0A0A] md:text-5xl lg:text-6xl leading-[1.1]">
-              The New Frontier for<br />Agency Growth
-            </h2>
+                The New Frontier for<br />Agency Growth
+              </h2>
             <p className="mt-8 text-xl text-[#666] leading-relaxed max-w-3xl">
               LLM visibility is the new digital shelf where brands rush to get surfaced. AI Answer Engines are used by billions daily to shape perspectives, help make buying decisions, and answer questions about your clients&apos; brands and industries.
             </p>
@@ -179,9 +179,9 @@ export default function HomePage() {
               {/* Visual */}
               <div className="mb-6 rounded-2xl bg-gradient-to-br from-[#F8F8F6] to-[#F0F0EC] p-6 min-h-[200px]">
                 <div className="flex items-center justify-between mb-4">
-                  <div>
+                    <div>
                     <div className="text-xs text-[#999] uppercase tracking-wide">AI Visibility Score</div>
-                    <div className="text-4xl font-bold text-[#0A0A0A]">78</div>
+                      <div className="text-4xl font-bold text-[#0A0A0A]">78</div>
                   </div>
                   <div className="h-16 w-16 rounded-full border-4 border-emerald-500 flex items-center justify-center bg-white">
                     <span className="text-lg font-bold text-emerald-600">B+</span>
@@ -266,15 +266,15 @@ export default function HomePage() {
               </div>
               <h3 className="text-2xl font-semibold text-[#0A0A0A]">Sentiment Analysis</h3>
               <p className="mt-3 text-[#666] leading-relaxed">Monitor and improve how your client is perceived in AI-generated responses. Track positive, neutral, and negative sentiment trends to protect and enhance brand reputation.</p>
-            </div>
-
+                  </div>
+                  
             {/* Optimization Hub */}
             <div className="group rounded-3xl border border-[#E5E5E5] bg-white p-8 transition-all duration-300 hover:border-emerald-200 hover:shadow-xl">
               {/* Visual */}
               <div className="mb-6 rounded-2xl bg-gradient-to-br from-[#F8F8F6] to-[#F0F0EC] p-6 min-h-[200px]">
                 <div className="text-xs text-[#999] uppercase tracking-wide mb-3">Recommendations</div>
-                <div className="space-y-2">
-                  {[
+                  <div className="space-y-2">
+                    {[
                     { priority: "High", text: "Add structured data markup to service pages", impact: "+12 pts" },
                     { priority: "Med", text: "Improve expertise signals in About section", impact: "+8 pts" },
                     { priority: "Med", text: "Create FAQ content for common queries", impact: "+6 pts" },
@@ -285,8 +285,8 @@ export default function HomePage() {
                       </span>
                       <span className="flex-1 text-sm text-[#0A0A0A] truncate">{rec.text}</span>
                       <span className="shrink-0 text-sm font-bold text-emerald-600">{rec.impact}</span>
-                    </div>
-                  ))}
+                      </div>
+                    ))}
                 </div>
               </div>
               <h3 className="text-2xl font-semibold text-[#0A0A0A]">Optimization Hub</h3>
@@ -313,7 +313,7 @@ export default function HomePage() {
                     <div className="h-8 w-full bg-[#F5F5F5] rounded mb-3" />
                     <div className="h-2 w-full bg-[#E5E5E5] rounded mb-2" />
                     <div className="h-2 w-1/2 bg-[#E5E5E5] rounded" />
-                  </div>
+                    </div>
                   {/* Download badge */}
                   <div className="absolute -top-2 -right-2 h-10 w-10 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg">
                     <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -337,12 +337,12 @@ export default function HomePage() {
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-semibold tracking-tight text-[#0A0A0A] md:text-4xl">
             Ready to show your clients how AI sees them?
-          </h2>
+            </h2>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
               href="/onboarding"
               className="inline-flex h-12 items-center justify-center rounded-xl bg-[#0A0A0A] px-8 text-base font-medium text-white transition-all hover:bg-[#1a1a1a] hover:scale-[1.02]"
-            >
+              >
               Start free trial
             </Link>
             <Link

@@ -41,74 +41,74 @@ export function Footer() {
         <div className="flex flex-col gap-12 lg:flex-row lg:justify-between">
           {/* Links columns - 4 columns */}
           <div className="grid flex-1 grid-cols-2 gap-8 sm:grid-cols-4 lg:gap-10">
-            {/* Company */}
-            <div>
+          {/* Company */}
+          <div>
               <h3 className="text-sm font-semibold text-white">Company</h3>
               <ul className="mt-4 space-y-2.5">
-                {footerLinks.company.map((link) => (
-                  <li key={link.href + link.label}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-white/50 transition-colors hover:text-white"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+              {footerLinks.company.map((link) => (
+                <li key={link.href + link.label}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-white/50 transition-colors hover:text-white"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            {/* Features */}
-            <div>
+          {/* Features */}
+          <div>
               <h3 className="text-sm font-semibold text-white">Features</h3>
               <ul className="mt-4 space-y-2.5">
-                {footerLinks.features.map((link) => (
-                  <li key={link.href + link.label}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-white/50 transition-colors hover:text-white"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+              {footerLinks.features.map((link) => (
+                <li key={link.href + link.label}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-white/50 transition-colors hover:text-white"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            {/* Models */}
-            <div>
+          {/* Models */}
+          <div>
               <h3 className="text-sm font-semibold text-white">Models</h3>
               <ul className="mt-4 space-y-2.5">
-                {footerLinks.models.map((link) => (
-                  <li key={link.href + link.label}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-white/50 transition-colors hover:text-white"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+              {footerLinks.models.map((link) => (
+                <li key={link.href + link.label}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-white/50 transition-colors hover:text-white"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            {/* Resources */}
-            <div>
+          {/* Resources */}
+          <div>
               <h3 className="text-sm font-semibold text-white">Resources</h3>
               <ul className="mt-4 space-y-2.5">
-                {footerLinks.resources.map((link) => (
-                  <li key={link.href + link.label}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-white/50 transition-colors hover:text-white"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+              {footerLinks.resources.map((link) => (
+                <li key={link.href + link.label}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-white/50 transition-colors hover:text-white"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
+        </div>
 
           {/* Logo on right - desktop only */}
           <div className="hidden lg:flex lg:items-center">
@@ -184,12 +184,12 @@ export function Footer() {
 
             {/* Mobile logo */}
             <div className="lg:hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                alt="VRTL Score"
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              alt="VRTL Score"
                 className="h-16 w-auto"
                 src="/brand/White_VRTL.png"
-              />
+            />
             </div>
           </div>
         </div>

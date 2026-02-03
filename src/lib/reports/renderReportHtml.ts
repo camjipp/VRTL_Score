@@ -68,7 +68,7 @@ function calculateMetrics(data: ReportData) {
   for (const c of competitors) {
     competitorData.set(c.name, { mentions: 0, topCount: 0 });
   }
-  
+
   for (const r of responses) {
     const pj = r.parsed_json;
     if (!pj) continue;
@@ -87,7 +87,7 @@ function calculateMetrics(data: ReportData) {
       }
     }
   }
-  
+
   const competitorStats = Array.from(competitorData.entries())
     .map(([name, data]) => ({ name, mentions: data.mentions }))
     .filter(c => c.mentions > 0)
@@ -386,14 +386,14 @@ export function renderReportHtml(data: ReportData): string {
 <body>
   <!-- PAGE 1: COVER -->
   <div class="page cover">
-    <div class="cover-header">
-      ${agency.brand_logo_url 
+      <div class="cover-header">
+        ${agency.brand_logo_url 
         ? `<div class="cover-logo"><img src="${escapeHtml(agency.brand_logo_url)}" alt="" /></div>`
         : `<div class="cover-logo-text">${escapeHtml(agency.name)}</div>`
-      }
+        }
       <div class="small">${formatDate(snapshot.created_at)}</div>
-    </div>
-    
+      </div>
+      
     <div class="cover-main">
       <div class="cover-type">AI Visibility Report</div>
       <div class="cover-client">${escapeHtml(client.name)}</div>
@@ -419,11 +419,11 @@ export function renderReportHtml(data: ReportData): string {
             <div class="scope-item">
               <div class="scope-value">${competitors.length}</div>
               <div class="scope-label">Competitors Tracked</div>
-            </div>
+          </div>
             <div class="scope-item">
               <div class="scope-value">${models.length || 1}</div>
               <div class="scope-label">AI Models</div>
-            </div>
+          </div>
           </div>
         </div>
       </div>
@@ -552,8 +552,8 @@ export function renderReportHtml(data: ReportData): string {
         <div class="insight-value">${metrics.citationRate}%</div>
         <div class="insight-note">Citations in ${metrics.hasCitations}/${metrics.total}</div>
       </div>
-    </div>
-    
+      </div>
+      
     <div class="models-section no-break">
       <div class="h3">Score by AI Model</div>
       ${models.length > 0 ? models.map(([name, val]) => `
@@ -589,7 +589,7 @@ export function renderReportHtml(data: ReportData): string {
         <div class="action-item">
           <div class="action-week">Week 3</div>
           <div class="action-text">Optimize competitive positioning content</div>
-        </div>
+          </div>
         <div class="action-item">
           <div class="action-week">Week 4</div>
           <div class="action-text">Rerun snapshot to measure progress</div>
@@ -623,7 +623,7 @@ export function renderReportHtml(data: ReportData): string {
       <div class="kpi-card">
         <div class="kpi-value">${metrics.hasCitations}/${metrics.total}</div>
         <div class="kpi-label">Citations</div>
-      </div>
+          </div>
       <div class="kpi-card">
         <div class="kpi-value">${metrics.hasFeatures}/${metrics.total}</div>
         <div class="kpi-label">Features</div>
@@ -661,14 +661,14 @@ export function renderReportHtml(data: ReportData): string {
     ${metrics.competitorStats.length > 0 ? `
     <div class="h3" style="margin-top: 24px;">Competitive Comparison</div>
     <table class="comp-table no-break">
-      <thead>
-        <tr>
+        <thead>
+          <tr>
           <th>Brand</th>
           <th>Visibility</th>
           <th>vs ${escapeHtml(client.name)}</th>
-        </tr>
-      </thead>
-      <tbody>
+          </tr>
+        </thead>
+        <tbody>
         <tr style="background: #f0fdf4;">
           <td><strong>${escapeHtml(client.name)}</strong></td>
           <td><strong>${metrics.mentioned}/${metrics.total} scenarios</strong></td>
@@ -676,16 +676,16 @@ export function renderReportHtml(data: ReportData): string {
         </tr>
         ${metrics.competitorStats.slice(0, 4).map(c => {
           const status = metrics.mentioned > c.mentions ? 'Ahead' : c.mentions > metrics.mentioned ? 'Behind' : 'Tied';
-          return `
-            <tr>
+            return `
+              <tr>
               <td>${escapeHtml(c.name)}</td>
               <td>${c.mentions}/${metrics.total} scenarios</td>
               <td><span class="pill ${status === 'Ahead' ? 'pill-green' : status === 'Behind' ? 'pill-red' : 'pill-yellow'}">${status}</span></td>
-            </tr>
-          `;
-        }).join("")}
-      </tbody>
-    </table>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
     ` : `
     <div style="margin-top: 24px; padding: 16px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;" class="no-break">
       <div class="h3" style="color: #166534; margin-bottom: 4px;">No Competitor Mentions Detected</div>
