@@ -64,64 +64,114 @@ export default function HomePage() {
           HERO SECTION
       ═══════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden bg-bg">
-        <div className="container-xl pb-8 pt-12 sm:pb-10 sm:pt-16">
-          <div className="mx-auto max-w-3xl text-center">
-            {/* Logo + wordmark */}
-            <div className="flex items-end justify-center gap-0">
-              <div className="h-[100px] w-[220px] overflow-hidden -mr-3 sm:h-[130px] sm:w-[280px] sm:-mr-5">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  alt="VRTL"
-                  className="h-full w-full scale-[1.6] object-cover object-left"
-                  src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
-                />
+        <div className="container-xl pb-10 pt-10 sm:pb-12 sm:pt-14">
+          <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-12">
+            {/* Left: Ahrefs-style copy hierarchy */}
+            <div className="lg:col-span-7">
+              <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm text-text-2">
+                <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                7-day free trial — cancel anytime
               </div>
-              <span className="text-[72px] font-semibold leading-[0.9] tracking-tight text-text sm:text-[96px]">
-                Score
-              </span>
-            </div>
 
-            {/* Tagline + AI icons */}
-            <div className="mx-auto mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
-              <span className="text-xl font-bold text-text sm:text-2xl">
-                AI visibility, measured.
-              </span>
-              <div className="flex items-center">
-                {AI_MODELS.slice(0, 4).map((model, i) => (
-                  <span
-                    key={model.name}
-                    className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface -ml-2 first:ml-0"
-                    style={{ zIndex: 4 - i }}
-                  >
+              <h1 className="mt-6 text-4xl font-bold tracking-tight text-text sm:text-5xl lg:text-6xl">
+                Make your clients discoverable in{" "}
+                <span className="marker-underline">AI search</span>.
+              </h1>
+
+              <p className="mt-5 max-w-2xl text-lg leading-relaxed text-text-2 sm:text-xl">
+                Track how ChatGPT, Claude, Gemini, and other answer engines describe, recommend, and rank your clients —
+                then ship client-ready reports that stand up to scrutiny.
+              </p>
+
+              <div className="mt-8 max-w-xl">
+                <DomainSearchBar />
+              </div>
+
+              <div className="mt-6 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+                <Link
+                  href="/onboarding"
+                  className="inline-flex h-12 items-center justify-center rounded-xl bg-text px-7 text-base font-semibold text-white shadow-lg shadow-text/10 transition-all hover:bg-text/90 hover:shadow-xl"
+                >
+                  Start free trial
+                </Link>
+                <Link
+                  href="/pricing"
+                  className="inline-flex h-12 items-center justify-center rounded-xl border border-border bg-surface px-7 text-base font-semibold text-text transition-all hover:border-text/20 hover:bg-surface-2"
+                >
+                  View pricing
+                </Link>
+              </div>
+
+              <div className="mt-6 flex flex-wrap items-center gap-2 text-sm text-text-3">
+                <span className="font-medium text-text-2">Models:</span>
+                {AI_MODELS.slice(0, 6).map((m) => (
+                  <span key={m.name} className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt={model.name} className="h-4 w-4" src={model.icon} />
+                    <img alt={m.name} className="h-4 w-4" src={m.icon} />
+                    {m.name}
                   </span>
                 ))}
-                <span className="ml-2 text-sm text-text-3">& more</span>
               </div>
             </div>
 
-            {/* Value prop subtitle */}
-            <p className="mx-auto mt-3 max-w-2xl text-base text-text-2 leading-relaxed sm:text-lg">
-              Unlock AI search growth, own how LLMs talk about your clients, and capture demand on ChatGPT, Gemini, and more—reaching billions who use AI daily.
-            </p>
+            {/* Right: clean “product preview” card (calm, not gimmicky) */}
+            <div className="lg:col-span-5">
+              <div className="rounded-3xl border border-border bg-surface p-6 shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 19V6l12-2v13" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 17c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-text">Snapshot preview</div>
+                      <div className="text-xs text-text-3">AI visibility audit — sample</div>
+                    </div>
+                  </div>
+                  <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                    Strong
+                  </span>
+                </div>
 
-            {/* Search bar */}
-            <div className="mx-auto mt-8 max-w-xl">
-              <DomainSearchBar />
-            </div>
+                <div className="mt-6 grid grid-cols-3 gap-3">
+                  {[
+                    { label: "VRTL Score", value: "78" },
+                    { label: "Top position", value: "62%" },
+                    { label: "Citations", value: "41%" },
+                  ].map((k) => (
+                    <div key={k.label} className="rounded-2xl border border-border bg-bg p-4">
+                      <div className="text-2xl font-bold text-text">{k.value}</div>
+                      <div className="mt-1 text-xs text-text-3">{k.label}</div>
+                    </div>
+                  ))}
+                </div>
 
-            {/* CTAs */}
-            <div className="mt-6 flex items-center justify-center gap-4">
-              <Link
-                href="/onboarding"
-                className="rounded-lg bg-text px-6 py-3 text-sm font-medium text-white shadow-lg shadow-text/10 transition-all hover:bg-text/90 hover:scale-[1.02]"
-              >
-                Start free trial
-              </Link>
-              <Link href="/pricing" className="text-sm text-text-2 hover:text-text transition-colors">
-                View pricing →
-              </Link>
+                <div className="mt-5 rounded-2xl border border-border bg-bg p-4">
+                  <div className="text-xs font-semibold uppercase tracking-widest text-text-3">Competitive mentions</div>
+                  <div className="mt-3 space-y-3">
+                    {[
+                      { name: "Your Client", value: 10, color: "bg-emerald-500" },
+                      { name: "Competitor A", value: 7, color: "bg-text" },
+                      { name: "Competitor B", value: 5, color: "bg-text" },
+                    ].map((r) => (
+                      <div key={r.name} className="flex items-center gap-3">
+                        <div className="w-24 truncate text-sm font-medium text-text">{r.name}</div>
+                        <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface ring-1 ring-border/60">
+                          <div className={`h-full rounded-full ${r.color}`} style={{ width: `${r.value * 10}%` }} />
+                        </div>
+                        <div className="w-6 text-right text-sm font-semibold text-text">{r.value}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-5 text-xs text-text-3">
+                  Built for agency reporting: evidence-first, repeatable, client-ready.
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -506,52 +556,44 @@ export default function HomePage() {
           FAQ (with Questions marquee)
       ═══════════════════════════════════════════════════════ */}
       <section id="faq" className="border-t border-border bg-surface">
-        {/* Questions Marquee - Goodie style */}
-        <div className="overflow-hidden py-6 md:py-10">
-          <div className="flex animate-marquee whitespace-nowrap">
-            {Array.from({ length: 30 }).map((_, i) => (
-              <span key={i} className="mx-10 text-6xl font-black text-text md:text-7xl lg:text-8xl xl:text-9xl">
-                Questions?
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* FAQ Content */}
-        <div className="px-6 pb-20 pt-8 md:pb-28 md:pt-12">
+        <div className="container-xl py-20 md:py-24">
           <div className="mx-auto max-w-2xl">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-semibold tracking-tight text-text md:text-4xl">
-                We have the answers.
+            <div className="mb-10">
+              <p className="text-sm font-semibold uppercase tracking-widest text-text-3">FAQ</p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-text md:text-4xl">
+                Clear answers, no fluff.
               </h2>
+              <p className="mt-3 text-lg leading-relaxed text-text-2">
+                Everything you need to understand what VRTL Score measures and how agencies use it with clients.
+              </p>
             </div>
 
-          <div>
-            <FAQItem
-              question="What is AI visibility?"
-              answer="AI visibility refers to how often and how prominently a brand appears in AI-generated responses. When someone asks ChatGPT, Claude, or Gemini for recommendations in your client's industry, are they mentioned? That's AI visibility."
-            />
-            <FAQItem
-              question="How does VRTL Score work?"
-              answer="We query ChatGPT, Claude, and Gemini with standardized, industry-specific prompts. We analyze the responses to see if and how your client is mentioned, then calculate a visibility score based on frequency, prominence, and sentiment."
-            />
-            <FAQItem
-              question="What AI models do you support?"
-              answer="Currently we support ChatGPT (OpenAI), Claude (Anthropic), and Gemini (Google). We're constantly adding new models as they become relevant for AI search."
-            />
-            <FAQItem
-              question="How accurate are the scores?"
-              answer="Scores are based on real AI responses at the time of the snapshot. AI outputs can vary, which is why we recommend running monthly snapshots to track trends over time rather than focusing on any single score."
-            />
-            <FAQItem
-              question="Can I white-label the reports?"
-              answer="Yes. PDF reports include your agency branding. You can add your logo and customize the look to match your brand."
-            />
-            <FAQItem
-              question="Is there a free trial?"
-              answer="Yes, we offer a 7-day free trial so you can test the platform with your own clients before committing."
-            />
-          </div>
+            <div>
+              <FAQItem
+                question="What is AI visibility?"
+                answer="AI visibility refers to how often and how prominently a brand appears in AI-generated responses. When someone asks ChatGPT, Claude, or Gemini for recommendations in your client's industry, are they mentioned? That's AI visibility."
+              />
+              <FAQItem
+                question="How does VRTL Score work?"
+                answer="We query ChatGPT, Claude, and Gemini with standardized, industry-specific prompts. We analyze the responses to see if and how your client is mentioned, then calculate a visibility score based on frequency, prominence, and sentiment."
+              />
+              <FAQItem
+                question="What AI models do you support?"
+                answer="Currently we support ChatGPT (OpenAI), Claude (Anthropic), and Gemini (Google). We're constantly adding new models as they become relevant for AI search."
+              />
+              <FAQItem
+                question="How accurate are the scores?"
+                answer="Scores are based on real AI responses at the time of the snapshot. AI outputs can vary, which is why we recommend running monthly snapshots to track trends over time rather than focusing on any single score."
+              />
+              <FAQItem
+                question="Can I white-label the reports?"
+                answer="Yes. PDF reports include your agency branding. You can add your logo and customize the look to match your brand."
+              />
+              <FAQItem
+                question="Is there a free trial?"
+                answer="Yes, we offer a 7-day free trial so you can test the platform with your own clients before committing."
+              />
+            </div>
           </div>
         </div>
       </section>
