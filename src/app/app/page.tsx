@@ -332,14 +332,14 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
               href={`/app/clients/${client.id}`}
               className="grid grid-cols-[1fr,120px,100px,80px] items-center gap-4 px-5 py-4 transition-colors hover:bg-[#FAFAF8]"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 min-w-0">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#0A0A0A] text-sm font-medium text-white">
                   {getInitials(client.name)}
                 </div>
-                <div className="min-w-0">
-                  <div className="font-medium text-[#0A0A0A]">{client.name}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium text-[#0A0A0A] truncate">{client.name}</div>
                   {client.website && (
-                    <div className="truncate text-xs text-[#999]">{client.website.replace(/^https?:\/\//, "")}</div>
+                    <div className="truncate text-xs text-[#999] max-w-[200px]">{client.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}</div>
                   )}
                 </div>
               </div>

@@ -140,40 +140,35 @@ export function AppEntitlementGate({ children }: Props) {
 
   if (!ready) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-surface via-bg to-surface-2">
+      <div className="flex min-h-screen items-center justify-center bg-bg">
         <div className="w-full max-w-sm px-6">
           {/* Logo */}
           <div className="mb-8 flex justify-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 shadow-lg shadow-emerald-500/20">
-              <span className="text-2xl font-bold text-white">V</span>
+            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-text">
+              <span className="text-xl font-bold text-white">V</span>
             </div>
           </div>
 
           {/* Progress card */}
-          <div className="rounded-2xl border border-border bg-white p-6 shadow-xl">
+          <div className="rounded-xl border border-border bg-white p-6">
             {/* Status text */}
             <p className="mb-4 text-center text-sm font-medium text-text">
               {statusText}
             </p>
 
             {/* Progress bar */}
-            <div className="h-2 overflow-hidden rounded-full bg-surface-2">
+            <div className="h-1.5 overflow-hidden rounded-full bg-surface-2">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 transition-all duration-500 ease-out"
+                className="h-full rounded-full bg-text transition-all duration-500 ease-out"
                 style={{ width: `${progress}%` }}
               />
             </div>
 
             {/* Progress percentage */}
             <p className="mt-3 text-center text-xs text-text-3">
-              {Math.round(progress)}% complete
+              {Math.round(progress)}%
             </p>
           </div>
-
-          {/* Subtle hint */}
-          <p className="mt-6 text-center text-xs text-text-3">
-            This only takes a moment
-          </p>
         </div>
       </div>
     );

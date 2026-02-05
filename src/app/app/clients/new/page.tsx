@@ -10,16 +10,16 @@ import { Alert, AlertDescription } from "@/components/ui/Alert";
 import { cn } from "@/lib/cn";
 
 const INDUSTRIES = [
-  { value: "technology", label: "Technology", icon: "💻" },
-  { value: "healthcare", label: "Healthcare", icon: "🏥" },
-  { value: "finance", label: "Finance", icon: "💰" },
-  { value: "retail", label: "Retail", icon: "🛍️" },
-  { value: "education", label: "Education", icon: "🎓" },
-  { value: "marketing", label: "Marketing", icon: "📣" },
-  { value: "real_estate", label: "Real Estate", icon: "🏠" },
-  { value: "hospitality", label: "Hospitality", icon: "🏨" },
-  { value: "legal", label: "Legal", icon: "⚖️" },
-  { value: "other", label: "Other", icon: "📦" },
+  { value: "technology", label: "Technology" },
+  { value: "healthcare", label: "Healthcare" },
+  { value: "finance", label: "Finance" },
+  { value: "retail", label: "Retail" },
+  { value: "education", label: "Education" },
+  { value: "marketing", label: "Marketing" },
+  { value: "real_estate", label: "Real Estate" },
+  { value: "hospitality", label: "Hospitality" },
+  { value: "legal", label: "Legal" },
+  { value: "other", label: "Other" },
 ];
 
 export default function NewClientPage() {
@@ -103,7 +103,7 @@ export default function NewClientPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                placeholder="e.g., Acme Corp"
+                placeholder="Company or brand name"
                 className="mt-2 w-full rounded-xl border border-border bg-surface-2 px-4 py-3 text-text placeholder:text-text-3 focus:border-accent focus:outline-none"
               />
             </div>
@@ -135,27 +135,21 @@ export default function NewClientPage() {
               <label className="block text-sm font-medium text-text">
                 Industry <span className="text-red-500">*</span>
               </label>
-              <p className="text-sm text-text-3">Select the client&apos;s primary industry</p>
-              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
+              <p className="mt-1 text-sm text-text-3">Used to generate relevant AI queries</p>
+              <div className="mt-3 flex flex-wrap gap-2">
                 {INDUSTRIES.map((ind) => (
                   <button
                     key={ind.value}
                     type="button"
                     onClick={() => setIndustry(ind.value)}
                     className={cn(
-                      "flex flex-col items-center gap-2 rounded-xl border-2 px-3 py-4 transition-all",
+                      "rounded-lg border px-4 py-2 text-sm font-medium transition-all",
                       industry === ind.value
-                        ? "border-accent bg-accent/5"
-                        : "border-border bg-surface-2 hover:border-text-3"
+                        ? "border-text bg-text text-white"
+                        : "border-border bg-white text-text-2 hover:border-text-3 hover:text-text"
                     )}
                   >
-                    <span className="text-2xl">{ind.icon}</span>
-                    <span className={cn(
-                      "text-xs font-medium",
-                      industry === ind.value ? "text-text" : "text-text-2"
-                    )}>
-                      {ind.label}
-                    </span>
+                    {ind.label}
                   </button>
                 ))}
               </div>
@@ -164,31 +158,22 @@ export default function NewClientPage() {
         </div>
 
         {/* What happens next */}
-        <div className="overflow-hidden rounded-2xl border border-dashed border-border bg-surface-2/50 p-6">
-          <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
-              <svg className="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-              </svg>
-            </div>
-            <div>
-              <h3 className="font-semibold text-text">What happens next?</h3>
-              <ul className="mt-2 space-y-1 text-sm text-text-2">
-                <li className="flex items-center gap-2">
-                  <span className="text-emerald-600">→</span>
-                  Add competitors to compare against
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-emerald-600">→</span>
-                  Run a snapshot to analyze AI visibility
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-emerald-600">→</span>
-                  Get actionable insights and scores
-                </li>
-              </ul>
-            </div>
-          </div>
+        <div className="rounded-xl border border-border bg-white p-5">
+          <h3 className="text-sm font-semibold text-text">After creating this client</h3>
+          <ol className="mt-3 space-y-2 text-sm text-text-2">
+            <li className="flex items-start gap-3">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface-2 text-xs font-medium text-text-3">1</span>
+              <span>Add competitors for benchmarking (optional)</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface-2 text-xs font-medium text-text-3">2</span>
+              <span>Run a snapshot to query AI models</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface-2 text-xs font-medium text-text-3">3</span>
+              <span>View scores and download reports</span>
+            </li>
+          </ol>
         </div>
 
         {/* Actions */}

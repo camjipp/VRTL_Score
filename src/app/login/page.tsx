@@ -33,79 +33,64 @@ export default async function LoginPage({
             </div>
           </div>
 
-          {/* Right: Visual */}
+          {/* Right: Value props */}
           <div className="hidden lg:block">
             <div className="sticky top-8">
-              <div className="mb-6 text-sm font-medium text-text-3">
-                Your dashboard awaits
-              </div>
-
-              {/* Dashboard preview mockup */}
-              <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-2xl">
-                {/* Header bar */}
-                <div className="flex items-center justify-between border-b border-border bg-surface-2/50 px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-emerald-500 text-sm font-bold text-white">
-                      V
+              <div className="rounded-2xl border border-border bg-white p-8">
+                <h2 className="text-lg font-semibold text-text">What you get with VRTL Score</h2>
+                
+                <div className="mt-6 space-y-5">
+                  <div className="flex gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50">
+                      <svg className="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605" />
+                      </svg>
                     </div>
-                    <span className="font-semibold text-text">VRTL Score</span>
+                    <div>
+                      <h3 className="font-medium text-text">AI Visibility Scores</h3>
+                      <p className="mt-1 text-sm text-text-2">See how AI models like ChatGPT, Claude, and Gemini perceive your clients.</p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-surface-2" />
+
+                  <div className="flex gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50">
+                      <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-text">Competitive Benchmarking</h3>
+                      <p className="mt-1 text-sm text-text-2">Track up to 8 competitors per client and see who AI recommends more often.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50">
+                      <svg className="h-5 w-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-text">Branded PDF Reports</h3>
+                      <p className="mt-1 text-sm text-text-2">Generate professional reports with your agency branding in seconds.</p>
+                    </div>
                   </div>
                 </div>
 
-                {/* Dashboard content mockup */}
-                <div className="p-6">
-                  {/* Stats row */}
-                  <div className="grid grid-cols-3 gap-4">
-                    {[
-                      { label: "Total Clients", value: "12", color: "emerald" },
-                      { label: "Avg Score", value: "78", color: "violet" },
-                      { label: "Reports", value: "47", color: "amber" },
-                    ].map((stat) => (
-                      <div key={stat.label} className="rounded-xl bg-surface-2 p-4">
-                        <div className="text-xs text-text-3">{stat.label}</div>
-                        <div className={`mt-1 text-2xl font-bold ${
-                          stat.color === "emerald" ? "text-emerald-600" :
-                          stat.color === "violet" ? "text-violet-600" :
-                          "text-amber-600"
-                        }`}>
-                          {stat.value}
+                <div className="mt-8 border-t border-border pt-6">
+                  <div className="flex items-center gap-4">
+                    <div className="flex -space-x-2">
+                      {["/ai/icons8-chatgpt.svg", "/ai/icons8-claude.svg", "/ai/gemini.png"].map((src) => (
+                        <div key={src} className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-surface-2">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={src} alt="" className="h-4 w-4" />
                         </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Client list mockup */}
-                  <div className="mt-6 space-y-3">
-                    {[
-                      { name: "Acme Corp", score: 82 },
-                      { name: "TechStart Inc", score: 74 },
-                      { name: "Growth Labs", score: 89 },
-                    ].map((client) => (
-                      <div key={client.name} className="flex items-center justify-between rounded-lg border border-border p-4">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-slate-100 to-slate-50 text-sm font-bold text-slate-600">
-                            {client.name.charAt(0)}
-                          </div>
-                          <div className="font-medium text-text">{client.name}</div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-emerald-600">{client.score}</span>
-                          <svg className="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                          </svg>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                    <span className="text-sm text-text-2">Analyzes ChatGPT, Claude, Gemini & more</span>
                   </div>
                 </div>
               </div>
-
-              <p className="mt-4 text-center text-xs text-text-3">
-                Pick up right where you left off
-              </p>
             </div>
           </div>
         </div>

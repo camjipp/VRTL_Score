@@ -131,7 +131,7 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
           className="font-medium text-accent hover:underline"
           href="/onboarding"
         >
-          Get started free
+          Sign up
         </Link>
       </p>
     </form>

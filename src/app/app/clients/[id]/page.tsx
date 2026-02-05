@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 
 import { DownloadPdfButton } from "@/components/DownloadPdfButton";
@@ -406,17 +406,85 @@ function ProviderBreakdown({ providers }: { providers: [string, number][] }) {
 /* ═══════════════════════════════════════════════════════════════════════════
    QUICK ACTIONS
 ═══════════════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════
+   SNAPSHOT PROGRESS
+═══════════════════════════════════════════════════════════════════════════ */
+function SnapshotProgress({ startedAt }: { startedAt: string | null }) {
+  const [elapsed, setElapsed] = useState(0);
+  
+  useEffect(() => {
+    if (!startedAt) return;
+    const start = new Date(startedAt).getTime();
+    const interval = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - start) / 1000));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [startedAt]);
+  
+  const minutes = Math.floor(elapsed / 60);
+  const seconds = elapsed % 60;
+  const progress = Math.min(95, Math.floor((elapsed / 180) * 100)); // ~3 min typical
+  
+  return (
+    <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100">
+          <svg className="h-5 w-5 animate-spin text-amber-600" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+        </div>
+        <div className="flex-1">
+          <div className="text-sm font-semibold text-amber-900">Analyzing AI responses...</div>
+          <div className="mt-1 text-xs text-amber-700">
+            Querying ChatGPT, Claude, and Gemini — {minutes}:{seconds.toString().padStart(2, '0')} elapsed
+          </div>
+        </div>
+      </div>
+      <div className="mt-4">
+        <div className="h-1.5 rounded-full bg-amber-200">
+          <div 
+            className="h-1.5 rounded-full bg-amber-500 transition-all duration-500"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <div className="mt-2 text-xs text-amber-600">
+          This typically takes 2-3 minutes
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function QuickActions({
   running,
   snapshotStatus,
+  snapshotStartedAt,
   onRunSnapshot,
   onResetSnapshot,
 }: {
   running: boolean;
   snapshotStatus: string | null;
+  snapshotStartedAt: string | null;
   onRunSnapshot: () => void;
   onResetSnapshot: () => void;
 }) {
+  // Show progress card if snapshot is running
+  if (snapshotStatus === "running") {
+    return (
+      <div className="space-y-3">
+        <SnapshotProgress startedAt={snapshotStartedAt} />
+        <button
+          onClick={onResetSnapshot}
+          disabled={running}
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-[#E5E5E5] px-4 py-2.5 text-sm font-medium text-[#666] transition-colors hover:bg-[#F5F5F5]"
+        >
+          Reset stuck snapshot
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-xl border border-[#E5E5E5] bg-white p-5">
       <h3 className="text-sm font-semibold text-[#0A0A0A]">Actions</h3>
@@ -432,7 +500,7 @@ function QuickActions({
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
-              Analyzing...
+              Starting...
             </>
           ) : (
             <>
@@ -443,16 +511,6 @@ function QuickActions({
             </>
           )}
         </button>
-
-        {snapshotStatus === "running" && (
-          <button
-            onClick={onResetSnapshot}
-            disabled={running}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-[#E5E5E5] px-4 py-2.5 text-sm font-medium text-[#666] transition-colors hover:bg-[#F5F5F5]"
-          >
-            Reset stuck snapshot
-          </button>
-        )}
       </div>
     </div>
   );
@@ -823,6 +881,24 @@ export default function ClientDetailPage() {
   );
   const previousSnapshot = useMemo(() => snapshots[1] ?? null, [snapshots]);
 
+  // Track when snapshot completes to show success message
+  const [showSuccess, setShowSuccess] = useState(false);
+  const prevStatusRef = useRef<string | null>(null);
+  
+  useEffect(() => {
+    const currentStatus = selectedSnapshot?.status;
+    const prevStatus = prevStatusRef.current;
+    
+    // Show success when transitioning from "running" to "complete"
+    if (prevStatus === "running" && currentStatus?.toLowerCase().includes("complete")) {
+      setShowSuccess(true);
+      const timer = setTimeout(() => setShowSuccess(false), 5000);
+      return () => clearTimeout(timer);
+    }
+    
+    prevStatusRef.current = currentStatus ?? null;
+  }, [selectedSnapshot?.status]);
+
   // Data refresh
   const refresh = useCallback(async (currentAgencyId: string) => {
     const clientRes = await supabase
@@ -1100,6 +1176,25 @@ export default function ClientDetailPage() {
           {/* Tab content */}
           {activeTab === "overview" && (
             <div className="space-y-6">
+              {showSuccess && (
+                <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100">
+                    <svg className="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-semibold text-emerald-900">Snapshot complete!</div>
+                    <div className="text-xs text-emerald-700">AI visibility score: {selectedSnapshot?.vrtl_score ?? "—"}</div>
+                  </div>
+                  <button onClick={() => setShowSuccess(false)} className="p-1 text-emerald-600 hover:text-emerald-800">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+              
               {runError && (
                 <Alert variant="danger">
                   <AlertDescription>{runError}</AlertDescription>
@@ -1129,6 +1224,7 @@ export default function ClientDetailPage() {
                   <QuickActions
                     running={running}
                     snapshotStatus={selectedSnapshot?.status ?? null}
+                    snapshotStartedAt={selectedSnapshot?.started_at ?? selectedSnapshot?.created_at ?? null}
                     onRunSnapshot={runSnapshot}
                     onResetSnapshot={resetRunningSnapshot}
                   />
