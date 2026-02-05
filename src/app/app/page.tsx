@@ -20,6 +20,9 @@ type SnapshotStats = {
   completed: number;
   avgScore: number | null;
   recentScores: number[];
+  providerAverages: Array<{ provider: string; avg: number; count: number }>;
+  lastScore: number | null;
+  prevScore: number | null;
 };
 
 function getInitials(name: string) {
@@ -75,13 +78,13 @@ function ProviderCard({ name, score, icon, rank }: { name: string; score: number
                      score !== null && score >= 40 ? "text-amber-600" : "text-red-600";
   
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-[#E5E5E5] bg-white p-4">
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#F5F5F5]">
+    <div className="flex items-center gap-3 rounded-xl border border-border bg-white p-4">
+      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-2">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={icon} alt={name} className="h-5 w-5" />
       </div>
       <div className="flex-1">
-        <div className="text-xs text-[#999]">#{rank} {name}</div>
+        <div className="text-xs text-text-3">#{rank} {name}</div>
         <div className={cn("text-lg font-semibold", scoreColor)}>
           {score !== null ? score.toFixed(1) : "—"}
         </div>
@@ -94,18 +97,18 @@ function ProviderCard({ name, score, icon, rank }: { name: string; score: number
 function EmptyState() {
   return (
     <div className="mx-auto max-w-2xl py-16 text-center">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#F5F5F5] border border-[#E5E5E5]">
-        <svg className="h-8 w-8 text-[#666]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-2 border border-border">
+        <svg className="h-8 w-8 text-text-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
         </svg>
       </div>
-      <h1 className="mt-6 text-2xl font-semibold text-[#0A0A0A]">Add your first client</h1>
-      <p className="mt-2 text-[#666]">
+      <h1 className="mt-6 text-2xl font-semibold text-text">Add your first client</h1>
+      <p className="mt-2 text-text-2">
         Track how AI models recommend your clients across ChatGPT, Claude, and Gemini.
       </p>
       <Link
         href="/app/clients/new"
-        className="mt-8 inline-flex items-center gap-2 rounded-xl bg-[#0A0A0A] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#1a1a1a]"
+        className="mt-8 inline-flex items-center gap-2 rounded-xl bg-text px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-text/90"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -120,10 +123,10 @@ function EmptyState() {
           { step: "02", title: "Run snapshot", desc: "We query AI models with industry prompts" },
           { step: "03", title: "Get report", desc: "Download a branded PDF with scores" },
         ].map((item) => (
-          <div key={item.step} className="rounded-xl border border-[#E5E5E5] bg-white p-5">
-            <div className="text-sm font-medium text-[#999]">{item.step}</div>
-            <div className="mt-2 font-semibold text-[#0A0A0A]">{item.title}</div>
-            <div className="mt-1 text-sm text-[#666]">{item.desc}</div>
+          <div key={item.step} className="rounded-xl border border-border bg-white p-5">
+            <div className="text-sm font-medium text-text-3">{item.step}</div>
+            <div className="mt-2 font-semibold text-text">{item.title}</div>
+            <div className="mt-1 text-sm text-text-2">{item.desc}</div>
           </div>
         ))}
       </div>
@@ -142,21 +145,22 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
       (c.website && c.website.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  // Calculate trend (mock for now - would compare to previous period)
-  const trend = stats.avgScore !== null ? (Math.random() > 0.5 ? 2.3 : -1.7) : 0;
-  const trendUp = trend >= 0;
+  const trend = stats.lastScore !== null && stats.prevScore !== null && stats.prevScore > 0
+    ? ((stats.lastScore - stats.prevScore) / stats.prevScore) * 100
+    : null;
+  const trendUp = (trend ?? 0) >= 0;
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-[#0A0A0A]">AI Visibility</h1>
-          <p className="mt-1 text-sm text-[#666]">Monitor how AI models recommend your clients</p>
+          <h1 className="text-2xl font-semibold text-text">AI Visibility</h1>
+          <p className="mt-1 text-sm text-text-2">Monitor how AI models recommend your clients</p>
         </div>
         <Link
           href="/app/clients/new"
-          className="inline-flex items-center gap-2 rounded-lg bg-[#0A0A0A] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1a1a1a]"
+          className="inline-flex items-center gap-2 rounded-lg bg-text px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-text/90"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -168,10 +172,10 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
       {/* Main stats grid */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Big score card */}
-        <div className="lg:col-span-2 rounded-xl border border-[#E5E5E5] bg-white p-6">
+        <div className="lg:col-span-2 rounded-xl border border-border bg-white p-6">
           <div className="flex items-start justify-between">
             <div>
-              <div className="text-sm text-[#666]">Average VRTL Score</div>
+              <div className="text-sm text-text-2">Average VRTL Score</div>
               <div className="mt-2 flex items-baseline gap-3">
                 <span className={cn(
                   "text-5xl font-bold",
@@ -180,7 +184,7 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
                 )}>
                   {stats.avgScore?.toFixed(1) ?? "—"}
                 </span>
-                {stats.avgScore !== null && (
+                {trend !== null && (
                   <span className={cn(
                     "flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
                     trendUp ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
@@ -194,7 +198,7 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
               </div>
             </div>
             <div className="text-right">
-              <div className="text-xs text-[#999]">Displaying data from all time</div>
+              <div className="text-xs text-text-3">Displaying data from all time</div>
             </div>
           </div>
           
@@ -207,24 +211,24 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
                        stats.avgScore !== null && stats.avgScore >= 40 ? "#f59e0b" : "#ef4444"} 
               />
             ) : (
-              <div className="flex h-16 items-center justify-center text-sm text-[#999]">
+              <div className="flex h-16 items-center justify-center text-sm text-text-3">
                 Run more snapshots to see trends
               </div>
             )}
           </div>
 
           {/* Quick stats */}
-          <div className="mt-6 grid grid-cols-3 gap-4 border-t border-[#E5E5E5] pt-6">
+          <div className="mt-6 grid grid-cols-3 gap-4 border-t border-border pt-6">
             <div>
-              <div className="text-xs text-[#999]">Total Clients</div>
-              <div className="mt-1 text-2xl font-semibold text-[#0A0A0A]">{clients.length}</div>
+              <div className="text-xs text-text-3">Total Clients</div>
+              <div className="mt-1 text-2xl font-semibold text-text">{clients.length}</div>
             </div>
             <div>
-              <div className="text-xs text-[#999]">Snapshots</div>
-              <div className="mt-1 text-2xl font-semibold text-[#0A0A0A]">{stats.completed}</div>
+              <div className="text-xs text-text-3">Snapshots</div>
+              <div className="mt-1 text-2xl font-semibold text-text">{stats.completed}</div>
             </div>
             <div>
-              <div className="text-xs text-[#999]">AI Models</div>
+              <div className="text-xs text-text-3">AI Models</div>
               <div className="mt-1 flex items-center gap-1">
                 {[
                   { src: "/ai/icons8-chatgpt.svg", alt: "ChatGPT" },
@@ -233,7 +237,7 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
                 ].map((icon) => (
                   <span
                     key={icon.alt}
-                    className="flex h-7 w-7 items-center justify-center rounded-full border border-[#E5E5E5] bg-[#FAFAF8]"
+                    className="flex h-7 w-7 items-center justify-center rounded-full border border-border bg-bg"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img alt={icon.alt} className="h-4 w-4" src={icon.src} />
@@ -245,40 +249,37 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
         </div>
 
         {/* Provider breakdown */}
-        <div className="rounded-xl border border-[#E5E5E5] bg-white p-6">
-          <div className="text-sm font-medium text-[#0A0A0A]">Score by Provider</div>
-          <p className="mt-1 text-xs text-[#999]">How your clients rank across AI models</p>
+        <div className="rounded-xl border border-border bg-white p-6">
+          <div className="text-sm font-medium text-text">Score by Provider</div>
+          <p className="mt-1 text-xs text-text-3">Averages from completed snapshots</p>
           
           <div className="mt-4 space-y-3">
-            <ProviderCard 
-              name="ChatGPT" 
-              score={stats.avgScore} 
-              icon="/ai/icons8-chatgpt.svg" 
-              rank={1} 
-            />
-            <ProviderCard 
-              name="Claude" 
-              score={stats.avgScore ? stats.avgScore * 0.95 : null} 
-              icon="/ai/icons8-claude.svg" 
-              rank={2} 
-            />
-            <ProviderCard 
-              name="Gemini" 
-              score={stats.avgScore ? stats.avgScore * 0.92 : null} 
-              icon="/ai/gemini.png" 
-              rank={3} 
-            />
+            {stats.providerAverages.length > 0 ? (
+              stats.providerAverages.slice(0, 3).map((p, idx) => (
+                <ProviderCard
+                  key={p.provider}
+                  name={`${p.provider} (n=${p.count})`}
+                  score={p.avg}
+                  icon={
+                    p.provider.toLowerCase().includes("openai") || p.provider.toLowerCase().includes("chatgpt")
+                      ? "/ai/icons8-chatgpt.svg"
+                      : p.provider.toLowerCase().includes("claude") || p.provider.toLowerCase().includes("anthropic")
+                        ? "/ai/icons8-claude.svg"
+                        : p.provider.toLowerCase().includes("gemini") || p.provider.toLowerCase().includes("google")
+                          ? "/ai/gemini.png"
+                          : "/ai/icons8-chatgpt.svg"
+                  }
+                  rank={idx + 1}
+                />
+              ))
+            ) : (
+              <>
+                <ProviderCard name="ChatGPT" score={null} icon="/ai/icons8-chatgpt.svg" rank={1} />
+                <ProviderCard name="Claude" score={null} icon="/ai/icons8-claude.svg" rank={2} />
+                <ProviderCard name="Gemini" score={null} icon="/ai/gemini.png" rank={3} />
+              </>
+            )}
           </div>
-
-          <Link 
-            href="#" 
-            className="mt-4 flex items-center justify-center gap-2 text-xs text-[#666] hover:text-[#0A0A0A] transition-colors"
-          >
-            View detailed breakdown
-            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
-            </svg>
-          </Link>
         </div>
       </div>
 
@@ -364,7 +365,15 @@ export default function AppPage() {
   const supabase = getSupabaseBrowserClient();
 
   const [clients, setClients] = useState<ClientRow[]>([]);
-  const [stats, setStats] = useState<SnapshotStats>({ total: 0, completed: 0, avgScore: null, recentScores: [] });
+  const [stats, setStats] = useState<SnapshotStats>({
+    total: 0,
+    completed: 0,
+    avgScore: null,
+    recentScores: [],
+    providerAverages: [],
+    lastScore: null,
+    prevScore: null,
+  });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -390,17 +399,52 @@ export default function AppPage() {
           const clientIds = clientList.map(c => c.id);
           const { data: snapshots } = await supabase
             .from("snapshots")
-            .select("id, status, vrtl_score, created_at")
+            .select("id, status, vrtl_score, score_by_provider, created_at")
             .in("client_id", clientIds)
             .order("created_at", { ascending: true });
           
           if (snapshots) {
-            const completed = snapshots.filter(s => s.status === "completed" || s.status === "success");
-            const scores = completed.map(s => s.vrtl_score).filter((s): s is number => typeof s === "number");
+            const completed = snapshots.filter((s) => {
+              const st = String((s as { status?: unknown }).status ?? "").toLowerCase();
+              return st.includes("complete") || st.includes("success");
+            });
+
+            const scores = completed.map((s) => (s as { vrtl_score?: unknown }).vrtl_score).filter((s): s is number => typeof s === "number");
             const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length * 10) / 10 : null;
             // Get last 10 scores for the chart
             const recentScores = scores.slice(-10);
-            if (!cancelled) setStats({ total: snapshots.length, completed: completed.length, avgScore, recentScores });
+
+            const lastScore = scores.length > 0 ? scores[scores.length - 1] : null;
+            const prevScore = scores.length > 1 ? scores[scores.length - 2] : null;
+
+            const providerTotals = new Map<string, { sum: number; count: number }>();
+            for (const s of completed) {
+              const byProvider = (s as { score_by_provider?: unknown }).score_by_provider as Record<string, unknown> | null | undefined;
+              if (!byProvider || typeof byProvider !== "object") continue;
+              for (const [provider, val] of Object.entries(byProvider)) {
+                if (typeof val !== "number") continue;
+                const cur = providerTotals.get(provider) ?? { sum: 0, count: 0 };
+                cur.sum += val;
+                cur.count += 1;
+                providerTotals.set(provider, cur);
+              }
+            }
+
+            const providerAverages = Array.from(providerTotals.entries())
+              .map(([provider, x]) => ({ provider, avg: Math.round((x.sum / x.count) * 10) / 10, count: x.count }))
+              .sort((a, b) => b.avg - a.avg);
+
+            if (!cancelled) {
+              setStats({
+                total: snapshots.length,
+                completed: completed.length,
+                avgScore,
+                recentScores,
+                providerAverages,
+                lastScore,
+                prevScore
+              });
+            }
           }
         }
       } catch (e) {

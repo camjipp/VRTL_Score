@@ -92,20 +92,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#FAFAF8]">
+    <div className="flex min-h-screen bg-bg">
       {/* Sidebar - Light theme */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-[228px] flex-col bg-white border-r border-[#E5E5E5] transition-transform duration-200 lg:relative lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 flex w-[228px] flex-col bg-surface border-r border-border transition-transform duration-200 lg:relative lg:translate-x-0",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         {/* Logo */}
-        <div className="flex h-[60px] items-center gap-3 px-4 border-b border-[#E5E5E5]">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0A0A0A]">
+        <div className="flex h-[60px] items-center gap-3 px-4 border-b border-border">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-text">
             <span className="text-sm font-bold text-white">V</span>
           </div>
-          <span className="text-sm font-semibold text-[#0A0A0A]">VRTL Score</span>
+          <span className="text-sm font-semibold text-text">VRTL Score</span>
         </div>
 
         {/* Main nav */}
@@ -116,8 +116,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
               isActive("/app")
-                ? "bg-[#0A0A0A] text-white"
-                : "text-[#666] hover:bg-[#F5F5F5] hover:text-[#0A0A0A]"
+                ? "bg-text text-white"
+                : "text-text-2 hover:bg-surface-2 hover:text-text"
             )}
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -127,13 +127,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
 
           <div className="pt-4">
-            <div className="px-3 pb-2 text-[10px] font-medium uppercase tracking-wider text-[#999]">
-              Content
+            <div className="px-3 pb-2 text-[10px] font-medium uppercase tracking-wider text-text-3">
+              Clients
             </div>
             <Link
               href="/app"
               onClick={() => setSidebarOpen(false)}
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#666] hover:bg-[#F5F5F5] hover:text-[#0A0A0A] transition-all"
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-text-2 hover:bg-surface-2 hover:text-text transition-all"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
@@ -143,44 +143,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="pt-4">
-            <div className="px-3 pb-2 text-[10px] font-medium uppercase tracking-wider text-[#999]">
-              AI Visibility
-            </div>
-            <Link
-              href="/app"
-              onClick={() => setSidebarOpen(false)}
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#666] hover:bg-[#F5F5F5] hover:text-[#0A0A0A] transition-all"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              Overview
-            </Link>
-            <Link
-              href="/app"
-              onClick={() => setSidebarOpen(false)}
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#666] hover:bg-[#F5F5F5] hover:text-[#0A0A0A] transition-all"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-              </svg>
-              Performance
-            </Link>
-            <Link
-              href="/app"
-              onClick={() => setSidebarOpen(false)}
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#666] hover:bg-[#F5F5F5] hover:text-[#0A0A0A] transition-all"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
-              </svg>
-              Sentiment
-            </Link>
-          </div>
-
-          <div className="pt-4">
-            <div className="px-3 pb-2 text-[10px] font-medium uppercase tracking-wider text-[#999]">
+            <div className="px-3 pb-2 text-[10px] font-medium uppercase tracking-wider text-text-3">
               Account
             </div>
             <Link
@@ -189,8 +152,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
               isActive("/app/settings")
-                ? "bg-[#0A0A0A] text-white"
-                : "text-[#666] hover:bg-[#F5F5F5] hover:text-[#0A0A0A]"
+                ? "bg-text text-white"
+                : "text-text-2 hover:bg-surface-2 hover:text-text"
             )}
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -207,8 +170,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
                 isActive("/app/admin")
-                  ? "bg-[#0A0A0A] text-white"
-                  : "text-[#666] hover:bg-[#F5F5F5] hover:text-[#0A0A0A]"
+                  ? "bg-text text-white"
+                  : "text-text-2 hover:bg-surface-2 hover:text-text"
               )}
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -221,20 +184,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* Bottom section */}
-        <div className="border-t border-[#E5E5E5] p-3 space-y-1">
+        <div className="border-t border-border p-3 space-y-1">
           {agency && (
-            <div className="flex items-center gap-3 rounded-lg bg-[#F5F5F5] px-3 py-2.5 mb-2">
+            <div className="flex items-center gap-3 rounded-lg bg-surface-2 px-3 py-2.5 mb-2">
               {agency.brand_logo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={agency.brand_logo_url} alt="" className="h-8 w-8 rounded-lg object-cover" />
               ) : (
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0A0A0A] text-sm font-bold text-white">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-text text-sm font-bold text-white">
                   {agency.name.charAt(0)}
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-medium text-[#0A0A0A]">{agency.name}</div>
-                <div className="text-[11px] text-[#999]">Agency</div>
+                <div className="truncate text-sm font-medium text-text">{agency.name}</div>
+                <div className="text-[11px] text-text-3">Agency</div>
               </div>
             </div>
           )}
@@ -242,7 +205,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <button
             onClick={logout}
             disabled={busy}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#666] hover:bg-[#F5F5F5] hover:text-[#0A0A0A] transition-all"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-text-2 hover:bg-surface-2 hover:text-text transition-all"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
@@ -252,7 +215,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           <Link
             href="/"
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#666] hover:bg-[#F5F5F5] hover:text-[#0A0A0A] transition-all"
+            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-text-2 hover:bg-surface-2 hover:text-text transition-all"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
@@ -273,23 +236,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Main */}
       <div className="flex flex-1 flex-col">
         {/* Mobile header */}
-        <header className="flex h-14 items-center gap-4 border-b border-[#E5E5E5] bg-white px-4 lg:hidden">
+        <header className="flex h-14 items-center gap-4 border-b border-border bg-surface px-4 lg:hidden">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-[#666] hover:bg-[#F5F5F5] hover:text-[#0A0A0A]"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-text-2 hover:bg-surface-2 hover:text-text"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>
           </button>
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0A0A0A]">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-text">
             <span className="text-sm font-bold text-white">V</span>
           </div>
-          <span className="text-sm font-semibold text-[#0A0A0A]">VRTL Score</span>
+          <span className="text-sm font-semibold text-text">VRTL Score</span>
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-auto bg-[#FAFAF8]">
+        <main className="flex-1 overflow-auto bg-bg">
           <div className="mx-auto max-w-6xl p-6">
             {children}
           </div>
