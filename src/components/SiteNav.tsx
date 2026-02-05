@@ -8,7 +8,7 @@ import { cn } from "@/lib/cn";
 
 const navLinks = [
   { href: "/#features", label: "Features" },
-  { href: "/#testimonials", label: "Testimonials" },
+  { href: "/#faq", label: "FAQ" },
   { href: "/pricing", label: "Pricing" },
 ];
 
@@ -127,3 +127,4 @@ export function SiteNav() {
     </header>
   );
 }
+

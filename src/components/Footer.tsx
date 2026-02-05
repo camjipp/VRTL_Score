@@ -26,9 +26,9 @@ const footerLinks = {
     { label: "DeepSeek", href: "/#models" },
   ],
   resources: [
-    { label: "How It Works", href: "/#how-it-works" },
     { label: "FAQ", href: "/#faq" },
     { label: "What is AI Visibility?", href: "/#faq" },
+    { label: "Methodology", href: "/#methodology" },
     { label: "AI Search Optimization", href: "/#features" },
   ],
 };
