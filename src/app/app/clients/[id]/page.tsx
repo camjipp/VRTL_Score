@@ -670,31 +670,24 @@ function SnapshotProgress({ startedAt }: { startedAt: string | null }) {
   );
 }
 
-function QuickActions({
+function RunSnapshotButton({
   running,
   snapshotStatus,
-  snapshotStartedAt,
   onRunSnapshot,
-  onResetSnapshot,
 }: {
   running: boolean;
   snapshotStatus: string | null;
-  snapshotStartedAt: string | null;
   onRunSnapshot: () => void;
-  onResetSnapshot: () => void;
 }) {
   if (snapshotStatus === "running") {
     return (
-      <div className="space-y-3">
-        <SnapshotProgress startedAt={snapshotStartedAt} />
-        <button
-          onClick={onResetSnapshot}
-          disabled={running}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text-2 transition-colors hover:bg-surface-2"
-        >
-          Reset stuck snapshot
-        </button>
-      </div>
+      <span className="inline-flex items-center gap-1.5 rounded-lg bg-amber-100 px-3 py-1.5 text-xs font-medium text-amber-700">
+        <svg className="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+        </svg>
+        Analyzing...
+      </span>
     );
   }
 
@@ -702,11 +695,11 @@ function QuickActions({
     <button
       onClick={onRunSnapshot}
       disabled={running}
-      className="flex w-full items-center justify-center gap-2 rounded-lg bg-text px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-text/90 disabled:opacity-50"
+      className="inline-flex items-center gap-1.5 rounded-lg bg-text px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-text/90 disabled:opacity-50"
     >
       {running ? (
         <>
-          <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+          <svg className="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
           </svg>
@@ -714,13 +707,351 @@ function QuickActions({
         </>
       ) : (
         <>
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
           </svg>
-          Run new snapshot
+          Run snapshot
         </>
       )}
     </button>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCORE TREND CHART
+═══════════════════════════════════════════════════════════════════════════ */
+function ScoreTrendChart({ scores, dates }: { scores: number[]; dates: string[] }) {
+  if (scores.length < 2) {
+    return (
+      <div className="rounded-xl border border-border bg-white p-5">
+        <h3 className="text-sm font-semibold text-text">Score Trend</h3>
+        <div className="mt-4 flex h-32 items-center justify-center text-sm text-text-3">
+          Run more snapshots to see trends
+        </div>
+      </div>
+    );
+  }
+
+  const max = Math.max(...scores, 100);
+  const min = Math.min(...scores, 0);
+  const range = max - min || 1;
+  const height = 120;
+  const width = 400;
+  const padding = { top: 10, right: 10, bottom: 24, left: 30 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+
+  // Generate points
+  const points = scores.map((val, i) => {
+    const x = padding.left + (i / (scores.length - 1)) * chartWidth;
+    const y = padding.top + chartHeight - ((val - min) / range) * chartHeight;
+    return { x, y, val };
+  });
+
+  const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+  const areaData = `M ${padding.left} ${padding.top + chartHeight} ${pathData} L ${points[points.length - 1].x} ${padding.top + chartHeight} Z`;
+
+  // Color based on trend
+  const trend = scores[scores.length - 1] - scores[0];
+  const color = trend >= 0 ? "#10b981" : "#ef4444";
+
+  return (
+    <div className="rounded-xl border border-border bg-white p-5">
+      <h3 className="text-sm font-semibold text-text">Score Trend</h3>
+      <div className="mt-4">
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ maxHeight: '140px' }}>
+          <defs>
+            <linearGradient id="trendGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor={color} stopOpacity="0.2" />
+              <stop offset="100%" stopColor={color} stopOpacity="0.02" />
+            </linearGradient>
+          </defs>
+          
+          {/* Grid lines */}
+          {[0, 25, 50, 75, 100].map(val => {
+            const y = padding.top + chartHeight - ((val - min) / range) * chartHeight;
+            return (
+              <g key={val}>
+                <line x1={padding.left} y1={y} x2={width - padding.right} y2={y} stroke="#f0f0f0" strokeWidth="1" />
+                <text x={padding.left - 4} y={y + 3} textAnchor="end" className="text-[9px] fill-text-3">{val}</text>
+              </g>
+            );
+          })}
+
+          {/* Area fill */}
+          <path d={areaData} fill="url(#trendGradient)" />
+          
+          {/* Line */}
+          <path d={pathData} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          
+          {/* Points */}
+          {points.map((p, i) => (
+            <circle key={i} cx={p.x} cy={p.y} r="4" fill="white" stroke={color} strokeWidth="2" />
+          ))}
+
+          {/* X-axis labels */}
+          {dates.slice(-scores.length).map((date, i) => {
+            const x = padding.left + (i / (scores.length - 1)) * chartWidth;
+            return (
+              <text key={i} x={x} y={height - 4} textAnchor="middle" className="text-[8px] fill-text-3">
+                {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              </text>
+            );
+          })}
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   COMPETITOR COMPARISON CHART
+═══════════════════════════════════════════════════════════════════════════ */
+function CompetitorComparisonChart({ 
+  clientName, 
+  clientMentions, 
+  topCompetitors 
+}: { 
+  clientName: string;
+  clientMentions: number;
+  topCompetitors: Array<{ name: string; count: number }>;
+}) {
+  const allEntities = [
+    { name: clientName, count: clientMentions, isClient: true },
+    ...topCompetitors.slice(0, 4).map(c => ({ ...c, isClient: false }))
+  ].sort((a, b) => b.count - a.count);
+
+  const maxCount = Math.max(...allEntities.map(e => e.count), 1);
+
+  if (allEntities.length <= 1 && clientMentions === 0) {
+    return (
+      <div className="rounded-xl border border-border bg-white p-5">
+        <h3 className="text-sm font-semibold text-text">Competitive Visibility</h3>
+        <div className="mt-4 flex h-32 items-center justify-center text-sm text-text-3">
+          No comparison data available
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-border bg-white p-5">
+      <h3 className="text-sm font-semibold text-text">Competitive Visibility</h3>
+      <p className="text-xs text-text-3 mt-1">Mentions in AI responses</p>
+      <div className="mt-4 space-y-3">
+        {allEntities.map((entity, idx) => (
+          <div key={entity.name} className="flex items-center gap-3">
+            <span className="w-4 text-xs text-text-3 text-right">{idx + 1}</span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-1">
+                <span className={cn(
+                  "text-sm font-medium truncate",
+                  entity.isClient ? "text-text" : "text-text-2"
+                )}>
+                  {entity.name}
+                  {entity.isClient && (
+                    <span className="ml-1.5 inline-flex items-center rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700">
+                      You
+                    </span>
+                  )}
+                </span>
+                <span className="text-xs text-text-3 ml-2">{entity.count}</span>
+              </div>
+              <div className="h-2 rounded-full bg-surface-2">
+                <div
+                  className={cn(
+                    "h-2 rounded-full transition-all duration-500",
+                    entity.isClient ? "bg-blue-500" : "bg-gray-400"
+                  )}
+                  style={{ width: `${(entity.count / maxCount) * 100}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MODEL RADAR CHART (simplified bar comparison)
+═══════════════════════════════════════════════════════════════════════════ */
+function ModelComparisonChart({ providers }: { providers: [string, number][] }) {
+  if (providers.length === 0) {
+    return (
+      <div className="rounded-xl border border-border bg-white p-5">
+        <h3 className="text-sm font-semibold text-text">Model Comparison</h3>
+        <div className="mt-4 flex h-32 items-center justify-center text-sm text-text-3">
+          Run a snapshot to see model scores
+        </div>
+      </div>
+    );
+  }
+
+  const sorted = [...providers].sort((a, b) => b[1] - a[1]);
+  const avg = Math.round(sorted.reduce((sum, [, score]) => sum + score, 0) / sorted.length);
+
+  // Create visual comparison
+  const height = 140;
+  const width = 300;
+  const barWidth = 50;
+  const gap = 20;
+  const totalBarsWidth = sorted.length * barWidth + (sorted.length - 1) * gap;
+  const startX = (width - totalBarsWidth) / 2;
+
+  return (
+    <div className="rounded-xl border border-border bg-white p-5">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-text">Model Comparison</h3>
+        <span className="text-xs text-text-3">Avg: {avg}</span>
+      </div>
+      <div className="mt-4">
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ maxHeight: '160px' }}>
+          {/* Average line */}
+          <line 
+            x1="0" 
+            y1={height - 20 - (avg / 100) * (height - 40)} 
+            x2={width} 
+            y2={height - 20 - (avg / 100) * (height - 40)} 
+            stroke="#e5e5e5" 
+            strokeWidth="1" 
+            strokeDasharray="4 4" 
+          />
+          
+          {sorted.map(([provider, score], idx) => {
+            const x = startX + idx * (barWidth + gap);
+            const barHeight = (score / 100) * (height - 40);
+            const y = height - 20 - barHeight;
+            const color = score >= 80 ? "#10b981" : score >= 50 ? "#f59e0b" : "#ef4444";
+            const icon = provider.toLowerCase().includes("openai") || provider.toLowerCase().includes("chatgpt")
+              ? "GPT"
+              : provider.toLowerCase().includes("claude") || provider.toLowerCase().includes("anthropic")
+                ? "CL"
+                : provider.toLowerCase().includes("gemini") || provider.toLowerCase().includes("google")
+                  ? "GEM"
+                  : provider.charAt(0).toUpperCase();
+
+            return (
+              <g key={provider}>
+                {/* Bar */}
+                <rect
+                  x={x}
+                  y={y}
+                  width={barWidth}
+                  height={barHeight}
+                  rx="4"
+                  fill={color}
+                  opacity="0.8"
+                />
+                {/* Score label */}
+                <text
+                  x={x + barWidth / 2}
+                  y={y - 4}
+                  textAnchor="middle"
+                  className="text-[10px] font-semibold fill-text"
+                >
+                  {score}
+                </text>
+                {/* Model label */}
+                <text
+                  x={x + barWidth / 2}
+                  y={height - 4}
+                  textAnchor="middle"
+                  className="text-[9px] fill-text-3"
+                >
+                  {icon}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SIGNAL QUALITY CHART (donut)
+═══════════════════════════════════════════════════════════════════════════ */
+function SignalQualityChart({ detail }: { detail: SnapshotDetailResponse | null }) {
+  if (!detail || detail.summary.responses_count === 0) {
+    return (
+      <div className="rounded-xl border border-border bg-white p-5">
+        <h3 className="text-sm font-semibold text-text">Signal Quality</h3>
+        <div className="mt-4 flex h-32 items-center justify-center text-sm text-text-3">
+          No signals to analyze
+        </div>
+      </div>
+    );
+  }
+
+  const { responses } = detail;
+  const total = responses.length;
+  
+  const strong = responses.filter(r => 
+    r.client_mentioned && r.client_position === "top" && r.recommendation_strength === "strong"
+  ).length;
+  const moderate = responses.filter(r => 
+    r.client_mentioned && (r.client_position === "middle" || r.recommendation_strength === "moderate" || r.recommendation_strength === "weak")
+  ).length;
+  const weak = responses.filter(r => !r.client_mentioned).length;
+
+  const data = [
+    { label: "Strong", value: strong, color: "#10b981" },
+    { label: "Moderate", value: moderate, color: "#f59e0b" },
+    { label: "Weak", value: weak, color: "#ef4444" },
+  ].filter(d => d.value > 0);
+
+  // Donut chart
+  const size = 100;
+  const strokeWidth = 20;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  
+  let offset = 0;
+
+  return (
+    <div className="rounded-xl border border-border bg-white p-5">
+      <h3 className="text-sm font-semibold text-text">Signal Quality</h3>
+      <div className="mt-4 flex items-center gap-6">
+        <div className="relative">
+          <svg viewBox={`0 0 ${size} ${size}`} className="h-24 w-24 -rotate-90">
+            {data.map((segment, idx) => {
+              const segmentLength = (segment.value / total) * circumference;
+              const path = (
+                <circle
+                  key={idx}
+                  cx={size / 2}
+                  cy={size / 2}
+                  r={radius}
+                  fill="none"
+                  stroke={segment.color}
+                  strokeWidth={strokeWidth}
+                  strokeDasharray={`${segmentLength} ${circumference - segmentLength}`}
+                  strokeDashoffset={-offset}
+                  strokeLinecap="round"
+                />
+              );
+              offset += segmentLength;
+              return path;
+            })}
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-lg font-bold text-text">{total}</span>
+          </div>
+        </div>
+        <div className="space-y-2">
+          {data.map(d => (
+            <div key={d.label} className="flex items-center gap-2">
+              <span className="h-3 w-3 rounded-sm" style={{ backgroundColor: d.color }} />
+              <span className="text-xs text-text-2">{d.label}</span>
+              <span className="text-xs font-semibold text-text">{d.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -1322,10 +1653,17 @@ export default function ClientDetailPage() {
 
       {client && (
         <>
-          {/* Client header + snapshot selector */}
+          {/* Client header + snapshot selector + run button */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-text">{client.name}</h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold text-text">{client.name}</h1>
+                <RunSnapshotButton
+                  running={running}
+                  snapshotStatus={selectedSnapshot?.status ?? null}
+                  onRunSnapshot={runSnapshot}
+                />
+              </div>
               <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-text-2">
                 {client.website && (
                   <a href={client.website} target="_blank" rel="noreferrer" className="hover:underline">
@@ -1366,6 +1704,11 @@ export default function ClientDetailPage() {
           {/* Tab content */}
           {activeTab === "overview" && (
             <div className="space-y-6">
+              {/* Snapshot progress (if running) */}
+              {selectedSnapshot?.status === "running" && (
+                <SnapshotProgress startedAt={selectedSnapshot?.started_at ?? selectedSnapshot?.created_at ?? null} />
+              )}
+
               {showSuccess && (
                 <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100">
@@ -1401,18 +1744,33 @@ export default function ClientDetailPage() {
                 historicalScores={historicalScores}
               />
 
-              {/* Run snapshot button (always visible at top) */}
-              <QuickActions
-                running={running}
-                snapshotStatus={selectedSnapshot?.status ?? null}
-                snapshotStartedAt={selectedSnapshot?.started_at ?? selectedSnapshot?.created_at ?? null}
-                onRunSnapshot={runSnapshot}
-                onResetSnapshot={resetRunningSnapshot}
-              />
+              {/* Charts Row 1: Trend + Model Comparison */}
+              <div className="grid gap-6 lg:grid-cols-2">
+                <ScoreTrendChart 
+                  scores={historicalScores} 
+                  dates={snapshots
+                    .filter(s => s.vrtl_score !== null && (s.status?.toLowerCase().includes("complete") || s.status?.toLowerCase().includes("success")))
+                    .slice(0, 10)
+                    .map(s => s.created_at)
+                    .reverse()
+                  } 
+                />
+                <ModelComparisonChart providers={providers} />
+              </div>
 
-              {/* Main content grid */}
+              {/* Charts Row 2: Prompt Performance + Signal Quality */}
               <div className="grid gap-6 lg:grid-cols-2">
                 <PromptPerformance detail={snapshotDetail} />
+                <SignalQualityChart detail={snapshotDetail} />
+              </div>
+
+              {/* Charts Row 3: Competitive Visibility + Provider Breakdown */}
+              <div className="grid gap-6 lg:grid-cols-2">
+                <CompetitorComparisonChart
+                  clientName={client.name}
+                  clientMentions={snapshotDetail?.summary.client_mentioned_count ?? 0}
+                  topCompetitors={snapshotDetail?.summary.top_competitors ?? []}
+                />
                 <ProviderBreakdown providers={providers} />
               </div>
 
