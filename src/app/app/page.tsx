@@ -7,41 +7,50 @@ import { ensureOnboarded } from "@/lib/onboard";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { cn } from "@/lib/cn";
 
-type ClientRow = {
+type ClientWithStats = {
   id: string;
   name: string;
   website: string | null;
   industry: string;
   created_at: string;
-};
-
-type SnapshotStats = {
-  total: number;
-  completed: number;
-  avgScore: number | null;
-  recentScores: number[];
-  providerAverages: Array<{ provider: string; avg: number; count: number }>;
-  lastScore: number | null;
-  prevScore: number | null;
+  // Snapshot stats
+  latestScore: number | null;
+  previousScore: number | null;
+  lastSnapshotAt: string | null;
+  snapshotCount: number;
+  recentScores: number[]; // Last 5 scores for sparkline
+  status: "running" | "complete" | "none";
 };
 
 function getInitials(name: string) {
   return name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
 }
 
-function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+function timeAgo(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-// Mini area chart component
-function MiniAreaChart({ data, color = "#10b981" }: { data: number[]; color?: string }) {
+// Mini sparkline component
+function Sparkline({ data, color = "#10b981" }: { data: number[]; color?: string }) {
   if (data.length < 2) return null;
   
   const max = Math.max(...data, 100);
   const min = Math.min(...data, 0);
   const range = max - min || 1;
-  const height = 60;
-  const width = 200;
+  const height = 24;
+  const width = 60;
   
   const points = data.map((val, i) => {
     const x = (i / (data.length - 1)) * width;
@@ -49,17 +58,8 @@ function MiniAreaChart({ data, color = "#10b981" }: { data: number[]; color?: st
     return `${x},${y}`;
   }).join(" ");
   
-  const areaPoints = `0,${height} ${points} ${width},${height}`;
-  
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-16">
-      <defs>
-        <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor={color} stopOpacity="0.3" />
-          <stop offset="100%" stopColor={color} stopOpacity="0.05" />
-        </linearGradient>
-      </defs>
-      <polygon points={areaPoints} fill="url(#chartGradient)" />
+    <svg viewBox={`0 0 ${width} ${height}`} className="h-6 w-15">
       <polyline
         points={points}
         fill="none"
@@ -72,71 +72,257 @@ function MiniAreaChart({ data, color = "#10b981" }: { data: number[]; color?: st
   );
 }
 
-// Provider score card
-function ProviderCard({ name, score, icon, rank }: { name: string; score: number | null; icon: string; rank: number }) {
-  const scoreColor = score !== null && score >= 70 ? "text-emerald-600" : 
-                     score !== null && score >= 40 ? "text-amber-600" : "text-red-600";
+// Status indicator
+function StatusDot({ score, status }: { score: number | null; status: string }) {
+  if (status === "running") {
+    return (
+      <span className="relative flex h-2.5 w-2.5">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
+        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-amber-500" />
+      </span>
+    );
+  }
   
+  if (score === null) {
+    return <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />;
+  }
+  
+  if (score >= 70) {
+    return <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />;
+  }
+  
+  if (score >= 40) {
+    return <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />;
+  }
+  
+  return <span className="h-2.5 w-2.5 rounded-full bg-red-500" />;
+}
+
+// Client card
+function ClientCard({ client }: { client: ClientWithStats }) {
+  const delta = client.latestScore !== null && client.previousScore !== null 
+    ? client.latestScore - client.previousScore 
+    : null;
+  
+  const scoreColor = client.latestScore !== null && client.latestScore >= 70 
+    ? "text-emerald-600" 
+    : client.latestScore !== null && client.latestScore >= 40 
+      ? "text-amber-600" 
+      : "text-text";
+
+  const sparklineColor = client.latestScore !== null && client.latestScore >= 70 
+    ? "#10b981" 
+    : client.latestScore !== null && client.latestScore >= 40 
+      ? "#f59e0b" 
+      : "#6b7280";
+
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-border bg-white p-4">
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-2">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={icon} alt={name} className="h-5 w-5" />
-      </div>
-      <div className="flex-1">
-        <div className="text-xs text-text-3">#{rank} {name}</div>
-        <div className={cn("text-lg font-semibold", scoreColor)}>
-          {score !== null ? score.toFixed(1) : "—"}
+    <Link
+      href={`/app/clients/${client.id}`}
+      className="group rounded-xl border border-border bg-white p-5 transition-all hover:border-text/20 hover:shadow-md"
+    >
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-text text-sm font-semibold text-white">
+            {getInitials(client.name)}
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <StatusDot score={client.latestScore} status={client.status} />
+              <h3 className="font-semibold text-text truncate">{client.name}</h3>
+            </div>
+            {client.website && (
+              <p className="text-xs text-text-3 truncate max-w-[180px]">
+                {client.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+              </p>
+            )}
+          </div>
         </div>
+        <svg 
+          className="h-4 w-4 text-text-3 opacity-0 transition-opacity group-hover:opacity-100" 
+          fill="none" 
+          viewBox="0 0 24 24" 
+          stroke="currentColor" 
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
       </div>
-    </div>
+
+      {/* Stats */}
+      <div className="mt-4 flex items-end justify-between">
+        <div>
+          {client.status === "running" ? (
+            <div className="flex items-center gap-2">
+              <svg className="h-4 w-4 animate-spin text-amber-500" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+              <span className="text-sm text-amber-600 font-medium">Analyzing...</span>
+            </div>
+          ) : client.latestScore !== null ? (
+            <div className="flex items-baseline gap-2">
+              <span className={cn("text-3xl font-bold tabular-nums", scoreColor)}>
+                {client.latestScore}
+              </span>
+              {delta !== null && delta !== 0 && (
+                <span className={cn(
+                  "flex items-center gap-0.5 text-sm font-medium",
+                  delta > 0 ? "text-emerald-600" : "text-red-600"
+                )}>
+                  <svg 
+                    className={cn("h-3 w-3", delta < 0 && "rotate-180")} 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor" 
+                    strokeWidth={2.5}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  </svg>
+                  {Math.abs(delta)}
+                </span>
+              )}
+            </div>
+          ) : (
+            <span className="text-sm text-text-3">No snapshots yet</span>
+          )}
+          
+          {client.lastSnapshotAt && client.status !== "running" && (
+            <p className="mt-1 text-xs text-text-3">
+              {timeAgo(client.lastSnapshotAt)}
+            </p>
+          )}
+        </div>
+
+        {/* Sparkline */}
+        {client.recentScores.length >= 2 && (
+          <Sparkline data={client.recentScores} color={sparklineColor} />
+        )}
+      </div>
+    </Link>
   );
 }
 
 // Empty state
 function EmptyState() {
   return (
-    <div className="mx-auto max-w-2xl py-16 text-center">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-2 border border-border">
-        <svg className="h-8 w-8 text-text-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <div className="mx-auto max-w-md py-20 text-center">
+      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-surface-2 border border-border">
+        <svg className="h-7 w-7 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
         </svg>
       </div>
-      <h1 className="mt-6 text-2xl font-semibold text-text">Add your first client</h1>
-      <p className="mt-2 text-text-2">
-        Track how AI models recommend your clients across ChatGPT, Claude, and Gemini.
+      <h1 className="mt-5 text-xl font-semibold text-text">Add your first client</h1>
+      <p className="mt-2 text-sm text-text-2">
+        Track how AI models like ChatGPT, Claude, and Gemini talk about your clients.
       </p>
       <Link
         href="/app/clients/new"
-        className="mt-8 inline-flex items-center gap-2 rounded-xl bg-text px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-text/90"
+        className="mt-6 inline-flex items-center gap-2 rounded-lg bg-text px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-text/90"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
         Add client
       </Link>
-
-      {/* How it works */}
-      <div className="mt-16 grid gap-4 text-left sm:grid-cols-3">
-        {[
-          { step: "01", title: "Add client", desc: "Enter their website and competitors" },
-          { step: "02", title: "Run snapshot", desc: "We query AI models with industry prompts" },
-          { step: "03", title: "Get report", desc: "Download a branded PDF with scores" },
-        ].map((item) => (
-          <div key={item.step} className="rounded-xl border border-border bg-white p-5">
-            <div className="text-sm font-medium text-text-3">{item.step}</div>
-            <div className="mt-2 font-semibold text-text">{item.title}</div>
-            <div className="mt-1 text-sm text-text-2">{item.desc}</div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
 
-// Main dashboard
-function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotStats }) {
+export default function AppPage() {
+  const supabase = getSupabaseBrowserClient();
+
+  const [clients, setClients] = useState<ClientWithStats[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    
+    async function load() {
+      try {
+        setError(null);
+        const { agencyId } = await ensureOnboarded();
+        if (cancelled) return;
+
+        // Get clients
+        const clientsRes = await supabase
+          .from("clients")
+          .select("id, name, website, industry, created_at")
+          .eq("agency_id", agencyId)
+          .order("created_at", { ascending: false });
+
+        if (clientsRes.error) throw clientsRes.error;
+        const clientList = clientsRes.data ?? [];
+
+        if (clientList.length === 0) {
+          if (!cancelled) {
+            setClients([]);
+            setLoading(false);
+          }
+          return;
+        }
+
+        // Get snapshots for all clients
+        const clientIds = clientList.map(c => c.id);
+        const snapshotsRes = await supabase
+          .from("snapshots")
+          .select("id, client_id, status, vrtl_score, created_at, completed_at")
+          .in("client_id", clientIds)
+          .order("created_at", { ascending: false });
+
+        const snapshots = snapshotsRes.data ?? [];
+
+        // Build client stats
+        const clientsWithStats: ClientWithStats[] = clientList.map(client => {
+          const clientSnapshots = snapshots.filter(s => s.client_id === client.id);
+          const completedSnapshots = clientSnapshots.filter(s => {
+            const st = String(s.status ?? "").toLowerCase();
+            return st.includes("complete") || st.includes("success");
+          });
+          const runningSnapshot = clientSnapshots.find(s => {
+            const st = String(s.status ?? "").toLowerCase();
+            return st.includes("running") || st.includes("pending") || st.includes("queued");
+          });
+
+          const scores = completedSnapshots
+            .map(s => s.vrtl_score)
+            .filter((s): s is number => typeof s === "number");
+
+          const latestScore = scores.length > 0 ? scores[0] : null;
+          const previousScore = scores.length > 1 ? scores[1] : null;
+          const lastSnapshotAt = completedSnapshots[0]?.completed_at || completedSnapshots[0]?.created_at || null;
+          
+          // Get last 5 scores for sparkline (reverse so oldest first)
+          const recentScores = scores.slice(0, 5).reverse();
+
+          return {
+            ...client,
+            latestScore,
+            previousScore,
+            lastSnapshotAt,
+            snapshotCount: completedSnapshots.length,
+            recentScores,
+            status: runningSnapshot ? "running" : completedSnapshots.length > 0 ? "complete" : "none",
+          };
+        });
+
+        if (!cancelled) {
+          setClients(clientsWithStats);
+        }
+      } catch (e) {
+        const err = e as { message?: string };
+        if (!cancelled) setError(err?.message || String(e));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    
+    load();
+    return () => { cancelled = true; };
+  }, [supabase]);
 
   const filteredClients = clients.filter(
     (c) =>
@@ -145,323 +331,10 @@ function Dashboard({ clients, stats }: { clients: ClientRow[]; stats: SnapshotSt
       (c.website && c.website.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  const trend = stats.lastScore !== null && stats.prevScore !== null && stats.prevScore > 0
-    ? ((stats.lastScore - stats.prevScore) / stats.prevScore) * 100
-    : null;
-  const trendUp = (trend ?? 0) >= 0;
-
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-text">AI Visibility</h1>
-          <p className="mt-1 text-sm text-text-2">Monitor how AI models recommend your clients</p>
-        </div>
-        <Link
-          href="/app/clients/new"
-          className="inline-flex items-center gap-2 rounded-lg bg-text px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-text/90"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          Add client
-        </Link>
-      </div>
-
-      {/* Main stats grid */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Big score card */}
-        <div className="lg:col-span-2 rounded-xl border border-border bg-white p-6">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="text-sm text-text-2">Average VRTL Score</div>
-              <div className="mt-2 flex items-baseline gap-3">
-                <span className={cn(
-                  "text-5xl font-bold",
-                  stats.avgScore !== null && stats.avgScore >= 70 ? "text-emerald-600" :
-                  stats.avgScore !== null && stats.avgScore >= 40 ? "text-amber-600" : "text-[#0A0A0A]"
-                )}>
-                  {stats.avgScore?.toFixed(1) ?? "—"}
-                </span>
-                {trend !== null && (
-                  <span className={cn(
-                    "flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
-                    trendUp ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
-                  )}>
-                    <svg className={cn("h-3 w-3", !trendUp && "rotate-180")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                    </svg>
-                    {Math.abs(trend).toFixed(2)}%
-                  </span>
-                )}
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="text-xs text-text-3">Displaying data from all time</div>
-            </div>
-          </div>
-          
-          {/* Chart */}
-          <div className="mt-6">
-            {stats.recentScores.length > 1 ? (
-              <MiniAreaChart 
-                data={stats.recentScores} 
-                color={stats.avgScore !== null && stats.avgScore >= 70 ? "#10b981" : 
-                       stats.avgScore !== null && stats.avgScore >= 40 ? "#f59e0b" : "#ef4444"} 
-              />
-            ) : (
-              <div className="flex h-16 items-center justify-center text-sm text-text-3">
-                Run more snapshots to see trends
-              </div>
-            )}
-          </div>
-
-          {/* Quick stats */}
-          <div className="mt-6 grid grid-cols-3 gap-4 border-t border-border pt-6">
-            <div>
-              <div className="text-xs text-text-3">Total Clients</div>
-              <div className="mt-1 text-2xl font-semibold text-text">{clients.length}</div>
-            </div>
-            <div>
-              <div className="text-xs text-text-3">Snapshots</div>
-              <div className="mt-1 text-2xl font-semibold text-text">{stats.completed}</div>
-            </div>
-            <div>
-              <div className="text-xs text-text-3">AI Models</div>
-              <div className="mt-1 flex items-center gap-1">
-                {[
-                  { src: "/ai/icons8-chatgpt.svg", alt: "ChatGPT" },
-                  { src: "/ai/icons8-claude.svg", alt: "Claude" },
-                  { src: "/ai/gemini.png", alt: "Gemini" },
-                ].map((icon) => (
-                  <span
-                    key={icon.alt}
-                    className="flex h-7 w-7 items-center justify-center rounded-full border border-border bg-bg"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt={icon.alt} className="h-4 w-4" src={icon.src} />
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Provider breakdown */}
-        <div className="rounded-xl border border-border bg-white p-6">
-          <div className="text-sm font-medium text-text">Score by Provider</div>
-          <p className="mt-1 text-xs text-text-3">Averages from completed snapshots</p>
-          
-          <div className="mt-4 space-y-3">
-            {stats.providerAverages.length > 0 ? (
-              stats.providerAverages.slice(0, 3).map((p, idx) => (
-                <ProviderCard
-                  key={p.provider}
-                  name={`${p.provider} (n=${p.count})`}
-                  score={p.avg}
-                  icon={
-                    p.provider.toLowerCase().includes("openai") || p.provider.toLowerCase().includes("chatgpt")
-                      ? "/ai/icons8-chatgpt.svg"
-                      : p.provider.toLowerCase().includes("claude") || p.provider.toLowerCase().includes("anthropic")
-                        ? "/ai/icons8-claude.svg"
-                        : p.provider.toLowerCase().includes("gemini") || p.provider.toLowerCase().includes("google")
-                          ? "/ai/gemini.png"
-                          : "/ai/icons8-chatgpt.svg"
-                  }
-                  rank={idx + 1}
-                />
-              ))
-            ) : (
-              <>
-                <ProviderCard name="ChatGPT" score={null} icon="/ai/icons8-chatgpt.svg" rank={1} />
-                <ProviderCard name="Claude" score={null} icon="/ai/icons8-claude.svg" rank={2} />
-                <ProviderCard name="Gemini" score={null} icon="/ai/gemini.png" rank={3} />
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Clients table */}
-      <div className="rounded-xl border border-[#E5E5E5] bg-white">
-        <div className="flex items-center justify-between border-b border-[#E5E5E5] px-5 py-4">
-          <h2 className="font-semibold text-[#0A0A0A]">All Clients</h2>
-          <div className="relative">
-            <svg
-              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#999]"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.5}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-            </svg>
-            <input
-              type="text"
-              placeholder="Search clients..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 w-56 rounded-lg border border-[#E5E5E5] bg-[#FAFAF8] pl-9 pr-3 text-sm text-[#0A0A0A] placeholder:text-[#999] focus:border-[#0A0A0A] focus:outline-none"
-            />
-          </div>
-        </div>
-
-        {/* Table header */}
-        <div className="grid grid-cols-[1fr,120px,100px,80px] gap-4 border-b border-[#E5E5E5] bg-[#FAFAF8] px-5 py-3 text-xs font-medium uppercase tracking-wide text-[#999]">
-          <div>Client</div>
-          <div>Industry</div>
-          <div>Added</div>
-          <div></div>
-        </div>
-
-        {/* Table body */}
-        <div className="divide-y divide-[#E5E5E5]">
-          {filteredClients.length === 0 && searchQuery && (
-            <div className="py-12 text-center">
-              <p className="text-[#666]">No clients match &quot;{searchQuery}&quot;</p>
-              <button onClick={() => setSearchQuery("")} className="mt-2 text-sm text-[#0A0A0A] underline">
-                Clear search
-              </button>
-            </div>
-          )}
-
-          {filteredClients.map((client) => (
-            <Link
-              key={client.id}
-              href={`/app/clients/${client.id}`}
-              className="grid grid-cols-[1fr,120px,100px,80px] items-center gap-4 px-5 py-4 transition-colors hover:bg-[#FAFAF8]"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#0A0A0A] text-sm font-medium text-white">
-                  {getInitials(client.name)}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="font-medium text-[#0A0A0A] truncate">{client.name}</div>
-                  {client.website && (
-                    <div className="truncate text-xs text-[#999] max-w-[200px]">{client.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}</div>
-                  )}
-                </div>
-              </div>
-              <div className="text-sm text-[#666] capitalize">{client.industry.replace(/_/g, " ")}</div>
-              <div className="text-sm text-[#666]">{formatDate(client.created_at)}</div>
-              <div className="text-right">
-                <span className="inline-flex items-center gap-1 text-sm text-[#666]">
-                  View
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                  </svg>
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function AppPage() {
-  const supabase = getSupabaseBrowserClient();
-
-  const [clients, setClients] = useState<ClientRow[]>([]);
-  const [stats, setStats] = useState<SnapshotStats>({
-    total: 0,
-    completed: 0,
-    avgScore: null,
-    recentScores: [],
-    providerAverages: [],
-    lastScore: null,
-    prevScore: null,
-  });
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      try {
-        setError(null);
-        const { agencyId } = await ensureOnboarded();
-        if (cancelled) return;
-
-        const res = await supabase
-          .from("clients")
-          .select("id,name,website,industry,created_at")
-          .eq("agency_id", agencyId)
-          .order("created_at", { ascending: false });
-
-        if (res.error) throw res.error;
-        const clientList = (res.data ?? []) as ClientRow[];
-        if (!cancelled) setClients(clientList);
-
-        if (clientList.length > 0) {
-          const clientIds = clientList.map(c => c.id);
-          const { data: snapshots } = await supabase
-            .from("snapshots")
-            .select("id, status, vrtl_score, score_by_provider, created_at")
-            .in("client_id", clientIds)
-            .order("created_at", { ascending: true });
-          
-          if (snapshots) {
-            const completed = snapshots.filter((s) => {
-              const st = String((s as { status?: unknown }).status ?? "").toLowerCase();
-              return st.includes("complete") || st.includes("success");
-            });
-
-            const scores = completed.map((s) => (s as { vrtl_score?: unknown }).vrtl_score).filter((s): s is number => typeof s === "number");
-            const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length * 10) / 10 : null;
-            // Get last 10 scores for the chart
-            const recentScores = scores.slice(-10);
-
-            const lastScore = scores.length > 0 ? scores[scores.length - 1] : null;
-            const prevScore = scores.length > 1 ? scores[scores.length - 2] : null;
-
-            const providerTotals = new Map<string, { sum: number; count: number }>();
-            for (const s of completed) {
-              const byProvider = (s as { score_by_provider?: unknown }).score_by_provider as Record<string, unknown> | null | undefined;
-              if (!byProvider || typeof byProvider !== "object") continue;
-              for (const [provider, val] of Object.entries(byProvider)) {
-                if (typeof val !== "number") continue;
-                const cur = providerTotals.get(provider) ?? { sum: 0, count: 0 };
-                cur.sum += val;
-                cur.count += 1;
-                providerTotals.set(provider, cur);
-              }
-            }
-
-            const providerAverages = Array.from(providerTotals.entries())
-              .map(([provider, x]) => ({ provider, avg: Math.round((x.sum / x.count) * 10) / 10, count: x.count }))
-              .sort((a, b) => b.avg - a.avg);
-
-            if (!cancelled) {
-              setStats({
-                total: snapshots.length,
-                completed: completed.length,
-                avgScore,
-                recentScores,
-                providerAverages,
-                lastScore,
-                prevScore
-              });
-            }
-          }
-        }
-      } catch (e) {
-        const err = e as { message?: string };
-          if (!cancelled) setError(err?.message || String(e));
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-    load();
-    return () => { cancelled = true; };
-  }, [supabase]);
-
   if (loading) {
-  return (
+    return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#E5E5E5] border-t-[#0A0A0A]" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-text" />
       </div>
     );
   }
@@ -474,18 +347,75 @@ export default function AppPage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
           </svg>
         </div>
-        <h2 className="text-lg font-semibold text-[#0A0A0A]">Something went wrong</h2>
-        <p className="mt-2 text-sm text-[#666]">{error}</p>
-        <button onClick={() => window.location.reload()} className="mt-4 text-sm font-medium text-[#0A0A0A] underline">
+        <h2 className="text-lg font-semibold text-text">Something went wrong</h2>
+        <p className="mt-2 text-sm text-text-2">{error}</p>
+        <button onClick={() => window.location.reload()} className="mt-4 text-sm font-medium text-text underline">
           Try again
         </button>
       </div>
-  );
-}
+    );
+  }
 
   if (clients.length === 0) {
     return <EmptyState />;
   }
 
-  return <Dashboard clients={clients} stats={stats} />;
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-text">Clients</h1>
+          <p className="mt-1 text-sm text-text-2">{clients.length} client{clients.length !== 1 ? "s" : ""}</p>
+        </div>
+        <div className="flex items-center gap-3">
+          {/* Search */}
+          <div className="relative">
+            <svg
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-9 w-44 rounded-lg border border-border bg-white pl-9 pr-3 text-sm text-text placeholder:text-text-3 focus:border-text focus:outline-none"
+            />
+          </div>
+          {/* Add client */}
+          <Link
+            href="/app/clients/new"
+            className="inline-flex items-center gap-2 rounded-lg bg-text px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-text/90"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span className="hidden sm:inline">Add client</span>
+          </Link>
+        </div>
+      </div>
+
+      {/* Client cards grid */}
+      {filteredClients.length === 0 && searchQuery ? (
+        <div className="py-12 text-center">
+          <p className="text-text-2">No clients match &quot;{searchQuery}&quot;</p>
+          <button onClick={() => setSearchQuery("")} className="mt-2 text-sm text-text underline">
+            Clear search
+          </button>
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredClients.map((client) => (
+            <ClientCard key={client.id} client={client} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
