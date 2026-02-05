@@ -510,8 +510,161 @@ function ProviderBreakdown({ providers }: { providers: [string, number][] }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   RECOMMENDATIONS
+   STRATEGIC INSIGHTS & RECOMMENDATIONS
 ═══════════════════════════════════════════════════════════════════════════ */
+type StrategicInsight = {
+  priority: "HIGH" | "MEDIUM" | "LOW";
+  title: string;
+  insight: string;
+  whyItMatters: string;
+  action: string;
+  expectedImpact: string;
+  consequence: string;
+};
+
+function generateStrategicInsights(
+  score: number | null,
+  providers: [string, number][],
+  competitors: CompetitorRow[],
+  detail: SnapshotDetailResponse | null
+): StrategicInsight[] {
+  const insights: StrategicInsight[] = [];
+  
+  if (score === null) return insights;
+  
+  const weakProviders = providers.filter(([, s]) => s < 50);
+  const strongProviders = providers.filter(([, s]) => s >= 80);
+  const avgScore = providers.length > 0 
+    ? Math.round(providers.reduce((sum, [, s]) => sum + s, 0) / providers.length) 
+    : score;
+  
+  const mentionRate = detail 
+    ? pct(detail.summary.client_mentioned_count, detail.summary.responses_count || 1) 
+    : 0;
+  const citationRate = detail 
+    ? pct(detail.summary.sources_count, detail.summary.responses_count || 1) 
+    : 0;
+  const topPositionRate = detail?.responses
+    ? pct(
+        detail.responses.filter(r => r.client_mentioned && r.client_position === "top").length,
+        detail.summary.responses_count || 1
+      )
+    : 0;
+
+  // Check for weak models — HIGH priority
+  if (weakProviders.length > 0) {
+    const worstModel = weakProviders.sort((a, b) => a[1] - b[1])[0];
+    const gap = avgScore - worstModel[1];
+    insights.push({
+      priority: "HIGH",
+      title: `${worstModel[0]} Visibility Gap`,
+      insight: `${worstModel[0]} scores ${worstModel[1]} — ${gap} points below your average.`,
+      whyItMatters: `${worstModel[0]} handles significant AI query volume. Low visibility means missed discovery opportunities every day.`,
+      action: "Audit your content for ${worstModel[0]}-specific optimization. Focus on structured data, clear value propositions, and content that addresses common user queries directly.",
+      expectedImpact: `+10-15 points in ${worstModel[0]} within 60 days.`,
+      consequence: `Every week this gap persists, competitors capture discovery opportunities you're missing.`
+    });
+  }
+  
+  // Competitor threat — HIGH priority
+  if (detail?.summary.top_competitors && detail.summary.top_competitors.length > 0) {
+    const topCompetitor = detail.summary.top_competitors[0];
+    const clientMentions = detail.summary.client_mentioned_count;
+    if (topCompetitor.count >= clientMentions) {
+      insights.push({
+        priority: "HIGH",
+        title: "Competitor Visibility Threat",
+        insight: `${topCompetitor.name} is mentioned ${topCompetitor.count} times vs your ${clientMentions}.`,
+        whyItMatters: "AI models are positioning a competitor ahead of you in recommendations. Users asking about your category see them first.",
+        action: "Audit their content strategy — what are they doing that you're not? Counter-position with differentiated messaging and unique value props.",
+        expectedImpact: "Regain competitive parity within 90 days.",
+        consequence: `Failure to act increases the likelihood ${topCompetitor.name} becomes the default AI recommendation.`
+      });
+    }
+  }
+  
+  // Low mention rate — HIGH priority
+  if (mentionRate < 50) {
+    insights.push({
+      priority: "HIGH",
+      title: "Low Visibility Rate",
+      insight: `Mentioned in only ${mentionRate}% of AI responses.`,
+      whyItMatters: "More than half of AI users asking about your category won't discover you. This is a fundamental visibility problem.",
+      action: "Improve brand authority through PR coverage, quality backlinks, and structured data. Create content that directly answers the questions AI models are trained on.",
+      expectedImpact: "Target 70%+ mention rate to enter consideration set.",
+      consequence: `Low visibility compounds — AI models learn from each other, and being absent now means being absent longer.`
+    });
+  }
+  
+  // Low positioning — MEDIUM priority
+  if (topPositionRate < 30 && mentionRate >= 50) {
+    insights.push({
+      priority: "MEDIUM",
+      title: "Positioning Weakness",
+      insight: `Mentioned but only in top position ${topPositionRate}% of the time.`,
+      whyItMatters: "You're in the conversation but not the first recommendation. Users trust first recommendations more.",
+      action: "Strengthen your unique value proposition. Create comparison content that positions you favorably. Build authority signals through reviews and testimonials.",
+      expectedImpact: "Move from 'also mentioned' to 'first choice' positioning.",
+      consequence: `Second place in AI recommendations means second place in consideration. Buyers often stop at the first option.`
+    });
+  }
+  
+  // Low citations — MEDIUM priority
+  if (citationRate < 20) {
+    insights.push({
+      priority: "MEDIUM",
+      title: "Authority Gap",
+      insight: `Only ${citationRate}% of mentions include citations.`,
+      whyItMatters: "AI models don't view your brand as an authoritative source worth citing. This affects both visibility and trust.",
+      action: "Earn citations from industry publications, trusted review sites, and authoritative sources. Create quotable content that AI models will reference.",
+      expectedImpact: "Higher citation rate correlates with +5-10 score points.",
+      consequence: `Without authority signals, AI models will increasingly favor competitors with stronger citation profiles.`
+    });
+  }
+  
+  // Competitor tracking — MEDIUM priority
+  if (competitors.length < 3) {
+    insights.push({
+      priority: "MEDIUM",
+      title: "Incomplete Competitive Intelligence",
+      insight: `Only ${competitors.length} competitor${competitors.length === 1 ? '' : 's'} tracked — recommend at least 3.`,
+      whyItMatters: "Without adequate competitive context, your score confidence is lower and you can't accurately benchmark your position.",
+      action: `Add ${3 - competitors.length} more key competitor${3 - competitors.length === 1 ? '' : 's'} to improve analysis accuracy and get meaningful competitive insights.`,
+      expectedImpact: "Higher confidence scores and actionable competitive intelligence.",
+      consequence: `Incomplete competitor data means blind spots — competitors may be gaining ground without your awareness.`
+    });
+  }
+  
+  // Strong model to replicate — LOW priority
+  if (strongProviders.length > 0 && strongProviders.length < providers.length) {
+    const bestModel = strongProviders.sort((a, b) => b[1] - a[1])[0];
+    insights.push({
+      priority: "LOW",
+      title: `${bestModel[0]} Success — Replicate`,
+      insight: `${bestModel[0]} scores ${bestModel[1]} — your highest performer.`,
+      whyItMatters: "This proves your content strategy can work. Understanding why gives you a playbook for other models.",
+      action: "Analyze what content resonates with this model — format, structure, keywords, citations. Apply these patterns to underperforming models.",
+      expectedImpact: "Lift weaker models by applying proven patterns.",
+      consequence: `This is a proven playbook — not replicating it to other models is leaving points on the table.`
+    });
+  }
+  
+  // Good score with no issues — LOW priority maintenance
+  if (score >= 70 && insights.length === 0) {
+    insights.push({
+      priority: "LOW",
+      title: "Strong Position — Maintain",
+      insight: "Your visibility is competitive — maintain current strategy.",
+      whyItMatters: "Strong positions require active defense. Competitors are working to catch up.",
+      action: "Continue content velocity, monitor competitor activity, and track score changes. Set up alerts for significant drops.",
+      expectedImpact: "Sustain top-tier visibility and early warning of threats.",
+      consequence: `Even strong positions erode without maintenance. Competitors are always working to overtake you.`
+    });
+  }
+  
+  return insights.slice(0, 4);
+}
+
 function Recommendations({
   score,
   providers,
@@ -523,99 +676,83 @@ function Recommendations({
   competitors: CompetitorRow[];
   detail: SnapshotDetailResponse | null;
 }) {
-  const recommendations: { text: string; type: "action" | "insight" | "warning" }[] = [];
+  const insights = generateStrategicInsights(score, providers, competitors, detail);
 
   if (score === null) {
     return (
       <div className="rounded-xl border border-border bg-white p-5">
-        <h3 className="text-sm font-semibold text-text">Recommendations</h3>
-        <p className="mt-2 text-sm text-text-2">Run a snapshot to get recommendations</p>
+        <h3 className="text-sm font-semibold text-text">Strategic Recommendations</h3>
+        <p className="mt-2 text-sm text-text-2">Run a snapshot to get actionable recommendations</p>
       </div>
     );
   }
 
-  // Generate recommendations based on data
-  const weakProviders = providers.filter(([, s]) => s < 50);
-  const strongProviders = providers.filter(([, s]) => s >= 80);
-  const mentionRate = detail ? pct(detail.summary.client_mentioned_count, detail.summary.responses_count || 1) : 0;
-
-  if (weakProviders.length > 0) {
-    recommendations.push({
-      text: `Improve visibility in ${weakProviders.map(([p]) => p).join(", ")} — currently scoring below 50`,
-      type: "action",
-    });
+  if (insights.length === 0) {
+    return (
+      <div className="rounded-xl border border-border bg-white p-5">
+        <h3 className="text-sm font-semibold text-text">Strategic Recommendations</h3>
+        <p className="mt-2 text-sm text-text-2">No critical issues detected. Keep monitoring.</p>
+      </div>
+    );
   }
 
-  if (strongProviders.length > 0 && strongProviders.length < providers.length) {
-    recommendations.push({
-      text: `Strong performance in ${strongProviders.map(([p]) => p).join(", ")} — replicate this strategy`,
-      type: "insight",
-    });
-  }
-
-  if (competitors.length < 3) {
-    recommendations.push({
-      text: `Add ${3 - competitors.length} more competitor${competitors.length === 2 ? "" : "s"} for better benchmarking`,
-      type: "action",
-    });
-  }
-
-  if (mentionRate < 50) {
-    recommendations.push({
-      text: `Low mention rate (${mentionRate}%) — review brand positioning and content`,
-      type: "warning",
-    });
-  }
-
-  if (detail && detail.summary.sources_count < detail.summary.responses_count * 0.3) {
-    recommendations.push({
-      text: "Improve content authority — low citation rate indicates weak online presence",
-      type: "action",
-    });
-  }
-
-  if (score >= 70 && recommendations.length === 0) {
-    recommendations.push({
-      text: "Strong visibility — maintain current strategy and monitor for changes",
-      type: "insight",
-    });
-  }
-
-  const icons = {
-    action: (
-      <svg className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-      </svg>
-    ),
-    insight: (
-      <svg className="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-      </svg>
-    ),
-    warning: (
-      <svg className="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-      </svg>
-    ),
-  };
-
-  const bgColors = {
-    action: "bg-blue-50",
-    insight: "bg-emerald-50",
-    warning: "bg-amber-50",
+  const priorityStyles = {
+    HIGH: { bg: "bg-red-50", border: "border-red-200", badge: "bg-red-100 text-red-700" },
+    MEDIUM: { bg: "bg-amber-50", border: "border-amber-200", badge: "bg-amber-100 text-amber-700" },
+    LOW: { bg: "bg-emerald-50", border: "border-emerald-200", badge: "bg-emerald-100 text-emerald-700" },
   };
 
   return (
     <div className="rounded-xl border border-border bg-white p-5">
-      <h3 className="text-sm font-semibold text-text">Recommendations</h3>
-      <ul className="mt-3 space-y-2">
-        {recommendations.map((rec, i) => (
-          <li key={i} className={cn("flex items-start gap-3 rounded-lg p-2.5", bgColors[rec.type])}>
-            <span className="shrink-0 mt-0.5">{icons[rec.type]}</span>
-            <span className="text-sm text-text">{rec.text}</span>
-          </li>
-        ))}
-      </ul>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-semibold text-text">Strategic Recommendations</h3>
+        <span className="text-xs text-text-3">{insights.length} prioritized action{insights.length !== 1 ? 's' : ''}</span>
+      </div>
+      
+      <div className="space-y-4">
+        {insights.map((insight, idx) => {
+          const styles = priorityStyles[insight.priority];
+          return (
+            <details key={idx} className={cn("group rounded-lg border", styles.border, styles.bg)}>
+              <summary className="flex cursor-pointer items-center justify-between p-4">
+                <div className="flex items-center gap-3">
+                  <span className={cn("shrink-0 rounded px-2 py-0.5 text-xs font-semibold", styles.badge)}>
+                    {insight.priority}
+                  </span>
+                  <span className="font-medium text-text">{insight.title}</span>
+                </div>
+                <svg className="h-4 w-4 text-text-3 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+              </summary>
+              <div className="border-t border-inherit bg-white/50 p-4 space-y-3">
+                <div>
+                  <div className="text-xs font-semibold text-text-3 uppercase tracking-wide mb-1">Insight</div>
+                  <p className="text-sm text-text">{insight.insight}</p>
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-text-3 uppercase tracking-wide mb-1">Why it matters</div>
+                  <p className="text-sm text-text-2">{insight.whyItMatters}</p>
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-text-3 uppercase tracking-wide mb-1">Action</div>
+                  <p className="text-sm text-text">{insight.action}</p>
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <div className="text-xs font-semibold text-emerald-700 uppercase tracking-wide mb-1">Expected impact</div>
+                    <p className="text-sm text-emerald-800">{insight.expectedImpact}</p>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-red-200/50">
+                  <div className="text-xs font-semibold text-red-700 uppercase tracking-wide mb-1">⚠ If no action</div>
+                  <p className="text-sm text-red-800 italic">{insight.consequence}</p>
+                </div>
+              </div>
+            </details>
+          );
+        })}
+      </div>
     </div>
   );
 }

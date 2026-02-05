@@ -40,6 +40,7 @@ type ScoreTier = {
   color: string;
   description: string;
   implication: string;
+  consequence: string;
 };
 
 function getScoreTier(score: number | null): ScoreTier {
@@ -48,42 +49,48 @@ function getScoreTier(score: number | null): ScoreTier {
     label: "No data", 
     color: "#64748b",
     description: "Run a snapshot to measure visibility",
-    implication: "Baseline measurement needed"
+    implication: "Baseline measurement needed",
+    consequence: "Without measurement, you can't improve what you can't see."
   };
   if (score >= 90) return { 
     tier: "Dominant", 
     label: "90-100", 
     color: "#059669",
     description: "You're the default recommendation in AI responses",
-    implication: "Defend your position — competitors will target you"
+    implication: "Defend your position — competitors will target you",
+    consequence: "Complacency here means competitors will study and replicate your strategy."
   };
   if (score >= 80) return { 
     tier: "Strong", 
     label: "80-89", 
     color: "#10b981",
     description: "Consistently mentioned first or second",
-    implication: "Maintain momentum — the gap to #1 is closable"
+    implication: "Maintain momentum — the gap to #1 is closable",
+    consequence: "At this level, a 10-point drop moves you from 'recommended' to 'also mentioned.'"
   };
   if (score >= 70) return { 
     tier: "Moderate", 
     label: "70-79", 
     color: "#f59e0b",
     description: "Mentioned but not prominently positioned",
-    implication: "Close the gap — you're in consideration but not first choice"
+    implication: "Close the gap — you're in consideration but not first choice",
+    consequence: "Buyers using AI for research will see competitors first. Every day this continues, you lose discovery opportunities."
   };
   if (score >= 50) return { 
     tier: "Contested", 
     label: "50-69", 
     color: "#f97316",
     description: "Sometimes mentioned, often behind competitors",
-    implication: "Differentiation needed — multiple players competing"
+    implication: "Differentiation needed — multiple players competing",
+    consequence: "In a contested market, the first to break away captures the default position. Inaction means falling further behind."
   };
   return { 
     tier: "Weak", 
     label: "<50", 
     color: "#ef4444",
     description: "Rarely surfaced in AI responses",
-    implication: "Foundational work required — significant gap to leaders"
+    implication: "Foundational work required — significant gap to leaders",
+    consequence: "AI-assisted buying is growing 40%+ annually. Invisibility now means compounding losses in discovery."
   };
 }
 
@@ -151,6 +158,12 @@ function calculateMetrics(data: ReportData) {
   // Find fastest riser (competitor with most mentions)
   const topCompetitor = competitorStats[0];
   
+  // Check for fragile leadership (competitors tied or very close)
+  const competitorsWithinRange = allEntities.filter(e => !e.isClient && Math.abs(e.mentions - mentioned) <= 2);
+  const isFragileLeadership = clientRank === 1 && competitorsWithinRange.length >= 1;
+  const isContestedMarket = allEntities.length >= 3 && 
+    Math.max(...allEntities.map(e => e.mentions)) - Math.min(...allEntities.map(e => e.mentions)) <= 3;
+  
   return {
     total,
     mentioned,
@@ -171,7 +184,10 @@ function calculateMetrics(data: ReportData) {
     clientRank,
     gapToLeader,
     leader,
-    topCompetitor
+    topCompetitor,
+    isFragileLeadership,
+    isContestedMarket,
+    competitorsWithinRange
   };
 }
 
@@ -186,6 +202,7 @@ type Insight = {
   whyItMatters: string;
   action: string;
   expectedImpact: string;
+  consequence: string;
 };
 
 function generateInsights(data: ReportData, metrics: ReturnType<typeof calculateMetrics>): Insight[] {
@@ -207,7 +224,8 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       insight: `${worstModel[0]} scores ${worstModel[1]} — ${gap} points below your average.`,
       whyItMatters: `${worstModel[0]} handles significant AI query volume. Low visibility means missed discovery.`,
       action: "Improve web authority and publish comparison content targeting this model's training data.",
-      expectedImpact: `+10-15 points in ${worstModel[0]} within 60 days.`
+      expectedImpact: `+10-15 points in ${worstModel[0]} within 60 days.`,
+      consequence: `Every week this gap persists, competitors capture discovery opportunities you're missing.`
     });
   }
   
@@ -219,7 +237,34 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       insight: `${metrics.topCompetitor.name} is mentioned ${metrics.topCompetitor.mentions} times vs your ${metrics.mentioned}.`,
       whyItMatters: "AI models are positioning a competitor ahead of you in recommendations.",
       action: "Audit their content strategy. Counter-position with differentiated messaging.",
-      expectedImpact: "Regain competitive parity within 90 days."
+      expectedImpact: "Regain competitive parity within 90 days.",
+      consequence: `Failure to act increases the likelihood ${metrics.topCompetitor.name} becomes the default recommendation.`
+    });
+  }
+  
+  // Fragile leadership
+  if (metrics.isFragileLeadership) {
+    insights.push({
+      priority: "HIGH",
+      title: "Fragile Leadership Position",
+      insight: `You're #1, but ${metrics.competitorsWithinRange.length} competitor${metrics.competitorsWithinRange.length > 1 ? 's are' : ' is'} within striking distance.`,
+      whyItMatters: "Leadership with thin margins can flip with a single algorithm update or competitor content push.",
+      action: "Accelerate content velocity to extend your lead before competitors catch up.",
+      expectedImpact: "Create 5+ mention gap to secure defensible leadership.",
+      consequence: `At current parity, any competitor content initiative could overtake you within 30 days.`
+    });
+  }
+  
+  // Contested market
+  if (metrics.isContestedMarket && !metrics.isFragileLeadership) {
+    insights.push({
+      priority: "MEDIUM",
+      title: "Contested Market — No Clear Leader",
+      insight: `All ${metrics.allEntities.length} tracked entities are within 3 mentions of each other.`,
+      whyItMatters: "This is both risk and opportunity — any player could break away with focused effort.",
+      action: "Aggressive content strategy for 90 days. First to differentiate captures the default position.",
+      expectedImpact: "Become the clear #1 with 10+ point lead.",
+      consequence: `In contested markets, the first mover advantage is decisive. Hesitation means someone else wins.`
     });
   }
   
@@ -231,7 +276,8 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       insight: `Mentioned in only ${metrics.mentionRate}% of AI responses.`,
       whyItMatters: "More than half of AI users asking about your category won't discover you.",
       action: "Improve brand authority through PR, backlinks, and structured data.",
-      expectedImpact: "Target 70%+ mention rate to enter consideration set."
+      expectedImpact: "Target 70%+ mention rate to enter consideration set.",
+      consequence: `Low visibility compounds — AI models learn from each other, and being absent now means being absent longer.`
     });
   }
   
@@ -243,7 +289,8 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       insight: `Mentioned but only in top position ${metrics.topPositionRate}% of the time.`,
       whyItMatters: "You're in the conversation but not the first recommendation.",
       action: "Strengthen unique value proposition messaging.",
-      expectedImpact: "Move from 'also mentioned' to 'first choice' positioning."
+      expectedImpact: "Move from 'also mentioned' to 'first choice' positioning.",
+      consequence: `Buyers trust first recommendations more. Second place in AI means second place in consideration.`
     });
   }
   
@@ -255,7 +302,8 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       insight: `Only ${metrics.citationRate}% of mentions include citations.`,
       whyItMatters: "AI models don't view your brand as an authoritative source.",
       action: "Earn citations from industry publications, reviews, and trusted sources.",
-      expectedImpact: "Higher citation rate correlates with +5-10 score points."
+      expectedImpact: "Higher citation rate correlates with +5-10 score points.",
+      consequence: `Without authority signals, AI models will increasingly favor competitors with stronger citation profiles.`
     });
   }
   
@@ -267,7 +315,8 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       insight: `${strongModels[0][0]} scores you ${strongModels[0][1]} — your highest.`,
       whyItMatters: "Shows your content strategy works for this model.",
       action: "Analyze what content resonates with this model and replicate for others.",
-      expectedImpact: "Lift weaker models by applying successful patterns."
+      expectedImpact: "Lift weaker models by applying successful patterns.",
+      consequence: `This is a proven playbook — not replicating it to other models is leaving points on the table.`
     });
   }
   
@@ -279,7 +328,8 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       insight: "Your visibility is competitive — maintain current strategy.",
       whyItMatters: "Complacency allows competitors to catch up.",
       action: "Continue content velocity and monitor competitor activity.",
-      expectedImpact: "Sustain top-tier visibility."
+      expectedImpact: "Sustain top-tier visibility.",
+      consequence: `Even strong positions erode without maintenance. Competitors are always working to overtake you.`
     });
   }
   
@@ -340,17 +390,35 @@ function generateBottomLine(data: ReportData, metrics: ReturnType<typeof calcula
     parts.push(`but rarely as the first recommendation`);
   }
   
-  // Competitive context
-  if (metrics.leader && !metrics.leader.isClient && metrics.gapToLeader > 0) {
-    parts.push(`${metrics.leader.name} leads by ${metrics.gapToLeader} mentions`);
-  } else if (metrics.clientRank === 1) {
-    parts.push(`You lead the competitive set`);
+  // Competitive context with tension
+  if (metrics.isFragileLeadership) {
+    parts.push(`Despite ranking #1, competitors are within striking distance — leadership is fragile`);
+  } else if (metrics.isContestedMarket) {
+    parts.push(`The market is contested with no clear leader — first to break away wins`);
+  } else if (metrics.leader && !metrics.leader.isClient && metrics.gapToLeader > 0) {
+    parts.push(`${metrics.leader.name} leads by ${metrics.gapToLeader} mentions — the gap is ${metrics.gapToLeader <= 3 ? 'closable' : 'significant'}`);
+  } else if (metrics.clientRank === 1 && metrics.allEntities.length > 1) {
+    const lead = metrics.mentioned - (metrics.allEntities[1]?.mentions ?? 0);
+    parts.push(`You lead by ${lead} mention${lead !== 1 ? 's' : ''} — ${lead <= 2 ? 'a thin margin to defend' : 'a defensible position'}`);
   }
   
-  // Implication
-  parts.push(tier.implication);
-  
   return parts.join(". ") + ".";
+}
+
+function generateTensionStatement(metrics: ReturnType<typeof calculateMetrics>): string {
+  if (metrics.isFragileLeadership) {
+    return `⚠ FRAGILE LEADERSHIP: You're #1, but all competitors achieve similar mention coverage. Any content push by a competitor could flip this ranking.`;
+  }
+  if (metrics.isContestedMarket) {
+    return `⚠ CONTESTED MARKET: No clear AI visibility leader exists. This is a land-grab opportunity — the first to differentiate captures the default position.`;
+  }
+  if (metrics.gapToLeader > 5) {
+    return `⚠ VISIBILITY GAP: ${metrics.leader?.name} has a ${metrics.gapToLeader}-mention lead. Without action, this gap will widen as AI models reinforce existing patterns.`;
+  }
+  if (metrics.mentionRate < 50) {
+    return `⚠ DISCOVERY RISK: More than half of AI-assisted buyers in your category won't discover you. This compounds daily.`;
+  }
+  return "";
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -366,8 +434,10 @@ export function renderReportHtml(data: ReportData): string {
   const metrics = calculateMetrics(data);
   const insights = generateInsights(data, metrics);
   const bottomLine = generateBottomLine(data, metrics);
+  const tensionStatement = generateTensionStatement(metrics);
   
   const models = snapshot.score_by_provider ? Object.entries(snapshot.score_by_provider).sort((a, b) => b[1] - a[1]) : [];
+  const avgModelScore = models.length > 0 ? Math.round(models.reduce((sum, [, s]) => sum + s, 0) / models.length) : 0;
   
   // Get best/worst evidence examples
   const labeledResponses = responses.map((r, idx) => ({
@@ -378,7 +448,7 @@ export function renderReportHtml(data: ReportData): string {
   
   const strengthExamples = labeledResponses.filter(r => r.label.label === "STRENGTH").slice(0, 2);
   const vulnerableExamples = labeledResponses.filter(r => r.label.label === "VULNERABLE").slice(0, 2);
-  const opportunityExamples = labeledResponses.filter(r => r.label.label === "OPPORTUNITY").slice(0, 2);
+  const opportunityExamples = labeledResponses.filter(r => r.label.label === "OPPORTUNITY").slice(0, 1);
 
   return `<!DOCTYPE html>
 <html>
@@ -397,7 +467,7 @@ export function renderReportHtml(data: ReportData): string {
     html, body {
       font-family: 'Inter', -apple-system, sans-serif;
       font-size: 10px;
-      line-height: 1.5;
+      line-height: 1.4;
       color: #1e293b;
       background: #fff;
     }
@@ -405,27 +475,26 @@ export function renderReportHtml(data: ReportData): string {
     .page {
       width: 210mm;
       min-height: 297mm;
-      padding: 14mm 16mm;
+      padding: 12mm 14mm;
       page-break-after: always;
       position: relative;
     }
     .page:last-child { page-break-after: avoid; }
     .no-break { page-break-inside: avoid; break-inside: avoid; }
     
-    /* Typography */
-    .h1 { font-size: 20px; font-weight: 800; color: #0f172a; line-height: 1.2; }
-    .h2 { font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 10px; }
-    .h3 { font-size: 11px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
-    .body { font-size: 10px; color: #475569; line-height: 1.6; }
-    .small { font-size: 9px; color: #64748b; }
-    .tiny { font-size: 8px; color: #94a3b8; }
+    /* Typography - tighter */
+    .h1 { font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.1; }
+    .h2 { font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+    .h3 { font-size: 10px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+    .body { font-size: 9px; color: #475569; line-height: 1.5; }
+    .small { font-size: 8px; color: #64748b; }
     
     /* Pills/Badges */
     .pill {
       display: inline-block;
-      padding: 2px 6px;
+      padding: 2px 5px;
       border-radius: 3px;
-      font-size: 8px;
+      font-size: 7px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.02em;
@@ -440,139 +509,143 @@ export function renderReportHtml(data: ReportData): string {
     .priority-medium { background: #fef3c7; color: #92400e; }
     .priority-low { background: #d1fae5; color: #065f46; }
     
-    /* Page Header/Footer */
+    /* Page Header/Footer - tighter */
     .page-header {
       display: flex; justify-content: space-between; align-items: center;
-      padding-bottom: 8px; border-bottom: 2px solid #0f172a; margin-bottom: 16px;
+      padding-bottom: 6px; border-bottom: 2px solid #0f172a; margin-bottom: 12px;
     }
-    .page-title { font-size: 9px; font-weight: 700; color: #0f172a; text-transform: uppercase; letter-spacing: 0.08em; }
-    .page-num { font-size: 8px; color: #94a3b8; }
+    .page-title { font-size: 8px; font-weight: 700; color: #0f172a; text-transform: uppercase; letter-spacing: 0.08em; }
+    .page-num { font-size: 7px; color: #94a3b8; }
     .page-footer {
-      position: absolute; bottom: 10mm; left: 16mm; right: 16mm;
-      display: flex; justify-content: space-between; font-size: 8px; color: #94a3b8;
-      padding-top: 8px; border-top: 1px solid #e2e8f0;
+      position: absolute; bottom: 8mm; left: 14mm; right: 14mm;
+      display: flex; justify-content: space-between; font-size: 7px; color: #94a3b8;
+      padding-top: 6px; border-top: 1px solid #e2e8f0;
     }
     
     /* Cover Page */
-    .cover { padding-top: 20mm; }
-    .cover-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
-    .cover-logo img { max-height: 28px; }
-    .cover-logo-text { font-size: 12px; font-weight: 700; color: #0f172a; }
-    .cover-type { font-size: 10px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
-    .cover-client { font-size: 28px; font-weight: 800; color: #0f172a; line-height: 1.1; }
-    .cover-url { font-size: 11px; color: #64748b; margin-top: 4px; }
+    .cover { padding-top: 16mm; }
+    .cover-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+    .cover-logo img { max-height: 24px; }
+    .cover-logo-text { font-size: 11px; font-weight: 700; color: #0f172a; }
+    .cover-type { font-size: 9px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+    .cover-client { font-size: 24px; font-weight: 800; color: #0f172a; line-height: 1.1; }
+    .cover-url { font-size: 10px; color: #64748b; margin-top: 2px; }
     
-    /* Score Hero */
-    .score-section { display: flex; gap: 20px; margin: 24px 0; }
+    /* Score Hero - compact */
+    .score-section { display: flex; gap: 16px; margin: 16px 0; }
     .score-ring {
-      width: 120px; height: 120px; border-radius: 50%; flex-shrink: 0;
+      width: 100px; height: 100px; border-radius: 50%; flex-shrink: 0;
       background: conic-gradient(var(--score-color) calc(${score ?? 0} * 3.6deg), #e2e8f0 0);
       display: flex; align-items: center; justify-content: center;
     }
     .score-ring-inner {
-      width: 96px; height: 96px; border-radius: 50%; background: #fff;
+      width: 80px; height: 80px; border-radius: 50%; background: #fff;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
-    .score-number { font-size: 36px; font-weight: 800; color: #0f172a; line-height: 1; }
-    .score-max { font-size: 12px; color: #94a3b8; }
+    .score-number { font-size: 32px; font-weight: 800; color: #0f172a; line-height: 1; }
+    .score-max { font-size: 10px; color: #94a3b8; }
     
     .score-context { flex: 1; }
-    .score-tier { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; background: var(--score-color); color: #fff; margin-bottom: 8px; }
-    .score-rank { font-size: 11px; color: #475569; margin-bottom: 12px; }
+    .score-tier { display: inline-block; padding: 3px 8px; border-radius: 3px; font-size: 9px; font-weight: 700; background: var(--score-color); color: #fff; margin-bottom: 6px; }
+    .score-rank { font-size: 9px; color: #475569; margin-bottom: 8px; }
     .score-rank strong { color: #0f172a; }
     
-    .context-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .context-item { padding: 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; }
-    .context-value { font-size: 14px; font-weight: 700; color: #0f172a; }
-    .context-label { font-size: 8px; color: #64748b; margin-top: 2px; }
+    .context-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .context-item { padding: 6px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 3px; }
+    .context-value { font-size: 12px; font-weight: 700; color: #0f172a; }
+    .context-label { font-size: 7px; color: #64748b; margin-top: 1px; }
     
-    /* Bottom Line Box */
-    .bottom-line {
-      padding: 14px 16px; background: #f8fafc; border-left: 3px solid var(--accent);
-      margin: 16px 0; border-radius: 0 6px 6px 0;
+    /* Tension Alert */
+    .tension-alert {
+      padding: 10px 12px; background: #fef2f2; border: 1px solid #fecaca; border-left: 3px solid #dc2626;
+      margin: 12px 0; border-radius: 0 4px 4px 0; font-size: 9px; color: #991b1b; line-height: 1.5;
     }
-    .bottom-line-title { font-size: 10px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
-    .bottom-line-text { font-size: 10px; color: #334155; line-height: 1.6; }
     
-    /* Win/Risk/Priority Strip */
-    .verdict-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
-    .verdict-card { padding: 12px; border-radius: 6px; }
+    /* Bottom Line Box - compact */
+    .bottom-line {
+      padding: 10px 12px; background: #f8fafc; border-left: 3px solid var(--accent);
+      margin: 12px 0; border-radius: 0 4px 4px 0;
+    }
+    .bottom-line-title { font-size: 9px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+    .bottom-line-text { font-size: 9px; color: #334155; line-height: 1.5; }
+    
+    /* Win/Risk/Priority Strip - compact */
+    .verdict-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+    .verdict-card { padding: 10px; border-radius: 4px; }
     .verdict-card.win { background: #f0fdf4; border: 1px solid #bbf7d0; }
     .verdict-card.risk { background: #fef2f2; border: 1px solid #fecaca; }
     .verdict-card.priority { background: #eff6ff; border: 1px solid #bfdbfe; }
-    .verdict-label { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+    .verdict-label { font-size: 7px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 3px; }
     .verdict-card.win .verdict-label { color: #166534; }
     .verdict-card.risk .verdict-label { color: #991b1b; }
     .verdict-card.priority .verdict-label { color: #1e40af; }
-    .verdict-value { font-size: 11px; font-weight: 600; color: #0f172a; }
-    .verdict-detail { font-size: 9px; color: #475569; margin-top: 2px; }
+    .verdict-value { font-size: 9px; font-weight: 600; color: #0f172a; }
+    .verdict-detail { font-size: 8px; color: #475569; margin-top: 2px; }
     
-    /* Competitive Ranking */
-    .ranking-section { margin: 20px 0; }
-    .ranking-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
+    /* Competitive Ranking - compact */
+    .ranking-section { margin: 12px 0; }
+    .ranking-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
     .ranking-row:last-child { border-bottom: none; }
-    .ranking-pos { width: 24px; font-size: 11px; font-weight: 700; color: #64748b; }
-    .ranking-name { width: 100px; font-size: 10px; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ranking-pos { width: 20px; font-size: 9px; font-weight: 700; color: #64748b; }
+    .ranking-name { width: 90px; font-size: 9px; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .ranking-name.client { font-weight: 700; color: #0f172a; }
-    .ranking-bar { flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
-    .ranking-fill { height: 100%; border-radius: 4px; }
+    .ranking-bar { flex: 1; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+    .ranking-fill { height: 100%; border-radius: 3px; }
     .ranking-fill.client { background: var(--accent); }
     .ranking-fill.other { background: #94a3b8; }
-    .ranking-score { width: 50px; font-size: 10px; color: #64748b; text-align: right; }
+    .ranking-score { width: 45px; font-size: 9px; color: #64748b; text-align: right; }
     .ranking-score.client { font-weight: 700; color: #0f172a; }
-    .ranking-delta { width: 50px; font-size: 9px; text-align: right; }
-    .ranking-delta.threat { color: #dc2626; }
+    .ranking-delta { width: 40px; font-size: 8px; text-align: right; }
+    .ranking-delta.threat { color: #dc2626; font-weight: 600; }
     .ranking-delta.safe { color: #16a34a; }
     
-    /* Model Breakdown */
-    .model-section { margin: 16px 0; }
-    .model-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 8px; }
-    .model-icon { width: 28px; height: 28px; border-radius: 6px; background: #0f172a; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; }
-    .model-info { flex: 1; }
-    .model-name { font-size: 11px; font-weight: 600; color: #0f172a; }
-    .model-bar { height: 6px; background: #e2e8f0; border-radius: 3px; margin-top: 4px; overflow: hidden; }
-    .model-fill { height: 100%; border-radius: 3px; }
-    .model-score { font-size: 18px; font-weight: 800; color: #0f172a; }
-    .model-label { font-size: 8px; color: #64748b; }
+    /* Model Breakdown - compact with delta */
+    .model-grid { display: grid; grid-template-columns: repeat(${models.length > 2 ? 2 : 1}, 1fr); gap: 8px; margin: 10px 0; }
+    .model-card { padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; border-left: 3px solid; }
+    .model-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .model-name { font-size: 10px; font-weight: 700; color: #0f172a; }
+    .model-score { font-size: 16px; font-weight: 800; color: #0f172a; }
+    .model-bar { height: 4px; background: #e2e8f0; border-radius: 2px; margin: 6px 0; overflow: hidden; }
+    .model-fill { height: 100%; border-radius: 2px; }
+    .model-insight { font-size: 8px; color: #475569; line-height: 1.4; }
+    .model-delta { font-size: 8px; margin-top: 4px; }
+    .model-delta.positive { color: #16a34a; }
+    .model-delta.negative { color: #dc2626; }
     
-    /* Insight Cards */
-    .insight-section { margin: 16px 0; }
-    .insight-card { padding: 12px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 10px; }
-    .insight-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-    .insight-priority { font-size: 8px; font-weight: 700; padding: 2px 6px; border-radius: 3px; }
-    .insight-title { font-size: 11px; font-weight: 700; color: #0f172a; }
-    .insight-row { display: grid; grid-template-columns: 80px 1fr; gap: 4px; font-size: 9px; margin-bottom: 4px; }
+    /* Insight Cards - compact */
+    .insight-card { padding: 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; margin-bottom: 8px; }
+    .insight-header { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+    .insight-priority { font-size: 7px; font-weight: 700; padding: 2px 5px; border-radius: 2px; }
+    .insight-title { font-size: 10px; font-weight: 700; color: #0f172a; }
+    .insight-grid { display: grid; grid-template-columns: 70px 1fr; gap: 3px; font-size: 8px; }
     .insight-label { color: #64748b; font-weight: 600; }
     .insight-value { color: #334155; }
+    .insight-consequence { font-size: 8px; color: #991b1b; margin-top: 6px; padding-top: 6px; border-top: 1px solid #fee2e2; font-style: italic; }
     
-    /* Evidence Blocks */
-    .evidence-section { margin: 16px 0; }
-    .evidence-block { padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 10px; border-left: 3px solid; }
-    .evidence-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-    .evidence-label { font-size: 8px; font-weight: 700; padding: 2px 6px; border-radius: 3px; }
-    .evidence-meta { font-size: 8px; color: #94a3b8; }
-    .evidence-prompt { font-size: 9px; color: #64748b; font-style: italic; margin-bottom: 8px; padding: 8px; background: #f8fafc; border-radius: 4px; }
-    .evidence-quote { font-size: 10px; color: #334155; line-height: 1.6; margin-bottom: 8px; }
-    .evidence-quote strong { color: #0f172a; background: #fef3c7; padding: 0 2px; }
-    .evidence-stats { display: flex; gap: 12px; }
-    .evidence-stat { font-size: 8px; color: #64748b; }
-    .evidence-stat strong { color: #0f172a; }
-    .evidence-impact { font-size: 9px; color: #475569; margin-top: 8px; padding-top: 8px; border-top: 1px solid #e2e8f0; }
+    /* Evidence Blocks - compact */
+    .evidence-block { padding: 10px; border: 1px solid #e2e8f0; border-radius: 4px; margin-bottom: 8px; border-left: 3px solid; }
+    .evidence-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .evidence-label { font-size: 7px; font-weight: 700; padding: 2px 5px; border-radius: 2px; }
+    .evidence-meta { font-size: 7px; color: #94a3b8; }
+    .evidence-quote { font-size: 9px; color: #334155; line-height: 1.5; margin-bottom: 6px; background: #f8fafc; padding: 6px; border-radius: 3px; }
+    .evidence-stats { display: flex; gap: 10px; font-size: 8px; color: #64748b; }
+    .evidence-stats strong { color: #0f172a; }
+    .evidence-impact { font-size: 8px; color: #475569; margin-top: 6px; padding-top: 6px; border-top: 1px solid #e2e8f0; }
     
-    /* Tables */
-    .data-table { width: 100%; border-collapse: collapse; font-size: 9px; }
-    .data-table th { text-align: left; padding: 8px; background: #f1f5f9; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0; }
-    .data-table td { padding: 8px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    /* Tables - compact */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 8px; }
+    .data-table th { text-align: left; padding: 6px; background: #f1f5f9; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0; }
+    .data-table td { padding: 6px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
     .data-table tr:nth-child(even) td { background: #fafafa; }
     
-    /* Methodology */
-    .method-box { padding: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; margin: 12px 0; }
-    .method-title { font-size: 10px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
-    .method-text { font-size: 9px; color: #475569; line-height: 1.6; }
-    .method-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+    /* Methodology - compact */
+    .method-box { padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; margin: 8px 0; }
+    .method-title { font-size: 9px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+    .method-text { font-size: 8px; color: #475569; line-height: 1.5; }
+    .method-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
     .method-item { }
-    .method-label { font-size: 8px; color: #94a3b8; }
-    .method-value { font-size: 9px; color: #0f172a; font-weight: 500; }
+    .method-label { font-size: 7px; color: #94a3b8; }
+    .method-value { font-size: 8px; color: #0f172a; font-weight: 500; }
   </style>
 </head>
 <body>
@@ -602,7 +675,7 @@ export function renderReportHtml(data: ReportData): string {
         <div class="score-tier">${tier.tier}</div>
         <div class="score-rank">
           Rank <strong>#${metrics.clientRank}</strong> of ${metrics.allEntities.length} tracked
-          ${metrics.gapToLeader > 0 ? ` · <strong>${metrics.gapToLeader}</strong> mentions behind leader` : metrics.clientRank === 1 ? " · Leading" : ""}
+          ${metrics.gapToLeader > 0 ? ` · <strong>${metrics.gapToLeader}</strong> behind leader` : metrics.clientRank === 1 ? " · Leading" : ""}
         </div>
         <div class="context-grid">
           <div class="context-item">
@@ -615,11 +688,13 @@ export function renderReportHtml(data: ReportData): string {
           </div>
           <div class="context-item">
             <div class="context-value">${metrics.citationRate}%</div>
-            <div class="context-label">Citation Rate</div>
+            <div class="context-label">Authority</div>
           </div>
         </div>
       </div>
     </div>
+    
+    ${tensionStatement ? `<div class="tension-alert no-break">${tensionStatement}</div>` : ""}
     
     <div class="bottom-line no-break">
       <div class="bottom-line-title">THE BOTTOM LINE</div>
@@ -630,12 +705,12 @@ export function renderReportHtml(data: ReportData): string {
       <div class="verdict-card win">
         <div class="verdict-label">Win</div>
         <div class="verdict-value">${models.length > 0 ? `Strong in ${models[0][0]}` : "Baseline established"}</div>
-        <div class="verdict-detail">${models.length > 0 ? `Score: ${Math.round(models[0][1])}` : "First snapshot complete"}</div>
+        <div class="verdict-detail">${models.length > 0 ? `Score: ${Math.round(models[0][1])}` : "First snapshot"}</div>
       </div>
       <div class="verdict-card risk">
         <div class="verdict-label">Risk</div>
-        <div class="verdict-value">${models.length > 1 && models[models.length - 1][1] < 60 ? `Weak in ${models[models.length - 1][0]}` : metrics.topCompetitor ? `${metrics.topCompetitor.name} gaining` : "Monitor competitors"}</div>
-        <div class="verdict-detail">${models.length > 1 && models[models.length - 1][1] < 60 ? `Score: ${Math.round(models[models.length - 1][1])}` : metrics.topCompetitor ? `${metrics.topCompetitor.mentions} mentions` : "Track changes"}</div>
+        <div class="verdict-value">${metrics.isFragileLeadership ? "Fragile lead" : models.length > 1 && models[models.length - 1][1] < 60 ? `Weak in ${models[models.length - 1][0]}` : metrics.topCompetitor ? `${metrics.topCompetitor.name} closing` : "Monitor changes"}</div>
+        <div class="verdict-detail">${metrics.isFragileLeadership ? "Competitors tied" : models.length > 1 && models[models.length - 1][1] < 60 ? `Score: ${Math.round(models[models.length - 1][1])}` : metrics.topCompetitor ? `${metrics.topCompetitor.mentions} mentions` : "Track weekly"}</div>
       </div>
       <div class="verdict-card priority">
         <div class="verdict-label">Priority</div>
@@ -648,7 +723,9 @@ export function renderReportHtml(data: ReportData): string {
       <div class="h3">Competitive Visibility Ranking</div>
       ${metrics.allEntities.slice(0, 5).map((entity, idx) => {
         const isClient = entity.isClient;
-        const gapText = isClient ? "" : entity.mentions > metrics.mentioned ? `+${entity.mentions - metrics.mentioned}` : entity.mentions < metrics.mentioned ? `${entity.mentions - metrics.mentioned}` : "Tied";
+        const gap = entity.mentions - metrics.mentioned;
+        const gapText = isClient ? "" : gap > 0 ? `+${gap}` : gap < 0 ? `${gap}` : "Tied";
+        const isThreat = !isClient && gap >= 0;
         return `
         <div class="ranking-row">
           <div class="ranking-pos">#${idx + 1}</div>
@@ -657,7 +734,7 @@ export function renderReportHtml(data: ReportData): string {
             <div class="ranking-fill ${isClient ? 'client' : 'other'}" style="width: ${entity.rate}%"></div>
           </div>
           <div class="ranking-score ${isClient ? 'client' : ''}">${entity.mentions}/${metrics.total}</div>
-          <div class="ranking-delta ${!isClient && entity.mentions > metrics.mentioned ? 'threat' : 'safe'}">${gapText}</div>
+          <div class="ranking-delta ${isThreat ? 'threat' : 'safe'}">${gapText}</div>
         </div>
         `;
       }).join("")}
@@ -665,77 +742,120 @@ export function renderReportHtml(data: ReportData): string {
     
     <div class="page-footer">
       <span>Confidential — ${escapeHtml(client.name)}</span>
-      <span>Powered by VRTL Score</span>
+      <span>VRTL Score</span>
     </div>
   </div>
   
-  <!-- PAGE 2: AI MODEL BREAKDOWN -->
+  <!-- PAGE 2: AI MODEL BREAKDOWN (with deltas and insights) -->
   <div class="page">
     <div class="page-header">
-      <span class="page-title">AI Model Breakdown</span>
+      <span class="page-title">AI Model Analysis</span>
       <span class="page-num">Page 2</span>
     </div>
     
-    <div class="h2">How Each AI Model Perceives ${escapeHtml(client.name)}</div>
-    <div class="body" style="margin-bottom: 16px;">Different AI models have different training data and ranking algorithms. Understanding per-model performance reveals optimization opportunities.</div>
+    <div class="h2">Model-by-Model Performance</div>
+    <div class="body" style="margin-bottom: 10px;">Each AI model ranks you differently. Understanding where you're strong (and weak) reveals exactly where to focus.</div>
     
-    <div class="model-section no-break">
+    <div class="model-grid no-break">
       ${models.map(([name, val]) => {
         const modelTier = getScoreTier(val);
-        const icon = name.toLowerCase().includes("openai") || name.toLowerCase().includes("chatgpt") ? "GPT" 
-          : name.toLowerCase().includes("claude") || name.toLowerCase().includes("anthropic") ? "CL"
-          : name.toLowerCase().includes("gemini") || name.toLowerCase().includes("google") ? "GEM"
-          : name.charAt(0).toUpperCase();
+        const delta = val - avgModelScore;
+        const isAboveAvg = delta > 0;
+        const isStrong = val >= 70;
+        const isWeak = val < 50;
+        
+        // Generate model-specific insight
+        let modelInsight = "";
+        if (isStrong) {
+          modelInsight = `Your strongest model. Content strategy resonates here — replicate this approach for weaker models.`;
+        } else if (isWeak) {
+          modelInsight = `Critical gap. ${name} users won't find you. Prioritize content that this model indexes well.`;
+        } else {
+          modelInsight = `Moderate performance. Incremental improvement possible with targeted optimization.`;
+        }
+        
+        // Competitive context for model
+        const modelCompContext = isStrong ? 
+          `This is likely where competitors will focus to catch up.` :
+          isWeak ? 
+          `Competitors may already dominate this model's recommendations.` :
+          `Room to differentiate before competitors claim this space.`;
+        
         return `
-        <div class="model-row">
-          <div class="model-icon">${icon}</div>
-          <div class="model-info">
+        <div class="model-card" style="border-left-color: ${modelTier.color};">
+          <div class="model-header">
             <div class="model-name">${escapeHtml(name)}</div>
-            <div class="model-bar">
-              <div class="model-fill" style="width: ${val}%; background: ${modelTier.color};"></div>
-            </div>
-          </div>
-          <div style="text-align: right;">
             <div class="model-score">${Math.round(val)}</div>
-            <div class="model-label">${modelTier.tier}</div>
+          </div>
+          <div class="model-bar">
+            <div class="model-fill" style="width: ${val}%; background: ${modelTier.color};"></div>
+          </div>
+          <div class="model-delta ${isAboveAvg ? 'positive' : 'negative'}">
+            ${isAboveAvg ? '↑' : '↓'} ${Math.abs(Math.round(delta))} vs your avg (${avgModelScore})
+          </div>
+          <div class="model-insight" style="margin-top: 6px;">
+            ${modelInsight}<br/>
+            <span style="color: #64748b; font-style: italic;">${modelCompContext}</span>
           </div>
         </div>
         `;
       }).join("")}
-      ${models.length === 0 ? `
-      <div class="model-row">
-        <div class="model-icon">?</div>
-        <div class="model-info">
-          <div class="model-name">No model data available</div>
-        </div>
-        <div style="text-align: right;">
-          <div class="model-score">—</div>
-        </div>
-      </div>
-      ` : ""}
     </div>
     
+    ${models.length === 0 ? `
+    <div class="method-box">
+      <div class="method-text">No per-model data available. Run a snapshot to see model-by-model breakdown.</div>
+    </div>
+    ` : ""}
+    
     ${models.length > 0 ? `
-    <div class="h3" style="margin-top: 20px;">Model-by-Model Analysis</div>
-    ${models.map(([name, val]) => {
-      const modelTier = getScoreTier(val);
-      const isStrong = val >= 70;
-      const isWeak = val < 50;
+    <div class="method-box no-break" style="margin-top: 12px;">
+      <div class="method-title">What This Means for Your Strategy</div>
+      <div class="method-text">
+        ${models[0][1] >= 70 && models[models.length - 1][1] < 50 ? 
+          `You have a ${Math.round(models[0][1] - models[models.length - 1][1])}-point spread between your best and worst models. This inconsistency means your content strategy works for some AI systems but not others. Closing this gap is your highest-leverage opportunity.` :
+          models.every(([, s]) => s >= 70) ?
+          `Consistent strong performance across models indicates robust content authority. Focus shifts to maintaining this position and monitoring for competitive threats.` :
+          models.every(([, s]) => s < 50) ?
+          `Weak performance across all models signals foundational content authority issues. This requires systematic improvement, not model-specific tactics.` :
+          `Mixed performance suggests opportunity for targeted optimization. Focus on lifting your weakest model while maintaining strength in others.`
+        }
+      </div>
+    </div>
+    ` : ""}
+    
+    <!-- Evidence Preview on Page 2 to fill space -->
+    <div class="h2" style="margin-top: 16px;">Evidence Preview</div>
+    <div class="body" style="margin-bottom: 8px;">A sample of what AI models are actually saying about ${escapeHtml(client.name)}.</div>
+    
+    ${strengthExamples.length > 0 ? strengthExamples.slice(0, 1).map(r => {
+      const pj = r.parsed_json;
+      const snippet = r.raw_text?.slice(0, 150) || pj?.evidence_snippet?.slice(0, 150) || "Response content";
       return `
-      <div class="method-box no-break" style="border-left: 3px solid ${modelTier.color};">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <div class="method-title">${escapeHtml(name)} (${Math.round(val)})</div>
-          <span class="pill" style="background: ${modelTier.color}; color: #fff;">${modelTier.tier}</span>
+      <div class="evidence-block no-break" style="border-left-color: #059669;">
+        <div class="evidence-header">
+          <span class="evidence-label" style="background: #d1fae5; color: #065f46;">STRENGTH</span>
         </div>
-        <div class="method-text">
-          ${isStrong ? `✓ Strong visibility in this model. Your content strategy resonates with ${name}'s training data and ranking signals.` : 
-            isWeak ? `⚠ Weak visibility in this model. Priority improvement area — focus on content that ${name} indexes well.` :
-            `→ Moderate visibility. Room for improvement through targeted content optimization.`}
-        </div>
+        <div class="evidence-quote">"${escapeHtml(snippet)}..."</div>
+        <div class="evidence-impact">✓ This is working. You're positioned as a top recommendation.</div>
       </div>
       `;
-    }).join("")}
-    ` : ""}
+    }).join("") : ""}
+    
+    ${vulnerableExamples.length > 0 ? vulnerableExamples.slice(0, 1).map(r => {
+      const pj = r.parsed_json;
+      const snippet = r.raw_text?.slice(0, 150) || "Response where competitors were mentioned but you were not.";
+      const competitors = pj?.competitors_mentioned?.slice(0, 2).join(", ") || "competitors";
+      return `
+      <div class="evidence-block no-break" style="border-left-color: #dc2626;">
+        <div class="evidence-header">
+          <span class="evidence-label" style="background: #fee2e2; color: #991b1b;">VULNERABLE</span>
+        </div>
+        <div class="evidence-quote">"${escapeHtml(snippet)}..."</div>
+        <div class="evidence-impact">⚠ ${competitors} mentioned, you were not. This is a discovery gap.</div>
+      </div>
+      `;
+    }).join("") : ""}
     
     <div class="page-footer">
       <span>${escapeHtml(client.name)} — AI Visibility Report</span>
@@ -743,81 +863,72 @@ export function renderReportHtml(data: ReportData): string {
     </div>
   </div>
   
-  <!-- PAGE 3: EVIDENCE & PROOF -->
+  <!-- PAGE 3: STRATEGIC RECOMMENDATIONS (with consequences) -->
   <div class="page">
     <div class="page-header">
-      <span class="page-title">Evidence & Proof</span>
+      <span class="page-title">Strategic Recommendations</span>
       <span class="page-num">Page 3</span>
     </div>
     
-    <div class="h2">What AI Models Are Saying</div>
-    <div class="body" style="margin-bottom: 16px;">Raw AI responses that determined your score. Each response is labeled by its impact on visibility.</div>
+    <div class="h2">Prioritized Actions</div>
+    <div class="body" style="margin-bottom: 10px;">Based on your snapshot, these are the highest-impact improvements — ranked by urgency and potential impact.</div>
     
-    <div class="evidence-section">
-      ${strengthExamples.length > 0 ? strengthExamples.map(r => {
-        const pj = r.parsed_json;
-        const snippet = r.raw_text?.slice(0, 200) || pj?.evidence_snippet || "Response content not available";
-        return `
-        <div class="evidence-block no-break" style="border-left-color: #059669;">
-          <div class="evidence-header">
-            <span class="evidence-label" style="background: #d1fae5; color: #065f46;">STRENGTH</span>
-            <span class="evidence-meta">Prompt ${r.index + 1}</span>
-          </div>
-          ${r.prompt_text ? `<div class="evidence-prompt">"${escapeHtml(r.prompt_text.slice(0, 100))}..."</div>` : ""}
-          <div class="evidence-quote">"${escapeHtml(snippet)}..."</div>
-          <div class="evidence-stats">
-            <div class="evidence-stat">Position: <strong>${pj?.client_position || "—"}</strong></div>
-            <div class="evidence-stat">Strength: <strong>${pj?.recommendation_strength || "—"}</strong></div>
-            <div class="evidence-stat">Cited: <strong>${pj?.has_sources_or_citations ? "Yes" : "No"}</strong></div>
-          </div>
-          <div class="evidence-impact">✓ This response positively contributes to your score — you're positioned as a top recommendation.</div>
+    ${insights.map((insight, idx) => `
+    <div class="insight-card no-break">
+      <div class="insight-header">
+        <span class="insight-priority priority-${insight.priority.toLowerCase()}">${insight.priority}</span>
+        <span class="insight-title">#${idx + 1} ${escapeHtml(insight.title)}</span>
+      </div>
+      <div class="insight-grid">
+        <div class="insight-label">Insight:</div>
+        <div class="insight-value">${escapeHtml(insight.insight)}</div>
+        <div class="insight-label">Why it matters:</div>
+        <div class="insight-value">${escapeHtml(insight.whyItMatters)}</div>
+        <div class="insight-label">Action:</div>
+        <div class="insight-value">${escapeHtml(insight.action)}</div>
+        <div class="insight-label">Expected:</div>
+        <div class="insight-value">${escapeHtml(insight.expectedImpact)}</div>
+      </div>
+      <div class="insight-consequence">⚠ If no action: ${escapeHtml(insight.consequence)}</div>
+    </div>
+    `).join("")}
+    
+    <div class="method-box no-break" style="margin-top: 12px; border-left: 3px solid var(--accent);">
+      <div class="method-title">30-Day Execution Plan</div>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px;">
+        <div style="padding: 8px; background: #fff; border: 1px solid #e2e8f0; border-radius: 3px;">
+          <div style="font-size: 8px; font-weight: 700; color: var(--accent);">Week 1-2</div>
+          <div style="font-size: 8px; color: #334155; margin-top: 3px;">Audit content for AI extractability. Identify authority gaps. Benchmark competitor content.</div>
         </div>
-        `;
-      }).join("") : ""}
-      
-      ${vulnerableExamples.length > 0 ? vulnerableExamples.map(r => {
-        const pj = r.parsed_json;
-        const snippet = r.raw_text?.slice(0, 200) || "Response content not available";
-        const competitors = pj?.competitors_mentioned?.slice(0, 3).join(", ") || "Unknown";
-        return `
-        <div class="evidence-block no-break" style="border-left-color: #dc2626;">
-          <div class="evidence-header">
-            <span class="evidence-label" style="background: #fee2e2; color: #991b1b;">VULNERABLE</span>
-            <span class="evidence-meta">Prompt ${r.index + 1}</span>
-          </div>
-          ${r.prompt_text ? `<div class="evidence-prompt">"${escapeHtml(r.prompt_text.slice(0, 100))}..."</div>` : ""}
-          <div class="evidence-quote">"${escapeHtml(snippet)}..."</div>
-          <div class="evidence-stats">
-            <div class="evidence-stat">Mentioned: <strong>No</strong></div>
-            <div class="evidence-stat">Competitors shown: <strong>${competitors}</strong></div>
-          </div>
-          <div class="evidence-impact">⚠ You're missing from this response while competitors are mentioned. This is a discovery gap.</div>
+        <div style="padding: 8px; background: #fff; border: 1px solid #e2e8f0; border-radius: 3px;">
+          <div style="font-size: 8px; font-weight: 700; color: var(--accent);">Week 2-3</div>
+          <div style="font-size: 8px; color: #334155; margin-top: 3px;">Implement priority #1 recommendation. Focus resources on weakest model.</div>
         </div>
-        `;
-      }).join("") : ""}
-      
-      ${opportunityExamples.length > 0 ? opportunityExamples.slice(0, 1).map(r => {
-        const pj = r.parsed_json;
-        const snippet = r.raw_text?.slice(0, 200) || pj?.evidence_snippet || "Response content not available";
-        return `
-        <div class="evidence-block no-break" style="border-left-color: #2563eb;">
-          <div class="evidence-header">
-            <span class="evidence-label" style="background: #dbeafe; color: #1e40af;">OPPORTUNITY</span>
-            <span class="evidence-meta">Prompt ${r.index + 1}</span>
-          </div>
-          ${r.prompt_text ? `<div class="evidence-prompt">"${escapeHtml(r.prompt_text.slice(0, 100))}..."</div>` : ""}
-          <div class="evidence-quote">"${escapeHtml(snippet)}..."</div>
-          <div class="evidence-stats">
-            <div class="evidence-stat">Position: <strong>${pj?.client_position || "—"}</strong></div>
-            <div class="evidence-stat">Strength: <strong>${pj?.recommendation_strength || "—"}</strong></div>
-          </div>
-          <div class="evidence-impact">→ You're mentioned but not prominently positioned. Improvement here could lift your score significantly.</div>
+        <div style="padding: 8px; background: #fff; border: 1px solid #e2e8f0; border-radius: 3px;">
+          <div style="font-size: 8px; font-weight: 700; color: var(--accent);">Week 3-4</div>
+          <div style="font-size: 8px; color: #334155; margin-top: 3px;">Build authority signals. Earn citations from trusted sources. Counter-position vs competitors.</div>
         </div>
-        `;
-      }).join("") : ""}
+        <div style="padding: 8px; background: #fff; border: 1px solid #e2e8f0; border-radius: 3px;">
+          <div style="font-size: 8px; font-weight: 700; color: var(--accent);">Week 4+</div>
+          <div style="font-size: 8px; color: #334155; margin-top: 3px;">Run follow-up snapshot to measure progress. Iterate on strategy based on results.</div>
+        </div>
+      </div>
     </div>
     
-    <div class="h3" style="margin-top: 16px;">Signal Summary</div>
+    <div class="page-footer">
+      <span>${escapeHtml(client.name)} — AI Visibility Report</span>
+      <span>${escapeHtml(agency.name)}</span>
+    </div>
+  </div>
+  
+  <!-- PAGE 4: EVIDENCE & APPENDIX (combined for density) -->
+  <div class="page">
+    <div class="page-header">
+      <span class="page-title">Evidence & Methodology</span>
+      <span class="page-num">Page 4</span>
+    </div>
+    
+    <div class="h2">Signal Summary</div>
     <table class="data-table no-break">
       <thead>
         <tr>
@@ -825,109 +936,79 @@ export function renderReportHtml(data: ReportData): string {
           <th>Count</th>
           <th>Rate</th>
           <th>Impact</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td>Strength (Top + Strong)</td>
+          <td><strong>Strength</strong> (Top position, strong rec)</td>
           <td>${metrics.topPosition}</td>
           <td>${metrics.topPositionRate}%</td>
           <td><span class="pill pill-green">Positive</span></td>
+          <td style="font-size: 7px;">Maintain & defend</td>
         </tr>
         <tr>
-          <td>Opportunity (Mentioned, not top)</td>
+          <td><strong>Opportunity</strong> (Mentioned, not top)</td>
           <td>${metrics.mentioned - metrics.topPosition}</td>
           <td>${Math.round(((metrics.mentioned - metrics.topPosition) / metrics.total) * 100)}%</td>
           <td><span class="pill pill-blue">Improvable</span></td>
+          <td style="font-size: 7px;">Strengthen positioning</td>
         </tr>
         <tr>
-          <td>Vulnerable (Not mentioned)</td>
+          <td><strong>Vulnerable</strong> (Not mentioned)</td>
           <td>${metrics.total - metrics.mentioned}</td>
           <td>${100 - metrics.mentionRate}%</td>
           <td><span class="pill pill-red">Gap</span></td>
+          <td style="font-size: 7px;">Build presence</td>
+        </tr>
+        <tr>
+          <td><strong>Authority</strong> (With citations)</td>
+          <td>${metrics.hasCitations}</td>
+          <td>${metrics.citationRate}%</td>
+          <td><span class="pill ${metrics.citationRate >= 30 ? 'pill-green' : 'pill-yellow'}">Trust signal</span></td>
+          <td style="font-size: 7px;">Earn citations</td>
         </tr>
       </tbody>
     </table>
     
-    <div class="page-footer">
-      <span>${escapeHtml(client.name)} — AI Visibility Report</span>
-      <span>${escapeHtml(agency.name)}</span>
-    </div>
-  </div>
-  
-  <!-- PAGE 4: STRATEGIC RECOMMENDATIONS -->
-  <div class="page">
-    <div class="page-header">
-      <span class="page-title">Strategic Recommendations</span>
-      <span class="page-num">Page 4</span>
-    </div>
+    ${metrics.competitorStats.length > 0 ? `
+    <div class="h2" style="margin-top: 12px;">Competitive Comparison</div>
+    <table class="data-table no-break">
+      <thead>
+        <tr>
+          <th>Brand</th>
+          <th>Mentions</th>
+          <th>Rate</th>
+          <th>vs You</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background: #f0fdf4;">
+          <td><strong>${escapeHtml(client.name)}</strong></td>
+          <td><strong>${metrics.mentioned}</strong></td>
+          <td><strong>${metrics.mentionRate}%</strong></td>
+          <td>—</td>
+          <td><span class="pill pill-green">#${metrics.clientRank}</span></td>
+        </tr>
+        ${metrics.competitorStats.slice(0, 4).map(c => {
+          const gap = c.mentions - metrics.mentioned;
+          const status = gap > 0 ? 'Ahead' : gap < 0 ? 'Behind' : 'Tied';
+          return `
+          <tr>
+            <td>${escapeHtml(c.name)}</td>
+            <td>${c.mentions}</td>
+            <td>${c.rate}%</td>
+            <td style="color: ${gap > 0 ? '#dc2626' : gap < 0 ? '#16a34a' : '#64748b'}; font-weight: 600;">${gap > 0 ? '+' : ''}${gap}</td>
+            <td><span class="pill ${status === 'Ahead' ? 'pill-red' : status === 'Behind' ? 'pill-green' : 'pill-yellow'}">${status}</span></td>
+          </tr>
+          `;
+        }).join("")}
+      </tbody>
+    </table>
+    ` : ""}
     
-    <div class="h2">Prioritized Actions</div>
-    <div class="body" style="margin-bottom: 16px;">Based on your snapshot data, these are the highest-impact improvements for ${escapeHtml(client.name)}.</div>
-    
-    <div class="insight-section">
-      ${insights.map((insight, idx) => `
-      <div class="insight-card no-break">
-        <div class="insight-header">
-          <span class="insight-priority priority-${insight.priority.toLowerCase()}">${insight.priority}</span>
-          <span class="insight-title">#${idx + 1} ${escapeHtml(insight.title)}</span>
-        </div>
-        <div class="insight-row">
-          <div class="insight-label">Insight:</div>
-          <div class="insight-value">${escapeHtml(insight.insight)}</div>
-        </div>
-        <div class="insight-row">
-          <div class="insight-label">Why it matters:</div>
-          <div class="insight-value">${escapeHtml(insight.whyItMatters)}</div>
-        </div>
-        <div class="insight-row">
-          <div class="insight-label">Action:</div>
-          <div class="insight-value">${escapeHtml(insight.action)}</div>
-        </div>
-        <div class="insight-row">
-          <div class="insight-label">Expected:</div>
-          <div class="insight-value">${escapeHtml(insight.expectedImpact)}</div>
-        </div>
-      </div>
-      `).join("")}
-    </div>
-    
-    <div class="method-box no-break" style="margin-top: 20px;">
-      <div class="method-title">30-Day Action Plan</div>
-      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px;">
-        <div style="padding: 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 4px;">
-          <div style="font-size: 9px; font-weight: 700; color: var(--accent);">Week 1-2</div>
-          <div style="font-size: 9px; color: #334155; margin-top: 4px;">Audit content structure for AI extractability. Identify gaps in authority signals.</div>
-        </div>
-        <div style="padding: 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 4px;">
-          <div style="font-size: 9px; font-weight: 700; color: var(--accent);">Week 2-3</div>
-          <div style="font-size: 9px; color: #334155; margin-top: 4px;">Implement priority recommendations. Focus on weakest AI model first.</div>
-        </div>
-        <div style="padding: 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 4px;">
-          <div style="font-size: 9px; font-weight: 700; color: var(--accent);">Week 3-4</div>
-          <div style="font-size: 9px; color: #334155; margin-top: 4px;">Build authority via citations and trusted source mentions. Competitive positioning content.</div>
-        </div>
-        <div style="padding: 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 4px;">
-          <div style="font-size: 9px; font-weight: 700; color: var(--accent);">Week 4+</div>
-          <div style="font-size: 9px; color: #334155; margin-top: 4px;">Run follow-up snapshot to measure progress. Iterate on strategy.</div>
-        </div>
-      </div>
-    </div>
-    
-    <div class="page-footer">
-      <span>${escapeHtml(client.name)} — AI Visibility Report</span>
-      <span>${escapeHtml(agency.name)}</span>
-    </div>
-  </div>
-  
-  <!-- PAGE 5: APPENDIX -->
-  <div class="page">
-    <div class="page-header">
-      <span class="page-title">Appendix</span>
-      <span class="page-num">Page 5</span>
-    </div>
-    
-    <div class="h2">Full Evidence Table</div>
+    <div class="h2" style="margin-top: 12px;">Full Evidence Table</div>
     <table class="data-table">
       <thead>
         <tr>
@@ -958,42 +1039,25 @@ export function renderReportHtml(data: ReportData): string {
       </tbody>
     </table>
     
-    <div class="method-box no-break" style="margin-top: 20px;">
+    <div class="method-box no-break" style="margin-top: 12px;">
       <div class="method-title">Methodology</div>
       <div class="method-text">
-        VRTL Score analyzes AI responses across standardized discovery scenarios. The score combines three signals: <strong>Presence</strong> (mention consistency), <strong>Positioning</strong> (ranking vs alternatives), and <strong>Authority</strong> (citation signals).
+        VRTL Score analyzes AI responses across standardized discovery scenarios. The score combines <strong>Presence</strong> (mention consistency), <strong>Positioning</strong> (ranking vs alternatives), and <strong>Authority</strong> (citation signals).
       </div>
       <div class="method-grid">
         <div class="method-item">
-          <div class="method-label">Report Generated</div>
+          <div class="method-label">Generated</div>
           <div class="method-value">${formatDate(snapshot.created_at)}</div>
         </div>
         <div class="method-item">
-          <div class="method-label">Snapshot ID</div>
-          <div class="method-value">${snapshot.id.slice(0, 12)}...</div>
+          <div class="method-label">AI Responses</div>
+          <div class="method-value">${metrics.total} analyzed</div>
         </div>
         <div class="method-item">
-          <div class="method-label">Scenarios Analyzed</div>
-          <div class="method-value">${metrics.total}</div>
-        </div>
-        <div class="method-item">
-          <div class="method-label">AI Models</div>
-          <div class="method-value">${models.length > 0 ? models.map(m => m[0]).join(", ") : "OpenAI"}</div>
-        </div>
-        <div class="method-item">
-          <div class="method-label">Competitors Tracked</div>
-          <div class="method-value">${competitors.length}</div>
-        </div>
-        <div class="method-item">
-          <div class="method-label">Confidence Level</div>
+          <div class="method-label">Confidence</div>
           <div class="method-value">${competitors.length >= 3 ? "High" : competitors.length > 0 ? "Medium" : "Low"}</div>
         </div>
       </div>
-    </div>
-    
-    <div style="margin-top: 24px; text-align: center;">
-      <div class="small">Questions about this report?</div>
-      <div style="font-size: 11px; font-weight: 600; color: #0f172a; margin-top: 4px;">Contact ${escapeHtml(agency.name)}</div>
     </div>
     
     <div class="page-footer">
