@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { cn } from "@/lib/cn";
@@ -18,9 +18,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [busy, setBusy] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [agency, setAgency] = useState<Agency | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -49,7 +50,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       
       if (!membership?.agency_id) return;
       
-      // Try with brand_logo_url first, fall back to just id,name if column doesn't exist
       let agencyData: Agency | null = null;
       const { data: fullData, error: fullErr } = await supabase
         .from("agencies")
@@ -58,7 +58,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         .maybeSingle();
       
       if (fullErr) {
-        // Column might not exist, try without it
         const { data: basicData } = await supabase
           .from("agencies")
           .select("id, name")
@@ -78,8 +77,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     loadData();
   }, [supabase]);
 
+  // Close menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   async function logout() {
     setBusy(true);
+    setMenuOpen(false);
     await supabase.auth.signOut();
     router.replace("/login");
   }
@@ -92,167 +103,148 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-bg">
-      {/* Sidebar - Light theme */}
-      <aside
-        className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-[228px] flex-col bg-surface border-r border-border transition-transform duration-200 lg:relative lg:translate-x-0",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        )}
-      >
-        {/* Logo */}
-        <div className="flex h-[60px] items-center gap-3 px-4 border-b border-border">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-text">
-            <span className="text-sm font-bold text-white">V</span>
-          </div>
-          <span className="text-sm font-semibold text-text">VRTL Score</span>
-        </div>
-
-        {/* Main nav */}
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          <Link
-            href="/app"
-            onClick={() => setSidebarOpen(false)}
-            className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
-              isActive("/app")
-                ? "bg-text text-white"
-                : "text-text-2 hover:bg-surface-2 hover:text-text"
-            )}
-          >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-            </svg>
-            Dashboard
-          </Link>
-
-          <Link
-            href="/app/clients/new"
-            onClick={() => setSidebarOpen(false)}
-            className="mt-4 flex items-center gap-3 rounded-lg border border-dashed border-border px-3 py-2.5 text-sm text-text-2 hover:border-text-3 hover:bg-surface-2 hover:text-text transition-all"
-          >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            Add client
-          </Link>
-
-          <div className="pt-4">
-            <div className="px-3 pb-2 text-[10px] font-medium uppercase tracking-wider text-text-3">
-              Account
+    <div className="min-h-screen bg-bg">
+      {/* Top nav */}
+      <header className="sticky top-0 z-50 border-b border-border bg-white">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
+          {/* Left: Logo */}
+          <Link href="/app" className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-text">
+              <span className="text-sm font-bold text-white">V</span>
             </div>
+            <span className="text-sm font-semibold text-text">VRTL Score</span>
+          </Link>
+
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2">
+            {/* Settings link - desktop */}
             <Link
               href="/app/settings"
-              onClick={() => setSidebarOpen(false)}
-            className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
-              isActive("/app/settings")
-                ? "bg-text text-white"
-                : "text-text-2 hover:bg-surface-2 hover:text-text"
-            )}
+              className={cn(
+                "hidden rounded-lg px-3 py-2 text-sm font-medium transition-colors sm:block",
+                isActive("/app/settings")
+                  ? "bg-surface-2 text-text"
+                  : "text-text-2 hover:bg-surface-2 hover:text-text"
+              )}
             >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
               Settings
             </Link>
 
+            {/* Admin link - desktop */}
             {isSuperAdmin && (
               <Link
                 href="/app/admin"
-                onClick={() => setSidebarOpen(false)}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
-                isActive("/app/admin")
-                  ? "bg-text text-white"
-                  : "text-text-2 hover:bg-surface-2 hover:text-text"
-              )}
+                className={cn(
+                  "hidden rounded-lg px-3 py-2 text-sm font-medium transition-colors sm:block",
+                  isActive("/app/admin")
+                    ? "bg-surface-2 text-text"
+                    : "text-text-2 hover:bg-surface-2 hover:text-text"
+                )}
               >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                </svg>
                 Admin
               </Link>
             )}
-          </div>
-        </nav>
 
-        {/* Bottom section */}
-        <div className="border-t border-border p-3 space-y-1">
-          {agency && (
-            <div className="flex items-center gap-3 rounded-lg bg-surface-2 px-3 py-2.5 mb-2">
-              {agency.brand_logo_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={agency.brand_logo_url} alt="" className="h-8 w-8 rounded-lg object-cover" />
-              ) : (
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-text text-sm font-bold text-white">
-                  {agency.name.charAt(0)}
+            {/* Account dropdown */}
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="flex items-center gap-2 rounded-lg border border-border bg-white px-3 py-1.5 text-sm font-medium text-text transition-colors hover:bg-surface-2"
+              >
+                {agency?.brand_logo_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={agency.brand_logo_url} alt="" className="h-6 w-6 rounded object-cover" />
+                ) : (
+                  <div className="flex h-6 w-6 items-center justify-center rounded bg-text text-xs font-bold text-white">
+                    {agency?.name?.charAt(0) || "?"}
+                  </div>
+                )}
+                <span className="hidden max-w-[120px] truncate sm:block">
+                  {agency?.name || "Account"}
+                </span>
+                <svg
+                  className={cn("h-4 w-4 text-text-3 transition-transform", menuOpen && "rotate-180")}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {/* Dropdown menu */}
+              {menuOpen && (
+                <div className="absolute right-0 mt-2 w-56 rounded-xl border border-border bg-white py-2 shadow-lg">
+                  {/* Agency info */}
+                  {agency && (
+                    <div className="border-b border-border px-4 pb-3 pt-1">
+                      <div className="text-sm font-medium text-text">{agency.name}</div>
+                      <div className="text-xs text-text-3">Agency</div>
+                    </div>
+                  )}
+
+                  {/* Mobile-only links */}
+                  <div className="border-b border-border py-1 sm:hidden">
+                    <Link
+                      href="/app/settings"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-2 hover:bg-surface-2 hover:text-text"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      Settings
+                    </Link>
+                    {isSuperAdmin && (
+                      <Link
+                        href="/app/admin"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-2 hover:bg-surface-2 hover:text-text"
+                      >
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                        </svg>
+                        Admin
+                      </Link>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="py-1">
+                    <Link
+                      href="/"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-2 hover:bg-surface-2 hover:text-text"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                      </svg>
+                      Back to home
+                    </Link>
+                    <button
+                      onClick={logout}
+                      disabled={busy}
+                      className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-text-2 hover:bg-surface-2 hover:text-text"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                      </svg>
+                      {busy ? "Signing out..." : "Sign out"}
+                    </button>
+                  </div>
                 </div>
               )}
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-medium text-text">{agency.name}</div>
-                <div className="text-[11px] text-text-3">Agency</div>
-              </div>
             </div>
-          )}
-          
-          <button
-            onClick={logout}
-            disabled={busy}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-text-2 hover:bg-surface-2 hover:text-text transition-all"
-          >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-            </svg>
-            {busy ? "Signing out..." : "Sign out"}
-          </button>
-
-          <Link
-            href="/"
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-text-2 hover:bg-surface-2 hover:text-text transition-all"
-          >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
-            </svg>
-            Back to home
-          </Link>
+          </div>
         </div>
-      </aside>
+      </header>
 
-      {/* Overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Main */}
-      <div className="flex flex-1 flex-col">
-        {/* Mobile header */}
-        <header className="flex h-14 items-center gap-4 border-b border-border bg-surface px-4 lg:hidden">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-text-2 hover:bg-surface-2 hover:text-text"
-          >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-            </svg>
-          </button>
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-text">
-            <span className="text-sm font-bold text-white">V</span>
-          </div>
-          <span className="text-sm font-semibold text-text">VRTL Score</span>
-        </header>
-
-        {/* Content */}
-        <main className="flex-1 overflow-auto bg-bg">
-          <div className="mx-auto max-w-6xl p-6">
-            {children}
-          </div>
-        </main>
-      </div>
+      {/* Content */}
+      <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+        {children}
+      </main>
     </div>
   );
 }
