@@ -1,9 +1,10 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import Link from "next/link";
 
+import { DownloadPdfButton } from "@/components/DownloadPdfButton";
 import { ensureOnboarded } from "@/lib/onboard";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { Alert, AlertDescription } from "@/components/ui/Alert";
@@ -12,7 +13,7 @@ import type { BadgeVariant } from "@/components/ui/Badge";
 import { cn } from "@/lib/cn";
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   TYPES (unchanged from original)
+   TYPES
 ═══════════════════════════════════════════════════════════════════════════ */
 type ClientRow = {
   id: string;
@@ -39,6 +40,34 @@ type SnapshotRow = {
   error?: string | null;
 };
 
+type SnapshotDetailResponse = {
+  snapshot: SnapshotRow & { prompt_pack_version: string | null; client_id: string };
+  client: ClientRow;
+  competitors: Array<{ id: string; name: string; website: string | null }>;
+  summary: {
+    responses_count: number;
+    client_mentioned_count: number;
+    sources_count: number;
+    specific_features_count: number;
+    top_competitors: Array<{ name: string; count: number }>;
+  };
+  responses: Array<{
+    id: string;
+    prompt_ordinal: number | null;
+    created_at: string;
+    parse_ok: boolean;
+    client_mentioned: boolean;
+    client_position: string | null;
+    recommendation_strength: string | null;
+    competitors_mentioned: string[];
+    has_sources_or_citations: boolean;
+    has_specific_features: boolean;
+    evidence_snippet: string | null;
+    prompt_text?: string | null;
+    raw_text?: string | null;
+  }>;
+};
+
 /* ═══════════════════════════════════════════════════════════════════════════
    UTILITY FUNCTIONS
 ═══════════════════════════════════════════════════════════════════════════ */
@@ -58,7 +87,6 @@ function errorMessage(e: unknown): string {
   return "Unknown error";
 }
 
-// Semantic score interpretation
 function getScoreLabel(score: number | null): { label: string; description: string } {
   if (score === null) return { label: "No data", description: "Run a snapshot to measure visibility" };
   if (score >= 80) return { label: "Strong", description: "Consistently surfaced in AI responses" };
@@ -110,85 +138,57 @@ function statusVariant(status: string | null | undefined): BadgeVariant {
   return "neutral";
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   TAB NAVIGATION (Ahrefs-style)
-═══════════════════════════════════════════════════════════════════════════ */
-type Tab = "overview" | "snapshots" | "competitors" | "evidence" | "reports";
+function pct(n: number, d: number) {
+  if (!d) return 0;
+  return Math.round((n / d) * 100);
+}
 
-const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
-  {
-    id: "overview",
-    label: "Overview",
-    icon: (
-      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
-      </svg>
-    ),
-  },
-  {
-    id: "snapshots",
-    label: "Snapshots",
-    icon: (
-      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-      </svg>
-    ),
-  },
-  {
-    id: "competitors",
-    label: "Competitors",
-    icon: (
-      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-      </svg>
-    ),
-  },
-  {
-    id: "evidence",
-    label: "Evidence",
-    icon: (
-      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-      </svg>
-    ),
-  },
-  {
-    id: "reports",
-    label: "Reports",
-    icon: (
-      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-      </svg>
-    ),
-  },
+/* ═══════════════════════════════════════════════════════════════════════════
+   TAB NAVIGATION
+═══════════════════════════════════════════════════════════════════════════ */
+type Tab = "overview" | "evidence" | "competitors" | "reports";
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: "overview", label: "Overview" },
+  { id: "evidence", label: "Evidence" },
+  { id: "competitors", label: "Competitors" },
+  { id: "reports", label: "Reports" },
 ];
 
-function TabBar({ activeTab, onTabChange }: { activeTab: Tab; onTabChange: (tab: Tab) => void }) {
+/* ═══════════════════════════════════════════════════════════════════════════
+   SNAPSHOT SELECTOR
+═══════════════════════════════════════════════════════════════════════════ */
+function SnapshotSelector({
+  snapshots,
+  selectedId,
+  onSelect,
+}: {
+  snapshots: SnapshotRow[];
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+}) {
+  if (snapshots.length === 0) return null;
+
   return (
-    <div className="border-b border-[#E5E5E5]">
-      <nav className="-mb-px flex gap-1">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => onTabChange(tab.id)}
-            className={cn(
-              "flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors",
-              activeTab === tab.id
-                ? "border-[#0A0A0A] text-[#0A0A0A]"
-                : "border-transparent text-[#666] hover:border-[#E5E5E5] hover:text-[#0A0A0A]"
-            )}
-          >
-            {tab.icon}
-            {tab.label}
-          </button>
+    <div className="flex items-center gap-2">
+      <label className="text-sm text-[#666]">Snapshot:</label>
+      <select
+        value={selectedId ?? ""}
+        onChange={(e) => onSelect(e.target.value)}
+        className="rounded-lg border border-[#E5E5E5] bg-white px-3 py-1.5 text-sm text-[#0A0A0A] focus:border-[#0A0A0A] focus:outline-none"
+      >
+        {snapshots.map((s, idx) => (
+          <option key={s.id} value={s.id}>
+            {idx === 0 ? "Latest" : new Date(s.created_at).toLocaleDateString()} — {s.vrtl_score ?? "—"}
+          </option>
         ))}
-      </nav>
+      </select>
     </div>
   );
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   SCORE HERO (Dominant metric - Ahrefs style)
+   SCORE HERO
 ═══════════════════════════════════════════════════════════════════════════ */
 function ScoreHero({
   score,
@@ -209,7 +209,6 @@ function ScoreHero({
   return (
     <div className="rounded-xl border border-[#E5E5E5] bg-white p-6">
       <div className="flex flex-col items-center text-center sm:flex-row sm:items-start sm:text-left">
-        {/* Score number - dominant */}
         <div className="flex flex-col items-center sm:items-start">
           <div className="flex items-baseline gap-3">
             <span className={cn("text-7xl font-bold tabular-nums", getScoreColor(score))}>
@@ -238,46 +237,35 @@ function ScoreHero({
           <div className="mt-1 text-sm text-[#999]">AI Visibility Score</div>
         </div>
 
-        {/* Metadata column */}
         <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:ml-auto sm:mt-0 sm:flex-col sm:items-end sm:gap-1.5">
-          {/* Semantic label */}
           <div className={cn("rounded-lg px-3 py-1.5 text-sm font-medium", getScoreBg(score), getScoreColor(score))}>
             {label}
           </div>
-          {/* Confidence badge */}
           <Badge variant={confidence.variant}>{confidence.label}</Badge>
-          {/* Status if running */}
           {status === "running" && <Badge variant="warning">Analyzing...</Badge>}
-          {/* Updated timestamp */}
           {updatedAt && (
             <span className="text-xs text-[#999]">Updated {timeAgo(updatedAt)}</span>
           )}
         </div>
       </div>
-
-      {/* Description */}
       <p className="mt-4 text-sm text-[#666]">{description}</p>
     </div>
   );
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   WHY THIS SCORE (Insight bullets - Ahrefs style)
+   WHY THIS SCORE
 ═══════════════════════════════════════════════════════════════════════════ */
 function WhyThisScore({
   score,
   providers,
   competitors,
   snapshotCount,
-  clientId,
-  snapshotId,
 }: {
   score: number | null;
   providers: [string, number][];
   competitors: CompetitorRow[];
   snapshotCount: number;
-  clientId: string;
-  snapshotId: string | null;
 }) {
   if (score === null) {
     return (
@@ -290,10 +278,8 @@ function WhyThisScore({
     );
   }
 
-  // Derive insights from provider scores
   const insights: { icon: string; text: string; sentiment: "positive" | "neutral" | "negative" }[] = [];
 
-  // Provider-specific insights
   const strongProviders = providers.filter(([, s]) => s >= 80);
   const weakProviders = providers.filter(([, s]) => s < 50);
   const moderateProviders = providers.filter(([, s]) => s >= 50 && s < 80);
@@ -322,7 +308,6 @@ function WhyThisScore({
     });
   }
 
-  // Competitor context
   if (competitors.length >= 3) {
     insights.push({
       icon: "✓",
@@ -343,7 +328,6 @@ function WhyThisScore({
     });
   }
 
-  // Historical context
   if (snapshotCount > 1) {
     insights.push({
       icon: "✓",
@@ -354,17 +338,7 @@ function WhyThisScore({
 
   return (
     <div className="rounded-xl border border-[#E5E5E5] bg-white p-5">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-[#0A0A0A]">Why this score?</h3>
-        {snapshotId && (
-          <Link
-            href={`/app/clients/${clientId}/snapshots/${snapshotId}`}
-            className="text-xs font-medium text-[#0A0A0A] hover:underline"
-          >
-            View evidence →
-          </Link>
-        )}
-      </div>
+      <h3 className="text-sm font-semibold text-[#0A0A0A]">Why this score?</h3>
       <ul className="mt-3 space-y-2">
         {insights.map((insight, i) => (
           <li key={i} className="flex items-start gap-2.5 text-sm">
@@ -387,12 +361,10 @@ function WhyThisScore({
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   PROVIDER BREAKDOWN (Semantic labels)
+   PROVIDER BREAKDOWN
 ═══════════════════════════════════════════════════════════════════════════ */
 function ProviderBreakdown({ providers }: { providers: [string, number][] }) {
-  if (providers.length === 0) {
-    return null;
-  }
+  if (providers.length === 0) return null;
 
   return (
     <div className="rounded-xl border border-[#E5E5E5] bg-white p-5">
@@ -432,24 +404,18 @@ function ProviderBreakdown({ providers }: { providers: [string, number][] }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   QUICK ACTIONS (Run snapshot, Download report)
+   QUICK ACTIONS
 ═══════════════════════════════════════════════════════════════════════════ */
 function QuickActions({
   running,
-  hasSnapshot,
   snapshotStatus,
   onRunSnapshot,
   onResetSnapshot,
-  clientId,
-  snapshotId,
 }: {
   running: boolean;
-  hasSnapshot: boolean;
   snapshotStatus: string | null;
   onRunSnapshot: () => void;
   onResetSnapshot: () => void;
-  clientId: string;
-  snapshotId: string | null;
 }) {
   return (
     <div className="rounded-xl border border-[#E5E5E5] bg-white p-5">
@@ -487,25 +453,13 @@ function QuickActions({
             Reset stuck snapshot
           </button>
         )}
-
-        {hasSnapshot && snapshotId && (
-          <Link
-            href={`/app/clients/${clientId}/snapshots/${snapshotId}`}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-[#E5E5E5] px-4 py-2.5 text-sm font-medium text-[#0A0A0A] transition-colors hover:bg-[#F5F5F5]"
-          >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-            </svg>
-            View full report
-          </Link>
-        )}
       </div>
     </div>
   );
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   COMPETITORS TAB CONTENT
+   COMPETITORS TAB
 ═══════════════════════════════════════════════════════════════════════════ */
 function CompetitorsTab({
   competitors,
@@ -530,7 +484,6 @@ function CompetitorsTab({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-[#0A0A0A]">Competitors</h2>
@@ -541,7 +494,6 @@ function CompetitorsTab({
         <Badge variant={confidence.variant}>{confidence.label}</Badge>
       </div>
 
-      {/* Add form */}
       {competitors.length < 8 && (
         <form className="flex gap-2" onSubmit={onAddCompetitor}>
           <input
@@ -571,7 +523,6 @@ function CompetitorsTab({
         </form>
       )}
 
-      {/* List */}
       {competitors.length > 0 ? (
         <div className="rounded-xl border border-[#E5E5E5] bg-white">
           <table className="w-full">
@@ -579,7 +530,6 @@ function CompetitorsTab({
               <tr className="border-b border-[#E5E5E5] text-left text-xs font-medium uppercase tracking-wide text-[#999]">
                 <th className="px-4 py-3">Competitor</th>
                 <th className="px-4 py-3">Website</th>
-                <th className="px-4 py-3">Added</th>
                 <th className="px-4 py-3 w-12"></th>
               </tr>
             </thead>
@@ -603,9 +553,6 @@ function CompetitorsTab({
                       "—"
                     )}
                   </td>
-                  <td className="px-4 py-3 text-sm text-[#666]">
-                    {new Date(c.created_at).toLocaleDateString()}
-                  </td>
                   <td className="px-4 py-3">
                     <button
                       onClick={() => onDeleteCompetitor(c.id)}
@@ -624,11 +571,6 @@ function CompetitorsTab({
         </div>
       ) : (
         <div className="rounded-xl border-2 border-dashed border-[#E5E5E5] bg-white py-12 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#F5F5F5]">
-            <svg className="h-6 w-6 text-[#999]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-            </svg>
-          </div>
           <p className="text-sm font-medium text-[#0A0A0A]">No competitors tracked</p>
           <p className="mt-1 text-xs text-[#999]">Add competitors to improve analysis confidence</p>
         </div>
@@ -638,73 +580,208 @@ function CompetitorsTab({
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   SNAPSHOTS TAB CONTENT
+   EVIDENCE TAB (inline, no page hop)
 ═══════════════════════════════════════════════════════════════════════════ */
-function SnapshotsTab({ snapshots, clientId }: { snapshots: SnapshotRow[]; clientId: string }) {
-  if (snapshots.length === 0) {
+function EvidenceTab({
+  detail,
+  loading,
+  clientName,
+}: {
+  detail: SnapshotDetailResponse | null;
+  loading: boolean;
+  clientName: string;
+}) {
+  if (loading) {
     return (
-      <div className="rounded-xl border-2 border-dashed border-[#E5E5E5] bg-white py-12 text-center">
-        <p className="text-sm font-medium text-[#0A0A0A]">No snapshots yet</p>
-        <p className="mt-1 text-xs text-[#999]">Run your first snapshot to start tracking visibility</p>
+      <div className="space-y-4">
+        <div className="h-24 animate-pulse rounded-xl bg-[#F5F5F5]" />
+        <div className="h-64 animate-pulse rounded-xl bg-[#F5F5F5]" />
       </div>
     );
   }
 
+  if (!detail) {
+    return (
+      <div className="rounded-xl border-2 border-dashed border-[#E5E5E5] bg-white py-12 text-center">
+        <p className="text-sm font-medium text-[#0A0A0A]">No evidence available</p>
+        <p className="mt-1 text-xs text-[#999]">Run a snapshot to generate evidence</p>
+      </div>
+    );
+  }
+
+  const { summary, responses } = detail;
+  const signalsTotal = summary.responses_count;
+
   return (
-    <div className="rounded-xl border border-[#E5E5E5] bg-white">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-[#E5E5E5] text-left text-xs font-medium uppercase tracking-wide text-[#999]">
-            <th className="px-4 py-3">Score</th>
-            <th className="px-4 py-3">Status</th>
-            <th className="px-4 py-3">Models</th>
-            <th className="px-4 py-3">Date</th>
-            <th className="px-4 py-3 w-12"></th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-[#E5E5E5]">
-          {snapshots.map((s) => (
-            <tr key={s.id} className="group transition-colors hover:bg-[#FAFAF8]">
-              <td className="px-4 py-3">
-                <span className={cn("text-lg font-bold tabular-nums", getScoreColor(s.vrtl_score))}>
-                  {s.vrtl_score ?? "—"}
-                </span>
-              </td>
-              <td className="px-4 py-3">
-                <Badge variant={statusVariant(s.status)}>{s.status}</Badge>
-              </td>
-              <td className="px-4 py-3 text-sm text-[#666]">
-                {s.score_by_provider ? Object.keys(s.score_by_provider).length : 0}
-              </td>
-              <td className="px-4 py-3 text-sm text-[#666]">
-                {new Date(s.created_at).toLocaleString()}
-              </td>
-              <td className="px-4 py-3">
-                <Link
-                  href={`/app/clients/${clientId}/snapshots/${s.id}`}
-                  className="rounded-lg p-1.5 text-[#999] opacity-0 transition-all hover:bg-[#F5F5F5] hover:text-[#0A0A0A] group-hover:opacity-100"
-                >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+    <div className="space-y-6">
+      {/* Summary metrics */}
+      <div className="grid gap-4 sm:grid-cols-4">
+        <div className="rounded-xl border border-[#E5E5E5] bg-white p-4">
+          <div className="text-2xl font-bold text-[#0A0A0A]">{pct(summary.client_mentioned_count, signalsTotal)}%</div>
+          <div className="text-xs text-[#666]">Mention rate ({summary.client_mentioned_count}/{signalsTotal})</div>
+        </div>
+        <div className="rounded-xl border border-[#E5E5E5] bg-white p-4">
+          <div className="text-2xl font-bold text-[#0A0A0A]">{pct(summary.sources_count, signalsTotal)}%</div>
+          <div className="text-xs text-[#666]">Citeable ({summary.sources_count}/{signalsTotal})</div>
+        </div>
+        <div className="rounded-xl border border-[#E5E5E5] bg-white p-4">
+          <div className="text-2xl font-bold text-[#0A0A0A]">{pct(summary.specific_features_count, signalsTotal)}%</div>
+          <div className="text-xs text-[#666]">Feature specific ({summary.specific_features_count}/{signalsTotal})</div>
+        </div>
+        <div className="rounded-xl border border-[#E5E5E5] bg-white p-4">
+          <div className="text-2xl font-bold text-[#0A0A0A]">{signalsTotal}</div>
+          <div className="text-xs text-[#666]">Signals analyzed</div>
+        </div>
+      </div>
+
+      {/* Findings list */}
+      <div className="rounded-xl border border-[#E5E5E5] bg-white">
+        <div className="border-b border-[#E5E5E5] px-5 py-4">
+          <h3 className="font-semibold text-[#0A0A0A]">Detailed Findings</h3>
+          <p className="text-xs text-[#666]">{responses.length} signals analyzed</p>
+        </div>
+        <div className="divide-y divide-[#E5E5E5]">
+          {responses.map((r, idx) => {
+            const mentioned = r.client_mentioned;
+            const position = r.client_position;
+            const strength = r.recommendation_strength;
+
+            let severity: "high" | "medium" | "low" = "low";
+            let title = "Strong signal";
+            if (!mentioned) {
+              severity = "high";
+              title = "Not mentioned";
+            } else if (position === "middle" || position === "bottom" || strength === "weak" || strength === "none") {
+              severity = "medium";
+              title = "Weak positioning";
+            }
+
+            const severityStyles = {
+              high: { bg: "bg-red-50", text: "text-red-700", border: "border-red-200" },
+              medium: { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200" },
+              low: { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200" },
+            };
+            const styles = severityStyles[severity];
+
+            return (
+              <details key={r.id} className="group">
+                <summary className="flex cursor-pointer items-center justify-between p-4 hover:bg-[#FAFAF8]">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#F5F5F5] text-xs font-bold text-[#666]">
+                      {idx + 1}
+                    </span>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className={cn("rounded-lg border px-2 py-0.5 text-xs font-medium", styles.bg, styles.text, styles.border)}>
+                          {severity === "high" ? "High" : severity === "medium" ? "Medium" : "Strong"}
+                        </span>
+                        <span className="text-sm font-medium text-[#0A0A0A]">{title}</span>
+                      </div>
+                      {mentioned && (
+                        <span className="mt-1 inline-flex items-center gap-1 text-xs text-emerald-600">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Mentioned
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <svg className="h-5 w-5 text-[#999] transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                   </svg>
-                </Link>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                </summary>
+                <div className="border-t border-[#E5E5E5] bg-[#FAFAF8] p-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <h4 className="text-sm font-medium text-[#0A0A0A]">Position</h4>
+                      <p className="mt-1 text-sm text-[#666] capitalize">{position || "—"}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-[#0A0A0A]">Recommendation strength</h4>
+                      <p className="mt-1 text-sm text-[#666] capitalize">{strength || "—"}</p>
+                    </div>
+                  </div>
+                  {r.competitors_mentioned.length > 0 && (
+                    <div className="mt-3">
+                      <h4 className="text-sm font-medium text-[#0A0A0A]">Competitors mentioned</h4>
+                      <p className="mt-1 text-sm text-[#666]">{r.competitors_mentioned.join(", ")}</p>
+                    </div>
+                  )}
+                  {r.evidence_snippet && (
+                    <div className="mt-3 rounded-lg border border-[#E5E5E5] bg-white p-3 text-sm text-[#666]">
+                      <strong className="text-[#0A0A0A]">Evidence:</strong> &quot;{r.evidence_snippet}&quot;
+                    </div>
+                  )}
+                </div>
+              </details>
+            );
+          })}
+          {responses.length === 0 && (
+            <div className="py-12 text-center text-sm text-[#999]">No findings available.</div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   PLACEHOLDER TAB (for Evidence/Reports)
+   REPORTS TAB (inline download)
 ═══════════════════════════════════════════════════════════════════════════ */
-function PlaceholderTab({ title, description }: { title: string; description: string }) {
+function ReportsTab({
+  snapshot,
+  clientName,
+}: {
+  snapshot: SnapshotRow | null;
+  clientName: string;
+}) {
+  if (!snapshot || !snapshot.vrtl_score) {
+    return (
+      <div className="rounded-xl border-2 border-dashed border-[#E5E5E5] bg-white py-12 text-center">
+        <p className="text-sm font-medium text-[#0A0A0A]">No reports available</p>
+        <p className="mt-1 text-xs text-[#999]">Run a completed snapshot to generate reports</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="rounded-xl border-2 border-dashed border-[#E5E5E5] bg-white py-12 text-center">
-      <p className="text-sm font-medium text-[#0A0A0A]">{title}</p>
-      <p className="mt-1 text-xs text-[#999]">{description}</p>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold text-[#0A0A0A]">Download Report</h2>
+        <p className="text-sm text-[#666]">
+          Generate a branded PDF report for {clientName}
+        </p>
+      </div>
+
+      <div className="rounded-xl border border-[#E5E5E5] bg-white p-6">
+        <div className="flex items-start gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#F5F5F5]">
+            <svg className="h-6 w-6 text-[#666]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <h3 className="font-medium text-[#0A0A0A]">AI Visibility Report</h3>
+            <p className="mt-1 text-sm text-[#666]">
+              Professional PDF with score breakdown, evidence, and recommendations. Ready for client presentation.
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2 text-xs text-[#999]">
+              <span>Score: {snapshot.vrtl_score}</span>
+              <span>·</span>
+              <span>{new Date(snapshot.created_at).toLocaleDateString()}</span>
+              <span>·</span>
+              <Badge variant={statusVariant(snapshot.status)}>{snapshot.status}</Badge>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <DownloadPdfButton snapshotId={snapshot.id} />
+        </div>
+      </div>
+
+      {/* Report history hint */}
+      <div className="rounded-xl border border-[#E5E5E5] bg-[#FAFAF8] p-4 text-sm text-[#666]">
+        <strong className="text-[#0A0A0A]">Tip:</strong> Use the snapshot selector above to download reports from previous snapshots.
+      </div>
     </div>
   );
 }
@@ -717,7 +794,7 @@ export default function ClientDetailPage() {
   const clientId = useMemo(() => (typeof params?.id === "string" ? params.id : ""), [params]);
   const supabase = getSupabaseBrowserClient();
 
-  // State
+  // Core state
   const [agencyId, setAgencyId] = useState<string | null>(null);
   const [client, setClient] = useState<ClientRow | null>(null);
   const [competitors, setCompetitors] = useState<CompetitorRow[]>([]);
@@ -728,15 +805,26 @@ export default function ClientDetailPage() {
   const [newWebsite, setNewWebsite] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const [snapshot, setSnapshot] = useState<SnapshotRow | null>(null);
   const [snapshots, setSnapshots] = useState<SnapshotRow[]>([]);
+  const [selectedSnapshotId, setSelectedSnapshotId] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
   const [runError, setRunError] = useState<string | null>(null);
 
   const [activeTab, setActiveTab] = useState<Tab>("overview");
 
-  // Data refresh (unchanged logic)
-  async function refresh(currentAgencyId: string) {
+  // Detail data for Evidence/Reports tabs (loaded on demand)
+  const [snapshotDetail, setSnapshotDetail] = useState<SnapshotDetailResponse | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+
+  // Selected snapshot
+  const selectedSnapshot = useMemo(
+    () => snapshots.find((s) => s.id === selectedSnapshotId) ?? snapshots[0] ?? null,
+    [snapshots, selectedSnapshotId]
+  );
+  const previousSnapshot = useMemo(() => snapshots[1] ?? null, [snapshots]);
+
+  // Data refresh
+  const refresh = useCallback(async (currentAgencyId: string) => {
     const clientRes = await supabase
       .from("clients")
       .select("id,name,website,industry")
@@ -761,17 +849,38 @@ export default function ClientDetailPage() {
       .select("id,status,vrtl_score,score_by_provider,started_at,completed_at,created_at,error")
       .eq("client_id", clientId)
       .order("created_at", { ascending: false })
-      .limit(10);
+      .limit(20);
 
     if (!snapsRes.error && snapsRes.data) {
       const rows = snapsRes.data as SnapshotRow[];
       setSnapshots(rows);
-      setSnapshot(rows[0] ?? null);
+      if (!selectedSnapshotId && rows[0]) {
+        setSelectedSnapshotId(rows[0].id);
+      }
     } else {
-      setSnapshot(null);
       setSnapshots([]);
     }
-  }
+  }, [clientId, supabase, selectedSnapshotId]);
+
+  // Load snapshot detail (for Evidence/Reports tabs)
+  const loadDetail = useCallback(async (snapshotId: string) => {
+    if (!snapshotId) return;
+    setDetailLoading(true);
+    try {
+      const { accessToken } = await ensureOnboarded();
+      const qs = new URLSearchParams({ snapshotId, clientId });
+      const res = await fetch(`/api/snapshots/detail?${qs.toString()}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!res.ok) throw new Error(await res.text());
+      setSnapshotDetail((await res.json()) as SnapshotDetailResponse);
+    } catch (e) {
+      console.error("Failed to load snapshot detail:", e);
+      setSnapshotDetail(null);
+    } finally {
+      setDetailLoading(false);
+    }
+  }, [clientId]);
 
   // Initial load
   useEffect(() => {
@@ -793,13 +902,12 @@ export default function ClientDetailPage() {
     }
     load();
     return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clientId]);
+  }, [clientId, refresh]);
 
   // Poll while running
   useEffect(() => {
     if (!agencyId) return;
-    if (snapshot?.status !== "running") return;
+    if (selectedSnapshot?.status !== "running") return;
     let cancelled = false;
     const t = window.setInterval(() => {
       if (cancelled) return;
@@ -808,13 +916,19 @@ export default function ClientDetailPage() {
       });
     }, 5000);
     return () => { cancelled = true; window.clearInterval(t); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [agencyId, snapshot?.status]);
+  }, [agencyId, selectedSnapshot?.status, refresh]);
 
-  // Actions (unchanged logic)
+  // Load detail when switching to Evidence/Reports tabs
+  useEffect(() => {
+    if ((activeTab === "evidence" || activeTab === "reports") && selectedSnapshot) {
+      loadDetail(selectedSnapshot.id);
+    }
+  }, [activeTab, selectedSnapshot, loadDetail]);
+
+  // Actions
   async function resetRunningSnapshot() {
     if (!clientId || !agencyId) return;
-    const ok = window.confirm("Reset the currently running snapshot? This marks it as failed so you can run again.");
+    const ok = window.confirm("Reset the currently running snapshot?");
     if (!ok) return;
 
     setRunError(null);
@@ -824,7 +938,7 @@ export default function ClientDetailPage() {
       const res = await fetch("/api/snapshots/reset", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
-        body: JSON.stringify({ clientId })
+        body: JSON.stringify({ clientId }),
       });
       if (!res.ok) throw new Error(await res.text());
       await refresh(agencyId);
@@ -844,7 +958,7 @@ export default function ClientDetailPage() {
       const res = await fetch("/api/snapshots/run", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
-        body: JSON.stringify({ clientId })
+        body: JSON.stringify({ clientId }),
       });
       if (!res.ok) {
         const ct = res.headers.get("content-type") ?? "";
@@ -871,7 +985,7 @@ export default function ClientDetailPage() {
       const insertRes = await supabase.from("competitors").insert({
         client_id: clientId,
         name: newName,
-        website: newWebsite || null
+        website: newWebsite || null,
       });
       if (insertRes.error) throw insertRes.error;
       setNewName("");
@@ -900,8 +1014,9 @@ export default function ClientDetailPage() {
   }
 
   // Derived values
-  const providers: [string, number][] = snapshot?.score_by_provider ? Object.entries(snapshot.score_by_provider) : [];
-  const previousSnapshot = snapshots[1] ?? null;
+  const providers: [string, number][] = selectedSnapshot?.score_by_provider
+    ? Object.entries(selectedSnapshot.score_by_provider)
+    : [];
   const confidence = getConfidenceLabel(competitors.length);
 
   return (
@@ -941,18 +1056,13 @@ export default function ClientDetailPage() {
 
       {client && (
         <>
-          {/* Client header */}
+          {/* Client header + snapshot selector */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl font-bold text-[#0A0A0A]">{client.name}</h1>
               <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-[#666]">
                 {client.website && (
-                  <a
-                    href={client.website}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:underline"
-                  >
+                  <a href={client.website} target="_blank" rel="noreferrer" className="hover:underline">
                     {client.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
                   </a>
                 )}
@@ -960,58 +1070,69 @@ export default function ClientDetailPage() {
                 <span className="capitalize">{client.industry.replace(/_/g, " ")}</span>
               </div>
             </div>
+            <SnapshotSelector
+              snapshots={snapshots}
+              selectedId={selectedSnapshotId}
+              onSelect={setSelectedSnapshotId}
+            />
           </div>
 
           {/* Tab bar */}
-          <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
+          <div className="border-b border-[#E5E5E5]">
+            <nav className="-mb-px flex gap-1">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    "border-b-2 px-4 py-3 text-sm font-medium transition-colors",
+                    activeTab === tab.id
+                      ? "border-[#0A0A0A] text-[#0A0A0A]"
+                      : "border-transparent text-[#666] hover:border-[#E5E5E5] hover:text-[#0A0A0A]"
+                  )}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </div>
 
           {/* Tab content */}
           {activeTab === "overview" && (
             <div className="space-y-6">
-              {/* Run error */}
               {runError && (
                 <Alert variant="danger">
                   <AlertDescription>{runError}</AlertDescription>
                 </Alert>
               )}
 
-              {/* Score hero - dominant metric */}
               <ScoreHero
-                score={snapshot?.vrtl_score ?? null}
+                score={selectedSnapshot?.vrtl_score ?? null}
                 previousScore={previousSnapshot?.vrtl_score ?? null}
                 confidence={confidence}
-                updatedAt={snapshot?.completed_at || snapshot?.created_at || null}
-                status={snapshot?.status ?? null}
+                updatedAt={selectedSnapshot?.completed_at || selectedSnapshot?.created_at || null}
+                status={selectedSnapshot?.status ?? null}
               />
 
-              {/* Two-column layout */}
               <div className="grid gap-6 lg:grid-cols-3">
-                {/* Left column - Why + Providers */}
                 <div className="space-y-6 lg:col-span-2">
                   <WhyThisScore
-                    score={snapshot?.vrtl_score ?? null}
+                    score={selectedSnapshot?.vrtl_score ?? null}
                     providers={providers}
                     competitors={competitors}
                     snapshotCount={snapshots.length}
-                    clientId={clientId}
-                    snapshotId={snapshot?.id ?? null}
                   />
                   <ProviderBreakdown providers={providers} />
                 </div>
 
-                {/* Right column - Actions */}
                 <div className="space-y-6">
                   <QuickActions
                     running={running}
-                    hasSnapshot={!!snapshot}
-                    snapshotStatus={snapshot?.status ?? null}
+                    snapshotStatus={selectedSnapshot?.status ?? null}
                     onRunSnapshot={runSnapshot}
                     onResetSnapshot={resetRunningSnapshot}
-                    clientId={clientId}
-                    snapshotId={snapshot?.id ?? null}
                   />
 
-                  {/* Summary cards */}
                   <div className="rounded-xl border border-[#E5E5E5] bg-white p-5">
                     <h3 className="text-sm font-semibold text-[#0A0A0A]">Quick stats</h3>
                     <dl className="mt-3 space-y-3 text-sm">
@@ -1034,8 +1155,12 @@ export default function ClientDetailPage() {
             </div>
           )}
 
-          {activeTab === "snapshots" && (
-            <SnapshotsTab snapshots={snapshots} clientId={clientId} />
+          {activeTab === "evidence" && (
+            <EvidenceTab
+              detail={snapshotDetail}
+              loading={detailLoading}
+              clientName={client.name}
+            />
           )}
 
           {activeTab === "competitors" && (
@@ -1051,46 +1176,8 @@ export default function ClientDetailPage() {
             />
           )}
 
-          {activeTab === "evidence" && (
-            snapshot ? (
-              <div className="space-y-4">
-                <p className="text-sm text-[#666]">
-                  Detailed evidence from the latest snapshot analysis.
-                </p>
-                <Link
-                  href={`/app/clients/${clientId}/snapshots/${snapshot.id}`}
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#0A0A0A] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1a1a1a]"
-                >
-                  View full evidence report →
-                </Link>
-              </div>
-            ) : (
-              <PlaceholderTab
-                title="No evidence yet"
-                description="Run a snapshot to generate evidence"
-              />
-            )
-          )}
-
           {activeTab === "reports" && (
-            snapshot ? (
-              <div className="space-y-4">
-                <p className="text-sm text-[#666]">
-                  Download branded PDF reports for client presentations.
-                </p>
-                <Link
-                  href={`/app/clients/${clientId}/snapshots/${snapshot.id}`}
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#0A0A0A] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1a1a1a]"
-                >
-                  Go to report download →
-                </Link>
-              </div>
-            ) : (
-              <PlaceholderTab
-                title="No reports available"
-                description="Run a snapshot to generate reports"
-              />
-            )
+            <ReportsTab snapshot={selectedSnapshot} clientName={client.name} />
           )}
         </>
       )}
