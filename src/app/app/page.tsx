@@ -41,6 +41,19 @@ type PortfolioStats = {
   weakClients: number;
 };
 
+type SnapshotDetailResponse = {
+  summary: {
+    responses_count: number;
+    client_mentioned_count: number;
+    sources_count: number;
+    top_competitors: Array<{ name: string; count: number }>;
+  };
+  responses: Array<{
+    client_mentioned: boolean;
+    client_position: string | null;
+  }>;
+};
+
 function getInitials(name: string) {
   return name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
 }
@@ -467,7 +480,7 @@ export default function AppPage() {
           return completed[0]?.id;
         }).filter(Boolean);
 
-        let detailsMap = new Map<string, any>();
+        const detailsMap = new Map<string, SnapshotDetailResponse>();
         if (latestSnapshotIds.length > 0) {
           const detailsPromises = latestSnapshotIds.map(async (snapshotId) => {
             const { data: { session } } = await supabase.auth.getSession();
@@ -477,7 +490,7 @@ export default function AppPage() {
                 headers: { Authorization: `Bearer ${session.access_token}` },
               });
               if (!res.ok) return null;
-              const data = await res.json();
+              const data: SnapshotDetailResponse = await res.json();
               return { snapshotId, data };
             } catch {
               return null;
@@ -532,7 +545,7 @@ export default function AppPage() {
             mentionRate = Math.round((detail.summary.client_mentioned_count / total) * 100);
             citationRate = Math.round((detail.summary.sources_count / total) * 100);
             
-            const topPositionCount = detail.responses?.filter((r: any) => r.client_mentioned && r.client_position === "top").length || 0;
+            const topPositionCount = detail.responses?.filter(r => r.client_mentioned && r.client_position === "top").length || 0;
             topPositionRate = Math.round((topPositionCount / total) * 100);
             
             // Calculate competitive rank
@@ -540,7 +553,7 @@ export default function AppPage() {
             const competitors = detail.summary.top_competitors || [];
             const allEntities = [
               { name: client.name, mentions: clientMentions, isClient: true },
-              ...competitors.map((c: any) => ({ name: c.name, mentions: c.count, isClient: false }))
+              ...competitors.map(c => ({ name: c.name, mentions: c.count, isClient: false }))
             ].sort((a, b) => b.mentions - a.mentions);
             competitorRank = allEntities.findIndex(e => e.isClient) + 1;
           }
@@ -705,7 +718,7 @@ export default function AppPage() {
           {/* Filter by health */}
           <select
             value={filterHealth}
-            onChange={(e) => setFilterHealth(e.target.value as any)}
+            onChange={(e) => setFilterHealth(e.target.value as "all" | "strong" | "moderate" | "weak")}
             className="h-9 rounded-lg border border-border bg-white px-3 text-sm text-text focus:border-text focus:outline-none"
           >
             <option value="all">All health</option>
@@ -717,7 +730,7 @@ export default function AppPage() {
           {/* Sort */}
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
+            onChange={(e) => setSortBy(e.target.value as "name" | "score" | "updated")}
             className="h-9 rounded-lg border border-border bg-white px-3 text-sm text-text focus:border-text focus:outline-none"
           >
             <option value="updated">Last updated</option>

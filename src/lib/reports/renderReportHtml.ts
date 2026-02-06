@@ -369,8 +369,6 @@ function getEvidenceLabel(pj: Extraction | null): { label: EvidenceLabel; color:
 
 function generateBottomLine(data: ReportData, metrics: ReturnType<typeof calculateMetrics>): string {
   const { client } = data;
-  const score = data.snapshot.vrtl_score;
-  const tier = getScoreTier(score);
   
   const parts: string[] = [];
   
@@ -448,7 +446,6 @@ export function renderReportHtml(data: ReportData): string {
   
   const strengthExamples = labeledResponses.filter(r => r.label.label === "STRENGTH").slice(0, 2);
   const vulnerableExamples = labeledResponses.filter(r => r.label.label === "VULNERABLE").slice(0, 2);
-  const opportunityExamples = labeledResponses.filter(r => r.label.label === "OPPORTUNITY").slice(0, 1);
 
   return `<!DOCTYPE html>
 <html>
