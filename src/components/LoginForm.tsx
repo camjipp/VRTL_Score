@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -58,7 +59,8 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
   }
 
   return (
-    <form className="space-y-5" onSubmit={handleSubmit}>
+    <>
+      <form className="space-y-5" onSubmit={handleSubmit}>
       <div>
         <label className="mb-2 block text-sm font-medium text-text">
           Email
@@ -134,6 +136,27 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
           Sign up
         </Link>
       </p>
-    </form>
+      </form>
+
+      {/* Full-screen branded loader during sign-in/onboarding */}
+      {busy && (
+        <div
+          className="fixed inset-0 z-50 flex min-h-screen flex-col items-center justify-center bg-bg/95 backdrop-blur-sm"
+          role="status"
+          aria-live="polite"
+        >
+          <Image
+            src="/brand/VRTL_Solo.png"
+            alt="VRTL Score"
+            width={180}
+            height={64}
+            className="mb-6 h-12 w-auto animate-pulse"
+            priority
+          />
+          <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-text/20 border-t-text" />
+          <p className="mt-4 text-sm text-text-2">Signing you in…</p>
+        </div>
+      )}
+    </>
   );
 }
