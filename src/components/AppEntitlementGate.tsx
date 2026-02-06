@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { ensureOnboarded } from "@/lib/onboard";
@@ -15,7 +15,6 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 export function AppEntitlementGate({ children }: Props) {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const hasChecked = useRef(false);
 

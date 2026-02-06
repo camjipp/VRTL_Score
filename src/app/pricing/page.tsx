@@ -247,7 +247,6 @@ function PricingContent() {
               const monthlyEquivalent = isAnnual ? Math.round(plan.yearlyPrice / 12) : plan.monthlyPrice;
               const isSelected = selectedPlan === plan.id;
               const isRecommended = plan.recommended && !selectedPlan;
-              const isLoading = loadingPlan === plan.id;
 
   return (
                 <button

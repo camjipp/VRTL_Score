@@ -562,7 +562,7 @@ export default function AppPage() {
           let bestModel = null;
           let worstModel = null;
           if (completedSnapshots[0]?.score_by_provider) {
-            const providers = Object.entries(completedSnapshots[0].score_by_provider);
+            const providers = Object.entries(completedSnapshots[0].score_by_provider as Record<string, number>);
             if (providers.length > 0) {
               const sorted = providers.sort((a, b) => b[1] - a[1]);
               bestModel = sorted[0][0];

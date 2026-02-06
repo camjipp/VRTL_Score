@@ -1319,11 +1319,10 @@ function CompetitorsTab({
 function EvidenceTab({
   detail,
   loading,
-  clientName,
 }: {
   detail: SnapshotDetailResponse | null;
   loading: boolean;
-  clientName: string;
+  clientName?: string;
 }) {
   if (loading) {
     return (
@@ -1622,7 +1621,7 @@ export default function ClientDetailPage() {
         }
         const data: SnapshotDetailResponse = await res.json();
         if (!cancelled) setSnapshotDetail(data);
-      } catch (e) {
+      } catch {
         if (!cancelled) setSnapshotDetail(null);
       } finally {
         if (!cancelled) setDetailLoading(false);
@@ -1686,6 +1685,7 @@ export default function ClientDetailPage() {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function resetRunningSnapshot() {
     if (!agencyId || !selectedSnapshot) return;
     setRunning(true);
