@@ -128,9 +128,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Image
                 src="/brand/VRTL_Solo.png"
                 alt="VRTL Score"
-                width={80}
-                height={28}
-                className="h-7 w-auto"
+                width={120}
+                height={40}
+                className="h-9 w-auto"
                 priority
               />
             </Link>

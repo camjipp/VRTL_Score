@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import Image from "next/image";
 import { Suspense } from "react";
 
 import { AppAuthGate } from "@/components/AppAuthGate";
@@ -12,11 +13,16 @@ export const metadata: Metadata = {
 
 function LoadingScreen() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg">
-      <div className="text-center">
-        <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-text/20 border-t-text" />
-        <p className="text-sm text-text-2">Loading...</p>
-      </div>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-bg">
+      <Image
+        src="/brand/VRTL_Solo.png"
+        alt="VRTL Score"
+        width={160}
+        height={56}
+        className="mb-6 h-12 w-auto animate-pulse"
+        priority
+      />
+      <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-text/20 border-t-text" />
     </div>
   );
 }
