@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -143,9 +144,14 @@ export function AppEntitlementGate({ children }: Props) {
         <div className="w-full max-w-sm px-6">
           {/* Logo */}
           <div className="mb-8 flex justify-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-text">
-              <span className="text-xl font-bold text-white">V</span>
-            </div>
+            <Image
+              src="/brand/VRTL_Solo.png"
+              alt="VRTL Score"
+              width={180}
+              height={64}
+              className="h-12 w-auto"
+              priority
+            />
           </div>
 
           {/* Progress card */}
