@@ -360,13 +360,17 @@ export default function SnapshotDetailPage() {
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm">
-        <Link href="/app" className="text-[#666] hover:text-[#0A0A0A]">Dashboard</Link>
-        <span className="text-[#999]">/</span>
-        <Link href={`/app/clients/${clientId}`} className="text-[#666] hover:text-[#0A0A0A]">{data?.client?.name || "Client"}</Link>
-        <span className="text-[#999]">/</span>
-        <span className="text-[#0A0A0A]">Report</span>
-      </div>
+      <nav className="flex items-center gap-1.5 text-sm">
+        <Link href="/app" className="text-text-2 transition-colors hover:text-text">Clients</Link>
+        <svg className="h-3.5 w-3.5 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+        <Link href={`/app/clients/${clientId}`} className="text-text-2 transition-colors hover:text-text">{data?.client?.name || "Client"}</Link>
+        <svg className="h-3.5 w-3.5 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+        <span className="font-medium text-text">Report</span>
+      </nav>
 
       {loading && (
         <div className="space-y-4">
