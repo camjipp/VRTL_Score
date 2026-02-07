@@ -102,8 +102,8 @@ export default function HomePage() {
             </div>
 
             {/* Value prop subtitle */}
-            <p className="mx-auto mt-3 max-w-2xl text-base text-text-2 leading-relaxed sm:text-lg">
-              Unlock AI search growth, own how LLMs talk about your clients, and capture demand on ChatGPT, Gemini, and more—reaching billions who use AI daily.
+            <p className="mx-auto mt-3 max-w-xl text-base text-text-2 leading-relaxed sm:text-lg">
+              Track and improve how AI recommends your clients.
             </p>
 
             {/* Search bar */}
@@ -111,16 +111,13 @@ export default function HomePage() {
               <DomainSearchBar />
             </div>
 
-            {/* CTAs */}
-            <div className="mt-6 flex items-center justify-center gap-4">
+            {/* CTA */}
+            <div className="mt-6 flex items-center justify-center">
               <Link
                 href="/onboarding"
-                className="rounded-lg bg-text px-6 py-3 text-sm font-medium text-white shadow-lg shadow-text/10 transition-all hover:bg-text/90 hover:scale-[1.02]"
+                className="rounded-full bg-text px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-text/10 transition-all hover:bg-text/90 hover:scale-[1.02]"
               >
-                Start free trial
-              </Link>
-              <Link href="/pricing" className="text-sm text-text-2 hover:text-text transition-colors">
-                View pricing →
+                Get Started
               </Link>
             </div>
           </div>
@@ -134,14 +131,13 @@ export default function HomePage() {
         <div className="container-xl">
           {/* Section Header - Future of Search */}
           <div className="mb-16">
-            <p className="text-sm font-semibold uppercase tracking-widest text-text-3">The Future of Search</p>
+            <p className="text-sm font-semibold uppercase tracking-widest text-text-3">How it Works</p>
             <h2 className="mt-4 text-4xl font-semibold leading-[1.1] tracking-tight text-text md:text-5xl lg:text-6xl">
-              The New Frontier for
-              <br />
-              Agency Growth
+              AI is the new search.<br />
+              Own it.
             </h2>
             <p className="mt-8 max-w-3xl text-xl leading-relaxed text-text-2">
-              LLM visibility is the new digital shelf where brands rush to get surfaced. AI Answer Engines are used by billions daily to shape perspectives, help make buying decisions, and answer questions about your clients&apos; brands and industries.
+              Billions use AI daily to make buying decisions. VRTL Score shows you exactly how LLMs talk about your clients—and gives you the tools to improve it.
             </p>
           </div>
 
@@ -348,144 +344,10 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          AI MODELS
-      ═══════════════════════════════════════════════════════ */}
-      {/* (Removed) Models supported: redundant with hero */}
-
-      {/* ═══════════════════════════════════════════════════════
-          CTA SECTION
-      ═══════════════════════════════════════════════════════ */}
-      <section className="bg-bg py-20 md:py-24">
-        <div className="container-xl">
-          <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-3xl font-semibold tracking-tight text-text md:text-4xl">
-            Ready to show your clients how AI sees them?
-            </h2>
-          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Link
-              href="/onboarding"
-              className="inline-flex h-12 items-center justify-center rounded-xl bg-text px-8 text-base font-medium text-white shadow-lg shadow-text/10 transition-all hover:bg-text/90 hover:scale-[1.02]"
-              >
-              Start free trial
-            </Link>
-            <Link
-              href="/pricing"
-              className="inline-flex h-12 items-center justify-center rounded-xl border border-border bg-surface px-8 text-base font-medium text-text transition-all hover:border-text/20 hover:bg-surface-2"
-            >
-              View pricing
-            </Link>
-          </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
-          STATS BANNER
-      ═══════════════════════════════════════════════════════ */}
-      <section className="bg-text py-16 md:py-20">
-        <div className="container-xl max-w-5xl">
-          <div className="grid gap-8 md:grid-cols-3">
-            {[
-              { value: "3+", label: "AI Models", sublabel: "ChatGPT, Claude, Gemini, and more" },
-              { value: "10", label: "Prompts", sublabel: "Industry-specific queries per snapshot" },
-              { value: "<5min", label: "To Report", sublabel: "From client onboarding to PDF" },
-            ].map((stat, i) => (
-              <div key={stat.label} className={`text-center ${i < 2 ? 'md:border-r md:border-white/10' : ''}`}>
-                <div className="text-5xl font-bold text-white md:text-6xl">{stat.value}</div>
-                <div className="mt-2 text-lg font-medium text-white">{stat.label}</div>
-                <div className="mt-1 text-sm text-white/60">{stat.sublabel}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
-          COMPARISON (Without vs With)
-      ═══════════════════════════════════════════════════════ */}
-      <section className="bg-bg py-20 md:py-28">
-        <div className="container-xl max-w-4xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-semibold tracking-tight text-text md:text-4xl">
-              No more manual searches.<br />Real, defensible data.
-            </h2>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Without */}
-            <div className="rounded-2xl border border-border bg-white p-6">
-              <div className="mb-4 text-sm font-semibold uppercase tracking-wide text-text-3">
-                Manual AI checks
-              </div>
-              <ul className="space-y-3 text-text-2">
-                <li className="flex items-start gap-3">
-                  <svg className="mt-0.5 h-5 w-5 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  Copy-paste queries into each AI
-                </li>
-                <li className="flex items-start gap-3">
-                  <svg className="mt-0.5 h-5 w-5 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  Screenshots that look unprofessional
-                </li>
-                <li className="flex items-start gap-3">
-                  <svg className="mt-0.5 h-5 w-5 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  No way to track changes over time
-                </li>
-                <li className="flex items-start gap-3">
-                  <svg className="mt-0.5 h-5 w-5 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  Hours building reports manually
-                </li>
-              </ul>
-            </div>
-
-            {/* With */}
-            <div className="rounded-2xl border border-text bg-text p-6 text-white">
-              <div className="mb-4 text-sm font-semibold uppercase tracking-wide text-white/60">
-                VRTL Score
-              </div>
-              <ul className="space-y-3 text-white/80">
-                <li className="flex items-start gap-3">
-                  <svg className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  Automated queries across all models
-                </li>
-                <li className="flex items-start gap-3">
-                  <svg className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  Branded PDFs ready for clients
-                </li>
-                <li className="flex items-start gap-3">
-                  <svg className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  Month-over-month tracking built in
-                </li>
-                <li className="flex items-start gap-3">
-                  <svg className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  Reports generated in minutes
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
           FAQ (with Questions marquee)
       ═══════════════════════════════════════════════════════ */}
       <section id="faq" className="border-t border-border bg-surface">
-        {/* Questions Marquee - Goodie style */}
+        {/* Questions Marquee */}
         <div className="overflow-hidden py-6 md:py-10">
           <div className="flex animate-marquee whitespace-nowrap">
             {Array.from({ length: 30 }).map((_, i) => (
@@ -505,79 +367,55 @@ export default function HomePage() {
               </h2>
             </div>
 
-          <div>
-            <FAQItem
-              question="What is AI visibility?"
-              answer="AI visibility refers to how often and how prominently a brand appears in AI-generated responses. When someone asks ChatGPT, Claude, or Gemini for recommendations in your client's industry, are they mentioned? That's AI visibility."
-            />
-            <FAQItem
-              question="How does VRTL Score work?"
-              answer="We query ChatGPT, Claude, and Gemini with standardized, industry-specific prompts. We analyze the responses to see if and how your client is mentioned, then calculate a visibility score based on frequency, prominence, and sentiment."
-            />
-            <FAQItem
-              question="What AI models do you support?"
-              answer="Currently we support ChatGPT (OpenAI), Claude (Anthropic), and Gemini (Google). We're constantly adding new models as they become relevant for AI search."
-            />
-            <FAQItem
-              question="How accurate are the scores?"
-              answer="Scores are based on real AI responses at the time of the snapshot. AI outputs can vary, which is why we recommend running monthly snapshots to track trends over time rather than focusing on any single score."
-            />
-            <FAQItem
-              question="Can I white-label the reports?"
-              answer="Yes. PDF reports include your agency branding. You can add your logo and customize the look to match your brand."
-            />
-            <FAQItem
-              question="Is there a free trial?"
-              answer="Yes, we offer a 7-day free trial so you can test the platform with your own clients before committing."
-            />
-          </div>
+            <div>
+              <FAQItem
+                question="What is AI visibility?"
+                answer="AI visibility is how often and how prominently a brand appears in AI-generated responses. When someone asks ChatGPT, Claude, or Gemini for a recommendation in your industry, does your client show up? That's AI visibility."
+              />
+              <FAQItem
+                question="How does VRTL Score work?"
+                answer="We query leading AI models with standardized, industry-specific prompts, analyze the responses to see if and how your client is mentioned, then calculate a visibility score based on frequency, prominence, and sentiment."
+              />
+              <FAQItem
+                question="What AI models do you support?"
+                answer="We currently support ChatGPT (OpenAI), Claude (Anthropic), and Gemini (Google). We're constantly adding new models as they become relevant for AI search."
+              />
+              <FAQItem
+                question="How accurate are the scores?"
+                answer="Scores are based on real AI responses at the time of the snapshot. AI outputs can vary, which is why we recommend monthly snapshots to track trends over time rather than focusing on any single score."
+              />
+              <FAQItem
+                question="Can I white-label the reports?"
+                answer="Yes. PDF reports include your agency branding. Add your logo and customize the look to match your brand."
+              />
+              <FAQItem
+                question="Is there a free trial?"
+                answer="Yes, we offer a 7-day free trial so you can test VRTL Score with your own clients before committing."
+              />
+            </div>
           </div>
         </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          METHODOLOGY (lightweight)
+          CTA SECTION
       ═══════════════════════════════════════════════════════ */}
-      <section id="methodology" className="border-t border-border bg-bg py-14">
+      <section className="bg-bg py-20 md:py-24">
         <div className="container-xl">
-          <div className="mx-auto max-w-5xl">
-            <div className="grid gap-8 rounded-3xl border border-border bg-surface p-8 md:grid-cols-12 md:items-center">
-              <div className="md:col-span-5">
-                <p className="text-sm font-semibold uppercase tracking-widest text-text-3">Defensible by design</p>
-                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-text md:text-3xl">
-                  Built to be client-proof.
-                </h2>
-                <p className="mt-3 text-base leading-relaxed text-text-2">
-                  Standardized discovery scenarios, consistent scoring, and preserved evidence—so agencies can explain
-                  the “why” behind every recommendation.
-                </p>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2 md:col-span-7">
-                <div className="rounded-2xl bg-white p-4 ring-1 ring-border/50">
-                  <div className="text-sm font-semibold text-text">Standardized snapshots</div>
-                  <div className="mt-1 text-sm text-text-2">
-                    The same scenarios run each time to measure change—not vibes.
-                  </div>
-                </div>
-                <div className="rounded-2xl bg-white p-4 ring-1 ring-border/50">
-                  <div className="text-sm font-semibold text-text">Evidence preserved</div>
-                  <div className="mt-1 text-sm text-text-2">
-                    Quotes, sources, and context saved for executive-ready proof.
-                  </div>
-                </div>
-                <div className="rounded-2xl bg-white p-4 ring-1 ring-border/50">
-                  <div className="text-sm font-semibold text-text">Actionable output</div>
-                  <div className="mt-1 text-sm text-text-2">
-                    Recommendations are prioritized with expected impact and consequences.
-                  </div>
-                </div>
-                <div className="rounded-2xl bg-white p-4 ring-1 ring-border/50">
-                  <div className="text-sm font-semibold text-text">Agency-ready reporting</div>
-                  <div className="mt-1 text-sm text-text-2">
-                    Shareable, branded PDFs designed to support renewal conversations.
-                  </div>
-                </div>
-              </div>
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl font-semibold tracking-tight text-text md:text-4xl">
+              Ready to see how AI talks about your clients?
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-lg text-text-2">
+              Get your first AI visibility report in minutes.
+            </p>
+            <div className="mt-8">
+              <Link
+                href="/onboarding"
+                className="inline-flex h-12 items-center justify-center rounded-full bg-text px-10 text-base font-semibold text-white shadow-lg shadow-text/10 transition-all hover:bg-text/90 hover:scale-[1.02]"
+              >
+                Get Started
+              </Link>
             </div>
           </div>
         </div>

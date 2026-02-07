@@ -55,24 +55,19 @@ export function DomainSearchBar() {
 
   return (
     <form onSubmit={submit}>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="flex flex-1 items-stretch overflow-hidden rounded-2xl border border-border bg-surface shadow-lift transition focus-within:border-text/20 focus-within:ring-2 focus-within:ring-accent/30">
-          <div className="flex min-w-0 flex-1 items-center px-5">
-            <input
-              className="h-12 w-full bg-transparent px-0 py-0 text-base text-text placeholder:text-text-3 outline-none sm:h-14"
-              onChange={(e) => setValue(e.target.value)}
-              placeholder="Enter website or URL"
-              value={value}
-              inputMode="url"
-              autoComplete="url"
-              aria-label="Website"
-            />
-          </div>
-          <div className="hidden w-px bg-border sm:block" />
-          <Button className="h-12 rounded-none px-6 text-base sm:h-14" type="submit" variant="primary">
-            Get insights
-          </Button>
-        </div>
+      <div className="relative flex items-center rounded-full border border-border bg-white shadow-sm transition-shadow focus-within:shadow-md">
+        <input
+          className="h-12 w-full rounded-full bg-transparent pl-5 pr-36 text-base text-text placeholder:text-text-3 outline-none sm:h-14 sm:pr-40"
+          onChange={(e) => setValue(e.target.value)}
+          placeholder="yourwebsite.com"
+          value={value}
+          inputMode="url"
+          autoComplete="url"
+          aria-label="Website"
+        />
+        <Button className="absolute right-1.5 h-9 rounded-full px-5 text-sm font-medium sm:h-11 sm:px-6" type="submit" variant="primary">
+          Get insights
+        </Button>
       </div>
       {error ? (
         <div className="mt-2">

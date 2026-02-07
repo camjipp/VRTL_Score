@@ -19,16 +19,15 @@ const footerLinks = {
     { label: "Branded PDF Reports", href: "/#features" },
   ],
   models: [
-    { label: "ChatGPT", href: "/#models" },
-    { label: "Claude", href: "/#models" },
-    { label: "Gemini", href: "/#models" },
-    { label: "Perplexity", href: "/#models" },
-    { label: "DeepSeek", href: "/#models" },
+    { label: "ChatGPT", href: "/#features" },
+    { label: "Claude", href: "/#features" },
+    { label: "Gemini", href: "/#features" },
+    { label: "Perplexity", href: "/#features" },
+    { label: "DeepSeek", href: "/#features" },
   ],
   resources: [
     { label: "FAQ", href: "/#faq" },
     { label: "What is AI Visibility?", href: "/#faq" },
-    { label: "Methodology", href: "/#methodology" },
     { label: "AI Search Optimization", href: "/#features" },
   ],
 };
