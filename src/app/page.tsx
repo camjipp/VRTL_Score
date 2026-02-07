@@ -63,7 +63,7 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════
           HERO SECTION
       ═══════════════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-bg">
+      <section className="relative overflow-hidden bg-white">
         <div className="container-xl pb-8 pt-12 sm:pb-10 sm:pt-16">
           <div className="mx-auto max-w-3xl text-center">
             {/* Logo + wordmark */}
@@ -127,7 +127,7 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════
           THE FUTURE OF SEARCH + FEATURE CARDS (Goodie-style)
       ═══════════════════════════════════════════════════════ */}
-      <section id="features" className="border-t border-border bg-surface py-20 md:py-28">
+      <section id="features" className="bg-white py-20 md:py-28">
         <div className="container-xl">
           {/* Section Header - Future of Search */}
           <div className="mb-16">
@@ -143,7 +143,7 @@ export default function HomePage() {
 
           <div className="grid gap-6 md:grid-cols-2">
             {/* Competitive Benchmarking */}
-            <div className="group rounded-3xl border border-border bg-white p-8 transition-all duration-300 hover:border-emerald-200 hover:shadow-xl">
+            <div className="group rounded-3xl border border-border bg-white p-8 shadow-sm transition-all duration-300 hover:border-emerald-200 hover:shadow-xl">
               {/* Visual */}
               <div className="mb-6 min-h-[200px] rounded-2xl bg-surface-2 p-6 ring-1 ring-border/60">
                 <div className="space-y-3">
@@ -178,7 +178,7 @@ export default function HomePage() {
             </div>
 
             {/* Performance Dashboard */}
-            <div className="group rounded-3xl border border-[#E5E5E5] bg-white p-8 transition-all duration-300 hover:border-emerald-200 hover:shadow-xl">
+            <div className="group rounded-3xl border border-border bg-white p-8 shadow-sm transition-all duration-300 hover:border-emerald-200 hover:shadow-xl">
               {/* Visual */}
               <div className="mb-6 min-h-[200px] rounded-2xl bg-surface-2 p-6 ring-1 ring-border/60">
                 <div className="flex items-center justify-between mb-4">
@@ -212,7 +212,7 @@ export default function HomePage() {
             </div>
 
             {/* Visibility Analysis */}
-            <div className="group rounded-3xl border border-[#E5E5E5] bg-white p-8 transition-all duration-300 hover:border-emerald-200 hover:shadow-xl">
+            <div className="group rounded-3xl border border-border bg-white p-8 shadow-sm transition-all duration-300 hover:border-emerald-200 hover:shadow-xl">
               {/* Visual */}
               <div className="mb-6 min-h-[200px] rounded-2xl bg-surface-2 p-6 ring-1 ring-border/60">
                 <div className="mb-3 text-xs uppercase tracking-wide text-text-3">AI Response Analysis</div>
@@ -247,7 +247,7 @@ export default function HomePage() {
             </div>
 
             {/* Sentiment Analysis */}
-            <div className="group rounded-3xl border border-[#E5E5E5] bg-white p-8 transition-all duration-300 hover:border-emerald-200 hover:shadow-xl">
+            <div className="group rounded-3xl border border-border bg-white p-8 shadow-sm transition-all duration-300 hover:border-emerald-200 hover:shadow-xl">
               {/* Visual */}
               <div className="mb-6 min-h-[200px] rounded-2xl bg-surface-2 p-6 ring-1 ring-border/60">
                 <div className="mb-3 text-xs uppercase tracking-wide text-text-3">Sentiment Breakdown</div>
@@ -276,7 +276,7 @@ export default function HomePage() {
                   </div>
                   
             {/* Optimization Hub */}
-            <div className="group rounded-3xl border border-[#E5E5E5] bg-white p-8 transition-all duration-300 hover:border-emerald-200 hover:shadow-xl">
+            <div className="group rounded-3xl border border-border bg-white p-8 shadow-sm transition-all duration-300 hover:border-emerald-200 hover:shadow-xl">
               {/* Visual */}
               <div className="mb-6 min-h-[200px] rounded-2xl bg-surface-2 p-6 ring-1 ring-border/60">
                 <div className="mb-3 text-xs uppercase tracking-wide text-text-3">Recommendations</div>
@@ -304,7 +304,7 @@ export default function HomePage() {
             </div>
 
             {/* Branded PDF Reports */}
-            <div className="group rounded-3xl border border-[#E5E5E5] bg-white p-8 transition-all duration-300 hover:border-emerald-200 hover:shadow-xl">
+            <div className="group rounded-3xl border border-border bg-white p-8 shadow-sm transition-all duration-300 hover:border-emerald-200 hover:shadow-xl">
               {/* Visual */}
               <div className="mb-6 flex min-h-[200px] items-center justify-center rounded-2xl bg-surface-2 p-6 ring-1 ring-border/60">
                 <div className="relative">
@@ -346,7 +346,7 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════
           FAQ (with Questions marquee)
       ═══════════════════════════════════════════════════════ */}
-      <section id="faq" className="border-t border-border bg-surface">
+      <section id="faq" className="border-t border-border bg-bg">
         {/* Questions Marquee */}
         <div className="overflow-hidden py-6 md:py-10">
           <div className="flex animate-marquee whitespace-nowrap">
@@ -400,7 +400,7 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════
           CTA SECTION
       ═══════════════════════════════════════════════════════ */}
-      <section className="bg-bg py-20 md:py-24">
+      <section className="bg-white py-20 md:py-24">
         <div className="container-xl">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-semibold tracking-tight text-text md:text-4xl">
