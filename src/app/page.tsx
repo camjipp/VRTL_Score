@@ -350,28 +350,7 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════
           AI MODELS
       ═══════════════════════════════════════════════════════ */}
-      <section id="models" className="border-t border-border bg-bg py-14 md:py-16">
-        <div className="container-xl">
-          <div className="mx-auto max-w-4xl text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-text-3">Models supported</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-text md:text-3xl">
-              Measure visibility across leading AI platforms
-            </h2>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              {AI_MODELS.map((m) => (
-                <span
-                  key={m.name}
-                  className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm text-text-2"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img alt={m.name} className="h-4 w-4" src={m.icon} />
-                  {m.name}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* (Removed) Models supported: redundant with hero */}
 
       {/* ═══════════════════════════════════════════════════════
           CTA SECTION
@@ -559,16 +538,47 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════
           METHODOLOGY (lightweight)
       ═══════════════════════════════════════════════════════ */}
-      <section id="methodology" className="border-t border-border bg-bg py-16">
+      <section id="methodology" className="border-t border-border bg-bg py-14">
         <div className="container-xl">
-          <div className="mx-auto max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-widest text-text-3">Methodology</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-text">Defensible by design</h2>
-            <p className="mt-4 text-lg leading-relaxed text-text-2">
-              VRTL Score runs standardized discovery scenarios across multiple AI models, then scores performance on
-              presence, positioning, and authority. Evidence is preserved so agencies can confidently present findings
-              to clients.
-            </p>
+          <div className="mx-auto max-w-5xl">
+            <div className="grid gap-8 rounded-3xl border border-border bg-surface p-8 md:grid-cols-12 md:items-center">
+              <div className="md:col-span-5">
+                <p className="text-sm font-semibold uppercase tracking-widest text-text-3">Defensible by design</p>
+                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-text md:text-3xl">
+                  Built to be client-proof.
+                </h2>
+                <p className="mt-3 text-base leading-relaxed text-text-2">
+                  Standardized discovery scenarios, consistent scoring, and preserved evidence—so agencies can explain
+                  the “why” behind every recommendation.
+                </p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 md:col-span-7">
+                <div className="rounded-2xl bg-white p-4 ring-1 ring-border/50">
+                  <div className="text-sm font-semibold text-text">Standardized snapshots</div>
+                  <div className="mt-1 text-sm text-text-2">
+                    The same scenarios run each time to measure change—not vibes.
+                  </div>
+                </div>
+                <div className="rounded-2xl bg-white p-4 ring-1 ring-border/50">
+                  <div className="text-sm font-semibold text-text">Evidence preserved</div>
+                  <div className="mt-1 text-sm text-text-2">
+                    Quotes, sources, and context saved for executive-ready proof.
+                  </div>
+                </div>
+                <div className="rounded-2xl bg-white p-4 ring-1 ring-border/50">
+                  <div className="text-sm font-semibold text-text">Actionable output</div>
+                  <div className="mt-1 text-sm text-text-2">
+                    Recommendations are prioritized with expected impact and consequences.
+                  </div>
+                </div>
+                <div className="rounded-2xl bg-white p-4 ring-1 ring-border/50">
+                  <div className="text-sm font-semibold text-text">Agency-ready reporting</div>
+                  <div className="mt-1 text-sm text-text-2">
+                    Shareable, branded PDFs designed to support renewal conversations.
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

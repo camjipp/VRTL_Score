@@ -5,8 +5,6 @@ import { useState } from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { cn } from "@/lib/cn";
 
 function normalizeWebsite(input: string): string {
   const raw = input.trim();
@@ -58,16 +56,16 @@ export function DomainSearchBar() {
   return (
     <form onSubmit={submit}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="flex flex-1 items-stretch overflow-hidden rounded-2xl border border-border bg-surface shadow-lift">
+        <div className="flex flex-1 items-stretch overflow-hidden rounded-2xl border border-border bg-surface shadow-lift transition focus-within:border-text/20 focus-within:ring-2 focus-within:ring-accent/30">
           <div className="flex min-w-0 flex-1 items-center px-5">
-            <Input
-              className={cn(
-                "h-12 w-full border-0 bg-transparent px-0 py-0 text-base placeholder:text-text-3 focus-visible:ring-0",
-                "sm:h-14"
-              )}
+            <input
+              className="h-12 w-full bg-transparent px-0 py-0 text-base text-text placeholder:text-text-3 outline-none sm:h-14"
               onChange={(e) => setValue(e.target.value)}
               placeholder="Enter website or URL"
               value={value}
+              inputMode="url"
+              autoComplete="url"
+              aria-label="Website"
             />
           </div>
           <div className="hidden w-px bg-border sm:block" />
@@ -83,7 +81,6 @@ export function DomainSearchBar() {
           </Alert>
         </div>
       ) : null}
-      <div className="mt-2 text-xs text-text-3">You’ll create an account next.</div>
     </form>
   );
 }

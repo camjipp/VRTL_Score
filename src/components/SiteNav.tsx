@@ -36,12 +36,12 @@ export function SiteNav() {
             />
           </Link>
 
-          {/* Desktop nav - centered */}
-          <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 rounded-full border border-border/50 bg-surface/80 px-2 py-1.5 shadow-sm backdrop-blur-sm md:flex">
+          {/* Desktop nav (standard layout) */}
+          <div className="hidden items-center gap-7 md:flex">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
-                className="rounded-full px-5 py-2 text-sm font-medium text-text-2 transition-all hover:bg-text/5 hover:text-text"
+                className="text-sm font-medium text-text-2 transition-colors hover:text-text"
                 href={link.href}
               >
                 {link.label}
@@ -61,7 +61,7 @@ export function SiteNav() {
               className="rounded-full bg-text px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-text/20 transition-all hover:bg-text/90 hover:shadow-xl hover:shadow-text/25"
               href="/onboarding"
             >
-              Get started
+              Sign up
             </Link>
           </div>
 
@@ -118,7 +118,7 @@ export function SiteNav() {
                 href="/onboarding"
                 onClick={() => setMobileOpen(false)}
               >
-                Get started
+                Sign up
               </Link>
             </div>
           </div>
