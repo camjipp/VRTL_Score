@@ -43,13 +43,12 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   AI MODELS LIST
+   AI MODEL ICONS (hero credibility strip)
 ───────────────────────────────────────────────────────────────*/
-const AI_MODELS = [
-  { name: "ChatGPT", icon: "/ai/icons8-chatgpt.svg" },
-  { name: "Google", icon: "/ai/icons8-google-48.svg" },
-  { name: "Gemini", icon: "/ai/gemini.png" },
-  { name: "Claude", icon: "/ai/icons8-claude.svg" },
+const AI_PROVIDERS = [
+  { name: "OpenAI", icon: "/ai/icons8-chatgpt.svg" },
+  { name: "Anthropic", icon: "/ai/icons8-claude.svg" },
+  { name: "Google", icon: "/ai/gemini.png" },
   { name: "Perplexity", icon: "/ai/perplexity.svg" },
   { name: "DeepSeek", icon: "/ai/deepseek.svg" },
 ];
@@ -61,10 +60,10 @@ export default function HomePage() {
   return (
     <main className="bg-bg">
       {/* ═══════════════════════════════════════════════════════
-          HERO SECTION
+          HERO
       ═══════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden bg-white">
-        <div className="container-xl pb-8 pt-12 sm:pb-10 sm:pt-16">
+        <div className="container-xl pb-10 pt-14 sm:pb-14 sm:pt-20">
           <div className="mx-auto max-w-3xl text-center">
             {/* Logo + wordmark */}
             <div className="flex items-end justify-center gap-0">
@@ -81,43 +80,46 @@ export default function HomePage() {
               </span>
             </div>
 
-            {/* Tagline + AI icons */}
-            <div className="mx-auto mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
-              <span className="text-xl font-bold text-text sm:text-2xl">
-                AI visibility, measured.
+            {/* Tagline — Option C (tension) */}
+            <h1 className="mx-auto mt-6 max-w-2xl text-2xl font-bold leading-snug text-text sm:text-3xl">
+              Your clients are being ranked by AI.
+              <br />
+              <span className="text-emerald-600">We measure it.</span>
+            </h1>
+
+            {/* Credibility stat */}
+            <p className="mx-auto mt-4 max-w-xl text-sm text-text-3">
+              Gartner predicts traditional search volume will drop 25% by 2026 due to AI chatbots and virtual agents.
+            </p>
+
+            {/* Credibility strip — providers */}
+            <div className="mx-auto mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-text-3">
+                Tracking visibility across
               </span>
-              <div className="flex items-center">
-                {AI_MODELS.slice(0, 4).map((model, i) => (
-                  <span
-                    key={model.name}
-                    className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface -ml-2 first:ml-0"
-                    style={{ zIndex: 4 - i }}
-                  >
+              <div className="flex items-center gap-3">
+                {AI_PROVIDERS.map((p) => (
+                  <span key={p.name} className="flex items-center gap-1.5 text-xs font-medium text-text-2">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt={model.name} className="h-4 w-4" src={model.icon} />
+                    <img alt={p.name} className="h-4 w-4" src={p.icon} />
+                    {p.name}
                   </span>
                 ))}
-                <span className="ml-2 text-sm text-text-3">& more</span>
               </div>
             </div>
 
-            {/* Value prop subtitle */}
-            <p className="mx-auto mt-3 max-w-xl text-base text-text-2 leading-relaxed sm:text-lg">
-              Track and improve how AI recommends your clients.
-            </p>
-
             {/* Search bar */}
-            <div className="mx-auto mt-8 max-w-xl">
+            <div className="mx-auto mt-9 max-w-xl">
               <DomainSearchBar />
             </div>
 
             {/* CTA */}
-            <div className="mt-6 flex items-center justify-center">
+            <div className="mt-5 flex items-center justify-center">
               <Link
                 href="/onboarding"
                 className="rounded-full bg-text px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-text/10 transition-all hover:bg-text/90 hover:scale-[1.02]"
               >
-                Get Started
+                Sign up
               </Link>
             </div>
           </div>
@@ -125,33 +127,73 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          THE FUTURE OF SEARCH + FEATURE CARDS (Goodie-style)
+          THE SHIFT — narrative arc (Shift → Problem → Solution)
       ═══════════════════════════════════════════════════════ */}
-      <section id="features" className="bg-white py-20 md:py-28">
+      <section className="border-t border-border bg-bg py-20 md:py-28">
         <div className="container-xl">
-          {/* Section Header - Future of Search */}
-          <div className="mb-16">
-            <p className="text-sm font-semibold uppercase tracking-widest text-text-3">How it Works</p>
-            <h2 className="mt-4 text-4xl font-semibold leading-[1.1] tracking-tight text-text md:text-5xl lg:text-6xl">
-              AI is the new search.<br />
-              Own it.
+          {/* Part 1: The Shift */}
+          <div className="mx-auto max-w-4xl text-center">
+            <p className="text-sm font-semibold uppercase tracking-widest text-text-3">The shift</p>
+            <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-tight text-text md:text-4xl lg:text-5xl">
+              Search is becoming AI.
             </h2>
-            <p className="mt-8 max-w-3xl text-xl leading-relaxed text-text-2">
-              Billions use AI daily to make buying decisions. VRTL Score shows you exactly how LLMs talk about your clients—and gives you the tools to improve it.
+            <div className="mx-auto mt-10 grid max-w-3xl gap-6 sm:grid-cols-3">
+              {[
+                { before: "Search engines", after: "AI answer engines", icon: "🔍 →" },
+                { before: "Blue-link rankings", after: "AI recommendations", icon: "📊 →" },
+                { before: "Click-through rates", after: "Brand mentions", icon: "🖱 →" },
+              ].map((item) => (
+                <div key={item.before} className="rounded-2xl border border-border bg-white p-5 text-center">
+                  <div className="text-2xl">{item.icon}</div>
+                  <div className="mt-3 text-sm text-text-3 line-through decoration-text-3/40">{item.before}</div>
+                  <div className="mt-1 text-base font-semibold text-text">{item.after}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Part 2: The Problem */}
+          <div className="mx-auto mt-20 max-w-3xl text-center">
+            <h3 className="text-2xl font-semibold tracking-tight text-text md:text-3xl">
+              Most agencies have no idea how their clients show up in AI.
+            </h3>
+            <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-text-2">
+              When a prospect asks ChatGPT for a recommendation, does your client appear? In what position? With what context? Today, most agencies are guessing.
             </p>
+          </div>
+
+          {/* Part 3: The Solution */}
+          <div className="mx-auto mt-20 max-w-3xl text-center">
+            <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600">The solution</p>
+            <h3 className="mt-3 text-2xl font-semibold tracking-tight text-text md:text-3xl">
+              VRTL Score gives you a defensible, repeatable way to measure AI visibility—and prove improvement over time.
+            </h3>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          FEATURES — what it actually does
+      ═══════════════════════════════════════════════════════ */}
+      <section id="features" className="border-t border-border bg-white py-20 md:py-28">
+        <div className="container-xl">
+          <div className="mb-14 max-w-2xl">
+            <p className="text-sm font-semibold uppercase tracking-widest text-text-3">What you get</p>
+            <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-tight text-text md:text-4xl">
+              Everything agencies need to own the AI channel.
+            </h2>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
             {/* Competitive Benchmarking */}
             <div className="group rounded-3xl border border-border bg-white p-8 shadow-sm transition-all duration-300 hover:border-emerald-200 hover:shadow-xl">
-              {/* Visual */}
               <div className="mb-6 min-h-[200px] rounded-2xl bg-surface-2 p-6 ring-1 ring-border/60">
                 <div className="space-y-3">
                   {[
-                    { name: "Your Client", score: 85, rank: 1, color: "bg-emerald-500" },
-                    { name: "Competitor A", score: 72, rank: 2, color: "bg-text" },
-                    { name: "Competitor B", score: 68, rank: 3, color: "bg-text" },
-                    { name: "Competitor C", score: 54, rank: 4, color: "bg-text" },
+                    { name: "Your Client", score: 85, rank: 1 },
+                    { name: "Competitor A", score: 72, rank: 2 },
+                    { name: "Competitor B", score: 68, rank: 3 },
+                    { name: "Competitor C", score: 54, rank: 4 },
                   ].map((item) => (
                     <div key={item.name} className="flex items-center gap-3">
                       <span
@@ -163,7 +205,10 @@ export default function HomePage() {
                       </span>
                       <span className="w-24 truncate text-sm font-medium text-text">{item.name}</span>
                       <div className="h-3 flex-1 overflow-hidden rounded-full bg-white shadow-inner ring-1 ring-border/50">
-                        <div className={`h-full ${item.color} rounded-full transition-all`} style={{ width: `${item.score}%` }} />
+                        <div
+                          className={`h-full rounded-full transition-all ${item.rank === 1 ? "bg-emerald-500" : "bg-text"}`}
+                          style={{ width: `${item.score}%` }}
+                        />
                       </div>
                       <span className="w-8 text-sm font-bold text-text">{item.score}</span>
                     </div>
@@ -172,19 +217,17 @@ export default function HomePage() {
               </div>
               <h3 className="text-2xl font-semibold text-text">Competitive Benchmarking</h3>
               <p className="mt-3 leading-relaxed text-text-2">
-                Compare your client&apos;s performance against competitors and stay ahead with real-time analytics. See
-                exactly where they rank across ChatGPT, Claude, Gemini, and emerging AI platforms.
+                See exactly where your client ranks against competitors across every major AI platform—scored, ranked, and tracked over time.
               </p>
             </div>
 
             {/* Performance Dashboard */}
             <div className="group rounded-3xl border border-border bg-white p-8 shadow-sm transition-all duration-300 hover:border-emerald-200 hover:shadow-xl">
-              {/* Visual */}
               <div className="mb-6 min-h-[200px] rounded-2xl bg-surface-2 p-6 ring-1 ring-border/60">
                 <div className="flex items-center justify-between mb-4">
-                    <div>
+                  <div>
                     <div className="text-xs uppercase tracking-wide text-text-3">AI Visibility Score</div>
-                      <div className="text-4xl font-bold text-text">78</div>
+                    <div className="text-4xl font-bold text-text">78</div>
                   </div>
                   <div className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-emerald-500 bg-white">
                     <span className="text-lg font-bold text-emerald-600">B+</span>
@@ -204,16 +247,14 @@ export default function HomePage() {
                   ))}
                 </div>
               </div>
-              <h3 className="text-2xl font-semibold text-text">Performance Dashboard</h3>
+              <h3 className="text-2xl font-semibold text-text">AI Visibility Score</h3>
               <p className="mt-3 leading-relaxed text-text-2">
-                Gain real-time insights into your client&apos;s visibility across AI Answer Engines like ChatGPT and
-                Google Gemini. Track trends, monitor progress, and visualize growth over time.
+                One score that captures mention rate, positioning, and citation quality across every AI model. Track trends and prove progress month over month.
               </p>
             </div>
 
             {/* Visibility Analysis */}
             <div className="group rounded-3xl border border-border bg-white p-8 shadow-sm transition-all duration-300 hover:border-emerald-200 hover:shadow-xl">
-              {/* Visual */}
               <div className="mb-6 min-h-[200px] rounded-2xl bg-surface-2 p-6 ring-1 ring-border/60">
                 <div className="mb-3 text-xs uppercase tracking-wide text-text-3">AI Response Analysis</div>
                 <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-border/40">
@@ -235,53 +276,25 @@ export default function HomePage() {
                     Mentioned
                   </span>
                   <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-1 text-xs font-medium text-blue-700">
-                    Recommended
+                    Top position
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700">
+                    Cited
                   </span>
                 </div>
               </div>
-              <h3 className="text-2xl font-semibold text-text">Visibility Analysis</h3>
+              <h3 className="text-2xl font-semibold text-text">Evidence Capture</h3>
               <p className="mt-3 leading-relaxed text-text-2">
-                Understand where your client stands in the AI ecosystem and enhance their presence on emerging
-                platforms. Every mention captured with full context, citations, and evidence.
+                Every mention preserved with full context—position, citation, competitors named, and the actual AI response. Proof your clients can see and trust.
               </p>
             </div>
 
-            {/* Sentiment Analysis */}
+            {/* Actionable Recommendations */}
             <div className="group rounded-3xl border border-border bg-white p-8 shadow-sm transition-all duration-300 hover:border-emerald-200 hover:shadow-xl">
-              {/* Visual */}
-              <div className="mb-6 min-h-[200px] rounded-2xl bg-surface-2 p-6 ring-1 ring-border/60">
-                <div className="mb-3 text-xs uppercase tracking-wide text-text-3">Sentiment Breakdown</div>
-                <div className="space-y-3">
-                  {[
-                    { label: "Positive", value: 72, dot: "bg-emerald-500" },
-                    { label: "Neutral", value: 23, dot: "bg-slate-400" },
-                    { label: "Negative", value: 5, dot: "bg-red-500" },
-                  ].map((row) => (
-                    <div key={row.label} className="flex items-center gap-3">
-                      <span className={`h-2.5 w-2.5 rounded-full ${row.dot}`} />
-                      <div className="w-16 text-sm font-medium text-text">{row.label}</div>
-                      <div className="h-2 flex-1 overflow-hidden rounded-full bg-white ring-1 ring-border/50">
-                        <div className="h-full rounded-full bg-text" style={{ width: `${row.value}%` }} />
-                      </div>
-                      <div className="w-10 text-right text-sm font-semibold text-text">{row.value}%</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <h3 className="text-2xl font-semibold text-text">Sentiment Analysis</h3>
-              <p className="mt-3 leading-relaxed text-text-2">
-                Monitor and improve how your client is perceived in AI-generated responses. Track positive, neutral,
-                and negative sentiment trends to protect and enhance brand reputation.
-              </p>
-                  </div>
-                  
-            {/* Optimization Hub */}
-            <div className="group rounded-3xl border border-border bg-white p-8 shadow-sm transition-all duration-300 hover:border-emerald-200 hover:shadow-xl">
-              {/* Visual */}
               <div className="mb-6 min-h-[200px] rounded-2xl bg-surface-2 p-6 ring-1 ring-border/60">
                 <div className="mb-3 text-xs uppercase tracking-wide text-text-3">Recommendations</div>
-                  <div className="space-y-2">
-                    {[
+                <div className="space-y-2">
+                  {[
                     { priority: "High", text: "Add structured data markup to service pages", impact: "+12 pts" },
                     { priority: "Med", text: "Improve expertise signals in About section", impact: "+8 pts" },
                     { priority: "Med", text: "Create FAQ content for common queries", impact: "+6 pts" },
@@ -292,59 +305,212 @@ export default function HomePage() {
                       </span>
                       <span className="flex-1 truncate text-sm text-text">{rec.text}</span>
                       <span className="shrink-0 text-sm font-bold text-emerald-600">{rec.impact}</span>
-                      </div>
-                    ))}
+                    </div>
+                  ))}
                 </div>
               </div>
-              <h3 className="text-2xl font-semibold text-text">Optimization Hub</h3>
+              <h3 className="text-2xl font-semibold text-text">Actionable Recommendations</h3>
               <p className="mt-3 leading-relaxed text-text-2">
-                Identify opportunities and get actionable recommendations to take control of your client&apos;s AI
-                narrative. Know exactly what to fix and why it matters—prioritized by impact.
+                Prioritized actions with expected point impact. Know exactly what to fix, why it matters, and what happens if you don&apos;t.
               </p>
             </div>
 
-            {/* Branded PDF Reports */}
-            <div className="group rounded-3xl border border-border bg-white p-8 shadow-sm transition-all duration-300 hover:border-emerald-200 hover:shadow-xl">
-              {/* Visual */}
-              <div className="mb-6 flex min-h-[200px] items-center justify-center rounded-2xl bg-surface-2 p-6 ring-1 ring-border/60">
-                <div className="relative">
-                  {/* PDF document mockup */}
-                  <div className="w-36 bg-white rounded-lg shadow-xl p-4 transform -rotate-3">
-                    <div className="h-3 w-16 bg-[#0A0A0A] rounded mb-3" />
-                    <div className="h-2 w-full bg-[#E5E5E5] rounded mb-2" />
-                    <div className="h-2 w-3/4 bg-[#E5E5E5] rounded mb-4" />
-                    <div className="h-12 w-full bg-emerald-100 rounded mb-3" />
-                    <div className="h-2 w-full bg-[#E5E5E5] rounded mb-2" />
-                    <div className="h-2 w-2/3 bg-[#E5E5E5] rounded" />
-                  </div>
-                  <div className="absolute -right-4 -bottom-2 w-32 bg-white rounded-lg shadow-xl p-4 transform rotate-6">
-                    <div className="h-3 w-12 bg-emerald-500 rounded mb-3" />
-                    <div className="h-2 w-full bg-[#E5E5E5] rounded mb-2" />
-                    <div className="h-8 w-full bg-[#F5F5F5] rounded mb-3" />
-                    <div className="h-2 w-full bg-[#E5E5E5] rounded mb-2" />
-                    <div className="h-2 w-1/2 bg-[#E5E5E5] rounded" />
+            {/* Branded PDF Reports — full width */}
+            <div className="group rounded-3xl border border-border bg-white p-8 shadow-sm transition-all duration-300 hover:border-emerald-200 hover:shadow-xl md:col-span-2">
+              <div className="flex flex-col items-center gap-8 md:flex-row">
+                <div className="flex min-h-[200px] items-center justify-center rounded-2xl bg-surface-2 p-8 ring-1 ring-border/60 md:w-1/2">
+                  <div className="relative">
+                    <div className="w-36 bg-white rounded-lg shadow-xl p-4 transform -rotate-3">
+                      <div className="h-3 w-16 bg-[#0A0A0A] rounded mb-3" />
+                      <div className="h-2 w-full bg-[#E5E5E5] rounded mb-2" />
+                      <div className="h-2 w-3/4 bg-[#E5E5E5] rounded mb-4" />
+                      <div className="h-12 w-full bg-emerald-100 rounded mb-3" />
+                      <div className="h-2 w-full bg-[#E5E5E5] rounded mb-2" />
+                      <div className="h-2 w-2/3 bg-[#E5E5E5] rounded" />
                     </div>
-                  {/* Download badge */}
-                  <div className="absolute -top-2 -right-2 h-10 w-10 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg">
-                    <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
+                    <div className="absolute -right-4 -bottom-2 w-32 bg-white rounded-lg shadow-xl p-4 transform rotate-6">
+                      <div className="h-3 w-12 bg-emerald-500 rounded mb-3" />
+                      <div className="h-2 w-full bg-[#E5E5E5] rounded mb-2" />
+                      <div className="h-8 w-full bg-[#F5F5F5] rounded mb-3" />
+                      <div className="h-2 w-full bg-[#E5E5E5] rounded mb-2" />
+                      <div className="h-2 w-1/2 bg-[#E5E5E5] rounded" />
+                    </div>
+                    <div className="absolute -top-2 -right-2 h-10 w-10 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg">
+                      <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
+                <div className="md:w-1/2">
+                  <h3 className="text-2xl font-semibold text-text">Client-Ready PDF Reports</h3>
+                  <p className="mt-3 leading-relaxed text-text-2">
+                    Executive-grade AI visibility reports with your agency branding. Score context, strategic recommendations, competitive landscape, and preserved evidence—designed to support client renewals and upsells.
+                  </p>
+                  <ul className="mt-4 space-y-2 text-sm text-text-2">
+                    <li className="flex items-center gap-2">
+                      <svg className="h-4 w-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                      White-label with your logo
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <svg className="h-4 w-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                      Generated in under 5 minutes
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <svg className="h-4 w-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                      Evidence-backed, not vibes
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <h3 className="text-2xl font-semibold text-text">Branded PDF Reports</h3>
-              <p className="mt-3 leading-relaxed text-text-2">
-                Generate polished, client-ready reports in seconds. Professional deliverables with your agency branding
-                that prove the value of your AI optimization work.
-              </p>
             </div>
           </div>
-
         </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          FAQ (with Questions marquee)
+          DASHBOARD PROOF — full-width, dark, dramatic
+      ═══════════════════════════════════════════════════════ */}
+      <section className="bg-[#0A0A0A] py-20 md:py-28">
+        <div className="container-xl">
+          <div className="mx-auto max-w-3xl text-center mb-12">
+            <p className="text-sm font-semibold uppercase tracking-widest text-white/40">Inside the platform</p>
+            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white md:text-4xl">
+              This is serious software.
+            </h2>
+          </div>
+
+          {/* Mock dashboard */}
+          <div className="mx-auto max-w-5xl rounded-2xl border border-white/10 bg-[#111] p-6 shadow-2xl md:p-8">
+            {/* Top bar */}
+            <div className="flex items-center justify-between border-b border-white/10 pb-5">
+              <div>
+                <div className="text-xs uppercase tracking-wide text-white/40">Client Overview</div>
+                <div className="mt-1 text-xl font-bold text-white">Acme Digital Agency</div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="rounded-lg bg-emerald-500/10 px-3 py-1.5">
+                  <span className="text-xs font-medium text-emerald-400">Score trending up</span>
+                </div>
+                <div className="rounded-lg bg-white/5 px-3 py-1.5">
+                  <span className="text-xs font-medium text-white/60">Last snapshot: 2 days ago</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Score + metrics row */}
+            <div className="mt-6 grid gap-6 md:grid-cols-4">
+              {/* Big score */}
+              <div className="flex flex-col items-center justify-center rounded-xl border border-white/10 bg-white/5 p-6">
+                <div className="text-5xl font-bold text-white">78</div>
+                <div className="mt-1 text-sm text-white/40">AI Visibility Score</div>
+                <div className="mt-2 flex items-center gap-1 text-sm font-medium text-emerald-400">
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  </svg>
+                  +6 vs last month
+                </div>
+              </div>
+
+              {/* Mini metrics */}
+              {[
+                { label: "Mention Rate", value: "72%", delta: "+8%" },
+                { label: "Top Position Rate", value: "45%", delta: "+12%" },
+                { label: "Citation Rate", value: "38%", delta: "+5%" },
+              ].map((m) => (
+                <div key={m.label} className="rounded-xl border border-white/10 bg-white/5 p-5">
+                  <div className="text-xs text-white/40">{m.label}</div>
+                  <div className="mt-2 text-2xl font-bold text-white">{m.value}</div>
+                  <div className="mt-1 text-xs font-medium text-emerald-400">{m.delta}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Model breakdown row */}
+            <div className="mt-6 grid gap-6 md:grid-cols-3">
+              {[
+                { model: "ChatGPT", score: 85, icon: "/ai/icons8-chatgpt.svg" },
+                { model: "Claude", score: 72, icon: "/ai/icons8-claude.svg" },
+                { model: "Gemini", score: 68, icon: "/ai/gemini.png" },
+              ].map((p) => (
+                <div key={p.model} className="rounded-xl border border-white/10 bg-white/5 p-5">
+                  <div className="flex items-center gap-2.5">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={p.icon} alt={p.model} className="h-5 w-5" />
+                    <span className="text-sm font-medium text-white">{p.model}</span>
+                    <span className="ml-auto text-lg font-bold text-white">{p.score}</span>
+                  </div>
+                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
+                    <div className="h-full rounded-full bg-emerald-500" style={{ width: `${p.score}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Trend chart mock */}
+            <div className="mt-6 rounded-xl border border-white/10 bg-white/5 p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="text-xs uppercase tracking-wide text-white/40">Score Trend</div>
+                <div className="text-xs text-white/30">Last 6 months</div>
+              </div>
+              <div className="flex items-end gap-2 h-24">
+                {[45, 52, 58, 62, 72, 78].map((v, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                    <div
+                      className="w-full rounded-t bg-emerald-500/80 transition-all"
+                      style={{ height: `${(v / 100) * 96}px` }}
+                    />
+                    <span className="text-[10px] text-white/30">{v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          TRUST STRIP — defensible by design
+      ═══════════════════════════════════════════════════════ */}
+      <section id="methodology" className="border-t border-border bg-bg py-14">
+        <div className="container-xl">
+          <div className="mx-auto max-w-5xl">
+            <div className="grid gap-8 rounded-3xl border border-border bg-surface p-8 md:grid-cols-12 md:items-center">
+              <div className="md:col-span-5">
+                <p className="text-sm font-semibold uppercase tracking-widest text-text-3">Defensible by design</p>
+                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-text md:text-3xl">
+                  Built to be client-proof.
+                </h2>
+                <p className="mt-3 text-base leading-relaxed text-text-2">
+                  Standardized discovery scenarios, consistent scoring, and preserved evidence—so agencies can explain
+                  the &quot;why&quot; behind every recommendation.
+                </p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 md:col-span-7">
+                <div className="rounded-2xl bg-white p-4 ring-1 ring-border/50">
+                  <div className="text-sm font-semibold text-text">Standardized snapshots</div>
+                  <div className="mt-1 text-sm text-text-2">The same scenarios run each time to measure change—not vibes.</div>
+                </div>
+                <div className="rounded-2xl bg-white p-4 ring-1 ring-border/50">
+                  <div className="text-sm font-semibold text-text">Evidence preserved</div>
+                  <div className="mt-1 text-sm text-text-2">Quotes, sources, and context saved for executive-ready proof.</div>
+                </div>
+                <div className="rounded-2xl bg-white p-4 ring-1 ring-border/50">
+                  <div className="text-sm font-semibold text-text">Actionable output</div>
+                  <div className="mt-1 text-sm text-text-2">Recommendations prioritized with expected impact and consequences.</div>
+                </div>
+                <div className="rounded-2xl bg-white p-4 ring-1 ring-border/50">
+                  <div className="text-sm font-semibold text-text">Agency-ready reporting</div>
+                  <div className="mt-1 text-sm text-text-2">Shareable, branded PDFs designed to support renewal conversations.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          FAQ
       ═══════════════════════════════════════════════════════ */}
       <section id="faq" className="border-t border-border bg-bg">
         {/* Questions Marquee */}
@@ -370,27 +536,27 @@ export default function HomePage() {
             <div>
               <FAQItem
                 question="What is AI visibility?"
-                answer="AI visibility is how often and how prominently a brand appears in AI-generated responses. When someone asks ChatGPT, Claude, or Gemini for a recommendation in your industry, does your client show up? That's AI visibility."
+                answer="AI visibility is how often—and how prominently—a brand appears when someone asks ChatGPT, Claude, Gemini, or other AI answer engines for a recommendation. It's the new version of 'do we rank on page one?'"
               />
               <FAQItem
-                question="How does VRTL Score work?"
-                answer="We query leading AI models with standardized, industry-specific prompts, analyze the responses to see if and how your client is mentioned, then calculate a visibility score based on frequency, prominence, and sentiment."
+                question="How does VRTL Score measure it?"
+                answer="We run standardized discovery scenarios across multiple AI models, analyze where and how your client is mentioned, then produce a composite visibility score based on mention rate, positioning, and citation quality. Every data point is preserved as evidence."
               />
               <FAQItem
-                question="What AI models do you support?"
-                answer="We currently support ChatGPT (OpenAI), Claude (Anthropic), and Gemini (Google). We're constantly adding new models as they become relevant for AI search."
+                question="What AI models do you track?"
+                answer="Currently ChatGPT (OpenAI), Claude (Anthropic), and Gemini (Google)—with Perplexity and others being added. We expand coverage as new AI answer engines gain user share."
               />
               <FAQItem
-                question="How accurate are the scores?"
-                answer="Scores are based on real AI responses at the time of the snapshot. AI outputs can vary, which is why we recommend monthly snapshots to track trends over time rather than focusing on any single score."
+                question="How is the score calculated?"
+                answer="The score combines three dimensions: how often your client is mentioned (mention rate), where they appear in the response (top, middle, or bottom), and whether they're cited with sources. Results are normalized across models into a single executive-ready number."
               />
               <FAQItem
                 question="Can I white-label the reports?"
-                answer="Yes. PDF reports include your agency branding. Add your logo and customize the look to match your brand."
+                answer="Yes. PDF reports include your agency logo and branding. They're designed to be handed directly to clients as a professional deliverable—supporting renewals, upsells, and new business pitches."
               />
               <FAQItem
                 question="Is there a free trial?"
-                answer="Yes, we offer a 7-day free trial so you can test VRTL Score with your own clients before committing."
+                answer="Yes. Start with a 7-day free trial—run snapshots on real clients and see the platform in action before committing."
               />
             </div>
           </div>
@@ -398,23 +564,22 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          CTA SECTION
+          FINAL CTA
       ═══════════════════════════════════════════════════════ */}
       <section className="bg-white py-20 md:py-24">
         <div className="container-xl">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-semibold tracking-tight text-text md:text-4xl">
-              Ready to see how AI talks about your clients?
+              Your clients are already being ranked.
+              <br />
+              <span className="text-emerald-600">Find out where they stand.</span>
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-lg text-text-2">
-              Get your first AI visibility report in minutes.
-            </p>
             <div className="mt-8">
               <Link
                 href="/onboarding"
                 className="inline-flex h-12 items-center justify-center rounded-full bg-text px-10 text-base font-semibold text-white shadow-lg shadow-text/10 transition-all hover:bg-text/90 hover:scale-[1.02]"
               >
-                Get Started
+                Sign up
               </Link>
             </div>
           </div>

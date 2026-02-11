@@ -65,8 +65,8 @@ export function DomainSearchBar() {
           autoComplete="url"
           aria-label="Website"
         />
-        <Button className="absolute right-1.5 h-9 rounded-full px-5 text-sm font-medium sm:h-11 sm:px-6" type="submit" variant="primary">
-          Get insights
+        <Button className="absolute right-1.5 h-9 rounded-full px-5 text-sm font-semibold sm:h-11 sm:px-6" type="submit" variant="primary">
+          Run free snapshot
         </Button>
       </div>
       {error ? (
