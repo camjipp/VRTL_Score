@@ -1,7 +1,7 @@
 export type Provider = "openai" | "anthropic" | "gemini";
 
 function getAnthropicKey(): string | undefined {
-  return process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_KEY;
+  return process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_KEY || process.env.CLAUDE_API_KEY;
 }
 
 export function getEnabledProviders(): Provider[] {
