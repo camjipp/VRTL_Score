@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { ensureOnboarded } from "@/lib/onboard";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -20,7 +20,7 @@ type ClientWithStats = {
   snapshotCount: number;
   recentScores: number[]; // Last 5 scores for sparkline
   status: "running" | "complete" | "none";
-  // New detailed stats
+  // Detailed stats
   mentionRate: number | null;
   topPositionRate: number | null;
   citationRate: number | null;
@@ -34,11 +34,14 @@ type ClientWithStats = {
 type PortfolioStats = {
   totalClients: number;
   avgScore: number;
+  avgScoreDelta: number | null;
   snapshotsThisMonth: number;
   clientsWithAlerts: number;
   strongClients: number;
   moderateClients: number;
   weakClients: number;
+  improvingClients: number;
+  decliningClients: number;
 };
 
 type SnapshotDetailResponse = {
@@ -76,27 +79,68 @@ function timeAgo(dateStr: string): string {
 
 function getHealthLabel(score: number | null): { label: string; color: string; bg: string } {
   if (score === null) return { label: "No data", color: "text-text-3", bg: "bg-surface-2" };
-  if (score >= 70) return { label: "Strong", color: "text-emerald-600", bg: "bg-emerald-50" };
-  if (score >= 40) return { label: "Moderate", color: "text-amber-600", bg: "bg-amber-50" };
-  return { label: "Weak", color: "text-red-600", bg: "bg-red-50" };
+  if (score >= 70) return { label: "Strong", color: "text-emerald-700", bg: "bg-emerald-50" };
+  if (score >= 40) return { label: "Moderate", color: "text-amber-700", bg: "bg-amber-50" };
+  return { label: "Weak", color: "text-red-700", bg: "bg-red-50" };
+}
+
+function getMomentumLabel(delta: number | null): { label: string; color: string; icon: "up" | "down" | "flat" } {
+  if (delta === null) return { label: "New", color: "text-text-3", icon: "flat" };
+  if (delta > 0) return { label: "Improving", color: "text-emerald-600", icon: "up" };
+  if (delta < 0) return { label: "Declining", color: "text-red-600", icon: "down" };
+  return { label: "Stable", color: "text-text-3", icon: "flat" };
+}
+
+// Generate an actionable signal for a client card
+function getActionSignal(client: ClientWithStats): { text: string; color: string } | null {
+  const delta = client.latestScore !== null && client.previousScore !== null
+    ? client.latestScore - client.previousScore
+    : null;
+
+  // Score dropped significantly
+  if (delta !== null && delta <= -5) {
+    return { text: `Score dropped ${Math.abs(delta)} pts`, color: "text-red-600" };
+  }
+
+  // Competitor ahead
+  if (client.competitorRank !== null && client.competitorRank > 1) {
+    return { text: `Ranked #${client.competitorRank} — competitor ahead`, color: "text-amber-600" };
+  }
+
+  // Low mention rate
+  if (client.mentionRate !== null && client.mentionRate < 40) {
+    return { text: "Low mention rate — visibility at risk", color: "text-amber-600" };
+  }
+
+  // Weak on a model
+  if (client.worstModel && client.bestModel && client.worstModel !== client.bestModel) {
+    return { text: `Weak on ${client.worstModel}`, color: "text-amber-600" };
+  }
+
+  // Gaining ground
+  if (delta !== null && delta >= 5) {
+    return { text: `Gained ${delta} pts — momentum building`, color: "text-emerald-600" };
+  }
+
+  return null;
 }
 
 // Mini sparkline component
 function Sparkline({ data, color = "#10b981" }: { data: number[]; color?: string }) {
   if (data.length < 2) return null;
-  
+
   const max = Math.max(...data, 100);
   const min = Math.min(...data, 0);
   const range = max - min || 1;
   const height = 32;
   const width = 80;
-  
+
   const points = data.map((val, i) => {
     const x = (i / (data.length - 1)) * width;
     const y = height - ((val - min) / range) * height;
     return `${x},${y}`;
   }).join(" ");
-  
+
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className="h-8 w-20">
       <polyline
@@ -111,50 +155,199 @@ function Sparkline({ data, color = "#10b981" }: { data: number[]; color?: string
   );
 }
 
-// Portfolio Summary
-function PortfolioSummary({ stats }: { stats: PortfolioStats }) {
+// Portfolio-level average score trend chart
+function PortfolioTrendChart({ clients }: { clients: ClientWithStats[] }) {
+  // Collect all recent scores across clients (up to 5 time periods)
+  const maxPeriods = 5;
+  const avgByPeriod: number[] = [];
+
+  for (let i = 0; i < maxPeriods; i++) {
+    const scores = clients
+      .filter(c => c.recentScores.length > i)
+      .map(c => c.recentScores[i]);
+    if (scores.length > 0) {
+      avgByPeriod.push(Math.round(scores.reduce((a, b) => a + b, 0) / scores.length));
+    }
+  }
+
+  if (avgByPeriod.length < 2) return null;
+
+  const max = Math.max(...avgByPeriod, 100);
+  const min = Math.min(...avgByPeriod, 0);
+  const range = max - min || 1;
+  const chartH = 120;
+  const chartW = 400;
+  const padding = 8;
+  const usableW = chartW - padding * 2;
+  const usableH = chartH - padding * 2;
+
+  const linePoints = avgByPeriod.map((val, i) => {
+    const x = padding + (i / (avgByPeriod.length - 1)) * usableW;
+    const y = padding + usableH - ((val - min) / range) * usableH;
+    return { x, y, val };
+  });
+
+  const polyline = linePoints.map(p => `${p.x},${p.y}`).join(" ");
+
+  // Gradient fill area
+  const areaPath = `M${linePoints[0].x},${chartH - padding} L${polyline.replace(/,/g, " L")} L${linePoints[linePoints.length - 1].x},${chartH - padding} Z`;
+
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <div className="rounded-xl border border-border bg-white p-4">
-        <div className="text-xs font-medium uppercase tracking-wide text-text-3">Total Clients</div>
-        <div className="mt-2 text-3xl font-bold text-text">{stats.totalClients}</div>
-        <div className="mt-2 flex gap-2 text-xs">
-          <span className="text-emerald-600">{stats.strongClients} strong</span>
-          <span className="text-text-3">·</span>
-          <span className="text-amber-600">{stats.moderateClients} moderate</span>
-          <span className="text-text-3">·</span>
-          <span className="text-red-600">{stats.weakClients} weak</span>
-        </div>
+    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-xs font-medium uppercase tracking-wide text-text-3">Portfolio Visibility Trend</div>
+        <div className="text-xs text-text-3">Last {avgByPeriod.length} snapshots</div>
+      </div>
+      <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full h-28">
+        <defs>
+          <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#10b981" stopOpacity="0.2" />
+            <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <path d={areaPath} fill="url(#trendFill)" />
+        <polyline
+          points={polyline}
+          fill="none"
+          stroke="#10b981"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        {linePoints.map((p, i) => (
+          <g key={i}>
+            <circle cx={p.x} cy={p.y} r="4" fill="#0a0a0a" stroke="#10b981" strokeWidth="2" />
+            <text
+              x={p.x}
+              y={p.y - 10}
+              textAnchor="middle"
+              className="fill-current text-text-2"
+              fontSize="11"
+              fontWeight="600"
+            >
+              {p.val}
+            </text>
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+// AI Visibility Overview (replaces PortfolioSummary)
+function VisibilityOverview({ stats, clients }: { stats: PortfolioStats; clients: ClientWithStats[] }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-text">AI Visibility Overview</h2>
+        <span className="text-xs text-text-3">{stats.totalClients} client{stats.totalClients !== 1 ? "s" : ""} tracked</span>
       </div>
 
-      <div className="rounded-xl border border-border bg-white p-4">
-        <div className="text-xs font-medium uppercase tracking-wide text-text-3">Avg AI Score</div>
-        <div className="mt-2 flex items-baseline gap-2">
-          <span className="text-3xl font-bold text-text">{stats.avgScore}</span>
-          <span className="text-sm text-text-3">/ 100</span>
+      <div className="grid gap-4 lg:grid-cols-12">
+        {/* Lead card: AI Visibility Health */}
+        <div className="rounded-xl border border-border bg-white p-5 shadow-sm lg:col-span-4">
+          <div className="text-xs font-medium uppercase tracking-wide text-text-3">AI Visibility Health</div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className={cn(
+              "text-5xl font-bold tabular-nums",
+              stats.avgScore >= 70 ? "text-emerald-600" : stats.avgScore >= 40 ? "text-amber-600" : "text-red-600"
+            )}>
+              {stats.avgScore}
+            </span>
+            <span className="text-lg text-text-3">/ 100</span>
+          </div>
+          {stats.avgScoreDelta !== null && (
+            <div className="mt-2 flex items-center gap-1.5">
+              <svg
+                className={cn(
+                  "h-3.5 w-3.5",
+                  stats.avgScoreDelta > 0 ? "text-emerald-500" : stats.avgScoreDelta < 0 ? "text-red-500 rotate-180" : "text-text-3"
+                )}
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+              </svg>
+              <span className={cn(
+                "text-sm font-semibold",
+                stats.avgScoreDelta > 0 ? "text-emerald-600" : stats.avgScoreDelta < 0 ? "text-red-600" : "text-text-3"
+              )}>
+                {stats.avgScoreDelta > 0 ? "+" : ""}{stats.avgScoreDelta} vs last snapshot
+              </span>
+            </div>
+          )}
+          <div className="mt-3 flex items-center gap-3 text-xs">
+            <span className="flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="text-text-2">{stats.improvingClients} improving</span>
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full bg-red-500" />
+              <span className="text-text-2">{stats.decliningClients} declining</span>
+            </span>
+          </div>
+          <div className="mt-3 h-2 rounded-full bg-surface-2">
+            <div
+              className={cn(
+                "h-2 rounded-full transition-all",
+                stats.avgScore >= 70 ? "bg-emerald-500" : stats.avgScore >= 40 ? "bg-amber-500" : "bg-red-500"
+              )}
+              style={{ width: `${stats.avgScore}%` }}
+            />
+          </div>
         </div>
-        <div className="mt-2 h-1.5 rounded-full bg-surface-2">
-          <div 
-            className={cn(
-              "h-1.5 rounded-full",
-              stats.avgScore >= 70 ? "bg-emerald-500" : stats.avgScore >= 40 ? "bg-amber-500" : "bg-red-500"
-            )}
-            style={{ width: `${stats.avgScore}%` }}
-          />
+
+        {/* Secondary metrics */}
+        <div className="grid gap-4 sm:grid-cols-3 lg:col-span-5">
+          <div className="rounded-xl border border-border bg-white p-4 shadow-sm">
+            <div className="text-xs font-medium uppercase tracking-wide text-text-3">Health Breakdown</div>
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                  <span className="text-sm text-text">Strong</span>
+                </div>
+                <span className="text-sm font-bold text-text">{stats.strongClients}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+                  <span className="text-sm text-text">Moderate</span>
+                </div>
+                <span className="text-sm font-bold text-text">{stats.moderateClients}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
+                  <span className="text-sm text-text">Weak</span>
+                </div>
+                <span className="text-sm font-bold text-text">{stats.weakClients}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-border bg-white p-4 shadow-sm">
+            <div className="text-xs font-medium uppercase tracking-wide text-text-3">Snapshots</div>
+            <div className="mt-3 text-3xl font-bold text-text">{stats.snapshotsThisMonth}</div>
+            <div className="mt-1 text-xs text-text-2">This month</div>
+          </div>
+
+          <div className="rounded-xl border border-border bg-white p-4 shadow-sm">
+            <div className="text-xs font-medium uppercase tracking-wide text-text-3">Alerts</div>
+            <div className={cn(
+              "mt-3 text-3xl font-bold",
+              stats.clientsWithAlerts > 0 ? "text-red-600" : "text-emerald-600"
+            )}>
+              {stats.clientsWithAlerts}
+            </div>
+            <div className="mt-1 text-xs text-text-2">
+              {stats.clientsWithAlerts > 0 ? "Need attention" : "All healthy"}
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div className="rounded-xl border border-border bg-white p-4">
-        <div className="text-xs font-medium uppercase tracking-wide text-text-3">Snapshots This Month</div>
-        <div className="mt-2 text-3xl font-bold text-text">{stats.snapshotsThisMonth}</div>
-        <div className="mt-2 text-xs text-text-2">Across all clients</div>
-      </div>
-
-      <div className="rounded-xl border border-border bg-white p-4">
-        <div className="text-xs font-medium uppercase tracking-wide text-text-3">Alerts</div>
-        <div className="mt-2 text-3xl font-bold text-text">{stats.clientsWithAlerts}</div>
-        <div className="mt-2 text-xs text-text-2">
-          {stats.clientsWithAlerts > 0 ? "Clients need attention" : "All clients healthy"}
+        {/* Trend chart */}
+        <div className="lg:col-span-3">
+          <PortfolioTrendChart clients={clients} />
         </div>
       </div>
     </div>
@@ -171,40 +364,32 @@ function StatusDot({ score, status }: { score: number | null; status: string }) 
       </span>
     );
   }
-  
-  if (score === null) {
-    return <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />;
-  }
-  
-  if (score >= 70) {
-    return <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />;
-  }
-  
-  if (score >= 40) {
-    return <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />;
-  }
-  
+  if (score === null) return <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />;
+  if (score >= 70) return <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />;
+  if (score >= 40) return <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />;
   return <span className="h-2.5 w-2.5 rounded-full bg-red-500" />;
 }
 
-// Dense client card
+// Dense client card (upgraded with narrative)
 function DenseClientCard({ client }: { client: ClientWithStats }) {
-  const delta = client.latestScore !== null && client.previousScore !== null 
-    ? client.latestScore - client.previousScore 
+  const delta = client.latestScore !== null && client.previousScore !== null
+    ? client.latestScore - client.previousScore
     : null;
-  
+
   const health = getHealthLabel(client.latestScore);
-  
-  const sparklineColor = client.latestScore !== null && client.latestScore >= 70 
-    ? "#10b981" 
-    : client.latestScore !== null && client.latestScore >= 40 
-      ? "#f59e0b" 
+  const momentum = getMomentumLabel(delta);
+  const signal = getActionSignal(client);
+
+  const sparklineColor = client.latestScore !== null && client.latestScore >= 70
+    ? "#10b981"
+    : client.latestScore !== null && client.latestScore >= 40
+      ? "#f59e0b"
       : "#ef4444";
 
   return (
     <Link
       href={`/app/clients/${client.id}`}
-      className="group rounded-xl border border-border bg-white p-5 transition-all hover:border-text/20 hover:shadow-lg"
+      className="group rounded-xl border border-border bg-white p-5 shadow-sm transition-all hover:border-text/20 hover:shadow-lg"
     >
       {/* Header */}
       <div className="flex items-start justify-between">
@@ -229,18 +414,15 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
             )}
           </div>
         </div>
-        <svg 
-          className="h-4 w-4 shrink-0 text-text-3 opacity-0 transition-opacity group-hover:opacity-100" 
-          fill="none" 
-          viewBox="0 0 24 24" 
-          stroke="currentColor" 
-          strokeWidth={2}
+        <svg
+          className="h-4 w-4 shrink-0 text-text-3 opacity-0 transition-opacity group-hover:opacity-100"
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
         </svg>
       </div>
 
-      {/* Main Score + Health */}
+      {/* Score + Sparkline */}
       <div className="mt-4 flex items-center justify-between border-b border-border pb-4">
         <div>
           {client.status === "running" ? (
@@ -261,115 +443,94 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
                   "flex items-center gap-0.5 text-sm font-semibold",
                   delta > 0 ? "text-emerald-600" : "text-red-600"
                 )}>
-                  <svg 
-                    className={cn("h-3 w-3", delta < 0 && "rotate-180")} 
-                    fill="none" 
-                    viewBox="0 0 24 24" 
-                    stroke="currentColor" 
-                    strokeWidth={2.5}
+                  <svg
+                    className={cn("h-3 w-3", delta < 0 && "rotate-180")}
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                   </svg>
                   {Math.abs(delta)}
                 </span>
               )}
-              <span className={cn("text-xs font-semibold rounded px-2 py-1", health.bg, health.color)}>
-                {health.label}
-              </span>
             </div>
           ) : (
             <span className="text-sm text-text-3">No snapshots yet</span>
           )}
-          
           {client.lastSnapshotAt && client.status !== "running" && (
             <p className="mt-1 text-xs text-text-3">
               Updated {timeAgo(client.lastSnapshotAt)}
             </p>
           )}
         </div>
-
-        {/* Sparkline */}
         {client.recentScores.length >= 2 && (
           <Sparkline data={client.recentScores} color={sparklineColor} />
         )}
       </div>
 
-      {/* Key Metrics Grid */}
+      {/* Narrative row: Visibility / Momentum / Best / Worst */}
       {client.latestScore !== null && (
-        <div className="mt-4 grid grid-cols-3 gap-3">
+        <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
           <div>
-            <div className="text-[10px] font-medium uppercase tracking-wide text-text-3">Mention</div>
-            <div className="mt-1 flex items-baseline gap-1">
-              <span className="text-lg font-bold text-text">{client.mentionRate ?? "—"}%</span>
-            </div>
-            <div className="mt-1 h-1 rounded-full bg-surface-2">
-              <div 
-                className={cn(
-                  "h-1 rounded-full",
-                  (client.mentionRate ?? 0) >= 70 ? "bg-emerald-500" : (client.mentionRate ?? 0) >= 40 ? "bg-amber-500" : "bg-red-500"
-                )}
-                style={{ width: `${client.mentionRate ?? 0}%` }}
-              />
+            <span className="text-text-3">Visibility</span>
+            <div className={cn("font-semibold", health.color)}>{health.label}</div>
+          </div>
+          <div>
+            <span className="text-text-3">Momentum</span>
+            <div className={cn("font-semibold flex items-center gap-1", momentum.color)}>
+              {momentum.icon === "up" && (
+                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                </svg>
+              )}
+              {momentum.icon === "down" && (
+                <svg className="h-3 w-3 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                </svg>
+              )}
+              {momentum.label}
             </div>
           </div>
-
           <div>
-            <div className="text-[10px] font-medium uppercase tracking-wide text-text-3">Top Pos</div>
-            <div className="mt-1 flex items-baseline gap-1">
-              <span className="text-lg font-bold text-text">{client.topPositionRate ?? "—"}%</span>
-            </div>
-            <div className="mt-1 h-1 rounded-full bg-surface-2">
-              <div 
-                className={cn(
-                  "h-1 rounded-full",
-                  (client.topPositionRate ?? 0) >= 50 ? "bg-emerald-500" : (client.topPositionRate ?? 0) >= 25 ? "bg-amber-500" : "bg-red-500"
-                )}
-                style={{ width: `${client.topPositionRate ?? 0}%` }}
-              />
-            </div>
+            <span className="text-text-3">Best model</span>
+            <div className="font-semibold text-emerald-600">{client.bestModel ?? "—"}</div>
           </div>
-
           <div>
-            <div className="text-[10px] font-medium uppercase tracking-wide text-text-3">Citations</div>
-            <div className="mt-1 flex items-baseline gap-1">
-              <span className="text-lg font-bold text-text">{client.citationRate ?? "—"}%</span>
-            </div>
-            <div className="mt-1 h-1 rounded-full bg-surface-2">
-              <div 
-                className={cn(
-                  "h-1 rounded-full",
-                  (client.citationRate ?? 0) >= 30 ? "bg-emerald-500" : (client.citationRate ?? 0) >= 15 ? "bg-amber-500" : "bg-gray-400"
-                )}
-                style={{ width: `${client.citationRate ?? 0}%` }}
-              />
-            </div>
+            <span className="text-text-3">Weakest model</span>
+            <div className="font-semibold text-red-600">{client.worstModel ?? "—"}</div>
           </div>
         </div>
       )}
 
-      {/* Footer: Model Performance + Competitive */}
+      {/* Action signal */}
+      {signal && client.latestScore !== null && (
+        <div className={cn(
+          "mt-3 rounded-lg border px-3 py-2 text-xs font-medium",
+          signal.color.includes("red") ? "border-red-200 bg-red-50" :
+          signal.color.includes("amber") ? "border-amber-200 bg-amber-50" :
+          "border-emerald-200 bg-emerald-50"
+        )}>
+          <span className={signal.color}>{signal.text}</span>
+        </div>
+      )}
+
+      {/* Metrics bar */}
       {client.latestScore !== null && (
-        <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-xs">
-          <div className="flex items-center gap-2">
-            {client.bestModel && (
-              <span className="text-text-2">
-                Best: <span className="font-medium text-emerald-600">{client.bestModel}</span>
-              </span>
-            )}
-            {client.worstModel && client.bestModel && <span className="text-text-3">·</span>}
-            {client.worstModel && (
-              <span className="text-text-2">
-                Worst: <span className="font-medium text-red-600">{client.worstModel}</span>
-              </span>
-            )}
-          </div>
+        <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-xs text-text-3">
+          <span>Mention {client.mentionRate ?? "—"}%</span>
+          <span className="text-text-3">·</span>
+          <span>Top pos {client.topPositionRate ?? "—"}%</span>
+          <span className="text-text-3">·</span>
+          <span>Cited {client.citationRate ?? "—"}%</span>
           {client.competitorRank !== null && client.competitorCount > 0 && (
-            <span className={cn(
-              "font-medium",
-              client.competitorRank === 1 ? "text-emerald-600" : "text-amber-600"
-            )}>
-              #{client.competitorRank} of {client.competitorCount + 1}
-            </span>
+            <>
+              <span className="text-text-3">·</span>
+              <span className={cn(
+                "font-medium",
+                client.competitorRank === 1 ? "text-emerald-600" : "text-amber-600"
+              )}>
+                #{client.competitorRank} of {client.competitorCount + 1}
+              </span>
+            </>
           )}
         </div>
       )}
@@ -416,7 +577,7 @@ export default function AppPage() {
 
   useEffect(() => {
     let cancelled = false;
-    
+
     async function load() {
       try {
         setError(null);
@@ -437,13 +598,10 @@ export default function AppPage() {
           if (!cancelled) {
             setClients([]);
             setPortfolioStats({
-              totalClients: 0,
-              avgScore: 0,
-              snapshotsThisMonth: 0,
-              clientsWithAlerts: 0,
-              strongClients: 0,
-              moderateClients: 0,
-              weakClients: 0,
+              totalClients: 0, avgScore: 0, avgScoreDelta: null,
+              snapshotsThisMonth: 0, clientsWithAlerts: 0,
+              strongClients: 0, moderateClients: 0, weakClients: 0,
+              improvingClients: 0, decliningClients: 0,
             });
             setLoading(false);
           }
@@ -465,13 +623,13 @@ export default function AppPage() {
           .from("competitors")
           .select("client_id, id")
           .in("client_id", clientIds);
-        
+
         const competitorsByClient = new Map<string, number>();
         (competitorsRes.data ?? []).forEach(c => {
           competitorsByClient.set(c.client_id, (competitorsByClient.get(c.client_id) || 0) + 1);
         });
 
-        // Get snapshot details for metrics (latest completed snapshot per client)
+        // Get snapshot details for metrics
         const latestSnapshotIds = clientList.map(c => {
           const completed = snapshots.filter(s => {
             const st = String(s.status ?? "").toLowerCase();
@@ -504,11 +662,10 @@ export default function AppPage() {
           });
         }
 
-        // Calculate this month start
+        // Build client stats
         const now = new Date();
         const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-        // Build client stats
         const clientsWithStats: ClientWithStats[] = clientList.map(client => {
           const clientSnapshots = snapshots.filter(s => s.client_id === client.id);
           const completedSnapshots = clientSnapshots.filter(s => {
@@ -527,28 +684,23 @@ export default function AppPage() {
           const latestScore = scores.length > 0 ? scores[0] : null;
           const previousScore = scores.length > 1 ? scores[1] : null;
           const lastSnapshotAt = completedSnapshots[0]?.completed_at || completedSnapshots[0]?.created_at || null;
-          
-          // Get last 5 scores for sparkline (reverse so oldest first)
           const recentScores = scores.slice(0, 5).reverse();
 
-          // Get detail stats for latest snapshot
+          // Detail stats
           const latestSnapshotId = completedSnapshots[0]?.id;
           const detail = latestSnapshotId ? detailsMap.get(latestSnapshotId) : null;
-          
+
           let mentionRate = null;
           let topPositionRate = null;
           let citationRate = null;
           let competitorRank = null;
-          
+
           if (detail) {
             const total = detail.summary.responses_count || 1;
             mentionRate = Math.round((detail.summary.client_mentioned_count / total) * 100);
             citationRate = Math.round((detail.summary.sources_count / total) * 100);
-            
             const topPositionCount = detail.responses?.filter(r => r.client_mentioned && r.client_position === "top").length || 0;
             topPositionRate = Math.round((topPositionCount / total) * 100);
-            
-            // Calculate competitive rank
             const clientMentions = detail.summary.client_mentioned_count;
             const competitors = detail.summary.top_competitors || [];
             const allEntities = [
@@ -570,60 +722,52 @@ export default function AppPage() {
             }
           }
 
-          // Check for alerts (score drop > 5 points, or competitor ahead)
           const hasAlert = (previousScore !== null && latestScore !== null && (previousScore - latestScore) >= 5) ||
                            (competitorRank !== null && competitorRank > 1);
 
           const competitorCount = competitorsByClient.get(client.id) || 0;
 
           return {
-            ...client,
-            latestScore,
-            previousScore,
-            lastSnapshotAt,
-            snapshotCount: completedSnapshots.length,
-            recentScores,
-            status: runningSnapshot ? "running" : completedSnapshots.length > 0 ? "complete" : "none",
-            mentionRate,
-            topPositionRate,
-            citationRate,
-            competitorRank,
-            competitorCount,
-            bestModel,
-            worstModel,
-            hasAlert,
+            ...client, latestScore, previousScore, lastSnapshotAt,
+            snapshotCount: completedSnapshots.length, recentScores,
+            status: runningSnapshot ? "running" : completedSnapshots.length > 0 ? "complete" : "none" as const,
+            mentionRate, topPositionRate, citationRate, competitorRank,
+            competitorCount, bestModel, worstModel, hasAlert,
           };
         });
 
-        // Calculate portfolio stats
+        // Portfolio stats
         const scoresForAvg = clientsWithStats
           .map(c => c.latestScore)
           .filter((s): s is number => typeof s === "number");
-        
-        const avgScore = scoresForAvg.length > 0 
+
+        const avgScore = scoresForAvg.length > 0
           ? Math.round(scoresForAvg.reduce((sum, s) => sum + s, 0) / scoresForAvg.length)
           : 0;
 
-        const snapshotsThisMonth = snapshots.filter(s => {
-          const created = new Date(s.created_at);
-          return created >= monthStart;
-        }).length;
+        // Calculate avg score delta
+        const deltas = clientsWithStats
+          .filter(c => c.latestScore !== null && c.previousScore !== null)
+          .map(c => c.latestScore! - c.previousScore!);
+        const avgScoreDelta = deltas.length > 0
+          ? Math.round(deltas.reduce((sum, d) => sum + d, 0) / deltas.length)
+          : null;
 
+        const snapshotsThisMonth = snapshots.filter(s => new Date(s.created_at) >= monthStart).length;
         const clientsWithAlerts = clientsWithStats.filter(c => c.hasAlert).length;
         const strongClients = clientsWithStats.filter(c => c.latestScore !== null && c.latestScore >= 70).length;
         const moderateClients = clientsWithStats.filter(c => c.latestScore !== null && c.latestScore >= 40 && c.latestScore < 70).length;
         const weakClients = clientsWithStats.filter(c => c.latestScore !== null && c.latestScore < 40).length;
+        const improvingClients = clientsWithStats.filter(c => c.latestScore !== null && c.previousScore !== null && c.latestScore > c.previousScore).length;
+        const decliningClients = clientsWithStats.filter(c => c.latestScore !== null && c.previousScore !== null && c.latestScore < c.previousScore).length;
 
         if (!cancelled) {
           setClients(clientsWithStats);
           setPortfolioStats({
-            totalClients: clientList.length,
-            avgScore,
-            snapshotsThisMonth,
-            clientsWithAlerts,
-            strongClients,
-            moderateClients,
-            weakClients,
+            totalClients: clientList.length, avgScore, avgScoreDelta,
+            snapshotsThisMonth, clientsWithAlerts,
+            strongClients, moderateClients, weakClients,
+            improvingClients, decliningClients,
           });
         }
       } catch (e) {
@@ -633,46 +777,49 @@ export default function AppPage() {
         if (!cancelled) setLoading(false);
       }
     }
-    
+
     load();
     return () => { cancelled = true; };
   }, [supabase]);
 
   // Filter and sort
-  let filteredClients = clients.filter(
-    (c) =>
-      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (c.website && c.website.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredClients = useMemo(() => {
+    let result = clients.filter(
+      (c) =>
+        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (c.website && c.website.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
 
-  if (filterHealth !== "all") {
-    filteredClients = filteredClients.filter(c => {
-      if (filterHealth === "strong") return c.latestScore !== null && c.latestScore >= 70;
-      if (filterHealth === "moderate") return c.latestScore !== null && c.latestScore >= 40 && c.latestScore < 70;
-      if (filterHealth === "weak") return c.latestScore !== null && c.latestScore < 40;
-      return true;
-    });
-  }
+    if (filterHealth !== "all") {
+      result = result.filter(c => {
+        if (filterHealth === "strong") return c.latestScore !== null && c.latestScore >= 70;
+        if (filterHealth === "moderate") return c.latestScore !== null && c.latestScore >= 40 && c.latestScore < 70;
+        if (filterHealth === "weak") return c.latestScore !== null && c.latestScore < 40;
+        return true;
+      });
+    }
 
-  // Sort
-  if (sortBy === "score") {
-    filteredClients.sort((a, b) => {
-      if (a.latestScore === null && b.latestScore === null) return 0;
-      if (a.latestScore === null) return 1;
-      if (b.latestScore === null) return -1;
-      return b.latestScore - a.latestScore;
-    });
-  } else if (sortBy === "name") {
-    filteredClients.sort((a, b) => a.name.localeCompare(b.name));
-  } else if (sortBy === "updated") {
-    filteredClients.sort((a, b) => {
-      if (!a.lastSnapshotAt && !b.lastSnapshotAt) return 0;
-      if (!a.lastSnapshotAt) return 1;
-      if (!b.lastSnapshotAt) return -1;
-      return new Date(b.lastSnapshotAt).getTime() - new Date(a.lastSnapshotAt).getTime();
-    });
-  }
+    if (sortBy === "score") {
+      result.sort((a, b) => {
+        if (a.latestScore === null && b.latestScore === null) return 0;
+        if (a.latestScore === null) return 1;
+        if (b.latestScore === null) return -1;
+        return b.latestScore - a.latestScore;
+      });
+    } else if (sortBy === "name") {
+      result.sort((a, b) => a.name.localeCompare(b.name));
+    } else {
+      result.sort((a, b) => {
+        if (!a.lastSnapshotAt && !b.lastSnapshotAt) return 0;
+        if (!a.lastSnapshotAt) return 1;
+        if (!b.lastSnapshotAt) return -1;
+        return new Date(b.lastSnapshotAt).getTime() - new Date(a.lastSnapshotAt).getTime();
+      });
+    }
+
+    return result;
+  }, [clients, searchQuery, filterHealth, sortBy]);
 
   if (loading) {
     return (
@@ -705,21 +852,25 @@ export default function AppPage() {
 
   return (
     <div className="space-y-6">
-      {/* Portfolio Summary */}
-      {portfolioStats && <PortfolioSummary stats={portfolioStats} />}
+      {/* AI Visibility Overview */}
+      {portfolioStats && <VisibilityOverview stats={portfolioStats} clients={clients} />}
+
+      {/* Separator */}
+      <div className="border-t border-border" />
 
       {/* Header with filters */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-text">Clients</h1>
-          <p className="mt-1 text-sm text-text-2">{clients.length} client{clients.length !== 1 ? "s" : ""}</p>
+          <h1 className="text-xl font-semibold text-text">Clients</h1>
+          <p className="mt-0.5 text-sm text-text-2">
+            {filteredClients.length} of {clients.length} client{clients.length !== 1 ? "s" : ""}
+          </p>
         </div>
         <div className="flex items-center gap-3">
-          {/* Filter by health */}
           <select
             value={filterHealth}
             onChange={(e) => setFilterHealth(e.target.value as "all" | "strong" | "moderate" | "weak")}
-            className="h-9 rounded-lg border border-border bg-white px-3 text-sm text-text focus:border-text focus:outline-none"
+            className="h-9 rounded-lg border border-border bg-white px-3 text-sm text-text shadow-sm focus:border-text focus:outline-none"
           >
             <option value="all">All health</option>
             <option value="strong">Strong</option>
@@ -727,25 +878,20 @@ export default function AppPage() {
             <option value="weak">Weak</option>
           </select>
 
-          {/* Sort */}
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as "name" | "score" | "updated")}
-            className="h-9 rounded-lg border border-border bg-white px-3 text-sm text-text focus:border-text focus:outline-none"
+            className="h-9 rounded-lg border border-border bg-white px-3 text-sm text-text shadow-sm focus:border-text focus:outline-none"
           >
             <option value="updated">Last updated</option>
             <option value="score">Score</option>
             <option value="name">Name</option>
           </select>
 
-          {/* Search */}
           <div className="relative">
             <svg
               className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-3"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.5}
+              fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
             </svg>
@@ -754,13 +900,13 @@ export default function AppPage() {
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 w-44 rounded-lg border border-border bg-white pl-9 pr-3 text-sm text-text placeholder:text-text-3 focus:border-text focus:outline-none"
+              className="h-9 w-44 rounded-lg border border-border bg-white pl-9 pr-3 text-sm text-text shadow-sm placeholder:text-text-3 focus:border-text focus:outline-none"
             />
           </div>
-          {/* Add client */}
+
           <Link
             href="/app/clients/new"
-            className="inline-flex items-center gap-2 rounded-lg bg-text px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-text/90"
+            className="inline-flex items-center gap-2 rounded-lg bg-text px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-text/90"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />

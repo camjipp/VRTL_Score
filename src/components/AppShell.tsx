@@ -116,7 +116,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     : NAV_LINKS;
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="min-h-screen bg-[#f2f3f5]">
       {/* ── Top navigation bar ── */}
       <header className="sticky top-0 z-50 border-b border-border bg-white">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
