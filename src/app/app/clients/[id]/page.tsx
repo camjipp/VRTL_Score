@@ -1675,8 +1675,8 @@ export default function ClientDetailPage() {
       }
       const data = await res.json();
       await refresh(agencyId);
-      if (data.snapshot?.id) {
-        setSelectedSnapshotId(data.snapshot.id);
+      if (data.snapshot_id) {
+        setSelectedSnapshotId(data.snapshot_id);
       }
     } catch (e) {
       setRunError(errorMessage(e));
