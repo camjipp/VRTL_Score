@@ -54,12 +54,20 @@ Then run:
 pnpm db:check
 ```
 
+## Launch checklist
+See **[LAUNCH_CHECKLIST.md](./LAUNCH_CHECKLIST.md)** for AI APIs, Stripe setup, webhook verification, and production deploy steps.
+
 ## Vercel + Supabase settings (required)
 **Vercel env vars (Preview + Production):**
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY` (server-only; never expose to browser)
-- `OPENAI_API_KEY` (server-only)
+- `OPENAI_API_KEY` (server-only; at least one AI provider required)
+- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` (when `BILLING_ENABLED=true`)
+
+**Optional AI (add for redundancy):**
+- `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`
+- `OPENAI_MODEL`, `ANTHROPIC_MODEL`, `GEMINI_MODEL`
 
 **Optional (recommended):**
 - `OPENAI_MODEL`

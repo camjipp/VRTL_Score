@@ -71,11 +71,18 @@ export async function POST(req: NextRequest) {
 
       case "customer.subscription.updated": {
         const subscription = event.data.object as Stripe.Subscription;
-        const agencyId = subscription.metadata?.agency_id;
-
+        let agencyId = subscription.metadata?.agency_id;
+        // Fallback: look up agency by stripe_subscription_id (e.g. when metadata missing from Portal updates)
+        if (!agencyId && subscription.id) {
+          const { data: agency } = await supabase
+            .from("agencies")
+            .select("id")
+            .eq("stripe_subscription_id", subscription.id)
+            .single();
+          agencyId = agency?.id ?? undefined;
+        }
         if (agencyId) {
           const isActive = subscription.status === "active" || subscription.status === "trialing";
-          
           await supabase
             .from("agencies")
             .update({
@@ -83,7 +90,6 @@ export async function POST(req: NextRequest) {
               plan: subscription.metadata?.plan_id || "starter",
             })
             .eq("id", agencyId);
-
           console.log(`Agency ${agencyId} subscription updated: ${subscription.status}`);
         }
         break;
@@ -91,10 +97,16 @@ export async function POST(req: NextRequest) {
 
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
-        const agencyId = subscription.metadata?.agency_id;
-
+        let agencyId = subscription.metadata?.agency_id;
+        if (!agencyId && subscription.id) {
+          const { data: agency } = await supabase
+            .from("agencies")
+            .select("id")
+            .eq("stripe_subscription_id", subscription.id)
+            .single();
+          agencyId = agency?.id ?? undefined;
+        }
         if (agencyId) {
-          // Deactivate the agency
           await supabase
             .from("agencies")
             .update({
@@ -102,7 +114,6 @@ export async function POST(req: NextRequest) {
               stripe_subscription_id: null,
             })
             .eq("id", agencyId);
-
           console.log(`Agency ${agencyId} subscription cancelled`);
         }
         break;

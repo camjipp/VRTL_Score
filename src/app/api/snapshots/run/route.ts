@@ -403,7 +403,11 @@ export async function POST(req: Request) {
       competitorsRes.error || !competitorsRes.data ? [] : competitorsRes.data.map((c) => c.name);
 
     const providers = getEnabledProviders();
-    console.log("enabled providers", providers);
+    console.log("enabled providers", providers, {
+      hasOpenAI: !!process.env.OPENAI_API_KEY,
+      hasAnthropic: !!process.env.ANTHROPIC_API_KEY,
+      hasGemini: !!process.env.GEMINI_API_KEY
+    });
     if (providers.length === 0) {
       await supabase
         .from("snapshots")
@@ -508,6 +512,7 @@ export async function POST(req: Request) {
             }
           } catch (err) {
             const message = err instanceof Error ? err.message : String(err);
+            console.error(`Provider ${provider} failed:`, message);
             rawText = `ERROR: ${message}`;
             parsedJson = { error: message };
             parseOk = false;
@@ -551,12 +556,14 @@ export async function POST(req: Request) {
       })
       .eq("id", snapshotId);
 
-    console.log("snapshot complete");
+    console.log("snapshot complete", { byProvider: Object.keys(score.byProvider) });
     return NextResponse.json({
       apiVersion: SNAPSHOT_API_VERSION,
       snapshot_id: snapshotId,
       status: "complete",
-      score
+      score,
+      enabled_providers: providers,
+      providers_used: Object.keys(score.byProvider)
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
