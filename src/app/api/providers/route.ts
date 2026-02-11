@@ -58,7 +58,7 @@ export async function GET(req: Request) {
       results.anthropic = { ok: false, error: e instanceof Error ? e.message : String(e) };
     }
   } else {
-    results.anthropic = { ok: false, error: "Not configured (ANTHROPIC_API_KEY not set)" };
+    results.anthropic = { ok: false, error: "Not configured (ANTHROPIC_API_KEY or ANTHROPIC_KEY not set)" };
   }
 
   if (status.gemini) {

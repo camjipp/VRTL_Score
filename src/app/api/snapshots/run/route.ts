@@ -405,7 +405,7 @@ export async function POST(req: Request) {
     const providers = getEnabledProviders();
     console.log("enabled providers", providers, {
       hasOpenAI: !!process.env.OPENAI_API_KEY,
-      hasAnthropic: !!process.env.ANTHROPIC_API_KEY,
+      hasAnthropic: !!(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_KEY),
       hasGemini: !!process.env.GEMINI_API_KEY
     });
     if (providers.length === 0) {
@@ -431,16 +431,16 @@ export async function POST(req: Request) {
         .eq("id", snapshotId);
       return NextResponse.json({ error: "OPENAI_API_KEY is missing" }, { status: 500 });
     }
-    if (providers.includes("anthropic") && !process.env.ANTHROPIC_API_KEY) {
+    if (providers.includes("anthropic") && !process.env.ANTHROPIC_API_KEY && !process.env.ANTHROPIC_KEY) {
       await supabase
         .from("snapshots")
         .update({
           status: "failed",
-          error: "ANTHROPIC_API_KEY is missing",
+          error: "ANTHROPIC_API_KEY or ANTHROPIC_KEY is missing",
           completed_at: new Date().toISOString()
         })
         .eq("id", snapshotId);
-      return NextResponse.json({ error: "ANTHROPIC_API_KEY is missing" }, { status: 500 });
+      return NextResponse.json({ error: "ANTHROPIC_API_KEY or ANTHROPIC_KEY is missing" }, { status: 500 });
     }
     if (providers.includes("gemini") && !process.env.GEMINI_API_KEY) {
       await supabase
