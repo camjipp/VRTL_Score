@@ -3,7 +3,7 @@ import "server-only";
 import { extractionSchema } from "@/lib/extraction/schema";
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_KEY || process.env.CLAUDE_API_KEY;
-const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || "claude-3-5-sonnet-20241022";
+const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-5-20250929";
 
 type RunAnthropicArgs = {
   system: string;
