@@ -1,6 +1,7 @@
 import "server-only";
 
 import { extractionSchema } from "@/lib/extraction/schema";
+import { extractJson } from "@/lib/llm/extractJson";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
@@ -71,7 +72,8 @@ export async function runGemini({ system, prompt, model }: RunGeminiArgs): Promi
   };
 
   const content = json.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
-  const parsed = extractionSchema.safeParse(safeJson(content));
+  const extracted = extractJson(content);
+  const parsed = extractionSchema.safeParse(extracted ?? {});
 
   return {
     rawText: content,
@@ -79,14 +81,6 @@ export async function runGemini({ system, prompt, model }: RunGeminiArgs): Promi
     modelUsed: modelToUse,
     latencyMs
   };
-}
-
-function safeJson(text: string) {
-  try {
-    return JSON.parse(text);
-  } catch {
-    return text;
-  }
 }
 
 

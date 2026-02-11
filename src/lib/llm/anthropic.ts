@@ -1,6 +1,7 @@
 import "server-only";
 
 import { extractionSchema } from "@/lib/extraction/schema";
+import { extractJson } from "@/lib/llm/extractJson";
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_KEY || process.env.CLAUDE_API_KEY;
 const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-5-20250929";
@@ -61,7 +62,8 @@ export async function runAnthropic({
       .map((c) => c.text ?? "")
       .join("") ?? "";
 
-  const parsed = extractionSchema.safeParse(safeJson(content));
+  const extracted = extractJson(content);
+  const parsed = extractionSchema.safeParse(extracted ?? {});
 
   return {
     rawText: content,
@@ -69,14 +71,6 @@ export async function runAnthropic({
     modelUsed: modelToUse,
     latencyMs
   };
-}
-
-function safeJson(text: string) {
-  try {
-    return JSON.parse(text);
-  } catch {
-    return text;
-  }
 }
 
 

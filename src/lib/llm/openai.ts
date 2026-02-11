@@ -1,6 +1,7 @@
 import "server-only";
 
 import { extractionSchema } from "@/lib/extraction/schema";
+import { extractJson } from "@/lib/llm/extractJson";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
@@ -61,7 +62,8 @@ export async function runOpenAI({
     choices: Array<{ message?: { content?: string } }>;
   };
   const content = json.choices?.[0]?.message?.content ?? "";
-  const parsed = extractionSchema.safeParse(safeJson(content));
+  const extracted = extractJson(content);
+  const parsed = extractionSchema.safeParse(extracted ?? {});
 
   return {
     rawText: content,
@@ -69,14 +71,6 @@ export async function runOpenAI({
     modelUsed: modelToUse,
     latencyMs
   };
-}
-
-function safeJson(text: string) {
-  try {
-    return JSON.parse(text);
-  } catch {
-    return text;
-  }
 }
 
 
