@@ -545,6 +545,10 @@ export async function POST(req: Request) {
 
     console.log("scoring");
     const score = scoreBalanced(byProviderExtractions);
+    const extractionCounts = Object.fromEntries(
+      (["openai", "anthropic", "gemini"] as const).map((p) => [p, byProviderExtractions[p].length])
+    );
+    console.log("extraction counts", extractionCounts);
 
     await supabase
       .from("snapshots")
@@ -563,7 +567,8 @@ export async function POST(req: Request) {
       status: "complete",
       score,
       enabled_providers: providers,
-      providers_used: Object.keys(score.byProvider)
+      providers_used: Object.keys(score.byProvider),
+      extraction_counts: extractionCounts
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
