@@ -1193,14 +1193,6 @@ function CompetitorComparisonChart({
 /* ═══════════════════════════════════════════════════════════════════════════
    CROSS-MODEL SNAPSHOT (chart + diagnosis in ONE card)
 ═══════════════════════════════════════════════════════════════════════════ */
-function getProviderColor(provider: string): string {
-  const p = provider.toLowerCase();
-  if (p.includes("openai") || p.includes("chatgpt")) return "#10b981"; // emerald-500
-  if (p.includes("gemini") || p.includes("google")) return "#fbbf24";   // amber-400 (softer)
-  if (p.includes("anthropic") || p.includes("claude")) return "#fb7185"; // rose-400 (softer)
-  return "#71717a"; // zinc-500
-}
-
 function getProviderStatus(score: number): { label: string; badge: string } {
   if (score >= 80) return { label: "Strong", badge: "bg-emerald-50 text-emerald-600 border-emerald-200" };
   if (score >= 50) return { label: "Moderate", badge: "bg-amber-50 text-amber-600 border-amber-200" };
@@ -1251,73 +1243,48 @@ function CrossModelSnapshot({
         ? "Maintain current strategy. Monitor for competitive shifts."
         : "Broad content + citation strategy improvements to lift baseline visibility.";
 
-  const height = 160;
-  const width = 360;
-  const barWidth = 80;
-  const barGap = 24;
-  const totalBarsWidth = sorted.length * barWidth + (sorted.length - 1) * barGap;
-  const startX = (width - totalBarsWidth) / 2;
-
   return (
     <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
       <h3 className="text-xl font-semibold text-zinc-900">Cross-Model Visibility Spread</h3>
 
-      <div className="mt-4 grid gap-8 lg:grid-cols-[1fr,minmax(160px,auto)]">
-        {/* Left: Bar chart — fills available space */}
-        <div className="min-h-[160px] flex items-center">
-          <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto min-w-0" preserveAspectRatio="xMidYMid meet" style={{ maxHeight: "220px", minHeight: "160px" }}>
-            <line
-              x1="0"
-              y1={height - 20 - (avg / 100) * (height - 40)}
-              x2={width}
-              y2={height - 20 - (avg / 100) * (height - 40)}
-              stroke="#e4e4e7"
-              strokeWidth="1"
-              strokeDasharray="4 4"
-            />
-            {sorted.map(([provider, score], idx) => {
-              const x = startX + idx * (barWidth + barGap);
-              const barHeight = (score / 100) * (height - 40);
-              const y = height - 20 - barHeight;
-              const color = getProviderColor(provider);
-              const icon = provider.toLowerCase().includes("openai") || provider.toLowerCase().includes("chatgpt")
-                ? "GPT"
-                : provider.toLowerCase().includes("claude") || provider.toLowerCase().includes("anthropic")
-                  ? "CL"
-                  : provider.toLowerCase().includes("gemini") || provider.toLowerCase().includes("google")
-                    ? "GEM"
-                    : provider.charAt(0).toUpperCase();
-
-              return (
-                <g key={provider}>
-                  <rect x={x} y={y} width={barWidth} height={barHeight} rx="4" fill={color} opacity="0.9" />
-                  <text x={x + barWidth / 2} y={y - 4} textAnchor="middle" className="text-[10px] font-semibold" fill="#18181b">{score}</text>
-                  <text x={x + barWidth / 2} y={height - 4} textAnchor="middle" className="text-[9px]" fill="#71717a">{icon}</text>
-                </g>
-              );
-            })}
-          </svg>
-        </div>
-
-        {/* Right: Model rows + stats */}
-        <div className="flex flex-col gap-3">
-          {sorted.map(([provider, score]) => {
-            const status = getProviderStatus(score);
-            return (
-              <div key={provider} className="flex items-center justify-between gap-3 text-sm">
-                <span className="font-medium text-zinc-900">{getProviderDisplayName(provider)} — {score}</span>
-                <span className={cn("shrink-0 rounded border px-2 py-0.5 text-xs font-medium", status.badge)}>
+      <div className="mt-5 space-y-5">
+        {sorted.map(([provider, score]) => {
+          const status = getProviderStatus(score);
+          const barColor = provider.toLowerCase().includes("openai") || provider.toLowerCase().includes("chatgpt")
+            ? "bg-emerald-500"
+            : provider.toLowerCase().includes("gemini") || provider.toLowerCase().includes("google")
+              ? "bg-amber-500"
+              : provider.toLowerCase().includes("anthropic") || provider.toLowerCase().includes("claude")
+                ? "bg-rose-500"
+                : "bg-zinc-500";
+          return (
+            <div key={provider} className="flex items-center gap-4">
+              <div className="w-24 shrink-0 text-sm font-medium text-zinc-900">
+                {getProviderDisplayName(provider)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="h-2.5 w-full overflow-hidden rounded-full bg-zinc-100">
+                  <div
+                    className={cn("h-full rounded-full transition-all duration-500", barColor)}
+                    style={{ width: `${Math.min(100, Math.max(0, score))}%` }}
+                  />
+                </div>
+              </div>
+              <div className="flex shrink-0 items-center gap-3">
+                <span className="tabular-nums text-sm font-semibold text-zinc-900">{score}</span>
+                <span className={cn("rounded-md border px-2 py-0.5 text-xs font-medium", status.badge)}>
                   {status.label}
                 </span>
               </div>
-            );
-          })}
-          <div className="mt-1 space-y-1 border-t border-zinc-200 pt-3 text-xs text-zinc-500">
-            <div>Gap: {gap} pts</div>
-            <div>Variance: {variance}%</div>
-            <div>Weakest model: {getProviderDisplayName(weakest[0])}</div>
-          </div>
-        </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="mt-5 flex flex-wrap gap-x-6 gap-y-1 border-t border-zinc-200 pt-4 text-xs text-zinc-500">
+        <span>Gap: <span className="font-medium text-zinc-700">{gap} pts</span></span>
+        <span>Variance: <span className="font-medium text-zinc-700">{variance}%</span></span>
+        <span>Weakest: <span className="font-medium text-zinc-700">{getProviderDisplayName(weakest[0])}</span></span>
       </div>
 
       <div className="mt-4 pt-4 border-t border-zinc-200">
