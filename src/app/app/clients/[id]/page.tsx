@@ -251,12 +251,12 @@ function ScoreHero({
         {/* Left: Score */}
         <div className="flex items-start gap-6">
           <div className="flex flex-col">
-            <span className={cn("text-5xl font-bold tabular-nums tracking-tight text-zinc-900")}>
+            <span className={cn("text-[44px] font-bold tabular-nums tracking-tight text-zinc-900 leading-none")}>
               {score ?? "—"}
             </span>
-            <span className="mt-1 text-sm font-medium text-zinc-500">AI Visibility Score</span>
+            <span className="mt-1.5 text-sm text-zinc-500">AI Visibility Score</span>
             {delta !== null && delta !== 0 && (
-              <span className={cn("mt-1 flex items-center gap-1 text-sm", delta > 0 ? "text-emerald-600" : "text-rose-600")}>
+              <span className={cn("mt-1 flex items-center gap-1 text-sm font-medium", delta > 0 ? "text-emerald-600" : "text-rose-600")}>
                 <svg className={cn("h-3.5 w-3.5", delta < 0 && "rotate-180")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                 </svg>
@@ -274,16 +274,16 @@ function ScoreHero({
         </div>
 
         {/* Right: Structured meta row */}
-        <div className="flex flex-col gap-1 text-right text-sm">
-          <div className="flex flex-wrap justify-end gap-x-4 gap-y-1">
-            <span className="text-text-2"><span className="font-medium text-text-3">Status:</span> {label}</span>
-            <span className="text-text-2"><span className="font-medium text-text-3">Confidence:</span> {confidence.label}</span>
+        <div className="flex flex-col gap-2 text-right text-sm">
+          <div className="flex flex-wrap justify-end gap-x-6 gap-y-2">
+            <span><span className="text-zinc-500">Status:</span> <span className="font-medium text-zinc-900">{label}</span></span>
+            <span><span className="text-zinc-500">Confidence:</span> <span className="font-medium text-zinc-900">{confidence.label}</span></span>
             {updatedAt && (
-              <span className="text-text-2"><span className="font-medium text-text-3">Last updated:</span> {timeAgo(updatedAt)}</span>
+              <span><span className="text-zinc-500">Last updated:</span> <span className="font-medium text-zinc-900">{timeAgo(updatedAt)}</span></span>
             )}
           </div>
           {reportReadyAt && (
-            <span className="mt-2 text-xs text-text-3">Last report generated {timeAgo(reportReadyAt)}</span>
+            <span className="mt-1 text-xs text-zinc-500">Last report generated {timeAgo(reportReadyAt)}</span>
           )}
           {status === "running" && (
             <Badge variant="warning" className="mt-1 w-fit self-end">Analyzing...</Badge>
@@ -1196,8 +1196,8 @@ function CompetitorComparisonChart({
 function getProviderColor(provider: string): string {
   const p = provider.toLowerCase();
   if (p.includes("openai") || p.includes("chatgpt")) return "#10b981"; // emerald-500
-  if (p.includes("gemini") || p.includes("google")) return "#f59e0b";   // amber-500
-  if (p.includes("anthropic") || p.includes("claude")) return "#f43f5e"; // rose-500
+  if (p.includes("gemini") || p.includes("google")) return "#fbbf24";   // amber-400 (softer)
+  if (p.includes("anthropic") || p.includes("claude")) return "#fb7185"; // rose-400 (softer)
   return "#71717a"; // zinc-500
 }
 
@@ -1262,7 +1262,7 @@ function CrossModelSnapshot({
     <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
       <h3 className="text-xl font-semibold text-zinc-900">Cross-Model Visibility Spread</h3>
 
-      <div className="mt-4 grid gap-6 lg:grid-cols-[1fr,auto]">
+      <div className="mt-4 grid gap-8 lg:grid-cols-[1fr,auto]">
         {/* Left: Bar chart */}
         <div className="min-h-[120px]">
           <svg viewBox={`0 0 ${width} ${height}`} className="w-full max-w-[280px]" style={{ maxHeight: "140px" }}>
@@ -1320,10 +1320,12 @@ function CrossModelSnapshot({
         </div>
       </div>
 
-      <p className="mt-4 text-sm text-zinc-600">{insight}</p>
-      <p className="mt-2 text-sm font-medium text-zinc-900">
-        <span className="text-zinc-500">Recommended:</span> {recommended}
-      </p>
+      <div className="mt-4 pt-4 border-t border-zinc-200">
+        <p className="text-sm text-zinc-600">{insight}</p>
+        <p className="mt-3 text-sm">
+          <span className="text-zinc-500">Primary action:</span> <span className="font-semibold text-zinc-900">{recommended}</span>
+        </p>
+      </div>
     </div>
   );
 }
@@ -2251,18 +2253,20 @@ export default function ClientDetailPage() {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <SnapshotSelector
-                snapshots={snapshots}
-                selectedId={selectedSnapshotId}
-                onSelect={setSelectedSnapshotId}
-              />
-              <RunSnapshotButton
-                running={running}
-                snapshotStatus={selectedSnapshot?.status ?? null}
-                onRunSnapshot={runSnapshot}
-              />
+              <div className="flex items-center gap-3">
+                <SnapshotSelector
+                  snapshots={snapshots}
+                  selectedId={selectedSnapshotId}
+                  onSelect={setSelectedSnapshotId}
+                />
+                <RunSnapshotButton
+                  running={running}
+                  snapshotStatus={selectedSnapshot?.status ?? null}
+                  onRunSnapshot={runSnapshot}
+                />
+              </div>
               {selectedSnapshot && (selectedSnapshot.status?.toLowerCase().includes("complete") || selectedSnapshot.status?.toLowerCase().includes("success")) && (
-                <DownloadPdfButton snapshotId={selectedSnapshot.id} variant="compact" />
+                <DownloadPdfButton snapshotId={selectedSnapshot.id} variant="compact" className="ml-4" />
               )}
             </div>
           </div>
