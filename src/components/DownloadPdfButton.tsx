@@ -63,12 +63,12 @@ export function DownloadPdfButton({ snapshotId, className, variant = "default" }
           disabled={busy}
           onClick={download}
           className={cn(
-            "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-all",
+            "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all",
             busy
-              ? "bg-gray-400 cursor-wait"
+              ? "bg-gray-400 text-white cursor-wait"
               : success
-                ? "bg-emerald-600"
-                : "bg-gradient-to-r from-violet-600 to-indigo-600 shadow-md hover:shadow-lg hover:from-violet-500 hover:to-indigo-500"
+                ? "bg-emerald-600 text-white"
+                : "bg-text text-white shadow-sm hover:bg-text/90"
           )}
         >
           {busy ? (
@@ -104,17 +104,12 @@ export function DownloadPdfButton({ snapshotId, className, variant = "default" }
         className={cn(
           "group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl px-6 py-4 text-base font-semibold text-white shadow-xl transition-all",
           busy
-            ? "bg-gradient-to-r from-gray-400 to-gray-500 cursor-wait"
+            ? "bg-gray-400 cursor-wait"
             : success
-              ? "bg-gradient-to-r from-emerald-500 to-green-500 shadow-emerald-500/30"
-              : "bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 shadow-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/40 hover:scale-[1.02]"
+              ? "bg-emerald-600"
+              : "bg-text shadow-sm hover:bg-text/90"
         )}
       >
-        {/* Shimmer effect */}
-        {!busy && !success && (
-          <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-        )}
-
         {/* Icon */}
         {busy ? (
           <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -137,13 +132,9 @@ export function DownloadPdfButton({ snapshotId, className, variant = "default" }
         </span>
       </button>
 
-      {/* Subtext / Badge */}
+      {/* Subtext */}
       {!busy && !success && !error && (
-        <p className="text-center text-xs text-text-3">
-          <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
-            Client-ready PDF
-          </span>
-        </p>
+        <p className="text-center text-xs text-text-3">Client-ready PDF</p>
       )}
 
       {/* Error */}

@@ -226,10 +226,7 @@ function ScoreHero({
   updatedAt,
   status,
   historicalScores,
-  snapshot,
-  clientName,
-  onRunSnapshot,
-  running,
+  reportReadyAt,
 }: {
   score: number | null;
   previousScore: number | null;
@@ -237,10 +234,7 @@ function ScoreHero({
   updatedAt: string | null;
   status: string | null;
   historicalScores: number[];
-  snapshot: SnapshotRow | null;
-  clientName: string;
-  onRunSnapshot: () => void;
-  running: boolean;
+  reportReadyAt: string | null;
 }) {
   const { label, description } = getScoreLabel(score);
   const delta = score !== null && previousScore !== null ? score - previousScore : null;
@@ -251,170 +245,52 @@ function ScoreHero({
       ? "#f59e0b" 
       : "#ef4444";
 
-  const scoreGradient = score !== null && score >= 80
-    ? "from-emerald-500/5 via-emerald-500/[0.02] to-transparent"
-    : score !== null && score >= 50
-      ? "from-amber-500/5 via-amber-500/[0.02] to-transparent"
-      : "from-red-500/5 via-red-500/[0.02] to-transparent";
-
-  const glowColor = score !== null && score >= 80
-    ? "shadow-emerald-500/10"
-    : score !== null && score >= 50
-      ? "shadow-amber-500/10"
-      : "shadow-red-500/10";
-
   return (
-    <div className={cn("relative overflow-hidden rounded-xl border border-border bg-white p-6", score !== null && `shadow-lg ${glowColor}`)}>
-      {/* Subtle radial glow */}
-      {score !== null && (
-        <div className={cn("pointer-events-none absolute -left-20 -top-20 h-60 w-60 rounded-full bg-gradient-radial", scoreGradient)} />
-      )}
-      <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div className="rounded-xl border border-border bg-white p-6 shadow-sm">
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
         {/* Left: Score */}
         <div className="flex items-start gap-6">
-          <div className="flex flex-col items-center">
-            <div className="relative">
-              <span className={cn("text-7xl font-black tabular-nums tracking-tight", getScoreColor(score))}>
-                {score ?? "—"}
-              </span>
-              {score !== null && (
-                <div className={cn(
-                  "absolute -inset-3 -z-10 rounded-2xl opacity-20",
-                  score >= 80 ? "bg-emerald-400" : score >= 50 ? "bg-amber-400" : "bg-red-400"
-                )} style={{ filter: "blur(20px)" }} />
-              )}
-            </div>
+          <div className="flex flex-col">
+            <span className={cn("text-7xl font-black tabular-nums tracking-tight", getScoreColor(score))}>
+              {score ?? "—"}
+            </span>
             <span className="mt-1 text-xs font-medium uppercase tracking-wider text-text-3">AI Visibility Score</span>
+            {delta !== null && delta !== 0 && (
+              <span className={cn("mt-1 flex items-center gap-1 text-sm", delta > 0 ? "text-emerald-600" : "text-red-600")}>
+                <svg className={cn("h-3.5 w-3.5", delta < 0 && "rotate-180")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                </svg>
+                {Math.abs(delta)} vs last snapshot
+              </span>
+            )}
           </div>
 
-          {/* Sparkline + delta */}
+          {/* Sparkline */}
           {historicalScores.length >= 2 && (
-            <div className="hidden flex-col items-end sm:flex">
+            <div className="hidden sm:block">
               <ScoreSparkline scores={historicalScores} color={sparklineColor} />
-              {delta !== null && delta !== 0 && (
-                <span
-                  className={cn(
-                    "mt-1 flex items-center gap-0.5 text-sm font-semibold",
-                    delta > 0 ? "text-emerald-600" : "text-red-600"
-                  )}
-                >
-                  <svg
-                    className={cn("h-3 w-3", delta < 0 && "rotate-180")}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2.5}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                  </svg>
-                  {Math.abs(delta)} vs last
-                </span>
-              )}
             </div>
           )}
         </div>
 
-        {/* Right: Labels + Report Ready */}
-        <div className="flex flex-col items-end gap-4">
-          <div className="flex flex-wrap items-start justify-end gap-2">
-            <div className={cn("rounded-lg px-3 py-1.5 text-sm font-semibold", getScoreBg(score), getScoreColor(score))}>
-              {label}
-            </div>
-            <Badge variant={confidence.variant}>{confidence.label}</Badge>
-            {status === "running" && <Badge variant="warning">Analyzing...</Badge>}
+        {/* Right: Structured meta row */}
+        <div className="flex flex-col gap-1 text-right text-sm">
+          <div className="flex flex-wrap justify-end gap-x-4 gap-y-1">
+            <span className="text-text-2"><span className="font-medium text-text-3">Status:</span> {label}</span>
+            <span className="text-text-2"><span className="font-medium text-text-3">Confidence:</span> {confidence.label}</span>
             {updatedAt && (
-              <span className="text-xs text-text-3">{timeAgo(updatedAt)}</span>
+              <span className="text-text-2"><span className="font-medium text-text-3">Last updated:</span> {timeAgo(updatedAt)}</span>
             )}
           </div>
-
-          {/* Report Ready block */}
-          <ReportReadyBlock
-            snapshot={snapshot}
-            clientName={clientName}
-            onRunSnapshot={onRunSnapshot}
-            running={running}
-          />
+          {reportReadyAt && (
+            <span className="mt-2 text-xs text-text-3">Last report generated {timeAgo(reportReadyAt)}</span>
+          )}
+          {status === "running" && (
+            <Badge variant="warning" className="mt-1 w-fit self-end">Analyzing...</Badge>
+          )}
         </div>
       </div>
-      <p className="relative mt-4 text-sm text-text-2">{description}</p>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   REPORT READY BLOCK
-═══════════════════════════════════════════════════════════════════════════ */
-function ReportReadyBlock({
-  snapshot,
-  clientName,
-  onRunSnapshot,
-  running,
-}: {
-  snapshot: SnapshotRow | null;
-  clientName: string;
-  onRunSnapshot: () => void;
-  running: boolean;
-}) {
-  const isComplete = snapshot && (snapshot.status?.toLowerCase().includes("complete") || snapshot.status?.toLowerCase().includes("success"));
-  const isRunning = snapshot?.status === "running";
-  const hasSnapshot = !!snapshot;
-  const completedAt = snapshot?.completed_at || snapshot?.created_at;
-
-  // Ready
-  if (isComplete) {
-    return (
-      <div className="w-full min-w-[200px] rounded-xl border border-emerald-200 bg-emerald-50/50 p-4">
-        <div className="flex items-center gap-2 text-emerald-700">
-          <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span className="text-sm font-bold">Report ready</span>
-        </div>
-        {completedAt && (
-          <p className="mt-1 text-xs text-emerald-600">Generated {timeAgo(completedAt)}</p>
-        )}
-        <div className="mt-3">
-          <DownloadPdfButton snapshotId={snapshot.id} variant="compact" />
-        </div>
-      </div>
-    );
-  }
-
-  // Running
-  if (isRunning) {
-    return (
-      <div className="w-full min-w-[200px] rounded-xl border border-amber-200 bg-amber-50/50 p-4">
-        <div className="flex items-center gap-2 text-amber-700">
-          <svg className="h-5 w-5 shrink-0 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span className="text-sm font-semibold">Report pending</span>
-        </div>
-        <p className="mt-1 text-xs text-amber-600">Will be ready when snapshot completes</p>
-      </div>
-    );
-  }
-
-  // Failed or no snapshot
-  return (
-    <div className="w-full min-w-[200px] rounded-xl border border-border bg-surface-2/50 p-4">
-      <div className="text-sm font-semibold text-text-2">No report yet</div>
-      <p className="mt-1 text-xs text-text-3">
-        {hasSnapshot ? "Run a new snapshot to generate report" : "Run your first snapshot to create a client report"}
-      </p>
-      <button
-        onClick={onRunSnapshot}
-        disabled={running}
-        className="mt-3 inline-flex items-center gap-2 rounded-lg bg-text px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-text/90 disabled:opacity-50"
-      >
-        {running ? (
-          <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-          </svg>
-        ) : null}
-        Run snapshot
-      </button>
+      <p className="mt-4 text-sm text-text-2">{description}</p>
     </div>
   );
 }
@@ -465,10 +341,9 @@ function KeyInsightsCards({
     topWeakness = "Strong position — focus on maintaining";
   }
 
-  // Primary: Cross-Model Alignment (larger). Supporting: Weakest Model, Competitive Standing, Confidence.
-  const alignmentLabel = modelGap > 40 ? "Critical misalignment" : modelGap > 20 ? "Partial alignment" : "Strong alignment";
-  const alignmentValue = modelGap > 0 ? `${topModel[0]} ${topModel[1]} · ${weakModel[0]} ${weakModel[1]}` : "Run snapshot";
-  const alignmentHighlight = modelGap > 40 ? "text-red-600" : modelGap > 20 ? "text-amber-600" : "text-emerald-600";
+  const alignmentStatus = modelGap > 40 ? { label: "Critical", dot: "bg-red-500" } : modelGap > 20 ? { label: "Moderate", dot: "bg-amber-500" } : { label: "Strong", dot: "bg-emerald-500" };
+  const weaknessStatus = topWeakness.includes("Strong") ? { label: "Strong", dot: "bg-emerald-500" } : topWeakness.includes("only") ? { label: "Critical", dot: "bg-red-500" } : { label: "Moderate", dot: "bg-amber-500" };
+  const confStatus = confidence.variant === "success" ? "bg-emerald-500" : confidence.variant === "warning" ? "bg-amber-500" : "bg-red-500";
 
   const hasCompetitiveData = totalEntities > 1;
   const competitiveValue = hasCompetitiveData ? `Rank #${clientRank} of ${totalEntities}` : "Not enough competitor data yet";
@@ -476,40 +351,66 @@ function KeyInsightsCards({
 
   return (
     <div className="space-y-4">
-      {/* Primary card — Cross-Model Alignment */}
-      <div className="rounded-xl border border-border bg-white p-5">
-        <div className="text-xs font-semibold uppercase tracking-wider text-text-3">Cross-Model Alignment</div>
-        <div className={cn("mt-2 text-lg font-bold", alignmentHighlight)}>{alignmentLabel}</div>
-        <div className="mt-1 text-sm text-text-2">{alignmentValue}</div>
+      {/* Primary card */}
+      <div className="rounded-xl border border-border bg-white p-5 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-wider text-text-3">Cross-Model Alignment</div>
+            <div className="mt-1.5 text-sm font-bold text-text">
+              {modelGap > 0 ? `${modelGap}pt gap (${topModel[0]} vs ${weakModel[0]})` : "Run snapshot"}
+            </div>
+          </div>
+          {modelGap > 0 && (
+            <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium", alignmentStatus.dot === "bg-red-500" ? "bg-red-50 text-red-700" : alignmentStatus.dot === "bg-amber-500" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700")}>
+              <span className={cn("h-1.5 w-1.5 rounded-full", alignmentStatus.dot)} />
+              {alignmentStatus.label}
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Supporting cards */}
+      {/* Supporting cards — all neutral */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-border bg-white p-4">
+        <div className="rounded-xl border border-border bg-white p-4 shadow-sm">
           <div className="text-xs font-semibold uppercase tracking-wider text-text-3">Weakest Model</div>
           <div className="mt-1.5 text-sm font-bold text-text">
             {weakModel ? `${weakModel[0]} (${weakModel[1]})` : "—"}
           </div>
         </div>
-        <div className="rounded-xl border border-border bg-white p-4">
+        <div className="rounded-xl border border-border bg-white p-4 shadow-sm">
           <div className="text-xs font-semibold uppercase tracking-wider text-text-3">Competitive Standing</div>
           <div className="mt-1.5 text-sm font-bold text-text">{competitiveValue}</div>
           {competitiveCta && (
-            <a href="#competitors" className="mt-2 inline-block text-xs font-semibold text-text hover:underline">
+            <a href="#competitors" className="mt-2 inline-block text-xs font-medium text-text-2 hover:text-text hover:underline">
               Add competitors →
             </a>
           )}
         </div>
-        <div className="rounded-xl border border-border bg-white p-4">
-          <div className="text-xs font-semibold uppercase tracking-wider text-text-3">Confidence</div>
-          <div className="mt-1.5 text-sm font-bold text-text">{confidence.label}</div>
+        <div className="rounded-xl border border-border bg-white p-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wider text-text-3">Confidence</div>
+              <div className="mt-1.5 text-sm font-bold text-text">{confidence.label}</div>
+            </div>
+            <span className={cn("h-2 w-2 rounded-full shrink-0", confStatus)} />
+          </div>
         </div>
       </div>
 
-      {/* Top weakness — full width */}
-      <div className="rounded-xl border border-border bg-white p-4">
-        <div className="text-xs font-semibold uppercase tracking-wider text-text-3">Top Weakness</div>
-        <div className="mt-1.5 text-sm font-bold text-text">{topWeakness}</div>
+      {/* Top weakness */}
+      <div className="rounded-xl border border-border bg-white p-4 shadow-sm">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-wider text-text-3">Top Weakness</div>
+            <div className="mt-1.5 text-sm font-bold text-text">{topWeakness}</div>
+          </div>
+          {!topWeakness.includes("Run a snapshot") && (
+            <span className={cn("inline-flex items-center gap-1.5 shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium", weaknessStatus.dot === "bg-red-500" ? "bg-red-50 text-red-700" : weaknessStatus.dot === "bg-amber-500" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700")}>
+              <span className={cn("h-1.5 w-1.5 rounded-full", weaknessStatus.dot)} />
+              {weaknessStatus.label}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -554,65 +455,44 @@ function DiagnosisSummary({
     diagnosisText = `Your brand shows uniformly low visibility across all models (avg: ${avg}). This indicates a fundamental authority signal deficiency rather than a model-specific issue. Broad content and citation strategy improvements are needed.`;
   }
 
-  // Neutral box — calm authority. Red only for severe numbers.
   const suggestedAction =
     gap > 40
-      ? "Recommended: Improve authority signals + cross-model structured retrieval. Focus on the weakest model."
+      ? "Improve authority signals + cross-model structured retrieval. Focus on the weakest model."
       : gap > 20
-        ? "Recommended: Apply patterns from your strongest model to underperforming architectures."
+        ? "Apply patterns from your strongest model to underperforming architectures."
         : avg >= 70
-          ? "Recommended: Maintain current strategy. Monitor for competitive shifts."
-          : "Recommended: Broad content + citation strategy improvements to lift baseline visibility.";
+          ? "Maintain current strategy. Monitor for competitive shifts."
+          : "Broad content + citation strategy improvements to lift baseline visibility.";
 
   return (
-    <div className="rounded-xl border border-border bg-white p-5">
-      <div className="flex items-start gap-3">
-        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-2">
-          <svg className="h-5 w-5 text-text-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611l-.772.136a18.182 18.182 0 01-6.363 0l-.772-.136c-1.717-.293-2.3-2.379-1.067-3.61L12.6 15.3" />
-          </svg>
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-bold uppercase tracking-wide text-text-3">Cross-Model Alignment Diagnosis</h3>
-          <p className="mt-2 text-sm leading-relaxed text-text">
-            {diagnosisText}
-          </p>
+    <div className="rounded-xl border border-border bg-white p-5 shadow-sm">
+      <h3 className="text-sm font-bold uppercase tracking-wide text-text-3">Cross-Model Diagnosis</h3>
+      <p className="mt-2 text-sm leading-relaxed text-text">
+        {diagnosisText}
+      </p>
 
-          {/* Key metrics — color only for severe numbers */}
-          <div className="mt-4 flex flex-wrap gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wide text-text-3">Spread</span>
-              <span className={cn("text-sm font-bold", gap > 40 ? "text-red-600" : "text-text")}>
-                {gap}pt gap
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wide text-text-3">Variance</span>
-              <span className="text-sm font-bold text-text">{variance}%</span>
-            </div>
-            {mentionRate !== null && (
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wide text-text-3">Mention Rate</span>
-                <span className={cn("text-sm font-bold", mentionRate >= 70 ? "text-emerald-600" : mentionRate >= 40 ? "text-text" : "text-amber-600")}>
-                  {mentionRate}%
-                </span>
-              </div>
-            )}
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wide text-text-3">Best</span>
-              <span className="text-sm font-bold capitalize text-text">{strongest[0]} ({strongest[1]})</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wide text-text-3">Weakest</span>
-              <span className={cn("text-sm font-bold capitalize", gap > 40 ? "text-red-600" : "text-text")}>{weakest[0]} ({weakest[1]})</span>
-            </div>
+      {/* Key numbers */}
+      {(() => {
+        const byName = Object.fromEntries(sorted.map(([p, s]) => [p.toLowerCase(), s]));
+        const openai = byName["openai"] ?? sorted[0]?.[1];
+        const anthropic = byName["anthropic"] ?? sorted.find(([p]) => p.toLowerCase().includes("anthropic"))?.[1];
+        const gemini = byName["gemini"] ?? sorted.find(([p]) => p.toLowerCase().includes("gemini"))?.[1];
+        return (
+          <div className="mt-4 flex flex-wrap gap-6 rounded-lg bg-surface-2/50 px-4 py-3">
+            {openai != null && <div><span className="text-xs text-text-3">OpenAI:</span> <span className="font-semibold text-text">{openai}</span></div>}
+            {anthropic != null && <div><span className="text-xs text-text-3">Anthropic:</span> <span className="font-semibold text-text">{anthropic}</span></div>}
+            {gemini != null && <div><span className="text-xs text-text-3">Gemini:</span> <span className="font-semibold text-text">{gemini}</span></div>}
+            <div><span className="text-xs text-text-3">Gap:</span> <span className="font-semibold text-text">{gap} points</span></div>
           </div>
+        );
+      })()}
 
-          <p className="mt-4 text-sm font-medium text-text-2">
-            {suggestedAction}
-          </p>
-        </div>
-      </div>
+      <p className="mt-3 text-xs text-text-3">
+        <span className="font-medium text-text-2">Interpretation:</span> Authority signals align with {strongest[0]} retrieval but {gap > 20 ? "vary" : "align"} in alternative model architectures.
+      </p>
+      <p className="mt-2 text-sm font-medium text-text">
+        <span className="text-text-3">Recommended focus:</span> {suggestedAction}
+      </p>
     </div>
   );
 }
@@ -1176,7 +1056,7 @@ function RunSnapshotButton({
     <button
       onClick={onRunSnapshot}
       disabled={running}
-      className="inline-flex items-center gap-1.5 rounded-lg bg-text px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-text/90 disabled:opacity-50"
+      className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-3 py-2 text-sm font-medium text-text transition-colors hover:bg-surface-2 disabled:opacity-50"
     >
       {running ? (
         <>
@@ -1405,8 +1285,8 @@ function CompetitorComparisonChart({
 function ModelComparisonChart({ providers }: { providers: [string, number][] }) {
   if (providers.length === 0) {
     return (
-      <div className="rounded-xl border border-border bg-white p-5">
-        <h3 className="text-sm font-semibold text-text">Cross-Model Visibility Analysis</h3>
+      <div className="rounded-xl border border-border bg-white p-5 shadow-sm">
+        <h3 className="text-sm font-semibold text-text">Cross-Model Visibility Spread</h3>
         <div className="mt-4 flex h-32 items-center justify-center text-sm text-text-3">
           Run a snapshot to see model-specific performance
         </div>
@@ -1421,9 +1301,6 @@ function ModelComparisonChart({ providers }: { providers: [string, number][] }) 
     ? Math.round(Math.sqrt(sorted.reduce((sum, [, s]) => sum + Math.pow(s - avg, 2), 0) / sorted.length) * 10) / 10
     : 0;
 
-  const gapLabel = maxGap > 40 ? "Massive Cross-Model Visibility Gap" : maxGap > 20 ? "Significant Cross-Model Variance" : "Consistent Cross-Model Alignment";
-  const gapColor = maxGap > 40 ? "text-red-600" : maxGap > 20 ? "text-amber-600" : "text-emerald-600";
-
   // Create visual comparison
   const height = 140;
   const width = 300;
@@ -1433,32 +1310,11 @@ function ModelComparisonChart({ providers }: { providers: [string, number][] }) 
   const startX = (width - totalBarsWidth) / 2;
 
   return (
-    <div className="rounded-xl border border-border bg-white p-5">
-      {/* Dramatic headline */}
-      <div className="mb-1">
-        <h3 className={cn("text-sm font-bold", gapColor)}>{gapLabel}</h3>
-        <p className="text-xs text-text-3 mt-0.5">Ranking signal density by AI model</p>
+    <div className="rounded-xl border border-border bg-white p-5 shadow-sm">
+      <div className="mb-4">
+        <h3 className="text-sm font-semibold text-text">Cross-Model Visibility Spread</h3>
+        <p className="text-xs text-text-3 mt-0.5">Gap: {maxGap} points · Variance: {variance}% · Average: {avg}</p>
       </div>
-
-      {/* Gap metrics strip */}
-      {sorted.length > 1 && (
-        <div className="mb-4 flex flex-wrap gap-3 rounded-lg bg-surface-2/50 px-3 py-2">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-text-3">Gap</span>
-            <span className={cn("text-xs font-bold", maxGap > 40 ? "text-red-600" : maxGap > 20 ? "text-amber-600" : "text-emerald-600")}>
-              {sorted[0][0]} vs {sorted[sorted.length - 1][0]}: +{maxGap}pts
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-text-3">Variance</span>
-            <span className="text-xs font-bold text-text">{variance}%</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-text-3">Avg</span>
-            <span className="text-xs font-bold text-text">{avg}</span>
-          </div>
-        </div>
-      )}
 
       <div>
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ maxHeight: '160px' }}>
@@ -2433,23 +2289,10 @@ export default function ClientDetailPage() {
             <span className="font-medium text-text">{client.name}</span>
           </nav>
 
-          {/* Client header: name, snapshot selector, Run + Download */}
+          {/* Client header: Left = name + site, Right = actions + snapshot */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-text">{client.name}</h1>
-                <RunSnapshotButton
-                  running={running}
-                  snapshotStatus={selectedSnapshot?.status ?? null}
-                  onRunSnapshot={runSnapshot}
-                />
-                {selectedSnapshot && (selectedSnapshot.status?.toLowerCase().includes("complete") || selectedSnapshot.status?.toLowerCase().includes("success")) && (
-                  <DownloadPdfButton
-                    snapshotId={selectedSnapshot.id}
-                    variant="compact"
-                  />
-                )}
-              </div>
+              <h1 className="text-2xl font-bold text-text">{client.name}</h1>
               <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-text-2">
                 {client.website && (
                   <a href={client.website} target="_blank" rel="noreferrer" className="hover:underline">
@@ -2460,11 +2303,21 @@ export default function ClientDetailPage() {
                 <span className="capitalize">{client.industry.replace(/_/g, " ")}</span>
               </div>
             </div>
-            <SnapshotSelector
-              snapshots={snapshots}
-              selectedId={selectedSnapshotId}
-              onSelect={setSelectedSnapshotId}
-            />
+            <div className="flex flex-wrap items-center gap-3">
+              <SnapshotSelector
+                snapshots={snapshots}
+                selectedId={selectedSnapshotId}
+                onSelect={setSelectedSnapshotId}
+              />
+              <RunSnapshotButton
+                running={running}
+                snapshotStatus={selectedSnapshot?.status ?? null}
+                onRunSnapshot={runSnapshot}
+              />
+              {selectedSnapshot && (selectedSnapshot.status?.toLowerCase().includes("complete") || selectedSnapshot.status?.toLowerCase().includes("success")) && (
+                <DownloadPdfButton snapshotId={selectedSnapshot.id} variant="compact" />
+              )}
+            </div>
           </div>
 
           {/* Single scrollable page */}
@@ -2499,7 +2352,7 @@ export default function ClientDetailPage() {
                 </Alert>
               )}
 
-              {/* SECTION 1: Score Hero + Report Ready */}
+              {/* SECTION 1: Score Summary */}
               <ScoreHero
                 score={selectedSnapshot?.vrtl_score ?? null}
                 previousScore={previousSnapshot?.vrtl_score ?? null}
@@ -2507,61 +2360,25 @@ export default function ClientDetailPage() {
                 updatedAt={selectedSnapshot?.completed_at || selectedSnapshot?.created_at || null}
                 status={selectedSnapshot?.status ?? null}
                 historicalScores={historicalScores}
-                snapshot={selectedSnapshot}
-                clientName={client.name}
-                onRunSnapshot={runSnapshot}
-                running={running}
+                reportReadyAt={
+                  selectedSnapshot && (selectedSnapshot.status?.toLowerCase().includes("complete") || selectedSnapshot.status?.toLowerCase().includes("success"))
+                    ? (selectedSnapshot.completed_at || selectedSnapshot.created_at)
+                    : null
+                }
               />
               <div ref={heroSentinelRef} className="h-0" aria-hidden />
 
-              {/* SECTION 2: Key insights (executive summary) */}
-              <KeyInsightsCards
-                score={selectedSnapshot?.vrtl_score ?? null}
-                providers={providers}
-                detail={snapshotDetail}
-                competitors={competitors}
-                confidence={confidence}
-              />
+              {/* SECTION 2: Cross-Model Snapshot (3 model bars) */}
+              <ModelComparisonChart providers={providers} />
 
-              {/* AI Visibility Diagnosis */}
+              {/* SECTION 3: Diagnosis */}
               <DiagnosisSummary
                 score={selectedSnapshot?.vrtl_score ?? null}
                 providers={providers}
                 detail={snapshotDetail}
               />
 
-              {/* SECTION 3: Deep analytics */}
-              <h3 className="text-sm font-bold uppercase tracking-wider text-text-3">Deep analytics</h3>
-              <div className="grid gap-6 lg:grid-cols-2">
-                <ModelComparisonChart providers={providers} />
-                <ScoreTrendChart 
-                  scores={historicalScores} 
-                  dates={snapshots
-                    .filter(s => s.vrtl_score !== null && (s.status?.toLowerCase().includes("complete") || s.status?.toLowerCase().includes("success")))
-                    .slice(0, 10)
-                    .map(s => s.created_at)
-                    .reverse()
-                  } 
-                />
-              </div>
-
-              {/* Model Authority + Competitive Intelligence */}
-              <div className="grid gap-6 lg:grid-cols-2">
-                <ProviderBreakdown providers={providers} />
-                <CompetitorComparisonChart
-                  clientName={client.name}
-                  clientMentions={snapshotDetail?.summary.client_mentioned_count ?? 0}
-                  topCompetitors={snapshotDetail?.summary.top_competitors ?? []}
-                />
-              </div>
-
-              {/* Prompt Performance + Signal Quality */}
-              <div className="grid gap-6 lg:grid-cols-2">
-                <PromptPerformance detail={snapshotDetail} />
-                <SignalQualityChart detail={snapshotDetail} />
-              </div>
-
-              {/* Strategic Recommendations */}
+              {/* SECTION 4: Recommended Actions */}
               <Recommendations
                 score={selectedSnapshot?.vrtl_score ?? null}
                 providers={providers}
@@ -2569,22 +2386,58 @@ export default function ClientDetailPage() {
                 detail={snapshotDetail}
               />
 
-              {/* Inline Competitors section */}
-              <CompetitorsSection
-                competitors={competitors}
-                busy={busy}
-                newName={newName}
-                newWebsite={newWebsite}
-                setNewName={setNewName}
-                setNewWebsite={setNewWebsite}
-                onAddCompetitor={addCompetitor}
-                onDeleteCompetitor={deleteCompetitor}
-              />
-
-              {/* Collapsible Detailed Findings (Evidence) - only when we have responses */}
-              {snapshotDetail?.responses && snapshotDetail.responses.length > 0 && (
-                <EvidenceSection detail={snapshotDetail} />
-              )}
+              {/* SECTION 5: Deep Analytics (collapsible) */}
+              <details className="group rounded-xl border border-border bg-white shadow-sm">
+                <summary className="flex cursor-pointer items-center justify-between px-5 py-4 hover:bg-surface-2/30">
+                  <h3 className="text-sm font-semibold text-text">Deep analytics</h3>
+                  <svg className="h-4 w-4 text-text-3 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                  </svg>
+                </summary>
+                <div className="border-t border-border space-y-6 p-5">
+                  <KeyInsightsCards
+                    score={selectedSnapshot?.vrtl_score ?? null}
+                    providers={providers}
+                    detail={snapshotDetail}
+                    competitors={competitors}
+                    confidence={confidence}
+                  />
+                  <div className="grid gap-6 lg:grid-cols-2">
+                    <ScoreTrendChart 
+                      scores={historicalScores} 
+                      dates={snapshots
+                        .filter(s => s.vrtl_score !== null && (s.status?.toLowerCase().includes("complete") || s.status?.toLowerCase().includes("success")))
+                        .slice(0, 10)
+                        .map(s => s.created_at)
+                        .reverse()
+                      } 
+                    />
+                    <ProviderBreakdown providers={providers} />
+                  </div>
+                  <div className="grid gap-6 lg:grid-cols-2">
+                    <CompetitorComparisonChart
+                      clientName={client.name}
+                      clientMentions={snapshotDetail?.summary.client_mentioned_count ?? 0}
+                      topCompetitors={snapshotDetail?.summary.top_competitors ?? []}
+                    />
+                    <PromptPerformance detail={snapshotDetail} />
+                  </div>
+                  <SignalQualityChart detail={snapshotDetail} />
+                  <CompetitorsSection
+                    competitors={competitors}
+                    busy={busy}
+                    newName={newName}
+                    newWebsite={newWebsite}
+                    setNewName={setNewName}
+                    setNewWebsite={setNewWebsite}
+                    onAddCompetitor={addCompetitor}
+                    onDeleteCompetitor={deleteCompetitor}
+                  />
+                  {snapshotDetail?.responses && snapshotDetail.responses.length > 0 && (
+                    <EvidenceSection detail={snapshotDetail} />
+                  )}
+                </div>
+              </details>
             </div>
 
           {/* Sticky Download Bar - appears after scroll */}
