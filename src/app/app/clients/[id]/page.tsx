@@ -1251,10 +1251,10 @@ function CrossModelSnapshot({
         ? "Maintain current strategy. Monitor for competitive shifts."
         : "Broad content + citation strategy improvements to lift baseline visibility.";
 
-  const height = 140;
-  const width = 240;
-  const barWidth = 48;
-  const barGap = 16;
+  const height = 160;
+  const width = 360;
+  const barWidth = 80;
+  const barGap = 24;
   const totalBarsWidth = sorted.length * barWidth + (sorted.length - 1) * barGap;
   const startX = (width - totalBarsWidth) / 2;
 
@@ -1262,10 +1262,10 @@ function CrossModelSnapshot({
     <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
       <h3 className="text-xl font-semibold text-zinc-900">Cross-Model Visibility Spread</h3>
 
-      <div className="mt-4 grid gap-8 lg:grid-cols-[1fr,auto]">
-        {/* Left: Bar chart */}
-        <div className="min-h-[120px]">
-          <svg viewBox={`0 0 ${width} ${height}`} className="w-full max-w-[280px]" style={{ maxHeight: "140px" }}>
+      <div className="mt-4 grid gap-8 lg:grid-cols-[1fr,minmax(160px,auto)]">
+        {/* Left: Bar chart — fills available space */}
+        <div className="min-h-[160px] flex items-center">
+          <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto min-w-0" preserveAspectRatio="xMidYMid meet" style={{ maxHeight: "220px", minHeight: "160px" }}>
             <line
               x1="0"
               y1={height - 20 - (avg / 100) * (height - 40)}
@@ -2227,17 +2227,6 @@ export default function ClientDetailPage() {
 
       {client && (
         <>
-          {/* Breadcrumb */}
-          <nav className="mb-4 flex items-center gap-1.5 text-sm">
-            <Link href="/app" className="text-text-2 transition-colors hover:text-text">
-              Clients
-            </Link>
-            <svg className="h-3.5 w-3.5 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-            </svg>
-            <span className="font-medium text-text">{client.name}</span>
-          </nav>
-
           {/* Client header: Left = name + site, Right = actions + snapshot */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
