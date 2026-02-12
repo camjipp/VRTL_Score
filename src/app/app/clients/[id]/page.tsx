@@ -144,18 +144,6 @@ function pct(n: number, d: number) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   TAB NAVIGATION
-═══════════════════════════════════════════════════════════════════════════ */
-type Tab = "overview" | "evidence" | "competitors" | "reports";
-
-const TABS: { id: Tab; label: string }[] = [
-  { id: "overview", label: "Overview" },
-  { id: "evidence", label: "Evidence" },
-  { id: "competitors", label: "Competitors" },
-  { id: "reports", label: "Reports" },
-];
-
-/* ═══════════════════════════════════════════════════════════════════════════
    SNAPSHOT SELECTOR
 ═══════════════════════════════════════════════════════════════════════════ */
 function SnapshotSelector({
@@ -229,7 +217,7 @@ function ScoreSparkline({ scores, color = "#10b981" }: { scores: number[]; color
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   SCORE HERO (with sparkline)
+   SCORE HERO (with sparkline + Report Ready)
 ═══════════════════════════════════════════════════════════════════════════ */
 function ScoreHero({
   score,
@@ -238,6 +226,10 @@ function ScoreHero({
   updatedAt,
   status,
   historicalScores,
+  snapshot,
+  clientName,
+  onRunSnapshot,
+  running,
 }: {
   score: number | null;
   previousScore: number | null;
@@ -245,6 +237,10 @@ function ScoreHero({
   updatedAt: string | null;
   status: string | null;
   historicalScores: number[];
+  snapshot: SnapshotRow | null;
+  clientName: string;
+  onRunSnapshot: () => void;
+  running: boolean;
 }) {
   const { label, description } = getScoreLabel(score);
   const delta = score !== null && previousScore !== null ? score - previousScore : null;
@@ -318,19 +314,198 @@ function ScoreHero({
           )}
         </div>
 
-        {/* Right: Labels */}
-        <div className="flex flex-wrap items-start gap-2 sm:flex-col sm:items-end">
-          <div className={cn("rounded-lg px-3 py-1.5 text-sm font-semibold", getScoreBg(score), getScoreColor(score))}>
-            {label}
+        {/* Right: Labels + Report Ready */}
+        <div className="flex flex-col items-end gap-4">
+          <div className="flex flex-wrap items-start justify-end gap-2">
+            <div className={cn("rounded-lg px-3 py-1.5 text-sm font-semibold", getScoreBg(score), getScoreColor(score))}>
+              {label}
+            </div>
+            <Badge variant={confidence.variant}>{confidence.label}</Badge>
+            {status === "running" && <Badge variant="warning">Analyzing...</Badge>}
+            {updatedAt && (
+              <span className="text-xs text-text-3">{timeAgo(updatedAt)}</span>
+            )}
           </div>
-          <Badge variant={confidence.variant}>{confidence.label}</Badge>
-          {status === "running" && <Badge variant="warning">Analyzing...</Badge>}
-          {updatedAt && (
-            <span className="text-xs text-text-3">{timeAgo(updatedAt)}</span>
-          )}
+
+          {/* Report Ready block */}
+          <ReportReadyBlock
+            snapshot={snapshot}
+            clientName={clientName}
+            onRunSnapshot={onRunSnapshot}
+            running={running}
+          />
         </div>
       </div>
       <p className="relative mt-4 text-sm text-text-2">{description}</p>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REPORT READY BLOCK
+═══════════════════════════════════════════════════════════════════════════ */
+function ReportReadyBlock({
+  snapshot,
+  clientName,
+  onRunSnapshot,
+  running,
+}: {
+  snapshot: SnapshotRow | null;
+  clientName: string;
+  onRunSnapshot: () => void;
+  running: boolean;
+}) {
+  const isComplete = snapshot && (snapshot.status?.toLowerCase().includes("complete") || snapshot.status?.toLowerCase().includes("success"));
+  const isRunning = snapshot?.status === "running";
+  const hasSnapshot = !!snapshot;
+  const completedAt = snapshot?.completed_at || snapshot?.created_at;
+
+  // Ready
+  if (isComplete) {
+    return (
+      <div className="w-full min-w-[200px] rounded-xl border border-emerald-200 bg-emerald-50/50 p-4">
+        <div className="flex items-center gap-2 text-emerald-700">
+          <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className="text-sm font-bold">Report ready</span>
+        </div>
+        {completedAt && (
+          <p className="mt-1 text-xs text-emerald-600">Generated {timeAgo(completedAt)}</p>
+        )}
+        <div className="mt-3">
+          <DownloadPdfButton snapshotId={snapshot.id} variant="compact" />
+        </div>
+      </div>
+    );
+  }
+
+  // Running
+  if (isRunning) {
+    return (
+      <div className="w-full min-w-[200px] rounded-xl border border-amber-200 bg-amber-50/50 p-4">
+        <div className="flex items-center gap-2 text-amber-700">
+          <svg className="h-5 w-5 shrink-0 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className="text-sm font-semibold">Report pending</span>
+        </div>
+        <p className="mt-1 text-xs text-amber-600">Will be ready when snapshot completes</p>
+      </div>
+    );
+  }
+
+  // Failed or no snapshot
+  return (
+    <div className="w-full min-w-[200px] rounded-xl border border-border bg-surface-2/50 p-4">
+      <div className="text-sm font-semibold text-text-2">No report yet</div>
+      <p className="mt-1 text-xs text-text-3">
+        {hasSnapshot ? "Run a new snapshot to generate report" : "Run your first snapshot to create a client report"}
+      </p>
+      <button
+        onClick={onRunSnapshot}
+        disabled={running}
+        className="mt-3 inline-flex items-center gap-2 rounded-lg bg-text px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-text/90 disabled:opacity-50"
+      >
+        {running ? (
+          <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+        ) : null}
+        Run snapshot
+      </button>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   KEY INSIGHTS (4 punchy cards)
+═══════════════════════════════════════════════════════════════════════════ */
+function KeyInsightsCards({
+  score,
+  providers,
+  detail,
+  competitors,
+  confidence,
+}: {
+  score: number | null;
+  providers: [string, number][];
+  detail: SnapshotDetailResponse | null;
+  competitors: CompetitorRow[];
+  confidence: { label: string; variant: BadgeVariant };
+}) {
+  if (score === null && providers.length === 0) return null;
+
+  const sorted = [...providers].sort((a, b) => b[1] - a[1]);
+  const modelGap = sorted.length > 1 ? sorted[0][1] - sorted[sorted.length - 1][1] : 0;
+  const topModel = sorted[0];
+  const weakModel = sorted[sorted.length - 1];
+
+  const clientMentions = detail?.summary.client_mentioned_count ?? 0;
+  const topCompetitors = detail?.summary.top_competitors ?? [];
+  const allEntities = [
+    { name: "You", count: clientMentions, isClient: true },
+    ...topCompetitors.slice(0, 4).map(c => ({ name: c.name, count: c.count, isClient: false })),
+  ].sort((a, b) => b.count - a.count);
+  const clientRank = allEntities.findIndex(e => e.isClient) + 1;
+  const totalEntities = allEntities.length;
+
+  const mentionRate = detail ? pct(detail.summary.client_mentioned_count, detail.summary.responses_count || 1) : null;
+  const citationRate = detail ? pct(detail.summary.sources_count, detail.summary.responses_count || 1) : null;
+
+  let topWeakness = "Run a snapshot to identify weaknesses";
+  if (mentionRate !== null && mentionRate < 50) {
+    topWeakness = `Low visibility — mentioned in only ${mentionRate}% of responses`;
+  } else if (citationRate !== null && citationRate < 20) {
+    topWeakness = `Authority gap — only ${citationRate}% with citations`;
+  } else if (modelGap > 40 && weakModel) {
+    topWeakness = `${weakModel[0]} retrieval weakness — ${weakModel[1]}pt gap vs best`;
+  } else if (score !== null && score >= 70) {
+    topWeakness = "Strong position — focus on maintaining";
+  }
+
+  type Severity = "high" | "medium" | "low";
+  const severityStyles: Record<Severity, string> = {
+    high: "border-red-200 bg-red-50/50 text-red-700",
+    medium: "border-amber-200 bg-amber-50/50 text-amber-700",
+    low: "border-emerald-200 bg-emerald-50/50 text-emerald-700",
+  };
+
+  const cards: { label: string; value: string; severity: Severity }[] = [
+    {
+      label: "Model gap",
+      value: modelGap > 0 ? `${topModel[0]} vs ${weakModel[0]}: ${modelGap}pt` : "—",
+      severity: modelGap > 40 ? "high" : modelGap > 20 ? "medium" : "low",
+    },
+    {
+      label: "Competitive position",
+      value: totalEntities > 1 ? `Rank #${clientRank} of ${totalEntities}` : "—",
+      severity: clientRank === 1 ? "low" : clientRank <= 2 ? "medium" : "high",
+    },
+    {
+      label: "Top weakness",
+      value: topWeakness,
+      severity: topWeakness.includes("Strong") ? "low" : topWeakness.includes("only") ? "high" : "medium",
+    },
+    {
+      label: "Confidence",
+      value: confidence.label,
+      severity: confidence.variant === "success" ? "low" : confidence.variant === "warning" ? "medium" : "high",
+    },
+  ];
+
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {cards.map((card) => (
+        <div
+          key={card.label}
+          className={cn("rounded-xl border p-4", severityStyles[card.severity])}
+        >
+          <div className="text-xs font-semibold uppercase tracking-wider text-text-3/90">{card.label}</div>
+          <div className="mt-1.5 text-sm font-bold leading-snug">{card.value}</div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -1421,7 +1596,208 @@ function SignalQualityChart({ detail }: { detail: SnapshotDetailResponse | null 
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   COMPETITORS TAB
+   COMPETITORS SECTION (inline, compact)
+═══════════════════════════════════════════════════════════════════════════ */
+function CompetitorsSection({
+  competitors,
+  busy,
+  newName,
+  newWebsite,
+  setNewName,
+  setNewWebsite,
+  onAddCompetitor,
+  onDeleteCompetitor,
+}: {
+  competitors: CompetitorRow[];
+  busy: boolean;
+  newName: string;
+  newWebsite: string;
+  setNewName: (v: string) => void;
+  setNewWebsite: (v: string) => void;
+  onAddCompetitor: (e: React.FormEvent) => void;
+  onDeleteCompetitor: (id: string) => void;
+}) {
+  const confidence = getConfidenceLabel(competitors.length);
+
+  return (
+    <div className="rounded-xl border border-border bg-white p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="text-sm font-semibold text-text">Tracked competitors</h3>
+          <p className="text-xs text-text-3 mt-0.5">
+            {competitors.length}/8 slots · {confidence.label}
+          </p>
+        </div>
+        {competitors.length < 8 && (
+          <form className="flex gap-2 flex-wrap" onSubmit={onAddCompetitor}>
+            <input
+              type="text"
+              placeholder="Competitor name"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              className="rounded-lg border border-border px-3 py-1.5 text-sm focus:border-text focus:outline-none w-36"
+            />
+            <input
+              type="url"
+              placeholder="https://..."
+              value={newWebsite}
+              onChange={(e) => setNewWebsite(e.target.value)}
+              className="rounded-lg border border-border px-3 py-1.5 text-sm focus:border-text focus:outline-none w-40"
+            />
+            <button
+              type="submit"
+              disabled={busy || !newName.trim()}
+              className="rounded-lg bg-text px-3 py-1.5 text-sm font-medium text-white hover:bg-text/90 disabled:opacity-50"
+            >
+              Add
+            </button>
+          </form>
+        )}
+      </div>
+      {competitors.length > 0 ? (
+        <div className="space-y-2">
+          {competitors.map((c) => (
+            <div
+              key={c.id}
+              className="flex items-center justify-between rounded-lg border border-border/50 bg-surface-2/30 px-3 py-2"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-text text-xs font-bold text-white">
+                  {(c.name || "?")[0].toUpperCase()}
+                </span>
+                <div className="min-w-0">
+                  <div className="text-sm font-medium text-text truncate">{c.name}</div>
+                  {c.website && (
+                    <div className="text-xs text-text-3 truncate">{c.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}</div>
+                  )}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => onDeleteCompetitor(c.id)}
+                disabled={busy}
+                className="shrink-0 p-1.5 text-text-3 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+                title="Remove competitor"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-text-3 py-4">Add competitors to improve analysis confidence and benchmark against the competition.</p>
+      )}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EVIDENCE SECTION (collapsible detailed findings)
+═══════════════════════════════════════════════════════════════════════════ */
+function EvidenceSection({ detail }: { detail: SnapshotDetailResponse }) {
+  const { summary, responses } = detail;
+  const signalsTotal = summary.responses_count;
+
+  return (
+    <details className="group rounded-xl border border-border bg-white">
+      <summary className="flex cursor-pointer items-center justify-between px-5 py-4 hover:bg-surface-2/30">
+        <div>
+          <h3 className="text-sm font-semibold text-text">Detailed findings</h3>
+          <p className="text-xs text-text-3 mt-0.5">{responses.length} signals analyzed</p>
+        </div>
+        <svg className="h-5 w-5 text-text-3 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+        </svg>
+      </summary>
+      <div className="border-t border-border">
+        <div className="grid gap-4 p-5 sm:grid-cols-4">
+          <div className="rounded-lg border border-border bg-surface-2/30 p-4">
+            <div className="text-2xl font-bold text-text">{pct(summary.client_mentioned_count, signalsTotal)}%</div>
+            <div className="text-xs text-text-2">Mention rate</div>
+          </div>
+          <div className="rounded-lg border border-border bg-surface-2/30 p-4">
+            <div className="text-2xl font-bold text-text">{pct(summary.sources_count, signalsTotal)}%</div>
+            <div className="text-xs text-text-2">Citeable</div>
+          </div>
+          <div className="rounded-lg border border-border bg-surface-2/30 p-4">
+            <div className="text-2xl font-bold text-text">{pct(summary.specific_features_count, signalsTotal)}%</div>
+            <div className="text-xs text-text-2">Feature specific</div>
+          </div>
+          <div className="rounded-lg border border-border bg-surface-2/30 p-4">
+            <div className="text-2xl font-bold text-text">{signalsTotal}</div>
+            <div className="text-xs text-text-2">Signals analyzed</div>
+          </div>
+        </div>
+        <div className="divide-y divide-border">
+          {responses.map((r, idx) => {
+            const mentioned = r.client_mentioned;
+            const position = r.client_position;
+            const strength = r.recommendation_strength;
+            let severity: "high" | "medium" | "low" = "low";
+            let title = "Strong signal";
+            if (!mentioned) {
+              severity = "high";
+              title = "Not mentioned";
+            } else if (position === "middle" || position === "bottom" || strength === "weak" || strength === "none") {
+              severity = "medium";
+              title = "Weak positioning";
+            }
+            const severityStyles = {
+              high: { bg: "bg-red-50", text: "text-red-700", border: "border-red-200" },
+              medium: { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200" },
+              low: { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200" },
+            };
+            const styles = severityStyles[severity];
+            return (
+              <details key={r.id} className="group/item">
+                <summary className="flex cursor-pointer items-center justify-between p-4 hover:bg-surface-2/20">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-6 w-6 items-center justify-center rounded bg-surface-2 text-xs font-bold text-text-2">
+                      {idx + 1}
+                    </span>
+                    <span className={cn("rounded px-2 py-0.5 text-xs font-medium", styles.bg, styles.text, styles.border)}>
+                      {severity === "high" ? "High" : severity === "medium" ? "Medium" : "Strong"}
+                    </span>
+                    <span className="text-sm font-medium text-text">{title}</span>
+                  </div>
+                  <svg className="h-4 w-4 text-text-3 transition-transform group-open/item:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                  </svg>
+                </summary>
+                <div className="border-t border-border bg-surface-2/10 p-4 space-y-3">
+                  {r.prompt_text && (
+                    <div>
+                      <div className="text-xs font-semibold text-text-3 mb-1">Prompt</div>
+                      <p className="text-sm text-text-2 italic">&quot;{r.prompt_text}&quot;</p>
+                    </div>
+                  )}
+                  {r.evidence_snippet && (
+                    <div>
+                      <div className="text-xs font-semibold text-text-3 mb-1">Evidence</div>
+                      <p className="text-sm text-text">{r.evidence_snippet}</p>
+                    </div>
+                  )}
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    <span className="rounded bg-surface-2 px-2 py-1 text-text-2">Position: {position || "N/A"}</span>
+                    <span className="rounded bg-surface-2 px-2 py-1 text-text-2">Strength: {strength || "N/A"}</span>
+                    {r.competitors_mentioned.length > 0 && (
+                      <span className="rounded bg-surface-2 px-2 py-1 text-text-2">Competitors: {r.competitors_mentioned.join(", ")}</span>
+                    )}
+                  </div>
+                </div>
+              </details>
+            );
+          })}
+        </div>
+      </div>
+    </details>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   COMPETITORS TAB (legacy - kept for reference, CompetitorsSection used)
 ═══════════════════════════════════════════════════════════════════════════ */
 function CompetitorsTab({
   competitors,
@@ -1766,10 +2142,11 @@ export default function ClientDetailPage() {
   const [running, setRunning] = useState(false);
   const [runError, setRunError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [activeTab, setActiveTab] = useState<Tab>("overview");
+  const [stickyVisible, setStickyVisible] = useState(false);
   const [newName, setNewName] = useState("");
   const [newWebsite, setNewWebsite] = useState("");
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const heroSentinelRef = useRef<HTMLDivElement>(null);
 
   // Derived
   const selectedSnapshot = useMemo(() => {
@@ -1882,6 +2259,18 @@ export default function ClientDetailPage() {
       }
     };
   }, [agencyId, selectedSnapshot?.status, refresh]);
+
+  // Sticky download bar: show when scrolled past hero
+  useEffect(() => {
+    const el = heroSentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setStickyVisible(!entry.isIntersecting),
+      { threshold: 0, rootMargin: "-80px 0px 0px 0px" }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   // Actions
   async function runSnapshot() {
@@ -2029,7 +2418,7 @@ export default function ClientDetailPage() {
             <span className="font-medium text-text">{client.name}</span>
           </nav>
 
-          {/* Client header + snapshot selector + run button */}
+          {/* Client header: name, snapshot selector, Run + Download */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <div className="flex items-center gap-3">
@@ -2039,6 +2428,12 @@ export default function ClientDetailPage() {
                   snapshotStatus={selectedSnapshot?.status ?? null}
                   onRunSnapshot={runSnapshot}
                 />
+                {selectedSnapshot && (selectedSnapshot.status?.toLowerCase().includes("complete") || selectedSnapshot.status?.toLowerCase().includes("success")) && (
+                  <DownloadPdfButton
+                    snapshotId={selectedSnapshot.id}
+                    variant="compact"
+                  />
+                )}
               </div>
               <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-text-2">
                 {client.website && (
@@ -2057,29 +2452,8 @@ export default function ClientDetailPage() {
             />
           </div>
 
-          {/* Tab bar */}
-          <div className="border-b border-border">
-            <nav className="-mb-px flex gap-1">
-              {TABS.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    "border-b-2 px-4 py-3 text-sm font-medium transition-colors",
-                    activeTab === tab.id
-                      ? "border-text text-text"
-                      : "border-transparent text-text-2 hover:border-border hover:text-text"
-                  )}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
-          </div>
-
-          {/* Tab content */}
-          {activeTab === "overview" && (
-            <div className="space-y-6">
+          {/* Single scrollable page */}
+          <div className="space-y-6">
               {/* Snapshot progress (if running) */}
               {selectedSnapshot?.status === "running" && (
                 <SnapshotProgress startedAt={selectedSnapshot?.started_at ?? selectedSnapshot?.created_at ?? null} />
@@ -2110,7 +2484,7 @@ export default function ClientDetailPage() {
                 </Alert>
               )}
 
-              {/* Score Hero */}
+              {/* SECTION 1: Score Hero + Report Ready */}
               <ScoreHero
                 score={selectedSnapshot?.vrtl_score ?? null}
                 previousScore={previousSnapshot?.vrtl_score ?? null}
@@ -2118,6 +2492,20 @@ export default function ClientDetailPage() {
                 updatedAt={selectedSnapshot?.completed_at || selectedSnapshot?.created_at || null}
                 status={selectedSnapshot?.status ?? null}
                 historicalScores={historicalScores}
+                snapshot={selectedSnapshot}
+                clientName={client.name}
+                onRunSnapshot={runSnapshot}
+                running={running}
+              />
+              <div ref={heroSentinelRef} className="h-0" aria-hidden />
+
+              {/* SECTION 2: Key insights (executive summary) */}
+              <KeyInsightsCards
+                score={selectedSnapshot?.vrtl_score ?? null}
+                providers={providers}
+                detail={snapshotDetail}
+                competitors={competitors}
+                confidence={confidence}
               />
 
               {/* AI Visibility Diagnosis */}
@@ -2127,7 +2515,8 @@ export default function ClientDetailPage() {
                 detail={snapshotDetail}
               />
 
-              {/* Cross-Model Analysis + Trend */}
+              {/* SECTION 3: Deep analytics */}
+              <h3 className="text-sm font-bold uppercase tracking-wider text-text-3">Deep analytics</h3>
               <div className="grid gap-6 lg:grid-cols-2">
                 <ModelComparisonChart providers={providers} />
                 <ScoreTrendChart 
@@ -2164,32 +2553,35 @@ export default function ClientDetailPage() {
                 competitors={competitors}
                 detail={snapshotDetail}
               />
+
+              {/* Inline Competitors section */}
+              <CompetitorsSection
+                competitors={competitors}
+                busy={busy}
+                newName={newName}
+                newWebsite={newWebsite}
+                setNewName={setNewName}
+                setNewWebsite={setNewWebsite}
+                onAddCompetitor={addCompetitor}
+                onDeleteCompetitor={deleteCompetitor}
+              />
+
+              {/* Collapsible Detailed Findings (Evidence) - only when we have responses */}
+              {snapshotDetail?.responses && snapshotDetail.responses.length > 0 && (
+                <EvidenceSection detail={snapshotDetail} />
+              )}
             </div>
-          )}
 
-          {activeTab === "evidence" && (
-            <EvidenceTab
-              detail={snapshotDetail}
-              loading={detailLoading}
-              clientName={client.name}
-            />
-          )}
-
-          {activeTab === "competitors" && (
-            <CompetitorsTab
-              competitors={competitors}
-              busy={busy}
-              newName={newName}
-              newWebsite={newWebsite}
-              setNewName={setNewName}
-              setNewWebsite={setNewWebsite}
-              onAddCompetitor={addCompetitor}
-              onDeleteCompetitor={deleteCompetitor}
-            />
-          )}
-
-          {activeTab === "reports" && (
-            <ReportsTab snapshot={selectedSnapshot} clientName={client.name} />
+          {/* Sticky Download Bar - appears after scroll */}
+          {stickyVisible && selectedSnapshot && (selectedSnapshot.status?.toLowerCase().includes("complete") || selectedSnapshot.status?.toLowerCase().includes("success")) && (
+            <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-white/95 py-3 shadow-lg backdrop-blur-sm">
+              <div className="container-xl flex items-center justify-between">
+                <span className="text-sm font-medium text-text">
+                  Ready to share with {client.name}?
+                </span>
+                <DownloadPdfButton snapshotId={selectedSnapshot.id} variant="compact" />
+              </div>
+            </div>
           )}
         </>
       )}
