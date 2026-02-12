@@ -4,6 +4,9 @@ const config: Config = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
+      backgroundImage: {
+        "gradient-radial": "radial-gradient(ellipse at top left, var(--tw-gradient-stops))",
+      },
       colors: {
         bg: "rgb(var(--bg) / <alpha-value>)",
         "bg-2": "rgb(var(--bg-2) / <alpha-value>)",

@@ -88,10 +88,10 @@ function errorMessage(e: unknown): string {
 }
 
 function getScoreLabel(score: number | null): { label: string; description: string } {
-  if (score === null) return { label: "No data", description: "Run a snapshot to measure visibility" };
-  if (score >= 80) return { label: "Strong", description: "Consistently surfaced in AI responses" };
-  if (score >= 50) return { label: "Moderate", description: "Mentioned but not prominently positioned" };
-  return { label: "Weak", description: "Rarely surfaced in AI responses" };
+  if (score === null) return { label: "No data", description: "Run a snapshot to diagnose your AI authority architecture" };
+  if (score >= 80) return { label: "Strong", description: "High ranking signal density — consistently surfaced and cited across AI models" };
+  if (score >= 50) return { label: "Moderate", description: "Partial model alignment — present but not positioned as a primary authority" };
+  return { label: "Weak", description: "Critical retrieval weakness — rarely surfaced or cited in AI-generated responses" };
 }
 
 function getScoreColor(score: number | null): string {
@@ -255,16 +255,40 @@ function ScoreHero({
       ? "#f59e0b" 
       : "#ef4444";
 
+  const scoreGradient = score !== null && score >= 80
+    ? "from-emerald-500/5 via-emerald-500/[0.02] to-transparent"
+    : score !== null && score >= 50
+      ? "from-amber-500/5 via-amber-500/[0.02] to-transparent"
+      : "from-red-500/5 via-red-500/[0.02] to-transparent";
+
+  const glowColor = score !== null && score >= 80
+    ? "shadow-emerald-500/10"
+    : score !== null && score >= 50
+      ? "shadow-amber-500/10"
+      : "shadow-red-500/10";
+
   return (
-    <div className="rounded-xl border border-border bg-white p-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div className={cn("relative overflow-hidden rounded-xl border border-border bg-white p-6", score !== null && `shadow-lg ${glowColor}`)}>
+      {/* Subtle radial glow */}
+      {score !== null && (
+        <div className={cn("pointer-events-none absolute -left-20 -top-20 h-60 w-60 rounded-full bg-gradient-radial", scoreGradient)} />
+      )}
+      <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         {/* Left: Score */}
         <div className="flex items-start gap-6">
           <div className="flex flex-col items-center">
-            <span className={cn("text-6xl font-bold tabular-nums", getScoreColor(score))}>
-              {score ?? "—"}
-            </span>
-            <span className="mt-1 text-xs text-text-3">AI Visibility Score</span>
+            <div className="relative">
+              <span className={cn("text-7xl font-black tabular-nums tracking-tight", getScoreColor(score))}>
+                {score ?? "—"}
+              </span>
+              {score !== null && (
+                <div className={cn(
+                  "absolute -inset-3 -z-10 rounded-2xl opacity-20",
+                  score >= 80 ? "bg-emerald-400" : score >= 50 ? "bg-amber-400" : "bg-red-400"
+                )} style={{ filter: "blur(20px)" }} />
+              )}
+            </div>
+            <span className="mt-1 text-xs font-medium uppercase tracking-wider text-text-3">AI Visibility Score</span>
           </div>
 
           {/* Sparkline + delta */}
@@ -296,7 +320,7 @@ function ScoreHero({
 
         {/* Right: Labels */}
         <div className="flex flex-wrap items-start gap-2 sm:flex-col sm:items-end">
-          <div className={cn("rounded-lg px-3 py-1.5 text-sm font-medium", getScoreBg(score), getScoreColor(score))}>
+          <div className={cn("rounded-lg px-3 py-1.5 text-sm font-semibold", getScoreBg(score), getScoreColor(score))}>
             {label}
           </div>
           <Badge variant={confidence.variant}>{confidence.label}</Badge>
@@ -306,7 +330,99 @@ function ScoreHero({
           )}
         </div>
       </div>
-      <p className="mt-4 text-sm text-text-2">{description}</p>
+      <p className="relative mt-4 text-sm text-text-2">{description}</p>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AI VISIBILITY DIAGNOSIS
+═══════════════════════════════════════════════════════════════════════════ */
+function DiagnosisSummary({
+  score,
+  providers,
+  detail,
+}: {
+  score: number | null;
+  providers: [string, number][];
+  detail: SnapshotDetailResponse | null;
+}) {
+  if (score === null || providers.length === 0) return null;
+
+  const sorted = [...providers].sort((a, b) => b[1] - a[1]);
+  const strongest = sorted[0];
+  const weakest = sorted[sorted.length - 1];
+  const gap = strongest[1] - weakest[1];
+  const avg = Math.round(sorted.reduce((sum, [, s]) => sum + s, 0) / sorted.length);
+  const variance = sorted.length > 1
+    ? Math.round(Math.sqrt(sorted.reduce((sum, [, s]) => sum + Math.pow(s - avg, 2), 0) / sorted.length) * 10) / 10
+    : 0;
+
+  const mentionRate = detail
+    ? pct(detail.summary.client_mentioned_count, detail.summary.responses_count || 1)
+    : null;
+
+  // Build diagnosis text
+  let diagnosisText = "";
+  if (gap > 40) {
+    diagnosisText = `Your brand shows a critical cross-model visibility disparity. ${strongest[0]} ranks you strongly (${strongest[1]}), but ${weakest[0]} barely recognizes you (${weakest[1]}). This ${gap}-point gap indicates your authority signals align with ${strongest[0]}'s retrieval heuristics but fail to register in alternative model architectures.`;
+  } else if (gap > 20) {
+    diagnosisText = `Your brand has moderate model-specific alignment variance. ${strongest[0]} leads at ${strongest[1]}, while ${weakest[0]} trails at ${weakest[1]}. This suggests inconsistent signal density across AI retrieval systems — some models surface you reliably, others don't.`;
+  } else if (avg >= 70) {
+    diagnosisText = `Your brand demonstrates strong cross-model consistency with only ${gap} points of variance. All models surface your brand reliably, indicating robust authority signals across AI retrieval architectures.`;
+  } else {
+    diagnosisText = `Your brand shows uniformly low visibility across all models (avg: ${avg}). This indicates a fundamental authority signal deficiency rather than a model-specific issue. Broad content and citation strategy improvements are needed.`;
+  }
+
+  const severityColor = gap > 40 ? "border-red-200 bg-red-50/50" : gap > 20 ? "border-amber-200 bg-amber-50/50" : "border-emerald-200 bg-emerald-50/50";
+  const severityIcon = gap > 40 ? "text-red-500" : gap > 20 ? "text-amber-500" : "text-emerald-500";
+  const headlineColor = gap > 40 ? "text-red-700" : gap > 20 ? "text-amber-700" : "text-emerald-700";
+
+  return (
+    <div className={cn("rounded-xl border p-5", severityColor)}>
+      <div className="flex items-start gap-3">
+        <div className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", gap > 40 ? "bg-red-100" : gap > 20 ? "bg-amber-100" : "bg-emerald-100")}>
+          <svg className={cn("h-5 w-5", severityIcon)} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611l-.772.136a18.182 18.182 0 01-6.363 0l-.772-.136c-1.717-.293-2.3-2.379-1.067-3.61L12.6 15.3" />
+          </svg>
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm font-bold uppercase tracking-wide text-text-3">AI Visibility Diagnosis</h3>
+          <p className={cn("mt-2 text-sm leading-relaxed", headlineColor)}>
+            {diagnosisText}
+          </p>
+
+          {/* Key metrics strip */}
+          <div className="mt-4 flex flex-wrap gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wide text-text-3">Spread</span>
+              <span className={cn("text-sm font-bold", gap > 40 ? "text-red-700" : gap > 20 ? "text-amber-700" : "text-emerald-700")}>
+                {gap}pt gap
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wide text-text-3">Variance</span>
+              <span className="text-sm font-bold text-text">{variance}%</span>
+            </div>
+            {mentionRate !== null && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wide text-text-3">Mention Rate</span>
+                <span className={cn("text-sm font-bold", mentionRate >= 70 ? "text-emerald-700" : mentionRate >= 40 ? "text-amber-700" : "text-red-700")}>
+                  {mentionRate}%
+                </span>
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wide text-text-3">Best</span>
+              <span className="text-sm font-bold capitalize text-emerald-700">{strongest[0]} ({strongest[1]})</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wide text-text-3">Weakest</span>
+              <span className="text-sm font-bold capitalize text-red-700">{weakest[0]} ({weakest[1]})</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -318,8 +434,8 @@ function PromptPerformance({ detail }: { detail: SnapshotDetailResponse | null }
   if (!detail) {
     return (
       <div className="rounded-xl border border-border bg-white p-5">
-        <h3 className="text-sm font-semibold text-text">Prompt Performance</h3>
-        <p className="mt-2 text-sm text-text-2">Run a snapshot to see performance</p>
+        <h3 className="text-sm font-semibold text-text">Retrieval Performance</h3>
+        <p className="mt-2 text-sm text-text-2">Run a snapshot to measure retrieval metrics</p>
       </div>
     );
   }
@@ -344,7 +460,8 @@ function PromptPerformance({ detail }: { detail: SnapshotDetailResponse | null }
 
   return (
     <div className="rounded-xl border border-border bg-white p-5">
-      <h3 className="text-sm font-semibold text-text">Prompt Performance</h3>
+      <h3 className="text-sm font-semibold text-text">Retrieval Performance</h3>
+      <p className="text-xs text-text-3 mt-0.5">How AI models surface and position your brand</p>
       
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         {/* Mention rate */}
@@ -454,20 +571,35 @@ function ProviderBreakdown({ providers }: { providers: [string, number][] }) {
   if (providers.length === 0) {
     return (
       <div className="rounded-xl border border-border bg-white p-5">
-        <h3 className="text-sm font-semibold text-text">Score by AI Model</h3>
-        <p className="mt-2 text-sm text-text-2">Run a snapshot to see model scores</p>
+        <h3 className="text-sm font-semibold text-text">Model-Specific Authority Signals</h3>
+        <p className="mt-2 text-sm text-text-2">Run a snapshot to analyze retrieval alignment</p>
       </div>
     );
   }
 
   const sorted = [...providers].sort((a, b) => b[1] - a[1]);
+  const avg = Math.round(sorted.reduce((sum, [, s]) => sum + s, 0) / sorted.length);
+
+  function getSignalLabel(score: number): { label: string; className: string } {
+    if (score >= 80) return { label: "Strong alignment", className: "text-emerald-600 bg-emerald-50" };
+    if (score >= 50) return { label: "Partial alignment", className: "text-amber-600 bg-amber-50" };
+    if (score >= 30) return { label: "Signal deficiency", className: "text-red-600 bg-red-50" };
+    return { label: "Citation absence", className: "text-red-700 bg-red-50" };
+  }
 
   return (
     <div className="rounded-xl border border-border bg-white p-5">
-      <h3 className="text-sm font-semibold text-text">Score by AI Model</h3>
-      <div className="mt-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-sm font-semibold text-text">Model-Specific Authority Signals</h3>
+          <p className="text-xs text-text-3 mt-0.5">Retrieval alignment per AI architecture</p>
+        </div>
+        <div className="rounded-lg bg-surface-2 px-2 py-1 text-xs font-bold text-text-2">Avg: {avg}</div>
+      </div>
+      <div className="mt-4 space-y-4">
         {sorted.map(([provider, score], idx) => {
-          const { label } = getScoreLabel(score);
+          const signal = getSignalLabel(score);
+          const gapFromAvg = score - avg;
           const icon = provider.toLowerCase().includes("openai") || provider.toLowerCase().includes("chatgpt")
             ? "/ai/icons8-chatgpt.svg"
             : provider.toLowerCase().includes("claude") || provider.toLowerCase().includes("anthropic")
@@ -477,24 +609,43 @@ function ProviderBreakdown({ providers }: { providers: [string, number][] }) {
                 : "/ai/icons8-chatgpt.svg";
           
           return (
-            <div key={provider} className="flex items-center gap-3">
-              <span className="flex h-6 w-6 items-center justify-center rounded bg-surface-2 text-xs font-bold text-text-3">
-                {idx + 1}
-              </span>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={icon} alt={provider} className="h-6 w-6" />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-medium capitalize text-text truncate">{provider}</span>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className={cn("text-xs font-medium", getScoreColor(score))}>{label}</span>
-                    <span className="text-sm font-bold tabular-nums text-text">{score}</span>
+            <div key={provider} className={cn(
+              "rounded-lg border p-3 transition-all",
+              score >= 80 ? "border-emerald-200 bg-emerald-50/30" : score >= 50 ? "border-amber-200 bg-amber-50/30" : "border-red-200 bg-red-50/30"
+            )}>
+              <div className="flex items-center gap-3">
+                <span className={cn(
+                  "flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold",
+                  idx === 0 ? "bg-emerald-100 text-emerald-700" : "bg-surface-2 text-text-3"
+                )}>
+                  {idx + 1}
+                </span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={icon} alt={provider} className="h-6 w-6" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-sm font-semibold capitalize text-text truncate">{provider}</span>
+                      <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-semibold", signal.className)}>
+                        {signal.label}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {gapFromAvg !== 0 && (
+                        <span className={cn("text-[10px] font-semibold", gapFromAvg > 0 ? "text-emerald-600" : "text-red-600")}>
+                          {gapFromAvg > 0 ? "+" : ""}{gapFromAvg}
+                        </span>
+                      )}
+                      <span className={cn("text-lg font-black tabular-nums", getScoreColor(score))}>{score}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="mt-1.5 h-1.5 rounded-full bg-surface-2">
+              </div>
+              <div className="mt-2 ml-[76px]">
+                <div className="h-2 rounded-full bg-white/80">
                   <div
                     className={cn(
-                      "h-1.5 rounded-full transition-all duration-500",
+                      "h-2 rounded-full transition-all duration-500",
                       score >= 80 ? "bg-emerald-500" : score >= 50 ? "bg-amber-500" : "bg-red-500"
                     )}
                     style={{ width: `${score}%` }}
@@ -557,12 +708,12 @@ function generateStrategicInsights(
     const gap = avgScore - worstModel[1];
     insights.push({
       priority: "HIGH",
-      title: `${worstModel[0]} Visibility Gap`,
-      insight: `${worstModel[0]} scores ${worstModel[1]} — ${gap} points below your average.`,
-      whyItMatters: `${worstModel[0]} handles significant AI query volume. Low visibility means missed discovery opportunities every day.`,
-      action: "Audit your content for ${worstModel[0]}-specific optimization. Focus on structured data, clear value propositions, and content that addresses common user queries directly.",
-      expectedImpact: `+10-15 points in ${worstModel[0]} within 60 days.`,
-      consequence: `Every week this gap persists, competitors capture discovery opportunities you're missing.`
+      title: `${worstModel[0]} Retrieval Weakness`,
+      insight: `${worstModel[0]} scores ${worstModel[1]} — a ${gap}-point authority signal deficiency vs your average.`,
+      whyItMatters: `${worstModel[0]} processes significant AI query volume. This retrieval weakness means your brand is systematically excluded from discovery in this model's architecture.`,
+      action: `Audit content for ${worstModel[0]}-specific optimization. Focus on structured data markup, clear entity relationships, and content that directly maps to common retrieval queries.`,
+      expectedImpact: `+10-15 point lift in ${worstModel[0]} ranking signal density within 60 days.`,
+      consequence: `Every week this gap persists, competitors capture discovery opportunities and compound their authority advantage.`
     });
   }
   
@@ -587,12 +738,12 @@ function generateStrategicInsights(
   if (mentionRate < 50) {
     insights.push({
       priority: "HIGH",
-      title: "Low Visibility Rate",
-      insight: `Mentioned in only ${mentionRate}% of AI responses.`,
-      whyItMatters: "More than half of AI users asking about your category won't discover you. This is a fundamental visibility problem.",
-      action: "Improve brand authority through PR coverage, quality backlinks, and structured data. Create content that directly answers the questions AI models are trained on.",
-      expectedImpact: "Target 70%+ mention rate to enter consideration set.",
-      consequence: `Low visibility compounds — AI models learn from each other, and being absent now means being absent longer.`
+      title: "Critical Citation Absence",
+      insight: `Surfaced in only ${mentionRate}% of AI responses — below the consideration threshold.`,
+      whyItMatters: "More than half of AI-driven queries about your category return zero mention of your brand. This signals a fundamental authority gap in model training data and retrieval systems.",
+      action: "Invest in brand authority through PR coverage, quality backlinks, and structured data markup. Create content that maps directly to the queries AI models use for retrieval.",
+      expectedImpact: "Target 70%+ mention rate to enter the AI consideration set.",
+      consequence: `Citation absence compounds — models learn from each other's outputs, and being absent now accelerates future invisibility.`
     });
   }
   
@@ -613,12 +764,12 @@ function generateStrategicInsights(
   if (citationRate < 20) {
     insights.push({
       priority: "MEDIUM",
-      title: "Authority Gap",
-      insight: `Only ${citationRate}% of mentions include citations.`,
-      whyItMatters: "AI models don't view your brand as an authoritative source worth citing. This affects both visibility and trust.",
-      action: "Earn citations from industry publications, trusted review sites, and authoritative sources. Create quotable content that AI models will reference.",
-      expectedImpact: "Higher citation rate correlates with +5-10 score points.",
-      consequence: `Without authority signals, AI models will increasingly favor competitors with stronger citation profiles.`
+      title: "Authority Signal Deficiency",
+      insight: `Only ${citationRate}% of mentions include direct citations — well below trust threshold.`,
+      whyItMatters: "AI models don't classify your brand as an authoritative source worth citing. This erodes both retrieval priority and user trust in recommendations.",
+      action: "Build citation density through industry publications, trusted review platforms, and authoritative third-party sources. Create structured, quotable content that models will reference directly.",
+      expectedImpact: "Higher citation rate correlates with +5-10 points in ranking signal density.",
+      consequence: `Without strong authority signals, AI models will systematically deprioritize you in favor of competitors with denser citation profiles.`
     });
   }
   
@@ -681,17 +832,17 @@ function Recommendations({
   if (score === null) {
     return (
       <div className="rounded-xl border border-border bg-white p-5">
-        <h3 className="text-sm font-semibold text-text">Strategic Recommendations</h3>
-        <p className="mt-2 text-sm text-text-2">Run a snapshot to get actionable recommendations</p>
+        <h3 className="text-sm font-semibold text-text">Strategic Action Plan</h3>
+        <p className="mt-2 text-sm text-text-2">Run a snapshot to generate your prioritized action plan</p>
       </div>
     );
   }
 
   if (insights.length === 0) {
     return (
-      <div className="rounded-xl border border-border bg-white p-5">
-        <h3 className="text-sm font-semibold text-text">Strategic Recommendations</h3>
-        <p className="mt-2 text-sm text-text-2">No critical issues detected. Keep monitoring.</p>
+      <div className="rounded-xl border border-emerald-200 bg-emerald-50/30 p-5">
+        <h3 className="text-sm font-semibold text-emerald-800">No Critical Actions Required</h3>
+        <p className="mt-2 text-sm text-emerald-700">Your AI authority architecture is performing well. Continue monitoring for competitive shifts.</p>
       </div>
     );
   }
@@ -705,8 +856,11 @@ function Recommendations({
   return (
     <div className="rounded-xl border border-border bg-white p-5">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-text">Strategic Recommendations</h3>
-        <span className="text-xs text-text-3">{insights.length} prioritized action{insights.length !== 1 ? 's' : ''}</span>
+        <div>
+          <h3 className="text-sm font-bold text-text">Strategic Action Plan</h3>
+          <p className="text-xs text-text-3 mt-0.5">Prioritized recommendations to improve AI authority architecture</p>
+        </div>
+        <span className="rounded-lg bg-surface-2 px-2 py-1 text-xs font-bold text-text-2">{insights.length} action{insights.length !== 1 ? 's' : ''}</span>
       </div>
       
       <div className="space-y-4">
@@ -960,25 +1114,66 @@ function CompetitorComparisonChart({
 
   const maxCount = Math.max(...allEntities.map(e => e.count), 1);
 
-  if (allEntities.length <= 1 && clientMentions === 0) {
-    return (
-      <div className="rounded-xl border border-border bg-white p-5">
-        <h3 className="text-sm font-semibold text-text">Competitive Visibility</h3>
-        <div className="mt-4 flex h-32 items-center justify-center text-sm text-text-3">
-          No comparison data available
-        </div>
-      </div>
-    );
-  }
+  const hasData = !(allEntities.length <= 1 && clientMentions === 0);
+
+  // Placeholder competitors for empty state
+  const placeholderEntities = [
+    { name: "Your Brand", count: 55, isClient: true },
+    { name: "Competitor A", count: 72, isClient: false },
+    { name: "Competitor B", count: 61, isClient: false },
+    { name: "Competitor C", count: 48, isClient: false },
+  ].sort((a, b) => b.count - a.count);
+
+  const displayEntities = hasData ? allEntities : placeholderEntities;
+  const displayMax = hasData ? maxCount : 72;
+
+  // Find client's rank
+  const clientRank = hasData
+    ? displayEntities.findIndex(e => e.isClient) + 1
+    : null;
+  const totalEntities = displayEntities.length;
 
   return (
-    <div className="rounded-xl border border-border bg-white p-5">
-      <h3 className="text-sm font-semibold text-text">Competitive Visibility</h3>
-      <p className="text-xs text-text-3 mt-1">Mentions in AI responses</p>
-      <div className="mt-4 space-y-3">
-        {allEntities.map((entity, idx) => (
+    <div className="relative rounded-xl border border-border bg-white p-5">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-sm font-semibold text-text">Competitive Visibility Intelligence</h3>
+          <p className="text-xs text-text-3 mt-0.5">AI citation frequency across models</p>
+        </div>
+        {hasData && clientRank && (
+          <div className={cn(
+            "rounded-lg px-2.5 py-1 text-xs font-bold",
+            clientRank === 1 ? "bg-emerald-50 text-emerald-700" : clientRank <= 2 ? "bg-amber-50 text-amber-700" : "bg-red-50 text-red-700"
+          )}>
+            Rank #{clientRank} of {totalEntities}
+          </div>
+        )}
+      </div>
+
+      {/* Blur overlay for empty state */}
+      {!hasData && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center rounded-xl bg-white/60 backdrop-blur-[2px]">
+          <div className="pointer-events-auto text-center">
+            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-surface-2">
+              <svg className="h-5 w-5 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+              </svg>
+            </div>
+            <p className="mt-2 text-sm font-medium text-text">Add competitors to unlock this</p>
+            <p className="mt-1 text-xs text-text-3">Track how you rank against the competition in AI results</p>
+          </div>
+        </div>
+      )}
+
+      <div className={cn("mt-4 space-y-3", !hasData && "select-none")}>
+        {displayEntities.map((entity, idx) => (
           <div key={entity.name} className="flex items-center gap-3">
-            <span className="w-4 text-xs text-text-3 text-right">{idx + 1}</span>
+            <span className={cn(
+              "flex h-6 w-6 shrink-0 items-center justify-center rounded text-xs font-bold",
+              entity.isClient ? "bg-blue-100 text-blue-700" : "bg-surface-2 text-text-3"
+            )}>
+              {idx + 1}
+            </span>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between mb-1">
                 <span className={cn(
@@ -987,20 +1182,23 @@ function CompetitorComparisonChart({
                 )}>
                   {entity.name}
                   {entity.isClient && (
-                    <span className="ml-1.5 inline-flex items-center rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700">
+                    <span className="ml-1.5 inline-flex items-center rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">
                       You
                     </span>
                   )}
                 </span>
-                <span className="text-xs text-text-3 ml-2">{entity.count}</span>
+                <span className={cn(
+                  "text-sm font-bold tabular-nums ml-2",
+                  entity.isClient ? "text-blue-700" : "text-text-3"
+                )}>{entity.count}</span>
               </div>
-              <div className="h-2 rounded-full bg-surface-2">
+              <div className="h-2.5 rounded-full bg-surface-2">
                 <div
                   className={cn(
-                    "h-2 rounded-full transition-all duration-500",
-                    entity.isClient ? "bg-blue-500" : "bg-gray-400"
+                    "h-2.5 rounded-full transition-all duration-500",
+                    entity.isClient ? "bg-blue-500" : "bg-gray-300"
                   )}
-                  style={{ width: `${(entity.count / maxCount) * 100}%` }}
+                  style={{ width: `${(entity.count / displayMax) * 100}%` }}
                 />
               </div>
             </div>
@@ -1018,9 +1216,9 @@ function ModelComparisonChart({ providers }: { providers: [string, number][] }) 
   if (providers.length === 0) {
     return (
       <div className="rounded-xl border border-border bg-white p-5">
-        <h3 className="text-sm font-semibold text-text">Model Comparison</h3>
+        <h3 className="text-sm font-semibold text-text">Cross-Model Visibility Analysis</h3>
         <div className="mt-4 flex h-32 items-center justify-center text-sm text-text-3">
-          Run a snapshot to see model scores
+          Run a snapshot to see model-specific performance
         </div>
       </div>
     );
@@ -1028,6 +1226,13 @@ function ModelComparisonChart({ providers }: { providers: [string, number][] }) 
 
   const sorted = [...providers].sort((a, b) => b[1] - a[1]);
   const avg = Math.round(sorted.reduce((sum, [, score]) => sum + score, 0) / sorted.length);
+  const maxGap = sorted.length > 1 ? sorted[0][1] - sorted[sorted.length - 1][1] : 0;
+  const variance = sorted.length > 1
+    ? Math.round(Math.sqrt(sorted.reduce((sum, [, s]) => sum + Math.pow(s - avg, 2), 0) / sorted.length) * 10) / 10
+    : 0;
+
+  const gapLabel = maxGap > 40 ? "Massive Cross-Model Visibility Gap" : maxGap > 20 ? "Significant Cross-Model Variance" : "Consistent Cross-Model Alignment";
+  const gapColor = maxGap > 40 ? "text-red-600" : maxGap > 20 ? "text-amber-600" : "text-emerald-600";
 
   // Create visual comparison
   const height = 140;
@@ -1039,11 +1244,33 @@ function ModelComparisonChart({ providers }: { providers: [string, number][] }) 
 
   return (
     <div className="rounded-xl border border-border bg-white p-5">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-text">Model Comparison</h3>
-        <span className="text-xs text-text-3">Avg: {avg}</span>
+      {/* Dramatic headline */}
+      <div className="mb-1">
+        <h3 className={cn("text-sm font-bold", gapColor)}>{gapLabel}</h3>
+        <p className="text-xs text-text-3 mt-0.5">Ranking signal density by AI model</p>
       </div>
-      <div className="mt-4">
+
+      {/* Gap metrics strip */}
+      {sorted.length > 1 && (
+        <div className="mb-4 flex flex-wrap gap-3 rounded-lg bg-surface-2/50 px-3 py-2">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-text-3">Gap</span>
+            <span className={cn("text-xs font-bold", maxGap > 40 ? "text-red-600" : maxGap > 20 ? "text-amber-600" : "text-emerald-600")}>
+              {sorted[0][0]} vs {sorted[sorted.length - 1][0]}: +{maxGap}pts
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-text-3">Variance</span>
+            <span className="text-xs font-bold text-text">{variance}%</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-text-3">Avg</span>
+            <span className="text-xs font-bold text-text">{avg}</span>
+          </div>
+        </div>
+      )}
+
+      <div>
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ maxHeight: '160px' }}>
           {/* Average line */}
           <line 
@@ -1115,9 +1342,9 @@ function SignalQualityChart({ detail }: { detail: SnapshotDetailResponse | null 
   if (!detail || detail.summary.responses_count === 0) {
     return (
       <div className="rounded-xl border border-border bg-white p-5">
-        <h3 className="text-sm font-semibold text-text">Signal Quality</h3>
+        <h3 className="text-sm font-semibold text-text">Authority Signal Composition</h3>
         <div className="mt-4 flex h-32 items-center justify-center text-sm text-text-3">
-          No signals to analyze
+          No authority signals to analyze
         </div>
       </div>
     );
@@ -1150,7 +1377,8 @@ function SignalQualityChart({ detail }: { detail: SnapshotDetailResponse | null 
 
   return (
     <div className="rounded-xl border border-border bg-white p-5">
-      <h3 className="text-sm font-semibold text-text">Signal Quality</h3>
+      <h3 className="text-sm font-semibold text-text">Authority Signal Composition</h3>
+      <p className="text-xs text-text-3 mt-0.5">Response quality breakdown</p>
       <div className="mt-4 flex items-center gap-6">
         <div className="relative">
           <svg viewBox={`0 0 ${size} ${size}`} className="h-24 w-24 -rotate-90">
@@ -1892,8 +2120,16 @@ export default function ClientDetailPage() {
                 historicalScores={historicalScores}
               />
 
-              {/* Charts Row 1: Trend + Model Comparison */}
+              {/* AI Visibility Diagnosis */}
+              <DiagnosisSummary
+                score={selectedSnapshot?.vrtl_score ?? null}
+                providers={providers}
+                detail={snapshotDetail}
+              />
+
+              {/* Cross-Model Analysis + Trend */}
               <div className="grid gap-6 lg:grid-cols-2">
+                <ModelComparisonChart providers={providers} />
                 <ScoreTrendChart 
                   scores={historicalScores} 
                   dates={snapshots
@@ -1903,26 +2139,25 @@ export default function ClientDetailPage() {
                     .reverse()
                   } 
                 />
-                <ModelComparisonChart providers={providers} />
               </div>
 
-              {/* Charts Row 2: Prompt Performance + Signal Quality */}
+              {/* Model Authority + Competitive Intelligence */}
               <div className="grid gap-6 lg:grid-cols-2">
-                <PromptPerformance detail={snapshotDetail} />
-                <SignalQualityChart detail={snapshotDetail} />
-              </div>
-
-              {/* Charts Row 3: Competitive Visibility + Provider Breakdown */}
-              <div className="grid gap-6 lg:grid-cols-2">
+                <ProviderBreakdown providers={providers} />
                 <CompetitorComparisonChart
                   clientName={client.name}
                   clientMentions={snapshotDetail?.summary.client_mentioned_count ?? 0}
                   topCompetitors={snapshotDetail?.summary.top_competitors ?? []}
                 />
-                <ProviderBreakdown providers={providers} />
               </div>
 
-              {/* Recommendations */}
+              {/* Prompt Performance + Signal Quality */}
+              <div className="grid gap-6 lg:grid-cols-2">
+                <PromptPerformance detail={snapshotDetail} />
+                <SignalQualityChart detail={snapshotDetail} />
+              </div>
+
+              {/* Strategic Recommendations */}
               <Recommendations
                 score={selectedSnapshot?.vrtl_score ?? null}
                 providers={providers}
