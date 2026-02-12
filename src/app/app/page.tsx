@@ -61,6 +61,25 @@ function getInitials(name: string) {
   return name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
 }
 
+function displayUrl(url: string | null): string {
+  if (!url) return "";
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, "");
+    return host;
+  } catch {
+    return url.replace(/^https?:\/\//, "").split("/")[0].split("?")[0].slice(0, 30) || "";
+  }
+}
+
+function displayModelName(name: string | null): string {
+  if (!name) return "";
+  const p = name.toLowerCase();
+  if (p.includes("openai") || p.includes("chatgpt")) return "OpenAI";
+  if (p.includes("gemini") || p.includes("google")) return "Gemini";
+  if (p.includes("anthropic") || p.includes("claude")) return "Anthropic";
+  return name;
+}
+
 function timeAgo(dateStr: string): string {
   const date = new Date(dateStr);
   const now = new Date();
@@ -425,7 +444,12 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
   return (
     <Link
       href={`/app/clients/${client.id}`}
-      className="group dashboard-card block transition-all hover:border-zinc-300 hover:shadow-md"
+      className={cn(
+        "group flex min-h-[260px] flex-col transition-all hover:shadow-md",
+        hasNoData
+          ? "rounded-xl border-2 border-dashed border-zinc-200 bg-zinc-50/50 p-6"
+          : "dashboard-card hover:border-zinc-300"
+      )}
     >
       {/* Header */}
       <div className="flex items-start justify-between">
@@ -434,18 +458,18 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
             {getInitials(client.name)}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
+            <div className="flex min-w-0 items-center gap-2">
               <StatusDot score={client.latestScore} status={client.status} />
-              <h3 className="font-semibold text-zinc-900 truncate">{client.name}</h3>
+              <h3 className="min-w-0 flex-1 truncate font-semibold text-zinc-900">{client.name}</h3>
               {client.hasAlert && (
-                <span className="inline-flex items-center rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-600">
+                <span className="shrink-0 rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-600">
                   Needs attention
                 </span>
               )}
             </div>
             {client.website && (
-              <p className="text-xs text-zinc-500 truncate">
-                {client.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+              <p className="text-xs text-zinc-500 truncate" title={client.website}>
+                {displayUrl(client.website)}
               </p>
             )}
           </div>
@@ -459,8 +483,8 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
       </div>
 
       {/* Score + Sparkline — or empty state */}
-      <div className="mt-4 flex items-center justify-between border-b border-zinc-200 pb-4">
-        <div>
+      <div className={cn("mt-4 flex items-center justify-between gap-4", !hasNoData && "border-b border-zinc-200 pb-4")}>
+        <div className="min-w-0 flex-1">
           {client.status === "running" ? (
             <div className="flex items-center gap-2">
               <svg className="h-4 w-4 animate-spin text-amber-500" fill="none" viewBox="0 0 24 24">
@@ -502,7 +526,9 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
           )}
         </div>
         {client.recentScores.length >= 2 && (
-          <Sparkline data={client.recentScores} color={sparklineColor} />
+          <div className="shrink-0">
+            <Sparkline data={client.recentScores} color={sparklineColor} />
+          </div>
         )}
       </div>
 
@@ -531,11 +557,11 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
           </div>
           <div>
             <span className="text-zinc-500">Best model</span>
-            <div className="font-semibold text-emerald-600">{client.bestModel ?? "Not enough data yet"}</div>
+            <div className="font-semibold text-emerald-600 truncate">{client.bestModel ? displayModelName(client.bestModel) : "—"}</div>
           </div>
           <div>
             <span className="text-zinc-500">Weakest model</span>
-            <div className="font-semibold text-rose-600">{client.worstModel ?? "Not enough data yet"}</div>
+            <div className="font-semibold text-rose-600 truncate">{client.worstModel ? displayModelName(client.worstModel) : "—"}</div>
           </div>
         </div>
       )}
@@ -554,9 +580,9 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
 
       {/* Empty state CTA when no snapshots */}
       {hasNoData && (
-        <div className="mt-3">
+        <div className="mt-auto pt-4">
           <span className="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-600">
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
             </svg>
             Run first snapshot
@@ -564,15 +590,15 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
         </div>
       )}
 
-      {/* Metrics bar */}
-      {client.latestScore !== null && (
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-x-2 border-t border-zinc-200 pt-3 text-xs text-zinc-500">
-          <span>Mention {client.mentionRate != null ? `${client.mentionRate}%` : "—"}</span>
-          <span>·</span>
-          <span>Top pos {client.topPositionRate != null ? `${client.topPositionRate}%` : "—"}</span>
-          <span>·</span>
-          <span>Cited {client.citationRate != null ? `${client.citationRate}%` : "—"}</span>
-          {client.competitorRank !== null && client.competitorCount > 0 && (
+      {/* Metrics bar — only when we have real data */}
+      {client.latestScore !== null && (client.mentionRate != null || client.topPositionRate != null || client.citationRate != null || (client.competitorRank != null && client.competitorCount > 0)) && (
+        <div className="mt-3 flex flex-wrap items-center gap-x-2 border-t border-zinc-200 pt-3 text-xs text-zinc-500">
+          {client.mentionRate != null && <span>Mention {client.mentionRate}%</span>}
+          {client.mentionRate != null && (client.topPositionRate != null || client.citationRate != null) && <span>·</span>}
+          {client.topPositionRate != null && <span>Top pos {client.topPositionRate}%</span>}
+          {client.topPositionRate != null && client.citationRate != null && <span>·</span>}
+          {client.citationRate != null && <span>Cited {client.citationRate}%</span>}
+          {client.competitorRank != null && client.competitorCount > 0 && (
             <>
               <span>·</span>
               <span className={cn(
@@ -981,7 +1007,7 @@ export default function AppPage() {
           </button>
         </div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 [&>a]:flex">
           {filteredClients.map((client) => (
             <DenseClientCard key={client.id} client={client} />
           ))}
