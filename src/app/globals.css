@@ -4,12 +4,12 @@
 
 :root {
   /* VRTL Score — Brand Tokens */
-  /* Core neutrals */
-  --bg: 250 249 246;
-  --bg-2: 245 244 240;
+  /* Core neutrals (calm analytics - zinc-tinted) */
+  --bg: 250 250 250;   /* zinc-50 */
+  --bg-2: 244 244 245; /* zinc-100 */
   --surface: 255 255 255;
   --surface-2: 250 249 246;
-  --border: 225 225 225;
+  --border: 228 228 231; /* zinc-200 */
 
   /* Text */
   --text: 8 8 8;
@@ -24,6 +24,19 @@
   --success: 16 155 92;
   --warning: 180 110 20;
   --danger: 160 30 30;
+
+  /* Executive status (calm palette) */
+  --strong: 5 150 105;      /* emerald-600 */
+  --moderate: 217 119 6;    /* amber-600 */
+  --critical: 225 29 72;    /* rose-600 */
+
+  /* Spacing system (premium consistency)
+     Use ONLY these between major cards:
+     space-y-8 (32px) between sections
+     space-y-4 (16px) inside cards
+     p-6 (24px) card padding
+     gap-3 (12px) internal groups
+  */
 
   /* Effects */
   --ring: var(--accent);
