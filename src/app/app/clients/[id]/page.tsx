@@ -465,47 +465,52 @@ function KeyInsightsCards({
     topWeakness = "Strong position — focus on maintaining";
   }
 
-  type Severity = "high" | "medium" | "low";
-  const severityStyles: Record<Severity, string> = {
-    high: "border-red-200 bg-red-50/50 text-red-700",
-    medium: "border-amber-200 bg-amber-50/50 text-amber-700",
-    low: "border-emerald-200 bg-emerald-50/50 text-emerald-700",
-  };
+  // Primary: Cross-Model Alignment (larger). Supporting: Weakest Model, Competitive Standing, Confidence.
+  const alignmentLabel = modelGap > 40 ? "Critical misalignment" : modelGap > 20 ? "Partial alignment" : "Strong alignment";
+  const alignmentValue = modelGap > 0 ? `${topModel[0]} ${topModel[1]} · ${weakModel[0]} ${weakModel[1]}` : "Run snapshot";
+  const alignmentHighlight = modelGap > 40 ? "text-red-600" : modelGap > 20 ? "text-amber-600" : "text-emerald-600";
 
-  const cards: { label: string; value: string; severity: Severity }[] = [
-    {
-      label: "Model gap",
-      value: modelGap > 0 ? `${topModel[0]} vs ${weakModel[0]}: ${modelGap}pt` : "—",
-      severity: modelGap > 40 ? "high" : modelGap > 20 ? "medium" : "low",
-    },
-    {
-      label: "Competitive position",
-      value: totalEntities > 1 ? `Rank #${clientRank} of ${totalEntities}` : "—",
-      severity: clientRank === 1 ? "low" : clientRank <= 2 ? "medium" : "high",
-    },
-    {
-      label: "Top weakness",
-      value: topWeakness,
-      severity: topWeakness.includes("Strong") ? "low" : topWeakness.includes("only") ? "high" : "medium",
-    },
-    {
-      label: "Confidence",
-      value: confidence.label,
-      severity: confidence.variant === "success" ? "low" : confidence.variant === "warning" ? "medium" : "high",
-    },
-  ];
+  const hasCompetitiveData = totalEntities > 1;
+  const competitiveValue = hasCompetitiveData ? `Rank #${clientRank} of ${totalEntities}` : "Not enough competitor data yet";
+  const competitiveCta = !hasCompetitiveData;
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {cards.map((card) => (
-        <div
-          key={card.label}
-          className={cn("rounded-xl border p-4", severityStyles[card.severity])}
-        >
-          <div className="text-xs font-semibold uppercase tracking-wider text-text-3/90">{card.label}</div>
-          <div className="mt-1.5 text-sm font-bold leading-snug">{card.value}</div>
+    <div className="space-y-4">
+      {/* Primary card — Cross-Model Alignment */}
+      <div className="rounded-xl border border-border bg-white p-5">
+        <div className="text-xs font-semibold uppercase tracking-wider text-text-3">Cross-Model Alignment</div>
+        <div className={cn("mt-2 text-lg font-bold", alignmentHighlight)}>{alignmentLabel}</div>
+        <div className="mt-1 text-sm text-text-2">{alignmentValue}</div>
+      </div>
+
+      {/* Supporting cards */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="rounded-xl border border-border bg-white p-4">
+          <div className="text-xs font-semibold uppercase tracking-wider text-text-3">Weakest Model</div>
+          <div className="mt-1.5 text-sm font-bold text-text">
+            {weakModel ? `${weakModel[0]} (${weakModel[1]})` : "—"}
+          </div>
         </div>
-      ))}
+        <div className="rounded-xl border border-border bg-white p-4">
+          <div className="text-xs font-semibold uppercase tracking-wider text-text-3">Competitive Standing</div>
+          <div className="mt-1.5 text-sm font-bold text-text">{competitiveValue}</div>
+          {competitiveCta && (
+            <a href="#competitors" className="mt-2 inline-block text-xs font-semibold text-text hover:underline">
+              Add competitors →
+            </a>
+          )}
+        </div>
+        <div className="rounded-xl border border-border bg-white p-4">
+          <div className="text-xs font-semibold uppercase tracking-wider text-text-3">Confidence</div>
+          <div className="mt-1.5 text-sm font-bold text-text">{confidence.label}</div>
+        </div>
+      </div>
+
+      {/* Top weakness — full width */}
+      <div className="rounded-xl border border-border bg-white p-4">
+        <div className="text-xs font-semibold uppercase tracking-wider text-text-3">Top Weakness</div>
+        <div className="mt-1.5 text-sm font-bold text-text">{topWeakness}</div>
+      </div>
     </div>
   );
 }
@@ -549,29 +554,35 @@ function DiagnosisSummary({
     diagnosisText = `Your brand shows uniformly low visibility across all models (avg: ${avg}). This indicates a fundamental authority signal deficiency rather than a model-specific issue. Broad content and citation strategy improvements are needed.`;
   }
 
-  const severityColor = gap > 40 ? "border-red-200 bg-red-50/50" : gap > 20 ? "border-amber-200 bg-amber-50/50" : "border-emerald-200 bg-emerald-50/50";
-  const severityIcon = gap > 40 ? "text-red-500" : gap > 20 ? "text-amber-500" : "text-emerald-500";
-  const headlineColor = gap > 40 ? "text-red-700" : gap > 20 ? "text-amber-700" : "text-emerald-700";
+  // Neutral box — calm authority. Red only for severe numbers.
+  const suggestedAction =
+    gap > 40
+      ? "Recommended: Improve authority signals + cross-model structured retrieval. Focus on the weakest model."
+      : gap > 20
+        ? "Recommended: Apply patterns from your strongest model to underperforming architectures."
+        : avg >= 70
+          ? "Recommended: Maintain current strategy. Monitor for competitive shifts."
+          : "Recommended: Broad content + citation strategy improvements to lift baseline visibility.";
 
   return (
-    <div className={cn("rounded-xl border p-5", severityColor)}>
+    <div className="rounded-xl border border-border bg-white p-5">
       <div className="flex items-start gap-3">
-        <div className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", gap > 40 ? "bg-red-100" : gap > 20 ? "bg-amber-100" : "bg-emerald-100")}>
-          <svg className={cn("h-5 w-5", severityIcon)} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-2">
+          <svg className="h-5 w-5 text-text-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611l-.772.136a18.182 18.182 0 01-6.363 0l-.772-.136c-1.717-.293-2.3-2.379-1.067-3.61L12.6 15.3" />
           </svg>
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-bold uppercase tracking-wide text-text-3">AI Visibility Diagnosis</h3>
-          <p className={cn("mt-2 text-sm leading-relaxed", headlineColor)}>
+          <h3 className="text-sm font-bold uppercase tracking-wide text-text-3">Cross-Model Alignment Diagnosis</h3>
+          <p className="mt-2 text-sm leading-relaxed text-text">
             {diagnosisText}
           </p>
 
-          {/* Key metrics strip */}
+          {/* Key metrics — color only for severe numbers */}
           <div className="mt-4 flex flex-wrap gap-4">
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold uppercase tracking-wide text-text-3">Spread</span>
-              <span className={cn("text-sm font-bold", gap > 40 ? "text-red-700" : gap > 20 ? "text-amber-700" : "text-emerald-700")}>
+              <span className={cn("text-sm font-bold", gap > 40 ? "text-red-600" : "text-text")}>
                 {gap}pt gap
               </span>
             </div>
@@ -582,20 +593,24 @@ function DiagnosisSummary({
             {mentionRate !== null && (
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold uppercase tracking-wide text-text-3">Mention Rate</span>
-                <span className={cn("text-sm font-bold", mentionRate >= 70 ? "text-emerald-700" : mentionRate >= 40 ? "text-amber-700" : "text-red-700")}>
+                <span className={cn("text-sm font-bold", mentionRate >= 70 ? "text-emerald-600" : mentionRate >= 40 ? "text-text" : "text-amber-600")}>
                   {mentionRate}%
                 </span>
               </div>
             )}
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold uppercase tracking-wide text-text-3">Best</span>
-              <span className="text-sm font-bold capitalize text-emerald-700">{strongest[0]} ({strongest[1]})</span>
+              <span className="text-sm font-bold capitalize text-text">{strongest[0]} ({strongest[1]})</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold uppercase tracking-wide text-text-3">Weakest</span>
-              <span className="text-sm font-bold capitalize text-red-700">{weakest[0]} ({weakest[1]})</span>
+              <span className={cn("text-sm font-bold capitalize", gap > 40 ? "text-red-600" : "text-text")}>{weakest[0]} ({weakest[1]})</span>
             </div>
           </div>
+
+          <p className="mt-4 text-sm font-medium text-text-2">
+            {suggestedAction}
+          </p>
         </div>
       </div>
     </div>
@@ -1620,7 +1635,7 @@ function CompetitorsSection({
   const confidence = getConfidenceLabel(competitors.length);
 
   return (
-    <div className="rounded-xl border border-border bg-white p-5">
+    <div id="competitors" className="rounded-xl border border-border bg-white p-5 scroll-mt-4">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-sm font-semibold text-text">Tracked competitors</h3>
