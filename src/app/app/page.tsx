@@ -78,17 +78,17 @@ function timeAgo(dateStr: string): string {
 }
 
 function getHealthLabel(score: number | null): { label: string; color: string; bg: string } {
-  if (score === null) return { label: "No data", color: "text-text-3", bg: "bg-surface-2" };
-  if (score >= 70) return { label: "Strong", color: "text-emerald-700", bg: "bg-emerald-50" };
-  if (score >= 40) return { label: "Moderate", color: "text-amber-700", bg: "bg-amber-50" };
-  return { label: "Weak", color: "text-red-700", bg: "bg-red-50" };
+  if (score === null) return { label: "No data", color: "text-zinc-500", bg: "bg-zinc-100" };
+  if (score >= 70) return { label: "Strong", color: "text-emerald-600", bg: "bg-emerald-50" };
+  if (score >= 40) return { label: "Moderate", color: "text-amber-600", bg: "bg-amber-50" };
+  return { label: "Weak", color: "text-rose-600", bg: "bg-rose-50" };
 }
 
 function getMomentumLabel(delta: number | null): { label: string; color: string; icon: "up" | "down" | "flat" } {
-  if (delta === null) return { label: "New", color: "text-text-3", icon: "flat" };
+  if (delta === null) return { label: "New", color: "text-zinc-500", icon: "flat" };
   if (delta > 0) return { label: "Improving", color: "text-emerald-600", icon: "up" };
-  if (delta < 0) return { label: "Declining", color: "text-red-600", icon: "down" };
-  return { label: "Stable", color: "text-text-3", icon: "flat" };
+  if (delta < 0) return { label: "Declining", color: "text-rose-600", icon: "down" };
+  return { label: "Stable", color: "text-zinc-500", icon: "flat" };
 }
 
 // Generate an actionable signal for a client card
@@ -99,7 +99,7 @@ function getActionSignal(client: ClientWithStats): { text: string; color: string
 
   // Score dropped significantly
   if (delta !== null && delta <= -5) {
-    return { text: `Score dropped ${Math.abs(delta)} pts`, color: "text-red-600" };
+    return { text: `Score dropped ${Math.abs(delta)} pts`, color: "text-rose-600" };
   }
 
   // Competitor ahead
@@ -193,11 +193,12 @@ function PortfolioTrendChart({ clients }: { clients: ClientWithStats[] }) {
   const areaPath = `M${linePoints[0].x},${chartH - padding} L${polyline.replace(/,/g, " L")} L${linePoints[linePoints.length - 1].x},${chartH - padding} Z`;
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
-      <div className="flex items-center justify-between mb-3">
-        <div className="text-xs font-medium uppercase tracking-wide text-text-3">Portfolio Visibility Trend</div>
-        <div className="text-xs text-text-3">Last {avgByPeriod.length} snapshots</div>
+    <div className="dashboard-card h-full flex flex-col">
+      <div className="flex items-center justify-between">
+        <div className="metric-label">Portfolio Visibility Trend</div>
+        <div className="text-xs text-zinc-500">Last {avgByPeriod.length} snapshots</div>
       </div>
+      <div className="mt-4 flex-1 min-h-[120px]">
       <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full h-28">
         <defs>
           <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
@@ -216,12 +217,12 @@ function PortfolioTrendChart({ clients }: { clients: ClientWithStats[] }) {
         />
         {linePoints.map((p, i) => (
           <g key={i}>
-            <circle cx={p.x} cy={p.y} r="4" fill="#0a0a0a" stroke="#10b981" strokeWidth="2" />
+            <circle cx={p.x} cy={p.y} r="4" fill="#18181b" stroke="#10b981" strokeWidth="2" />
             <text
               x={p.x}
               y={p.y - 10}
               textAnchor="middle"
-              className="fill-current text-text-2"
+              fill="#52525b"
               fontSize="11"
               fontWeight="600"
             >
@@ -230,117 +231,150 @@ function PortfolioTrendChart({ clients }: { clients: ClientWithStats[] }) {
           </g>
         ))}
       </svg>
+      </div>
     </div>
   );
 }
 
-// AI Visibility Overview (replaces PortfolioSummary)
+// Actionable insight — first client needing attention
+function getActionableInsight(clients: ClientWithStats[]): { text: string; clientId?: string } | null {
+  const needsAttention = clients.find(c => c.hasAlert);
+  if (!needsAttention) return null;
+  const signal = getActionSignal(needsAttention);
+  if (!signal) return null;
+  return {
+    text: `${needsAttention.name} — ${signal.text}`,
+    clientId: needsAttention.id,
+  };
+}
+
+// AI Visibility Overview — premium B2B dashboard
 function VisibilityOverview({ stats, clients }: { stats: PortfolioStats; clients: ClientWithStats[] }) {
+  const actionable = getActionableInsight(clients);
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-text">AI Visibility Overview</h2>
-        <span className="text-xs text-text-3">{stats.totalClients} client{stats.totalClients !== 1 ? "s" : ""} tracked</span>
+        <h2 className="text-xl font-semibold text-zinc-900">AI Visibility Overview</h2>
+        <span className="text-sm text-zinc-500">{stats.totalClients} client{stats.totalClients !== 1 ? "s" : ""} tracked</span>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-12">
-        {/* Lead card: AI Visibility Health */}
-        <div className="rounded-xl border border-border bg-white p-5 shadow-sm lg:col-span-4">
-          <div className="text-xs font-medium uppercase tracking-wide text-text-3">AI Visibility Health</div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className={cn(
-              "text-5xl font-bold tabular-nums",
-              stats.avgScore >= 70 ? "text-emerald-600" : stats.avgScore >= 40 ? "text-amber-600" : "text-red-600"
-            )}>
-              {stats.avgScore}
-            </span>
-            <span className="text-lg text-text-3">/ 100</span>
-          </div>
-          {stats.avgScoreDelta !== null && (
-            <div className="mt-2 flex items-center gap-1.5">
-              <svg
-                className={cn(
-                  "h-3.5 w-3.5",
-                  stats.avgScoreDelta > 0 ? "text-emerald-500" : stats.avgScoreDelta < 0 ? "text-red-500 rotate-180" : "text-text-3"
-                )}
-                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-              </svg>
-              <span className={cn(
-                "text-sm font-semibold",
-                stats.avgScoreDelta > 0 ? "text-emerald-600" : stats.avgScoreDelta < 0 ? "text-red-600" : "text-text-3"
-              )}>
-                {stats.avgScoreDelta > 0 ? "+" : ""}{stats.avgScoreDelta} vs last snapshot
+      <div className="grid gap-6 lg:grid-cols-12">
+        {/* Hero card: AI Visibility Health — spans 5 cols */}
+        <div className="dashboard-card-hero lg:col-span-5 flex flex-col justify-between">
+          <div>
+            <div className="metric-label">AI Visibility Health</div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-4xl font-bold tabular-nums tracking-tight text-zinc-900">
+                {stats.avgScore}
+              </span>
+              <span className="text-lg text-zinc-500">/ 100</span>
+            </div>
+            {stats.avgScoreDelta !== null && stats.avgScoreDelta !== 0 && (
+              <div className="mt-1 flex items-center gap-1.5 text-sm font-medium">
+                <svg
+                  className={cn(
+                    "h-3.5 w-3.5",
+                    stats.avgScoreDelta > 0 ? "text-emerald-600" : "text-rose-600 rotate-180"
+                  )}
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                </svg>
+                <span className={stats.avgScoreDelta > 0 ? "text-emerald-600" : "text-rose-600"}>
+                  {stats.avgScoreDelta > 0 ? "+" : ""}{stats.avgScoreDelta} vs last snapshot
+                </span>
+              </div>
+            )}
+            <div className="mt-4 flex items-center gap-4 text-sm text-zinc-600">
+              <span className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                {stats.improvingClients} improving
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-rose-500" />
+                {stats.decliningClients} declining
               </span>
             </div>
+            <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-zinc-100">
+              <div
+                className={cn(
+                  "h-full rounded-full transition-all",
+                  stats.avgScore >= 70 ? "bg-emerald-500" : stats.avgScore >= 40 ? "bg-amber-500" : "bg-rose-500"
+                )}
+                style={{ width: `${Math.min(100, stats.avgScore)}%` }}
+              />
+            </div>
+          </div>
+          {actionable !== null ? (
+            <div className="mt-5 pt-5 border-t border-zinc-200">
+              <p className="text-sm text-zinc-600">
+                <span className="font-medium text-zinc-900">Action needed:</span>{" "}
+                {actionable.clientId ? (
+                  <Link href={`/app/clients/${actionable.clientId}`} className="text-amber-600 hover:underline">
+                    {actionable.text}
+                  </Link>
+                ) : (
+                  actionable.text
+                )}
+              </p>
+            </div>
+          ) : (
+            <div className="mt-5 pt-5 border-t border-zinc-200">
+              <p className="text-sm text-zinc-500">All clients healthy</p>
+            </div>
           )}
-          <div className="mt-3 flex items-center gap-3 text-xs">
-            <span className="flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              <span className="text-text-2">{stats.improvingClients} improving</span>
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-red-500" />
-              <span className="text-text-2">{stats.decliningClients} declining</span>
-            </span>
-          </div>
-          <div className="mt-3 h-2 rounded-full bg-surface-2">
-            <div
-              className={cn(
-                "h-2 rounded-full transition-all",
-                stats.avgScore >= 70 ? "bg-emerald-500" : stats.avgScore >= 40 ? "bg-amber-500" : "bg-red-500"
-              )}
-              style={{ width: `${stats.avgScore}%` }}
-            />
-          </div>
         </div>
 
-        {/* Secondary metrics */}
-        <div className="grid gap-4 sm:grid-cols-3 lg:col-span-5">
-          <div className="rounded-xl border border-border bg-white p-4 shadow-sm">
-            <div className="text-xs font-medium uppercase tracking-wide text-text-3">Health Breakdown</div>
-            <div className="mt-3 space-y-2">
+        {/* Secondary cards — equal width */}
+        <div className="grid gap-6 sm:grid-cols-3 lg:col-span-4">
+          <div className="dashboard-card">
+            <div className="metric-label">Health Breakdown</div>
+            <div className="mt-4 space-y-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-                  <span className="text-sm text-text">Strong</span>
-                </div>
-                <span className="text-sm font-bold text-text">{stats.strongClients}</span>
+                <span className="flex items-center gap-2 text-sm text-zinc-700">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                  Strong
+                </span>
+                <span className="metric-value text-lg">{stats.strongClients}</span>
               </div>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
-                  <span className="text-sm text-text">Moderate</span>
-                </div>
-                <span className="text-sm font-bold text-text">{stats.moderateClients}</span>
+                <span className="flex items-center gap-2 text-sm text-zinc-700">
+                  <span className="h-2 w-2 rounded-full bg-amber-500" />
+                  Moderate
+                </span>
+                <span className="metric-value text-lg">{stats.moderateClients}</span>
               </div>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
-                  <span className="text-sm text-text">Weak</span>
-                </div>
-                <span className="text-sm font-bold text-text">{stats.weakClients}</span>
+                <span className="flex items-center gap-2 text-sm text-zinc-700">
+                  <span className="h-2 w-2 rounded-full bg-rose-500" />
+                  Weak
+                </span>
+                <span className="metric-value text-lg">{stats.weakClients}</span>
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-border bg-white p-4 shadow-sm">
-            <div className="text-xs font-medium uppercase tracking-wide text-text-3">Snapshots</div>
-            <div className="mt-3 text-3xl font-bold text-text">{stats.snapshotsThisMonth}</div>
-            <div className="mt-1 text-xs text-text-2">This month</div>
+          <div className="dashboard-card">
+            <div className="metric-label">Snapshots</div>
+            <div className="mt-4">
+              <span className="metric-value">{stats.snapshotsThisMonth}</span>
+              <div className="mt-0.5 text-sm text-zinc-500">This month</div>
+            </div>
           </div>
 
-          <div className="rounded-xl border border-border bg-white p-4 shadow-sm">
-            <div className="text-xs font-medium uppercase tracking-wide text-text-3">Alerts</div>
-            <div className={cn(
-              "mt-3 text-3xl font-bold",
-              stats.clientsWithAlerts > 0 ? "text-red-600" : "text-emerald-600"
-            )}>
-              {stats.clientsWithAlerts}
-            </div>
-            <div className="mt-1 text-xs text-text-2">
-              {stats.clientsWithAlerts > 0 ? "Need attention" : "All healthy"}
+          <div className="dashboard-card">
+            <div className="metric-label">Alerts</div>
+            <div className="mt-4">
+              <span className={cn(
+                "metric-value",
+                stats.clientsWithAlerts > 0 ? "text-rose-600" : "text-zinc-900"
+              )}>
+                {stats.clientsWithAlerts}
+              </span>
+              <div className="mt-0.5 text-sm text-zinc-500">
+                {stats.clientsWithAlerts > 0 ? "Need attention" : "All healthy"}
+              </div>
             </div>
           </div>
         </div>
@@ -364,10 +398,10 @@ function StatusDot({ score, status }: { score: number | null; status: string }) 
       </span>
     );
   }
-  if (score === null) return <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />;
+  if (score === null) return <span className="h-2.5 w-2.5 rounded-full bg-zinc-300" />;
   if (score >= 70) return <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />;
   if (score >= 40) return <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />;
-  return <span className="h-2.5 w-2.5 rounded-full bg-red-500" />;
+  return <span className="h-2.5 w-2.5 rounded-full bg-rose-500" />;
 }
 
 // Dense client card (upgraded with narrative)
@@ -384,46 +418,48 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
     ? "#10b981"
     : client.latestScore !== null && client.latestScore >= 40
       ? "#f59e0b"
-      : "#ef4444";
+      : "#f43f5e";
+
+  const hasNoData = client.status === "none" && client.latestScore === null;
 
   return (
     <Link
       href={`/app/clients/${client.id}`}
-      className="group rounded-xl border border-border bg-white p-5 shadow-sm transition-all hover:border-text/20 hover:shadow-lg"
+      className="group dashboard-card block transition-all hover:border-zinc-300 hover:shadow-md"
     >
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-text text-sm font-semibold text-white">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-sm font-semibold text-white">
             {getInitials(client.name)}
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <StatusDot score={client.latestScore} status={client.status} />
-              <h3 className="font-semibold text-text truncate">{client.name}</h3>
+              <h3 className="font-semibold text-zinc-900 truncate">{client.name}</h3>
               {client.hasAlert && (
-                <span className="inline-flex items-center rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-semibold text-red-700">
-                  ALERT
+                <span className="inline-flex items-center rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-600">
+                  Needs attention
                 </span>
               )}
             </div>
             {client.website && (
-              <p className="text-xs text-text-3 truncate">
+              <p className="text-xs text-zinc-500 truncate">
                 {client.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
               </p>
             )}
           </div>
         </div>
-        <svg
-          className="h-4 w-4 shrink-0 text-text-3 opacity-0 transition-opacity group-hover:opacity-100"
+          <svg
+            className="h-4 w-4 shrink-0 text-zinc-400 opacity-0 transition-opacity group-hover:opacity-100"
           fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
         </svg>
       </div>
 
-      {/* Score + Sparkline */}
-      <div className="mt-4 flex items-center justify-between border-b border-border pb-4">
+      {/* Score + Sparkline — or empty state */}
+      <div className="mt-4 flex items-center justify-between border-b border-zinc-200 pb-4">
         <div>
           {client.status === "running" ? (
             <div className="flex items-center gap-2">
@@ -433,15 +469,20 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
               </svg>
               <span className="text-sm text-amber-600 font-medium">Analyzing...</span>
             </div>
+          ) : hasNoData ? (
+            <div className="flex flex-col gap-1">
+              <span className="text-sm font-medium text-zinc-500">No snapshots yet</span>
+              <span className="text-xs text-zinc-400">Run first snapshot to measure AI visibility</span>
+            </div>
           ) : client.latestScore !== null ? (
             <div className="flex items-baseline gap-3">
-              <span className="text-4xl font-bold tabular-nums text-text">
+              <span className="text-4xl font-bold tabular-nums text-zinc-900">
                 {client.latestScore}
               </span>
               {delta !== null && delta !== 0 && (
                 <span className={cn(
                   "flex items-center gap-0.5 text-sm font-semibold",
-                  delta > 0 ? "text-emerald-600" : "text-red-600"
+                  delta > 0 ? "text-emerald-600" : "text-rose-600"
                 )}>
                   <svg
                     className={cn("h-3 w-3", delta < 0 && "rotate-180")}
@@ -453,11 +494,9 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
                 </span>
               )}
             </div>
-          ) : (
-            <span className="text-sm text-text-3">No snapshots yet</span>
-          )}
+          ) : null}
           {client.lastSnapshotAt && client.status !== "running" && (
-            <p className="mt-1 text-xs text-text-3">
+            <p className="mt-1 text-xs text-zinc-500">
               Updated {timeAgo(client.lastSnapshotAt)}
             </p>
           )}
@@ -471,11 +510,11 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
       {client.latestScore !== null && (
         <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
           <div>
-            <span className="text-text-3">Visibility</span>
+            <span className="text-zinc-500">Visibility</span>
             <div className={cn("font-semibold", health.color)}>{health.label}</div>
           </div>
           <div>
-            <span className="text-text-3">Momentum</span>
+            <span className="text-zinc-500">Momentum</span>
             <div className={cn("font-semibold flex items-center gap-1", momentum.color)}>
               {momentum.icon === "up" && (
                 <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -491,21 +530,21 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
             </div>
           </div>
           <div>
-            <span className="text-text-3">Best model</span>
-            <div className="font-semibold text-emerald-600">{client.bestModel ?? "—"}</div>
+            <span className="text-zinc-500">Best model</span>
+            <div className="font-semibold text-emerald-600">{client.bestModel ?? "Not enough data yet"}</div>
           </div>
           <div>
-            <span className="text-text-3">Weakest model</span>
-            <div className="font-semibold text-red-600">{client.worstModel ?? "—"}</div>
+            <span className="text-zinc-500">Weakest model</span>
+            <div className="font-semibold text-rose-600">{client.worstModel ?? "Not enough data yet"}</div>
           </div>
         </div>
       )}
 
-      {/* Action signal */}
+      {/* Action signal — subtle pill */}
       {signal && client.latestScore !== null && (
         <div className={cn(
           "mt-3 rounded-lg border px-3 py-2 text-xs font-medium",
-          signal.color.includes("red") ? "border-red-200 bg-red-50" :
+          signal.color.includes("rose") ? "border-rose-200 bg-rose-50" :
           signal.color.includes("amber") ? "border-amber-200 bg-amber-50" :
           "border-emerald-200 bg-emerald-50"
         )}>
@@ -513,17 +552,29 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
         </div>
       )}
 
+      {/* Empty state CTA when no snapshots */}
+      {hasNoData && (
+        <div className="mt-3">
+          <span className="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-600">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+            </svg>
+            Run first snapshot
+          </span>
+        </div>
+      )}
+
       {/* Metrics bar */}
       {client.latestScore !== null && (
-        <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-xs text-text-3">
-          <span>Mention {client.mentionRate ?? "—"}%</span>
-          <span className="text-text-3">·</span>
-          <span>Top pos {client.topPositionRate ?? "—"}%</span>
-          <span className="text-text-3">·</span>
-          <span>Cited {client.citationRate ?? "—"}%</span>
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-x-2 border-t border-zinc-200 pt-3 text-xs text-zinc-500">
+          <span>Mention {client.mentionRate != null ? `${client.mentionRate}%` : "—"}</span>
+          <span>·</span>
+          <span>Top pos {client.topPositionRate != null ? `${client.topPositionRate}%` : "—"}</span>
+          <span>·</span>
+          <span>Cited {client.citationRate != null ? `${client.citationRate}%` : "—"}</span>
           {client.competitorRank !== null && client.competitorCount > 0 && (
             <>
-              <span className="text-text-3">·</span>
+              <span>·</span>
               <span className={cn(
                 "font-medium",
                 client.competitorRank === 1 ? "text-emerald-600" : "text-amber-600"
@@ -538,22 +589,22 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
   );
 }
 
-// Empty state
+// Empty state — intentional design with dashed border + CTA
 function EmptyState() {
   return (
-    <div className="mx-auto max-w-md py-20 text-center">
-      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-surface-2 border border-border">
-        <svg className="h-7 w-7 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+    <div className="empty-state-card mx-auto max-w-md">
+      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-100">
+        <svg className="h-6 w-6 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
       </div>
-      <h1 className="mt-5 text-xl font-semibold text-text">Add your first client</h1>
-      <p className="mt-2 text-sm text-text-2">
+      <h2 className="mt-4 text-lg font-semibold text-zinc-900">Add your first client</h2>
+      <p className="mt-1 text-sm text-zinc-500">
         Track how AI models like ChatGPT, Claude, and Gemini talk about your clients.
       </p>
       <Link
         href="/app/clients/new"
-        className="mt-6 inline-flex items-center gap-2 rounded-lg bg-text px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-text/90"
+        className="mt-6 inline-flex items-center gap-2 rounded-lg border border-zinc-300 bg-white px-5 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -824,7 +875,7 @@ export default function AppPage() {
   if (loading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-text" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900" />
       </div>
     );
   }
@@ -832,14 +883,14 @@ export default function AppPage() {
   if (error) {
     return (
       <div className="mx-auto max-w-md py-16 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-          <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-rose-50">
+          <svg className="h-6 w-6 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
           </svg>
         </div>
-        <h2 className="text-lg font-semibold text-text">Something went wrong</h2>
-        <p className="mt-2 text-sm text-text-2">{error}</p>
-        <button onClick={() => window.location.reload()} className="mt-4 text-sm font-medium text-text underline">
+        <h2 className="text-lg font-semibold text-zinc-900">Something went wrong</h2>
+        <p className="mt-2 text-sm text-zinc-600">{error}</p>
+        <button onClick={() => window.location.reload()} className="mt-4 text-sm font-medium text-zinc-700 hover:text-zinc-900">
           Try again
         </button>
       </div>
@@ -851,26 +902,24 @@ export default function AppPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* AI Visibility Overview */}
       {portfolioStats && <VisibilityOverview stats={portfolioStats} clients={clients} />}
 
-      {/* Separator */}
-      <div className="border-t border-border" />
-
-      {/* Header with filters */}
+      {/* Clients section — spacing + subtle separation */}
+      <div className="space-y-6 pt-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-text">Clients</h1>
-          <p className="mt-0.5 text-sm text-text-2">
+          <h1 className="text-xl font-semibold text-zinc-900">Clients</h1>
+          <p className="mt-0.5 text-sm text-zinc-500">
             {filteredClients.length} of {clients.length} client{clients.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <select
             value={filterHealth}
             onChange={(e) => setFilterHealth(e.target.value as "all" | "strong" | "moderate" | "weak")}
-            className="h-9 rounded-lg border border-border bg-white px-3 text-sm text-text shadow-sm focus:border-text focus:outline-none"
+            className="h-9 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none"
           >
             <option value="all">All health</option>
             <option value="strong">Strong</option>
@@ -881,7 +930,7 @@ export default function AppPage() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as "name" | "score" | "updated")}
-            className="h-9 rounded-lg border border-border bg-white px-3 text-sm text-text shadow-sm focus:border-text focus:outline-none"
+            className="h-9 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none"
           >
             <option value="updated">Last updated</option>
             <option value="score">Score</option>
@@ -900,13 +949,13 @@ export default function AppPage() {
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 w-44 rounded-lg border border-border bg-white pl-9 pr-3 text-sm text-text shadow-sm placeholder:text-text-3 focus:border-text focus:outline-none"
+              className="h-9 w-44 rounded-lg border border-zinc-200 bg-white pl-9 pr-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none"
             />
           </div>
 
           <Link
             href="/app/clients/new"
-            className="inline-flex items-center gap-2 rounded-lg bg-text px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-text/90"
+            className="inline-flex h-9 items-center gap-2 rounded-lg border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 hover:border-zinc-400"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -918,26 +967,27 @@ export default function AppPage() {
 
       {/* Client cards grid */}
       {filteredClients.length === 0 && searchQuery ? (
-        <div className="py-12 text-center">
-          <p className="text-text-2">No clients match &quot;{searchQuery}&quot;</p>
-          <button onClick={() => setSearchQuery("")} className="mt-2 text-sm text-text underline">
+        <div className="empty-state-card py-12">
+          <p className="text-sm font-medium text-zinc-700">No clients match &quot;{searchQuery}&quot;</p>
+          <button onClick={() => setSearchQuery("")} className="mt-3 text-sm font-medium text-zinc-600 hover:text-zinc-900">
             Clear search
           </button>
         </div>
       ) : filteredClients.length === 0 && filterHealth !== "all" ? (
-        <div className="py-12 text-center">
-          <p className="text-text-2">No {filterHealth} clients found</p>
-          <button onClick={() => setFilterHealth("all")} className="mt-2 text-sm text-text underline">
+        <div className="empty-state-card py-12">
+          <p className="text-sm font-medium text-zinc-700">No {filterHealth} clients found</p>
+          <button onClick={() => setFilterHealth("all")} className="mt-3 text-sm font-medium text-zinc-600 hover:text-zinc-900">
             Clear filter
           </button>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filteredClients.map((client) => (
             <DenseClientCard key={client.id} client={client} />
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }
