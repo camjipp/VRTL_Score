@@ -6,17 +6,18 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 import { Alert, AlertDescription } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
 async function onboard(accessToken: string) {
-  const res = await fetch("/api/onboard", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`
-    }
-  });
+  const res = await fetchWithTimeout(
+    "/api/onboard",
+    { method: "POST", headers: { Authorization: `Bearer ${accessToken}` } },
+    25000,
+    1
+  );
   if (!res.ok) {
     const text = await res.text();
     throw new Error(text || `Onboard failed (${res.status})`);
@@ -52,7 +53,12 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
       await onboard(accessToken);
       router.push(nextPath);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg === "Failed to fetch" || msg.includes("load failed") || msg.includes("NetworkError")) {
+        setError("Connection failed. The server may be starting up — please try again in a moment.");
+      } else {
+        setError(msg);
+      }
     } finally {
       setBusy(false);
     }

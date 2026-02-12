@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { ensureOnboarded } from "@/lib/onboard";
+import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 
 type Props = {
   children: React.ReactNode;
@@ -22,6 +23,8 @@ export function AppEntitlementGate({ children }: Props) {
   const [ready, setReady] = useState(false);
   const [progress, setProgress] = useState(0);
   const [statusText, setStatusText] = useState("Initializing...");
+  const [authError, setAuthError] = useState<string | null>(null);
+  const lastNetworkError = useRef(false);
 
   // Check if user just came from successful checkout
   const isCheckoutSuccess = searchParams.get("checkout") === "success";
@@ -58,10 +61,15 @@ export function AppEntitlementGate({ children }: Props) {
 
     async function checkEntitlements(): Promise<boolean> {
       try {
+        lastNetworkError.current = false;
+        setAuthError(null);
         const { accessToken } = await ensureOnboarded();
-        const res = await fetch("/api/entitlements", {
-          headers: { Authorization: `Bearer ${accessToken}` }
-        });
+        const res = await fetchWithTimeout(
+          "/api/entitlements",
+          { headers: { Authorization: `Bearer ${accessToken}` } },
+          25000,
+          1
+        );
 
         if (res.ok) {
           // Cache the successful result
@@ -74,7 +82,12 @@ export function AppEntitlementGate({ children }: Props) {
         }
 
         return false;
-      } catch {
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        if (msg === "Failed to fetch" || msg.includes("load failed") || msg.includes("aborted")) {
+          lastNetworkError.current = true;
+          if (!cancelled) setAuthError("Connection failed. Refresh the page to try again.");
+        }
         return false;
       }
     }
@@ -103,8 +116,12 @@ export function AppEntitlementGate({ children }: Props) {
           return;
         }
 
-        // If not entitled and not from checkout, redirect immediately
+        // If not entitled and not from checkout, redirect (unless it was a network error)
         if (!isCheckoutSuccess) {
+          if (lastNetworkError.current) {
+            if (!cancelled) setStatusText("Connection failed — refresh the page to try again.");
+            return;
+          }
           router.replace(`/app/plans`);
           return;
         }
@@ -173,6 +190,12 @@ export function AppEntitlementGate({ children }: Props) {
             <p className="mt-3 text-center text-xs text-text-3">
               {Math.round(progress)}%
             </p>
+
+            {authError && (
+              <p className="mt-3 text-center text-xs text-rose-600">
+                {authError}
+              </p>
+            )}
           </div>
         </div>
       </div>
