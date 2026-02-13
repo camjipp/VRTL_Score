@@ -274,14 +274,14 @@ function AuthorityBrief({ stats, clients }: { stats: PortfolioStats; clients: Cl
               <div className="text-xs font-semibold text-zinc-500">AAI</div>
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-x-3 gap-y-2 text-xs text-zinc-600">
-              <span><span className="font-semibold text-emerald-700">{dominant}</span> Dominant</span>
-              <span className="text-zinc-300">/</span>
-              <span><span className="font-semibold text-zinc-800">{stable}</span> Stable</span>
-              <span className="text-zinc-300">/</span>
-              <span><span className="font-semibold text-amber-700">{watchlist}</span> Watchlist</span>
-              <span className="text-zinc-300">/</span>
-              <span><span className="font-semibold text-rose-700">{losing}</span> Losing Ground</span>
+            <div className="mt-4 flex flex-nowrap items-center gap-x-1.5 overflow-x-auto text-xs text-zinc-600">
+              <span className="whitespace-nowrap"><span className="font-semibold text-emerald-700">{dominant}</span> Dominant</span>
+              <span className="text-zinc-300 shrink-0">·</span>
+              <span className="whitespace-nowrap"><span className="font-semibold text-zinc-800">{stable}</span> Stable</span>
+              <span className="text-zinc-300 shrink-0">·</span>
+              <span className="whitespace-nowrap"><span className="font-semibold text-amber-700">{watchlist}</span> Watchlist</span>
+              <span className="text-zinc-300 shrink-0">·</span>
+              <span className="whitespace-nowrap"><span className="font-semibold text-rose-700">{losing}</span> Losing</span>
             </div>
 
             {lastSnapshotAt ? (
@@ -307,7 +307,11 @@ function AuthorityShifts({ clients }: { clients: ClientWithStats[] }) {
         const delta = c.latestScore !== null && c.previousScore !== null ? c.latestScore - c.previousScore : null;
         return { client: c, state, delta };
       })
-      .filter((r) => r.state === "Losing Ground" || r.state === "Watchlist" || (r.delta !== null && r.delta < 0))
+      .filter((r) => {
+        if (r.state === "Losing Ground") return true;
+        if (r.state === "Watchlist" && (r.delta === null || r.delta <= 0)) return true;
+        return r.delta !== null && r.delta < 0;
+      })
       .sort((a, b) => {
         const s = severity(a.state) - severity(b.state);
         if (s !== 0) return s;
@@ -400,13 +404,10 @@ function AuthorityLeaders({ clients }: { clients: ClientWithStats[] }) {
 
       <div className="mt-5 grid gap-4 md:grid-cols-3">
         {leaders.map(({ family, leader, score, proxy }) => {
-          const leaderState = leader ? getAuthorityState(leader) : "Watchlist";
+          const leaderState = leader ? getAuthorityState(leader) : null;
           return (
             <div key={family} className="rounded-xl border border-zinc-200/80 bg-white p-5">
-              <div className="flex items-center justify-between">
-                <div className="text-sm font-bold text-zinc-900">{modelFamilyLabel(family)}</div>
-                {leader ? <StatusPill state={leaderState} /> : null}
-              </div>
+              <div className="text-sm font-bold text-zinc-900">{modelFamilyLabel(family)}</div>
 
               <div className="mt-3">
                 <div className="text-sm font-semibold text-zinc-900 truncate">{leader?.name ?? "—"}</div>
@@ -414,11 +415,9 @@ function AuthorityLeaders({ clients }: { clients: ClientWithStats[] }) {
                   <div className="text-2xl font-bold tabular-nums text-zinc-900">{score ?? "—"}</div>
                   <div className="text-xs font-semibold text-zinc-500">AAI</div>
                 </div>
-                {proxy ? (
-                  <div className="mt-2 text-xs text-zinc-500">Leader (proxy)</div>
-                ) : (
-                  <div className="mt-2 text-xs text-zinc-500">Leader</div>
-                )}
+                <div className="mt-2 text-xs text-zinc-500">
+                  {proxy ? "Leader (proxy)" : leaderState === "Dominant" ? "Dominant" : "Leader"}
+                </div>
               </div>
             </div>
           );
