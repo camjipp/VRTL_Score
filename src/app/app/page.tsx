@@ -27,6 +27,8 @@ type ClientWithStats = {
   citationRate: number | null;
   competitorRank: number | null;
   competitorCount: number;
+  primaryDisplacer: string | null;
+  authorityGap: number | null;
   bestModel: string | null;
   worstModel: string | null;
   hasAlert: boolean;
@@ -113,6 +115,24 @@ function getHealthLabel(score: number | null): { label: string; color: string; b
   if (score >= 70) return { label: "Strong", color: "text-emerald-700", bg: "bg-emerald-100/90" };
   if (score >= 40) return { label: "Moderate", color: "text-amber-700", bg: "bg-amber-100/90" };
   return { label: "Weak", color: "text-rose-700", bg: "bg-rose-100/90" };
+}
+
+type AuthorityState = "Dominant" | "Stable" | "Watchlist" | "Losing Ground";
+
+function getAuthorityState(client: ClientWithStats): AuthorityState {
+  if (client.latestScore === null) return "Watchlist";
+  const delta = client.previousScore !== null ? client.latestScore - client.previousScore : 0;
+  if (client.hasAlert || delta <= -5 || client.latestScore < 40) return "Losing Ground";
+  if (client.latestScore >= 80) return "Dominant";
+  if (client.latestScore >= 60) return "Stable";
+  return "Watchlist";
+}
+
+function getAuthorityStateTone(state: AuthorityState): string {
+  if (state === "Dominant") return "bg-emerald-50 text-emerald-700 border-emerald-200";
+  if (state === "Watchlist") return "bg-amber-50 text-amber-700 border-amber-200";
+  if (state === "Losing Ground") return "bg-rose-50 text-rose-700 border-rose-200";
+  return "bg-zinc-100 text-zinc-700 border-zinc-200";
 }
 
 function getMomentumLabel(delta: number | null): { label: string; color: string; icon: "up" | "down" | "flat" } {
@@ -289,157 +309,60 @@ function PortfolioTrendChart({ clients, embedded }: { clients: ClientWithStats[]
   );
 }
 
-// Action-driving insight — Moderate/Weak clients need attention
-function getActionableInsight(clients: ClientWithStats[]): { text: string; clientId?: string } {
-  const needsAttention = clients.filter(c => {
-    if (c.latestScore === null) return false;
-    return c.latestScore < 70; // Moderate (<70) or Weak (<40)
-  });
-  if (needsAttention.length === 0) {
-    return { text: "All clients healthy", clientId: undefined };
-  }
-  const first = needsAttention[0];
-  const severity = first.latestScore! < 40 ? "weak" : "moderate";
-  const modelPart = first.worstModel ? ` on ${displayModelName(first.worstModel)}` : "";
-  const count = needsAttention.length;
-  const text = count === 1
-    ? `1 client needs attention — ${first.name} is ${severity}${modelPart}`
-    : `${count} clients need attention — ${first.name} is ${severity}${modelPart}`;
-  return {
-    text,
-    clientId: first.id,
-  };
-}
+function CompetitiveAuthorityStatus({ stats, clients }: { stats: PortfolioStats; clients: ClientWithStats[] }) {
+  const rankedRisk = [...clients]
+    .filter((c) => getAuthorityState(c) === "Losing Ground")
+    .sort((a, b) => (b.authorityGap ?? 0) - (a.authorityGap ?? 0));
+  const topRisk = rankedRisk[0] ?? null;
 
-// KPI metric cell with optional tooltip
-function KpiCell({ label, value, sub, tooltip }: { label: string; value: React.ReactNode; sub?: string; tooltip?: string }) {
-  return (
-    <div className="flex min-w-[80px] flex-col px-4 py-3" title={tooltip}>
-      <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">{label}</span>
-      <span className="mt-0.5 text-lg font-bold tabular-nums text-zinc-900">{value}</span>
-      {sub && <span className="mt-0.5 text-[10px] text-zinc-600">{sub}</span>}
-    </div>
-  );
-}
-
-// AI Visibility Overview — SimilarWeb/Semrush single-bar strip
-function VisibilityOverview({ stats, clients }: { stats: PortfolioStats; clients: ClientWithStats[] }) {
-  const actionable = getActionableInsight(clients);
+  const dominant = clients.filter((c) => getAuthorityState(c) === "Dominant").length;
+  const stable = clients.filter((c) => getAuthorityState(c) === "Stable").length;
+  const watchlist = clients.filter((c) => getAuthorityState(c) === "Watchlist").length;
+  const losing = clients.filter((c) => getAuthorityState(c) === "Losing Ground").length;
 
   return (
     <div className="space-y-4">
-      {/* Single-bar KPI strip — hero score visually dominant */}
-      <div className="flex flex-wrap items-stretch divide-x divide-zinc-200 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
-        {/* Hero score — circular ring + premium prominence */}
-        <div className="flex items-center gap-5 bg-zinc-50/60 px-6 py-4">
-          {/* Circular progress ring */}
-          <div className="relative flex h-16 w-16 shrink-0 items-center justify-center">
-            <svg className="h-16 w-16 -rotate-90" viewBox="0 0 36 36">
-              <circle cx="18" cy="18" r="16" fill="none" stroke="rgb(228 228 231)" strokeWidth="3" />
-              <circle
-                cx="18"
-                cy="18"
-                r="16"
-                fill="none"
-                stroke="rgb(16 185 129)"
-                strokeWidth="3"
-                strokeDasharray={`${(stats.avgScore / 100) * 100.5} 100.5`}
-                strokeLinecap="round"
-                className="transition-[stroke-dasharray] duration-500"
-              />
-            </svg>
-            <span className="absolute text-lg font-bold tabular-nums text-zinc-900">{stats.avgScore}</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">AI Visibility Score</span>
-            <div className="mt-0.5 flex items-baseline gap-1.5">
-              <span className="text-3xl font-bold tabular-nums text-zinc-900">{stats.avgScore}</span>
-              <span className="text-base font-medium text-zinc-600">/ 100</span>
-            </div>
-            {stats.avgScoreDelta !== null && stats.avgScoreDelta !== 0 && (
-              <span className={cn("mt-0.5 text-[11px] font-semibold tabular-nums", stats.avgScoreDelta > 0 ? "text-emerald-600" : "text-rose-600")}>
-                {stats.avgScoreDelta > 0 ? "+" : ""}{stats.avgScoreDelta} vs last
-              </span>
-            )}
-            <span className="mt-1.5 text-[11px] font-medium text-zinc-600">
-              {stats.avgScore >= 75 ? "Top quartile of tracked brands" : stats.avgScore >= 60 ? "Above industry average" : "Room to improve"}
-            </span>
-          </div>
-        </div>
-        <KpiCell label="Strong" value={stats.strongClients} tooltip="Clients with score ≥70 across AI models" />
-        <KpiCell label="Moderate" value={stats.moderateClients} tooltip="Clients scoring 40–69" />
-        <KpiCell label="Weak" value={stats.weakClients} tooltip="Clients scoring &lt;40" />
-        <KpiCell label="Snapshots" value={stats.snapshotsThisMonth} sub="This month" />
-        <KpiCell
-          label="Alerts"
-          value={stats.clientsWithAlerts}
-          sub={stats.clientsWithAlerts > 0 ? "Need attention" : "All healthy"}
-        />
-      </div>
-
-      {/* Action-driving insight — clickable, jumps to client model breakdown */}
-      <div className="flex items-center gap-2 px-1 text-[13px] font-medium text-zinc-700">
-        {actionable.text === "All clients healthy" ? (
-          <>
-            <span className="text-emerald-600" aria-hidden>✓</span>
-            <span>{actionable.text}</span>
-          </>
-        ) : (
-          <>
-            <span className="text-amber-600" aria-hidden>⚠</span>
-            <span>
-              {actionable.clientId ? (
-                <Link
-                  href={`/app/clients/${actionable.clientId}${actionable.text.includes(" on ") ? "#cross-model" : ""}`}
-                  className="text-zinc-800 hover:text-zinc-900 no-underline hover:no-underline font-medium"
-                >
-                  {actionable.text}
-                </Link>
-              ) : (
-                actionable.text
-              )}
-            </span>
-          </>
-        )}
-      </div>
-
-      {/* Recommended Actions — prescriptive CTA */}
-      <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3 shadow-sm">
-        <div className="flex items-center justify-between gap-4">
+      <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h3 className="text-[13px] font-semibold text-zinc-800">Recommended Actions</h3>
-            <p className="mt-0.5 text-[12px] text-zinc-600">
-              {actionable.text !== "All clients healthy" && actionable.clientId ? (
-                <>View model breakdown and prioritized fixes for this client</>
-              ) : (
-                <>All clients on track. Run snapshots regularly to keep recommendations fresh.</>
-              )}
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Competitive Authority Status</p>
+            <h2 className="mt-2 text-2xl font-semibold text-zinc-900">
+              {topRisk ? `${losing} Client${losing !== 1 ? "s" : ""} Losing Authority` : "All Clients Maintaining Authority"}
+            </h2>
           </div>
-          {actionable.text !== "All clients healthy" && actionable.clientId && (
-            <Link
-              href={`/app/clients/${actionable.clientId}#cross-model`}
-              className="shrink-0 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-semibold text-zinc-800 transition hover:bg-zinc-100"
-            >
-              View action plan →
-            </Link>
-          )}
+
+          {topRisk ? (
+            <div className="min-w-0 rounded-lg border border-rose-200 bg-rose-50/60 px-4 py-3">
+              <p className="text-sm font-semibold text-zinc-900">{topRisk.name}</p>
+              <p className="mt-1 text-sm text-zinc-700">
+                {displayModelName(topRisk.worstModel) || "Model signal"} - Losing Ground
+              </p>
+              <p className="mt-1 text-sm text-zinc-700">
+                Primary Displacer:{" "}
+                <span className="font-medium">
+                  {topRisk.primaryDisplacer
+                    ? `${topRisk.primaryDisplacer}${topRisk.authorityGap ? ` (+${topRisk.authorityGap} Authority Gap)` : ""}`
+                    : "No clear displacer yet"}
+                </span>
+              </p>
+              <Link
+                href={`/app/clients/${topRisk.id}#cross-model`}
+                className="mt-2 inline-flex items-center text-sm font-semibold text-zinc-900 hover:text-zinc-700"
+              >
+                View Competitive Breakdown →
+              </Link>
+            </div>
+          ) : null}
         </div>
       </div>
 
-      {/* Trend — collapsible (Semrush-style) */}
-      <details className="group overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
-        <summary className="flex cursor-pointer items-center justify-between px-4 py-2.5 text-[13px] font-semibold text-zinc-700 hover:bg-zinc-50">
-          <span>Portfolio visibility trend</span>
-          <span className="text-[11px] font-medium text-zinc-500">Last 5 snapshots</span>
-          <svg className="h-4 w-4 text-zinc-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </summary>
-        <div className="border-t border-zinc-200 p-4">
-          <PortfolioTrendChart clients={clients} embedded />
+      <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+        <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Portfolio Overview</p>
+        <div className="mt-2 flex flex-wrap items-baseline gap-3">
+          <span className="text-2xl font-semibold tabular-nums text-zinc-900">AI Authority Index: {stats.avgScore}</span>
+          <span className="text-sm text-zinc-600">{dominant} Dominant · {stable} Stable · {watchlist} Watchlist · {losing} Losing Ground</span>
         </div>
-      </details>
+      </div>
     </div>
   );
 }
@@ -656,7 +579,6 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
   );
 }
 
-// Client table — SimilarWeb/Semrush data-dense row layout
 function ClientTable({ clients }: { clients: ClientWithStats[] }) {
   const router = useRouter();
 
@@ -666,11 +588,11 @@ function ClientTable({ clients }: { clients: ClientWithStats[] }) {
         <thead>
           <tr className="border-b border-zinc-200 bg-zinc-50/80">
             <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Client</th>
-            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Score</th>
-            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Δ</th>
-            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Health</th>
-            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Weakest</th>
-            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Updated</th>
+            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">AI Authority</th>
+            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Index</th>
+            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Trend</th>
+            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Primary Displacer</th>
+            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Weakest Model</th>
           </tr>
         </thead>
         <tbody>
@@ -678,8 +600,9 @@ function ClientTable({ clients }: { clients: ClientWithStats[] }) {
             const delta = client.latestScore !== null && client.previousScore !== null
               ? client.latestScore - client.previousScore
               : null;
-            const health = getHealthLabel(client.latestScore);
+            const state = getAuthorityState(client);
             const hasNoData = client.status === "none" && client.latestScore === null;
+
             return (
               <tr
                 key={client.id}
@@ -696,15 +619,12 @@ function ClientTable({ clients }: { clients: ClientWithStats[] }) {
                       <div className="min-w-0 flex-1">
                         <span className="font-semibold text-zinc-900">{client.name}</span>
                         <div className="mt-1 flex flex-wrap items-center gap-3">
-                          <span className="text-[12px] font-medium text-zinc-600">Analyze visibility across 3 AI models</span>
+                          <span className="text-[12px] font-medium text-zinc-600">Analyze AI authority across major models</span>
                           <Link
                             href={`/app/clients/${client.id}`}
                             onClick={(e) => e.stopPropagation()}
                             className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-800 shadow-sm transition hover:bg-zinc-50 hover:border-zinc-400"
                           >
-                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
-                            </svg>
                             Run snapshot
                           </Link>
                         </div>
@@ -713,67 +633,59 @@ function ClientTable({ clients }: { clients: ClientWithStats[] }) {
                   </td>
                 ) : (
                   <>
-                <td className="py-2.5 pl-4 pr-2">
-                  <div className="flex items-center gap-2">
-                    <StatusDot score={client.latestScore} status={client.status} />
-                    <div className="min-w-0 flex-1">
-                      <span className="font-semibold text-zinc-900">{client.name}</span>
-                      {client.website ? (
-                        <div className="text-[11px] font-medium text-zinc-500">{displayUrl(client.website)}</div>
-                      ) : null}
-                    </div>
-                    {client.hasAlert && (
-                      <span className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold text-rose-600 bg-rose-100/90">
-                        Alert
+                    <td className="py-2.5 pl-4 pr-2">
+                      <div className="flex items-center gap-2">
+                        <StatusDot score={client.latestScore} status={client.status} />
+                        <div className="min-w-0 flex-1">
+                          <span className="font-semibold text-zinc-900">{client.name}</span>
+                          {client.website ? (
+                            <div className="text-[11px] font-medium text-zinc-500">{displayUrl(client.website)}</div>
+                          ) : null}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <span className={cn("inline-flex rounded-md border px-2 py-0.5 text-[11px] font-semibold", getAuthorityStateTone(state))}>
+                        {state}
                       </span>
-                    )}
-                  </div>
-                </td>
-                <td className="px-4 py-2.5">
-                  {client.latestScore !== null ? (
-                    <span className="font-bold tabular-nums text-zinc-900">{client.latestScore}</span>
-                  ) : (
-                    <span className="text-zinc-400">—</span>
-                  )}
-                </td>
-                <td className="px-4 py-2.5">
-                  {delta !== null && delta !== 0 ? (
-                    <span className={cn("font-semibold tabular-nums", delta > 0 ? "text-emerald-600" : "text-rose-600")}>
-                      {delta > 0 ? "+" : ""}{delta}
-                    </span>
-                  ) : (
-                    <span className="text-zinc-400">—</span>
-                  )}
-                </td>
-                <td className="px-4 py-2.5">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span className={cn("rounded-md px-2 py-0.5 text-[11px] font-semibold", health.color, health.bg)}>
-                      {health.label}
-                    </span>
-                    {health.label === "Strong" && (
-                      <span className="rounded px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50/90">
-                        Top performer
-                      </span>
-                    )}
-                  </div>
-                </td>
-                <td className="px-4 py-2.5 text-[12px] font-medium text-zinc-700">
-                  {client.worstModel ? (
-                    <Link
-                      href={`/app/clients/${client.id}#cross-model`}
-                      onClick={(e) => e.stopPropagation()}
-                      className="inline-flex items-center text-amber-700 hover:text-amber-800 hover:underline no-underline font-semibold"
-                    >
-                      <ModelDot model={client.worstModel} />
-                      {displayModelName(client.worstModel)}
-                    </Link>
-                  ) : (
-                    "—"
-                  )}
-                </td>
-                <td className="px-4 py-2.5 text-[11px] text-zinc-500">
-                  {client.lastSnapshotAt ? timeAgo(client.lastSnapshotAt) : "—"}
-                </td>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <span className="font-bold tabular-nums text-zinc-900">{client.latestScore ?? "—"}</span>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      {delta !== null && delta !== 0 ? (
+                        <span className={cn("font-semibold tabular-nums", delta > 0 ? "text-emerald-600" : "text-rose-600")}>
+                          {delta > 0 ? "↑ +" : "↓ "}
+                          {Math.abs(delta)}
+                        </span>
+                      ) : (
+                        <span className="text-zinc-400">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-2.5 text-[12px] text-zinc-700">
+                      {client.primaryDisplacer ? (
+                        <span className="font-medium">
+                          {client.primaryDisplacer}
+                          {client.authorityGap ? ` (+${client.authorityGap})` : ""}
+                        </span>
+                      ) : (
+                        <span className="text-zinc-400">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-2.5 text-[12px] font-medium text-zinc-700">
+                      {client.worstModel ? (
+                        <Link
+                          href={`/app/clients/${client.id}#cross-model`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex items-center text-zinc-800 hover:text-zinc-900 hover:underline no-underline font-semibold"
+                        >
+                          <ModelDot model={client.worstModel} />
+                          {displayModelName(client.worstModel)}
+                        </Link>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
                   </>
                 )}
               </tr>
@@ -818,8 +730,7 @@ export default function AppPage() {
   const [portfolioStats, setPortfolioStats] = useState<PortfolioStats | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"name" | "score" | "updated">("updated");
-  const [filterHealth, setFilterHealth] = useState<"all" | "strong" | "moderate" | "weak">("all");
-  const [viewMode, setViewMode] = useState<"cards" | "table">("table");
+  const [filterHealth, setFilterHealth] = useState<"all" | "dominant" | "stable" | "watchlist" | "losing">("all");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -942,6 +853,8 @@ export default function AppPage() {
           let topPositionRate = null;
           let citationRate = null;
           let competitorRank = null;
+          let primaryDisplacer: string | null = null;
+          let authorityGap: number | null = null;
 
           if (detail) {
             const total = detail.summary.responses_count || 1;
@@ -956,6 +869,11 @@ export default function AppPage() {
               ...competitors.map(c => ({ name: c.name, mentions: c.count, isClient: false }))
             ].sort((a, b) => b.mentions - a.mentions);
             competitorRank = allEntities.findIndex(e => e.isClient) + 1;
+            const topCompetitor = competitors[0] ?? null;
+            if (topCompetitor) {
+              primaryDisplacer = topCompetitor.name;
+              authorityGap = Math.max(0, topCompetitor.count - clientMentions);
+            }
           }
 
           // Best/worst models
@@ -980,7 +898,7 @@ export default function AppPage() {
             snapshotCount: completedSnapshots.length, recentScores,
             status: runningSnapshot ? "running" : completedSnapshots.length > 0 ? "complete" : "none" as const,
             mentionRate, topPositionRate, citationRate, competitorRank,
-            competitorCount, bestModel, worstModel, hasAlert,
+            competitorCount, primaryDisplacer, authorityGap, bestModel, worstModel, hasAlert,
           };
         });
 
@@ -1041,9 +959,11 @@ export default function AppPage() {
 
     if (filterHealth !== "all") {
       result = result.filter(c => {
-        if (filterHealth === "strong") return c.latestScore !== null && c.latestScore >= 70;
-        if (filterHealth === "moderate") return c.latestScore !== null && c.latestScore >= 40 && c.latestScore < 70;
-        if (filterHealth === "weak") return c.latestScore !== null && c.latestScore < 40;
+        const state = getAuthorityState(c);
+        if (filterHealth === "dominant") return state === "Dominant";
+        if (filterHealth === "stable") return state === "Stable";
+        if (filterHealth === "watchlist") return state === "Watchlist";
+        if (filterHealth === "losing") return state === "Losing Ground";
         return true;
       });
     }
@@ -1100,16 +1020,9 @@ export default function AppPage() {
 
   return (
     <div className="space-y-8">
-      {/* AI Visibility Overview */}
-      <div className="space-y-5">
-        <div className="border-b border-zinc-200 pb-3">
-          <h2 className="text-base font-semibold text-zinc-800">Overview</h2>
-          <p className="mt-0.5 text-sm text-zinc-600">Portfolio AI visibility across ChatGPT, Gemini & Claude</p>
-        </div>
-        {portfolioStats && <VisibilityOverview stats={portfolioStats} clients={clients} />}
-      </div>
+      {portfolioStats && <CompetitiveAuthorityStatus stats={portfolioStats} clients={clients} />}
 
-      {/* Clients section — SimilarWeb-style data table */}
+      {/* Clients section */}
       <div className="space-y-4 pt-2">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -1121,13 +1034,14 @@ export default function AppPage() {
         <div className="flex flex-wrap items-center gap-3">
           <select
             value={filterHealth}
-            onChange={(e) => setFilterHealth(e.target.value as "all" | "strong" | "moderate" | "weak")}
+            onChange={(e) => setFilterHealth(e.target.value as "all" | "dominant" | "stable" | "watchlist" | "losing")}
             className="h-9 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none"
           >
-            <option value="all">All health</option>
-            <option value="strong">Strong</option>
-            <option value="moderate">Moderate</option>
-            <option value="weak">Weak</option>
+            <option value="all">All states</option>
+            <option value="dominant">Dominant</option>
+            <option value="stable">Stable</option>
+            <option value="watchlist">Watchlist</option>
+            <option value="losing">Losing ground</option>
           </select>
 
           <select
@@ -1139,27 +1053,6 @@ export default function AppPage() {
             <option value="score">Score</option>
             <option value="name">Name</option>
           </select>
-
-          <div className="flex items-center gap-1 rounded-lg border border-zinc-200 bg-zinc-50/50 p-0.5">
-            <button
-              onClick={() => setViewMode("table")}
-              className={cn(
-                "rounded-md px-2.5 py-1.5 text-xs font-semibold transition-colors",
-                viewMode === "table" ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-700"
-              )}
-            >
-              Table
-            </button>
-            <button
-              onClick={() => setViewMode("cards")}
-              className={cn(
-                "rounded-md px-2.5 py-1.5 text-xs font-semibold transition-colors",
-                viewMode === "cards" ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-700"
-              )}
-            >
-              Cards
-            </button>
-          </div>
 
           <div className="relative">
             <svg
@@ -1189,7 +1082,7 @@ export default function AppPage() {
         </div>
       </div>
 
-      {/* Client cards grid */}
+      {/* Clients table */}
       {filteredClients.length === 0 && searchQuery ? (
         <div className="empty-state-card py-12">
           <p className="text-sm font-medium text-zinc-700">No clients match &quot;{searchQuery}&quot;</p>
@@ -1204,14 +1097,8 @@ export default function AppPage() {
             Clear filter
           </button>
         </div>
-      ) : viewMode === "table" ? (
-        <ClientTable clients={filteredClients} />
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 [&>a]:flex">
-          {filteredClients.map((client) => (
-            <DenseClientCard key={client.id} client={client} />
-          ))}
-        </div>
+        <ClientTable clients={filteredClients} />
       )}
       </div>
     </div>

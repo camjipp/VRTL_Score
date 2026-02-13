@@ -48,7 +48,7 @@ function getScoreTier(score: number | null): ScoreTier {
     tier: "Unknown", 
     label: "No data", 
     color: "#64748b",
-    description: "Run a snapshot to measure visibility",
+    description: "Run a snapshot to measure AI authority",
     implication: "Baseline measurement needed",
     consequence: "Without measurement, you can't improve what you can't see."
   };
@@ -220,9 +220,9 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
     const gap = avgScore - worstModel[1];
     insights.push({
       priority: "HIGH",
-      title: `${worstModel[0]} Visibility Gap`,
+      title: `${worstModel[0]} Authority Gap`,
       insight: `${worstModel[0]} scores ${worstModel[1]} — ${gap} points below your average.`,
-      whyItMatters: `${worstModel[0]} handles significant AI query volume. Low visibility means missed discovery.`,
+      whyItMatters: `${worstModel[0]} handles significant AI query volume. Low authority means competitive displacement risk.`,
       action: "Improve web authority and publish comparison content targeting this model's training data.",
       expectedImpact: `+10-15 points in ${worstModel[0]} within 60 days.`,
       consequence: `Every week this gap persists, competitors capture discovery opportunities you're missing.`
@@ -233,7 +233,7 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
   if (metrics.topCompetitor && metrics.topCompetitor.mentions >= metrics.mentioned) {
     insights.push({
       priority: "HIGH",
-      title: "Competitor Visibility Threat",
+      title: "Competitive Authority Threat",
       insight: `${metrics.topCompetitor.name} is mentioned ${metrics.topCompetitor.mentions} times vs your ${metrics.mentioned}.`,
       whyItMatters: "AI models are positioning a competitor ahead of you in recommendations.",
       action: "Audit their content strategy. Counter-position with differentiated messaging.",
@@ -272,11 +272,11 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
   if (metrics.mentionRate < 50) {
     insights.push({
       priority: "HIGH",
-      title: "Low Visibility Rate",
-      insight: `Mentioned in only ${metrics.mentionRate}% of AI responses.`,
-      whyItMatters: "More than half of AI users asking about your category won't discover you.",
+      title: "Low Authority Coverage",
+      insight: `Authority signals appear in only ${metrics.mentionRate}% of AI responses.`,
+      whyItMatters: "More than half of AI users asking about your category won't see your brand as an authoritative option.",
       action: "Improve brand authority through PR, backlinks, and structured data.",
-      expectedImpact: "Target 70%+ mention rate to enter consideration set.",
+      expectedImpact: "Target 70%+ authority coverage to enter the AI consideration set.",
       consequence: `Low visibility compounds — AI models learn from each other, and being absent now means being absent longer.`
     });
   }
@@ -325,7 +325,7 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
     insights.push({
       priority: "LOW",
       title: "Strong Position (Maintain)",
-      insight: "Your visibility is competitive — maintain current strategy.",
+      insight: "Your AI authority is competitive — maintain current strategy.",
       whyItMatters: "Complacency allows competitors to catch up.",
       action: "Continue content velocity and monitor competitor activity.",
       expectedImpact: "Sustain top-tier visibility.",
@@ -656,7 +656,7 @@ export function renderReportHtml(data: ReportData): string {
       <div class="small">${formatDate(snapshot.created_at)}</div>
     </div>
     
-    <div class="cover-type">AI Visibility Audit</div>
+    <div class="cover-type">AI Authority Intelligence Briefing</div>
     <div class="cover-client">${escapeHtml(client.name)}</div>
     ${client.website ? `<div class="cover-url">${escapeHtml(client.website)}</div>` : ""}
     
@@ -717,7 +717,7 @@ export function renderReportHtml(data: ReportData): string {
     </div>
     
     <div class="ranking-section no-break">
-      <div class="h3">Competitive Visibility Ranking</div>
+      <div class="h3">Competitive Authority Ranking</div>
       ${metrics.allEntities.slice(0, 5).map((entity, idx) => {
         const isClient = entity.isClient;
         const gap = entity.mentions - metrics.mentioned;
@@ -855,7 +855,7 @@ export function renderReportHtml(data: ReportData): string {
     }).join("") : ""}
     
     <div class="page-footer">
-      <span>${escapeHtml(client.name)} — AI Visibility Report</span>
+      <span>${escapeHtml(client.name)} — AI Authority Briefing</span>
       <span>${escapeHtml(agency.name)}</span>
     </div>
   </div>
@@ -913,7 +913,7 @@ export function renderReportHtml(data: ReportData): string {
     </div>
     
     <div class="page-footer">
-      <span>${escapeHtml(client.name)} — AI Visibility Report</span>
+      <span>${escapeHtml(client.name)} — AI Authority Briefing</span>
       <span>${escapeHtml(agency.name)}</span>
     </div>
   </div>
@@ -1058,7 +1058,7 @@ export function renderReportHtml(data: ReportData): string {
     </div>
     
     <div class="page-footer">
-      <span>${escapeHtml(client.name)} — AI Visibility Report</span>
+      <span>${escapeHtml(client.name)} — AI Authority Briefing</span>
       <span>Powered by VRTL Score</span>
     </div>
   </div>

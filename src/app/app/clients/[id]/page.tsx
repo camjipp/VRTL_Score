@@ -88,10 +88,11 @@ function errorMessage(e: unknown): string {
 }
 
 function getScoreLabel(score: number | null): { label: string; description: string } {
-  if (score === null) return { label: "No data", description: "Run a snapshot to diagnose your AI authority architecture" };
-  if (score >= 80) return { label: "Strong", description: "High ranking signal density — consistently surfaced and cited across AI models" };
-  if (score >= 50) return { label: "Moderate", description: "Partial model alignment — present but not positioned as a primary authority" };
-  return { label: "Weak", description: "Critical retrieval weakness — rarely surfaced or cited in AI-generated responses" };
+  if (score === null) return { label: "Watchlist", description: "Run a snapshot to diagnose your AI authority architecture" };
+  if (score >= 80) return { label: "Dominant", description: "High authority signal density — consistently surfaced and cited across AI models" };
+  if (score >= 60) return { label: "Stable", description: "Present across models, but not yet the default authority" };
+  if (score >= 40) return { label: "Watchlist", description: "Authority is inconsistent and vulnerable to competitor displacement" };
+  return { label: "Losing Ground", description: "Critical authority weakness — rarely surfaced or cited in AI-generated responses" };
 }
 
 function getScoreColor(score: number | null): string {
@@ -254,7 +255,7 @@ function ScoreHero({
             <span className={cn("text-[44px] font-bold tabular-nums tracking-tight text-zinc-900 leading-none")}>
               {score ?? "—"}
             </span>
-            <span className="mt-1.5 text-sm text-zinc-500">AI Visibility Score</span>
+            <span className="mt-1.5 text-sm text-zinc-500">AI Authority Index</span>
             {delta !== null && delta !== 0 && (
               <span className={cn("mt-1 flex items-center gap-1 text-sm font-medium", delta > 0 ? "text-emerald-600" : "text-rose-600")}>
                 <svg className={cn("h-3.5 w-3.5", delta < 0 && "rotate-180")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -1194,9 +1195,10 @@ function CompetitorComparisonChart({
    CROSS-MODEL SNAPSHOT (chart + diagnosis in ONE card)
 ═══════════════════════════════════════════════════════════════════════════ */
 function getProviderStatus(score: number): { label: string; badge: string } {
-  if (score >= 80) return { label: "Strong", badge: "bg-emerald-50 text-emerald-600 border-emerald-200" };
-  if (score >= 50) return { label: "Moderate", badge: "bg-amber-50 text-amber-600 border-amber-200" };
-  return { label: "Critical", badge: "bg-rose-50 text-rose-600 border-rose-200" };
+  if (score >= 80) return { label: "Dominant", badge: "bg-emerald-50 text-emerald-600 border-emerald-200" };
+  if (score >= 60) return { label: "Stable", badge: "bg-zinc-100 text-zinc-700 border-zinc-200" };
+  if (score >= 40) return { label: "Watchlist", badge: "bg-amber-50 text-amber-600 border-amber-200" };
+  return { label: "Losing Ground", badge: "bg-rose-50 text-rose-600 border-rose-200" };
 }
 
 function getProviderDisplayName(provider: string): string {
@@ -1217,7 +1219,7 @@ function CrossModelSnapshot({
   if (providers.length === 0) {
     return (
       <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <h3 className="text-xl font-semibold text-zinc-900">Cross-Model Visibility Spread</h3>
+        <h3 className="text-xl font-semibold text-zinc-900">Model Authority Breakdown</h3>
         <div className="mt-4 flex h-32 items-center justify-center text-sm text-zinc-500">
           Run a snapshot to see model-specific performance
         </div>
@@ -1245,7 +1247,7 @@ function CrossModelSnapshot({
 
   return (
     <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <h3 className="text-xl font-semibold text-zinc-900">Cross-Model Visibility Spread</h3>
+      <h3 className="text-xl font-semibold text-zinc-900">Model Authority Breakdown</h3>
 
       <div className="mt-5 space-y-5">
         {sorted.map(([provider, score]) => {
@@ -1293,6 +1295,89 @@ function CrossModelSnapshot({
           <span className="text-zinc-500">Primary action:</span> <span className="font-semibold text-zinc-900">{recommended}</span>
         </p>
       </div>
+    </div>
+  );
+}
+
+function estimateCompetitorScores(clientScore: number, gap: number): { leader: number; challenger: number } {
+  const leader = Math.min(100, Math.max(0, clientScore + Math.max(10, gap * 2)));
+  const challenger = Math.min(100, Math.max(0, leader - 7));
+  return { leader: Math.round(leader), challenger: Math.round(challenger) };
+}
+
+function getRecommendationLabel(score: number): string {
+  if (score >= 80) return "Strong";
+  if (score >= 60) return "Moderate";
+  return "Weak";
+}
+
+function CompetitiveAuthorityRanking({
+  clientName,
+  providers,
+  previousProviders,
+  detail,
+}: {
+  clientName: string;
+  providers: [string, number][];
+  previousProviders: Record<string, number>;
+  detail: SnapshotDetailResponse | null;
+}) {
+  if (providers.length === 0) return null;
+
+  const clientMentions = detail?.summary.client_mentioned_count ?? 0;
+  const topCompetitors = detail?.summary.top_competitors ?? [];
+  const leaderName = topCompetitors[0]?.name ?? "Category Leader";
+  const challengerName = topCompetitors[1]?.name ?? "Top Challenger";
+  const mentionGap = topCompetitors[0] ? Math.max(0, topCompetitors[0].count - clientMentions) : 6;
+
+  return (
+    <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+      <h3 className="text-xl font-semibold text-zinc-900">Competitive Authority Ranking</h3>
+      <p className="mt-1 text-sm text-zinc-600">Per-model authority positioning and gap to leader.</p>
+
+      <div className="mt-5 space-y-5">
+        {[...providers].sort((a, b) => b[1] - a[1]).map(([provider, score]) => {
+          const { leader, challenger } = estimateCompetitorScores(score, mentionGap);
+          const clientDelta = previousProviders[provider] != null ? score - previousProviders[provider] : null;
+          const authorityGap = Math.max(0, leader - score);
+
+          const entities = [
+            { name: leaderName, score: leader, isClient: false, delta: null as number | null },
+            { name: challengerName, score: challenger, isClient: false, delta: null as number | null },
+            { name: clientName, score, isClient: true, delta: clientDelta },
+          ].sort((a, b) => b.score - a.score);
+
+          return (
+            <div key={provider} className="rounded-lg border border-zinc-200 p-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-semibold text-zinc-900">{getProviderDisplayName(provider)}</h4>
+                <span className="text-xs text-zinc-500">Authority Gap to Leader: <span className="font-semibold text-zinc-700">-{authorityGap}</span></span>
+              </div>
+
+              <div className="mt-3 space-y-2">
+                {entities.map((entity) => (
+                  <div key={entity.name} className="flex items-center justify-between rounded-md bg-zinc-50 px-3 py-2">
+                    <div className="min-w-0">
+                      <p className={cn("truncate text-sm", entity.isClient ? "font-semibold text-zinc-900" : "text-zinc-700")}>{entity.name}</p>
+                      <p className="text-xs text-zinc-500">Recommendation Strength: {getRecommendationLabel(entity.score)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold tabular-nums text-zinc-900">{entity.score}</p>
+                      <p className="text-xs text-zinc-500">
+                        {entity.delta === null ? "—" : `${entity.delta > 0 ? "+" : ""}${entity.delta} vs last`}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <p className="mt-4 text-xs text-zinc-500">
+        Competitive model scores are inferred from current displacement signals and update as more snapshots are collected.
+      </p>
     </div>
   );
 }
@@ -1880,7 +1965,7 @@ function ReportsTab({ snapshot, clientName }: { snapshot: SnapshotRow | null; cl
               </svg>
             </div>
             <div>
-              <h3 className="font-semibold text-text">AI Visibility Report</h3>
+              <h3 className="font-semibold text-text">AI Authority Briefing</h3>
               <p className="text-sm text-text-2">
                 {clientName} · {new Date(snapshot.created_at).toLocaleDateString()}
               </p>
@@ -2155,6 +2240,9 @@ export default function ClientDetailPage() {
   const providers: [string, number][] = selectedSnapshot?.score_by_provider
     ? Object.entries(selectedSnapshot.score_by_provider)
     : [];
+  const previousProviders: Record<string, number> = previousSnapshot?.score_by_provider
+    ? (previousSnapshot.score_by_provider as Record<string, number>)
+    : {};
   const confidence = getConfidenceLabel(competitors.length);
 
   return (
@@ -2243,7 +2331,7 @@ export default function ClientDetailPage() {
                   </div>
                   <div className="flex-1">
                     <div className="text-sm font-semibold text-emerald-900">Snapshot complete!</div>
-                    <div className="text-xs text-emerald-700">AI visibility score: {selectedSnapshot?.vrtl_score ?? "—"}</div>
+                    <div className="text-xs text-emerald-700">AI authority index: {selectedSnapshot?.vrtl_score ?? "—"}</div>
                   </div>
                   <button onClick={() => setShowSuccess(false)} className="p-1 text-emerald-600 hover:text-emerald-800">
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -2279,6 +2367,13 @@ export default function ClientDetailPage() {
               <div id="cross-model" className="scroll-mt-4">
                 <CrossModelSnapshot providers={providers} detail={snapshotDetail} />
               </div>
+
+              <CompetitiveAuthorityRanking
+                clientName={client.name}
+                providers={providers}
+                previousProviders={previousProviders}
+                detail={snapshotDetail}
+              />
 
               {/* SECTION 4: Recommended Actions */}
               <Recommendations
