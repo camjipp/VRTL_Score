@@ -279,8 +279,8 @@ function VisibilityOverview({ stats, clients }: { stats: PortfolioStats; clients
       </div>
 
       <div className="grid gap-6 lg:grid-cols-12">
-        {/* Hero card: AI Visibility Health — spans 5 cols */}
-        <div className="dashboard-card-hero lg:col-span-5 flex flex-col justify-between">
+        {/* Hero card: AI Visibility Health — left half */}
+        <div className="dashboard-card-hero lg:col-span-6 flex flex-col justify-between">
           <div>
             <div className="metric-label">AI Visibility Health</div>
             <div className="mt-3 flex items-baseline gap-2">
@@ -345,8 +345,13 @@ function VisibilityOverview({ stats, clients }: { stats: PortfolioStats; clients
           )}
         </div>
 
-        {/* Secondary cards — equal width */}
-        <div className="grid gap-6 sm:grid-cols-3 lg:col-span-4">
+        {/* Trend chart — right of hero on desktop */}
+        <div className="lg:col-span-6 min-h-0">
+          <PortfolioTrendChart clients={clients} />
+        </div>
+
+        {/* Secondary cards — full width row */}
+        <div className="grid gap-6 sm:grid-cols-3 lg:col-span-12">
           <div className="dashboard-card">
             <div className="metric-label">Health Breakdown</div>
             <div className="mt-4 space-y-3">
@@ -396,11 +401,6 @@ function VisibilityOverview({ stats, clients }: { stats: PortfolioStats; clients
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Trend chart */}
-        <div className="lg:col-span-3">
-          <PortfolioTrendChart clients={clients} />
         </div>
       </div>
     </div>
@@ -561,7 +561,11 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
           </div>
           <div>
             <span className="text-zinc-500">Weakest model</span>
-            <div className="font-semibold text-rose-600 truncate">{client.worstModel ? displayModelName(client.worstModel) : "—"}</div>
+            <div className="font-semibold text-zinc-600 truncate">
+              {client.worstModel && client.bestModel && client.worstModel.toLowerCase() !== client.bestModel.toLowerCase()
+                ? displayModelName(client.worstModel)
+                : "—"}
+            </div>
           </div>
         </div>
       )}
@@ -569,12 +573,12 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
       {/* Action signal — subtle pill */}
       {signal && client.latestScore !== null && (
         <div className={cn(
-          "mt-3 rounded-lg border px-3 py-2 text-xs font-medium",
-          signal.color.includes("rose") ? "border-rose-200 bg-rose-50" :
-          signal.color.includes("amber") ? "border-amber-200 bg-amber-50" :
-          "border-emerald-200 bg-emerald-50"
+          "mt-3 rounded-md border px-2.5 py-1.5 text-xs",
+          signal.color.includes("rose") ? "border-rose-200/60 bg-rose-50/70 text-rose-700" :
+          signal.color.includes("amber") ? "border-amber-200/60 bg-amber-50/70 text-amber-700" :
+          "border-emerald-200/60 bg-emerald-50/70 text-emerald-700"
         )}>
-          <span className={signal.color}>{signal.text}</span>
+          {signal.text}
         </div>
       )}
 
