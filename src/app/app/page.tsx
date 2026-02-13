@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { ensureOnboarded } from "@/lib/onboard";
@@ -97,10 +98,10 @@ function timeAgo(dateStr: string): string {
 }
 
 function getHealthLabel(score: number | null): { label: string; color: string; bg: string } {
-  if (score === null) return { label: "No data", color: "text-zinc-500", bg: "bg-zinc-100" };
-  if (score >= 70) return { label: "Strong", color: "text-emerald-600", bg: "bg-emerald-50" };
-  if (score >= 40) return { label: "Moderate", color: "text-amber-600", bg: "bg-amber-50" };
-  return { label: "Weak", color: "text-rose-600", bg: "bg-rose-50" };
+  if (score === null) return { label: "No data", color: "text-zinc-600", bg: "bg-zinc-200/80" };
+  if (score >= 70) return { label: "Strong", color: "text-emerald-700", bg: "bg-emerald-100/90" };
+  if (score >= 40) return { label: "Moderate", color: "text-amber-700", bg: "bg-amber-100/90" };
+  return { label: "Weak", color: "text-rose-700", bg: "bg-rose-100/90" };
 }
 
 function getMomentumLabel(delta: number | null): { label: string; color: string; icon: "up" | "down" | "flat" } {
@@ -267,15 +268,25 @@ function PortfolioTrendChart({ clients, embedded }: { clients: ClientWithStats[]
   );
 }
 
-// Actionable insight — first client needing attention
-function getActionableInsight(clients: ClientWithStats[]): { text: string; clientId?: string } | null {
-  const needsAttention = clients.find(c => c.hasAlert);
-  if (!needsAttention) return null;
-  const signal = getActionSignal(needsAttention);
-  if (!signal) return null;
+// Action-driving insight — Moderate/Weak clients need attention
+function getActionableInsight(clients: ClientWithStats[]): { text: string; clientId?: string } {
+  const needsAttention = clients.filter(c => {
+    if (c.latestScore === null) return false;
+    return c.latestScore < 70; // Moderate (<70) or Weak (<40)
+  });
+  if (needsAttention.length === 0) {
+    return { text: "All clients healthy", clientId: undefined };
+  }
+  const first = needsAttention[0];
+  const severity = first.latestScore! < 40 ? "weak" : "moderate";
+  const modelPart = first.worstModel ? ` on ${displayModelName(first.worstModel)}` : "";
+  const count = needsAttention.length;
+  const text = count === 1
+    ? `1 client needs attention — ${first.name} is ${severity}${modelPart}`
+    : `${count} clients need attention — ${first.name} is ${severity}${modelPart}`;
   return {
-    text: `${needsAttention.name} — ${signal.text}`,
-    clientId: needsAttention.id,
+    text,
+    clientId: first.id,
   };
 }
 
@@ -295,18 +306,18 @@ function VisibilityOverview({ stats, clients }: { stats: PortfolioStats; clients
   const actionable = getActionableInsight(clients);
 
   return (
-    <div className="space-y-3">
-      {/* Single-bar KPI strip — one continuous surface, dividers between metrics */}
+    <div className="space-y-4">
+      {/* Single-bar KPI strip — hero score visually dominant */}
       <div className="flex flex-wrap items-stretch divide-x divide-zinc-200 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
-        {/* Hero score — left anchor */}
-        <div className="flex flex-col px-5 py-3.5">
+        {/* Hero score — left anchor, premium prominence */}
+        <div className="flex flex-col bg-zinc-50/50 px-6 py-4">
           <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400">AI Visibility Score</span>
-          <div className="mt-0.5 flex items-baseline gap-1.5">
-            <span className="text-2xl font-bold tabular-nums text-zinc-900">{stats.avgScore}</span>
-            <span className="text-sm font-medium text-zinc-500">/ 100</span>
+          <div className="mt-1 flex items-baseline gap-2">
+            <span className="text-3xl font-bold tabular-nums text-zinc-900">{stats.avgScore}</span>
+            <span className="text-base font-medium text-zinc-500">/ 100</span>
           </div>
           {stats.avgScoreDelta !== null && stats.avgScoreDelta !== 0 && (
-            <span className={cn("mt-0.5 text-[11px] font-semibold tabular-nums", stats.avgScoreDelta > 0 ? "text-emerald-600" : "text-rose-600")}>
+            <span className={cn("mt-1 text-[11px] font-semibold tabular-nums", stats.avgScoreDelta > 0 ? "text-emerald-600" : "text-rose-600")}>
               {stats.avgScoreDelta > 0 ? "+" : ""}{stats.avgScoreDelta} vs last
             </span>
           )}
@@ -322,23 +333,28 @@ function VisibilityOverview({ stats, clients }: { stats: PortfolioStats; clients
         />
       </div>
 
-      {/* Action banner — inline, compact */}
-      {actionable !== null ? (
-        <div className="flex items-center gap-2 rounded-lg border border-amber-300/70 bg-amber-50/80 px-4 py-2 text-sm">
-          <span className="font-semibold text-zinc-800">Action needed:</span>
-          {actionable.clientId ? (
-            <Link href={`/app/clients/${actionable.clientId}`} className="font-medium text-amber-800 hover:underline">
-              {actionable.text}
-            </Link>
-          ) : (
-            <span className="text-zinc-600">{actionable.text}</span>
-          )}
-        </div>
-      ) : (
-        <div className="flex items-center gap-2 px-1 text-xs font-medium text-zinc-400">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> All clients healthy
-        </div>
-      )}
+      {/* Action-driving insight — calm system status line */}
+      <div className="flex items-center gap-2 px-1 text-[13px] font-medium text-zinc-600">
+        {actionable.text === "All clients healthy" ? (
+          <>
+            <span className="text-emerald-600" aria-hidden>✓</span>
+            <span>{actionable.text}</span>
+          </>
+        ) : (
+          <>
+            <span className="text-amber-600" aria-hidden>⚠</span>
+            <span>
+              {actionable.clientId ? (
+                <Link href={`/app/clients/${actionable.clientId}`} className="text-zinc-800 hover:text-zinc-900 no-underline hover:no-underline">
+                  {actionable.text}
+                </Link>
+              ) : (
+                actionable.text
+              )}
+            </span>
+          </>
+        )}
+      </div>
 
       {/* Trend — collapsible (Semrush-style) */}
       <details className="group overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
@@ -571,6 +587,8 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
 
 // Client table — SimilarWeb/Semrush data-dense row layout
 function ClientTable({ clients }: { clients: ClientWithStats[] }) {
+  const router = useRouter();
+
   return (
     <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
       <table className="w-full text-left text-sm">
@@ -592,22 +610,37 @@ function ClientTable({ clients }: { clients: ClientWithStats[] }) {
             const health = getHealthLabel(client.latestScore);
             const hasNoData = client.status === "none" && client.latestScore === null;
             return (
-              <tr key={client.id} className="group border-b border-zinc-100 last:border-b-0 hover:bg-zinc-50">
-                <td>
-                  <Link href={`/app/clients/${client.id}`} className="flex items-center gap-2 py-2.5 pl-4 pr-2">
+              <tr
+                key={client.id}
+                onClick={() => router.push(`/app/clients/${client.id}`)}
+                className="group cursor-pointer border-b border-zinc-100 last:border-b-0 transition-colors hover:bg-zinc-50/80"
+              >
+                <td className="py-2.5 pl-4 pr-2">
+                  <div className="flex items-center gap-2">
                     <StatusDot score={client.latestScore} status={client.status} />
-                    <div>
-                      <span className="font-semibold text-zinc-900 group-hover:text-zinc-700">{client.name}</span>
-                      {client.website && (
+                    <div className="min-w-0 flex-1">
+                      <span className="font-semibold text-zinc-900">{client.name}</span>
+                      {hasNoData ? (
+                        <div className="mt-0.5 flex flex-wrap items-center gap-2">
+                          <span className="text-[11px] font-medium text-zinc-500">No snapshots yet</span>
+                          <Link
+                            href={`/app/clients/${client.id}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-[11px] font-semibold text-zinc-700 hover:text-zinc-900 no-underline"
+                          >
+                            Run first snapshot →
+                          </Link>
+                        </div>
+                      ) : client.website ? (
                         <div className="text-[11px] font-medium text-zinc-500">{displayUrl(client.website)}</div>
-                      )}
+                      ) : null}
                     </div>
                     {client.hasAlert && (
-                      <span className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold text-rose-600 bg-rose-50">
+                      <span className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold text-rose-600 bg-rose-100/90">
                         Alert
                       </span>
                     )}
-                  </Link>
+                  </div>
                 </td>
                 <td className="px-4 py-2.5">
                   {hasNoData ? (
@@ -628,7 +661,7 @@ function ClientTable({ clients }: { clients: ClientWithStats[] }) {
                   )}
                 </td>
                 <td className="px-4 py-2.5">
-                  <span className={cn("rounded px-2 py-0.5 text-[11px] font-semibold", health.color, health.bg)}>
+                  <span className={cn("rounded-md px-2 py-0.5 text-[11px] font-semibold", health.color, health.bg)}>
                     {health.label}
                   </span>
                 </td>
@@ -963,13 +996,13 @@ export default function AppPage() {
   return (
     <div className="space-y-6">
       {/* AI Visibility Overview — SimilarWeb/Semrush single-strip */}
-      <div>
-        <h2 className="mb-3 text-[13px] font-semibold uppercase tracking-widest text-zinc-500">Overview</h2>
+      <div className="space-y-4">
+        <h2 className="text-[13px] font-semibold uppercase tracking-widest text-zinc-500">Overview</h2>
         {portfolioStats && <VisibilityOverview stats={portfolioStats} clients={clients} />}
       </div>
 
       {/* Clients section — SimilarWeb-style data table */}
-      <div className="space-y-4 pt-6">
+      <div className="space-y-4 pt-2">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-[13px] font-semibold uppercase tracking-widest text-zinc-500">Clients</h2>
@@ -1038,7 +1071,7 @@ export default function AppPage() {
 
           <Link
             href="/app/clients/new"
-            className="inline-flex h-9 items-center gap-2 rounded-lg border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 hover:border-zinc-400"
+            className="inline-flex h-9 items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50/70 px-3.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100/80 hover:border-zinc-300 hover:text-zinc-700"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
