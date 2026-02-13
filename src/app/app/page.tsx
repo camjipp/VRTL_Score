@@ -175,7 +175,7 @@ function Sparkline({ data, color = "#10b981" }: { data: number[]; color?: string
 }
 
 // Portfolio-level average score trend chart
-function PortfolioTrendChart({ clients }: { clients: ClientWithStats[] }) {
+function PortfolioTrendChart({ clients, embedded }: { clients: ClientWithStats[]; embedded?: boolean }) {
   // Collect all recent scores across clients (up to 5 time periods)
   const maxPeriods = 5;
   const avgByPeriod: number[] = [];
@@ -211,6 +211,49 @@ function PortfolioTrendChart({ clients }: { clients: ClientWithStats[] }) {
   // Gradient fill area
   const areaPath = `M${linePoints[0].x},${chartH - padding} L${polyline.replace(/,/g, " L")} L${linePoints[linePoints.length - 1].x},${chartH - padding} Z`;
 
+  const chartSvg = (
+    <svg viewBox={`0 0 ${chartW} ${chartH}`} className={embedded ? "w-full h-24" : "w-full h-28"}>
+      <defs>
+        <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#10b981" stopOpacity="0.2" />
+          <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={areaPath} fill="url(#trendFill)" />
+      <polyline
+        points={polyline}
+        fill="none"
+        stroke="#10b981"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {linePoints.map((p, i) => (
+        <g key={i}>
+          <circle cx={p.x} cy={p.y} r="4" fill="#18181b" stroke="#10b981" strokeWidth="2" />
+          <text
+            x={p.x}
+            y={p.y - 10}
+            textAnchor="middle"
+            fill="#52525b"
+            fontSize="11"
+            fontWeight="600"
+          >
+            {p.val}
+          </text>
+        </g>
+      ))}
+    </svg>
+  );
+
+  if (embedded) {
+    return (
+      <div className="mt-2 min-h-[100px]">
+        {chartSvg}
+      </div>
+    );
+  }
+
   return (
     <div className="dashboard-card h-full flex flex-col">
       <div className="flex items-center justify-between">
@@ -218,38 +261,7 @@ function PortfolioTrendChart({ clients }: { clients: ClientWithStats[] }) {
         <div className="text-xs text-zinc-500">Last {avgByPeriod.length} snapshots</div>
       </div>
       <div className="mt-4 flex-1 min-h-[120px]">
-      <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full h-28">
-        <defs>
-          <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#10b981" stopOpacity="0.2" />
-            <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <path d={areaPath} fill="url(#trendFill)" />
-        <polyline
-          points={polyline}
-          fill="none"
-          stroke="#10b981"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        {linePoints.map((p, i) => (
-          <g key={i}>
-            <circle cx={p.x} cy={p.y} r="4" fill="#18181b" stroke="#10b981" strokeWidth="2" />
-            <text
-              x={p.x}
-              y={p.y - 10}
-              textAnchor="middle"
-              fill="#52525b"
-              fontSize="11"
-              fontWeight="600"
-            >
-              {p.val}
-            </text>
-          </g>
-        ))}
-      </svg>
+        {chartSvg}
       </div>
     </div>
   );
@@ -267,142 +279,80 @@ function getActionableInsight(clients: ClientWithStats[]): { text: string; clien
   };
 }
 
-// AI Visibility Overview — premium B2B dashboard
+// KPI metric cell — in-strip unit (Semrush/SimilarWeb single-bar style)
+function KpiCell({ label, value, sub }: { label: string; value: React.ReactNode; sub?: string }) {
+  return (
+    <div className="flex min-w-[80px] flex-col px-4 py-3">
+      <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400">{label}</span>
+      <span className="mt-0.5 text-lg font-bold tabular-nums text-zinc-900">{value}</span>
+      {sub && <span className="mt-0.5 text-[10px] text-zinc-500">{sub}</span>}
+    </div>
+  );
+}
+
+// AI Visibility Overview — SimilarWeb/Semrush single-bar strip
 function VisibilityOverview({ stats, clients }: { stats: PortfolioStats; clients: ClientWithStats[] }) {
   const actionable = getActionableInsight(clients);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-zinc-900">AI Visibility Overview</h2>
-        <span className="text-sm text-zinc-500">{stats.totalClients} client{stats.totalClients !== 1 ? "s" : ""} tracked</span>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-12">
-        {/* Hero card: AI Visibility Health — left half */}
-        <div className="dashboard-card-hero lg:col-span-6 flex flex-col justify-between">
-          <div>
-            <div className="metric-label">AI Visibility Health</div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-4xl font-bold tabular-nums tracking-tight text-zinc-900">
-                {stats.avgScore}
-              </span>
-              <span className="text-lg text-zinc-500">/ 100</span>
-            </div>
-            {stats.avgScoreDelta !== null && stats.avgScoreDelta !== 0 && (
-              <div className="mt-1 flex items-center gap-1.5 text-sm font-medium">
-                <svg
-                  className={cn(
-                    "h-3.5 w-3.5",
-                    stats.avgScoreDelta > 0 ? "text-emerald-600" : "text-rose-600 rotate-180"
-                  )}
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                </svg>
-                <span className={stats.avgScoreDelta > 0 ? "text-emerald-600" : "text-rose-600"}>
-                  {stats.avgScoreDelta > 0 ? "+" : ""}{stats.avgScoreDelta} vs last snapshot
-                </span>
-              </div>
-            )}
-            <div className="mt-4 flex items-center gap-4 text-sm text-zinc-600">
-              <span className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                {stats.improvingClients} improving
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-rose-500" />
-                {stats.decliningClients} declining
-              </span>
-            </div>
-            <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-zinc-100">
-              <div
-                className={cn(
-                  "h-full rounded-full transition-all",
-                  stats.avgScore >= 70 ? "bg-emerald-500" : stats.avgScore >= 40 ? "bg-amber-500" : "bg-rose-500"
-                )}
-                style={{ width: `${Math.min(100, stats.avgScore)}%` }}
-              />
-            </div>
+    <div className="space-y-3">
+      {/* Single-bar KPI strip — one continuous surface, dividers between metrics */}
+      <div className="flex flex-wrap items-stretch divide-x divide-zinc-200 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
+        {/* Hero score — left anchor */}
+        <div className="flex flex-col px-5 py-3.5">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400">AI Visibility Score</span>
+          <div className="mt-0.5 flex items-baseline gap-1.5">
+            <span className="text-2xl font-bold tabular-nums text-zinc-900">{stats.avgScore}</span>
+            <span className="text-sm font-medium text-zinc-500">/ 100</span>
           </div>
-          {actionable !== null ? (
-            <div className="mt-5 pt-5 border-t border-zinc-200">
-              <p className="text-sm text-zinc-600">
-                <span className="font-medium text-zinc-900">Action needed:</span>{" "}
-                {actionable.clientId ? (
-                  <Link href={`/app/clients/${actionable.clientId}`} className="text-amber-600 hover:underline">
-                    {actionable.text}
-                  </Link>
-                ) : (
-                  actionable.text
-                )}
-              </p>
-            </div>
-          ) : (
-            <div className="mt-5 pt-5 border-t border-zinc-200">
-              <p className="text-sm text-zinc-500">All clients healthy</p>
-            </div>
+          {stats.avgScoreDelta !== null && stats.avgScoreDelta !== 0 && (
+            <span className={cn("mt-0.5 text-[11px] font-semibold tabular-nums", stats.avgScoreDelta > 0 ? "text-emerald-600" : "text-rose-600")}>
+              {stats.avgScoreDelta > 0 ? "+" : ""}{stats.avgScoreDelta} vs last
+            </span>
           )}
         </div>
-
-        {/* Trend chart — right of hero on desktop */}
-        <div className="lg:col-span-6 min-h-0">
-          <PortfolioTrendChart clients={clients} />
-        </div>
-
-        {/* Secondary cards — full width row */}
-        <div className="grid gap-6 sm:grid-cols-3 lg:col-span-12">
-          <div className="dashboard-card">
-            <div className="metric-label">Health Breakdown</div>
-            <div className="mt-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-sm text-zinc-700">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                  Strong
-                </span>
-                <span className="metric-value text-lg">{stats.strongClients}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-sm text-zinc-700">
-                  <span className="h-2 w-2 rounded-full bg-amber-500" />
-                  Moderate
-                </span>
-                <span className="metric-value text-lg">{stats.moderateClients}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-sm text-zinc-700">
-                  <span className="h-2 w-2 rounded-full bg-rose-500" />
-                  Weak
-                </span>
-                <span className="metric-value text-lg">{stats.weakClients}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="dashboard-card">
-            <div className="metric-label">Snapshots</div>
-            <div className="mt-4">
-              <span className="metric-value">{stats.snapshotsThisMonth}</span>
-              <div className="mt-0.5 text-sm text-zinc-500">This month</div>
-            </div>
-          </div>
-
-          <div className="dashboard-card">
-            <div className="metric-label">Alerts</div>
-            <div className="mt-4">
-              <span className={cn(
-                "metric-value",
-                stats.clientsWithAlerts > 0 ? "text-rose-600" : "text-zinc-900"
-              )}>
-                {stats.clientsWithAlerts}
-              </span>
-              <div className="mt-0.5 text-sm text-zinc-500">
-                {stats.clientsWithAlerts > 0 ? "Need attention" : "All healthy"}
-              </div>
-            </div>
-          </div>
-        </div>
+        <KpiCell label="Strong" value={stats.strongClients} />
+        <KpiCell label="Moderate" value={stats.moderateClients} />
+        <KpiCell label="Weak" value={stats.weakClients} />
+        <KpiCell label="Snapshots" value={stats.snapshotsThisMonth} sub="This month" />
+        <KpiCell
+          label="Alerts"
+          value={stats.clientsWithAlerts}
+          sub={stats.clientsWithAlerts > 0 ? "Need attention" : "All healthy"}
+        />
       </div>
+
+      {/* Action banner — inline, compact */}
+      {actionable !== null ? (
+        <div className="flex items-center gap-2 rounded-lg border border-amber-300/70 bg-amber-50/80 px-4 py-2 text-sm">
+          <span className="font-semibold text-zinc-800">Action needed:</span>
+          {actionable.clientId ? (
+            <Link href={`/app/clients/${actionable.clientId}`} className="font-medium text-amber-800 hover:underline">
+              {actionable.text}
+            </Link>
+          ) : (
+            <span className="text-zinc-600">{actionable.text}</span>
+          )}
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 px-1 text-xs font-medium text-zinc-400">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> All clients healthy
+        </div>
+      )}
+
+      {/* Trend — collapsible (Semrush-style) */}
+      <details className="group overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
+        <summary className="flex cursor-pointer items-center justify-between px-4 py-2.5 text-[13px] font-semibold text-zinc-700 hover:bg-zinc-50">
+          <span>Portfolio visibility trend</span>
+          <span className="text-[11px] font-medium text-zinc-500">Last 5 snapshots</span>
+          <svg className="h-4 w-4 text-zinc-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </summary>
+        <div className="border-t border-zinc-200 p-4">
+          <PortfolioTrendChart clients={clients} embedded />
+        </div>
+      </details>
     </div>
   );
 }
@@ -619,6 +569,84 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
   );
 }
 
+// Client table — SimilarWeb/Semrush data-dense row layout
+function ClientTable({ clients }: { clients: ClientWithStats[] }) {
+  return (
+    <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
+      <table className="w-full text-left text-sm">
+        <thead>
+          <tr className="border-b border-zinc-200 bg-zinc-50/80">
+            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Client</th>
+            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Score</th>
+            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Δ</th>
+            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Health</th>
+            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Weakest</th>
+            <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          {clients.map((client) => {
+            const delta = client.latestScore !== null && client.previousScore !== null
+              ? client.latestScore - client.previousScore
+              : null;
+            const health = getHealthLabel(client.latestScore);
+            const hasNoData = client.status === "none" && client.latestScore === null;
+            return (
+              <tr key={client.id} className="group border-b border-zinc-100 last:border-b-0 hover:bg-zinc-50">
+                <td>
+                  <Link href={`/app/clients/${client.id}`} className="flex items-center gap-2 py-2.5 pl-4 pr-2">
+                    <StatusDot score={client.latestScore} status={client.status} />
+                    <div>
+                      <span className="font-semibold text-zinc-900 group-hover:text-zinc-700">{client.name}</span>
+                      {client.website && (
+                        <div className="text-[11px] font-medium text-zinc-500">{displayUrl(client.website)}</div>
+                      )}
+                    </div>
+                    {client.hasAlert && (
+                      <span className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold text-rose-600 bg-rose-50">
+                        Alert
+                      </span>
+                    )}
+                  </Link>
+                </td>
+                <td className="px-4 py-2.5">
+                  {hasNoData ? (
+                    <span className="text-zinc-400">—</span>
+                  ) : client.latestScore !== null ? (
+                    <span className="font-bold tabular-nums text-zinc-900">{client.latestScore}</span>
+                  ) : (
+                    <span className="text-zinc-400">—</span>
+                  )}
+                </td>
+                <td className="px-4 py-2.5">
+                  {delta !== null && delta !== 0 ? (
+                    <span className={cn("font-semibold tabular-nums", delta > 0 ? "text-emerald-600" : "text-rose-600")}>
+                      {delta > 0 ? "+" : ""}{delta}
+                    </span>
+                  ) : (
+                    <span className="text-zinc-400">—</span>
+                  )}
+                </td>
+                <td className="px-4 py-2.5">
+                  <span className={cn("rounded px-2 py-0.5 text-[11px] font-semibold", health.color, health.bg)}>
+                    {health.label}
+                  </span>
+                </td>
+                <td className="px-4 py-2.5 text-[12px] font-medium text-zinc-600">
+                  {client.worstModel ? displayModelName(client.worstModel) : "—"}
+                </td>
+                <td className="px-4 py-2.5 text-[11px] text-zinc-500">
+                  {client.lastSnapshotAt ? timeAgo(client.lastSnapshotAt) : "—"}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 // Empty state — intentional design with dashed border + CTA
 function EmptyState() {
   return (
@@ -653,6 +681,7 @@ export default function AppPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"name" | "score" | "updated">("updated");
   const [filterHealth, setFilterHealth] = useState<"all" | "strong" | "moderate" | "weak">("all");
+  const [viewMode, setViewMode] = useState<"cards" | "table">("table");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -932,16 +961,19 @@ export default function AppPage() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* AI Visibility Overview */}
-      {portfolioStats && <VisibilityOverview stats={portfolioStats} clients={clients} />}
+    <div className="space-y-6">
+      {/* AI Visibility Overview — SimilarWeb/Semrush single-strip */}
+      <div>
+        <h2 className="mb-3 text-[13px] font-semibold uppercase tracking-widest text-zinc-500">Overview</h2>
+        {portfolioStats && <VisibilityOverview stats={portfolioStats} clients={clients} />}
+      </div>
 
-      {/* Clients section — spacing + subtle separation */}
-      <div className="space-y-6 pt-8">
+      {/* Clients section — SimilarWeb-style data table */}
+      <div className="space-y-4 pt-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-zinc-900">Clients</h1>
-          <p className="mt-0.5 text-sm text-zinc-500">
+          <h2 className="text-[13px] font-semibold uppercase tracking-widest text-zinc-500">Clients</h2>
+          <p className="mt-0.5 text-lg font-bold tabular-nums text-zinc-900">
             {filteredClients.length} of {clients.length} client{clients.length !== 1 ? "s" : ""}
           </p>
         </div>
@@ -966,6 +998,27 @@ export default function AppPage() {
             <option value="score">Score</option>
             <option value="name">Name</option>
           </select>
+
+          <div className="flex items-center gap-1 rounded-lg border border-zinc-200 bg-zinc-50/50 p-0.5">
+            <button
+              onClick={() => setViewMode("table")}
+              className={cn(
+                "rounded-md px-2.5 py-1.5 text-xs font-semibold transition-colors",
+                viewMode === "table" ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-700"
+              )}
+            >
+              Table
+            </button>
+            <button
+              onClick={() => setViewMode("cards")}
+              className={cn(
+                "rounded-md px-2.5 py-1.5 text-xs font-semibold transition-colors",
+                viewMode === "cards" ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-700"
+              )}
+            >
+              Cards
+            </button>
+          </div>
 
           <div className="relative">
             <svg
@@ -1010,6 +1063,8 @@ export default function AppPage() {
             Clear filter
           </button>
         </div>
+      ) : viewMode === "table" ? (
+        <ClientTable clients={filteredClients} />
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 [&>a]:flex">
           {filteredClients.map((client) => (
