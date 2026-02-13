@@ -81,6 +81,17 @@ function displayModelName(name: string | null): string {
   return name;
 }
 
+// Model color dot for branding (OpenAI=emerald, Gemini=amber, Anthropic=rose)
+function ModelDot({ model }: { model: string | null }) {
+  if (!model) return null;
+  const p = (model || "").toLowerCase();
+  const color = p.includes("openai") || p.includes("chatgpt") ? "bg-emerald-500"
+    : p.includes("gemini") || p.includes("google") ? "bg-amber-500"
+    : p.includes("anthropic") || p.includes("claude") ? "bg-rose-500"
+    : "bg-zinc-400";
+  return <span className={cn("mr-1.5 inline-block h-2 w-2 shrink-0 rounded-full", color)} aria-hidden />;
+}
+
 function timeAgo(dateStr: string): string {
   const date = new Date(dateStr);
   const now = new Date();
@@ -192,9 +203,9 @@ function PortfolioTrendChart({ clients, embedded }: { clients: ClientWithStats[]
 
   if (avgByPeriod.length < 2) return null;
 
-  const max = Math.max(...avgByPeriod, 100);
-  const min = Math.min(...avgByPeriod, 0);
-  const range = max - min || 1;
+  const max = 100;
+  const min = 0;
+  const range = 100;
   const chartH = 120;
   const chartW = 400;
   const padding = 8;
@@ -216,9 +227,16 @@ function PortfolioTrendChart({ clients, embedded }: { clients: ClientWithStats[]
     <svg viewBox={`0 0 ${chartW} ${chartH}`} className={embedded ? "w-full h-24" : "w-full h-28"}>
       <defs>
         <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#10b981" stopOpacity="0.2" />
+          <stop offset="0%" stopColor="#10b981" stopOpacity="0.35" />
           <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
         </linearGradient>
+        <filter id="trendGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
       </defs>
       <path d={areaPath} fill="url(#trendFill)" />
       <polyline
@@ -229,9 +247,11 @@ function PortfolioTrendChart({ clients, embedded }: { clients: ClientWithStats[]
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      {linePoints.map((p, i) => (
+      {linePoints.map((p, i) => {
+        const isLast = i === linePoints.length - 1;
+        return (
         <g key={i}>
-          <circle cx={p.x} cy={p.y} r="4" fill="#18181b" stroke="#10b981" strokeWidth="2" />
+          <circle cx={p.x} cy={p.y} r={isLast ? 5 : 4} fill="#18181b" stroke="#10b981" strokeWidth={isLast ? 2.5 : 2} filter={isLast ? "url(#trendGlow)" : undefined} />
           <text
             x={p.x}
             y={p.y - 10}
@@ -243,7 +263,8 @@ function PortfolioTrendChart({ clients, embedded }: { clients: ClientWithStats[]
             {p.val}
           </text>
         </g>
-      ))}
+        );
+      })}
     </svg>
   );
 
@@ -290,13 +311,13 @@ function getActionableInsight(clients: ClientWithStats[]): { text: string; clien
   };
 }
 
-// KPI metric cell — in-strip unit (Semrush/SimilarWeb single-bar style)
-function KpiCell({ label, value, sub }: { label: string; value: React.ReactNode; sub?: string }) {
+// KPI metric cell with optional tooltip
+function KpiCell({ label, value, sub, tooltip }: { label: string; value: React.ReactNode; sub?: string; tooltip?: string }) {
   return (
-    <div className="flex min-w-[80px] flex-col px-4 py-3">
-      <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400">{label}</span>
+    <div className="flex min-w-[80px] flex-col px-4 py-3" title={tooltip}>
+      <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">{label}</span>
       <span className="mt-0.5 text-lg font-bold tabular-nums text-zinc-900">{value}</span>
-      {sub && <span className="mt-0.5 text-[10px] text-zinc-500">{sub}</span>}
+      {sub && <span className="mt-0.5 text-[10px] text-zinc-600">{sub}</span>}
     </div>
   );
 }
@@ -309,22 +330,45 @@ function VisibilityOverview({ stats, clients }: { stats: PortfolioStats; clients
     <div className="space-y-4">
       {/* Single-bar KPI strip — hero score visually dominant */}
       <div className="flex flex-wrap items-stretch divide-x divide-zinc-200 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
-        {/* Hero score — left anchor, premium prominence */}
-        <div className="flex flex-col bg-zinc-50/50 px-6 py-4">
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400">AI Visibility Score</span>
-          <div className="mt-1 flex items-baseline gap-2">
-            <span className="text-3xl font-bold tabular-nums text-zinc-900">{stats.avgScore}</span>
-            <span className="text-base font-medium text-zinc-500">/ 100</span>
+        {/* Hero score — circular ring + premium prominence */}
+        <div className="flex items-center gap-5 bg-zinc-50/60 px-6 py-4">
+          {/* Circular progress ring */}
+          <div className="relative flex h-16 w-16 shrink-0 items-center justify-center">
+            <svg className="h-16 w-16 -rotate-90" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="16" fill="none" stroke="rgb(228 228 231)" strokeWidth="3" />
+              <circle
+                cx="18"
+                cy="18"
+                r="16"
+                fill="none"
+                stroke="rgb(16 185 129)"
+                strokeWidth="3"
+                strokeDasharray={`${(stats.avgScore / 100) * 100.5} 100.5`}
+                strokeLinecap="round"
+                className="transition-[stroke-dasharray] duration-500"
+              />
+            </svg>
+            <span className="absolute text-lg font-bold tabular-nums text-zinc-900">{stats.avgScore}</span>
           </div>
-          {stats.avgScoreDelta !== null && stats.avgScoreDelta !== 0 && (
-            <span className={cn("mt-1 text-[11px] font-semibold tabular-nums", stats.avgScoreDelta > 0 ? "text-emerald-600" : "text-rose-600")}>
-              {stats.avgScoreDelta > 0 ? "+" : ""}{stats.avgScoreDelta} vs last
+          <div className="flex flex-col">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">AI Visibility Score</span>
+            <div className="mt-0.5 flex items-baseline gap-1.5">
+              <span className="text-3xl font-bold tabular-nums text-zinc-900">{stats.avgScore}</span>
+              <span className="text-base font-medium text-zinc-600">/ 100</span>
+            </div>
+            {stats.avgScoreDelta !== null && stats.avgScoreDelta !== 0 && (
+              <span className={cn("mt-0.5 text-[11px] font-semibold tabular-nums", stats.avgScoreDelta > 0 ? "text-emerald-600" : "text-rose-600")}>
+                {stats.avgScoreDelta > 0 ? "+" : ""}{stats.avgScoreDelta} vs last
+              </span>
+            )}
+            <span className="mt-1.5 text-[11px] font-medium text-zinc-600">
+              {stats.avgScore >= 75 ? "Top quartile of tracked brands" : stats.avgScore >= 60 ? "Above industry average" : "Room to improve"}
             </span>
-          )}
+          </div>
         </div>
-        <KpiCell label="Strong" value={stats.strongClients} />
-        <KpiCell label="Moderate" value={stats.moderateClients} />
-        <KpiCell label="Weak" value={stats.weakClients} />
+        <KpiCell label="Strong" value={stats.strongClients} tooltip="Clients with score ≥70 across AI models" />
+        <KpiCell label="Moderate" value={stats.moderateClients} tooltip="Clients scoring 40–69" />
+        <KpiCell label="Weak" value={stats.weakClients} tooltip="Clients scoring &lt;40" />
         <KpiCell label="Snapshots" value={stats.snapshotsThisMonth} sub="This month" />
         <KpiCell
           label="Alerts"
@@ -333,8 +377,8 @@ function VisibilityOverview({ stats, clients }: { stats: PortfolioStats; clients
         />
       </div>
 
-      {/* Action-driving insight — calm system status line */}
-      <div className="flex items-center gap-2 px-1 text-[13px] font-medium text-zinc-600">
+      {/* Action-driving insight — clickable, jumps to client model breakdown */}
+      <div className="flex items-center gap-2 px-1 text-[13px] font-medium text-zinc-700">
         {actionable.text === "All clients healthy" ? (
           <>
             <span className="text-emerald-600" aria-hidden>✓</span>
@@ -345,7 +389,10 @@ function VisibilityOverview({ stats, clients }: { stats: PortfolioStats; clients
             <span className="text-amber-600" aria-hidden>⚠</span>
             <span>
               {actionable.clientId ? (
-                <Link href={`/app/clients/${actionable.clientId}`} className="text-zinc-800 hover:text-zinc-900 no-underline hover:no-underline">
+                <Link
+                  href={`/app/clients/${actionable.clientId}${actionable.text.includes(" on ") ? "#cross-model" : ""}`}
+                  className="text-zinc-800 hover:text-zinc-900 no-underline hover:no-underline font-medium"
+                >
                   {actionable.text}
                 </Link>
               ) : (
@@ -354,6 +401,30 @@ function VisibilityOverview({ stats, clients }: { stats: PortfolioStats; clients
             </span>
           </>
         )}
+      </div>
+
+      {/* Recommended Actions — prescriptive CTA */}
+      <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3 shadow-sm">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h3 className="text-[13px] font-semibold text-zinc-800">Recommended Actions</h3>
+            <p className="mt-0.5 text-[12px] text-zinc-600">
+              {actionable.text !== "All clients healthy" && actionable.clientId ? (
+                <>View model breakdown and prioritized fixes for this client</>
+              ) : (
+                <>All clients on track. Run snapshots regularly to keep recommendations fresh.</>
+              )}
+            </p>
+          </div>
+          {actionable.text !== "All clients healthy" && actionable.clientId && (
+            <Link
+              href={`/app/clients/${actionable.clientId}#cross-model`}
+              className="shrink-0 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-semibold text-zinc-800 transition hover:bg-zinc-100"
+            >
+              View action plan →
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Trend — collapsible (Semrush-style) */}
@@ -612,26 +683,42 @@ function ClientTable({ clients }: { clients: ClientWithStats[] }) {
             return (
               <tr
                 key={client.id}
-                onClick={() => router.push(`/app/clients/${client.id}`)}
-                className="group cursor-pointer border-b border-zinc-100 last:border-b-0 transition-colors hover:bg-zinc-50/80"
+                onClick={() => !hasNoData && router.push(`/app/clients/${client.id}`)}
+                className={cn(
+                  "group border-b border-zinc-100 last:border-b-0 transition-colors",
+                  hasNoData ? "bg-amber-50/40 hover:bg-amber-50/60" : "cursor-pointer hover:bg-zinc-50/80"
+                )}
               >
+                {hasNoData ? (
+                  <td colSpan={6} className="py-3 pl-4 pr-4">
+                    <div className="flex items-center gap-3">
+                      <StatusDot score={client.latestScore} status={client.status} />
+                      <div className="min-w-0 flex-1">
+                        <span className="font-semibold text-zinc-900">{client.name}</span>
+                        <div className="mt-1 flex flex-wrap items-center gap-3">
+                          <span className="text-[12px] font-medium text-zinc-600">Analyze visibility across 3 AI models</span>
+                          <Link
+                            href={`/app/clients/${client.id}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-800 shadow-sm transition hover:bg-zinc-50 hover:border-zinc-400"
+                          >
+                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+                            </svg>
+                            Run snapshot
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                ) : (
+                  <>
                 <td className="py-2.5 pl-4 pr-2">
                   <div className="flex items-center gap-2">
                     <StatusDot score={client.latestScore} status={client.status} />
                     <div className="min-w-0 flex-1">
                       <span className="font-semibold text-zinc-900">{client.name}</span>
-                      {hasNoData ? (
-                        <div className="mt-0.5 flex flex-wrap items-center gap-2">
-                          <span className="text-[11px] font-medium text-zinc-500">No snapshots yet</span>
-                          <Link
-                            href={`/app/clients/${client.id}`}
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-[11px] font-semibold text-zinc-700 hover:text-zinc-900 no-underline"
-                          >
-                            Run first snapshot →
-                          </Link>
-                        </div>
-                      ) : client.website ? (
+                      {client.website ? (
                         <div className="text-[11px] font-medium text-zinc-500">{displayUrl(client.website)}</div>
                       ) : null}
                     </div>
@@ -643,9 +730,7 @@ function ClientTable({ clients }: { clients: ClientWithStats[] }) {
                   </div>
                 </td>
                 <td className="px-4 py-2.5">
-                  {hasNoData ? (
-                    <span className="text-zinc-400">—</span>
-                  ) : client.latestScore !== null ? (
+                  {client.latestScore !== null ? (
                     <span className="font-bold tabular-nums text-zinc-900">{client.latestScore}</span>
                   ) : (
                     <span className="text-zinc-400">—</span>
@@ -661,16 +746,36 @@ function ClientTable({ clients }: { clients: ClientWithStats[] }) {
                   )}
                 </td>
                 <td className="px-4 py-2.5">
-                  <span className={cn("rounded-md px-2 py-0.5 text-[11px] font-semibold", health.color, health.bg)}>
-                    {health.label}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className={cn("rounded-md px-2 py-0.5 text-[11px] font-semibold", health.color, health.bg)}>
+                      {health.label}
+                    </span>
+                    {health.label === "Strong" && (
+                      <span className="rounded px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50/90">
+                        Top performer
+                      </span>
+                    )}
+                  </div>
                 </td>
-                <td className="px-4 py-2.5 text-[12px] font-medium text-zinc-600">
-                  {client.worstModel ? displayModelName(client.worstModel) : "—"}
+                <td className="px-4 py-2.5 text-[12px] font-medium text-zinc-700">
+                  {client.worstModel ? (
+                    <Link
+                      href={`/app/clients/${client.id}#cross-model`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="inline-flex items-center text-amber-700 hover:text-amber-800 hover:underline no-underline font-semibold"
+                    >
+                      <ModelDot model={client.worstModel} />
+                      {displayModelName(client.worstModel)}
+                    </Link>
+                  ) : (
+                    "—"
+                  )}
                 </td>
                 <td className="px-4 py-2.5 text-[11px] text-zinc-500">
                   {client.lastSnapshotAt ? timeAgo(client.lastSnapshotAt) : "—"}
                 </td>
+                  </>
+                )}
               </tr>
             );
           })}
@@ -994,10 +1099,13 @@ export default function AppPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* AI Visibility Overview — SimilarWeb/Semrush single-strip */}
-      <div className="space-y-4">
-        <h2 className="text-[13px] font-semibold uppercase tracking-widest text-zinc-500">Overview</h2>
+    <div className="space-y-8">
+      {/* AI Visibility Overview */}
+      <div className="space-y-5">
+        <div className="border-b border-zinc-200 pb-3">
+          <h2 className="text-base font-semibold text-zinc-800">Overview</h2>
+          <p className="mt-0.5 text-sm text-zinc-600">Portfolio AI visibility across ChatGPT, Gemini & Claude</p>
+        </div>
         {portfolioStats && <VisibilityOverview stats={portfolioStats} clients={clients} />}
       </div>
 

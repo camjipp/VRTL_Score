@@ -2276,7 +2276,9 @@ export default function ClientDetailPage() {
               <div ref={heroSentinelRef} className="h-0" aria-hidden />
 
               {/* SECTION 2: Cross-Model Snapshot (chart + diagnosis in one card) */}
-              <CrossModelSnapshot providers={providers} detail={snapshotDetail} />
+              <div id="cross-model" className="scroll-mt-4">
+                <CrossModelSnapshot providers={providers} detail={snapshotDetail} />
+              </div>
 
               {/* SECTION 4: Recommended Actions */}
               <Recommendations
