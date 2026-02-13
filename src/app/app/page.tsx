@@ -148,31 +148,21 @@ function getActionSignal(client: ClientWithStats): { text: string; color: string
     ? client.latestScore - client.previousScore
     : null;
 
-  // Score dropped significantly
   if (delta !== null && delta <= -5) {
-    return { text: `Score dropped ${Math.abs(delta)} pts`, color: "text-rose-600" };
+    return { text: `−${Math.abs(delta)} pts`, color: "text-rose-600" };
   }
-
-  // Competitor ahead
   if (client.competitorRank !== null && client.competitorRank > 1) {
-    return { text: `Ranked #${client.competitorRank} — competitor ahead`, color: "text-amber-600" };
+    return { text: `#${client.competitorRank} — behind leader`, color: "text-amber-600" };
   }
-
-  // Low mention rate
   if (client.mentionRate !== null && client.mentionRate < 40) {
-    return { text: "Low mention rate — visibility at risk", color: "text-amber-600" };
+    return { text: "Low visibility", color: "text-amber-600" };
   }
-
-  // Weak on a model
   if (client.worstModel && client.bestModel && client.worstModel !== client.bestModel) {
-    return { text: `Weak on ${client.worstModel}`, color: "text-amber-600" };
+    return { text: `Weak: ${displayModelName(client.worstModel)}`, color: "text-amber-600" };
   }
-
-  // Gaining ground
   if (delta !== null && delta >= 5) {
-    return { text: `Gained ${delta} pts — momentum building`, color: "text-emerald-600" };
+    return { text: `+${delta} pts`, color: "text-emerald-600" };
   }
-
   return null;
 }
 
@@ -320,47 +310,67 @@ function CompetitiveAuthorityStatus({ stats, clients }: { stats: PortfolioStats;
   const watchlist = clients.filter((c) => getAuthorityState(c) === "Watchlist").length;
   const losing = clients.filter((c) => getAuthorityState(c) === "Losing Ground").length;
 
+  const hasRisk = !!topRisk;
+
   return (
-    <div className="space-y-4">
-      <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Competitive Authority Status</p>
-            <h2 className="mt-2 text-2xl font-semibold text-zinc-900">
-              {topRisk ? `${losing} Client${losing !== 1 ? "s" : ""} Losing Authority` : "All Clients Maintaining Authority"}
-            </h2>
+    <div className="space-y-6">
+      {/* Hero: Competitive Authority Status — dominates the page */}
+      <div
+        className={cn(
+          "rounded-2xl border-2 p-8 shadow-sm",
+          hasRisk
+            ? "border-rose-200/80 bg-rose-50/40"
+            : "border-zinc-200 bg-white"
+        )}
+      >
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-1">
+            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+              Competitive Authority Status
+            </p>
+            <h1
+              className={cn(
+                "text-3xl font-bold tracking-tight md:text-4xl",
+                hasRisk ? "text-rose-900" : "text-zinc-900"
+              )}
+            >
+              {topRisk
+                ? `${losing} Client${losing !== 1 ? "s" : ""} Losing Authority`
+                : "All Clients Maintaining Authority"}
+            </h1>
           </div>
 
           {topRisk ? (
-            <div className="min-w-0 rounded-lg border border-rose-200 bg-rose-50/60 px-4 py-3">
-              <p className="text-sm font-semibold text-zinc-900">{topRisk.name}</p>
-              <p className="mt-1 text-sm text-zinc-700">
-                {displayModelName(topRisk.worstModel) || "Model signal"} - Losing Ground
+            <div className="min-w-0 shrink-0 rounded-xl border-2 border-rose-200 bg-white px-5 py-4 shadow-sm">
+              <p className="text-base font-bold text-zinc-900">{topRisk.name}</p>
+              <p className="mt-1.5 text-sm font-medium text-zinc-700">
+                {displayModelName(topRisk.worstModel) || "Model"} — Losing Ground
               </p>
-              <p className="mt-1 text-sm text-zinc-700">
+              <p className="mt-1.5 text-sm text-zinc-700">
                 Primary Displacer:{" "}
-                <span className="font-medium">
+                <span className="font-semibold">
                   {topRisk.primaryDisplacer
-                    ? `${topRisk.primaryDisplacer}${topRisk.authorityGap ? ` (+${topRisk.authorityGap} Authority Gap)` : ""}`
-                    : "No clear displacer yet"}
+                    ? `${topRisk.primaryDisplacer}${topRisk.authorityGap != null ? ` · Gap ${topRisk.authorityGap} pts` : ""}`
+                    : "—"}
                 </span>
               </p>
               <Link
                 href={`/app/clients/${topRisk.id}#cross-model`}
-                className="mt-2 inline-flex items-center text-sm font-semibold text-zinc-900 hover:text-zinc-700"
+                className="mt-3 inline-flex items-center text-sm font-bold text-zinc-900 hover:text-zinc-700"
               >
-                View Competitive Breakdown →
+                View breakdown →
               </Link>
             </div>
           ) : null}
         </div>
       </div>
 
-      <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Portfolio Overview</p>
-        <div className="mt-2 flex flex-wrap items-baseline gap-3">
-          <span className="text-2xl font-semibold tabular-nums text-zinc-900">AI Authority Index: {stats.avgScore}</span>
-          <span className="text-sm text-zinc-600">{dominant} Dominant · {stable} Stable · {watchlist} Watchlist · {losing} Losing Ground</span>
+      {/* Portfolio Overview — de-emphasized secondary block */}
+      <div className="rounded-lg border border-zinc-200 bg-zinc-50/50 px-4 py-3">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400">Portfolio Overview</p>
+        <div className="mt-1.5 flex flex-wrap items-baseline gap-2">
+          <span className="text-lg font-semibold tabular-nums text-zinc-700">Index {stats.avgScore}</span>
+          <span className="text-xs text-zinc-500">{dominant} Dominant · {stable} Stable · {watchlist} Watchlist · {losing} Losing</span>
         </div>
       </div>
     </div>
@@ -423,7 +433,7 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
               <h3 className="min-w-0 flex-1 truncate font-semibold text-zinc-900">{client.name}</h3>
               {client.hasAlert && (
                 <span className="shrink-0 rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-600">
-                  Needs attention
+                  At risk
                 </span>
               )}
             </div>
@@ -455,8 +465,8 @@ function DenseClientCard({ client }: { client: ClientWithStats }) {
             </div>
           ) : hasNoData ? (
             <div className="flex flex-col gap-1">
-              <span className="text-sm font-medium text-zinc-500">No snapshots yet</span>
-              <span className="text-xs text-zinc-400">Run first snapshot to measure AI visibility</span>
+              <span className="text-sm font-medium text-zinc-500">No data</span>
+              <span className="text-xs text-zinc-400">Run snapshot</span>
             </div>
           ) : client.latestScore !== null ? (
             <div className="flex items-baseline gap-3">
@@ -666,7 +676,7 @@ function ClientTable({ clients }: { clients: ClientWithStats[] }) {
                       {client.primaryDisplacer ? (
                         <span className="font-medium">
                           {client.primaryDisplacer}
-                          {client.authorityGap ? ` (+${client.authorityGap})` : ""}
+                          {client.authorityGap != null ? ` · Gap ${client.authorityGap} pts` : ""}
                         </span>
                       ) : (
                         <span className="text-zinc-400">—</span>
@@ -870,9 +880,13 @@ export default function AppPage() {
             ].sort((a, b) => b.mentions - a.mentions);
             competitorRank = allEntities.findIndex(e => e.isClient) + 1;
             const topCompetitor = competitors[0] ?? null;
-            if (topCompetitor) {
+            if (topCompetitor && topCompetitor.count >= clientMentions) {
               primaryDisplacer = topCompetitor.name;
-              authorityGap = Math.max(0, topCompetitor.count - clientMentions);
+              // Authority Gap = Leader Index − Client Index (estimated from mention displacement)
+              const mentionGap = topCompetitor.count - clientMentions;
+              const clientScore = latestScore ?? 0;
+              const estimatedLeaderIndex = Math.min(100, clientScore + Math.max(10, mentionGap * 2));
+              authorityGap = Math.round(Math.max(0, estimatedLeaderIndex - clientScore));
             }
           }
 
@@ -1019,11 +1033,11 @@ export default function AppPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {portfolioStats && <CompetitiveAuthorityStatus stats={portfolioStats} clients={clients} />}
 
       {/* Clients section */}
-      <div className="space-y-4 pt-2">
+      <div className="space-y-4 pt-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-[13px] font-semibold uppercase tracking-widest text-zinc-500">Clients</h2>

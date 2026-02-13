@@ -331,15 +331,15 @@ function KeyInsightsCards({
   const mentionRate = detail ? pct(detail.summary.client_mentioned_count, detail.summary.responses_count || 1) : null;
   const citationRate = detail ? pct(detail.summary.sources_count, detail.summary.responses_count || 1) : null;
 
-  let topWeakness = "Run a snapshot to identify weaknesses";
+  let topWeakness = "Run snapshot";
   if (mentionRate !== null && mentionRate < 50) {
-    topWeakness = `Low visibility — mentioned in only ${mentionRate}% of responses`;
+    topWeakness = `Low visibility — ${mentionRate}% of responses`;
   } else if (citationRate !== null && citationRate < 20) {
-    topWeakness = `Authority gap — only ${citationRate}% with citations`;
+    topWeakness = `Citations: ${citationRate}% — authority gap`;
   } else if (modelGap > 40 && weakModel) {
-    topWeakness = `${weakModel[0]} retrieval weakness — ${weakModel[1]}pt gap vs best`;
+    topWeakness = `${weakModel[0]}: ${weakModel[1]} — ${modelGap}pt behind best`;
   } else if (score !== null && score >= 70) {
-    topWeakness = "Strong position — focus on maintaining";
+    topWeakness = "Strong — maintain";
   }
 
   const alignmentStatus = modelGap > 40 ? { label: "Critical", dot: "bg-rose-500" } : modelGap > 20 ? { label: "Moderate", dot: "bg-amber-500" } : { label: "Strong", dot: "bg-emerald-500" };
@@ -358,7 +358,7 @@ function KeyInsightsCards({
           <div>
             <div className="text-xs font-semibold uppercase tracking-wider text-text-3">Cross-Model Alignment</div>
             <div className="mt-1.5 text-sm font-bold text-text">
-              {modelGap > 0 ? `${modelGap}pt gap (${topModel[0]} vs ${weakModel[0]})` : "Run snapshot"}
+              {modelGap > 0 ? `${modelGap}pt gap` : "Run snapshot"}
             </div>
           </div>
           {modelGap > 0 && (
@@ -1331,15 +1331,15 @@ function CompetitiveAuthorityRanking({
   const mentionGap = topCompetitors[0] ? Math.max(0, topCompetitors[0].count - clientMentions) : 6;
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <h3 className="text-xl font-semibold text-zinc-900">Competitive Authority Ranking</h3>
-      <p className="mt-1 text-sm text-zinc-600">Per-model authority positioning and gap to leader.</p>
+    <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm" id="cross-model">
+      <h3 className="text-xl font-bold text-zinc-900">Competitive Authority Ranking</h3>
+      <p className="mt-1.5 text-sm text-zinc-500">Per-model positioning. Gap = Leader Index − Client Index.</p>
 
-      <div className="mt-5 space-y-5">
+      <div className="mt-8 space-y-8">
         {[...providers].sort((a, b) => b[1] - a[1]).map(([provider, score]) => {
           const { leader, challenger } = estimateCompetitorScores(score, mentionGap);
           const clientDelta = previousProviders[provider] != null ? score - previousProviders[provider] : null;
-          const authorityGap = Math.max(0, leader - score);
+          const authorityGap = Math.max(0, leader - score); // Leader Index − Client Index
 
           const entities = [
             { name: leaderName, score: leader, isClient: false, delta: null as number | null },
@@ -1348,24 +1348,43 @@ function CompetitiveAuthorityRanking({
           ].sort((a, b) => b.score - a.score);
 
           return (
-            <div key={provider} className="rounded-lg border border-zinc-200 p-4">
-              <div className="flex items-center justify-between">
-                <h4 className="text-sm font-semibold text-zinc-900">{getProviderDisplayName(provider)}</h4>
-                <span className="text-xs text-zinc-500">Authority Gap to Leader: <span className="font-semibold text-zinc-700">-{authorityGap}</span></span>
+            <div key={provider} className="rounded-xl border border-zinc-200/80 bg-zinc-50/30 p-6">
+              <div className="mb-4 flex items-center justify-between">
+                <h4 className="text-base font-bold text-zinc-900">{getProviderDisplayName(provider)}</h4>
+                <span className="text-sm text-zinc-600">
+                  <span className="font-medium text-zinc-900">{authorityGap}</span> pts behind leader
+                </span>
               </div>
 
-              <div className="mt-3 space-y-2">
-                {entities.map((entity) => (
-                  <div key={entity.name} className="flex items-center justify-between rounded-md bg-zinc-50 px-3 py-2">
-                    <div className="min-w-0">
-                      <p className={cn("truncate text-sm", entity.isClient ? "font-semibold text-zinc-900" : "text-zinc-700")}>{entity.name}</p>
-                      <p className="text-xs text-zinc-500">Recommendation Strength: {getRecommendationLabel(entity.score)}</p>
+              <div className="space-y-3">
+                {entities.map((entity, idx) => (
+                  <div
+                    key={`${entity.name}-${entity.isClient}`}
+                    className={cn(
+                      "flex items-center justify-between rounded-lg px-4 py-3 transition",
+                      entity.isClient
+                        ? "bg-white border-2 border-zinc-900 shadow-sm"
+                        : "bg-white/80 border border-zinc-200"
+                    )}
+                  >
+                    <div className="flex min-w-0 items-center gap-4">
+                      <span className="w-6 text-sm font-bold tabular-nums text-zinc-400">
+                        {idx + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <p className={cn("truncate font-semibold", entity.isClient ? "text-zinc-900" : "text-zinc-700")}>
+                          {entity.name}
+                        </p>
+                        <p className="text-xs text-zinc-500">{getRecommendationLabel(entity.score)}</p>
+                      </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-semibold tabular-nums text-zinc-900">{entity.score}</p>
-                      <p className="text-xs text-zinc-500">
-                        {entity.delta === null ? "—" : `${entity.delta > 0 ? "+" : ""}${entity.delta} vs last`}
-                      </p>
+                      <p className="text-lg font-bold tabular-nums text-zinc-900">{entity.score}</p>
+                      {entity.delta !== null && (
+                        <p className={cn("text-xs font-medium", entity.delta > 0 ? "text-emerald-600" : entity.delta < 0 ? "text-rose-600" : "text-zinc-500")}>
+                          {entity.delta > 0 ? "+" : ""}{entity.delta} vs last
+                        </p>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -1375,8 +1394,8 @@ function CompetitiveAuthorityRanking({
         })}
       </div>
 
-      <p className="mt-4 text-xs text-zinc-500">
-        Competitive model scores are inferred from current displacement signals and update as more snapshots are collected.
+      <p className="mt-6 text-xs text-zinc-400">
+        Leader scores inferred from displacement signals. Refined with more snapshots.
       </p>
     </div>
   );
