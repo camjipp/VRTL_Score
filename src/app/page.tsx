@@ -65,19 +65,19 @@ export default function HomePage() {
         <div className="pointer-events-none absolute inset-0">
           {/* Vignette — darken edges, defines the "room" boundary */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.06)_0%,rgba(0,0,0,0)_45%,rgba(0,0,0,0.55)_100%)]" aria-hidden />
-          {/* Floor plane — light gray haze receding into dark, the "floor" the card sits on */}
-          <div className="absolute inset-x-0 bottom-0 h-[65vh] bg-gradient-to-t from-white/[0.14] via-white/[0.07] to-transparent blur-2xl" aria-hidden />
+          {/* Floor plane — large blurred gradient, not a band */}
+          <div className="absolute inset-x-0 bottom-0 h-[70vh] bg-gradient-to-t from-white/[0.10] via-white/[0.05] to-transparent blur-3xl" aria-hidden />
         </div>
 
         <div className="container-xl relative z-10 flex flex-1 flex-col justify-center pb-14 pt-16 sm:pb-20 sm:pt-24">
-          <div className="mx-auto max-w-3xl text-center">
+          <div className="mx-auto max-w-3xl text-center lg:mx-0 lg:mr-auto lg:text-left">
             {/* Headline — largest text, first thing eye hits */}
-            <h1 className="mx-auto max-w-2xl text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl">
+            <h1 className="mx-auto max-w-2xl text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl lg:mx-0">
               Your clients are already being ranked by AI.
             </h1>
 
             {/* Subheadline — 2 lines, clean spacing */}
-            <p className="mx-auto mt-8 max-w-xl text-lg leading-relaxed text-white/80 sm:text-xl">
+            <p className="mx-auto mt-8 max-w-xl text-lg leading-relaxed text-white/80 sm:text-xl lg:mx-0">
               Answer engines are shaping brand perception in real time.
               <br />
               VRTL Score measures where your clients appear — and where they&apos;re invisible.
@@ -87,7 +87,7 @@ export default function HomePage() {
             <p className="mt-5 text-sm text-white/50">Measured across the AI ecosystem.</p>
 
             {/* AI logos — grayscale, structural proof */}
-            <div className="mx-auto mt-10 flex items-center justify-center gap-3 sm:gap-4">
+            <div className="mx-auto mt-10 flex items-center justify-center gap-3 sm:gap-4 lg:mx-0 lg:justify-start">
               {AI_PROVIDERS.map((p) => (
                 <span
                   key={p.name}
@@ -101,7 +101,7 @@ export default function HomePage() {
             </div>
 
             {/* CTAs — primary dominates */}
-            <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-5">
+            <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-5 lg:justify-start">
               <Link
                 href="/signup"
                 className="w-full rounded-2xl bg-accent px-10 py-4 text-center text-base font-semibold text-white shadow-lg shadow-black/20 transition hover:bg-accent-2 sm:w-auto"
@@ -116,53 +116,53 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* Platform preview card — sits in front of the "room", on the floor */}
-            <div className="relative z-10 mx-auto mt-16 w-full max-w-6xl translate-y-12 sm:translate-y-16">
-              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#0a0a0a] shadow-[0_25px_80px_-12px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.06)] ring-1 ring-white/5">
-                {/* Inner glow */}
-                <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-b from-white/[0.02] via-transparent to-transparent" aria-hidden />
+            {/* Platform preview card — sits on the floor, extends into next section */}
+            <div className="relative z-10 mx-auto mt-8 w-full max-w-7xl translate-y-16 sm:translate-y-24">
+              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] shadow-[0_40px_140px_rgba(0,0,0,0.65)]">
+                {/* Top inner highlight */}
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-32 rounded-t-3xl bg-gradient-to-b from-white/[0.12] to-transparent" aria-hidden />
                 <div className="relative p-6 md:p-8">
                   {/* Pill label */}
-                  <span className="inline-block rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/60">
+                  <span className="inline-block rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white/70">
                     Platform preview
                   </span>
-                  {/* Dashboard skeleton */}
+                  {/* Dashboard skeleton — readable as UI */}
                   <div className="mt-6 flex flex-col gap-6 md:flex-row">
                     {/* Left: score ring */}
                     <div className="flex shrink-0 flex-col items-center md:w-48">
-                      <div className="h-24 w-24 animate-pulse rounded-full border-4 border-white/10 bg-white/5" />
-                      <div className="mt-3 text-xs font-medium text-white/40">AI Visibility Score</div>
-                      <div className="mt-1 h-3 w-20 animate-pulse rounded bg-white/5" />
+                      <div className="h-24 w-24 animate-pulse rounded-full border-4 border-white/15 bg-white/10" />
+                      <div className="mt-3 text-xs font-medium text-white/60">AI Visibility Score</div>
+                      <div className="mt-1 h-3 w-20 animate-pulse rounded bg-white/15" />
                     </div>
                     {/* Right: 3 metric tiles */}
                     <div className="flex flex-1 flex-wrap gap-4">
                       {[1, 2, 3].map((i) => (
-                        <div key={i} className="flex-1 min-w-[120px] rounded-xl border border-white/10 bg-white/5 p-4">
-                          <div className="h-3 w-16 animate-pulse rounded bg-white/10" />
-                          <div className="mt-3 h-8 w-12 animate-pulse rounded bg-white/15" />
-                          <div className="mt-2 h-3 w-10 animate-pulse rounded bg-white/5" />
+                        <div key={i} className="flex-1 min-w-[120px] rounded-xl border border-white/15 bg-white/10 p-4">
+                          <div className="h-3 w-20 animate-pulse rounded bg-white/20" />
+                          <div className="mt-3 h-8 w-14 animate-pulse rounded bg-white/25" />
+                          <div className="mt-2 h-3 w-12 animate-pulse rounded bg-white/15" />
                         </div>
                       ))}
                     </div>
                   </div>
                   {/* Bottom: chart + competitor list */}
                   <div className="mt-6 grid gap-6 md:grid-cols-2">
-                    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                      <div className="h-3 w-24 animate-pulse rounded bg-white/10" />
+                    <div className="rounded-xl border border-white/15 bg-white/10 p-4">
+                      <div className="h-3 w-24 animate-pulse rounded bg-white/20" />
                       <div className="mt-4 flex h-24 items-end gap-2">
                         {[40, 65, 45, 80, 55, 70].map((h, i) => (
-                          <div key={i} className="flex-1 animate-pulse rounded-t bg-white/10" style={{ height: `${h}%` }} />
+                          <div key={i} className="flex-1 animate-pulse rounded-t bg-white/20" style={{ height: `${h}%` }} />
                         ))}
                       </div>
                     </div>
-                    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                      <div className="h-3 w-28 animate-pulse rounded bg-white/10" />
+                    <div className="rounded-xl border border-white/15 bg-white/10 p-4">
+                      <div className="h-3 w-28 animate-pulse rounded bg-white/20" />
                       <div className="mt-4 space-y-2">
                         {[1, 2, 3, 4].map((i) => (
                           <div key={i} className="flex items-center gap-3">
-                            <div className="h-2 w-2 animate-pulse rounded-full bg-white/10" />
-                            <div className="h-3 flex-1 animate-pulse rounded bg-white/10" />
-                            <div className="h-3 w-8 animate-pulse rounded bg-white/5" />
+                            <div className="h-2 w-2 animate-pulse rounded-full bg-white/20" />
+                            <div className="h-3 flex-1 animate-pulse rounded bg-white/20" />
+                            <div className="h-3 w-8 animate-pulse rounded bg-white/15" />
                           </div>
                         ))}
                       </div>
@@ -179,7 +179,7 @@ export default function HomePage() {
           THE SHIFT — narrative arc (Shift → Problem → Solution)
           Negative margin overlaps platform preview card
       ═══════════════════════════════════════════════════════ */}
-      <section className="-mt-24 border-t border-white/5 bg-[#0A0A0A] py-20 md:-mt-32 md:py-28">
+      <section className="-mt-20 border-t border-white/5 bg-[#0A0A0A] py-20 md:-mt-40 md:py-28">
         <div className="container-xl">
           {/* Part 1: The Shift */}
           <div className="mx-auto max-w-4xl text-center">
