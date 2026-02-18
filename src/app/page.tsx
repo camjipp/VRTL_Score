@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { DomainSearchBar } from "@/components/DomainSearchBar";
 import { Footer } from "@/components/Footer";
 
 /* ─────────────────────────────────────────────────────────────
@@ -62,8 +61,8 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════
           HERO
       ═══════════════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-white">
-        <div className="container-xl pb-10 pt-14 sm:pb-14 sm:pt-20">
+      <section className="relative flex min-h-[70vh] flex-col overflow-hidden bg-white sm:min-h-[85vh]">
+        <div className="container-xl flex flex-1 flex-col justify-center pb-10 pt-14 sm:pb-14 sm:pt-20">
           <div className="mx-auto max-w-3xl text-center">
             {/* Logo + wordmark */}
             <div className="flex items-end justify-center gap-0">
@@ -80,46 +79,50 @@ export default function HomePage() {
               </span>
             </div>
 
-            {/* Tagline — Option C (tension) */}
-            <h1 className="mx-auto mt-6 max-w-2xl text-2xl font-bold leading-snug text-text sm:text-3xl">
-              Your{" "}
-              <span className="relative inline-block">
-                clients
-                <span className="absolute -bottom-0.5 left-0 right-0 h-4 rotate-[-1deg] bg-accent/60" aria-hidden />
-              </span>{" "}
-              are being ranked by AI.
-              <br />
-              <span className="text-accent">We measure it.</span>
+            {/* Headline */}
+            <h1 className="mx-auto mt-8 max-w-2xl text-2xl font-bold leading-snug text-text sm:text-3xl md:text-4xl">
+              Your clients are already being ranked by AI.
             </h1>
 
-            {/* Credibility strip — overlapping logos only */}
-            <div className="mx-auto mt-8 flex items-center justify-center gap-0">
-              <span className="mr-3 text-xs font-medium uppercase tracking-wide text-text-3">
-                Visibility across
-              </span>
-              <div className="flex -space-x-2">
-                {AI_PROVIDERS.map((p) => (
-                  <span
-                    key={p.name}
-                    className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-white bg-white shadow-sm ring-1 ring-black/5"
-                    title={p.name}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt={p.name} className="h-4 w-4 object-contain" src={p.icon} />
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Search bar */}
-            <div className="mx-auto mt-9 max-w-xl">
-              <DomainSearchBar />
-            </div>
-
-            {/* CTA — primary action lives in search bar; secondary for direct sign up */}
-            <p className="mt-4 text-sm text-text-3">
-              Enter a domain above to get your free AI visibility snapshot. No credit card required.
+            {/* Subheadline */}
+            <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-text-2 sm:text-xl">
+              Answer engines are shaping brand perception in real time.
+              <br />
+              VRTL Score measures where your clients appear — and where they&apos;re invisible.
             </p>
+
+            {/* Supporting line */}
+            <p className="mt-4 text-sm text-text-3">Measured across leading AI systems.</p>
+
+            {/* AI logos — grayscale, no names, medium size, before CTAs */}
+            <div className="mx-auto mt-8 flex items-center justify-center gap-4 sm:gap-6">
+              {AI_PROVIDERS.map((p) => (
+                <span
+                  key={p.name}
+                  className="flex h-10 w-10 shrink-0 items-center justify-center opacity-70 grayscale sm:h-12 sm:w-12"
+                  title={p.name}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img alt="" className="h-full w-full object-contain" src={p.icon} />
+                </span>
+              ))}
+            </div>
+
+            {/* CTAs */}
+            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-5">
+              <Link
+                href="/signup"
+                className="w-full rounded-xl bg-accent px-8 py-3.5 text-center text-base font-semibold text-white shadow-sm transition hover:bg-accent-2 sm:w-auto"
+              >
+                Start Free Trial
+              </Link>
+              <Link
+                href="#platform"
+                className="w-full rounded-xl border border-border bg-transparent px-8 py-3.5 text-center text-base font-medium text-text transition hover:bg-bg-2 sm:w-auto"
+              >
+                See Platform
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -375,7 +378,7 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════
           DASHBOARD PROOF — full-width, dark, dramatic
       ═══════════════════════════════════════════════════════ */}
-      <section className="bg-[#0A0A0A] py-20 md:py-28">
+      <section id="platform" className="bg-[#0A0A0A] py-20 md:py-28">
         <div className="container-xl">
           <div className="mx-auto max-w-3xl text-center mb-12">
             <p className="text-sm font-semibold uppercase tracking-widest text-white/40">Inside the platform</p>
