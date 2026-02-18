@@ -101,6 +101,24 @@ html {
   animation-play-state: paused;
 }
 
+/* Hero AI logos carousel */
+@keyframes carousel-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-carousel {
+  animation: carousel-scroll 20s linear infinite;
+}
+
+.animate-carousel:hover {
+  animation-play-state: paused;
+}
+
 /* Stagger animation for grid items */
 @keyframes fade-up {
   from {

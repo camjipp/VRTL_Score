@@ -48,8 +48,7 @@ const AI_PROVIDERS = [
   { name: "OpenAI", icon: "/ai/icons8-chatgpt.svg" },
   { name: "Anthropic", icon: "/ai/icons8-claude.svg" },
   { name: "Google", icon: "/ai/gemini.png" },
-  { name: "Perplexity", icon: "/ai/perplexity.svg" },
-  { name: "DeepSeek", icon: "/ai/deepseek.svg" },
+  { name: "Perplexity", icon: "/ai/perplexity.png" },
 ];
 
 /* ─────────────────────────────────────────────────────────────
@@ -94,18 +93,20 @@ export default function HomePage() {
             {/* Supporting line */}
             <p className="mt-4 text-sm text-text-3">Measured across leading AI systems.</p>
 
-            {/* AI logos — grayscale, no names, medium size, before CTAs */}
-            <div className="mx-auto mt-8 flex items-center justify-center gap-4 sm:gap-6">
-              {AI_PROVIDERS.map((p) => (
-                <span
-                  key={p.name}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center opacity-70 grayscale sm:h-12 sm:w-12"
-                  title={p.name}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img alt="" className="h-full w-full object-contain" src={p.icon} />
-                </span>
-              ))}
+            {/* AI logos — grayscale carousel, before CTAs */}
+            <div className="mx-auto mt-8 w-full max-w-md overflow-hidden">
+              <div className="flex animate-carousel gap-4 sm:gap-6">
+                {[...AI_PROVIDERS, ...AI_PROVIDERS].map((p, i) => (
+                  <span
+                    key={`${p.name}-${i}`}
+                    className="flex h-10 w-10 shrink-0 items-center justify-center opacity-70 grayscale sm:h-12 sm:w-12"
+                    title={p.name}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img alt="" className="h-full w-full object-contain" src={p.icon} />
+                  </span>
+                ))}
+              </div>
             </div>
 
             {/* CTAs */}

@@ -6,7 +6,7 @@ const AI_PROVIDERS = [
   { name: "ChatGPT", icon: "/ai/icons8-chatgpt.svg" },
   { name: "Claude", icon: "/ai/icons8-claude.svg" },
   { name: "Gemini", icon: "/ai/gemini.png" },
-  { name: "Perplexity", icon: "/ai/perplexity.svg" },
+  { name: "Perplexity", icon: "/ai/perplexity.png" },
   { name: "Grok", icon: "/ai/grok.svg" },
   { name: "DeepSeek", icon: "/ai/deepseek.svg" },
 ];
