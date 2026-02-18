@@ -58,32 +58,40 @@ export default function HomePage() {
   return (
     <main className="bg-bg">
       {/* ═══════════════════════════════════════════════════════
-          HERO — brand in nav only; headline dominant
+          HERO — Linear-style dark + bottom fade
       ═══════════════════════════════════════════════════════ */}
-      <section className="relative flex min-h-[70vh] flex-col overflow-hidden bg-white sm:min-h-[90vh]">
-        <div className="container-xl flex flex-1 flex-col justify-center pb-14 pt-16 sm:pb-20 sm:pt-24">
+      <section className="relative flex min-h-[70vh] flex-col overflow-hidden bg-[#0A0A0A] sm:min-h-[90vh]">
+        {/* Gradient overlays — pointer-events-none, behind content */}
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-black via-black/90 to-black" />
+          <div className="absolute inset-x-0 bottom-0 h-[45vh] bg-gradient-to-t from-white/[0.15] via-white/[0.05] to-transparent" />
+          {/* Subtle vignette — edges darker than center */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,transparent_0%,rgba(0,0,0,0.25)_100%)]" aria-hidden />
+        </div>
+
+        <div className="container-xl relative z-10 flex flex-1 flex-col justify-center pb-14 pt-16 sm:pb-20 sm:pt-24">
           <div className="mx-auto max-w-3xl text-center">
             {/* Headline — largest text, first thing eye hits */}
-            <h1 className="mx-auto max-w-2xl text-3xl font-bold leading-tight text-text sm:text-4xl md:text-5xl">
+            <h1 className="mx-auto max-w-2xl text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl">
               Your clients are already being ranked by AI.
             </h1>
 
             {/* Subheadline — 2 lines, clean spacing */}
-            <p className="mx-auto mt-8 max-w-xl text-lg leading-relaxed text-text-2 sm:text-xl">
+            <p className="mx-auto mt-8 max-w-xl text-lg leading-relaxed text-white/80 sm:text-xl">
               Answer engines are shaping brand perception in real time.
               <br />
               VRTL Score measures where your clients appear — and where they&apos;re invisible.
             </p>
 
             {/* Supporting line — shorter, stronger */}
-            <p className="mt-5 text-sm text-text-3">Measured across the AI ecosystem.</p>
+            <p className="mt-5 text-sm text-white/50">Measured across the AI ecosystem.</p>
 
             {/* AI logos — grayscale, structural proof */}
             <div className="mx-auto mt-10 flex items-center justify-center gap-3 sm:gap-4">
               {AI_PROVIDERS.map((p) => (
                 <span
                   key={p.name}
-                  className="flex h-12 w-12 shrink-0 items-center justify-center opacity-75 grayscale sm:h-14 sm:w-14"
+                  className="flex h-12 w-12 shrink-0 items-center justify-center opacity-75 grayscale invert sm:h-14 sm:w-14"
                   title={p.name}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -96,13 +104,13 @@ export default function HomePage() {
             <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-5">
               <Link
                 href="/signup"
-                className="w-full rounded-2xl bg-accent px-10 py-4 text-center text-base font-semibold text-white shadow-lg shadow-black/5 transition hover:bg-accent-2 sm:w-auto"
+                className="w-full rounded-2xl bg-accent px-10 py-4 text-center text-base font-semibold text-white shadow-lg shadow-black/20 transition hover:bg-accent-2 sm:w-auto"
               >
                 Start Free Trial
               </Link>
               <Link
                 href="#platform"
-                className="w-full rounded-2xl border border-border bg-transparent px-10 py-4 text-center text-base font-medium text-text transition hover:bg-bg-2 sm:w-auto"
+                className="w-full rounded-2xl border border-white/20 bg-transparent px-10 py-4 text-center text-base font-medium text-white/90 transition hover:bg-white/10 sm:w-auto"
               >
                 See Platform
               </Link>
@@ -114,30 +122,30 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════
           THE SHIFT — narrative arc (Shift → Problem → Solution)
       ═══════════════════════════════════════════════════════ */}
-      <section className="border-t border-border bg-bg py-20 md:py-28">
+      <section className="border-t border-white/5 bg-[#0A0A0A] py-20 md:py-28">
         <div className="container-xl">
           {/* Part 1: The Shift */}
           <div className="mx-auto max-w-4xl text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-text-3">The shift</p>
-            <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-tight text-text md:text-4xl lg:text-5xl">
+            <p className="text-sm font-semibold uppercase tracking-widest text-white/50">The shift</p>
+            <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-tight text-white md:text-4xl lg:text-5xl">
               Search is becoming AI.
             </h2>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-text-2">
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/70">
               Google, ChatGPT, Perplexity, and Claude are answering search queries directly—with recommendations, not blue links. SEO is no longer enough.
             </p>
           </div>
 
           {/* Part 2: AEO & GEO — education */}
           <div className="mx-auto mt-16 grid max-w-4xl gap-8 sm:grid-cols-2">
-            <div className="rounded-2xl border border-border bg-white p-8 text-left">
-              <h3 className="text-xl font-bold text-text">AEO — Answer Engine Optimization</h3>
-              <p className="mt-4 leading-relaxed text-text-2">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-left">
+              <h3 className="text-xl font-bold text-white">AEO — Answer Engine Optimization</h3>
+              <p className="mt-4 leading-relaxed text-white/70">
                 Optimizing for AI assistants (ChatGPT, Claude, Perplexity) that answer questions directly. If your client isn’t in those answers, they’re invisible to a growing share of discovery.
               </p>
             </div>
-            <div className="rounded-2xl border border-border bg-white p-8 text-left">
-              <h3 className="text-xl font-bold text-text">GEO — Generative Engine Optimization</h3>
-              <p className="mt-4 leading-relaxed text-text-2">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-left">
+              <h3 className="text-xl font-bold text-white">GEO — Generative Engine Optimization</h3>
+              <p className="mt-4 leading-relaxed text-white/70">
                 Optimizing for AI-generated search results. Google’s SGE, Perplexity’s search, and AI-powered product recommendations are where rankings happen now—and traditional tools can’t measure them.
               </p>
             </div>
@@ -145,18 +153,18 @@ export default function HomePage() {
 
           {/* Part 3: The Problem */}
           <div className="mx-auto mt-16 max-w-3xl text-center">
-            <h3 className="text-2xl font-semibold tracking-tight text-text md:text-3xl">
+            <h3 className="text-2xl font-semibold tracking-tight text-white md:text-3xl">
               Most agencies have no idea how their clients show up in AI.
             </h3>
-            <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-text-2">
+            <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-white/70">
               When a prospect asks ChatGPT for a recommendation, does your client appear? In what position? With what context? Today, most agencies are guessing—and losing clients to competitors who show up first.
             </p>
           </div>
 
           {/* Part 4: The Solution */}
           <div className="mx-auto mt-16 max-w-3xl text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600">The solution</p>
-            <h3 className="mt-3 text-2xl font-semibold tracking-tight text-text md:text-3xl">
+            <p className="text-sm font-semibold uppercase tracking-widest text-accent">The solution</p>
+            <h3 className="mt-3 text-2xl font-semibold tracking-tight text-white md:text-3xl">
               VRTL Score isn’t a gimmick—it’s the infrastructure agencies need to own AEO & GEO. Measure AI visibility across every major model, prove ROI, and defend your clients before it’s too late.
             </h3>
           </div>
