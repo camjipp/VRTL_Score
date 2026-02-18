@@ -20,15 +20,16 @@ export function SiteNav() {
   // Hide marketing nav inside the app; the app has its own shell.
   if (pathname.startsWith("/app")) return null;
 
-  const isHome = pathname === "/";
+  // Treat null/undefined as home to avoid white flash before pathname hydrates
+  const isHome = pathname === "/" || pathname === null || pathname === undefined;
 
   return (
     <header className="sticky top-0 z-50">
-      {/* Background — transparent/dark on homepage so hero shows through */}
+      {/* Background — dark on homepage (slight tint avoids white flash before hero paints) */}
       <div
         className={cn(
           "absolute inset-0 border-b",
-          isHome ? "border-white/10 bg-transparent" : "border-border/40 bg-white/80 backdrop-blur-xl"
+          isHome ? "border-white/10 bg-black/50 backdrop-blur-sm" : "border-border/40 bg-white/80 backdrop-blur-xl"
         )}
       />
 

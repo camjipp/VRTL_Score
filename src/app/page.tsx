@@ -71,22 +71,19 @@ export default function HomePage() {
               VRTL Score measures where your clients appear — and where they&apos;re invisible.
             </p>
 
-            {/* Single primary CTA + optional text link */}
-            <div className="mt-10 flex flex-col items-start gap-3">
+            {/* Single primary CTA — Linear minimalism */}
+            <div className="mt-10">
               <Link
                 href="/signup"
-                className="rounded-2xl bg-accent px-8 py-3.5 text-base font-semibold text-white shadow-lg transition hover:bg-accent-2"
+                className="inline-block rounded-2xl bg-accent px-8 py-3.5 text-base font-semibold text-white shadow-lg transition hover:bg-accent-2"
               >
                 Start Free Trial
-              </Link>
-              <Link href="#platform" className="text-sm text-white/50 transition hover:text-white/80">
-                See Platform →
               </Link>
             </div>
           </div>
 
-          {/* Product preview card — max-w-7xl, pulled up, overlaps fold aggressively */}
-          <div className="relative z-10 mx-auto mt-12 w-full max-w-7xl translate-y-16 sm:translate-y-24">
+          {/* Product preview card — visual anchor, pulled up, overlaps fold */}
+          <div className="relative z-10 mx-auto mt-8 w-full max-w-7xl translate-y-20 sm:translate-y-28">
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] shadow-[0_40px_140px_rgba(0,0,0,0.65)]">
               {/* Inner highlight — glass UI depth */}
               <div className="pointer-events-none absolute inset-x-0 top-0 h-40 rounded-t-2xl bg-gradient-to-b from-white/[0.12] to-transparent" aria-hidden />
@@ -193,7 +190,7 @@ export default function HomePage() {
           THE SHIFT — narrative arc (Shift → Problem → Solution)
           Negative margin overlaps platform preview card
       ═══════════════════════════════════════════════════════ */}
-      <section className="-mt-16 border-t border-white/5 bg-[#0A0A0A] pt-12 pb-20 md:-mt-32 md:pb-28">
+      <section className="-mt-12 border-t border-white/5 bg-[#0A0A0A] pt-12 pb-20 md:-mt-36 md:pb-28">
         <div className="container-xl">
           {/* Part 1: The Shift */}
           <div className="mx-auto max-w-4xl text-center">
