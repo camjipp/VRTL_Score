@@ -58,47 +58,32 @@ export default function HomePage() {
   return (
     <main className="bg-bg">
       {/* ═══════════════════════════════════════════════════════
-          HERO
+          HERO — brand in nav only; headline dominant
       ═══════════════════════════════════════════════════════ */}
-      <section className="relative flex min-h-[70vh] flex-col overflow-hidden bg-white sm:min-h-[85vh]">
-        <div className="container-xl flex flex-1 flex-col justify-center pb-10 pt-14 sm:pb-14 sm:pt-20">
+      <section className="relative flex min-h-[70vh] flex-col overflow-hidden bg-white sm:min-h-[90vh]">
+        <div className="container-xl flex flex-1 flex-col justify-center pb-14 pt-16 sm:pb-20 sm:pt-24">
           <div className="mx-auto max-w-3xl text-center">
-            {/* Logo + wordmark */}
-            <div className="flex items-end justify-center gap-0">
-              <div className="h-[100px] w-[220px] overflow-hidden -mr-3 sm:h-[130px] sm:w-[280px] sm:-mr-5">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  alt="VRTL"
-                  className="h-full w-full scale-[1.6] object-cover object-left"
-                  src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
-                />
-              </div>
-              <span className="text-[72px] font-semibold leading-[0.9] tracking-tight text-text sm:text-[96px]">
-                Score
-              </span>
-            </div>
-
-            {/* Headline */}
-            <h1 className="mx-auto mt-8 max-w-2xl text-2xl font-bold leading-snug text-text sm:text-3xl md:text-4xl">
+            {/* Headline — largest text, first thing eye hits */}
+            <h1 className="mx-auto max-w-2xl text-3xl font-bold leading-tight text-text sm:text-4xl md:text-5xl">
               Your clients are already being ranked by AI.
             </h1>
 
-            {/* Subheadline */}
-            <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-text-2 sm:text-xl">
+            {/* Subheadline — 2 lines, clean spacing */}
+            <p className="mx-auto mt-8 max-w-xl text-lg leading-relaxed text-text-2 sm:text-xl">
               Answer engines are shaping brand perception in real time.
               <br />
               VRTL Score measures where your clients appear — and where they&apos;re invisible.
             </p>
 
-            {/* Supporting line */}
-            <p className="mt-4 text-sm text-text-3">Measured across leading AI systems.</p>
+            {/* Supporting line — shorter, stronger */}
+            <p className="mt-5 text-sm text-text-3">Measured across the AI ecosystem.</p>
 
-            {/* AI logos — grayscale, no names, medium size, before CTAs */}
-            <div className="mx-auto mt-8 flex items-center justify-center gap-4 sm:gap-6">
+            {/* AI logos — grayscale, structural proof */}
+            <div className="mx-auto mt-10 flex items-center justify-center gap-3 sm:gap-4">
               {AI_PROVIDERS.map((p) => (
                 <span
                   key={p.name}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center opacity-70 grayscale sm:h-12 sm:w-12"
+                  className="flex h-12 w-12 shrink-0 items-center justify-center opacity-75 grayscale sm:h-14 sm:w-14"
                   title={p.name}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -107,17 +92,17 @@ export default function HomePage() {
               ))}
             </div>
 
-            {/* CTAs */}
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-5">
+            {/* CTAs — primary dominates */}
+            <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-5">
               <Link
                 href="/signup"
-                className="w-full rounded-xl bg-accent px-8 py-3.5 text-center text-base font-semibold text-white shadow-sm transition hover:bg-accent-2 sm:w-auto"
+                className="w-full rounded-2xl bg-accent px-10 py-4 text-center text-base font-semibold text-white shadow-lg shadow-black/5 transition hover:bg-accent-2 sm:w-auto"
               >
                 Start Free Trial
               </Link>
               <Link
                 href="#platform"
-                className="w-full rounded-xl border border-border bg-transparent px-8 py-3.5 text-center text-base font-medium text-text transition hover:bg-bg-2 sm:w-auto"
+                className="w-full rounded-2xl border border-border bg-transparent px-10 py-4 text-center text-base font-medium text-text transition hover:bg-bg-2 sm:w-auto"
               >
                 See Platform
               </Link>
