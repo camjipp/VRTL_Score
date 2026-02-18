@@ -16,16 +16,16 @@
   --text-2: 58 58 58;
   --text-3: 120 120 120;
 
-  /* Brand accent */
-  --accent: 8 8 8;
-  --accent-2: 35 35 35;
+  /* Primary brand accent (emerald) */
+  --accent: 5 150 105;   /* emerald-600 */
+  --accent-2: 4 120 87;  /* emerald-700-ish (hover) */
 
   /* Semantic */
   --success: 16 155 92;
   --warning: 180 110 20;
   --danger: 160 30 30;
 
-  /* Executive status (calm palette) */
+  /* Executive status (calm palette) — --strong matches --accent */
   --strong: 5 150 105;      /* emerald-600 */
   --moderate: 217 119 6;    /* amber-600 */
   --critical: 225 29 72;    /* rose-600 */
@@ -173,10 +173,10 @@ html {
     @apply rounded-xl border border-border/15 bg-surface shadow-[0_1px_0_rgba(0,0,0,0.04)];
   }
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-accent/90;
+    @apply inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-accent-2 focus-visible:ring-accent/30;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-lg border border-border/15 bg-bg-2 px-4 py-2 text-sm font-medium text-text transition hover:bg-bg-2/90;
+    @apply inline-flex items-center justify-center rounded-lg border border-border bg-transparent px-4 py-2 text-sm font-medium text-text transition hover:border-border hover:bg-bg-2/40;
   }
   .badge {
     @apply inline-flex items-center rounded-full border border-border/15 bg-bg-2 px-2 py-0.5 text-xs text-text-2;

@@ -82,27 +82,30 @@ export default function HomePage() {
 
             {/* Tagline — Option C (tension) */}
             <h1 className="mx-auto mt-6 max-w-2xl text-2xl font-bold leading-snug text-text sm:text-3xl">
-              Your clients are being ranked by AI.
+              Your{" "}
+              <span className="relative inline-block">
+                clients
+                <span className="absolute -bottom-0.5 left-0 right-0 h-4 rotate-[-1deg] bg-accent/60" aria-hidden />
+              </span>{" "}
+              are being ranked by AI.
               <br />
-              <span className="text-emerald-600">We measure it.</span>
+              <span className="text-accent">We measure it.</span>
             </h1>
 
-            {/* Credibility stat */}
-            <p className="mx-auto mt-4 max-w-xl text-sm text-text-3">
-              Gartner predicts traditional search volume will drop 25% by 2026 due to AI chatbots and virtual agents.
-            </p>
-
-            {/* Credibility strip — providers */}
-            <div className="mx-auto mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
-              <span className="text-xs font-medium uppercase tracking-wide text-text-3">
-                Tracking visibility across
+            {/* Credibility strip — overlapping logos only */}
+            <div className="mx-auto mt-8 flex items-center justify-center gap-0">
+              <span className="mr-3 text-xs font-medium uppercase tracking-wide text-text-3">
+                Visibility across
               </span>
-              <div className="flex items-center gap-3">
+              <div className="flex -space-x-2">
                 {AI_PROVIDERS.map((p) => (
-                  <span key={p.name} className="flex items-center gap-1.5 text-xs font-medium text-text-2">
+                  <span
+                    key={p.name}
+                    className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-white bg-white shadow-sm ring-1 ring-black/5"
+                    title={p.name}
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt={p.name} className="h-4 w-4" src={p.icon} />
-                    {p.name}
+                    <img alt={p.name} className="h-4 w-4 object-contain" src={p.icon} />
                   </span>
                 ))}
               </div>
@@ -113,15 +116,10 @@ export default function HomePage() {
               <DomainSearchBar />
             </div>
 
-            {/* CTA */}
-            <div className="mt-5 flex items-center justify-center">
-              <Link
-                href="/onboarding"
-                className="rounded-full bg-text px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-text/10 transition-all hover:bg-text/90 hover:scale-[1.02]"
-              >
-                Sign up
-              </Link>
-            </div>
+            {/* CTA — primary action lives in search bar; secondary for direct sign up */}
+            <p className="mt-4 text-sm text-text-3">
+              Enter a domain above to get your free AI visibility snapshot. No credit card required.
+            </p>
           </div>
         </div>
       </section>
@@ -137,36 +135,42 @@ export default function HomePage() {
             <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-tight text-text md:text-4xl lg:text-5xl">
               Search is becoming AI.
             </h2>
-            <div className="mx-auto mt-10 grid max-w-3xl gap-6 sm:grid-cols-3">
-              {[
-                { before: "Search engines", after: "AI answer engines", icon: "🔍 →" },
-                { before: "Blue-link rankings", after: "AI recommendations", icon: "📊 →" },
-                { before: "Click-through rates", after: "Brand mentions", icon: "🖱 →" },
-              ].map((item) => (
-                <div key={item.before} className="rounded-2xl border border-border bg-white p-5 text-center">
-                  <div className="text-2xl">{item.icon}</div>
-                  <div className="mt-3 text-sm text-text-3 line-through decoration-text-3/40">{item.before}</div>
-                  <div className="mt-1 text-base font-semibold text-text">{item.after}</div>
-                </div>
-              ))}
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-text-2">
+              Google, ChatGPT, Perplexity, and Claude are answering search queries directly—with recommendations, not blue links. SEO is no longer enough.
+            </p>
+          </div>
+
+          {/* Part 2: AEO & GEO — education */}
+          <div className="mx-auto mt-16 grid max-w-4xl gap-8 sm:grid-cols-2">
+            <div className="rounded-2xl border border-border bg-white p-8 text-left">
+              <h3 className="text-xl font-bold text-text">AEO — Answer Engine Optimization</h3>
+              <p className="mt-4 leading-relaxed text-text-2">
+                Optimizing for AI assistants (ChatGPT, Claude, Perplexity) that answer questions directly. If your client isn’t in those answers, they’re invisible to a growing share of discovery.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-border bg-white p-8 text-left">
+              <h3 className="text-xl font-bold text-text">GEO — Generative Engine Optimization</h3>
+              <p className="mt-4 leading-relaxed text-text-2">
+                Optimizing for AI-generated search results. Google’s SGE, Perplexity’s search, and AI-powered product recommendations are where rankings happen now—and traditional tools can’t measure them.
+              </p>
             </div>
           </div>
 
-          {/* Part 2: The Problem */}
-          <div className="mx-auto mt-20 max-w-3xl text-center">
+          {/* Part 3: The Problem */}
+          <div className="mx-auto mt-16 max-w-3xl text-center">
             <h3 className="text-2xl font-semibold tracking-tight text-text md:text-3xl">
               Most agencies have no idea how their clients show up in AI.
             </h3>
             <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-text-2">
-              When a prospect asks ChatGPT for a recommendation, does your client appear? In what position? With what context? Today, most agencies are guessing.
+              When a prospect asks ChatGPT for a recommendation, does your client appear? In what position? With what context? Today, most agencies are guessing—and losing clients to competitors who show up first.
             </p>
           </div>
 
-          {/* Part 3: The Solution */}
-          <div className="mx-auto mt-20 max-w-3xl text-center">
+          {/* Part 4: The Solution */}
+          <div className="mx-auto mt-16 max-w-3xl text-center">
             <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600">The solution</p>
             <h3 className="mt-3 text-2xl font-semibold tracking-tight text-text md:text-3xl">
-              VRTL Score gives you a defensible, repeatable way to measure AI visibility—and prove improvement over time.
+              VRTL Score isn’t a gimmick—it’s the infrastructure agencies need to own AEO & GEO. Measure AI visibility across every major model, prove ROI, and defend your clients before it’s too late.
             </h3>
           </div>
         </div>
@@ -178,7 +182,7 @@ export default function HomePage() {
       <section id="features" className="border-t border-border bg-white py-20 md:py-28">
         <div className="container-xl">
           <div className="mb-14 max-w-2xl">
-            <p className="text-sm font-semibold uppercase tracking-widest text-text-3">What you get</p>
+            <p className="text-sm font-semibold uppercase tracking-widest text-text-3">The platform</p>
             <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-tight text-text md:text-4xl">
               Everything agencies need to own the AI channel.
             </h2>
@@ -217,7 +221,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-2xl font-semibold text-text">Competitive Benchmarking</h3>
               <p className="mt-3 leading-relaxed text-text-2">
-                See exactly where your client ranks against competitors across every major AI platform—scored, ranked, and tracked over time.
+                Your clients are being compared in AI responses right now. See exactly where they rank vs. competitors across ChatGPT, Claude, Gemini & Perplexity—with month-over-month proof you can show stakeholders.
               </p>
             </div>
 

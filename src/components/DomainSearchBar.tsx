@@ -55,18 +55,23 @@ export function DomainSearchBar() {
 
   return (
     <form onSubmit={submit}>
-      <div className="relative flex items-center rounded-full border border-border bg-white shadow-sm transition-shadow focus-within:shadow-md">
+      <div className="relative flex items-center overflow-hidden rounded-xl border-2 border-border bg-white shadow-md transition-all focus-within:border-accent/50 focus-within:shadow-lg focus-within:ring-2 focus-within:ring-accent/20 sm:rounded-2xl">
+        <span className="absolute left-5 text-text-3 sm:left-6">
+          <svg className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+        </span>
         <input
-          className="h-12 w-full rounded-full bg-transparent pl-5 pr-36 text-base text-text placeholder:text-text-3 outline-none sm:h-14 sm:pr-40"
+          className="h-14 w-full bg-transparent pl-12 pr-40 text-base text-text placeholder:text-text-3 outline-none sm:h-16 sm:pl-14 sm:pr-44 sm:text-lg"
           onChange={(e) => setValue(e.target.value)}
           placeholder="yourwebsite.com"
           value={value}
           inputMode="url"
           autoComplete="url"
-          aria-label="Website"
+          aria-label="Enter website domain"
         />
-        <Button className="absolute right-1.5 h-9 rounded-full px-5 text-sm font-semibold sm:h-11 sm:px-6" type="submit" variant="primary">
-          Run free snapshot
+        <Button className="absolute right-2 h-10 rounded-lg px-5 text-sm font-semibold sm:right-2.5 sm:h-11 sm:rounded-xl sm:px-6" type="submit" variant="primary">
+          Check visibility
         </Button>
       </div>
       {error ? (

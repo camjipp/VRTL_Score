@@ -7,9 +7,9 @@ import { useState } from "react";
 import { cn } from "@/lib/cn";
 
 const navLinks = [
-  { href: "/#features", label: "How it Works" },
+  { href: "/#features", label: "Features" },
   { href: "/pricing", label: "Pricing" },
-  { href: "/#faq", label: "FAQ" },
+  { href: "/#faq", label: "Questions" },
   { href: "/blog", label: "Blog" },
 ];
 
@@ -32,7 +32,7 @@ export function SiteNav() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
               alt="VRTL Score" 
-              className="h-10 w-auto md:h-12" 
+              className="h-11 w-auto md:h-[52px]" 
               src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png" 
             />
           </Link>
@@ -52,16 +52,16 @@ export function SiteNav() {
             </div>
           </div>
 
-          {/* Desktop CTA */}
+          {/* Desktop CTA — Login = subtle filled neutral (real software), Sign up = link */}
           <div className="hidden shrink-0 items-center gap-3 md:flex">
             <Link
-              className="rounded-full px-4 py-2 text-sm font-medium text-text-2 transition-colors hover:text-text"
+              className="rounded-full border border-border bg-surface-2 px-5 py-2 text-sm font-medium text-text transition-colors hover:bg-bg-2 hover:border-border/80"
               href="/login"
             >
               Log in
             </Link>
             <Link
-              className="rounded-full bg-text px-5 py-2 text-sm font-semibold text-white shadow-md shadow-text/15 transition-all hover:bg-text/90 hover:shadow-lg hover:shadow-text/20"
+              className="text-sm font-medium text-text-3 transition-colors hover:text-text"
               href="/onboarding"
             >
               Sign up
@@ -110,14 +110,14 @@ export function SiteNav() {
             <hr className="my-3 border-border" />
             <div className="flex flex-col gap-2">
               <Link
-                className="rounded-xl px-4 py-3.5 text-center text-base font-medium text-text-2 transition-all hover:bg-surface-2 hover:text-text"
+                className="rounded-xl border border-border bg-surface-2 px-4 py-3.5 text-center text-base font-medium text-text transition-all hover:bg-bg-2"
                 href="/login"
                 onClick={() => setMobileOpen(false)}
               >
                 Log in
               </Link>
               <Link
-                className="rounded-xl bg-text px-4 py-3.5 text-center text-base font-semibold text-white transition-all hover:bg-text/90"
+                className="rounded-xl px-4 py-3.5 text-center text-base font-medium text-text-3 transition-all hover:text-text"
                 href="/onboarding"
                 onClick={() => setMobileOpen(false)}
               >
