@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/cn";
 
@@ -16,6 +16,14 @@ const navLinks = [
 export function SiteNav() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(typeof window !== "undefined" && window.scrollY > 80);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // Hide marketing nav inside the app; the app has its own shell.
   if (pathname.startsWith("/app")) return null;
@@ -23,13 +31,16 @@ export function SiteNav() {
   // Treat null/undefined as home to avoid white flash before pathname hydrates
   const isHome = pathname === "/" || pathname === null || pathname === undefined;
 
+  // On homepage: transparent at top, subtle dark bg when scrolled (readable over light sections)
+  const homeBg = scrolled ? "border-white/10 bg-black/80 backdrop-blur-md" : "border-white/[0.06] bg-transparent";
+
   return (
     <header className="sticky top-0 z-50">
-      {/* Background — dark on homepage (slight tint avoids white flash before hero paints) */}
+      {/* Background — transparent on homepage (Linear-style); solid when scrolled or on other pages */}
       <div
         className={cn(
-          "absolute inset-0 border-b",
-          isHome ? "border-white/10 bg-black/50 backdrop-blur-sm" : "border-border/40 bg-white/80 backdrop-blur-xl"
+          "absolute inset-0 border-b transition-colors duration-200",
+          isHome ? homeBg : "border-border/40 bg-white/80 backdrop-blur-xl"
         )}
       />
 

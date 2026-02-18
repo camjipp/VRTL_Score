@@ -46,45 +46,42 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 ───────────────────────────────────────────────────────────────*/
 export default function HomePage() {
   return (
-    <main className="bg-bg">
+    <main className="bg-black">
       {/* ═══════════════════════════════════════════════════════
           HERO — Linear-style dark + bottom fade
       ═══════════════════════════════════════════════════════ */}
-      <section className="relative flex min-h-[85vh] flex-col overflow-visible bg-black sm:min-h-[95vh]">
-        {/* Room depth layers — pointer-events-none, behind content */}
+      <section className="relative flex min-h-[90vh] flex-col overflow-visible bg-black sm:min-h-[95vh]">
+        {/* Room depth — Linear-style: subtle radial glow, no heavy vignette */}
         <div className="pointer-events-none absolute inset-0">
-          {/* Vignette — darken edges, defines the "room" boundary */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.06)_0%,rgba(0,0,0,0)_45%,rgba(0,0,0,0.55)_100%)]" aria-hidden />
-          {/* Floor haze — atmospheric fog, not a band */}
-          <div className="absolute inset-x-0 bottom-0 h-[68vh] bg-gradient-to-t from-white/[0.10] via-white/[0.04] to-transparent blur-3xl" aria-hidden />
+          <div className="absolute inset-x-0 bottom-0 h-[70vh] bg-gradient-to-t from-white/[0.06] via-white/[0.02] to-transparent blur-3xl" aria-hidden />
         </div>
 
-        <div className="container-xl relative z-10 flex flex-1 flex-col justify-center px-6 pb-24 pt-20 sm:px-10 sm:pt-28 md:px-14">
-          {/* Copy block — editorial, left-aligned, more breathing room */}
+        <div className="container-xl relative z-10 flex flex-1 flex-col justify-start px-6 pb-24 pt-24 sm:px-10 sm:pt-28 md:px-14">
+          {/* Copy block — Linear-tight: headline + sub + CTA, minimal vertical space */}
           <div className="max-w-3xl">
             <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl">
               Your clients are already being ranked by AI.
             </h1>
 
-            <p className="mt-8 max-w-xl text-base leading-relaxed text-white/60 sm:text-lg">
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/60 sm:text-lg">
               Answer engines are shaping brand perception in real time.
               VRTL Score measures where your clients appear — and where they&apos;re invisible.
             </p>
 
             {/* Single primary CTA — Linear minimalism */}
-            <div className="mt-10">
+            <div className="mt-6">
               <Link
                 href="/signup"
-                className="inline-block rounded-2xl bg-accent px-8 py-3.5 text-base font-semibold text-white shadow-lg transition hover:bg-accent-2"
+                className="inline-block rounded-2xl bg-white px-8 py-3.5 text-base font-semibold text-black shadow-lg transition hover:bg-white/90"
               >
                 Start Free Trial
               </Link>
             </div>
           </div>
 
-          {/* Product preview card — visual anchor, pulled up, overlaps fold */}
-          <div className="relative z-10 mx-auto mt-8 w-full max-w-7xl translate-y-20 sm:translate-y-28">
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] shadow-[0_40px_140px_rgba(0,0,0,0.65)]">
+          {/* Product preview card — dominant visual anchor, pulled up tight like Linear */}
+          <div className="relative z-10 mx-auto mt-6 w-full max-w-7xl translate-y-12 sm:translate-y-16 md:translate-y-20">
+            <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] shadow-[0_50px_120px_-20px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.05)]">
               {/* Inner highlight — glass UI depth */}
               <div className="pointer-events-none absolute inset-x-0 top-0 h-40 rounded-t-2xl bg-gradient-to-b from-white/[0.12] to-transparent" aria-hidden />
               <div className="relative">
