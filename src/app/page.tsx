@@ -55,33 +55,46 @@ export default function HomePage() {
         <div className="pointer-events-none absolute inset-0">
           {/* Vignette — darken edges, defines the "room" boundary */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.06)_0%,rgba(0,0,0,0)_45%,rgba(0,0,0,0.55)_100%)]" aria-hidden />
-          {/* Floor plane — large blurred gradient, not a band */}
-          <div className="absolute inset-x-0 bottom-0 h-[70vh] bg-gradient-to-t from-white/[0.10] via-white/[0.05] to-transparent blur-3xl" aria-hidden />
+          {/* Floor haze — atmospheric fog, not a band */}
+          <div className="absolute inset-x-0 bottom-0 h-[68vh] bg-gradient-to-t from-white/[0.10] via-white/[0.04] to-transparent blur-3xl" aria-hidden />
         </div>
 
-        <div className="container-xl relative z-10 flex flex-1 flex-col items-center justify-center pb-8 pt-16 sm:pt-24">
-          {/* Copy block — centered like Linear */}
-          <div className="mx-auto max-w-4xl text-center">
-            <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+        <div className="container-xl relative z-10 flex flex-1 flex-col justify-center px-6 pb-24 pt-20 sm:px-10 sm:pt-28 md:px-14">
+          {/* Copy block — editorial, left-aligned, more breathing room */}
+          <div className="max-w-3xl">
+            <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl">
               Your clients are already being ranked by AI.
             </h1>
 
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/60 sm:text-lg">
+            <p className="mt-8 max-w-xl text-base leading-relaxed text-white/60 sm:text-lg">
               Answer engines are shaping brand perception in real time.
               VRTL Score measures where your clients appear — and where they&apos;re invisible.
             </p>
+
+            {/* Single primary CTA + optional text link */}
+            <div className="mt-10 flex flex-col items-start gap-3">
+              <Link
+                href="/signup"
+                className="rounded-2xl bg-accent px-8 py-3.5 text-base font-semibold text-white shadow-lg transition hover:bg-accent-2"
+              >
+                Start Free Trial
+              </Link>
+              <Link href="#platform" className="text-sm text-white/50 transition hover:text-white/80">
+                See Platform →
+              </Link>
+            </div>
           </div>
 
-          {/* Product preview card — huge, centered, overlaps fold like Linear */}
-          <div className="relative z-10 mx-auto mt-14 w-full max-w-5xl translate-y-10 sm:translate-y-16 md:translate-y-20">
-            <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#111113] shadow-[0_40px_140px_rgba(0,0,0,0.6)]">
-              {/* Top inner highlight */}
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-40 rounded-t-2xl bg-gradient-to-b from-white/[0.06] to-transparent" aria-hidden />
+          {/* Product preview card — max-w-7xl, pulled up, overlaps fold aggressively */}
+          <div className="relative z-10 mx-auto mt-12 w-full max-w-7xl translate-y-16 sm:translate-y-24">
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] shadow-[0_40px_140px_rgba(0,0,0,0.65)]">
+              {/* Inner highlight — glass UI depth */}
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-40 rounded-t-2xl bg-gradient-to-b from-white/[0.12] to-transparent" aria-hidden />
               <div className="relative">
                 {/* App chrome — sidebar + main content like Linear */}
                 <div className="flex min-h-[420px] md:min-h-[500px]">
                   {/* Sidebar */}
-                  <div className="hidden w-52 shrink-0 border-r border-white/[0.06] bg-white/[0.02] p-4 md:block">
+                  <div className="hidden w-52 shrink-0 border-r border-white/[0.08] bg-white/[0.04] p-4 md:block">
                     <div className="flex items-center gap-2">
                       <div className="h-5 w-5 rounded bg-accent/30" />
                       <div className="h-3 w-20 rounded bg-white/20" />
@@ -124,7 +137,7 @@ export default function HomePage() {
                     </div>
                     {/* Metrics row */}
                     <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
-                      <div className="flex flex-col items-center rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+                      <div className="flex flex-col items-center rounded-xl border border-white/[0.08] bg-white/[0.05] p-4">
                         <div className="text-3xl font-bold text-white">78</div>
                         <div className="mt-1 text-[10px] text-white/40">Visibility Score</div>
                       </div>
@@ -133,7 +146,7 @@ export default function HomePage() {
                         { label: "Top Position", value: "45%" },
                         { label: "Citation Rate", value: "38%" },
                       ].map((m) => (
-                        <div key={m.label} className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-3">
+                        <div key={m.label} className="rounded-xl border border-white/[0.08] bg-white/[0.05] p-3">
                           <div className="text-[10px] text-white/30">{m.label}</div>
                           <div className="mt-1 text-lg font-bold text-white/90">{m.value}</div>
                           <div className="mt-0.5 text-[10px] font-medium text-accent">+5%</div>
@@ -142,7 +155,7 @@ export default function HomePage() {
                     </div>
                     {/* Chart + competitor list */}
                     <div className="mt-4 grid gap-3 md:grid-cols-5">
-                      <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 md:col-span-3">
+                      <div className="rounded-xl border border-white/[0.08] bg-white/[0.05] p-4 md:col-span-3">
                         <div className="text-[10px] uppercase tracking-wider text-white/30">Score Over Time</div>
                         <div className="mt-3 flex h-28 items-end gap-1.5">
                           {[35, 42, 38, 55, 52, 60, 58, 72, 68, 75, 78].map((h, i) => (
@@ -150,7 +163,7 @@ export default function HomePage() {
                           ))}
                         </div>
                       </div>
-                      <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 md:col-span-2">
+                      <div className="rounded-xl border border-white/[0.08] bg-white/[0.05] p-4 md:col-span-2">
                         <div className="text-[10px] uppercase tracking-wider text-white/30">Competitors</div>
                         <div className="mt-3 space-y-2.5">
                           {[
@@ -180,7 +193,7 @@ export default function HomePage() {
           THE SHIFT — narrative arc (Shift → Problem → Solution)
           Negative margin overlaps platform preview card
       ═══════════════════════════════════════════════════════ */}
-      <section className="border-t border-white/5 bg-[#0A0A0A] pt-10 pb-20 md:pt-4 md:pb-28">
+      <section className="-mt-16 border-t border-white/5 bg-[#0A0A0A] pt-12 pb-20 md:-mt-32 md:pb-28">
         <div className="container-xl">
           {/* Part 1: The Shift */}
           <div className="mx-auto max-w-4xl text-center">

@@ -24,11 +24,11 @@ export function SiteNav() {
 
   return (
     <header className="sticky top-0 z-50">
-      {/* Background — fully dark on homepage, light elsewhere */}
+      {/* Background — transparent/dark on homepage so hero shows through */}
       <div
         className={cn(
           "absolute inset-0 border-b",
-          isHome ? "border-white/10 bg-black/80 backdrop-blur-md" : "border-border/40 bg-white/80 backdrop-blur-xl"
+          isHome ? "border-white/10 bg-transparent" : "border-border/40 bg-white/80 backdrop-blur-xl"
         )}
       />
 
@@ -74,9 +74,7 @@ export function SiteNav() {
             <Link
               className={cn(
                 "rounded-full px-5 py-2 text-sm font-medium transition-colors",
-                isHome
-                  ? "border border-white/20 text-white/90 hover:bg-white/10 hover:text-white"
-                  : "border border-border bg-surface-2 text-text hover:bg-bg-2 hover:border-border/80"
+                isHome ? "text-white/80 hover:text-white" : "border border-border bg-surface-2 text-text hover:bg-bg-2 hover:border-border/80"
               )}
               href="/login"
             >
@@ -85,9 +83,7 @@ export function SiteNav() {
             <Link
               className={cn(
                 "rounded-full px-5 py-2 text-sm font-medium transition-colors",
-                isHome
-                  ? "bg-white text-black hover:bg-white/90"
-                  : "text-text-3 hover:text-text"
+                isHome ? "bg-white text-black hover:bg-white/90" : "text-text-3 hover:text-text"
               )}
               href="/onboarding"
             >
@@ -99,9 +95,7 @@ export function SiteNav() {
           <button
             className={cn(
               "flex h-10 w-10 items-center justify-center rounded-full transition-all md:hidden",
-              isHome
-                ? "border border-white/20 bg-white/10 text-white hover:bg-white/15"
-                : "border border-border bg-white text-text hover:bg-surface-2"
+              isHome ? "text-white/80 hover:text-white" : "border border-border bg-white text-text hover:bg-surface-2"
             )}
             onClick={() => setMobileOpen(!mobileOpen)}
             type="button"
@@ -147,12 +141,10 @@ export function SiteNav() {
             </div>
             <hr className={cn("my-3", isHome ? "border-white/15" : "border-border")} />
             <div className="flex flex-col gap-2">
-              <Link
+                <Link
                 className={cn(
                   "rounded-xl px-4 py-3.5 text-center text-base font-medium transition-all",
-                  isHome
-                    ? "border border-white/25 bg-white/10 text-white hover:bg-white/15"
-                    : "border border-border bg-surface-2 text-text hover:bg-bg-2"
+                  isHome ? "text-white/80 hover:text-white" : "border border-border bg-surface-2 text-text hover:bg-bg-2"
                 )}
                 href="/login"
                 onClick={() => setMobileOpen(false)}
@@ -162,7 +154,7 @@ export function SiteNav() {
               <Link
                 className={cn(
                   "rounded-xl px-4 py-3.5 text-center text-base font-medium transition-all",
-                  isHome ? "text-white/80 hover:text-white" : "text-text-3 hover:text-text"
+                  isHome ? "bg-white text-black hover:bg-white/90" : "text-text-3 hover:text-text"
                 )}
                 href="/onboarding"
                 onClick={() => setMobileOpen(false)}
