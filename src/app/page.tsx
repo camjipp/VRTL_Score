@@ -51,9 +51,18 @@ export default function HomePage() {
           HERO — Linear-style dark + bottom fade
       ═══════════════════════════════════════════════════════ */}
       <section className="relative flex min-h-[90vh] flex-col overflow-visible bg-black sm:min-h-[95vh]">
-        {/* Room depth — Linear-style: subtle radial glow, no heavy vignette */}
+        {/* Room depth — Linear-style: vignette + floor haze */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-x-0 bottom-0 h-[70vh] bg-gradient-to-t from-white/[0.06] via-white/[0.02] to-transparent blur-3xl" aria-hidden />
+          {/* Radial vignette — subtle darkening at edges */}
+          <div
+            className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.05)_0%,rgba(0,0,0,0)_45%,rgba(0,0,0,0.65)_100%)]"
+            aria-hidden
+          />
+          {/* Bottom floor haze */}
+          <div
+            className="absolute inset-x-0 bottom-0 h-[70vh] bg-gradient-to-t from-white/[0.06] via-white/[0.02] to-transparent blur-3xl"
+            aria-hidden
+          />
         </div>
 
         <div className="container-xl relative z-10 flex flex-1 flex-col justify-start px-6 pb-28 pt-24 sm:px-10 sm:pt-28 md:px-14">
@@ -68,19 +77,10 @@ export default function HomePage() {
               VRTL Score measures where your clients appear — and where they&apos;re invisible.
             </p>
 
-            {/* Single primary CTA — Linear minimalism */}
-            <div className="mt-6">
-              <Link
-                href="/signup"
-                className="inline-block rounded-2xl bg-white px-8 py-3.5 text-base font-semibold text-black shadow-lg transition hover:bg-white/90"
-              >
-                Start Free Trial
-              </Link>
-            </div>
           </div>
 
           {/* Product preview card — dominant visual anchor, pulled up tight like Linear */}
-          <div className="relative z-10 mx-auto mt-6 w-full max-w-7xl translate-y-6 sm:translate-y-10 md:translate-y-12">
+          <div className="relative z-10 mx-auto mt-10 w-full max-w-7xl translate-y-6 sm:translate-y-10 md:translate-y-12">
             <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] shadow-[0_50px_120px_-20px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.05)]">
               {/* Inner highlight — glass UI depth */}
               <div className="pointer-events-none absolute inset-x-0 top-0 h-40 rounded-t-2xl bg-gradient-to-b from-white/[0.12] to-transparent" aria-hidden />
