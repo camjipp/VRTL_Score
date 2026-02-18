@@ -31,11 +31,13 @@ export function SiteNav() {
   // Treat null/undefined as home to avoid white flash before pathname hydrates
   const isHome = pathname === "/" || pathname === null || pathname === undefined;
 
-  // On homepage: transparent at top, subtle dark bg when scrolled (readable over light sections)
-  const homeBg = scrolled ? "border-white/10 bg-black/80 backdrop-blur-md" : "border-white/[0.06] bg-transparent";
+  // On homepage: dark at top (avoids white flash from body); darker when scrolled
+  const homeBg = scrolled
+    ? "border-white/10 bg-black/80 backdrop-blur-md"
+    : "border-white/[0.06] bg-black";
 
   return (
-    <header className="sticky top-0 z-50">
+    <header className={cn("sticky top-0 z-50", isHome && "bg-black")}>
       {/* Background — transparent on homepage (Linear-style); solid when scrolled or on other pages */}
       <div
         className={cn(

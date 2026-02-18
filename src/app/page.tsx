@@ -56,7 +56,7 @@ export default function HomePage() {
           <div className="absolute inset-x-0 bottom-0 h-[70vh] bg-gradient-to-t from-white/[0.06] via-white/[0.02] to-transparent blur-3xl" aria-hidden />
         </div>
 
-        <div className="container-xl relative z-10 flex flex-1 flex-col justify-start px-6 pb-24 pt-24 sm:px-10 sm:pt-28 md:px-14">
+        <div className="container-xl relative z-10 flex flex-1 flex-col justify-start px-6 pb-28 pt-24 sm:px-10 sm:pt-28 md:px-14">
           {/* Copy block — Linear-tight: headline + sub + CTA, minimal vertical space */}
           <div className="max-w-3xl">
             <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl">
@@ -80,7 +80,7 @@ export default function HomePage() {
           </div>
 
           {/* Product preview card — dominant visual anchor, pulled up tight like Linear */}
-          <div className="relative z-10 mx-auto mt-6 w-full max-w-7xl translate-y-12 sm:translate-y-16 md:translate-y-20">
+          <div className="relative z-10 mx-auto mt-6 w-full max-w-7xl translate-y-6 sm:translate-y-10 md:translate-y-12">
             <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] shadow-[0_50px_120px_-20px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.05)]">
               {/* Inner highlight — glass UI depth */}
               <div className="pointer-events-none absolute inset-x-0 top-0 h-40 rounded-t-2xl bg-gradient-to-b from-white/[0.12] to-transparent" aria-hidden />
@@ -187,7 +187,7 @@ export default function HomePage() {
           THE SHIFT — narrative arc (Shift → Problem → Solution)
           Negative margin overlaps platform preview card
       ═══════════════════════════════════════════════════════ */}
-      <section className="-mt-12 border-t border-white/5 bg-[#0A0A0A] pt-12 pb-20 md:-mt-36 md:pb-28">
+      <section className="-mt-6 border-t border-white/5 bg-[#0A0A0A] pt-12 pb-20 md:-mt-20 md:pb-28">
         <div className="container-xl">
           {/* Part 1: The Shift */}
           <div className="mx-auto max-w-4xl text-center">
