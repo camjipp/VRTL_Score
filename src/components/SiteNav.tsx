@@ -24,11 +24,11 @@ export function SiteNav() {
 
   return (
     <header className="sticky top-0 z-50">
-      {/* Background — dark/transparent on homepage, light elsewhere */}
+      {/* Background — fully dark on homepage, light elsewhere */}
       <div
         className={cn(
-          "absolute inset-0 border-b backdrop-blur-xl",
-          isHome ? "border-white/10 bg-transparent" : "border-border/40 bg-white/80"
+          "absolute inset-0 border-b",
+          isHome ? "border-white/10 bg-black/80 backdrop-blur-md" : "border-border/40 bg-white/80 backdrop-blur-xl"
         )}
       />
 
@@ -44,24 +44,22 @@ export function SiteNav() {
             />
           </Link>
 
-          {/* Desktop nav — centered pill */}
+          {/* Desktop nav — no pill on homepage (Linear-style) */}
           <div className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:block">
-            <div
-              className={cn(
-                "flex items-center gap-1 rounded-full px-1.5 py-1",
-                isHome
-                  ? "border border-white/20 bg-white/5"
-                  : "border border-border/60 bg-surface-2/60"
-              )}
-            >
+          <div
+            className={cn(
+              "flex items-center",
+              isHome ? "gap-6" : "gap-1 rounded-full border border-border/60 bg-surface-2/60 px-1.5 py-1"
+            )}
+          >
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   className={cn(
-                    "rounded-full px-4 py-1.5 text-sm font-medium transition-all",
+                    "text-sm font-medium transition-all",
                     isHome
-                      ? "text-white/80 hover:bg-white/10 hover:text-white"
-                      : "text-text-2 hover:bg-white hover:text-text hover:shadow-sm"
+                      ? "rounded-full px-4 py-1.5 text-white/80 hover:text-white"
+                      : "rounded-full px-4 py-1.5 text-text-2 hover:bg-white hover:text-text hover:shadow-sm"
                   )}
                   href={link.href}
                 >
@@ -77,7 +75,7 @@ export function SiteNav() {
               className={cn(
                 "rounded-full px-5 py-2 text-sm font-medium transition-colors",
                 isHome
-                  ? "border border-white/25 bg-white/10 text-white hover:bg-white/15"
+                  ? "border border-white/20 text-white/90 hover:bg-white/10 hover:text-white"
                   : "border border-border bg-surface-2 text-text hover:bg-bg-2 hover:border-border/80"
               )}
               href="/login"
@@ -86,8 +84,10 @@ export function SiteNav() {
             </Link>
             <Link
               className={cn(
-                "text-sm font-medium transition-colors",
-                isHome ? "text-white/80 hover:text-white" : "text-text-3 hover:text-text"
+                "rounded-full px-5 py-2 text-sm font-medium transition-colors",
+                isHome
+                  ? "bg-white text-black hover:bg-white/90"
+                  : "text-text-3 hover:text-text"
               )}
               href="/onboarding"
             >

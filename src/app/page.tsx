@@ -42,16 +42,6 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   AI MODEL ICONS (hero credibility strip)
-───────────────────────────────────────────────────────────────*/
-const AI_PROVIDERS = [
-  { name: "OpenAI", icon: "/ai/icons8-chatgpt.svg" },
-  { name: "Anthropic", icon: "/ai/icons8-claude.svg" },
-  { name: "Google", icon: "/ai/gemini.png" },
-  { name: "Perplexity", icon: "/ai/perplexity.png" },
-];
-
-/* ─────────────────────────────────────────────────────────────
    HOMEPAGE
 ───────────────────────────────────────────────────────────────*/
 export default function HomePage() {
@@ -60,7 +50,7 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════
           HERO — Linear-style dark + bottom fade
       ═══════════════════════════════════════════════════════ */}
-      <section className="relative flex min-h-[70vh] flex-col overflow-visible bg-black sm:min-h-[90vh]">
+      <section className="relative flex min-h-[85vh] flex-col overflow-visible bg-black sm:min-h-[95vh]">
         {/* Room depth layers — pointer-events-none, behind content */}
         <div className="pointer-events-none absolute inset-0">
           {/* Vignette — darken edges, defines the "room" boundary */}
@@ -69,7 +59,7 @@ export default function HomePage() {
           <div className="absolute inset-x-0 bottom-0 h-[70vh] bg-gradient-to-t from-white/[0.10] via-white/[0.05] to-transparent blur-3xl" aria-hidden />
         </div>
 
-        <div className="container-xl relative z-10 flex flex-1 flex-col justify-center pb-14 pt-16 sm:pb-20 sm:pt-24">
+        <div className="container-xl relative z-10 flex flex-1 flex-col justify-center pb-32 pt-16 sm:pb-40 sm:pt-24">
           <div className="mx-auto max-w-3xl text-center lg:mx-0 lg:mr-auto lg:text-left">
             {/* Headline — largest text, first thing eye hits */}
             <h1 className="mx-auto max-w-2xl text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl lg:mx-0">
@@ -86,33 +76,13 @@ export default function HomePage() {
             {/* Supporting line — shorter, stronger */}
             <p className="mt-5 text-sm text-white/50">Measured across the AI ecosystem.</p>
 
-            {/* AI logos — grayscale, structural proof */}
-            <div className="mx-auto mt-10 flex items-center justify-center gap-3 sm:gap-4 lg:mx-0 lg:justify-start">
-              {AI_PROVIDERS.map((p) => (
-                <span
-                  key={p.name}
-                  className="flex h-12 w-12 shrink-0 items-center justify-center opacity-75 grayscale invert sm:h-14 sm:w-14"
-                  title={p.name}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img alt="" className="h-full w-full object-contain" src={p.icon} />
-                </span>
-              ))}
-            </div>
-
-            {/* CTAs — primary dominates */}
-            <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-5 lg:justify-start">
+            {/* CTAs — single primary, Linear-style */}
+            <div className="mt-12 flex flex-col items-center lg:items-start">
               <Link
                 href="/signup"
                 className="w-full rounded-2xl bg-accent px-10 py-4 text-center text-base font-semibold text-white shadow-lg shadow-black/20 transition hover:bg-accent-2 sm:w-auto"
               >
                 Start Free Trial
-              </Link>
-              <Link
-                href="#platform"
-                className="w-full rounded-2xl border border-white/20 bg-transparent px-10 py-4 text-center text-base font-medium text-white/90 transition hover:bg-white/10 sm:w-auto"
-              >
-                See Platform
               </Link>
             </div>
 
