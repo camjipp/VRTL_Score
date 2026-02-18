@@ -59,82 +59,113 @@ export default function HomePage() {
           <div className="absolute inset-x-0 bottom-0 h-[70vh] bg-gradient-to-t from-white/[0.10] via-white/[0.05] to-transparent blur-3xl" aria-hidden />
         </div>
 
-        <div className="container-xl relative z-10 flex flex-1 flex-col justify-center pb-32 pt-16 sm:pb-40 sm:pt-24">
-          <div className="mx-auto max-w-3xl text-center lg:mx-0 lg:mr-auto lg:text-left">
-            {/* Headline — largest text, first thing eye hits */}
-            <h1 className="mx-auto max-w-2xl text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl lg:mx-0">
+        <div className="container-xl relative z-10 flex flex-1 flex-col items-center justify-center pb-8 pt-16 sm:pt-24">
+          {/* Copy block — centered like Linear */}
+          <div className="mx-auto max-w-4xl text-center">
+            <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
               Your clients are already being ranked by AI.
             </h1>
 
-            {/* Subheadline — 2 lines, clean spacing */}
-            <p className="mx-auto mt-8 max-w-xl text-lg leading-relaxed text-white/80 sm:text-xl lg:mx-0">
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/60 sm:text-lg">
               Answer engines are shaping brand perception in real time.
-              <br />
               VRTL Score measures where your clients appear — and where they&apos;re invisible.
             </p>
+          </div>
 
-            {/* Supporting line — shorter, stronger */}
-            <p className="mt-5 text-sm text-white/50">Measured across the AI ecosystem.</p>
-
-            {/* CTAs — single primary, Linear-style */}
-            <div className="mt-12 flex flex-col items-center lg:items-start">
-              <Link
-                href="/signup"
-                className="w-full rounded-2xl bg-accent px-10 py-4 text-center text-base font-semibold text-white shadow-lg shadow-black/20 transition hover:bg-accent-2 sm:w-auto"
-              >
-                Start Free Trial
-              </Link>
-            </div>
-
-            {/* Platform preview card — sits on the floor, extends into next section */}
-            <div className="relative z-10 mx-auto mt-8 w-full max-w-7xl translate-y-16 sm:translate-y-24">
-              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] shadow-[0_40px_140px_rgba(0,0,0,0.65)]">
-                {/* Top inner highlight */}
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-32 rounded-t-3xl bg-gradient-to-b from-white/[0.12] to-transparent" aria-hidden />
-                <div className="relative p-6 md:p-8">
-                  {/* Pill label */}
-                  <span className="inline-block rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white/70">
-                    Platform preview
-                  </span>
-                  {/* Dashboard skeleton — readable as UI */}
-                  <div className="mt-6 flex flex-col gap-6 md:flex-row">
-                    {/* Left: score ring */}
-                    <div className="flex shrink-0 flex-col items-center md:w-48">
-                      <div className="h-24 w-24 animate-pulse rounded-full border-4 border-white/15 bg-white/10" />
-                      <div className="mt-3 text-xs font-medium text-white/60">AI Visibility Score</div>
-                      <div className="mt-1 h-3 w-20 animate-pulse rounded bg-white/15" />
+          {/* Product preview card — huge, centered, overlaps fold like Linear */}
+          <div className="relative z-10 mx-auto mt-14 w-full max-w-5xl translate-y-10 sm:translate-y-16 md:translate-y-20">
+            <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#111113] shadow-[0_40px_140px_rgba(0,0,0,0.6)]">
+              {/* Top inner highlight */}
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-40 rounded-t-2xl bg-gradient-to-b from-white/[0.06] to-transparent" aria-hidden />
+              <div className="relative">
+                {/* App chrome — sidebar + main content like Linear */}
+                <div className="flex min-h-[420px] md:min-h-[500px]">
+                  {/* Sidebar */}
+                  <div className="hidden w-52 shrink-0 border-r border-white/[0.06] bg-white/[0.02] p-4 md:block">
+                    <div className="flex items-center gap-2">
+                      <div className="h-5 w-5 rounded bg-accent/30" />
+                      <div className="h-3 w-20 rounded bg-white/20" />
                     </div>
-                    {/* Right: 3 metric tiles */}
-                    <div className="flex flex-1 flex-wrap gap-4">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="flex-1 min-w-[120px] rounded-xl border border-white/15 bg-white/10 p-4">
-                          <div className="h-3 w-20 animate-pulse rounded bg-white/20" />
-                          <div className="mt-3 h-8 w-14 animate-pulse rounded bg-white/25" />
-                          <div className="mt-2 h-3 w-12 animate-pulse rounded bg-white/15" />
+                    <div className="mt-6 space-y-1">
+                      {["Dashboard", "Clients", "Snapshots", "Reports", "Settings"].map((label) => (
+                        <div
+                          key={label}
+                          className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs ${label === "Dashboard" ? "bg-white/10 text-white/90" : "text-white/40"}`}
+                        >
+                          <div className={`h-3.5 w-3.5 rounded ${label === "Dashboard" ? "bg-white/30" : "bg-white/10"}`} />
+                          {label}
                         </div>
                       ))}
                     </div>
-                  </div>
-                  {/* Bottom: chart + competitor list */}
-                  <div className="mt-6 grid gap-6 md:grid-cols-2">
-                    <div className="rounded-xl border border-white/15 bg-white/10 p-4">
-                      <div className="h-3 w-24 animate-pulse rounded bg-white/20" />
-                      <div className="mt-4 flex h-24 items-end gap-2">
-                        {[40, 65, 45, 80, 55, 70].map((h, i) => (
-                          <div key={i} className="flex-1 animate-pulse rounded-t bg-white/20" style={{ height: `${h}%` }} />
+                    <div className="mt-8 border-t border-white/[0.06] pt-4">
+                      <div className="text-[10px] font-medium uppercase tracking-wider text-white/25">Recent Clients</div>
+                      <div className="mt-3 space-y-2">
+                        {["Acme Corp", "BluePeak Digital", "Nexus AI"].map((c) => (
+                          <div key={c} className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-accent/40" />
+                            <span className="text-xs text-white/40">{c}</span>
+                          </div>
                         ))}
                       </div>
                     </div>
-                    <div className="rounded-xl border border-white/15 bg-white/10 p-4">
-                      <div className="h-3 w-28 animate-pulse rounded bg-white/20" />
-                      <div className="mt-4 space-y-2">
-                        {[1, 2, 3, 4].map((i) => (
-                          <div key={i} className="flex items-center gap-3">
-                            <div className="h-2 w-2 animate-pulse rounded-full bg-white/20" />
-                            <div className="h-3 flex-1 animate-pulse rounded bg-white/20" />
-                            <div className="h-3 w-8 animate-pulse rounded bg-white/15" />
-                          </div>
-                        ))}
+                  </div>
+                  {/* Main content */}
+                  <div className="flex-1 p-5 md:p-6">
+                    {/* Top bar */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-[10px] uppercase tracking-wider text-white/30">Client Overview</div>
+                        <div className="mt-1 text-sm font-semibold text-white/90">Acme Digital Agency</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="rounded-md bg-accent/20 px-2 py-1 text-[10px] font-medium text-accent">Score ↑</span>
+                        <span className="rounded-md bg-white/5 px-2 py-1 text-[10px] text-white/40">2 days ago</span>
+                      </div>
+                    </div>
+                    {/* Metrics row */}
+                    <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
+                      <div className="flex flex-col items-center rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+                        <div className="text-3xl font-bold text-white">78</div>
+                        <div className="mt-1 text-[10px] text-white/40">Visibility Score</div>
+                      </div>
+                      {[
+                        { label: "Mention Rate", value: "72%" },
+                        { label: "Top Position", value: "45%" },
+                        { label: "Citation Rate", value: "38%" },
+                      ].map((m) => (
+                        <div key={m.label} className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-3">
+                          <div className="text-[10px] text-white/30">{m.label}</div>
+                          <div className="mt-1 text-lg font-bold text-white/90">{m.value}</div>
+                          <div className="mt-0.5 text-[10px] font-medium text-accent">+5%</div>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Chart + competitor list */}
+                    <div className="mt-4 grid gap-3 md:grid-cols-5">
+                      <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 md:col-span-3">
+                        <div className="text-[10px] uppercase tracking-wider text-white/30">Score Over Time</div>
+                        <div className="mt-3 flex h-28 items-end gap-1.5">
+                          {[35, 42, 38, 55, 52, 60, 58, 72, 68, 75, 78].map((h, i) => (
+                            <div key={i} className="flex-1 rounded-t bg-accent/40" style={{ height: `${h}%` }} />
+                          ))}
+                        </div>
+                      </div>
+                      <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 md:col-span-2">
+                        <div className="text-[10px] uppercase tracking-wider text-white/30">Competitors</div>
+                        <div className="mt-3 space-y-2.5">
+                          {[
+                            { name: "Your Client", score: 78, top: true },
+                            { name: "Competitor A", score: 65, top: false },
+                            { name: "Competitor B", score: 52, top: false },
+                            { name: "Competitor C", score: 41, top: false },
+                          ].map((c) => (
+                            <div key={c.name} className="flex items-center gap-2">
+                              <div className={`h-1.5 w-1.5 rounded-full ${c.top ? "bg-accent" : "bg-white/20"}`} />
+                              <span className={`flex-1 text-xs ${c.top ? "text-white/80" : "text-white/40"}`}>{c.name}</span>
+                              <span className={`text-xs font-medium tabular-nums ${c.top ? "text-white/90" : "text-white/40"}`}>{c.score}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -149,7 +180,7 @@ export default function HomePage() {
           THE SHIFT — narrative arc (Shift → Problem → Solution)
           Negative margin overlaps platform preview card
       ═══════════════════════════════════════════════════════ */}
-      <section className="-mt-20 border-t border-white/5 bg-[#0A0A0A] py-20 md:-mt-40 md:py-28">
+      <section className="border-t border-white/5 bg-[#0A0A0A] pt-10 pb-20 md:pt-4 md:pb-28">
         <div className="container-xl">
           {/* Part 1: The Shift */}
           <div className="mx-auto max-w-4xl text-center">
