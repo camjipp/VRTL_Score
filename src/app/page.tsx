@@ -60,13 +60,13 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════
           HERO — Linear-style dark + bottom fade
       ═══════════════════════════════════════════════════════ */}
-      <section className="relative flex min-h-[70vh] flex-col overflow-hidden bg-black sm:min-h-[90vh]">
+      <section className="relative flex min-h-[70vh] flex-col overflow-visible bg-black sm:min-h-[90vh]">
         {/* Gradient overlays — pointer-events-none, behind content */}
         <div className="pointer-events-none absolute inset-0">
           {/* Vignette — darken edges subtly */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.06)_0%,rgba(0,0,0,0)_45%,rgba(0,0,0,0.55)_100%)]" aria-hidden />
-          {/* Bottom haze — soft, no banding */}
-          <div className="absolute inset-x-0 bottom-0 h-[65vh] bg-gradient-to-t from-white/[0.10] via-white/[0.05] to-transparent blur-2xl" aria-hidden />
+          {/* Floor overlay — Linear-style light gray haze, soft, no banding */}
+          <div className="absolute inset-x-0 bottom-0 h-[60vh] bg-gradient-to-t from-white/[0.10] via-white/[0.05] to-transparent blur-2xl" aria-hidden />
         </div>
 
         <div className="container-xl relative z-10 flex flex-1 flex-col justify-center pb-14 pt-16 sm:pb-20 sm:pt-24">
@@ -115,14 +115,71 @@ export default function HomePage() {
                 See Platform
               </Link>
             </div>
+
+            {/* Platform preview card — overlaps fold like Linear */}
+            <div className="relative z-10 mx-auto mt-16 w-full max-w-6xl translate-y-12 sm:translate-y-16">
+              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#0c0c0c] shadow-2xl shadow-black/50 ring-1 ring-white/5">
+                {/* Inner glow */}
+                <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-b from-white/[0.02] via-transparent to-transparent" aria-hidden />
+                <div className="relative p-6 md:p-8">
+                  {/* Pill label */}
+                  <span className="inline-block rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/60">
+                    Platform preview
+                  </span>
+                  {/* Dashboard skeleton */}
+                  <div className="mt-6 flex flex-col gap-6 md:flex-row">
+                    {/* Left: score ring */}
+                    <div className="flex shrink-0 flex-col items-center md:w-48">
+                      <div className="h-24 w-24 animate-pulse rounded-full border-4 border-white/10 bg-white/5" />
+                      <div className="mt-3 text-xs font-medium text-white/40">AI Visibility Score</div>
+                      <div className="mt-1 h-3 w-20 animate-pulse rounded bg-white/5" />
+                    </div>
+                    {/* Right: 3 metric tiles */}
+                    <div className="flex flex-1 flex-wrap gap-4">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex-1 min-w-[120px] rounded-xl border border-white/10 bg-white/5 p-4">
+                          <div className="h-3 w-16 animate-pulse rounded bg-white/10" />
+                          <div className="mt-3 h-8 w-12 animate-pulse rounded bg-white/15" />
+                          <div className="mt-2 h-3 w-10 animate-pulse rounded bg-white/5" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Bottom: chart + competitor list */}
+                  <div className="mt-6 grid gap-6 md:grid-cols-2">
+                    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                      <div className="h-3 w-24 animate-pulse rounded bg-white/10" />
+                      <div className="mt-4 flex h-24 items-end gap-2">
+                        {[40, 65, 45, 80, 55, 70].map((h, i) => (
+                          <div key={i} className="flex-1 animate-pulse rounded-t bg-white/10" style={{ height: `${h}%` }} />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                      <div className="h-3 w-28 animate-pulse rounded bg-white/10" />
+                      <div className="mt-4 space-y-2">
+                        {[1, 2, 3, 4].map((i) => (
+                          <div key={i} className="flex items-center gap-3">
+                            <div className="h-2 w-2 animate-pulse rounded-full bg-white/10" />
+                            <div className="h-3 flex-1 animate-pulse rounded bg-white/10" />
+                            <div className="h-3 w-8 animate-pulse rounded bg-white/5" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════
           THE SHIFT — narrative arc (Shift → Problem → Solution)
+          Negative margin overlaps platform preview card
       ═══════════════════════════════════════════════════════ */}
-      <section className="border-t border-white/5 bg-[#0A0A0A] py-20 md:py-28">
+      <section className="-mt-24 border-t border-white/5 bg-[#0A0A0A] py-20 md:-mt-32 md:py-28">
         <div className="container-xl">
           {/* Part 1: The Shift */}
           <div className="mx-auto max-w-4xl text-center">

@@ -24,22 +24,22 @@ export function SiteNav() {
 
   return (
     <header className="sticky top-0 z-50">
-      {/* Background — dark on homepage, light elsewhere */}
+      {/* Background — dark/transparent on homepage, light elsewhere */}
       <div
         className={cn(
           "absolute inset-0 border-b backdrop-blur-xl",
-          isHome ? "border-white/10 bg-black/60" : "border-border/40 bg-white/80"
+          isHome ? "border-white/10 bg-transparent" : "border-border/40 bg-white/80"
         )}
       />
 
       <div className="container-xl relative">
         <nav className="flex h-16 items-center justify-between md:h-18">
-          {/* Logo */}
+          {/* Logo — white on homepage */}
           <Link className="flex shrink-0 items-center transition-transform hover:scale-[1.02]" href="/">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               alt="VRTL Score"
-              className="h-11 w-auto md:h-[52px]"
+              className={cn("h-11 w-auto md:h-[52px]", isHome && "brightness-0 invert")}
               src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
             />
           </Link>
