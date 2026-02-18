@@ -61,12 +61,12 @@ export default function HomePage() {
           HERO — Linear-style dark + bottom fade
       ═══════════════════════════════════════════════════════ */}
       <section className="relative flex min-h-[70vh] flex-col overflow-visible bg-black sm:min-h-[90vh]">
-        {/* Gradient overlays — pointer-events-none, behind content */}
+        {/* Room depth layers — pointer-events-none, behind content */}
         <div className="pointer-events-none absolute inset-0">
-          {/* Vignette — darken edges subtly */}
+          {/* Vignette — darken edges, defines the "room" boundary */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.06)_0%,rgba(0,0,0,0)_45%,rgba(0,0,0,0.55)_100%)]" aria-hidden />
-          {/* Floor overlay — Linear-style light gray haze, soft, no banding */}
-          <div className="absolute inset-x-0 bottom-0 h-[60vh] bg-gradient-to-t from-white/[0.10] via-white/[0.05] to-transparent blur-2xl" aria-hidden />
+          {/* Floor plane — light gray haze receding into dark, the "floor" the card sits on */}
+          <div className="absolute inset-x-0 bottom-0 h-[65vh] bg-gradient-to-t from-white/[0.14] via-white/[0.07] to-transparent blur-2xl" aria-hidden />
         </div>
 
         <div className="container-xl relative z-10 flex flex-1 flex-col justify-center pb-14 pt-16 sm:pb-20 sm:pt-24">
@@ -116,9 +116,9 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* Platform preview card — overlaps fold like Linear */}
+            {/* Platform preview card — sits in front of the "room", on the floor */}
             <div className="relative z-10 mx-auto mt-16 w-full max-w-6xl translate-y-12 sm:translate-y-16">
-              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#0c0c0c] shadow-2xl shadow-black/50 ring-1 ring-white/5">
+              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#0a0a0a] shadow-[0_25px_80px_-12px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.06)] ring-1 ring-white/5">
                 {/* Inner glow */}
                 <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-b from-white/[0.02] via-transparent to-transparent" aria-hidden />
                 <div className="relative p-6 md:p-8">
