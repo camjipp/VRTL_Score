@@ -60,13 +60,13 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════
           HERO — Linear-style dark + bottom fade
       ═══════════════════════════════════════════════════════ */}
-      <section className="relative flex min-h-[70vh] flex-col overflow-hidden bg-[#0A0A0A] sm:min-h-[90vh]">
+      <section className="relative flex min-h-[70vh] flex-col overflow-hidden bg-black sm:min-h-[90vh]">
         {/* Gradient overlays — pointer-events-none, behind content */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-b from-black via-black/90 to-black" />
-          <div className="absolute inset-x-0 bottom-0 h-[45vh] bg-gradient-to-t from-white/[0.15] via-white/[0.05] to-transparent" />
-          {/* Subtle vignette — edges darker than center */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,transparent_0%,rgba(0,0,0,0.25)_100%)]" aria-hidden />
+          {/* Vignette — darken edges subtly */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.06)_0%,rgba(0,0,0,0)_45%,rgba(0,0,0,0.55)_100%)]" aria-hidden />
+          {/* Bottom haze — soft, no banding */}
+          <div className="absolute inset-x-0 bottom-0 h-[65vh] bg-gradient-to-t from-white/[0.10] via-white/[0.05] to-transparent blur-2xl" aria-hidden />
         </div>
 
         <div className="container-xl relative z-10 flex flex-1 flex-col justify-center pb-14 pt-16 sm:pb-20 sm:pt-24">

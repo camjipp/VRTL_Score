@@ -20,30 +20,49 @@ export function SiteNav() {
   // Hide marketing nav inside the app; the app has its own shell.
   if (pathname.startsWith("/app")) return null;
 
+  const isHome = pathname === "/";
+
   return (
     <header className="sticky top-0 z-50">
-      {/* Frosted glass background */}
-      <div className="absolute inset-0 border-b border-border/40 bg-white/80 backdrop-blur-xl" />
+      {/* Background — dark on homepage, light elsewhere */}
+      <div
+        className={cn(
+          "absolute inset-0 border-b backdrop-blur-xl",
+          isHome ? "border-white/10 bg-black/60" : "border-border/40 bg-white/80"
+        )}
+      />
 
       <div className="container-xl relative">
         <nav className="flex h-16 items-center justify-between md:h-18">
           {/* Logo */}
           <Link className="flex shrink-0 items-center transition-transform hover:scale-[1.02]" href="/">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
-              alt="VRTL Score" 
-              className="h-11 w-auto md:h-[52px]" 
-              src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png" 
+            <img
+              alt="VRTL Score"
+              className="h-11 w-auto md:h-[52px]"
+              src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
             />
           </Link>
 
           {/* Desktop nav — centered pill */}
           <div className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:block">
-            <div className="flex items-center gap-1 rounded-full border border-border/60 bg-surface-2/60 px-1.5 py-1">
+            <div
+              className={cn(
+                "flex items-center gap-1 rounded-full px-1.5 py-1",
+                isHome
+                  ? "border border-white/20 bg-white/5"
+                  : "border border-border/60 bg-surface-2/60"
+              )}
+            >
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
-                  className="rounded-full px-4 py-1.5 text-sm font-medium text-text-2 transition-all hover:bg-white hover:text-text hover:shadow-sm"
+                  className={cn(
+                    "rounded-full px-4 py-1.5 text-sm font-medium transition-all",
+                    isHome
+                      ? "text-white/80 hover:bg-white/10 hover:text-white"
+                      : "text-text-2 hover:bg-white hover:text-text hover:shadow-sm"
+                  )}
                   href={link.href}
                 >
                   {link.label}
@@ -52,16 +71,24 @@ export function SiteNav() {
             </div>
           </div>
 
-          {/* Desktop CTA — Login = subtle filled neutral (real software), Sign up = link */}
+          {/* Desktop CTA */}
           <div className="hidden shrink-0 items-center gap-3 md:flex">
             <Link
-              className="rounded-full border border-border bg-surface-2 px-5 py-2 text-sm font-medium text-text transition-colors hover:bg-bg-2 hover:border-border/80"
+              className={cn(
+                "rounded-full px-5 py-2 text-sm font-medium transition-colors",
+                isHome
+                  ? "border border-white/25 bg-white/10 text-white hover:bg-white/15"
+                  : "border border-border bg-surface-2 text-text hover:bg-bg-2 hover:border-border/80"
+              )}
               href="/login"
             >
               Log in
             </Link>
             <Link
-              className="text-sm font-medium text-text-3 transition-colors hover:text-text"
+              className={cn(
+                "text-sm font-medium transition-colors",
+                isHome ? "text-white/80 hover:text-white" : "text-text-3 hover:text-text"
+              )}
               href="/onboarding"
             >
               Sign up
@@ -70,7 +97,12 @@ export function SiteNav() {
 
           {/* Mobile menu button */}
           <button
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-text transition-all hover:bg-surface-2 md:hidden"
+            className={cn(
+              "flex h-10 w-10 items-center justify-center rounded-full transition-all md:hidden",
+              isHome
+                ? "border border-white/20 bg-white/10 text-white hover:bg-white/15"
+                : "border border-border bg-white text-text hover:bg-surface-2"
+            )}
             onClick={() => setMobileOpen(!mobileOpen)}
             type="button"
             aria-label="Toggle menu"
@@ -90,8 +122,9 @@ export function SiteNav() {
         {/* Mobile menu */}
         <div
           className={cn(
-            "absolute left-4 right-4 top-full overflow-hidden rounded-2xl border border-border bg-surface shadow-xl transition-all duration-300 ease-out md:hidden",
-            mobileOpen ? "mt-2 max-h-96 opacity-100" : "max-h-0 opacity-0 border-0"
+            "absolute left-4 right-4 top-full overflow-hidden rounded-2xl shadow-xl transition-all duration-300 ease-out md:hidden",
+            mobileOpen ? "mt-2 max-h-96 opacity-100" : "max-h-0 opacity-0 border-0",
+            isHome ? "border border-white/20 bg-black/95 backdrop-blur-xl" : "border border-border bg-surface"
           )}
         >
           <div className="p-4">
@@ -99,7 +132,12 @@ export function SiteNav() {
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
-                  className="rounded-xl px-4 py-3.5 text-base font-medium text-text-2 transition-all hover:bg-surface-2 hover:text-text"
+                  className={cn(
+                    "rounded-xl px-4 py-3.5 text-base font-medium transition-all",
+                    isHome
+                      ? "text-white/80 hover:bg-white/10 hover:text-white"
+                      : "text-text-2 hover:bg-surface-2 hover:text-text"
+                  )}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
                 >
@@ -107,17 +145,25 @@ export function SiteNav() {
                 </Link>
               ))}
             </div>
-            <hr className="my-3 border-border" />
+            <hr className={cn("my-3", isHome ? "border-white/15" : "border-border")} />
             <div className="flex flex-col gap-2">
               <Link
-                className="rounded-xl border border-border bg-surface-2 px-4 py-3.5 text-center text-base font-medium text-text transition-all hover:bg-bg-2"
+                className={cn(
+                  "rounded-xl px-4 py-3.5 text-center text-base font-medium transition-all",
+                  isHome
+                    ? "border border-white/25 bg-white/10 text-white hover:bg-white/15"
+                    : "border border-border bg-surface-2 text-text hover:bg-bg-2"
+                )}
                 href="/login"
                 onClick={() => setMobileOpen(false)}
               >
                 Log in
               </Link>
               <Link
-                className="rounded-xl px-4 py-3.5 text-center text-base font-medium text-text-3 transition-all hover:text-text"
+                className={cn(
+                  "rounded-xl px-4 py-3.5 text-center text-base font-medium transition-all",
+                  isHome ? "text-white/80 hover:text-white" : "text-text-3 hover:text-text"
+                )}
                 href="/onboarding"
                 onClick={() => setMobileOpen(false)}
               >
