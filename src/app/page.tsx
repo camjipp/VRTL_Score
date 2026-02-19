@@ -8,18 +8,36 @@ import { Footer } from "@/components/Footer";
 /* ─────────────────────────────────────────────────────────────
    FAQ ACCORDION
 ───────────────────────────────────────────────────────────────*/
-function FAQItem({ question, answer }: { question: string; answer: string }) {
+function FAQItem({
+  question,
+  answer,
+  dark = false,
+}: {
+  question: string;
+  answer: string;
+  dark?: boolean;
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="border-b border-border">
+    <div className={dark ? "border-b border-white/10" : "border-b border-border"}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex w-full items-center justify-between py-5 text-left"
       >
-        <span className="text-lg font-semibold text-text">{question}</span>
+        <span
+          className={
+            dark
+              ? "text-lg font-semibold text-white"
+              : "text-lg font-semibold text-text"
+          }
+        >
+          {question}
+        </span>
         <svg
-          className={`h-5 w-5 shrink-0 text-text-3 transition-transform ${isOpen ? "rotate-180" : ""}`}
+          className={`h-5 w-5 shrink-0 transition-transform ${
+            dark ? "text-white/50" : "text-text-3"
+          } ${isOpen ? "rotate-180" : ""}`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -34,7 +52,15 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
         }`}
       >
         <div className="overflow-hidden">
-          <p className="text-text-2 leading-relaxed">{answer}</p>
+          <p
+            className={
+              dark
+                ? "text-white/70 leading-relaxed"
+                : "text-text-2 leading-relaxed"
+            }
+          >
+            {answer}
+          </p>
         </div>
       </div>
     </div>
@@ -279,82 +305,6 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          AI VISIBILITY IS MEASURABLE — four rows
-      ═══════════════════════════════════════════════════════ */}
-      <section className="bg-black py-24 md:py-28">
-        <div className="mx-auto max-w-7xl px-6 sm:px-10 md:px-14">
-          <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl md:text-5xl">
-            AI visibility is measurable.
-          </h2>
-          <p className="mt-4 max-w-2xl text-lg text-white/60">
-            It is tracked across inclusion, position, replacement, and change.
-          </p>
-
-          <div className="mt-16 border-t border-white/10">
-            {/* Row 1 */}
-            <div className="grid border-b border-white/10 py-10 md:grid-cols-2 md:py-12">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-white/50">Inclusion</p>
-                <ul className="mt-4 space-y-2 text-white/80">
-                  <li>Whether the brand is named in the model response at all.</li>
-                  <li>Binary outcome per scenario: mentioned or not.</li>
-                  <li>Baseline for all other visibility metrics.</li>
-                </ul>
-              </div>
-              <div className="mt-6 md:mt-0 md:pl-8">
-                <p className="text-sm text-white/40">Presence in direct answers.</p>
-              </div>
-            </div>
-
-            {/* Row 2 */}
-            <div className="grid border-b border-white/10 py-10 md:grid-cols-2 md:py-12">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-white/50">Position</p>
-                <ul className="mt-4 space-y-2 text-white/80">
-                  <li>Where the brand appears in the response: top, middle, or tail.</li>
-                  <li>Earlier placement correlates with higher perceived recommendation strength.</li>
-                  <li>Tracked as a share of scenarios where the brand leads the answer.</li>
-                </ul>
-              </div>
-              <div className="mt-6 md:mt-0 md:pl-8">
-                <p className="text-sm text-white/40">Order of appearance matters.</p>
-              </div>
-            </div>
-
-            {/* Row 3 */}
-            <div className="grid border-b border-white/10 py-10 md:grid-cols-2 md:py-12">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-white/50">Replacement</p>
-                <ul className="mt-4 space-y-2 text-white/80">
-                  <li>When a competitor is recommended instead of your client.</li>
-                  <li>Identifies which entities are displacing the brand in key scenarios.</li>
-                  <li>Surfaced for strategic response and content gaps.</li>
-                </ul>
-              </div>
-              <div className="mt-6 md:mt-0 md:pl-8">
-                <p className="text-sm text-white/40">Who shows up when you don’t.</p>
-              </div>
-            </div>
-
-            {/* Row 4 */}
-            <div className="grid border-b border-white/10 py-10 md:grid-cols-2 md:py-12">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-white/50">Change</p>
-                <ul className="mt-4 space-y-2 text-white/80">
-                  <li>Movement over time: snapshots compared period over period.</li>
-                  <li>Score deltas, mention rate shifts, and position drift.</li>
-                  <li>Evidence that actions are moving the needle.</li>
-                </ul>
-              </div>
-              <div className="mt-6 md:mt-0 md:pl-8">
-                <p className="text-sm text-white/40">Trend and impact over time.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
           FEATURES — what it actually does
       ═══════════════════════════════════════════════════════ */}
       <section id="features" className="border-t border-border bg-white py-20 md:py-28">
@@ -551,126 +501,67 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          PLATFORM — AI visibility measurable and billable
+          PROOF — Make AI visibility reportable
       ═══════════════════════════════════════════════════════ */}
-      <section id="platform" className="bg-black py-24 md:py-28">
+      <section id="platform" className="bg-black py-20 md:py-24">
         <div className="mx-auto max-w-7xl px-6 sm:px-10 md:px-14">
-          <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl md:text-5xl">
-            AI visibility is measurable and billable.
+          <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+            Make AI visibility reportable.
           </h2>
-          <p className="mt-4 max-w-2xl text-lg text-white/50">
-            Track inclusion, displacement, and change. Deliver structured evidence to clients.
+          <p className="mt-3 text-lg text-white/50">
+            Snapshots, competitors, and exports your clients understand.
           </p>
 
-          <div className="mt-16 border-t border-white/10">
-            {/* Row 1 — Inclusion */}
-            <div className="grid border-b border-white/10 py-10 md:grid-cols-2 md:py-12">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-white/50">Inclusion</p>
-                <ul className="mt-4 space-y-1.5 text-sm text-white/80">
-                  <li>Mention rate across models</li>
-                  <li>Prompt-level coverage distribution</li>
-                  <li>Model variance analysis</li>
-                </ul>
-              </div>
-              <div className="mt-6 flex items-center md:mt-0 md:pl-8">
-                <div className="flex w-full max-w-xs gap-2">
-                  <div className="h-2 flex-1 rounded-sm bg-white/20" />
-                  <div className="h-2 flex-1 rounded-sm bg-white/10" />
-                  <div className="h-2 flex-1 rounded-sm bg-emerald-500/70" />
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {/* 1) Snapshots */}
+            <div className="flex flex-col rounded-lg border border-white/10 bg-white/[0.02] p-6">
+              <p className="text-xs font-semibold uppercase tracking-wider text-white/40">Snapshots</p>
+              <h3 className="mt-2 text-lg font-semibold text-white">Standardized snapshots.</h3>
+              <p className="mt-2 text-sm leading-relaxed text-white/70">
+                Run repeatable scenarios and capture results across models.
+              </p>
+              <div className="mt-5 flex flex-1 flex-col justify-end gap-2">
+                <div className="rounded border border-white/15 bg-white/5 p-2.5">
+                  <div className="h-1.5 w-full rounded-sm bg-white/20" />
+                  <div className="mt-1.5 h-1 w-4/5 rounded-sm bg-white/10" />
+                </div>
+                <div className="rounded border border-white/15 bg-white/5 p-2.5">
+                  <div className="h-1.5 w-full rounded-sm bg-white/15" />
+                  <div className="mt-1.5 h-1 w-3/4 rounded-sm bg-emerald-500/50" />
                 </div>
               </div>
             </div>
 
-            {/* Row 2 — Position */}
-            <div className="grid border-b border-white/10 py-10 md:grid-cols-2 md:py-12">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-white/50">Position</p>
-                <ul className="mt-4 space-y-1.5 text-sm text-white/80">
-                  <li>First mention frequency</li>
-                  <li>Recommendation rank index</li>
-                  <li>Comparative placement scoring</li>
-                </ul>
-              </div>
-              <div className="mt-6 md:mt-0 md:pl-8">
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex items-center gap-2 rounded border border-white/20 bg-white/5 py-1.5 pl-2 pr-3">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/30 text-xs font-bold text-white">1</span>
-                    <span className="h-1.5 flex-1 rounded-sm bg-white/20" />
-                  </div>
-                  <div className="flex items-center gap-2 py-1.5 pl-2">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-medium text-white/50">2</span>
-                    <span className="h-1.5 flex-1 max-w-[60%] rounded-sm bg-white/10" />
-                  </div>
-                  <div className="flex items-center gap-2 py-1.5 pl-2">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-medium text-white/50">3</span>
-                    <span className="h-1.5 flex-1 max-w-[40%] rounded-sm bg-white/10" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Row 3 — Replacement */}
-            <div className="grid border-b border-white/10 py-10 md:grid-cols-2 md:py-12">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-white/50">Replacement</p>
-                <ul className="mt-4 space-y-1.5 text-sm text-white/80">
-                  <li>Primary displacer identification</li>
-                  <li>Substitution pattern analysis</li>
-                  <li>Emerging competitor detection</li>
-                </ul>
-              </div>
-              <div className="mt-6 md:mt-0 md:pl-8">
-                <div className="flex items-center gap-2">
-                  <div className="rounded border border-white/15 bg-white/5 px-2.5 py-1.5 text-xs text-white/70">Client</div>
-                  <svg className="h-3 w-3 shrink-0 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                  <div className="rounded border border-white/15 bg-white/5 px-2.5 py-1.5 text-xs text-white/70">Competitor</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Row 4 — Change */}
-            <div className="grid border-b border-white/10 py-10 md:grid-cols-2 md:py-12">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-white/50">Change</p>
-                <ul className="mt-4 space-y-1.5 text-sm text-white/80">
-                  <li>Week-over-week deltas</li>
-                  <li>Authority trend index</li>
-                  <li>Model volatility tracking</li>
-                </ul>
-              </div>
-              <div className="mt-6 md:mt-0 md:pl-8">
-                <svg className="h-10 w-24 text-white/60" viewBox="0 0 96 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="0,32 16,28 32,24 48,20 64,14 80,10 96,6" />
+            {/* 2) Competitive replacement */}
+            <div className="flex flex-col rounded-lg border border-white/10 bg-white/[0.02] p-6">
+              <p className="text-xs font-semibold uppercase tracking-wider text-white/40">Competitive replacement</p>
+              <h3 className="mt-2 text-lg font-semibold text-white">See who replaces you.</h3>
+              <p className="mt-2 text-sm leading-relaxed text-white/70">
+                Identify the primary displacer when your client is not included.
+              </p>
+              <div className="mt-5 flex flex-1 items-center justify-center gap-2">
+                <div className="rounded border border-white/15 bg-white/5 px-2.5 py-1.5 text-xs text-white/70">Client</div>
+                <svg className="h-3.5 w-3.5 shrink-0 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
+                <div className="rounded border border-white/15 bg-white/5 px-2.5 py-1.5 text-xs text-white/70">Competitor</div>
               </div>
             </div>
 
-            {/* Row 5 — Reporting */}
-            <div className="grid border-b border-white/10 py-10 md:grid-cols-2 md:py-12">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-white/50">Reporting</p>
-                <h3 className="mt-3 text-lg font-semibold text-white">Turn AI visibility into billable reporting.</h3>
-                <ul className="mt-4 space-y-1.5 text-sm text-white/80">
-                  <li>Downloadable client-ready PDFs</li>
-                  <li>White-labeled branded exports</li>
-                  <li>Competitive replacement snapshots</li>
-                  <li>Time-stamped scenario preservation</li>
-                </ul>
-              </div>
-              <div className="mt-6 md:mt-0 md:pl-8">
-                <div className="w-full max-w-[220px] rounded border border-white/15 bg-white/[0.04] p-4">
-                  <div className="h-5 w-16 rounded bg-white/20" />
-                  <div className="mt-4 text-2xl font-bold text-white">78</div>
-                  <div className="mt-0.5 text-[10px] uppercase tracking-wider text-white/40">Visibility Score</div>
-                  <div className="mt-3 flex items-center gap-1.5 text-xs text-white/60">
-                    <span>Competitor delta</span>
-                    <span className="font-medium text-emerald-400/80">−4</span>
-                  </div>
-                  <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-                    <div className="h-full w-[80%] rounded-full bg-white/30" />
+            {/* 3) PDF exports */}
+            <div className="flex flex-col rounded-lg border border-white/10 bg-white/[0.02] p-6">
+              <p className="text-xs font-semibold uppercase tracking-wider text-white/40">PDF exports</p>
+              <h3 className="mt-2 text-lg font-semibold text-white">White-labeled PDF exports.</h3>
+              <p className="mt-2 text-sm leading-relaxed text-white/70">
+                Deliver client-ready reports with evidence and competitive context.
+              </p>
+              <div className="mt-5 flex flex-1 flex-col justify-end">
+                <div className="w-full max-w-[160px] rounded border border-white/15 bg-white/[0.04] p-3">
+                  <div className="h-4 w-12 rounded bg-white/20" />
+                  <div className="mt-3 text-xl font-bold text-white">78</div>
+                  <div className="mt-0.5 text-[10px] uppercase tracking-wider text-white/40">Score</div>
+                  <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-white/10">
+                    <div className="h-full w-4/5 rounded-full bg-white/30" />
                   </div>
                 </div>
               </div>
@@ -722,12 +613,12 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════
           FAQ
       ═══════════════════════════════════════════════════════ */}
-      <section id="faq" className="border-t border-border bg-bg">
+      <section id="faq" className="border-t border-white/10 bg-black">
         {/* Questions Marquee */}
         <div className="overflow-hidden py-6 md:py-10">
           <div className="flex animate-marquee whitespace-nowrap">
             {Array.from({ length: 30 }).map((_, i) => (
-              <span key={i} className="mx-10 text-6xl font-black text-text md:text-7xl lg:text-8xl xl:text-9xl">
+              <span key={i} className="mx-10 text-6xl font-black text-white/90 md:text-7xl lg:text-8xl xl:text-9xl">
                 Questions?
               </span>
             ))}
@@ -738,33 +629,39 @@ export default function HomePage() {
         <div className="px-6 pb-20 pt-8 md:pb-28 md:pt-12">
           <div className="mx-auto max-w-2xl">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-semibold tracking-tight text-text md:text-4xl">
+              <h2 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">
                 We have the answers.
               </h2>
             </div>
 
             <div>
               <FAQItem
+                dark
                 question="What is AI visibility?"
                 answer="AI visibility is how often—and how prominently—a brand appears when someone asks ChatGPT, Claude, Gemini, or other AI answer engines for a recommendation. It's the new version of 'do we rank on page one?'"
               />
               <FAQItem
+                dark
                 question="How does VRTL Score measure it?"
                 answer="We run standardized discovery scenarios across multiple AI models, analyze where and how your client is mentioned, then produce a composite visibility score based on mention rate, positioning, and citation quality. Every data point is preserved as evidence."
               />
               <FAQItem
+                dark
                 question="What AI models do you track?"
                 answer="Currently ChatGPT (OpenAI), Claude (Anthropic), and Gemini (Google)—with Perplexity and others being added. We expand coverage as new AI answer engines gain user share."
               />
               <FAQItem
+                dark
                 question="How is the score calculated?"
                 answer="The score combines three dimensions: how often your client is mentioned (mention rate), where they appear in the response (top, middle, or bottom), and whether they're cited with sources. Results are normalized across models into a single executive-ready number."
               />
               <FAQItem
+                dark
                 question="Can I white-label the reports?"
                 answer="Yes. PDF reports include your agency logo and branding. They're designed to be handed directly to clients as a professional deliverable—supporting renewals, upsells, and new business pitches."
               />
               <FAQItem
+                dark
                 question="Is there a free trial?"
                 answer="Yes. Start with a 7-day free trial—run snapshots on real clients and see the platform in action before committing."
               />
@@ -774,24 +671,29 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          FINAL CTA
+          FINAL CTA — dark, minimal (Linear-style)
       ═══════════════════════════════════════════════════════ */}
-      <section className="bg-white py-20 md:py-24">
-        <div className="container-xl">
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl font-semibold tracking-tight text-text md:text-4xl">
-              Your clients are already being ranked.
-              <br />
-              <span className="text-emerald-600">Find out where they stand.</span>
-            </h2>
-            <div className="mt-8">
-              <Link
-                href="/onboarding"
-                className="inline-flex h-12 items-center justify-center rounded-full bg-text px-10 text-base font-semibold text-white shadow-lg shadow-text/10 transition-all hover:bg-text/90 hover:scale-[1.02]"
-              >
-                Sign up
-              </Link>
-            </div>
+      <section className="border-t border-white/10 bg-black py-24 md:py-32">
+        <div className="mx-auto max-w-2xl px-6 text-center sm:px-10">
+          <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+            Start measuring AI visibility.
+          </h2>
+          <p className="mt-4 text-base text-white/50 sm:text-lg">
+            Give clients proof. Keep the narrative. Defend renewals.
+          </p>
+          <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-6">
+            <Link
+              href="/signup"
+              className="inline-flex h-11 min-w-[160px] items-center justify-center rounded-lg border border-white/20 bg-white text-sm font-medium text-black transition-colors hover:bg-white/95"
+            >
+              Start free trial
+            </Link>
+            <Link
+              href="/sample-report"
+              className="text-sm text-white/60 underline-offset-4 transition-colors hover:text-white/80"
+            >
+              View sample PDF →
+            </Link>
           </div>
         </div>
       </section>
