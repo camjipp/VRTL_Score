@@ -184,116 +184,111 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          THE SHIFT — visual feature blocks with mini UI mocks
+          THE SHIFT — diagram-style feature blocks, flat black
       ═══════════════════════════════════════════════════════ */}
       <section
         id="shift"
-        className="-mt-6 border-t border-white/5 bg-[#0A0A0A] pt-20 pb-24 md:-mt-20 md:pt-28 md:pb-32"
+        className="-mt-6 border-t border-white/5 bg-black pt-20 pb-24 md:-mt-20 md:pt-28 md:pb-32"
       >
         <div className="container-xl px-6 sm:px-10 md:px-14">
           <div className="max-w-3xl">
             <p className="text-3xl font-semibold leading-[1.15] tracking-tight text-white sm:text-4xl md:text-5xl">
-              Search is becoming answers.
+              AI answers are becoming the homepage.
             </p>
-            <p className="mt-5 text-base leading-relaxed text-white/65 sm:text-lg">
-              Visibility now means being mentioned. Or being replaced.
+            <p className="mt-4 text-base text-white/50 sm:text-lg">
+              Visibility means being mentioned. Or replaced.
             </p>
           </div>
 
-          <div className="mx-auto mt-14 max-w-7xl md:mt-20">
-            <div className="grid gap-8 md:grid-cols-3 md:gap-10">
+          <div className="mx-auto mt-12 max-w-7xl md:mt-16">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-3 md:gap-10">
               {/* AEO / Inclusion */}
-              <div className="group relative overflow-hidden rounded-3xl border border-white/[0.12] bg-white/[0.02] p-8 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)] transition-all duration-200 hover:-translate-y-[3px] hover:border-white/[0.18] hover:shadow-[0_50px_120px_-35px_rgba(0,0,0,0.7)] md:p-10">
+              <div className="flex flex-col rounded-3xl border border-white/[0.1] bg-white/[0.02] p-8 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.5)] transition-all duration-200 hover:border-white/[0.15] hover:shadow-[0_30px_80px_-25px_rgba(0,0,0,0.6)]">
                 <div className="text-[10px] font-medium uppercase tracking-wider text-white/40">AEO</div>
                 <h3 className="mt-2 text-xl font-semibold text-white">Win inclusion.</h3>
-                <p className="mt-4 text-sm leading-relaxed text-white/65">
+                <p className="mt-4 text-sm leading-relaxed text-white/60">
                   Get your client named inside AI answers.
                 </p>
-                {/* Mini UI mock: chat-style AI answer card */}
-                <div className="mt-6 rounded-xl border border-white/[0.08] bg-white/[0.03] p-4">
-                  <div className="text-[9px] font-medium uppercase tracking-wider text-white/35">Prompt</div>
-                  <div className="mt-1.5 h-2.5 w-full max-w-[90%] rounded-sm bg-white/25" />
-                  <div className="mt-4 space-y-2">
-                    <div className="h-2 w-full rounded-sm bg-white/15" />
-                    <div className="h-2 w-[85%] rounded-sm bg-white/15" />
-                  </div>
-                  <span className="mt-3 inline-block rounded-full bg-accent/30 px-2.5 py-1 text-[10px] font-semibold text-accent">
-                    Mentioned: Your Client
-                  </span>
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[8px] text-white/50">source1.com</span>
-                    <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[8px] text-white/50">source2.com</span>
-                    <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[8px] text-white/50">source3.com</span>
+                {/* Diagram: thin outlined answer card, 2 line blocks, emerald pill */}
+                <div className="mt-6 flex flex-1 flex-col justify-end">
+                  <div className="rounded-lg border border-white/[0.12] p-4">
+                    <div className="space-y-3">
+                      <div className="h-1.5 w-full rounded-sm border border-white/[0.15]" />
+                      <div className="h-1.5 w-[95%] rounded-sm border border-white/[0.15]" />
+                    </div>
+                    <span className="mt-3 inline-block rounded-full border border-accent/50 bg-accent/20 px-2.5 py-1 text-[10px] font-medium text-accent">
+                      Mentioned
+                    </span>
                   </div>
                 </div>
               </div>
 
               {/* GEO / Recommendations */}
-              <div className="group relative overflow-hidden rounded-3xl border border-white/[0.12] bg-white/[0.02] p-8 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)] transition-all duration-200 hover:-translate-y-[3px] hover:border-white/[0.18] hover:shadow-[0_50px_120px_-35px_rgba(0,0,0,0.7)] md:p-10">
+              <div className="flex flex-col rounded-3xl border border-white/[0.1] bg-white/[0.02] p-8 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.5)] transition-all duration-200 hover:border-white/[0.15] hover:shadow-[0_30px_80px_-25px_rgba(0,0,0,0.6)]">
                 <div className="text-[10px] font-medium uppercase tracking-wider text-white/40">GEO</div>
                 <h3 className="mt-2 text-xl font-semibold text-white">Win recommendations.</h3>
-                <p className="mt-4 text-sm leading-relaxed text-white/65">
+                <p className="mt-4 text-sm leading-relaxed text-white/60">
                   Influence which brands get recommended.
                 </p>
-                {/* Mini UI mock: comparison list/table */}
-                <div className="mt-6 overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03]">
-                  <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-2.5">
-                    <span className="flex items-center gap-2.5">
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/15 text-[10px] font-bold text-white/90">1</span>
-                      <span className="text-xs font-semibold text-white/95">Your Client</span>
-                    </span>
-                    <span className="rounded bg-accent/25 px-2 py-0.5 text-[9px] font-semibold text-accent">Recommended</span>
-                  </div>
-                  <div className="flex items-center gap-2.5 border-b border-white/[0.05] px-4 py-2">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-[10px] font-medium text-white/50">2</span>
-                    <span className="text-xs text-white/50">Competitor A</span>
-                  </div>
-                  <div className="flex items-center gap-2.5 px-4 py-2">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-[10px] font-medium text-white/50">3</span>
-                    <span className="text-xs text-white/50">Competitor B</span>
+                {/* Diagram: thin outlined ranked list, #1 with emerald bar + Recommended pill */}
+                <div className="mt-6 flex flex-1 flex-col justify-end">
+                  <div className="overflow-hidden rounded-lg border border-white/[0.12]">
+                    <div className="flex items-center border-b border-white/[0.08] px-3 py-2.5">
+                      <div className="h-8 w-0.5 shrink-0 rounded-full bg-accent" />
+                      <div className="ml-2 flex-1" />
+                      <span className="rounded border border-accent/50 bg-accent/20 px-2 py-0.5 text-[9px] font-medium text-accent">
+                        Recommended
+                      </span>
+                    </div>
+                    <div className="flex items-center border-b border-white/[0.06] px-3 py-2">
+                      <div className="ml-2.5 h-1 w-12 rounded-sm border border-white/[0.12]" />
+                    </div>
+                    <div className="flex items-center px-3 py-2">
+                      <div className="ml-2.5 h-1 w-10 rounded-sm border border-white/[0.12]" />
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* MEASURE / Reportable */}
-              <div className="group relative overflow-hidden rounded-3xl border border-white/[0.12] bg-white/[0.02] p-8 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)] transition-all duration-200 hover:-translate-y-[3px] hover:border-white/[0.18] hover:shadow-[0_50px_120px_-35px_rgba(0,0,0,0.7)] md:p-10">
+              <div className="flex flex-col rounded-3xl border border-white/[0.1] bg-white/[0.02] p-8 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.5)] transition-all duration-200 hover:border-white/[0.15] hover:shadow-[0_30px_80px_-25px_rgba(0,0,0,0.6)]">
                 <div className="text-[10px] font-medium uppercase tracking-wider text-white/40">MEASURE</div>
                 <h3 className="mt-2 text-xl font-semibold text-white">Make it reportable.</h3>
-                <p className="mt-4 text-sm leading-relaxed text-white/65">
+                <p className="mt-4 text-sm leading-relaxed text-white/60">
                   Turn AI visibility into metrics you can track.
                 </p>
-                {/* Mini UI mock: dashboard widget with score ring */}
-                <div className="mt-6 flex flex-col gap-4 rounded-xl border border-white/[0.08] bg-white/[0.03] p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="relative flex h-14 w-14 shrink-0 items-center justify-center">
-                      <svg className="h-14 w-14 -rotate-90" viewBox="0 0 56 56">
-                        <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4" />
-                        <circle cx="28" cy="28" r="24" fill="none" stroke="rgb(var(--accent))" strokeWidth="4" strokeDasharray={`${0.78 * 151} ${0.22 * 151}`} strokeLinecap="round" />
+                {/* Diagram: score ring + 5-point trend line + metric chips */}
+                <div className="mt-6 flex flex-1 flex-col justify-end">
+                  <div className="flex flex-col gap-4 rounded-lg border border-white/[0.12] p-4">
+                    <div className="flex items-center gap-4">
+                      <div className="relative flex h-12 w-12 shrink-0 items-center justify-center">
+                        <svg className="h-12 w-12 -rotate-90" viewBox="0 0 48 48">
+                          <circle cx="24" cy="24" r="20" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="2" />
+                          <circle cx="24" cy="24" r="20" fill="none" stroke="rgb(var(--accent))" strokeWidth="2" strokeDasharray={`${0.78 * 125.6} ${0.22 * 125.6}`} strokeLinecap="round" />
+                        </svg>
+                        <span className="absolute text-sm font-bold text-white">78</span>
+                      </div>
+                      <svg className="h-8 flex-1" viewBox="0 0 80 32" preserveAspectRatio="none">
+                        <polyline points="0,24 20,20 40,16 60,10 80,4" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
-                      <span className="absolute text-base font-bold text-white">78</span>
                     </div>
-                    <div className="flex flex-col gap-1.5">
-                      <span className="rounded-md bg-white/10 px-2 py-1 text-[9px] text-white/60">Mention Rate</span>
-                      <span className="rounded-md bg-white/10 px-2 py-1 text-[9px] text-white/60">Primary Displacer</span>
+                    <div className="flex gap-2">
+                      <span className="rounded border border-white/[0.12] px-2 py-1 text-[9px] text-white/50">Mention Rate</span>
+                      <span className="rounded border border-white/[0.12] px-2 py-1 text-[9px] text-white/50">Primary Displacer</span>
                     </div>
-                  </div>
-                  <div className="flex h-7 items-end gap-1">
-                    {[42, 58, 52, 68, 62, 78].map((h, i) => (
-                      <div key={i} className="flex-1 rounded-t bg-accent/50" style={{ height: `${h}%` }} />
-                    ))}
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="mt-14 text-center md:mt-20">
-            <p className="text-base font-medium text-white/85 sm:text-lg">
+          <div className="mx-auto mt-10 max-w-7xl text-center md:mt-12">
+            <p className="text-base font-medium text-white/80 sm:text-lg">
               VRTL Score makes AI visibility a measurable channel.
             </p>
             <Link
               href="/#platform"
-              className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-white/80 underline-offset-4 transition-colors hover:text-white hover:underline"
+              className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-white/70 underline-offset-4 transition-colors hover:text-white hover:underline"
             >
               See the platform
               <span aria-hidden>→</span>
