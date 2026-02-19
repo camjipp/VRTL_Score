@@ -42,13 +42,11 @@
   --ring: var(--accent);
   --shadow-lift: 0 8px 18px rgba(0,0,0,0.08);
 
-  /* Stage / floating panel (hero — ambient room + glass panel) */
+  /* Stage / floating panel — Linear-style: one glow behind/below panel */
   --stage-bg: #050608;
   --stage-vignette: rgba(0, 0, 0, 0.72);
-  --stage-glow-1: rgba(110, 231, 255, 0.1);
-  --stage-glow-2: rgba(167, 139, 250, 0.08);
-  --stage-glow-3: rgba(255, 255, 255, 0.04);
-  --stage-haze: rgba(255, 255, 255, 0.03);
+  --stage-spotlight: rgba(255, 255, 255, 0.08);
+  --stage-spotlight-mid: rgba(255, 255, 255, 0.04);
 
   --panel-bg: rgba(18, 20, 24, 0.78);
   --panel-surface-1: rgba(255, 255, 255, 0.1);
@@ -181,33 +179,36 @@ html {
   overflow: visible;
 }
 
+/* Single soft radial: behind and below the panel (Linear-style spotlight) */
 .stage::before {
   content: "";
   position: absolute;
-  inset: -20%;
-  background:
-    radial-gradient(900px 600px at 30% 20%, var(--stage-glow-1), transparent 60%),
-    radial-gradient(800px 520px at 70% 35%, var(--stage-glow-2), transparent 62%),
-    radial-gradient(900px 700px at 50% 70%, var(--stage-glow-3), transparent 65%);
-  opacity: 1;
+  inset: -30%;
+  background: radial-gradient(
+    1400px 900px at 50% 78%,
+    var(--stage-spotlight) 0%,
+    var(--stage-spotlight-mid) 35%,
+    transparent 60%
+  );
   pointer-events: none;
   z-index: 0;
 }
 
+/* Vignette: darker edges, focus on center (Linear) */
 .stage::after {
   content: "";
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    1200px 800px at 50% 35%,
-    transparent 55%,
+    1400px 1000px at 50% 55%,
+    transparent 45%,
     var(--stage-vignette) 100%
   );
   pointer-events: none;
   z-index: 2;
 }
 
-/* Floor plane — strictly behind content (z-index 1). Soft surface hint, not a solid block. */
+/* Floor plane — horizontal band at bottom, lit by the spotlight above (Linear) */
 .floorPlane {
   position: absolute;
   left: -20%;
@@ -218,19 +219,19 @@ html {
     linear-gradient(
       180deg,
       transparent 0%,
-      transparent 25%,
-      rgba(8, 9, 11, 0.4) 50%,
-      rgba(15, 16, 18, 0.5) 75%,
-      rgba(25, 26, 30, 0.45) 100%
+      transparent 20%,
+      rgba(18, 19, 22, 0.5) 45%,
+      rgba(28, 30, 34, 0.6) 70%,
+      rgba(35, 36, 40, 0.5) 100%
     ),
     radial-gradient(
-      1000px 400px at 50% 30%,
-      rgba(255, 255, 255, 0.06),
-      rgba(255, 255, 255, 0.02) 50%,
-      transparent 75%
+      1200px 350px at 50% 15%,
+      rgba(255, 255, 255, 0.09),
+      rgba(255, 255, 255, 0.03) 45%,
+      transparent 70%
     );
-  filter: blur(2px);
-  opacity: 0.7;
+  filter: blur(3px);
+  opacity: 0.85;
   pointer-events: none;
   z-index: 1;
 }
@@ -303,15 +304,17 @@ html {
 
 @media (max-width: 768px) {
   .stage::before {
-    background:
-      radial-gradient(520px 360px at 30% 20%, var(--stage-glow-1), transparent 60%),
-      radial-gradient(480px 320px at 70% 35%, var(--stage-glow-2), transparent 62%),
-      radial-gradient(520px 400px at 50% 70%, var(--stage-glow-3), transparent 65%);
+    background: radial-gradient(
+      900px 600px at 50% 78%,
+      var(--stage-spotlight) 0%,
+      var(--stage-spotlight-mid) 35%,
+      transparent 60%
+    );
   }
   .stage::after {
     background: radial-gradient(
-      700px 500px at 50% 35%,
-      transparent 55%,
+      900px 700px at 50% 55%,
+      transparent 45%,
       var(--stage-vignette) 100%
     );
   }
