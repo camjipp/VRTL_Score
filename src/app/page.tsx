@@ -53,22 +53,21 @@ export default function HomePage() {
       <section className="heroFrame container-xl relative flex min-h-[90vh] flex-1 flex-col justify-start px-6 pb-28 pt-24 sm:min-h-[95vh] sm:px-10 sm:pt-28 md:px-14">
         <div className="heroFrameBg" aria-hidden />
 
-        <div className="max-w-3xl">
-            <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl">
-              Your clients are already being ranked by AI.
-            </h1>
+        <div className="heroContent max-w-3xl">
+          <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl">
+            Your clients are already being ranked by AI.
+          </h1>
+          <p className="mt-5 max-w-xl text-base leading-relaxed text-white/60 sm:text-lg">
+            Answer engines are shaping brand perception in real time.
+            VRTL Score measures where your clients appear — and where they&apos;re invisible.
+          </p>
+        </div>
 
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/60 sm:text-lg">
-              Answer engines are shaping brand perception in real time.
-              VRTL Score measures where your clients appear — and where they&apos;re invisible.
-            </p>
-          </div>
-
-          <div className="panelWrap mx-auto mt-10 w-full max-w-7xl translate-y-6 sm:translate-y-10 md:translate-y-12">
-            <div className="floatingPanel w-full max-w-7xl">
-              <div className="relative">
-                {/* App chrome — sidebar + main content */}
-                <div className="flex min-h-[420px] md:min-h-[500px]">
+        <div className="panelWrap mx-auto mt-10 w-full max-w-7xl translate-y-6 sm:translate-y-10 md:translate-y-12">
+          <div className="floatingPanel w-full max-w-7xl">
+            <div className="relative">
+              {/* App chrome — sidebar + main content */}
+              <div className="flex min-h-[420px] md:min-h-[500px]">
                   {/* Sidebar */}
                   <div className="hidden w-52 shrink-0 border-r border-white/[0.08] bg-white/[0.04] p-4 md:block">
                     <div className="flex items-center gap-2">
@@ -158,7 +157,10 @@ export default function HomePage() {
                       </div>
                     </div>
                   </div>
-                </div></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════
