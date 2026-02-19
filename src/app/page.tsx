@@ -50,11 +50,10 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════
           HERO — Linear-style frame (room + floor in one bg layer)
       ═══════════════════════════════════════════════════════ */}
-      <section className="heroFrame relative flex min-h-[90vh] flex-col sm:min-h-[95vh]">
+      <section className="heroFrame container-xl relative flex min-h-[90vh] flex-1 flex-col justify-start px-6 pb-28 pt-24 sm:min-h-[95vh] sm:px-10 sm:pt-28 md:px-14">
         <div className="heroFrameBg" aria-hidden />
 
-        <div className="heroContent container-xl flex flex-1 flex-col justify-start px-6 pb-28 pt-24 sm:px-10 sm:pt-28 md:px-14">
-          <div className="max-w-3xl">
+        <div className="max-w-3xl">
             <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl">
               Your clients are already being ranked by AI.
             </h1>
@@ -159,12 +158,7 @@ export default function HomePage() {
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        </div>
+                </div></div></div></div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════
