@@ -42,30 +42,22 @@
   --ring: var(--accent);
   --shadow-lift: 0 8px 18px rgba(0,0,0,0.08);
 
-  /* Stage / floating panel (hero — ambient room + glass panel) */
-  --stage-bg: #050608;
-  --stage-vignette: rgba(0, 0, 0, 0.72);
-  --stage-glow-1: rgba(110, 231, 255, 0.1);
-  --stage-glow-2: rgba(167, 139, 250, 0.08);
-  --stage-glow-3: rgba(255, 255, 255, 0.04);
-  --stage-haze: rgba(255, 255, 255, 0.03);
+  /* Linear-style hero: air, floor, panel */
+  --lin-air: #050608;
+  --lin-air2: #07080b;
+  --lin-floor: #5d6066;
+  --lin-floor2: #3e4046;
+  --lin-vignette: rgba(0, 0, 0, 0.78);
 
-  --panel-bg: rgba(18, 20, 24, 0.78);
-  --panel-surface-1: rgba(255, 255, 255, 0.1);
-  --panel-surface-2: rgba(255, 255, 255, 0.02);
+  --panel-bg1: rgba(20, 22, 26, 0.92);
+  --panel-bg2: rgba(12, 13, 16, 0.78);
   --panel-border: rgba(255, 255, 255, 0.1);
-  --panel-border-soft: rgba(120, 140, 255, 0.12);
-  --panel-inner: rgba(0, 0, 0, 0.55);
+  --panel-sheen: rgba(255, 255, 255, 0.08);
+  --panel-rim: rgba(255, 255, 255, 0.1);
 
-  --rim-top: rgba(255, 255, 255, 0.1);
-  --rim-side: rgba(120, 160, 255, 0.08);
-
-  --shadow-tight: 0 10px 30px rgba(0, 0, 0, 0.55);
-  --shadow-mid: 0 40px 90px rgba(0, 0, 0, 0.55);
-  --shadow-wide: 0 120px 220px rgba(0, 0, 0, 0.6);
-
-  --under-glow: rgba(120, 160, 255, 0.08);
-  --radius-panel: 20px;
+  --sh-tight: 0 10px 28px rgba(0, 0, 0, 0.55);
+  --sh-mid: 0 50px 120px rgba(0, 0, 0, 0.55);
+  --sh-wide: 0 160px 320px rgba(0, 0, 0, 0.6);
 
   /*
     Compatibility aliases (so existing classes like bg-bg0/bg-bg1/muted keep working)
@@ -174,71 +166,129 @@ html {
   animation: shimmer 2s infinite;
 }
 
-/* ═══ Stage (ambient room background) ═══ */
+/* ═══ Linear-style stage (air + floor + vignette) ═══ */
 .stage {
   position: relative;
-  background: var(--stage-bg);
   overflow: hidden;
+  background: linear-gradient(
+    180deg,
+    var(--lin-air) 0%,
+    var(--lin-air2) 40%,
+    #0b0c10 100%
+  );
 }
 
+/* Faint ambient in the "air" */
 .stage::before {
   content: "";
   position: absolute;
   inset: -20%;
   background:
-    radial-gradient(900px 600px at 30% 20%, var(--stage-glow-1), transparent 60%),
-    radial-gradient(800px 520px at 70% 35%, var(--stage-glow-2), transparent 62%),
-    radial-gradient(900px 700px at 50% 70%, var(--stage-glow-3), transparent 65%);
-  opacity: 1;
+    radial-gradient(900px 520px at 25% 20%, rgba(255, 255, 255, 0.05), transparent 60%),
+    radial-gradient(900px 520px at 75% 25%, rgba(180, 160, 255, 0.05), transparent 62%);
+  opacity: 0.7;
   pointer-events: none;
+  z-index: 0;
 }
 
+/* Vignette (gentle edge darkening, no spotlight) */
 .stage::after {
   content: "";
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    1200px 800px at 50% 35%,
+    1200px 900px at 50% 30%,
     transparent 55%,
-    var(--stage-vignette) 100%
+    var(--lin-vignette) 100%
   );
+  opacity: 0.65;
   pointer-events: none;
+  z-index: 2;
 }
 
-.stage .haze {
+/* Floor plane — gray surface fading up into air */
+.floorPlane {
   position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    1200px 800px at 50% 60%,
-    var(--stage-haze),
-    transparent 70%
-  );
+  left: -30%;
+  right: -30%;
+  bottom: -120px;
+  height: 520px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 0) 15%,
+      rgba(10, 11, 14, 0.35) 35%,
+      rgba(10, 11, 14, 0.55) 55%,
+      rgba(10, 11, 14, 0.85) 100%
+    ),
+    radial-gradient(
+      1200px 520px at 50% 25%,
+      rgba(255, 255, 255, 0.2),
+      rgba(255, 255, 255, 0.1) 38%,
+      rgba(255, 255, 255, 0.04) 60%,
+      transparent 75%
+    ),
+    linear-gradient(180deg, rgba(120, 122, 130, 0.25), rgba(60, 62, 70, 0.18));
+  filter: blur(1px);
+  opacity: 0.95;
   pointer-events: none;
+  z-index: 1;
 }
 
-/* ═══ Floating panel (glass dashboard mock) ═══ */
+.stage > * {
+  position: relative;
+  z-index: 3;
+}
+
+/* ═══ Floating panel (Linear-style) ═══ */
+.panelWrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.contactShadow {
+  position: absolute;
+  width: min(1080px, 96vw);
+  height: 220px;
+  bottom: 10px;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.55), transparent 70%);
+  filter: blur(20px);
+  opacity: 0.55;
+  pointer-events: none;
+  z-index: 0;
+}
+
 .floatingPanel {
   position: relative;
-  border-radius: var(--radius-panel);
+  z-index: 1;
+  width: min(1120px, 96vw);
+  border-radius: 22px;
   background:
-    linear-gradient(180deg, var(--panel-surface-1), rgba(255, 255, 255, 0) 35%),
-    linear-gradient(180deg, rgba(18, 20, 24, 0.84), rgba(12, 13, 16, 0.72));
+    linear-gradient(180deg, var(--panel-sheen), transparent 42%),
+    linear-gradient(180deg, var(--panel-bg1), var(--panel-bg2));
   border: 1px solid var(--panel-border);
-  box-shadow: var(--shadow-tight), var(--shadow-mid), var(--shadow-wide);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  box-shadow: var(--sh-tight), var(--sh-mid), var(--sh-wide);
   overflow: hidden;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 .floatingPanel::before {
   content: "";
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background:
-    linear-gradient(180deg, var(--rim-top), transparent 35%),
-    linear-gradient(90deg, var(--rim-side), transparent 25%, transparent 75%, var(--rim-side));
-  opacity: 0.55;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--panel-rim),
+    transparent
+  );
+  opacity: 0.9;
   pointer-events: none;
 }
 
@@ -248,47 +298,19 @@ html {
   inset: 0;
   border-radius: inherit;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 -20px 60px var(--panel-inner);
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -34px 90px rgba(0, 0, 0, 0.55);
   pointer-events: none;
-}
-
-.panelGlow {
-  position: absolute;
-  inset: auto 10% -40px 10%;
-  height: 120px;
-  background: radial-gradient(closest-side, var(--under-glow), transparent 70%);
-  filter: blur(14px);
-  opacity: 0.7;
-  pointer-events: none;
-  z-index: 0;
 }
 
 @media (max-width: 768px) {
-  .stage::before {
-    background:
-      radial-gradient(520px 360px at 30% 20%, var(--stage-glow-1), transparent 60%),
-      radial-gradient(480px 320px at 70% 35%, var(--stage-glow-2), transparent 62%),
-      radial-gradient(520px 400px at 50% 70%, var(--stage-glow-3), transparent 65%);
+  .floorPlane {
+    height: 380px;
+    bottom: -80px;
   }
-  .stage::after {
-    background: radial-gradient(
-      700px 500px at 50% 35%,
-      transparent 55%,
-      var(--stage-vignette) 100%
-    );
-  }
-  .stage .haze {
-    background: radial-gradient(
-      700px 500px at 50% 60%,
-      var(--stage-haze),
-      transparent 70%
-    );
-  }
-  .panelGlow {
-    height: 80px;
-    inset: auto 5% -24px 5%;
-    filter: blur(10px);
+  .contactShadow {
+    height: 140px;
+    width: min(100%, 92vw);
   }
 }
 

@@ -48,12 +48,12 @@ export default function HomePage() {
   return (
     <main className="bg-black">
       {/* ═══════════════════════════════════════════════════════
-          HERO — Stage (ambient room) + floating glass panel
+          HERO — Linear-style stage (air + floor) + floating panel
       ═══════════════════════════════════════════════════════ */}
       <section className="stage relative flex min-h-[90vh] flex-col overflow-visible sm:min-h-[95vh]">
-        <div className="haze" aria-hidden />
+        <div className="floorPlane" aria-hidden />
 
-        <div className="container-xl relative z-10 flex flex-1 flex-col justify-start px-6 pb-28 pt-24 sm:px-10 sm:pt-28 md:px-14">
+        <div className="container-xl flex flex-1 flex-col justify-start px-6 pb-28 pt-24 sm:px-10 sm:pt-28 md:px-14">
           {/* Copy block */}
           <div className="max-w-3xl">
             <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl">
@@ -67,11 +67,11 @@ export default function HomePage() {
 
           </div>
 
-          {/* Floating panel (dashboard mock) */}
-          <div className="relative z-10 mx-auto mt-10 w-full max-w-7xl translate-y-6 sm:translate-y-10 md:translate-y-12">
-            <div className="relative">
-              <div className="panelGlow" aria-hidden />
-              <div className="floatingPanel relative z-10">
+          {/* Dashboard mock on floor (panelWrap + contactShadow + floatingPanel) */}
+          <div className="mx-auto mt-10 w-full max-w-7xl translate-y-6 sm:translate-y-10 md:translate-y-12">
+            <div className="panelWrap">
+              <div className="contactShadow" aria-hidden />
+              <div className="floatingPanel">
                 <div className="relative">
                   {/* App chrome — sidebar + main content */}
                   <div className="flex min-h-[420px] md:min-h-[500px]">
