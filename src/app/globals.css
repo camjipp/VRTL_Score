@@ -172,87 +172,43 @@ html {
   animation: shimmer 2s infinite;
 }
 
-/* ═══ Stage (ambient room background) — overflow visible so floor + shadows aren't clipped ═══ */
+/* ═══ Stage — Linear's actual background (from .Frame_background__iLZh4) ═══ */
 .stage {
   position: relative;
-  background: var(--stage-bg);
+  --stage-bottom: #0c0d0e;
+  background:
+    radial-gradient(
+      52.53% 57.5% at 50% 100%,
+      rgba(8, 9, 10, 0) 0,
+      rgba(8, 9, 10, 0.5) 100%
+    ),
+    linear-gradient(180deg, #08090a 10%, var(--stage-bottom) 100%);
   overflow: visible;
 }
 
-/* Single soft radial: behind and below the panel (Linear-style spotlight) */
-.stage::before {
-  content: "";
-  position: absolute;
-  inset: -30%;
-  background: radial-gradient(
-    1400px 900px at 50% 78%,
-    var(--stage-spotlight) 0%,
-    var(--stage-spotlight-mid) 35%,
-    transparent 60%
-  );
-  pointer-events: none;
-  z-index: 0;
+.stage::before,
+.stage::after {
+  display: none;
 }
 
-/* Vignette: darker edges, focus on center (Linear) */
-.stage::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    1400px 1000px at 50% 55%,
-    transparent 45%,
-    var(--stage-vignette) 100%
-  );
-  pointer-events: none;
+/* Floor: hidden by default; set to block + adjust if you want a visible band */
+.floorPlane {
+  display: none;
+}
+
+.stage > *:not(.floorPlane) {
+  position: relative;
   z-index: 2;
 }
 
-/* Floor plane — horizontal band at bottom, lit by the spotlight above (Linear) */
-.floorPlane {
-  position: absolute;
-  left: -20%;
-  right: -20%;
-  bottom: -80px;
-  height: 420px;
-  background:
-    linear-gradient(
-      180deg,
-      transparent 0%,
-      transparent 20%,
-      rgba(18, 19, 22, 0.5) 45%,
-      rgba(28, 30, 34, 0.6) 70%,
-      rgba(35, 36, 40, 0.5) 100%
-    ),
-    radial-gradient(
-      1200px 350px at 50% 15%,
-      rgba(255, 255, 255, 0.09),
-      rgba(255, 255, 255, 0.03) 45%,
-      transparent 70%
-    );
-  filter: blur(3px);
-  opacity: 0.85;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Content and panel sit above ambient + floor + vignette. Floor stays at z-index 1. */
-.stage > *:not(.floorPlane) {
-  position: relative;
-  z-index: 3;
-}
-
-/* ═══ Floating panel (glass dashboard mock) ═══ */
+/* Panel — Linear reference: dark charcoal card, soft diffuse shadow (depth = shadow only) */
 .floatingPanel {
   position: relative;
-  border-radius: var(--radius-panel);
-  background:
-    linear-gradient(180deg, var(--panel-surface-1), rgba(255, 255, 255, 0) 35%),
-    linear-gradient(180deg, rgba(18, 20, 24, 0.84), rgba(12, 13, 16, 0.72));
-  border: 1px solid var(--panel-border);
-  box-shadow: var(--shadow-tight), var(--shadow-mid), var(--shadow-wide);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  z-index: 1;
+  border-radius: 16px;
+  background: #1c1c1e;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
   overflow: hidden;
 }
 
@@ -261,22 +217,12 @@ html {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background:
-    linear-gradient(180deg, var(--rim-top), transparent 35%),
-    linear-gradient(90deg, var(--rim-side), transparent 25%, transparent 75%, var(--rim-side));
-  opacity: 0.55;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   pointer-events: none;
 }
 
 .floatingPanel::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 -20px 60px var(--panel-inner);
-  pointer-events: none;
+  display: none;
 }
 
 .panelWrap {
@@ -288,44 +234,18 @@ html {
 .contactShadow {
   position: absolute;
   width: min(1080px, 96vw);
-  height: 220px;
-  bottom: 10px;
-  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.55), transparent 70%);
-  filter: blur(20px);
-  opacity: 0.55;
+  height: 120px;
+  bottom: 0;
+  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0, 0, 0, 0.4), transparent 70%);
+  filter: blur(16px);
+  opacity: 0.8;
   pointer-events: none;
   z-index: 0;
 }
 
-.floatingPanel {
-  position: relative;
-  z-index: 1;
-}
-
 @media (max-width: 768px) {
-  .stage::before {
-    background: radial-gradient(
-      900px 600px at 50% 78%,
-      var(--stage-spotlight) 0%,
-      var(--stage-spotlight-mid) 35%,
-      transparent 60%
-    );
-  }
-  .stage::after {
-    background: radial-gradient(
-      900px 700px at 50% 55%,
-      transparent 45%,
-      var(--stage-vignette) 100%
-    );
-  }
-  .floorPlane {
-    height: 280px;
-    bottom: -60px;
-    opacity: 0.6;
-  }
   .contactShadow {
-    height: 140px;
-    width: min(100%, 92vw);
+    height: 80px;
   }
 }
 
