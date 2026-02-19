@@ -310,38 +310,31 @@ export default function HomePage() {
       <section id="platform" className="border-t border-white/10 bg-black py-20 md:py-24">
         <div className="mx-auto max-w-7xl px-6 sm:px-10 md:px-14">
           <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-            Make AI visibility reportable.
+            If you can&apos;t measure AI, you can&apos;t sell it.
           </h2>
           <p className="mt-3 text-lg text-white/50">
-            Snapshots, competitors, and exports your clients understand.
+            Most agencies report rankings. Not inclusion. Not displacement. Not revenue impact.
           </p>
 
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             {/* 1) Snapshots */}
             <div className="flex flex-col rounded-lg border border-white/10 bg-white/[0.02] p-6">
               <p className="text-xs font-semibold uppercase tracking-wider text-white/40">Snapshots</p>
-              <h3 className="mt-2 text-lg font-semibold text-white">Standardized snapshots.</h3>
+              <h3 className="mt-2 text-lg font-semibold text-white">Run the same tests every month.</h3>
               <p className="mt-2 text-sm leading-relaxed text-white/70">
-                Run repeatable scenarios and capture results across models.
+                Track inclusion, positioning, and displacement across models. Measure change. Eliminate &quot;vibes.&quot;
               </p>
-              <div className="mt-5 flex flex-1 flex-col justify-end gap-2">
-                <div className="rounded border border-white/15 bg-white/5 p-2.5">
-                  <div className="h-1.5 w-full rounded-sm bg-white/20" />
-                  <div className="mt-1.5 h-1 w-4/5 rounded-sm bg-white/10" />
-                </div>
-                <div className="rounded border border-white/15 bg-white/5 p-2.5">
-                  <div className="h-1.5 w-full rounded-sm bg-white/15" />
-                  <div className="mt-1.5 h-1 w-3/4 rounded-sm bg-emerald-500/50" />
-                </div>
+              <div className="mt-5 flex flex-1 flex-col justify-end">
+                <div className="h-1.5 w-full rounded-sm bg-white/10" />
               </div>
             </div>
 
             {/* 2) Competitive replacement */}
             <div className="flex flex-col rounded-lg border border-white/10 bg-white/[0.02] p-6">
               <p className="text-xs font-semibold uppercase tracking-wider text-white/40">Competitive replacement</p>
-              <h3 className="mt-2 text-lg font-semibold text-white">See who replaces you.</h3>
+              <h3 className="mt-2 text-lg font-semibold text-white">See who AI chooses instead.</h3>
               <p className="mt-2 text-sm leading-relaxed text-white/70">
-                Identify the primary displacer when your client is not included.
+                When your client isn&apos;t recommended, know exactly who is — and why.
               </p>
               <div className="mt-5 flex flex-1 items-center justify-center gap-2">
                 <div className="rounded border border-white/15 bg-white/5 px-2.5 py-1.5 text-xs text-white/70">Client</div>
@@ -355,19 +348,12 @@ export default function HomePage() {
             {/* 3) PDF exports */}
             <div className="flex flex-col rounded-lg border border-white/10 bg-white/[0.02] p-6">
               <p className="text-xs font-semibold uppercase tracking-wider text-white/40">PDF exports</p>
-              <h3 className="mt-2 text-lg font-semibold text-white">White-labeled PDF exports.</h3>
+              <h3 className="mt-2 text-lg font-semibold text-white">Walk into renewals with proof.</h3>
               <p className="mt-2 text-sm leading-relaxed text-white/70">
-                Deliver client-ready reports with evidence and competitive context.
+                Branded, executive-ready AI visibility reports built for retention and upsell conversations.
               </p>
               <div className="mt-5 flex flex-1 flex-col justify-end">
-                <div className="w-full max-w-[160px] rounded border border-white/15 bg-white/[0.04] p-3">
-                  <div className="h-4 w-12 rounded bg-white/20" />
-                  <div className="mt-3 text-xl font-bold text-white">78</div>
-                  <div className="mt-0.5 text-[10px] uppercase tracking-wider text-white/40">Score</div>
-                  <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-white/10">
-                    <div className="h-full w-4/5 rounded-full bg-white/30" />
-                  </div>
-                </div>
+                <div className="h-1.5 w-full rounded-sm bg-white/10" />
               </div>
             </div>
           </div>
@@ -382,7 +368,7 @@ export default function HomePage() {
         <div className="overflow-hidden py-6 md:py-10">
           <div className="flex animate-marquee whitespace-nowrap">
             {Array.from({ length: 30 }).map((_, i) => (
-              <span key={i} className="mx-10 text-6xl font-black text-white/90 md:text-7xl lg:text-8xl xl:text-9xl">
+              <span key={i} className="mx-10 text-6xl font-black text-white/40 md:text-7xl lg:text-8xl xl:text-9xl">
                 Questions?
               </span>
             ))}
@@ -440,10 +426,10 @@ export default function HomePage() {
       <section className="border-t border-white/10 bg-black py-24 md:py-32">
         <div className="mx-auto max-w-2xl px-6 text-center sm:px-10">
           <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-            Start measuring AI visibility.
+            AI is already ranking your clients.
           </h2>
           <p className="mt-4 text-base text-white/50 sm:text-lg">
-            Give clients proof. Keep the narrative. Defend renewals.
+            Start defending them.
           </p>
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-6">
             <Link
