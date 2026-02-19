@@ -184,54 +184,121 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          THE SHIFT — narrative arc (Shift → Problem → Solution)
-          Negative margin overlaps platform preview card
+          THE SHIFT — Linear-style market memo (AEO, GEO, measurement gap)
       ═══════════════════════════════════════════════════════ */}
-      <section className="-mt-6 border-t border-white/5 bg-[#0A0A0A] pt-12 pb-20 md:-mt-20 md:pb-28">
-        <div className="container-xl">
-          {/* Part 1: The Shift */}
-          <div className="mx-auto max-w-4xl text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-white/50">The shift</p>
-            <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-tight text-white md:text-4xl lg:text-5xl">
-              Search is becoming AI.
-            </h2>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/70">
-              Google, ChatGPT, Perplexity, and Claude are answering search queries directly—with recommendations, not blue links. SEO is no longer enough.
+      <section
+        id="shift"
+        className="-mt-6 border-t border-white/5 bg-[#0A0A0A] pt-20 pb-24 md:-mt-20 md:pt-28 md:pb-32"
+      >
+        <div className="container-xl px-6 sm:px-10 md:px-14">
+          <div className="max-w-3xl">
+            <p className="text-3xl font-semibold leading-[1.15] tracking-tight text-white sm:text-4xl md:text-5xl">
+              Search is becoming answers.
+            </p>
+            <p className="mt-5 text-base leading-relaxed text-white/65 sm:text-lg">
+              Search is no longer a ranked list of links. It is a system of generated responses.
+              Visibility now means being mentioned — or being replaced.
             </p>
           </div>
 
-          {/* Part 2: AEO & GEO — education */}
-          <div className="mx-auto mt-16 grid max-w-4xl gap-8 sm:grid-cols-2">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-left">
-              <h3 className="text-xl font-bold text-white">AEO — Answer Engine Optimization</h3>
-              <p className="mt-4 leading-relaxed text-white/70">
-                Optimizing for AI assistants (ChatGPT, Claude, Perplexity) that answer questions directly. If your client isn’t in those answers, they’re invisible to a growing share of discovery.
-              </p>
+          <div className="mt-10 grid gap-4 md:mt-12 md:grid-cols-2">
+            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)]">
+              <div className="flex items-center justify-between">
+                <div className="text-xs font-medium uppercase tracking-wider text-white/35">AEO</div>
+                <div className="text-xs font-medium text-white/35">Answer Engine Optimization</div>
+              </div>
+              <div className="mt-3 text-lg font-semibold text-white">
+                Win inclusion in answers.
+              </div>
+              <div className="mt-5 space-y-4">
+                <div>
+                  <div className="text-xs font-medium uppercase tracking-wider text-white/30">What it is</div>
+                  <p className="mt-2 text-sm leading-relaxed text-white/60">
+                    Getting your client named inside AI-generated responses — not just &quot;ranking,&quot; but inclusion.
+                  </p>
+                </div>
+                <div>
+                  <div className="text-xs font-medium uppercase tracking-wider text-white/30">What agencies can do</div>
+                  <p className="mt-2 text-sm leading-relaxed text-white/60">
+                    Build authority signals: entities, citations, and structured pages that increase inclusion when answers are generated.
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-left">
-              <h3 className="text-xl font-bold text-white">GEO — Generative Engine Optimization</h3>
-              <p className="mt-4 leading-relaxed text-white/70">
-                Optimizing for AI-generated search results. Google’s SGE, Perplexity’s search, and AI-powered product recommendations are where rankings happen now—and traditional tools can’t measure them.
-              </p>
+
+            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)]">
+              <div className="flex items-center justify-between">
+                <div className="text-xs font-medium uppercase tracking-wider text-white/35">GEO</div>
+                <div className="text-xs font-medium text-white/35">Generative Engine Optimization</div>
+              </div>
+              <div className="mt-3 text-lg font-semibold text-white">
+                Win recommendations in generation.
+              </div>
+              <div className="mt-5 space-y-4">
+                <div>
+                  <div className="text-xs font-medium uppercase tracking-wider text-white/30">What it is</div>
+                  <p className="mt-2 text-sm leading-relaxed text-white/60">
+                    Influencing which brands models recommend when users ask for options, comparisons, or &quot;best&quot; picks.
+                  </p>
+                </div>
+                <div>
+                  <div className="text-xs font-medium uppercase tracking-wider text-white/30">What agencies can do</div>
+                  <p className="mt-2 text-sm leading-relaxed text-white/60">
+                    Strengthen competitive positioning and narrative authority so the model chooses your client when it generates recommendations.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Part 3: The Problem */}
-          <div className="mx-auto mt-16 max-w-3xl text-center">
-            <h3 className="text-2xl font-semibold tracking-tight text-white md:text-3xl">
-              Most agencies have no idea how their clients show up in AI.
-            </h3>
-            <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-white/70">
-              When a prospect asks ChatGPT for a recommendation, does your client appear? In what position? With what context? Today, most agencies are guessing—and losing clients to competitors who show up first.
-            </p>
-          </div>
+          <div className="mt-10 grid gap-6 md:mt-12 md:grid-cols-5">
+            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 md:col-span-3">
+              <div className="text-xs font-medium uppercase tracking-wider text-white/35">
+                The measurement gap
+              </div>
+              <p className="mt-3 text-sm leading-relaxed text-white/60">
+                Most agencies can report rankings. Few can report mentions.
+              </p>
+              <div className="mt-5 space-y-3">
+                {[
+                  "Is your client included in AI answers?",
+                  "Who is replacing them when they're not?",
+                  "Which model shifted — and why?",
+                  "How did visibility change week over week?",
+                ].map((q) => (
+                  <div key={q} className="flex items-start gap-3">
+                    <div className="mt-1.5 h-1.5 w-1.5 rounded-full bg-white/35" />
+                    <p className="text-sm leading-relaxed text-white/60">{q}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-          {/* Part 4: The Solution */}
-          <div className="mx-auto mt-16 max-w-3xl text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-accent">The solution</p>
-            <h3 className="mt-3 text-2xl font-semibold tracking-tight text-white md:text-3xl">
-              VRTL Score isn’t a gimmick—it’s the infrastructure agencies need to own AEO & GEO. Measure AI visibility across every major model, prove ROI, and defend your clients before it’s too late.
-            </h3>
+            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 md:col-span-2">
+              <div className="text-xs font-medium uppercase tracking-wider text-white/35">
+                What happens next
+              </div>
+              <p className="mt-3 text-sm leading-relaxed text-white/60">
+                When visibility shifts inside answer engines, keyword reports stop explaining reality.
+                Clients see competitors in AI responses while agencies show rankings. That gap erodes trust.
+              </p>
+
+              <div className="mt-6 border-t border-white/[0.06] pt-5">
+                <div className="text-xs font-medium uppercase tracking-wider text-white/35">
+                  The bridge
+                </div>
+                <p className="mt-2 text-sm leading-relaxed text-white/70">
+                  VRTL Score turns AI visibility into a measurable channel.
+                </p>
+
+                <Link
+                  href="/pricing"
+                  className="mt-4 inline-flex text-sm font-medium text-white/70 underline-offset-4 hover:text-white hover:underline"
+                >
+                  See pricing
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>

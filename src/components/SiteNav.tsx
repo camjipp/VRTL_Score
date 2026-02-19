@@ -128,56 +128,57 @@ export function SiteNav() {
         </nav>
 
         {/* Mobile menu */}
-        <div
-          className={cn(
-            "absolute left-4 right-4 top-full overflow-hidden rounded-2xl shadow-xl transition-all duration-300 ease-out md:hidden",
-            mobileOpen ? "mt-2 max-h-96 opacity-100" : "max-h-0 opacity-0 border-0",
-            isHome ? "border border-white/20 bg-black/95 backdrop-blur-xl" : "border border-border bg-surface"
-          )}
-        >
-          <div className="p-4">
-            <div className="flex flex-col gap-1">
-              {navLinks.map((link) => (
+        {mobileOpen && (
+          <div
+            className={cn(
+              "absolute left-4 right-4 top-full mt-2 rounded-2xl shadow-xl md:hidden",
+              isHome ? "border border-white/20 bg-black/95 backdrop-blur-xl" : "border border-border bg-surface"
+            )}
+          >
+            <div className="p-4">
+              <div className="flex flex-col gap-1">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    className={cn(
+                      "rounded-xl px-4 py-3.5 text-base font-medium transition-all",
+                      isHome
+                        ? "text-white/80 hover:bg-white/10 hover:text-white"
+                        : "text-text-2 hover:bg-surface-2 hover:text-text"
+                    )}
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+              <hr className={cn("my-3", isHome ? "border-white/15" : "border-border")} />
+              <div className="flex flex-col gap-2">
                 <Link
-                  key={link.href}
                   className={cn(
-                    "rounded-xl px-4 py-3.5 text-base font-medium transition-all",
-                    isHome
-                      ? "text-white/80 hover:bg-white/10 hover:text-white"
-                      : "text-text-2 hover:bg-surface-2 hover:text-text"
+                    "rounded-xl px-4 py-3.5 text-center text-base font-medium transition-all",
+                    isHome ? "text-white/80 hover:text-white" : "border border-border bg-surface-2 text-text hover:bg-bg-2"
                   )}
-                  href={link.href}
+                  href="/login"
                   onClick={() => setMobileOpen(false)}
                 >
-                  {link.label}
+                  Log in
                 </Link>
-              ))}
-            </div>
-            <hr className={cn("my-3", isHome ? "border-white/15" : "border-border")} />
-            <div className="flex flex-col gap-2">
                 <Link
-                className={cn(
-                  "rounded-xl px-4 py-3.5 text-center text-base font-medium transition-all",
-                  isHome ? "text-white/80 hover:text-white" : "border border-border bg-surface-2 text-text hover:bg-bg-2"
-                )}
-                href="/login"
-                onClick={() => setMobileOpen(false)}
-              >
-                Log in
-              </Link>
-              <Link
-                className={cn(
-                  "rounded-xl px-4 py-3.5 text-center text-base font-medium transition-all",
-                  isHome ? "bg-white text-black hover:bg-white/90" : "text-text-3 hover:text-text"
-                )}
-                href="/onboarding"
-                onClick={() => setMobileOpen(false)}
-              >
-                Sign up
-              </Link>
+                  className={cn(
+                    "rounded-xl px-4 py-3.5 text-center text-base font-medium transition-all",
+                    isHome ? "bg-white text-black hover:bg-white/90" : "text-text-3 hover:text-text"
+                  )}
+                  href="/onboarding"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Sign up
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </header>
   );
