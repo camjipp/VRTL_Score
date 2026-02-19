@@ -279,6 +279,82 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
+          AI VISIBILITY IS MEASURABLE — four rows
+      ═══════════════════════════════════════════════════════ */}
+      <section className="bg-black py-24 md:py-28">
+        <div className="mx-auto max-w-7xl px-6 sm:px-10 md:px-14">
+          <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl md:text-5xl">
+            AI visibility is measurable.
+          </h2>
+          <p className="mt-4 max-w-2xl text-lg text-white/60">
+            It is tracked across inclusion, position, replacement, and change.
+          </p>
+
+          <div className="mt-16 border-t border-white/10">
+            {/* Row 1 */}
+            <div className="grid border-b border-white/10 py-10 md:grid-cols-2 md:py-12">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wider text-white/50">Inclusion</p>
+                <ul className="mt-4 space-y-2 text-white/80">
+                  <li>Whether the brand is named in the model response at all.</li>
+                  <li>Binary outcome per scenario: mentioned or not.</li>
+                  <li>Baseline for all other visibility metrics.</li>
+                </ul>
+              </div>
+              <div className="mt-6 md:mt-0 md:pl-8">
+                <p className="text-sm text-white/40">Presence in direct answers.</p>
+              </div>
+            </div>
+
+            {/* Row 2 */}
+            <div className="grid border-b border-white/10 py-10 md:grid-cols-2 md:py-12">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wider text-white/50">Position</p>
+                <ul className="mt-4 space-y-2 text-white/80">
+                  <li>Where the brand appears in the response: top, middle, or tail.</li>
+                  <li>Earlier placement correlates with higher perceived recommendation strength.</li>
+                  <li>Tracked as a share of scenarios where the brand leads the answer.</li>
+                </ul>
+              </div>
+              <div className="mt-6 md:mt-0 md:pl-8">
+                <p className="text-sm text-white/40">Order of appearance matters.</p>
+              </div>
+            </div>
+
+            {/* Row 3 */}
+            <div className="grid border-b border-white/10 py-10 md:grid-cols-2 md:py-12">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wider text-white/50">Replacement</p>
+                <ul className="mt-4 space-y-2 text-white/80">
+                  <li>When a competitor is recommended instead of your client.</li>
+                  <li>Identifies which entities are displacing the brand in key scenarios.</li>
+                  <li>Surfaced for strategic response and content gaps.</li>
+                </ul>
+              </div>
+              <div className="mt-6 md:mt-0 md:pl-8">
+                <p className="text-sm text-white/40">Who shows up when you don’t.</p>
+              </div>
+            </div>
+
+            {/* Row 4 */}
+            <div className="grid border-b border-white/10 py-10 md:grid-cols-2 md:py-12">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wider text-white/50">Change</p>
+                <ul className="mt-4 space-y-2 text-white/80">
+                  <li>Movement over time: snapshots compared period over period.</li>
+                  <li>Score deltas, mention rate shifts, and position drift.</li>
+                  <li>Evidence that actions are moving the needle.</li>
+                </ul>
+              </div>
+              <div className="mt-6 md:mt-0 md:pl-8">
+                <p className="text-sm text-white/40">Trend and impact over time.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
           FEATURES — what it actually does
       ═══════════════════════════════════════════════════════ */}
       <section id="features" className="border-t border-border bg-white py-20 md:py-28">
