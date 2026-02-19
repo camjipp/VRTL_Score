@@ -196,85 +196,107 @@ export default function HomePage() {
               Search is becoming answers.
             </p>
             <p className="mt-5 text-base leading-relaxed text-white/65 sm:text-lg">
-              Visibility now means being mentioned — or being replaced.
+              Visibility now means being mentioned. Or being replaced.
             </p>
           </div>
 
-          <div className="mt-12 grid gap-6 md:mt-16 md:grid-cols-3">
-            {/* AEO / Inclusion */}
-            <div className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)] transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.12] hover:shadow-[0_40px_100px_-30px_rgba(0,0,0,0.7)]">
-              <div className="text-[10px] font-medium uppercase tracking-wider text-white/35">AEO</div>
-              <h3 className="mt-2 text-lg font-semibold text-white">Win inclusion.</h3>
-              <p className="mt-3 text-sm leading-relaxed text-white/60">
-                Get your client named inside AI-generated responses, not just ranked.
-              </p>
-              {/* Mini UI mock: AI answer card */}
-              <div className="mt-5 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
-                <div className="h-2 w-3/4 rounded bg-white/20" />
-                <div className="mt-3 space-y-1.5">
-                  <div className="h-2 w-full rounded bg-white/10" />
-                  <div className="h-2 w-4/5 rounded bg-white/10" />
-                </div>
-                <span className="mt-2 inline-block rounded-full bg-accent/25 px-2 py-1 text-[10px] font-medium text-accent">
-                  Mentioned: Your Client
-                </span>
-              </div>
-            </div>
-
-            {/* GEO / Recommendations */}
-            <div className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)] transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.12] hover:shadow-[0_40px_100px_-30px_rgba(0,0,0,0.7)]">
-              <div className="text-[10px] font-medium uppercase tracking-wider text-white/35">GEO</div>
-              <h3 className="mt-2 text-lg font-semibold text-white">Win recommendations.</h3>
-              <p className="mt-3 text-sm leading-relaxed text-white/60">
-                Influence which brands models surface when users ask for options.
-              </p>
-              {/* Mini UI mock: comparison list */}
-              <div className="mt-5 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-white/90">Your Client</span>
-                  <span className="rounded bg-accent/20 px-1.5 py-0.5 text-[9px] font-medium text-accent">Recommended</span>
-                </div>
-                <div className="mt-2 flex items-center justify-between text-[10px] text-white/40">
-                  <span>Competitor A</span>
-                </div>
-                <div className="mt-1 flex items-center justify-between text-[10px] text-white/40">
-                  <span>Competitor B</span>
+          <div className="mx-auto mt-14 max-w-7xl md:mt-20">
+            <div className="grid gap-8 md:grid-cols-3 md:gap-10">
+              {/* AEO / Inclusion */}
+              <div className="group relative overflow-hidden rounded-3xl border border-white/[0.12] bg-white/[0.02] p-8 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)] transition-all duration-200 hover:-translate-y-[3px] hover:border-white/[0.18] hover:shadow-[0_50px_120px_-35px_rgba(0,0,0,0.7)] md:p-10">
+                <div className="text-[10px] font-medium uppercase tracking-wider text-white/40">AEO</div>
+                <h3 className="mt-2 text-xl font-semibold text-white">Win inclusion.</h3>
+                <p className="mt-4 text-sm leading-relaxed text-white/65">
+                  Get your client named inside AI answers.
+                </p>
+                {/* Mini UI mock: chat-style AI answer card */}
+                <div className="mt-6 rounded-xl border border-white/[0.08] bg-white/[0.03] p-4">
+                  <div className="text-[9px] font-medium uppercase tracking-wider text-white/35">Prompt</div>
+                  <div className="mt-1.5 h-2.5 w-full max-w-[90%] rounded-sm bg-white/25" />
+                  <div className="mt-4 space-y-2">
+                    <div className="h-2 w-full rounded-sm bg-white/15" />
+                    <div className="h-2 w-[85%] rounded-sm bg-white/15" />
+                  </div>
+                  <span className="mt-3 inline-block rounded-full bg-accent/30 px-2.5 py-1 text-[10px] font-semibold text-accent">
+                    Mentioned: Your Client
+                  </span>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[8px] text-white/50">source1.com</span>
+                    <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[8px] text-white/50">source2.com</span>
+                    <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[8px] text-white/50">source3.com</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* MEASURE / Reportable */}
-            <div className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)] transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.12] hover:shadow-[0_40px_100px_-30px_rgba(0,0,0,0.7)]">
-              <div className="text-[10px] font-medium uppercase tracking-wider text-white/35">MEASURE</div>
-              <h3 className="mt-2 text-lg font-semibold text-white">Make it reportable.</h3>
-              <p className="mt-3 text-sm leading-relaxed text-white/60">
-                Turn AI visibility into metrics you can track and prove.
-              </p>
-              {/* Mini UI mock: dashboard strip */}
-              <div className="mt-5 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
-                <div className="flex flex-wrap gap-1.5">
-                  <span className="rounded-md bg-white/10 px-2 py-1 text-[9px] text-white/60">Mention Rate</span>
-                  <span className="rounded-md bg-white/10 px-2 py-1 text-[9px] text-white/60">Primary Displacer</span>
-                  <span className="rounded-md bg-accent/20 px-2 py-1 text-[9px] font-medium text-accent">Visibility Score</span>
+              {/* GEO / Recommendations */}
+              <div className="group relative overflow-hidden rounded-3xl border border-white/[0.12] bg-white/[0.02] p-8 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)] transition-all duration-200 hover:-translate-y-[3px] hover:border-white/[0.18] hover:shadow-[0_50px_120px_-35px_rgba(0,0,0,0.7)] md:p-10">
+                <div className="text-[10px] font-medium uppercase tracking-wider text-white/40">GEO</div>
+                <h3 className="mt-2 text-xl font-semibold text-white">Win recommendations.</h3>
+                <p className="mt-4 text-sm leading-relaxed text-white/65">
+                  Influence which brands get recommended.
+                </p>
+                {/* Mini UI mock: comparison list/table */}
+                <div className="mt-6 overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03]">
+                  <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-2.5">
+                    <span className="flex items-center gap-2.5">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/15 text-[10px] font-bold text-white/90">1</span>
+                      <span className="text-xs font-semibold text-white/95">Your Client</span>
+                    </span>
+                    <span className="rounded bg-accent/25 px-2 py-0.5 text-[9px] font-semibold text-accent">Recommended</span>
+                  </div>
+                  <div className="flex items-center gap-2.5 border-b border-white/[0.05] px-4 py-2">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-[10px] font-medium text-white/50">2</span>
+                    <span className="text-xs text-white/50">Competitor A</span>
+                  </div>
+                  <div className="flex items-center gap-2.5 px-4 py-2">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-[10px] font-medium text-white/50">3</span>
+                    <span className="text-xs text-white/50">Competitor B</span>
+                  </div>
                 </div>
-                <div className="mt-3 flex h-8 items-end gap-1">
-                  {[40, 55, 48, 72, 65, 78].map((h, i) => (
-                    <div key={i} className="flex-1 rounded-t bg-accent/40" style={{ height: `${h}%` }} />
-                  ))}
+              </div>
+
+              {/* MEASURE / Reportable */}
+              <div className="group relative overflow-hidden rounded-3xl border border-white/[0.12] bg-white/[0.02] p-8 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)] transition-all duration-200 hover:-translate-y-[3px] hover:border-white/[0.18] hover:shadow-[0_50px_120px_-35px_rgba(0,0,0,0.7)] md:p-10">
+                <div className="text-[10px] font-medium uppercase tracking-wider text-white/40">MEASURE</div>
+                <h3 className="mt-2 text-xl font-semibold text-white">Make it reportable.</h3>
+                <p className="mt-4 text-sm leading-relaxed text-white/65">
+                  Turn AI visibility into metrics you can track.
+                </p>
+                {/* Mini UI mock: dashboard widget with score ring */}
+                <div className="mt-6 flex flex-col gap-4 rounded-xl border border-white/[0.08] bg-white/[0.03] p-4">
+                  <div className="flex items-center gap-4">
+                    <div className="relative flex h-14 w-14 shrink-0 items-center justify-center">
+                      <svg className="h-14 w-14 -rotate-90" viewBox="0 0 56 56">
+                        <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4" />
+                        <circle cx="28" cy="28" r="24" fill="none" stroke="rgb(var(--accent))" strokeWidth="4" strokeDasharray={`${0.78 * 151} ${0.22 * 151}`} strokeLinecap="round" />
+                      </svg>
+                      <span className="absolute text-base font-bold text-white">78</span>
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <span className="rounded-md bg-white/10 px-2 py-1 text-[9px] text-white/60">Mention Rate</span>
+                      <span className="rounded-md bg-white/10 px-2 py-1 text-[9px] text-white/60">Primary Displacer</span>
+                    </div>
+                  </div>
+                  <div className="flex h-7 items-end gap-1">
+                    {[42, 58, 52, 68, 62, 78].map((h, i) => (
+                      <div key={i} className="flex-1 rounded-t bg-accent/50" style={{ height: `${h}%` }} />
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="mt-12 text-center md:mt-16">
-            <p className="text-base font-medium text-white/80 sm:text-lg">
+          <div className="mt-14 text-center md:mt-20">
+            <p className="text-base font-medium text-white/85 sm:text-lg">
               VRTL Score makes AI visibility a measurable channel.
             </p>
             <Link
               href="/#platform"
-              className="mt-3 inline-flex text-sm font-medium text-white/60 underline-offset-4 hover:text-white hover:underline"
+              className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-white/80 underline-offset-4 transition-colors hover:text-white hover:underline"
             >
-              See the platform →
+              See the platform
+              <span aria-hidden>→</span>
             </Link>
           </div>
         </div>
