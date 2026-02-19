@@ -188,93 +188,104 @@ export default function HomePage() {
       ═══════════════════════════════════════════════════════ */}
       <section
         id="shift"
-        className="-mt-6 border-t border-white/5 bg-black pt-20 pb-24 md:-mt-20 md:pt-28 md:pb-32"
+        className="-mt-6 border-t border-white/5 bg-[#000] pt-20 pb-24 md:-mt-20 md:pt-28 md:pb-32"
       >
         <div className="container-xl px-6 sm:px-10 md:px-14">
           <div className="max-w-3xl">
             <p className="text-3xl font-semibold leading-[1.15] tracking-tight text-white sm:text-4xl md:text-5xl">
               AI answers are becoming the homepage.
             </p>
-            <p className="mt-4 text-base text-white/50 sm:text-lg">
-              Visibility means being mentioned. Or replaced.
+            <p className="mt-3 text-base text-white/50 sm:text-lg">
+              Visibility means being mentioned. Or being replaced.
             </p>
           </div>
 
-          <div className="mx-auto mt-12 max-w-7xl md:mt-16">
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-3 md:gap-10">
+          <div className="mx-auto mt-10 max-w-7xl md:mt-14">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-8">
               {/* AEO / Inclusion */}
-              <div className="flex flex-col rounded-3xl border border-white/[0.1] bg-white/[0.02] p-8 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.5)] transition-all duration-200 hover:border-white/[0.15] hover:shadow-[0_30px_80px_-25px_rgba(0,0,0,0.6)]">
+              <div className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.02] p-6 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.35)] transition-all duration-200 hover:border-white/[0.14] md:p-7">
                 <div className="text-[10px] font-medium uppercase tracking-wider text-white/40">AEO</div>
-                <h3 className="mt-2 text-xl font-semibold text-white">Win inclusion.</h3>
-                <p className="mt-4 text-sm leading-relaxed text-white/60">
+                <h3 className="mt-1.5 text-lg font-semibold text-white">Win inclusion.</h3>
+                <p className="mt-3 text-sm leading-relaxed text-white/60">
                   Get your client named inside AI answers.
                 </p>
-                {/* Diagram: thin outlined answer card, 2 line blocks, emerald pill */}
-                <div className="mt-6 flex flex-1 flex-col justify-end">
-                  <div className="rounded-lg border border-white/[0.12] p-4">
-                    <div className="space-y-3">
-                      <div className="h-1.5 w-full rounded-sm border border-white/[0.15]" />
-                      <div className="h-1.5 w-[95%] rounded-sm border border-white/[0.15]" />
+                {/* Diagram: answer card, 2 line blocks, mention pill, sources row */}
+                <div className="mt-5 flex flex-1 flex-col justify-end">
+                  <div className="rounded-lg border border-white/[0.12] p-3.5">
+                    <div className="space-y-2.5">
+                      <div className="h-1 w-full rounded-sm border border-white/[0.15]" />
+                      <div className="h-1 w-[95%] rounded-sm border border-white/[0.15]" />
                     </div>
-                    <span className="mt-3 inline-block rounded-full border border-accent/50 bg-accent/20 px-2.5 py-1 text-[10px] font-medium text-accent">
+                    <span className="mt-2.5 inline-block rounded-full border border-accent/50 bg-accent/20 px-2 py-0.5 text-[9px] font-medium text-accent">
                       Mentioned
                     </span>
+                    <div className="mt-2.5 flex gap-1.5">
+                      <div className="h-1.5 w-1.5 rounded-full border border-white/[0.2]" />
+                      <div className="h-1.5 w-1.5 rounded-full border border-white/[0.2]" />
+                      <div className="h-1.5 w-1.5 rounded-full border border-white/[0.2]" />
+                      <div className="h-1.5 w-1.5 rounded-full border border-white/[0.2]" />
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* GEO / Recommendations */}
-              <div className="flex flex-col rounded-3xl border border-white/[0.1] bg-white/[0.02] p-8 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.5)] transition-all duration-200 hover:border-white/[0.15] hover:shadow-[0_30px_80px_-25px_rgba(0,0,0,0.6)]">
+              <div className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.02] p-6 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.35)] transition-all duration-200 hover:border-white/[0.14] md:p-7">
                 <div className="text-[10px] font-medium uppercase tracking-wider text-white/40">GEO</div>
-                <h3 className="mt-2 text-xl font-semibold text-white">Win recommendations.</h3>
-                <p className="mt-4 text-sm leading-relaxed text-white/60">
+                <h3 className="mt-1.5 text-lg font-semibold text-white">Win recommendations.</h3>
+                <p className="mt-3 text-sm leading-relaxed text-white/60">
                   Influence which brands get recommended.
                 </p>
-                {/* Diagram: thin outlined ranked list, #1 with emerald bar + Recommended pill */}
-                <div className="mt-6 flex flex-1 flex-col justify-end">
+                {/* Diagram: ranked list with 1/2/3, row #1 fill + emerald bar + Recommended */}
+                <div className="mt-5 flex flex-1 flex-col justify-end">
                   <div className="overflow-hidden rounded-lg border border-white/[0.12]">
-                    <div className="flex items-center border-b border-white/[0.08] px-3 py-2.5">
-                      <div className="h-8 w-0.5 shrink-0 rounded-full bg-accent" />
-                      <div className="ml-2 flex-1" />
-                      <span className="rounded border border-accent/50 bg-accent/20 px-2 py-0.5 text-[9px] font-medium text-accent">
+                    <div className="flex items-center border-b border-white/[0.08] bg-white/[0.04] px-3 py-2">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/15 text-[9px] font-bold text-white/90">1</span>
+                      <div className="ml-2 h-1 flex-1 rounded-sm border border-white/[0.12]" />
+                      <span className="ml-2 rounded border border-accent/50 bg-accent/20 px-1.5 py-0.5 text-[9px] font-medium text-accent">
                         Recommended
                       </span>
                     </div>
-                    <div className="flex items-center border-b border-white/[0.06] px-3 py-2">
-                      <div className="ml-2.5 h-1 w-12 rounded-sm border border-white/[0.12]" />
+                    <div className="flex items-center border-b border-white/[0.05] px-3 py-2">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[9px] font-medium text-white/40">2</span>
+                      <div className="ml-2 h-1 w-12 rounded-sm border border-white/[0.12]" />
                     </div>
                     <div className="flex items-center px-3 py-2">
-                      <div className="ml-2.5 h-1 w-10 rounded-sm border border-white/[0.12]" />
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[9px] font-medium text-white/40">3</span>
+                      <div className="ml-2 h-1 w-10 rounded-sm border border-white/[0.12]" />
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* MEASURE / Reportable */}
-              <div className="flex flex-col rounded-3xl border border-white/[0.1] bg-white/[0.02] p-8 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.5)] transition-all duration-200 hover:border-white/[0.15] hover:shadow-[0_30px_80px_-25px_rgba(0,0,0,0.6)]">
+              <div className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.02] p-6 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.35)] transition-all duration-200 hover:border-white/[0.14] md:p-7">
                 <div className="text-[10px] font-medium uppercase tracking-wider text-white/40">MEASURE</div>
-                <h3 className="mt-2 text-xl font-semibold text-white">Make it reportable.</h3>
-                <p className="mt-4 text-sm leading-relaxed text-white/60">
+                <h3 className="mt-1.5 text-lg font-semibold text-white">Make it reportable.</h3>
+                <p className="mt-3 text-sm leading-relaxed text-white/60">
                   Turn AI visibility into metrics you can track.
                 </p>
-                {/* Diagram: score ring + 5-point trend line + metric chips */}
-                <div className="mt-6 flex flex-1 flex-col justify-end">
-                  <div className="flex flex-col gap-4 rounded-lg border border-white/[0.12] p-4">
-                    <div className="flex items-center gap-4">
-                      <div className="relative flex h-12 w-12 shrink-0 items-center justify-center">
-                        <svg className="h-12 w-12 -rotate-90" viewBox="0 0 48 48">
-                          <circle cx="24" cy="24" r="20" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="2" />
-                          <circle cx="24" cy="24" r="20" fill="none" stroke="rgb(var(--accent))" strokeWidth="2" strokeDasharray={`${0.78 * 125.6} ${0.22 * 125.6}`} strokeLinecap="round" />
-                        </svg>
-                        <span className="absolute text-sm font-bold text-white">78</span>
+                {/* Diagram: score ring (~20% larger), Visibility label, trend line, metric chips */}
+                <div className="mt-5 flex flex-1 flex-col justify-end">
+                  <div className="flex flex-col gap-3 rounded-lg border border-white/[0.12] p-3.5">
+                    <div className="flex items-center gap-3">
+                      <div className="flex flex-col items-center">
+                        <div className="relative flex h-14 w-14 shrink-0 items-center justify-center">
+                          <svg className="h-14 w-14 -rotate-90" viewBox="0 0 56 56">
+                            <circle cx="28" cy="28" r="23" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="2" />
+                            <circle cx="28" cy="28" r="23" fill="none" stroke="rgb(var(--accent))" strokeWidth="2" strokeDasharray={`${0.78 * 144.5} ${0.22 * 144.5}`} strokeLinecap="round" />
+                          </svg>
+                          <span className="absolute text-base font-bold text-white">78</span>
+                        </div>
+                        <span className="mt-1 text-[8px] font-medium text-white/40">Visibility</span>
                       </div>
-                      <svg className="h-8 flex-1" viewBox="0 0 80 32" preserveAspectRatio="none">
+                      <svg className="h-9 flex-1" viewBox="0 0 80 32" preserveAspectRatio="none">
                         <polyline points="0,24 20,20 40,16 60,10 80,4" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </div>
                     <div className="flex gap-2">
-                      <span className="rounded border border-white/[0.12] px-2 py-1 text-[9px] text-white/50">Mention Rate</span>
-                      <span className="rounded border border-white/[0.12] px-2 py-1 text-[9px] text-white/50">Primary Displacer</span>
+                      <span className="rounded border border-white/[0.12] px-2 py-0.5 text-[9px] text-white/50">Mention Rate</span>
+                      <span className="rounded border border-white/[0.12] px-2 py-0.5 text-[9px] text-white/50">Primary Displacer</span>
                     </div>
                   </div>
                 </div>
@@ -282,15 +293,15 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="mx-auto mt-10 max-w-7xl text-center md:mt-12">
+          <div className="mx-auto mt-8 max-w-7xl text-center md:mt-10">
             <p className="text-base font-medium text-white/80 sm:text-lg">
               VRTL Score makes AI visibility a measurable channel.
             </p>
             <Link
               href="/#platform"
-              className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-white/70 underline-offset-4 transition-colors hover:text-white hover:underline"
+              className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-white/80 underline-offset-4 transition-colors hover:text-white hover:underline"
             >
-              See the platform
+              Learn more
               <span aria-hidden>→</span>
             </Link>
           </div>
