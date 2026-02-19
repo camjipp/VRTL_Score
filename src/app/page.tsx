@@ -53,14 +53,14 @@ export default function HomePage() {
       <section className="relative flex min-h-[90vh] flex-col overflow-visible bg-[#0a0a0a] sm:min-h-[95vh]">
         {/* Room depth — Linear-style: dark top, distinct light gray floor at bottom */}
         <div className="pointer-events-none absolute inset-0">
-          {/* Two-tone: dark ceiling, distinct light gray floor — creates 3D "sitting in room" effect */}
+          {/* Two-tone: dark ceiling, bright light gray floor — Linear-style room */}
           <div
-            className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(8,8,8,1)_0%,rgba(10,10,10,1)_25%,rgba(18,18,20,1)_45%,rgba(32,32,35,1)_70%,rgba(50,50,54,1)_100%)]"
+            className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(5,5,5,1)_0%,rgba(8,8,8,1)_20%,rgba(15,15,16,1)_40%,rgba(40,40,44,1)_65%,rgba(70,70,75,1)_100%)]"
             aria-hidden
           />
-          {/* Floor surface — lighter gray band, brightest under card, recedes toward bottom */}
+          {/* Floor surface — brighter, distinct light gray like Linear */}
           <div
-            className="absolute inset-x-0 bottom-0 h-[65%] bg-[linear-gradient(to_top,rgba(45,45,49,1)_0%,rgba(62,62,66,1)_40%,rgba(58,58,62,1)_65%,transparent_100%)]"
+            className="absolute inset-x-0 bottom-0 h-[70%] bg-[linear-gradient(to_top,rgba(55,55,60,1)_0%,rgba(85,85,90,1)_35%,rgba(90,90,96,1)_55%,transparent_100%)]"
             aria-hidden
           />
         </div>
@@ -81,9 +81,9 @@ export default function HomePage() {
 
           {/* Product preview card — dominant visual anchor, pulled up tight like Linear */}
           <div className="relative z-10 mx-auto mt-10 w-full max-w-7xl translate-y-6 sm:translate-y-10 md:translate-y-12">
-            <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.02] shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_24px_48px_-8px_rgba(0,0,0,0.5),0_40px_80px_-20px_rgba(0,0,0,0.4)]">
-              {/* Inner highlight — glass UI depth */}
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-40 rounded-t-2xl bg-gradient-to-b from-white/[0.12] to-transparent" aria-hidden />
+            <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-[#161618] shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_24px_48px_-8px_rgba(0,0,0,0.5),0_48px_96px_-16px_rgba(0,0,0,0.55),0_72px_144px_-24px_rgba(0,0,0,0.45)]">
+              {/* Subtle top edge — Linear app window feel */}
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-32 rounded-t-2xl bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden />
               <div className="relative">
                 {/* App chrome — sidebar + main content like Linear */}
                 <div className="flex min-h-[420px] md:min-h-[500px]">
@@ -193,10 +193,10 @@ export default function HomePage() {
         <div className="container-xl px-6 sm:px-10 md:px-14">
           <div className="max-w-3xl">
             <p className="text-3xl font-semibold leading-[1.15] tracking-tight text-white sm:text-4xl md:text-5xl">
-              AI answers are becoming the homepage.
+              SEO is reporting the past. AI answers are deciding the present. VRTL Score measures what actually matters.
             </p>
             <p className="mt-3 text-base text-white/50 sm:text-lg">
-              Visibility means being mentioned. Or being replaced.
+              Search results are being replaced by generated answers. Inclusion is the new visibility.
             </p>
           </div>
 
@@ -205,9 +205,11 @@ export default function HomePage() {
               {/* AEO / Inclusion */}
               <div className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.02] p-6 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.35)] transition-all duration-200 hover:border-white/[0.14] md:p-7">
                 <div className="text-[10px] font-medium uppercase tracking-wider text-white/40">AEO</div>
-                <h3 className="mt-1.5 text-lg font-semibold text-white">Win inclusion.</h3>
+                <h3 className="mt-1.5 text-lg font-semibold text-white">Win inclusion in answers.</h3>
                 <p className="mt-3 text-sm leading-relaxed text-white/60">
-                  Get your client named inside AI answers.
+                  AI models generate direct responses.
+                  <br />
+                  If your client is not named inside them, they do not exist.
                 </p>
                 {/* Diagram: answer card, 2 line blocks, mention pill, sources row */}
                 <div className="mt-5 flex flex-1 flex-col justify-end">
@@ -232,9 +234,11 @@ export default function HomePage() {
               {/* GEO / Recommendations */}
               <div className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.02] p-6 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.35)] transition-all duration-200 hover:border-white/[0.14] md:p-7">
                 <div className="text-[10px] font-medium uppercase tracking-wider text-white/40">GEO</div>
-                <h3 className="mt-1.5 text-lg font-semibold text-white">Win recommendations.</h3>
+                <h3 className="mt-1.5 text-lg font-semibold text-white">Win recommendations in generation.</h3>
                 <p className="mt-3 text-sm leading-relaxed text-white/60">
-                  Influence which brands get recommended.
+                  When users ask for the best agency, product, or tool, models decide who appears first.
+                  <br />
+                  That decision is not random.
                 </p>
                 {/* Diagram: ranked list with 1/2/3, row #1 fill + emerald bar + Recommended */}
                 <div className="mt-5 flex flex-1 flex-col justify-end">
@@ -263,7 +267,9 @@ export default function HomePage() {
                 <div className="text-[10px] font-medium uppercase tracking-wider text-white/40">MEASURE</div>
                 <h3 className="mt-1.5 text-lg font-semibold text-white">Make it reportable.</h3>
                 <p className="mt-3 text-sm leading-relaxed text-white/60">
-                  Turn AI visibility into metrics you can track.
+                  Most agencies cannot report AI visibility.
+                  <br />
+                  They can report rankings. Not inclusion. Not replacement.
                 </p>
                 {/* Diagram: score ring (~20% larger), Visibility label, trend line, metric chips */}
                 <div className="mt-5 flex flex-1 flex-col justify-end">
@@ -295,13 +301,13 @@ export default function HomePage() {
 
           <div className="mx-auto mt-8 max-w-7xl text-center md:mt-10">
             <p className="text-base font-medium text-white/80 sm:text-lg">
-              VRTL Score makes AI visibility a measurable channel.
+              VRTL Score turns AI visibility into a channel you can measure and defend.
             </p>
             <Link
               href="/#platform"
               className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-white/80 underline-offset-4 transition-colors hover:text-white hover:underline"
             >
-              Learn more
+              See the platform
               <span aria-hidden>→</span>
             </Link>
           </div>
