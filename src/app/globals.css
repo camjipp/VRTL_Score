@@ -172,57 +172,38 @@ html {
   animation: shimmer 2s infinite;
 }
 
-/* ═══ Stage — Linear's actual background (from .Frame_background__iLZh4) ═══ */
-.stage {
+/* ═══ Hero frame — Linear pattern: one clipped “room + floor” background ═══ */
+.heroFrame {
+  --inset: 12px;
   position: relative;
-  --stage-bottom: #0c0d0e;
+  border-radius: 28px;
+  overflow: hidden;
+  background: #050608;
+}
+
+.heroFrameBg {
+  position: absolute;
+  inset: 0 var(--inset);
+  border-radius: inherit;
+  pointer-events: none;
   background:
     radial-gradient(
       52.53% 57.5% at 50% 100%,
-      rgba(8, 9, 10, 0) 0,
-      rgba(8, 9, 10, 0.5) 100%
+      rgba(8, 9, 10, 0) 0%,
+      rgba(8, 9, 10, 0.55) 100%
     ),
-    linear-gradient(180deg, #08090a 10%, var(--stage-bottom) 100%);
-  overflow: visible;
+    linear-gradient(
+      180deg,
+      #08090a 10%,
+      rgba(140, 145, 155, 0.6) 100%
+    );
+  overflow: hidden;
+  z-index: 0;
 }
 
-.stage::before,
-.stage::after {
-  display: none;
-}
-
-/* Floor: hidden by default; set to block + adjust if you want a visible band */
-.floorPlane {
-  display: none;
-}
-
-.stage > *:not(.floorPlane) {
-  position: relative;
-  z-index: 2;
-}
-
-/* Panel — Linear reference: dark charcoal card, soft diffuse shadow (depth = shadow only) */
-.floatingPanel {
+.heroFrame > * {
   position: relative;
   z-index: 1;
-  border-radius: 16px;
-  background: #1c1c1e;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
-  overflow: hidden;
-}
-
-.floatingPanel::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  pointer-events: none;
-}
-
-.floatingPanel::after {
-  display: none;
 }
 
 .panelWrap {
@@ -231,22 +212,33 @@ html {
   place-items: center;
 }
 
-.contactShadow {
-  position: absolute;
-  width: min(1080px, 96vw);
-  height: 120px;
-  bottom: 0;
-  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0, 0, 0, 0.4), transparent 70%);
-  filter: blur(16px);
-  opacity: 0.8;
-  pointer-events: none;
-  z-index: 0;
+/* Panel — grounded shadow stack so it “sits” on the floor */
+.floatingPanel {
+  position: relative;
+  z-index: 1;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 42%),
+    linear-gradient(180deg, rgba(18, 20, 24, 0.92), rgba(10, 11, 14, 0.78));
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.55),
+    0 60px 140px rgba(0, 0, 0, 0.55),
+    0 170px 320px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
 }
 
-@media (max-width: 768px) {
-  .contactShadow {
-    height: 80px;
-  }
+.floatingPanel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  pointer-events: none;
+}
+
+.floatingPanel::after {
+  display: none;
 }
 
 @layer components {

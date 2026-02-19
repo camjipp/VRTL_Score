@@ -48,10 +48,10 @@ export default function HomePage() {
   return (
     <main className="bg-black">
       {/* ═══════════════════════════════════════════════════════
-          HERO — Stage (floor behind content; panel on top)
+          HERO — Linear-style frame (room + floor in one bg layer)
       ═══════════════════════════════════════════════════════ */}
-      <section className="stage relative flex min-h-[90vh] flex-col overflow-visible sm:min-h-[95vh]">
-        <div className="floorPlane" aria-hidden />
+      <section className="heroFrame relative flex min-h-[90vh] flex-col sm:min-h-[95vh]">
+        <div className="heroFrameBg" aria-hidden />
 
         <div className="heroContent container-xl flex flex-1 flex-col justify-start px-6 pb-28 pt-24 sm:px-10 sm:pt-28 md:px-14">
           <div className="max-w-3xl">
@@ -66,7 +66,6 @@ export default function HomePage() {
           </div>
 
           <div className="panelWrap mx-auto mt-10 w-full max-w-7xl translate-y-6 sm:translate-y-10 md:translate-y-12">
-            <div className="contactShadow" aria-hidden />
             <div className="floatingPanel w-full max-w-7xl">
               <div className="relative">
                 {/* App chrome — sidebar + main content */}
@@ -164,6 +163,7 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </section>
 
