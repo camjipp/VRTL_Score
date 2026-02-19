@@ -50,17 +50,12 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════
           HERO — Linear-style dark + bottom fade
       ═══════════════════════════════════════════════════════ */}
-      <section className="relative flex min-h-[90vh] flex-col overflow-visible bg-[#0a0a0a] sm:min-h-[95vh]">
-        {/* Room depth — Linear-style: spotlight behind card, darker edges */}
+      <section className="relative flex min-h-[90vh] flex-col overflow-visible bg-[#000] sm:min-h-[95vh]">
+        {/* Room depth — Linear-style: crisp spotlight, no blur, hard edge */}
         <div className="pointer-events-none absolute inset-0">
-          {/* Stage spotlight — lighter gray behind card, creates "sitting in a room" effect */}
+          {/* Hard radial spotlight — defined boundary, lighter gray behind card */}
           <div
-            className="absolute inset-0 bg-[radial-gradient(ellipse_80%_70%_at_50%_55%,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.03)_35%,rgba(0,0,0,0)_60%,rgba(0,0,0,0.9)_100%)]"
-            aria-hidden
-          />
-          {/* Subtle floor haze — atmospheric depth at bottom */}
-          <div
-            className="absolute inset-x-0 bottom-0 h-[60vh] bg-gradient-to-t from-white/[0.04] via-white/[0.01] to-transparent blur-2xl"
+            className="absolute inset-0 bg-[radial-gradient(ellipse_75%_60%_at_50%_52%,rgba(40,40,42,1)_0%,rgba(25,25,27,1)_40%,rgba(10,10,10,1)_70%,rgba(0,0,0,1)_100%)]"
             aria-hidden
           />
         </div>
@@ -81,7 +76,7 @@ export default function HomePage() {
 
           {/* Product preview card — dominant visual anchor, pulled up tight like Linear */}
           <div className="relative z-10 mx-auto mt-10 w-full max-w-7xl translate-y-6 sm:translate-y-10 md:translate-y-12">
-            <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] shadow-[0_40px_100px_-15px_rgba(0,0,0,0.6),0_25px_50px_-25px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.06)]">
+            <div className="relative overflow-hidden rounded-2xl border border-white/[0.1] bg-white/[0.03] shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_32px_64px_-12px_rgba(0,0,0,0.75),0_16px_32px_-8px_rgba(0,0,0,0.5)]">
               {/* Inner highlight — glass UI depth */}
               <div className="pointer-events-none absolute inset-x-0 top-0 h-40 rounded-t-2xl bg-gradient-to-b from-white/[0.12] to-transparent" aria-hidden />
               <div className="relative">
