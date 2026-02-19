@@ -42,6 +42,31 @@
   --ring: var(--accent);
   --shadow-lift: 0 8px 18px rgba(0,0,0,0.08);
 
+  /* Stage / floating panel (hero — ambient room + glass panel) */
+  --stage-bg: #050608;
+  --stage-vignette: rgba(0, 0, 0, 0.72);
+  --stage-glow-1: rgba(110, 231, 255, 0.1);
+  --stage-glow-2: rgba(167, 139, 250, 0.08);
+  --stage-glow-3: rgba(255, 255, 255, 0.04);
+  --stage-haze: rgba(255, 255, 255, 0.03);
+
+  --panel-bg: rgba(18, 20, 24, 0.78);
+  --panel-surface-1: rgba(255, 255, 255, 0.1);
+  --panel-surface-2: rgba(255, 255, 255, 0.02);
+  --panel-border: rgba(255, 255, 255, 0.1);
+  --panel-border-soft: rgba(120, 140, 255, 0.12);
+  --panel-inner: rgba(0, 0, 0, 0.55);
+
+  --rim-top: rgba(255, 255, 255, 0.1);
+  --rim-side: rgba(120, 160, 255, 0.08);
+
+  --shadow-tight: 0 10px 30px rgba(0, 0, 0, 0.55);
+  --shadow-mid: 0 40px 90px rgba(0, 0, 0, 0.55);
+  --shadow-wide: 0 120px 220px rgba(0, 0, 0, 0.6);
+
+  --under-glow: rgba(120, 160, 255, 0.08);
+  --radius-panel: 20px;
+
   /*
     Compatibility aliases (so existing classes like bg-bg0/bg-bg1/muted keep working)
     Feel free to remove once the UI is migrated to the new token names.
@@ -147,6 +172,124 @@ html {
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
+}
+
+/* ═══ Stage (ambient room background) ═══ */
+.stage {
+  position: relative;
+  background: var(--stage-bg);
+  overflow: hidden;
+}
+
+.stage::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(900px 600px at 30% 20%, var(--stage-glow-1), transparent 60%),
+    radial-gradient(800px 520px at 70% 35%, var(--stage-glow-2), transparent 62%),
+    radial-gradient(900px 700px at 50% 70%, var(--stage-glow-3), transparent 65%);
+  opacity: 1;
+  pointer-events: none;
+}
+
+.stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    1200px 800px at 50% 35%,
+    transparent 55%,
+    var(--stage-vignette) 100%
+  );
+  pointer-events: none;
+}
+
+.stage .haze {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    1200px 800px at 50% 60%,
+    var(--stage-haze),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+/* ═══ Floating panel (glass dashboard mock) ═══ */
+.floatingPanel {
+  position: relative;
+  border-radius: var(--radius-panel);
+  background:
+    linear-gradient(180deg, var(--panel-surface-1), rgba(255, 255, 255, 0) 35%),
+    linear-gradient(180deg, rgba(18, 20, 24, 0.84), rgba(12, 13, 16, 0.72));
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--shadow-tight), var(--shadow-mid), var(--shadow-wide);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+
+.floatingPanel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(180deg, var(--rim-top), transparent 35%),
+    linear-gradient(90deg, var(--rim-side), transparent 25%, transparent 75%, var(--rim-side));
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.floatingPanel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -20px 60px var(--panel-inner);
+  pointer-events: none;
+}
+
+.panelGlow {
+  position: absolute;
+  inset: auto 10% -40px 10%;
+  height: 120px;
+  background: radial-gradient(closest-side, var(--under-glow), transparent 70%);
+  filter: blur(14px);
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@media (max-width: 768px) {
+  .stage::before {
+    background:
+      radial-gradient(520px 360px at 30% 20%, var(--stage-glow-1), transparent 60%),
+      radial-gradient(480px 320px at 70% 35%, var(--stage-glow-2), transparent 62%),
+      radial-gradient(520px 400px at 50% 70%, var(--stage-glow-3), transparent 65%);
+  }
+  .stage::after {
+    background: radial-gradient(
+      700px 500px at 50% 35%,
+      transparent 55%,
+      var(--stage-vignette) 100%
+    );
+  }
+  .stage .haze {
+    background: radial-gradient(
+      700px 500px at 50% 60%,
+      var(--stage-haze),
+      transparent 70%
+    );
+  }
+  .panelGlow {
+    height: 80px;
+    inset: auto 5% -24px 5%;
+    filter: blur(10px);
+  }
 }
 
 @layer components {

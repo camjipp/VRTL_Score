@@ -48,29 +48,13 @@ export default function HomePage() {
   return (
     <main className="bg-black">
       {/* ═══════════════════════════════════════════════════════
-          HERO — Linear-style dark + bottom fade
+          HERO — Stage (ambient room) + floating glass panel
       ═══════════════════════════════════════════════════════ */}
-      <section className="relative flex min-h-[90vh] flex-col overflow-visible bg-[#080808] sm:min-h-[95vh]">
-        {/* Linear-style lighting: soft glow under card, dark corners */}
-        <div className="pointer-events-none absolute inset-0">
-          {/* Soft upward glow — light from under/below the dashboard, central-bottom */}
-          <div
-            className="absolute inset-0 bg-[radial-gradient(ellipse_120%_100%_at_50%_88%,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_35%,rgba(255,255,255,0.02)_55%,transparent_75%)]"
-            aria-hidden
-          />
-          {/* Darker corners — shadows live in the corners, not under the card */}
-          <div
-            className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_0%_100%,rgba(0,0,0,0.5)_0%,transparent_55%)]"
-            aria-hidden
-          />
-          <div
-            className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_100%_100%,rgba(0,0,0,0.5)_0%,transparent_55%)]"
-            aria-hidden
-          />
-        </div>
+      <section className="stage relative flex min-h-[90vh] flex-col overflow-visible sm:min-h-[95vh]">
+        <div className="haze" aria-hidden />
 
         <div className="container-xl relative z-10 flex flex-1 flex-col justify-start px-6 pb-28 pt-24 sm:px-10 sm:pt-28 md:px-14">
-          {/* Copy block — Linear-tight: headline + sub + CTA, minimal vertical space */}
+          {/* Copy block */}
           <div className="max-w-3xl">
             <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl">
               Your clients are already being ranked by AI.
@@ -83,19 +67,14 @@ export default function HomePage() {
 
           </div>
 
-          {/* Product preview card — dominant visual anchor, pulled up tight like Linear */}
+          {/* Floating panel (dashboard mock) */}
           <div className="relative z-10 mx-auto mt-10 w-full max-w-7xl translate-y-6 sm:translate-y-10 md:translate-y-12">
-            {/* Under-light: soft diffuse glow from below card — illuminates area under dashboard */}
-            <div
-              className="pointer-events-none absolute left-0 right-0 top-full z-0 h-32 bg-gradient-to-b from-white/[0.22] via-white/[0.09] to-transparent blur-md"
-              aria-hidden
-            />
-            <div className="relative z-10 overflow-hidden rounded-2xl border border-white/[0.06] bg-[#161618] shadow-[0_0_0_1px_rgba(255,255,255,0.05),-24px_20px_40px_-8px_rgba(0,0,0,0.35),24px_20px_40px_-8px_rgba(0,0,0,0.35),-40px_28px_56px_-12px_rgba(0,0,0,0.28),40px_28px_56px_-12px_rgba(0,0,0,0.28)]">
-              {/* Subtle top edge — Linear app window feel */}
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-32 rounded-t-2xl bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden />
-              <div className="relative">
-                {/* App chrome — sidebar + main content like Linear */}
-                <div className="flex min-h-[420px] md:min-h-[500px]">
+            <div className="relative">
+              <div className="panelGlow" aria-hidden />
+              <div className="floatingPanel relative z-10">
+                <div className="relative">
+                  {/* App chrome — sidebar + main content */}
+                  <div className="flex min-h-[420px] md:min-h-[500px]">
                   {/* Sidebar */}
                   <div className="hidden w-52 shrink-0 border-r border-white/[0.08] bg-white/[0.04] p-4 md:block">
                     <div className="flex items-center gap-2">
@@ -190,6 +169,7 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+      </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════
