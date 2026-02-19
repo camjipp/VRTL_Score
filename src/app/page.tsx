@@ -184,7 +184,7 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          THE SHIFT — Linear-style market memo (AEO, GEO, measurement gap)
+          THE SHIFT — visual feature blocks with mini UI mocks
       ═══════════════════════════════════════════════════════ */}
       <section
         id="shift"
@@ -196,109 +196,86 @@ export default function HomePage() {
               Search is becoming answers.
             </p>
             <p className="mt-5 text-base leading-relaxed text-white/65 sm:text-lg">
-              Search is no longer a ranked list of links. It is a system of generated responses.
               Visibility now means being mentioned — or being replaced.
             </p>
           </div>
 
-          <div className="mt-10 grid gap-4 md:mt-12 md:grid-cols-2">
-            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)]">
-              <div className="flex items-center justify-between">
-                <div className="text-xs font-medium uppercase tracking-wider text-white/35">AEO</div>
-                <div className="text-xs font-medium text-white/35">Answer Engine Optimization</div>
-              </div>
-              <div className="mt-3 text-lg font-semibold text-white">
-                Win inclusion in answers.
-              </div>
-              <div className="mt-5 space-y-4">
-                <div>
-                  <div className="text-xs font-medium uppercase tracking-wider text-white/30">What it is</div>
-                  <p className="mt-2 text-sm leading-relaxed text-white/60">
-                    Getting your client named inside AI-generated responses — not just &quot;ranking,&quot; but inclusion.
-                  </p>
+          <div className="mt-12 grid gap-6 md:mt-16 md:grid-cols-3">
+            {/* AEO / Inclusion */}
+            <div className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)] transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.12] hover:shadow-[0_40px_100px_-30px_rgba(0,0,0,0.7)]">
+              <div className="text-[10px] font-medium uppercase tracking-wider text-white/35">AEO</div>
+              <h3 className="mt-2 text-lg font-semibold text-white">Win inclusion.</h3>
+              <p className="mt-3 text-sm leading-relaxed text-white/60">
+                Get your client named inside AI-generated responses, not just ranked.
+              </p>
+              {/* Mini UI mock: AI answer card */}
+              <div className="mt-5 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+                <div className="h-2 w-3/4 rounded bg-white/20" />
+                <div className="mt-3 space-y-1.5">
+                  <div className="h-2 w-full rounded bg-white/10" />
+                  <div className="h-2 w-4/5 rounded bg-white/10" />
                 </div>
-                <div>
-                  <div className="text-xs font-medium uppercase tracking-wider text-white/30">What agencies can do</div>
-                  <p className="mt-2 text-sm leading-relaxed text-white/60">
-                    Build authority signals: entities, citations, and structured pages that increase inclusion when answers are generated.
-                  </p>
+                <span className="mt-2 inline-block rounded-full bg-accent/25 px-2 py-1 text-[10px] font-medium text-accent">
+                  Mentioned: Your Client
+                </span>
+              </div>
+            </div>
+
+            {/* GEO / Recommendations */}
+            <div className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)] transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.12] hover:shadow-[0_40px_100px_-30px_rgba(0,0,0,0.7)]">
+              <div className="text-[10px] font-medium uppercase tracking-wider text-white/35">GEO</div>
+              <h3 className="mt-2 text-lg font-semibold text-white">Win recommendations.</h3>
+              <p className="mt-3 text-sm leading-relaxed text-white/60">
+                Influence which brands models surface when users ask for options.
+              </p>
+              {/* Mini UI mock: comparison list */}
+              <div className="mt-5 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-white/90">Your Client</span>
+                  <span className="rounded bg-accent/20 px-1.5 py-0.5 text-[9px] font-medium text-accent">Recommended</span>
+                </div>
+                <div className="mt-2 flex items-center justify-between text-[10px] text-white/40">
+                  <span>Competitor A</span>
+                </div>
+                <div className="mt-1 flex items-center justify-between text-[10px] text-white/40">
+                  <span>Competitor B</span>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)]">
-              <div className="flex items-center justify-between">
-                <div className="text-xs font-medium uppercase tracking-wider text-white/35">GEO</div>
-                <div className="text-xs font-medium text-white/35">Generative Engine Optimization</div>
-              </div>
-              <div className="mt-3 text-lg font-semibold text-white">
-                Win recommendations in generation.
-              </div>
-              <div className="mt-5 space-y-4">
-                <div>
-                  <div className="text-xs font-medium uppercase tracking-wider text-white/30">What it is</div>
-                  <p className="mt-2 text-sm leading-relaxed text-white/60">
-                    Influencing which brands models recommend when users ask for options, comparisons, or &quot;best&quot; picks.
-                  </p>
+            {/* MEASURE / Reportable */}
+            <div className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)] transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.12] hover:shadow-[0_40px_100px_-30px_rgba(0,0,0,0.7)]">
+              <div className="text-[10px] font-medium uppercase tracking-wider text-white/35">MEASURE</div>
+              <h3 className="mt-2 text-lg font-semibold text-white">Make it reportable.</h3>
+              <p className="mt-3 text-sm leading-relaxed text-white/60">
+                Turn AI visibility into metrics you can track and prove.
+              </p>
+              {/* Mini UI mock: dashboard strip */}
+              <div className="mt-5 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+                <div className="flex flex-wrap gap-1.5">
+                  <span className="rounded-md bg-white/10 px-2 py-1 text-[9px] text-white/60">Mention Rate</span>
+                  <span className="rounded-md bg-white/10 px-2 py-1 text-[9px] text-white/60">Primary Displacer</span>
+                  <span className="rounded-md bg-accent/20 px-2 py-1 text-[9px] font-medium text-accent">Visibility Score</span>
                 </div>
-                <div>
-                  <div className="text-xs font-medium uppercase tracking-wider text-white/30">What agencies can do</div>
-                  <p className="mt-2 text-sm leading-relaxed text-white/60">
-                    Strengthen competitive positioning and narrative authority so the model chooses your client when it generates recommendations.
-                  </p>
+                <div className="mt-3 flex h-8 items-end gap-1">
+                  {[40, 55, 48, 72, 65, 78].map((h, i) => (
+                    <div key={i} className="flex-1 rounded-t bg-accent/40" style={{ height: `${h}%` }} />
+                  ))}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="mt-10 grid gap-6 md:mt-12 md:grid-cols-5">
-            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 md:col-span-3">
-              <div className="text-xs font-medium uppercase tracking-wider text-white/35">
-                The measurement gap
-              </div>
-              <p className="mt-3 text-sm leading-relaxed text-white/60">
-                Most agencies can report rankings. Few can report mentions.
-              </p>
-              <div className="mt-5 space-y-3">
-                {[
-                  "Is your client included in AI answers?",
-                  "Who is replacing them when they're not?",
-                  "Which model shifted — and why?",
-                  "How did visibility change week over week?",
-                ].map((q) => (
-                  <div key={q} className="flex items-start gap-3">
-                    <div className="mt-1.5 h-1.5 w-1.5 rounded-full bg-white/35" />
-                    <p className="text-sm leading-relaxed text-white/60">{q}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 md:col-span-2">
-              <div className="text-xs font-medium uppercase tracking-wider text-white/35">
-                What happens next
-              </div>
-              <p className="mt-3 text-sm leading-relaxed text-white/60">
-                When visibility shifts inside answer engines, keyword reports stop explaining reality.
-                Clients see competitors in AI responses while agencies show rankings. That gap erodes trust.
-              </p>
-
-              <div className="mt-6 border-t border-white/[0.06] pt-5">
-                <div className="text-xs font-medium uppercase tracking-wider text-white/35">
-                  The bridge
-                </div>
-                <p className="mt-2 text-sm leading-relaxed text-white/70">
-                  VRTL Score turns AI visibility into a measurable channel.
-                </p>
-
-                <Link
-                  href="/pricing"
-                  className="mt-4 inline-flex text-sm font-medium text-white/70 underline-offset-4 hover:text-white hover:underline"
-                >
-                  See pricing
-                </Link>
-              </div>
-            </div>
+          <div className="mt-12 text-center md:mt-16">
+            <p className="text-base font-medium text-white/80 sm:text-lg">
+              VRTL Score makes AI visibility a measurable channel.
+            </p>
+            <Link
+              href="/#platform"
+              className="mt-3 inline-flex text-sm font-medium text-white/60 underline-offset-4 hover:text-white hover:underline"
+            >
+              See the platform →
+            </Link>
           </div>
         </div>
       </section>
