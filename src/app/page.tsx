@@ -551,100 +551,128 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          DASHBOARD PROOF — full-width, dark, dramatic
+          PLATFORM — AI visibility measurable and billable
       ═══════════════════════════════════════════════════════ */}
-      <section id="platform" className="bg-[#0A0A0A] py-20 md:py-28">
-        <div className="container-xl">
-          <div className="mx-auto max-w-3xl text-center mb-12">
-            <p className="text-sm font-semibold uppercase tracking-widest text-white/40">Inside the platform</p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white md:text-4xl">
-              This is serious software.
-            </h2>
-          </div>
+      <section id="platform" className="bg-black py-24 md:py-28">
+        <div className="mx-auto max-w-7xl px-6 sm:px-10 md:px-14">
+          <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl md:text-5xl">
+            AI visibility is measurable and billable.
+          </h2>
+          <p className="mt-4 max-w-2xl text-lg text-white/50">
+            Track inclusion, displacement, and change. Deliver structured evidence to clients.
+          </p>
 
-          {/* Mock dashboard */}
-          <div className="mx-auto max-w-5xl rounded-2xl border border-white/10 bg-[#111] p-6 shadow-2xl md:p-8">
-            {/* Top bar */}
-            <div className="flex items-center justify-between border-b border-white/10 pb-5">
+          <div className="mt-16 border-t border-white/10">
+            {/* Row 1 — Inclusion */}
+            <div className="grid border-b border-white/10 py-10 md:grid-cols-2 md:py-12">
               <div>
-                <div className="text-xs uppercase tracking-wide text-white/40">Client Overview</div>
-                <div className="mt-1 text-xl font-bold text-white">Acme Digital Agency</div>
+                <p className="text-sm font-semibold uppercase tracking-wider text-white/50">Inclusion</p>
+                <ul className="mt-4 space-y-1.5 text-sm text-white/80">
+                  <li>Mention rate across models</li>
+                  <li>Prompt-level coverage distribution</li>
+                  <li>Model variance analysis</li>
+                </ul>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="rounded-lg bg-emerald-500/10 px-3 py-1.5">
-                  <span className="text-xs font-medium text-emerald-400">Score trending up</span>
-                </div>
-                <div className="rounded-lg bg-white/5 px-3 py-1.5">
-                  <span className="text-xs font-medium text-white/60">Last snapshot: 2 days ago</span>
+              <div className="mt-6 flex items-center md:mt-0 md:pl-8">
+                <div className="flex w-full max-w-xs gap-2">
+                  <div className="h-2 flex-1 rounded-sm bg-white/20" />
+                  <div className="h-2 flex-1 rounded-sm bg-white/10" />
+                  <div className="h-2 flex-1 rounded-sm bg-emerald-500/70" />
                 </div>
               </div>
             </div>
 
-            {/* Score + metrics row */}
-            <div className="mt-6 grid gap-6 md:grid-cols-4">
-              {/* Big score */}
-              <div className="flex flex-col items-center justify-center rounded-xl border border-white/10 bg-white/5 p-6">
-                <div className="text-5xl font-bold text-white">78</div>
-                <div className="mt-1 text-sm text-white/40">AI Visibility Score</div>
-                <div className="mt-2 flex items-center gap-1 text-sm font-medium text-emerald-400">
-                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+            {/* Row 2 — Position */}
+            <div className="grid border-b border-white/10 py-10 md:grid-cols-2 md:py-12">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wider text-white/50">Position</p>
+                <ul className="mt-4 space-y-1.5 text-sm text-white/80">
+                  <li>First mention frequency</li>
+                  <li>Recommendation rank index</li>
+                  <li>Comparative placement scoring</li>
+                </ul>
+              </div>
+              <div className="mt-6 md:mt-0 md:pl-8">
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center gap-2 rounded border border-white/20 bg-white/5 py-1.5 pl-2 pr-3">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/30 text-xs font-bold text-white">1</span>
+                    <span className="h-1.5 flex-1 rounded-sm bg-white/20" />
+                  </div>
+                  <div className="flex items-center gap-2 py-1.5 pl-2">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-medium text-white/50">2</span>
+                    <span className="h-1.5 flex-1 max-w-[60%] rounded-sm bg-white/10" />
+                  </div>
+                  <div className="flex items-center gap-2 py-1.5 pl-2">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-medium text-white/50">3</span>
+                    <span className="h-1.5 flex-1 max-w-[40%] rounded-sm bg-white/10" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Row 3 — Replacement */}
+            <div className="grid border-b border-white/10 py-10 md:grid-cols-2 md:py-12">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wider text-white/50">Replacement</p>
+                <ul className="mt-4 space-y-1.5 text-sm text-white/80">
+                  <li>Primary displacer identification</li>
+                  <li>Substitution pattern analysis</li>
+                  <li>Emerging competitor detection</li>
+                </ul>
+              </div>
+              <div className="mt-6 md:mt-0 md:pl-8">
+                <div className="flex items-center gap-2">
+                  <div className="rounded border border-white/15 bg-white/5 px-2.5 py-1.5 text-xs text-white/70">Client</div>
+                  <svg className="h-3 w-3 shrink-0 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
-                  +6 vs last month
+                  <div className="rounded border border-white/15 bg-white/5 px-2.5 py-1.5 text-xs text-white/70">Competitor</div>
                 </div>
               </div>
-
-              {/* Mini metrics */}
-              {[
-                { label: "Mention Rate", value: "72%", delta: "+8%" },
-                { label: "Top Position Rate", value: "45%", delta: "+12%" },
-                { label: "Citation Rate", value: "38%", delta: "+5%" },
-              ].map((m) => (
-                <div key={m.label} className="rounded-xl border border-white/10 bg-white/5 p-5">
-                  <div className="text-xs text-white/40">{m.label}</div>
-                  <div className="mt-2 text-2xl font-bold text-white">{m.value}</div>
-                  <div className="mt-1 text-xs font-medium text-emerald-400">{m.delta}</div>
-                </div>
-              ))}
             </div>
 
-            {/* Model breakdown row */}
-            <div className="mt-6 grid gap-6 md:grid-cols-3">
-              {[
-                { model: "ChatGPT", score: 85, icon: "/ai/icons8-chatgpt.svg" },
-                { model: "Claude", score: 72, icon: "/ai/icons8-claude.svg" },
-                { model: "Gemini", score: 68, icon: "/ai/gemini.png" },
-              ].map((p) => (
-                <div key={p.model} className="rounded-xl border border-white/10 bg-white/5 p-5">
-                  <div className="flex items-center gap-2.5">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={p.icon} alt={p.model} className="h-5 w-5" />
-                    <span className="text-sm font-medium text-white">{p.model}</span>
-                    <span className="ml-auto text-lg font-bold text-white">{p.score}</span>
-                  </div>
-                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
-                    <div className="h-full rounded-full bg-emerald-500" style={{ width: `${p.score}%` }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Trend chart mock */}
-            <div className="mt-6 rounded-xl border border-white/10 bg-white/5 p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div className="text-xs uppercase tracking-wide text-white/40">Score Trend</div>
-                <div className="text-xs text-white/30">Last 6 months</div>
+            {/* Row 4 — Change */}
+            <div className="grid border-b border-white/10 py-10 md:grid-cols-2 md:py-12">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wider text-white/50">Change</p>
+                <ul className="mt-4 space-y-1.5 text-sm text-white/80">
+                  <li>Week-over-week deltas</li>
+                  <li>Authority trend index</li>
+                  <li>Model volatility tracking</li>
+                </ul>
               </div>
-              <div className="flex items-end gap-2 h-24">
-                {[45, 52, 58, 62, 72, 78].map((v, i) => (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                    <div
-                      className="w-full rounded-t bg-emerald-500/80 transition-all"
-                      style={{ height: `${(v / 100) * 96}px` }}
-                    />
-                    <span className="text-[10px] text-white/30">{v}</span>
+              <div className="mt-6 md:mt-0 md:pl-8">
+                <svg className="h-10 w-24 text-white/60" viewBox="0 0 96 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="0,32 16,28 32,24 48,20 64,14 80,10 96,6" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Row 5 — Reporting */}
+            <div className="grid border-b border-white/10 py-10 md:grid-cols-2 md:py-12">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wider text-white/50">Reporting</p>
+                <h3 className="mt-3 text-lg font-semibold text-white">Turn AI visibility into billable reporting.</h3>
+                <ul className="mt-4 space-y-1.5 text-sm text-white/80">
+                  <li>Downloadable client-ready PDFs</li>
+                  <li>White-labeled branded exports</li>
+                  <li>Competitive replacement snapshots</li>
+                  <li>Time-stamped scenario preservation</li>
+                </ul>
+              </div>
+              <div className="mt-6 md:mt-0 md:pl-8">
+                <div className="w-full max-w-[220px] rounded border border-white/15 bg-white/[0.04] p-4">
+                  <div className="h-5 w-16 rounded bg-white/20" />
+                  <div className="mt-4 text-2xl font-bold text-white">78</div>
+                  <div className="mt-0.5 text-[10px] uppercase tracking-wider text-white/40">Visibility Score</div>
+                  <div className="mt-3 flex items-center gap-1.5 text-xs text-white/60">
+                    <span>Competitor delta</span>
+                    <span className="font-medium text-emerald-400/80">−4</span>
                   </div>
-                ))}
+                  <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                    <div className="h-full w-[80%] rounded-full bg-white/30" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
