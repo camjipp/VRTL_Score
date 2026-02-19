@@ -81,7 +81,12 @@ export default function HomePage() {
 
           {/* Product preview card — dominant visual anchor, pulled up tight like Linear */}
           <div className="relative z-10 mx-auto mt-10 w-full max-w-7xl translate-y-6 sm:translate-y-10 md:translate-y-12">
-            <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-[#161618] shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_24px_48px_-8px_rgba(0,0,0,0.5),0_48px_96px_-16px_rgba(0,0,0,0.55),0_72px_144px_-24px_rgba(0,0,0,0.45)]">
+            {/* Under-light: bright strip from below card (desk light) — no black along card bottom */}
+            <div
+              className="pointer-events-none absolute left-0 right-0 top-full z-0 h-24 bg-gradient-to-b from-white/[0.18] via-white/[0.08] to-transparent"
+              aria-hidden
+            />
+            <div className="relative z-10 overflow-hidden rounded-2xl border border-white/[0.06] bg-[#161618] shadow-[0_0_0_1px_rgba(255,255,255,0.05),-32px_24px_48px_-12px_rgba(0,0,0,0.45),32px_24px_48px_-12px_rgba(0,0,0,0.45),-48px_32px_64px_-16px_rgba(0,0,0,0.35),48px_32px_64px_-16px_rgba(0,0,0,0.35)]">
               {/* Subtle top edge — Linear app window feel */}
               <div className="pointer-events-none absolute inset-x-0 top-0 h-32 rounded-t-2xl bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden />
               <div className="relative">
