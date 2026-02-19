@@ -448,7 +448,7 @@ export default function HomePage() {
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-6">
             <Link
               href="/signup"
-              className="inline-flex h-11 min-w-[160px] items-center justify-center rounded-lg border border-white/20 bg-white text-sm font-medium text-black transition-colors hover:bg-white/95"
+              className="inline-flex h-11 min-w-[160px] items-center justify-center rounded-lg bg-emerald-500 text-sm font-medium text-white transition-colors hover:bg-emerald-600"
             >
               Start free trial
             </Link>
