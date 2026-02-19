@@ -207,38 +207,36 @@ html {
   z-index: 2;
 }
 
-/* Floor plane — behind content (z-index 1), reads as surface under panel */
+/* Floor plane — strictly behind content (z-index 1). Soft surface hint, not a solid block. */
 .floorPlane {
   position: absolute;
-  left: -30%;
-  right: -30%;
-  bottom: -120px;
-  height: 520px;
+  left: -20%;
+  right: -20%;
+  bottom: -80px;
+  height: 420px;
   background:
     linear-gradient(
       180deg,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(0, 0, 0, 0) 15%,
-      rgba(10, 11, 14, 0.35) 35%,
-      rgba(10, 11, 14, 0.55) 55%,
-      rgba(10, 11, 14, 0.85) 100%
+      transparent 0%,
+      transparent 25%,
+      rgba(8, 9, 11, 0.4) 50%,
+      rgba(15, 16, 18, 0.5) 75%,
+      rgba(25, 26, 30, 0.45) 100%
     ),
     radial-gradient(
-      1200px 520px at 50% 25%,
-      rgba(255, 255, 255, 0.2),
-      rgba(255, 255, 255, 0.1) 38%,
-      rgba(255, 255, 255, 0.04) 60%,
+      1000px 400px at 50% 30%,
+      rgba(255, 255, 255, 0.06),
+      rgba(255, 255, 255, 0.02) 50%,
       transparent 75%
-    ),
-    linear-gradient(180deg, rgba(120, 122, 130, 0.25), rgba(60, 62, 70, 0.18));
-  filter: blur(1px);
-  opacity: 0.95;
+    );
+  filter: blur(2px);
+  opacity: 0.7;
   pointer-events: none;
   z-index: 1;
 }
 
-/* All direct children of stage (heroContent, panelWrap) sit above ambient + floor + vignette */
-.stage > * {
+/* Content and panel sit above ambient + floor + vignette. Floor stays at z-index 1. */
+.stage > *:not(.floorPlane) {
   position: relative;
   z-index: 3;
 }
@@ -318,8 +316,9 @@ html {
     );
   }
   .floorPlane {
-    height: 380px;
-    bottom: -80px;
+    height: 280px;
+    bottom: -60px;
+    opacity: 0.6;
   }
   .contactShadow {
     height: 140px;
