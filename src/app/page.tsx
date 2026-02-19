@@ -50,17 +50,21 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════
           HERO — Linear-style dark + bottom fade
       ═══════════════════════════════════════════════════════ */}
-      <section className="relative flex min-h-[90vh] flex-col overflow-visible bg-[#0a0a0a] sm:min-h-[95vh]">
-        {/* Room depth — Linear-style: dark top, distinct light gray floor at bottom */}
+      <section className="relative flex min-h-[90vh] flex-col overflow-visible bg-[#080808] sm:min-h-[95vh]">
+        {/* Linear-style lighting: soft glow under card, dark corners */}
         <div className="pointer-events-none absolute inset-0">
-          {/* Two-tone: dark ceiling, bright light gray floor — Linear-style room */}
+          {/* Soft upward glow — light from under/below the dashboard, central-bottom */}
           <div
-            className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(5,5,5,1)_0%,rgba(8,8,8,1)_20%,rgba(15,15,16,1)_40%,rgba(40,40,44,1)_65%,rgba(70,70,75,1)_100%)]"
+            className="absolute inset-0 bg-[radial-gradient(ellipse_120%_100%_at_50%_88%,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_35%,rgba(255,255,255,0.02)_55%,transparent_75%)]"
             aria-hidden
           />
-          {/* Floor surface — brighter, distinct light gray like Linear */}
+          {/* Darker corners — shadows live in the corners, not under the card */}
           <div
-            className="absolute inset-x-0 bottom-0 h-[70%] bg-[linear-gradient(to_top,rgba(55,55,60,1)_0%,rgba(85,85,90,1)_35%,rgba(90,90,96,1)_55%,transparent_100%)]"
+            className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_0%_100%,rgba(0,0,0,0.5)_0%,transparent_55%)]"
+            aria-hidden
+          />
+          <div
+            className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_100%_100%,rgba(0,0,0,0.5)_0%,transparent_55%)]"
             aria-hidden
           />
         </div>
@@ -81,12 +85,12 @@ export default function HomePage() {
 
           {/* Product preview card — dominant visual anchor, pulled up tight like Linear */}
           <div className="relative z-10 mx-auto mt-10 w-full max-w-7xl translate-y-6 sm:translate-y-10 md:translate-y-12">
-            {/* Under-light: bright strip from below card (desk light) — no black along card bottom */}
+            {/* Under-light: soft diffuse glow from below card — illuminates area under dashboard */}
             <div
-              className="pointer-events-none absolute left-0 right-0 top-full z-0 h-24 bg-gradient-to-b from-white/[0.18] via-white/[0.08] to-transparent"
+              className="pointer-events-none absolute left-0 right-0 top-full z-0 h-32 bg-gradient-to-b from-white/[0.22] via-white/[0.09] to-transparent blur-md"
               aria-hidden
             />
-            <div className="relative z-10 overflow-hidden rounded-2xl border border-white/[0.06] bg-[#161618] shadow-[0_0_0_1px_rgba(255,255,255,0.05),-32px_24px_48px_-12px_rgba(0,0,0,0.45),32px_24px_48px_-12px_rgba(0,0,0,0.45),-48px_32px_64px_-16px_rgba(0,0,0,0.35),48px_32px_64px_-16px_rgba(0,0,0,0.35)]">
+            <div className="relative z-10 overflow-hidden rounded-2xl border border-white/[0.06] bg-[#161618] shadow-[0_0_0_1px_rgba(255,255,255,0.05),-24px_20px_40px_-8px_rgba(0,0,0,0.35),24px_20px_40px_-8px_rgba(0,0,0,0.35),-40px_28px_56px_-12px_rgba(0,0,0,0.28),40px_28px_56px_-12px_rgba(0,0,0,0.28)]">
               {/* Subtle top edge — Linear app window feel */}
               <div className="pointer-events-none absolute inset-x-0 top-0 h-32 rounded-t-2xl bg-gradient-to-b from-white/[0.04] to-transparent" aria-hidden />
               <div className="relative">
@@ -200,12 +204,9 @@ export default function HomePage() {
             <p className="text-3xl font-semibold leading-[1.15] tracking-tight text-white sm:text-4xl md:text-5xl">
               SEO is reporting the past. AI answers are deciding the present. VRTL Score measures what actually matters.
             </p>
-            <p className="mt-3 text-base text-white/50 sm:text-lg">
-              Search results are being replaced by generated answers. Inclusion is the new visibility.
-            </p>
           </div>
 
-          <div className="mx-auto mt-10 max-w-7xl md:mt-14">
+          <div className="mx-auto mt-6 max-w-7xl md:mt-8">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-8">
               {/* AEO / Inclusion */}
               <div className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.02] p-6 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.35)] transition-all duration-200 hover:border-white/[0.14] md:p-7">
@@ -302,19 +303,6 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-          </div>
-
-          <div className="mx-auto mt-8 max-w-7xl text-center md:mt-10">
-            <p className="text-base font-medium text-white/80 sm:text-lg">
-              VRTL Score turns AI visibility into a channel you can measure and defend.
-            </p>
-            <Link
-              href="/#platform"
-              className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-white/80 underline-offset-4 transition-colors hover:text-white hover:underline"
-            >
-              See the platform
-              <span aria-hidden>→</span>
-            </Link>
           </div>
         </div>
       </section>
