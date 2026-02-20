@@ -30,19 +30,20 @@ export function SiteNav() {
 
   // Treat null/undefined as home to avoid white flash before pathname hydrates
   const isHome = pathname === "/" || pathname === null || pathname === undefined;
+  const isDarkPage = isHome || pathname === "/pricing";
 
-  // On homepage: dark at top (avoids white flash from body); darker when scrolled
-  const homeBg = scrolled
+  // On dark pages: dark at top; darker when scrolled
+  const darkPageBg = scrolled
     ? "border-white/10 bg-black/80 backdrop-blur-md"
     : "border-white/[0.06] bg-black";
 
   return (
-    <header className={cn("sticky top-0 z-50", isHome && "bg-black")}>
-      {/* Background — transparent on homepage (Linear-style); solid when scrolled or on other pages */}
+    <header className={cn("sticky top-0 z-50", isDarkPage && "bg-black")}>
+      {/* Background — dark on home/pricing; light on other pages */}
       <div
         className={cn(
           "absolute inset-0 border-b transition-colors duration-200",
-          isHome ? homeBg : "border-border/40 bg-white/80 backdrop-blur-xl"
+          isDarkPage ? darkPageBg : "border-border/40 bg-white/80 backdrop-blur-xl"
         )}
       />
 
@@ -53,7 +54,7 @@ export function SiteNav() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               alt="VRTL Score"
-              className={cn("h-11 w-auto md:h-[52px]", isHome && "brightness-0 invert")}
+              className={cn("h-11 w-auto md:h-[52px]", isDarkPage && "brightness-0 invert")}
               src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
             />
           </Link>
@@ -63,7 +64,7 @@ export function SiteNav() {
           <div
             className={cn(
               "flex items-center",
-              isHome ? "gap-6" : "gap-1 rounded-full border border-border/60 bg-surface-2/60 px-1.5 py-1"
+              isDarkPage ? "gap-6" : "gap-1 rounded-full border border-border/60 bg-surface-2/60 px-1.5 py-1"
             )}
           >
               {navLinks.map((link) => (
@@ -71,7 +72,7 @@ export function SiteNav() {
                   key={link.href}
                   className={cn(
                     "text-sm font-medium transition-all",
-                    isHome
+                    isDarkPage
                       ? "rounded-full px-4 py-1.5 text-white/80 hover:text-white"
                       : "rounded-full px-4 py-1.5 text-text-2 hover:bg-white hover:text-text hover:shadow-sm"
                   )}
@@ -88,7 +89,7 @@ export function SiteNav() {
             <Link
               className={cn(
                 "rounded-full px-5 py-2 text-sm font-medium transition-colors",
-                isHome ? "text-white/80 hover:text-white" : "border border-border bg-surface-2 text-text hover:bg-bg-2 hover:border-border/80"
+                isDarkPage ? "text-white/80 hover:text-white" : "border border-border bg-surface-2 text-text hover:bg-bg-2 hover:border-border/80"
               )}
               href="/login"
             >
@@ -97,7 +98,7 @@ export function SiteNav() {
             <Link
               className={cn(
                 "rounded-full px-5 py-2 text-sm font-medium transition-colors",
-                isHome ? "bg-white text-black hover:bg-white/90" : "text-text-3 hover:text-text"
+                isDarkPage ? "bg-white text-black hover:bg-white/90" : "text-text-3 hover:text-text"
               )}
               href="/onboarding"
             >
@@ -109,7 +110,7 @@ export function SiteNav() {
           <button
             className={cn(
               "flex h-10 w-10 items-center justify-center rounded-full transition-all md:hidden",
-              isHome ? "text-white/80 hover:text-white" : "border border-border bg-white text-text hover:bg-surface-2"
+              isDarkPage ? "text-white/80 hover:text-white" : "border border-border bg-white text-text hover:bg-surface-2"
             )}
             onClick={() => setMobileOpen(!mobileOpen)}
             type="button"
@@ -130,9 +131,9 @@ export function SiteNav() {
         {/* Mobile menu */}
         {mobileOpen && (
           <div
-            className={cn(
+            className={            cn(
               "absolute left-4 right-4 top-full mt-2 rounded-2xl shadow-xl md:hidden",
-              isHome ? "border border-white/20 bg-black/95 backdrop-blur-xl" : "border border-border bg-surface"
+              isDarkPage ? "border border-white/20 bg-black/95 backdrop-blur-xl" : "border border-border bg-surface"
             )}
           >
             <div className="p-4">
@@ -142,7 +143,7 @@ export function SiteNav() {
                     key={link.href}
                     className={cn(
                       "rounded-xl px-4 py-3.5 text-base font-medium transition-all",
-                      isHome
+                      isDarkPage
                         ? "text-white/80 hover:bg-white/10 hover:text-white"
                         : "text-text-2 hover:bg-surface-2 hover:text-text"
                     )}
@@ -153,12 +154,12 @@ export function SiteNav() {
                   </Link>
                 ))}
               </div>
-              <hr className={cn("my-3", isHome ? "border-white/15" : "border-border")} />
+              <hr className={cn("my-3", isDarkPage ? "border-white/15" : "border-border")} />
               <div className="flex flex-col gap-2">
                 <Link
                   className={cn(
                     "rounded-xl px-4 py-3.5 text-center text-base font-medium transition-all",
-                    isHome ? "text-white/80 hover:text-white" : "border border-border bg-surface-2 text-text hover:bg-bg-2"
+                    isDarkPage ? "text-white/80 hover:text-white" : "border border-border bg-surface-2 text-text hover:bg-bg-2"
                   )}
                   href="/login"
                   onClick={() => setMobileOpen(false)}
@@ -168,7 +169,7 @@ export function SiteNav() {
                 <Link
                   className={cn(
                     "rounded-xl px-4 py-3.5 text-center text-base font-medium transition-all",
-                    isHome ? "bg-white text-black hover:bg-white/90" : "text-text-3 hover:text-text"
+                    isDarkPage ? "bg-white text-black hover:bg-white/90" : "text-text-3 hover:text-text"
                   )}
                   href="/onboarding"
                   onClick={() => setMobileOpen(false)}

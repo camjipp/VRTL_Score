@@ -368,7 +368,7 @@ export default function HomePage() {
         <div className="overflow-hidden py-6 md:py-10">
           <div className="flex animate-marquee whitespace-nowrap">
             {Array.from({ length: 30 }).map((_, i) => (
-              <span key={i} className="mx-10 text-6xl font-black text-white/40 md:text-7xl lg:text-8xl xl:text-9xl">
+              <span key={i} className="mx-10 text-6xl font-black text-white md:text-7xl lg:text-8xl xl:text-9xl">
                 Questions?
               </span>
             ))}
