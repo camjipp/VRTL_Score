@@ -160,11 +160,15 @@ function Delta({ value }: { value: number | null }) {
   );
 }
 
+/** Momentum = gap direction: ▲ widening (red), ▼ narrowing (green), — stable (gray). No animation. */
+function MomentumArrow({ delta }: { delta: number | null }) {
+  if (delta === null || delta === 0) return <span className="text-text-2">—</span>;
+  if (delta < 0) return <span className="text-authority-losing" aria-label="Widening gap">▲</span>;
+  return <span className="text-authority-dominant" aria-label="Narrowing gap">▼</span>;
+}
+
 function TrendArrow({ value }: { value: number | null }) {
-  if (value === null) return <span className="text-text-3">—</span>;
-  if (value > 0) return <span className="text-authority-dominant">↑</span>;
-  if (value < 0) return <span className="text-authority-losing">↓</span>;
-  return <span className="text-text-2">−</span>;
+  return <MomentumArrow delta={value} />;
 }
 
 function ModelDot({ model }: { model: string | null }) {
@@ -179,7 +183,10 @@ function ModelDot({ model }: { model: string | null }) {
 
 /* Section 1: Strategic Overview — four metric cards */
 function StrategicOverviewCards({ clients }: { clients: ClientWithStats[] }) {
-  const losingCount = clients.filter((c) => getAuthorityState(c) === "Losing Ground").length;
+  const wideningGapsCount = clients.filter((c) => {
+    const delta = c.latestScore !== null && c.previousScore !== null ? c.latestScore - c.previousScore : null;
+    return delta !== null && delta < 0;
+  }).length;
   const dominantCount = clients.filter((c) => getAuthorityState(c) === "Dominant").length;
   const gaps = clients
     .map((c) => c.authorityGap)
@@ -199,8 +206,8 @@ function StrategicOverviewCards({ clients }: { clients: ClientWithStats[] }) {
   return (
     <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <div className="app-card p-4">
-        <div className="text-[11px] font-medium uppercase tracking-wider text-text-2">Clients Losing Ground</div>
-        <div className="mt-1 text-2xl font-semibold tabular-nums text-text">{losingCount}</div>
+        <div className="text-[11px] font-medium uppercase tracking-wider text-text-2">Clients With Widening Gaps</div>
+        <div className="mt-1 text-2xl font-semibold tabular-nums text-text">{wideningGapsCount}</div>
       </div>
       <div className="app-card p-4">
         <div className="text-[11px] font-medium uppercase tracking-wider text-text-2">Average Authority Gap to Leader</div>
@@ -220,8 +227,39 @@ function StrategicOverviewCards({ clients }: { clients: ClientWithStats[] }) {
   );
 }
 
-/* Section 2: AI Authority Risk Map — client × model matrix */
+/* Section 2: AI Authority Risk Map — client × model matrix. Authority state = background tint only. Momentum = arrow + color. */
 const MODEL_FAMILIES: ModelFamily[] = ["chatgpt", "gemini", "claude"];
+
+function RiskMapCell({
+  score,
+  delta,
+  stateBg,
+  stateText,
+  title,
+}: {
+  score: number | null;
+  delta: number | null;
+  stateBg: string;
+  stateText: string;
+  title: string;
+}) {
+  const deltaFormatted = delta !== null && delta !== 0 ? (delta > 0 ? `+${delta}` : `${delta}`) : null;
+  return (
+    <td className={cn("w-24 min-w-[5rem] px-2 py-1.5 text-center align-top", stateBg)} title={title}>
+      <div className="flex flex-col items-center gap-0.5">
+        <span className={cn("text-xs font-medium", stateText)}>{score ?? "—"}</span>
+        {deltaFormatted !== null && (
+          <span className={cn("text-[10px] tabular-nums", delta !== null && delta < 0 ? "text-authority-losing" : "text-authority-dominant")}>
+            {deltaFormatted}
+          </span>
+        )}
+        <span className="mt-0.5">
+          <MomentumArrow delta={delta} />
+        </span>
+      </div>
+    </td>
+  );
+}
 
 function RiskMap({ clients }: { clients: ClientWithStats[] }) {
   return (
@@ -230,16 +268,16 @@ function RiskMap({ clients }: { clients: ClientWithStats[] }) {
         <h2 className="text-sm font-semibold text-text">AI Authority Risk Map</h2>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[600px] border-collapse text-left text-[13px]">
+        <table className="w-full min-w-[640px] border-collapse text-left text-[13px]">
           <thead>
             <tr className="border-b border-white/5">
               <th className="bg-surface-2/80 px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Client</th>
               {MODEL_FAMILIES.map((f) => (
-                <th key={f} className="w-20 bg-surface-2/80 px-2 py-2 text-center text-[10px] font-medium uppercase tracking-wider text-text-2">
+                <th key={f} className="w-24 min-w-[5rem] bg-surface-2/80 px-2 py-2 text-center text-[10px] font-medium uppercase tracking-wider text-text-2">
                   {modelFamilyLabel(f)}
                 </th>
               ))}
-              <th className="w-20 bg-surface-2/80 px-2 py-2 text-center text-[10px] font-medium uppercase tracking-wider text-text-2">Overall</th>
+              <th className="w-24 min-w-[5rem] bg-surface-2/80 px-2 py-2 text-center text-[10px] font-medium uppercase tracking-wider text-text-2">Overall</th>
             </tr>
           </thead>
           <tbody>
@@ -255,21 +293,23 @@ function RiskMap({ clients }: { clients: ClientWithStats[] }) {
                     const state = getAuthorityStateFromScore(score);
                     const hoverText = score != null ? [`Index ${score}`, client.primaryDisplacer && `Displacer: ${client.primaryDisplacer}`, overallDelta != null && `Change: ${overallDelta >= 0 ? "+" : ""}${overallDelta}`].filter(Boolean).join(". ") : "No data";
                     return (
-                      <td
+                      <RiskMapCell
                         key={family}
-                        className={cn("w-20 px-2 py-1.5 text-center", getAuthorityStateBg(state))}
+                        score={score}
+                        delta={overallDelta}
+                        stateBg={getAuthorityStateBg(state)}
+                        stateText={getAuthorityStateText(state)}
                         title={hoverText}
-                      >
-                        <span className={cn("text-xs font-medium", getAuthorityStateText(state))}>{score ?? "—"}</span>
-                      </td>
+                      />
                     );
                   })}
-                  <td
-                    className={cn("w-20 px-2 py-1.5 text-center", getAuthorityStateBg(overallState))}
+                  <RiskMapCell
+                    score={client.latestScore}
+                    delta={overallDelta}
+                    stateBg={getAuthorityStateBg(overallState)}
+                    stateText={getAuthorityStateText(overallState)}
                     title={hoverOverall}
-                  >
-                    <span className={cn("text-xs font-medium", getAuthorityStateText(overallState))}>{client.latestScore ?? "—"}</span>
-                  </td>
+                  />
                 </tr>
               );
             })}
@@ -280,12 +320,19 @@ function RiskMap({ clients }: { clients: ClientWithStats[] }) {
   );
 }
 
-/* Section 3: Top 5 Competitive Threats */
+/* Section 3: Top 5 Competitive Threats — prioritize widening gaps, then absolute gap size */
 function TopThreats({ clients }: { clients: ClientWithStats[] }) {
   const top5 = useMemo(() => {
-    return [...clients]
-      .filter((c) => (c.authorityGap ?? 0) > 0)
-      .sort((a, b) => (b.authorityGap ?? 0) - (a.authorityGap ?? 0))
+    const withGap = [...clients].filter((c) => (c.authorityGap ?? 0) > 0);
+    const delta = (c: ClientWithStats) =>
+      c.latestScore !== null && c.previousScore !== null ? c.latestScore - c.previousScore : null;
+    return withGap
+      .sort((a, b) => {
+        const aWidening = (delta(a) ?? 0) < 0 ? 1 : 0;
+        const bWidening = (delta(b) ?? 0) < 0 ? 1 : 0;
+        if (bWidening !== aWidening) return bWidening - aWidening;
+        return (b.authorityGap ?? 0) - (a.authorityGap ?? 0);
+      })
       .slice(0, 5);
   }, [clients]);
 
