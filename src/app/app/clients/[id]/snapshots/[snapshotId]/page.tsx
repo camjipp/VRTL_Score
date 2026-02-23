@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+
+import { BackLink } from "@/components/BackLink";
 import { useEffect, useMemo, useState } from "react";
 
 import { DownloadPdfButton } from "@/components/DownloadPdfButton";
@@ -358,7 +360,8 @@ export default function SnapshotDetailPage() {
   }, {} as Record<string, number>) ?? {};
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
+      <BackLink href={clientId ? `/app/clients/${clientId}` : "/app"} label={clientId ? "Back to Client" : "Back to Dashboard"} />
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-sm">
         <Link href="/app" className="text-text-2 transition-colors hover:text-text">Clients</Link>

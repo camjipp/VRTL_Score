@@ -21,20 +21,25 @@ const config: Config = {
         success: "rgb(var(--success) / <alpha-value>)",
         warning: "rgb(var(--warning) / <alpha-value>)",
         danger: "rgb(var(--danger) / <alpha-value>)",
-
-        /*
-          Compatibility color names (avoid breaking existing classnames; remove once migrated)
-        */
         bg0: "rgb(var(--bg-0) / <alpha-value>)",
         bg1: "rgb(var(--bg-1) / <alpha-value>)",
-        muted: "rgb(var(--muted) / <alpha-value>)"
+        muted: "rgb(var(--muted) / <alpha-value>)",
+        /* Authority states (app theme) */
+        authority: {
+          dominant: "rgb(var(--authority-dominant, 34 197 94) / <alpha-value>)",
+          stable: "rgb(var(--authority-stable, 148 163 184) / <alpha-value>)",
+          watchlist: "rgb(var(--authority-watchlist, 245 158 11) / <alpha-value>)",
+          losing: "rgb(var(--authority-losing, 127 29 29) / <alpha-value>)",
+        },
       },
       boxShadow: {
         lift: "var(--shadow-lift)"
       },
       borderRadius: {
         xl: "14px",
-        "2xl": "18px"
+        "2xl": "18px",
+        app: "6px",
+        "app-lg": "8px",
       }
     }
   },

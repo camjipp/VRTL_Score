@@ -3,75 +3,76 @@
 @tailwind utilities;
 
 :root {
-  /* VRTL Score — Brand Tokens */
-  /* Core neutrals (calm analytics - zinc-tinted) */
-  --bg: 250 250 250;   /* zinc-50 */
-  --bg-2: 244 244 245; /* zinc-100 */
+  /* VRTL Score — Brand Tokens (marketing/landing) */
+  --bg: 250 250 250;
+  --bg-2: 244 244 245;
   --surface: 255 255 255;
   --surface-2: 250 249 246;
-  --border: 228 228 231; /* zinc-200 */
-
-  /* Text */
+  --border: 228 228 231;
   --text: 8 8 8;
   --text-2: 58 58 58;
   --text-3: 120 120 120;
-
-  /* Primary brand accent (emerald) */
-  --accent: 5 150 105;   /* emerald-600 */
-  --accent-2: 4 120 87;  /* emerald-700-ish (hover) */
-
-  /* Semantic */
+  --accent: 5 150 105;
+  --accent-2: 4 120 87;
   --success: 16 155 92;
   --warning: 180 110 20;
   --danger: 160 30 30;
-
-  /* Executive status (calm palette) — --strong matches --accent */
-  --strong: 5 150 105;      /* emerald-600 */
-  --moderate: 217 119 6;    /* amber-600 */
-  --critical: 225 29 72;    /* rose-600 */
-
-  /* Spacing system (premium consistency)
-     Use ONLY these between major cards:
-     space-y-8 (32px) between sections
-     space-y-4 (16px) inside cards
-     p-6 (24px) card padding
-     gap-3 (12px) internal groups
-  */
-
-  /* Effects */
+  --strong: 5 150 105;
+  --moderate: 217 119 6;
+  --critical: 225 29 72;
   --ring: var(--accent);
   --shadow-lift: 0 8px 18px rgba(0,0,0,0.08);
-
-  /* Stage / floating panel — Linear-style: one glow behind/below panel */
   --stage-bg: #050608;
   --stage-vignette: rgba(0, 0, 0, 0.72);
   --stage-spotlight: rgba(255, 255, 255, 0.08);
   --stage-spotlight-mid: rgba(255, 255, 255, 0.04);
-
   --panel-bg: rgba(18, 20, 24, 0.78);
   --panel-surface-1: rgba(255, 255, 255, 0.1);
   --panel-surface-2: rgba(255, 255, 255, 0.02);
   --panel-border: rgba(255, 255, 255, 0.1);
   --panel-border-soft: rgba(120, 140, 255, 0.12);
   --panel-inner: rgba(0, 0, 0, 0.55);
-
   --rim-top: rgba(255, 255, 255, 0.1);
   --rim-side: rgba(120, 160, 255, 0.08);
-
   --shadow-tight: 0 10px 30px rgba(0, 0, 0, 0.55);
   --shadow-mid: 0 40px 90px rgba(0, 0, 0, 0.55);
   --shadow-wide: 0 120px 220px rgba(0, 0, 0, 0.6);
-
   --under-glow: rgba(120, 160, 255, 0.08);
   --radius-panel: 20px;
-
-  /*
-    Compatibility aliases (so existing classes like bg-bg0/bg-bg1/muted keep working)
-    Feel free to remove once the UI is migrated to the new token names.
-  */
   --bg-0: var(--bg);
   --bg-1: var(--bg-2);
   --muted: var(--text-3);
+}
+
+/* ═══ App: Dark intelligence theme (white-label ready) ═══ */
+.vrtl-app {
+  --bg: 11 13 16;           /* #0B0D10 */
+  --bg-2: 15 18 34;         /* #0F1216 sidebar */
+  --surface: 17 20 24;       /* #111418 */
+  --surface-2: 21 25 34;    /* #151922 */
+  --border: 255 255 255;     /* use border-border/5 for rgba(255,255,255,0.06) */
+  --text: 230 234 240;      /* #E6EAF0 */
+  --text-2: 156 163 175;    /* #9CA3AF */
+  --text-3: 107 114 128;
+  --accent: 34 197 94;      /* swappable accent */
+  --accent-2: 22 163 74;
+  --success: 34 197 94;
+  --warning: 245 158 11;
+  --danger: 185 28 28;
+  --strong: 34 197 94;
+  --moderate: 148 163 184;
+  --critical: 185 28 28;
+  --ring: 34 197 94;
+  --shadow-lift: 0 2px 8px rgba(0,0,0,0.2);
+  --bg-0: var(--bg);
+  --bg-1: var(--bg-2);
+  --muted: var(--text-3);
+
+  /* Authority states (muted, no neon) */
+  --authority-dominant: 34 197 94;   /* muted green */
+  --authority-stable: 148 163 184;   /* blue-gray */
+  --authority-watchlist: 245 158 11; /* toned amber */
+  --authority-losing: 127 29 29;     /* deep red */
 }
 
 html,
@@ -241,11 +242,26 @@ html {
   display: none;
 }
 
+/* Toast: fade only, no slide */
+@keyframes toast-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes toast-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+.toast-enter {
+  animation: toast-in 0.2s ease-out forwards;
+}
+.toast-exit {
+  animation: toast-out 0.2s ease-out forwards;
+}
+
 @layer components {
   .container-xl {
     @apply mx-auto w-full max-w-6xl px-6;
   }
-  /* Dashboard card system */
   .dashboard-card {
     @apply rounded-xl border border-zinc-200 bg-white p-6 shadow-sm;
   }
@@ -272,6 +288,13 @@ html {
   }
   .badge {
     @apply inline-flex items-center rounded-full border border-border/15 bg-bg-2 px-2 py-0.5 text-xs text-text-2;
+  }
+  /* App: dark intelligence surfaces */
+  .vrtl-app .app-card {
+    @apply rounded-app-lg border border-white/5 bg-surface;
+  }
+  .vrtl-app .app-card-secondary {
+    @apply rounded-app-lg border border-white/5 bg-surface-2;
   }
 }
 

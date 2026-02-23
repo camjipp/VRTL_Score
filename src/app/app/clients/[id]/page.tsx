@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 
+import { BackLink } from "@/components/BackLink";
 import { DownloadPdfButton } from "@/components/DownloadPdfButton";
 import { ensureOnboarded } from "@/lib/onboard";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -2265,7 +2266,8 @@ export default function ClientDetailPage() {
   const confidence = getConfidenceLabel(competitors.length);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
+      <BackLink href="/app" label="Back to Dashboard" />
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm">
         <Link href="/app" className="text-text-2 hover:text-text">Clients</Link>
