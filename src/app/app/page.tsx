@@ -132,6 +132,14 @@ function getAuthorityStateText(state: AuthorityState): string {
   return "text-authority-losing";
 }
 
+/** 3px left bar color for Risk Map cells (no full-cell tint) */
+function getAuthorityStateBar(state: AuthorityState): string {
+  if (state === "Dominant") return "border-l-authority-dominant";
+  if (state === "Stable") return "border-l-authority-stable";
+  if (state === "Watchlist") return "border-l-authority-watchlist";
+  return "border-l-authority-losing";
+}
+
 function StatusPill({ state }: { state: AuthorityState }) {
   return (
     <span className={cn("inline-flex items-center rounded-app border border-white/5 px-2 py-0.5 text-[11px] font-medium", getAuthorityStateBg(state), getAuthorityStateText(state))}>
@@ -227,27 +235,25 @@ function StrategicOverviewCards({ clients }: { clients: ClientWithStats[] }) {
   );
 }
 
-/* Section 2: AI Authority Risk Map — client × model matrix. Authority state = background tint only. Momentum = arrow + color. */
+/* Section 2: AI Authority Risk Map — neutral cells, 3px left bar = state, arrow = momentum */
 const MODEL_FAMILIES: ModelFamily[] = ["chatgpt", "gemini", "claude"];
 
 function RiskMapCell({
   score,
   delta,
-  stateBg,
-  stateText,
+  stateBar,
   title,
 }: {
   score: number | null;
   delta: number | null;
-  stateBg: string;
-  stateText: string;
+  stateBar: string;
   title: string;
 }) {
   const deltaFormatted = delta !== null && delta !== 0 ? (delta > 0 ? `+${delta}` : `${delta}`) : null;
   return (
-    <td className={cn("w-24 min-w-[5rem] px-2 py-1.5 text-center align-top", stateBg)} title={title}>
-      <div className="flex flex-col items-center gap-0.5">
-        <span className={cn("text-xs font-medium", stateText)}>{score ?? "—"}</span>
+    <td className="w-24 min-w-[5rem] bg-surface px-0 py-0 align-top" title={title}>
+      <div className={cn("flex flex-col border-l-[3px] py-1.5 pl-2 pr-2 text-center", stateBar)}>
+        <span className="text-base font-semibold tabular-nums text-text">{score ?? "—"}</span>
         {deltaFormatted !== null && (
           <span className={cn("text-[10px] tabular-nums", delta !== null && delta < 0 ? "text-authority-losing" : "text-authority-dominant")}>
             {deltaFormatted}
@@ -297,8 +303,7 @@ function RiskMap({ clients }: { clients: ClientWithStats[] }) {
                         key={family}
                         score={score}
                         delta={overallDelta}
-                        stateBg={getAuthorityStateBg(state)}
-                        stateText={getAuthorityStateText(state)}
+                        stateBar={getAuthorityStateBar(state)}
                         title={hoverText}
                       />
                     );
@@ -306,8 +311,7 @@ function RiskMap({ clients }: { clients: ClientWithStats[] }) {
                   <RiskMapCell
                     score={client.latestScore}
                     delta={overallDelta}
-                    stateBg={getAuthorityStateBg(overallState)}
-                    stateText={getAuthorityStateText(overallState)}
+                    stateBar={getAuthorityStateBar(overallState)}
                     title={hoverOverall}
                   />
                 </tr>
@@ -320,7 +324,7 @@ function RiskMap({ clients }: { clients: ClientWithStats[] }) {
   );
 }
 
-/* Section 3: Top 5 Competitive Threats — prioritize widening gaps, then absolute gap size */
+/* Section 3: Top Competitive Threats — when empty, single-line system status */
 function TopThreats({ clients }: { clients: ClientWithStats[] }) {
   const top5 = useMemo(() => {
     const withGap = [...clients].filter((c) => (c.authorityGap ?? 0) > 0);
@@ -336,29 +340,30 @@ function TopThreats({ clients }: { clients: ClientWithStats[] }) {
       .slice(0, 5);
   }, [clients]);
 
+  const isEmpty = top5.length === 0;
+
   return (
     <section className="app-card overflow-hidden">
-      <div className="border-b border-white/5 px-4 py-3">
+      <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
         <h2 className="text-sm font-semibold text-text">Top Competitive Threats</h2>
+        {isEmpty && (
+          <span className="text-xs text-text-2">No competitive threats above threshold</span>
+        )}
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-[13px]">
-          <thead>
-            <tr className="border-b border-white/5">
-              <th className="px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Client</th>
-              <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Model</th>
-              <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Primary Displacer</th>
-              <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2 text-right">Gap</th>
-              <th className="w-8 px-1 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2 text-center">Trend</th>
-            </tr>
-          </thead>
-          <tbody>
-            {top5.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-3 py-4 text-sm text-text-2">No threats above threshold.</td>
+      {!isEmpty && (
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-[13px]">
+            <thead>
+              <tr className="border-b border-white/5">
+                <th className="px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Client</th>
+                <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Model</th>
+                <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Primary Displacer</th>
+                <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2 text-right">Gap</th>
+                <th className="w-8 px-1 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2 text-center">Trend</th>
               </tr>
-            ) : (
-              top5.map((c) => {
+            </thead>
+            <tbody>
+              {top5.map((c) => {
                 const delta = c.latestScore !== null && c.previousScore !== null ? c.latestScore - c.previousScore : null;
                 return (
                   <tr key={c.id} className="border-b border-white/5 last:border-b-0">
@@ -369,11 +374,11 @@ function TopThreats({ clients }: { clients: ClientWithStats[] }) {
                     <td className="w-8 px-1 py-2 text-center"><TrendArrow value={delta} /></td>
                   </tr>
                 );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </section>
   );
 }
@@ -879,23 +884,23 @@ export default function AppPage() {
 
         <TopThreats clients={clients} />
 
-        <section id="accounts" className="space-y-4">
+        <section id="clients-overview" className="space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm text-text-2">
-              {filteredClients.length} of {clients.length} account{clients.length !== 1 ? "s" : ""}
+              Clients Overview · {filteredClients.length} of {clients.length} client{clients.length !== 1 ? "s" : ""}
             </div>
           </div>
 
           {filteredClients.length === 0 && searchQuery ? (
             <div className="rounded-app-lg border border-white/5 bg-surface/50 py-8 text-center">
-              <p className="text-sm text-text-2">No accounts match &quot;{searchQuery}&quot;</p>
+              <p className="text-sm text-text-2">No clients match &quot;{searchQuery}&quot;</p>
               <button onClick={() => setSearchQuery("")} className="mt-2 text-sm text-text hover:underline">
                 Clear search
               </button>
             </div>
           ) : filteredClients.length === 0 && filterHealth !== "all" ? (
             <div className="rounded-app-lg border border-white/5 bg-surface/50 py-8 text-center">
-              <p className="text-sm text-text-2">No {filterHealth} accounts found</p>
+              <p className="text-sm text-text-2">No {filterHealth} clients found</p>
               <button onClick={() => setFilterHealth("all")} className="mt-2 text-sm text-text hover:underline">
                 Clear filter
               </button>

@@ -137,19 +137,19 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
       {/* Full-screen branded loader during sign-in/onboarding */}
       {busy && (
         <div
-          className="fixed inset-0 z-50 flex min-h-screen flex-col items-center justify-center bg-bg/95 backdrop-blur-sm"
+          className="vrtl-app fixed inset-0 z-50 flex min-h-screen flex-col items-center justify-center bg-bg/95 backdrop-blur-sm"
           role="status"
           aria-live="polite"
         >
           <Image
             src="/brand/VRTL_Solo.png"
-            alt="VRTL Score"
+            alt=""
             width={180}
             height={64}
-            className="mb-6 h-12 w-auto animate-pulse"
+            className="mb-6 h-12 w-auto animate-pulse opacity-90"
             priority
           />
-          <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-text/20 border-t-text" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/10 border-t-text-2" />
           <p className="mt-4 text-sm text-text-2">Signing you in…</p>
         </div>
       )}

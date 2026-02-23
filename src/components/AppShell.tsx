@@ -16,7 +16,7 @@ type Agency = {
 
 const NAV_LINKS = [
   { href: "/app", label: "Dashboard" },
-  { href: "/app#accounts", label: "Clients" },
+  { href: "/app#clients-overview", label: "Clients" },
   { href: "/app/reports", label: "Reports" },
   { href: "/app/snapshots", label: "Snapshots" },
   { href: "/app/settings", label: "Settings" },
@@ -30,7 +30,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [agency, setAgency] = useState<Agency | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [hash, setHash] = useState("");
   const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setHash(typeof window !== "undefined" ? window.location.hash : "");
+  }, [pathname]);
+  useEffect(() => {
+    const onHashChange = () => setHash(window.location.hash);
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
 
   useEffect(() => {
     async function loadData() {
@@ -99,9 +109,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   function isActive(href: string) {
-    if (href === "/app") return pathname === "/app";
-    if (href === "/app#accounts") return pathname === "/app";
-    return pathname === href || pathname?.startsWith(href.replace(/#.*/, "") + "/");
+    const base = href.replace(/#.*/, "");
+    const fragment = href.includes("#") ? href.slice(href.indexOf("#")) : "";
+    if (pathname !== base) return false;
+    if (fragment === "" && hash === "") return true;
+    if (fragment && hash === fragment) return true;
+    if (fragment === "" && hash !== "") return false;
+    return false;
   }
 
   const allNavLinks = isSuperAdmin
@@ -136,8 +150,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 className={cn(
                   "block rounded-app border-l-2 py-2 px-3 text-sm font-medium transition-colors",
                   isActive(link.href)
-                    ? "border-l-accent bg-surface/60 text-text"
-                    : "border-l-transparent text-text-2 hover:bg-surface/40 hover:text-text"
+                    ? "border-l-[3px] border-l-white/30 bg-surface/50 text-text"
+                    : "border-l-[3px] border-l-transparent text-text-2 hover:bg-surface/40 hover:text-text"
                 )}
               >
                 {link.label}
