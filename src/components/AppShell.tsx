@@ -150,8 +150,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 className={cn(
                   "block rounded-app border-l-2 py-2 px-3 text-sm font-medium transition-colors",
                   isActive(link.href)
-                    ? "border-l-[3px] border-l-white/30 bg-surface/50 text-text"
-                    : "border-l-[3px] border-l-transparent text-text-2 hover:bg-surface/40 hover:text-text"
+                    ? "border-l-white/20 bg-white/5 text-text"
+                    : "border-l-transparent text-text-2 hover:bg-surface/40 hover:text-text"
                 )}
               >
                 {link.label}
@@ -183,7 +183,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     {agency?.name?.charAt(0) ?? "?"}
                   </div>
                 )}
-                <span className="min-w-0 flex-1 truncate">Account</span>
+                <span className="min-w-0 flex-1 truncate">Organization</span>
                 <svg
                   className={cn("h-3.5 w-3.5 shrink-0 text-text-3", menuOpen && "rotate-180")}
                   fill="none"

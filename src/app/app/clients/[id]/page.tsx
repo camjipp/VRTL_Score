@@ -223,6 +223,7 @@ function ScoreHero({
   status,
   historicalScores,
   reportReadyAt,
+  gapToLeader = null,
 }: {
   score: number | null;
   previousScore: number | null;
@@ -231,9 +232,11 @@ function ScoreHero({
   status: string | null;
   historicalScores: number[];
   reportReadyAt: string | null;
+  gapToLeader?: number | null;
 }) {
   const { label, description } = getScoreLabel(score);
   const delta = score !== null && previousScore !== null ? score - previousScore : null;
+  const displayGap = gapToLeader ?? (score != null ? 100 - score : null);
 
   const sparklineColor = score !== null && score >= 80 
     ? CHART_COLORS.dominant 
@@ -246,7 +249,7 @@ function ScoreHero({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-4">
           <div className="flex flex-col">
-            <span className="text-3xl font-semibold tabular-nums tracking-tight text-text leading-none">
+            <span className="text-4xl font-semibold tabular-nums tracking-tight text-text leading-none">
               {score ?? "—"}
             </span>
             <span className="mt-1 text-xs text-text-2">AI Authority Index</span>
@@ -254,6 +257,9 @@ function ScoreHero({
               <span className={cn("mt-0.5 text-xs tabular-nums", delta > 0 ? "text-authority-dominant" : "text-authority-losing")}>
                 {delta > 0 ? "+" : ""}{delta} vs last
               </span>
+            )}
+            {displayGap != null && displayGap > 0 && (
+              <span className="mt-0.5 text-xs text-text-2">{displayGap} pts behind leader</span>
             )}
           </div>
           {historicalScores.length >= 2 && (
@@ -270,7 +276,63 @@ function ScoreHero({
           {status === "running" && <Badge variant="warning" className="mt-1 w-fit self-end">Analyzing...</Badge>}
         </div>
       </div>
+      {/* Position Bar: 0–100 with leader and client markers */}
+      {score != null && (
+        <div className="mt-4 pt-3 border-t border-white/5">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] uppercase tracking-wider text-text-3">Position vs leader</span>
+            {displayGap != null && displayGap > 0 && (
+              <span className="text-[10px] text-text-2">{displayGap} pts behind leader</span>
+            )}
+          </div>
+          <div className="relative h-6 w-full rounded-app bg-surface-2/50 overflow-hidden">
+            <div className="absolute inset-y-0 left-0 right-0 flex">
+              <div className="h-full bg-white/5" style={{ width: `${score}%` }} />
+              <div className="h-full bg-surface-2" style={{ width: `${100 - score}%` }} />
+            </div>
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-0.5 h-4 bg-text rounded-full"
+              style={{ left: `${score}%`, marginLeft: -2 }}
+              aria-hidden
+            />
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-0.5 h-4 bg-authority-stable rounded-full"
+              style={{ right: 0, marginRight: -2 }}
+              aria-hidden
+            />
+          </div>
+          <div className="flex justify-between mt-0.5 text-[10px] text-text-3">
+            <span>0</span>
+            <span>Client · {score}</span>
+            <span>Leader · 100</span>
+          </div>
+        </div>
+      )}
       <p className="mt-2 text-sm text-text-2">{description}</p>
+    </div>
+  );
+}
+
+/* Compact Trend strip: sparkline + gap widening/narrowing */
+function TrendStrip({ historicalScores, delta }: { historicalScores: number[]; delta: number | null }) {
+  const momentumLabel = delta === null || delta === 0 ? "Stable" : delta < 0 ? "Gap widening" : "Gap narrowing";
+  const momentumColor = delta === null || delta === 0 ? "text-text-2" : delta < 0 ? "text-authority-losing" : "text-authority-dominant";
+  if (historicalScores.length < 2) {
+    return (
+      <div className="rounded-app border border-white/5 bg-surface px-3 py-2 flex items-center justify-between">
+        <span className="text-xs text-text-2">Trend</span>
+        <span className={cn("text-[11px]", momentumColor)}>{momentumLabel}</span>
+      </div>
+    );
+  }
+  const color = delta !== null && delta < 0 ? CHART_COLORS.losing : CHART_COLORS.dominant;
+  return (
+    <div className="rounded-app border border-white/5 bg-surface px-3 py-2 flex items-center gap-3">
+      <span className="text-xs text-text-2 shrink-0">Trend</span>
+      <div className="flex-1 min-w-0">
+        <ScoreSparkline scores={historicalScores} color={color} />
+      </div>
+      <span className={cn("text-[11px] shrink-0", momentumColor)}>{momentumLabel}</span>
     </div>
   );
 }
@@ -435,8 +497,8 @@ function PromptPerformance({ detail }: { detail: SnapshotDetailResponse | null }
             <div
               className={cn(
                 "h-2 rounded-full transition-all",
-                pct(summary.sources_count, total) >= 50 ? "bg-emerald-500" :
-                pct(summary.sources_count, total) >= 20 ? "bg-authority-watchlist" : "bg-white/20"
+                pct(summary.sources_count, total) >= 50 ? "bg-authority-dominant" :
+                pct(summary.sources_count, total) >= 20 ? "bg-authority-watchlist/80" : "bg-white/20"
               )}
               style={{ width: `${pct(summary.sources_count, total)}%` }}
             />
@@ -1088,29 +1150,53 @@ function CrossModelSnapshot({
   const gap = sorted[0][1] - weakest[1];
   const avg = Math.round(sorted.reduce((sum, [, s]) => sum + s, 0) / sorted.length);
 
+  const leaderScore = 100;
+
   return (
     <div className="rounded-app-lg border border-white/5 bg-surface p-4">
-      <h3 className="text-sm font-semibold text-text">Model Authority Breakdown</h3>
-      <div className="mt-3 space-y-1">
-        {sorted.map(([provider, score]) => {
-          const status = getProviderStatus(score);
-          return (
-            <div
-              key={provider}
-              className={cn("flex items-center gap-3 border-l-[3px] py-2 px-2 rounded-app", status.bar, "bg-surface-2/30")}
-            >
-              <span className="w-20 shrink-0 text-xs font-medium text-text">{getProviderDisplayName(provider)}</span>
-              <span className="tabular-nums text-sm font-semibold text-text w-8">{score}</span>
-              <span className="text-[10px] text-text-2">{status.label}</span>
-              <div className="flex-1 h-1 max-w-24 rounded-full bg-white/10 overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-current opacity-50"
-                  style={{ width: `${Math.min(100, score)}%` }}
-                />
+      <h3 className="text-base font-semibold text-text">Model Authority Breakdown</h3>
+      <p className="text-xs text-text-2 mt-0.5">Per-model score and gap to leader</p>
+      <div className="mt-3 grid gap-3 lg:grid-cols-2">
+        {/* Left: ranked list with score, state stripe, delta */}
+        <div className="space-y-1">
+          {sorted.map(([provider, score]) => {
+            const status = getProviderStatus(score);
+            return (
+              <div
+                key={provider}
+                className={cn("flex items-center gap-3 border-l-[3px] py-1.5 px-2 rounded-app", status.bar, "bg-surface-2/30")}
+              >
+                <span className="w-20 shrink-0 text-xs font-medium text-text">{getProviderDisplayName(provider)}</span>
+                <span className="tabular-nums text-sm font-semibold text-text w-8">{score}</span>
+                <span className="text-[10px] text-text-2">{status.label}</span>
+                <div className="flex-1 h-0.5 max-w-20 rounded-full bg-white/10 overflow-hidden">
+                  <div className="h-full rounded-full bg-current opacity-50" style={{ width: `${Math.min(100, score)}%` }} />
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+        {/* Right: Per-Model Gap Visual — thin comparison bar per model */}
+        <div className="space-y-2">
+          <div className="text-[10px] uppercase tracking-wider text-text-3">Gap to leader</div>
+          {sorted.map(([provider, score]) => {
+            const modelGap = Math.max(0, leaderScore - score);
+            return (
+              <div key={provider} className="flex items-center gap-2">
+                <span className="w-20 shrink-0 text-[11px] text-text-2">{getProviderDisplayName(provider)}</span>
+                <div className="relative flex-1 h-4 rounded bg-surface-2/50 overflow-hidden">
+                  <div className="absolute inset-y-0 left-0 w-full flex">
+                    <div className="h-full bg-white/10" style={{ width: `${score}%` }} />
+                    <div className="h-full bg-surface-2" style={{ width: `${100 - score}%` }} />
+                  </div>
+                  <div className="absolute top-1/2 -translate-y-1/2 w-0.5 h-3 bg-text" style={{ left: `${score}%`, marginLeft: -1 }} aria-hidden />
+                  <div className="absolute top-1/2 -translate-y-1/2 w-0.5 h-3 bg-authority-stable right-0" style={{ marginRight: -1 }} aria-hidden />
+                </div>
+                <span className="w-12 shrink-0 text-right text-[10px] tabular-nums text-text-2">Gap: {modelGap}</span>
+              </div>
+            );
+          })}
+        </div>
       </div>
       <div className="mt-3 pt-2 border-t border-white/5 flex flex-wrap gap-x-4 gap-y-0 text-[10px] text-text-2">
         <span>Gap: {gap} pts</span>
@@ -2176,6 +2262,17 @@ export default function ClientDetailPage() {
                 reportReadyAt={
                   selectedSnapshot && (selectedSnapshot.status?.toLowerCase().includes("complete") || selectedSnapshot.status?.toLowerCase().includes("success"))
                     ? (selectedSnapshot.completed_at || selectedSnapshot.created_at)
+                    : null
+                }
+                gapToLeader={
+                  selectedSnapshot?.vrtl_score != null ? 100 - selectedSnapshot.vrtl_score : null
+                }
+              />
+              <TrendStrip
+                historicalScores={historicalScores}
+                delta={
+                  selectedSnapshot?.vrtl_score != null && previousSnapshot?.vrtl_score != null
+                    ? selectedSnapshot.vrtl_score - previousSnapshot.vrtl_score
                     : null
                 }
               />

@@ -189,47 +189,224 @@ function ModelDot({ model }: { model: string | null }) {
   return <span className={cn("mr-1.5 inline-block h-2 w-2 shrink-0 rounded-full", color)} aria-hidden />;
 }
 
-/* Section 1: Strategic Overview — four metric cards */
-function StrategicOverviewCards({ clients }: { clients: ClientWithStats[] }) {
+/* Section 1: Portfolio Status — single rich executive verdict module */
+function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
+  const dominantCount = clients.filter((c) => getAuthorityState(c) === "Dominant").length;
+  const stableCount = clients.filter((c) => getAuthorityState(c) === "Stable").length;
+  const watchlistCount = clients.filter((c) => getAuthorityState(c) === "Watchlist").length;
+  const losingCount = clients.filter((c) => getAuthorityState(c) === "Losing Ground").length;
   const wideningGapsCount = clients.filter((c) => {
     const delta = c.latestScore !== null && c.previousScore !== null ? c.latestScore - c.previousScore : null;
     return delta !== null && delta < 0;
   }).length;
-  const dominantCount = clients.filter((c) => getAuthorityState(c) === "Dominant").length;
-  const gaps = clients
-    .map((c) => c.authorityGap)
-    .filter((g): g is number => g != null && g > 0);
+  const gaps = clients.map((c) => c.authorityGap).filter((g): g is number => g != null && g > 0);
   const avgGap = gaps.length ? Math.round(gaps.reduce((a, b) => a + b, 0) / gaps.length) : null;
-  const fastestDeclining = useMemo(() => {
+  const highestRisk = useMemo(() => {
     return [...clients]
-      .filter((c) => c.latestScore !== null && c.previousScore !== null)
+      .filter((c) => getAuthorityState(c) === "Losing Ground" || getAuthorityState(c) === "Watchlist")
       .map((c) => ({
         client: c,
-        delta: (c.latestScore ?? 0) - (c.previousScore ?? 0),
+        delta: c.latestScore !== null && c.previousScore !== null ? c.latestScore - c.previousScore : null,
+        gap: c.authorityGap ?? 0,
       }))
-      .filter((x) => x.delta < 0)
-      .sort((a, b) => a.delta - b.delta)[0] ?? null;
+      .sort((a, b) => {
+        if (a.delta !== null && b.delta !== null && a.delta < 0 && b.delta >= 0) return -1;
+        if (a.delta !== null && b.delta !== null && a.delta >= 0 && b.delta < 0) return 1;
+        return b.gap - a.gap;
+      })[0] ?? null;
+  }, [clients]);
+
+  const total = dominantCount + stableCount + watchlistCount + losingCount || 1;
+  const seg = (n: number) => (n / total) * 100;
+
+  return (
+    <section className="app-card overflow-hidden">
+      <div className="border-b border-white/5 px-4 py-3">
+        <h2 className="text-base font-semibold text-text">Portfolio Status</h2>
+        <p className="text-xs text-text-2 mt-0.5">Executive verdict · state distribution and risk signals</p>
+      </div>
+      <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* State distribution bar */}
+        <div className="lg:col-span-2">
+          <div className="text-[11px] font-medium uppercase tracking-wider text-text-2 mb-1.5">State distribution</div>
+          <div className="flex h-8 w-full overflow-hidden rounded-app border border-white/5 bg-surface-2/50">
+            {dominantCount > 0 && (
+              <div
+                className="bg-authority-dominant/80 shrink-0 transition-all"
+                style={{ width: `${seg(dominantCount)}%` }}
+                title={`Dominant: ${dominantCount}`}
+              />
+            )}
+            {stableCount > 0 && (
+              <div
+                className="bg-authority-stable/80 shrink-0 transition-all"
+                style={{ width: `${seg(stableCount)}%` }}
+                title={`Stable: ${stableCount}`}
+              />
+            )}
+            {watchlistCount > 0 && (
+              <div
+                className="bg-authority-watchlist/80 shrink-0 transition-all"
+                style={{ width: `${seg(watchlistCount)}%` }}
+                title={`Watchlist: ${watchlistCount}`}
+              />
+            )}
+            {losingCount > 0 && (
+              <div
+                className="bg-authority-losing/80 shrink-0 transition-all"
+                style={{ width: `${seg(losingCount)}%` }}
+                title={`Losing: ${losingCount}`}
+              />
+            )}
+          </div>
+          <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-text-2">
+            <span><span className="text-authority-dominant">Dominant</span> {dominantCount}</span>
+            <span><span className="text-authority-stable">Stable</span> {stableCount}</span>
+            <span><span className="text-authority-watchlist">Watchlist</span> {watchlistCount}</span>
+            <span><span className="text-authority-losing">Losing</span> {losingCount}</span>
+          </div>
+        </div>
+        <div>
+          <div className="text-[11px] font-medium uppercase tracking-wider text-text-2">Widening gaps</div>
+          <div className="mt-0.5 flex items-center gap-1.5">
+            <span className="text-2xl font-semibold tabular-nums text-text">{wideningGapsCount}</span>
+            {wideningGapsCount > 0 && <span className="text-xs text-authority-losing">momentum risk</span>}
+          </div>
+        </div>
+        <div>
+          <div className="text-[11px] font-medium uppercase tracking-wider text-text-2">Avg gap to leader</div>
+          <div className="mt-0.5 text-2xl font-semibold tabular-nums text-text">{avgGap ?? "—"}</div>
+        </div>
+      </div>
+      {highestRisk && (
+        <div className="border-t border-white/5 px-4 py-2.5">
+          <span className="text-[11px] font-medium uppercase tracking-wider text-text-2">Highest risk client</span>
+          <Link
+            href={`/app/clients/${highestRisk.client.id}`}
+            className="ml-2 text-sm font-medium text-text hover:underline"
+          >
+            {highestRisk.client.name}
+            {highestRisk.client.worstModel ? ` · ${displayModelName(highestRisk.client.worstModel)}` : ""}
+          </Link>
+        </div>
+      )}
+    </section>
+  );
+}
+
+/* Section 2: Clients Requiring Attention — Watchlist + Losing only, dense table */
+function ClientsRequiringAttention({ clients }: { clients: ClientWithStats[] }) {
+  const attention = useMemo(() => {
+    return clients.filter((c) => {
+      const state = getAuthorityState(c);
+      if (state === "Watchlist" || state === "Losing Ground") return true;
+      const delta = c.latestScore !== null && c.previousScore !== null ? c.latestScore - c.previousScore : null;
+      return delta !== null && delta < 0;
+    });
+  }, [clients]);
+
+  if (attention.length === 0) {
+    return (
+      <section className="app-card overflow-hidden">
+        <div className="px-4 py-3 text-sm text-text-2">
+          Portfolio stable — no widening gaps detected.
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="app-card overflow-hidden">
+      <div className="border-b border-white/5 px-4 py-3">
+        <h2 className="text-base font-semibold text-text">Clients Requiring Attention</h2>
+        <p className="text-xs text-text-2 mt-0.5">Watchlist and Losing · or widening gaps</p>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[560px] border-collapse text-left text-[13px]">
+          <thead>
+            <tr className="border-b border-white/5 bg-surface-2/80">
+              <th className="px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Client</th>
+              <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2 text-right">Index</th>
+              <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2 text-right">Gap to leader</th>
+              <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Weakest model</th>
+              <th className="w-10 px-1 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2 text-center">Momentum</th>
+              <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Primary displacer</th>
+            </tr>
+          </thead>
+          <tbody>
+            {attention.map((c) => {
+              const delta = c.latestScore !== null && c.previousScore !== null ? c.latestScore - c.previousScore : null;
+              return (
+                <tr key={c.id} className="border-b border-white/5 last:border-b-0">
+                  <td className="px-3 py-2 font-medium text-text">
+                    <Link href={`/app/clients/${c.id}`} className="hover:underline">{c.name}</Link>
+                  </td>
+                  <td className="px-2 py-2 text-right tabular-nums text-text">{c.latestScore ?? "—"}</td>
+                  <td className="px-2 py-2 text-right tabular-nums text-text-2">{c.authorityGap ?? "—"}</td>
+                  <td className="px-2 py-2 text-text-2">{c.worstModel ? displayModelName(c.worstModel) : "—"}</td>
+                  <td className="w-10 px-1 py-2 text-center"><MomentumArrow delta={delta} /></td>
+                  <td className="px-2 py-2 text-text-2">{c.primaryDisplacer ?? "—"}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+/* Section 3: Model Exposure Summary — per-model D/S/W/L stacked bar + widening gaps per model */
+function ModelExposureSummary({ clients }: { clients: ClientWithStats[] }) {
+  const byModel = useMemo(() => {
+    const out: Record<ModelFamily, { dominant: number; stable: number; watchlist: number; losing: number; widening: number }> = {
+      chatgpt: { dominant: 0, stable: 0, watchlist: 0, losing: 0, widening: 0 },
+      gemini: { dominant: 0, stable: 0, watchlist: 0, losing: 0, widening: 0 },
+      claude: { dominant: 0, stable: 0, watchlist: 0, losing: 0, widening: 0 },
+    };
+    clients.forEach((c) => {
+      const delta = c.latestScore !== null && c.previousScore !== null ? c.latestScore - c.previousScore : null;
+      const widening = delta !== null && delta < 0;
+      const worstFamily = c.worstModel ? modelFamilyFromProviderKey(c.worstModel) : null;
+      MODEL_FAMILIES.forEach((family) => {
+        const score = c.providerFamilyScores?.[family] ?? null;
+        const state = getAuthorityStateFromScore(score);
+        if (state === "Dominant") out[family].dominant++;
+        else if (state === "Stable") out[family].stable++;
+        else if (state === "Watchlist") out[family].watchlist++;
+        else out[family].losing++;
+        if (widening && worstFamily === family) out[family].widening++;
+      });
+    });
+    return out;
   }, [clients]);
 
   return (
-    <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <div className="app-card p-4">
-        <div className="text-[11px] font-medium uppercase tracking-wider text-text-2">Clients With Widening Gaps</div>
-        <div className="mt-1 text-2xl font-semibold tabular-nums text-text">{wideningGapsCount}</div>
+    <section className="app-card overflow-hidden">
+      <div className="border-b border-white/5 px-4 py-3">
+        <h2 className="text-base font-semibold text-text">Model Exposure Summary</h2>
+        <p className="text-xs text-text-2 mt-0.5">Where risk is concentrated by model</p>
       </div>
-      <div className="app-card p-4">
-        <div className="text-[11px] font-medium uppercase tracking-wider text-text-2">Average Authority Gap to Leader</div>
-        <div className="mt-1 text-2xl font-semibold tabular-nums text-text">{avgGap ?? "—"}</div>
-      </div>
-      <div className="app-card p-4">
-        <div className="text-[11px] font-medium uppercase tracking-wider text-text-2">Fastest Declining Account</div>
-        <div className="mt-1 text-lg font-semibold text-text">
-          {fastestDeclining ? `${fastestDeclining.client.name} · ${fastestDeclining.client.worstModel ? displayModelName(fastestDeclining.client.worstModel) : "—"}` : "—"}
-        </div>
-      </div>
-      <div className="app-card p-4">
-        <div className="text-[11px] font-medium uppercase tracking-wider text-text-2">Dominant Accounts Count</div>
-        <div className="mt-1 text-2xl font-semibold tabular-nums text-text">{dominantCount}</div>
+      <div className="p-4 space-y-4">
+        {MODEL_FAMILIES.map((family) => {
+          const d = byModel[family];
+          const total = d.dominant + d.stable + d.watchlist + d.losing || 1;
+          const pct = (n: number) => (n / total) * 100;
+          return (
+            <div key={family} className="flex items-center gap-3">
+              <div className="w-20 shrink-0 text-[11px] font-medium text-text-2">{modelFamilyLabel(family)}</div>
+              <div className="flex flex-1 h-6 overflow-hidden rounded-app border border-white/5 bg-surface-2/50">
+                {d.dominant > 0 && <div className="bg-authority-dominant/80 shrink-0" style={{ width: `${pct(d.dominant)}%` }} />}
+                {d.stable > 0 && <div className="bg-authority-stable/80 shrink-0" style={{ width: `${pct(d.stable)}%` }} />}
+                {d.watchlist > 0 && <div className="bg-authority-watchlist/80 shrink-0" style={{ width: `${pct(d.watchlist)}%` }} />}
+                {d.losing > 0 && <div className="bg-authority-losing/80 shrink-0" style={{ width: `${pct(d.losing)}%` }} />}
+              </div>
+              <div className="w-16 shrink-0 text-right text-[11px] text-text-2">
+                {d.widening > 0 ? <span className="text-authority-losing">{d.widening} widening</span> : "—"}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
@@ -251,8 +428,8 @@ function RiskMapCell({
 }) {
   const deltaFormatted = delta !== null && delta !== 0 ? (delta > 0 ? `+${delta}` : `${delta}`) : null;
   return (
-    <td className="w-24 min-w-[5rem] bg-surface px-0 py-0 align-top" title={title}>
-      <div className={cn("flex flex-col border-l-[3px] py-1.5 pl-2 pr-2 text-center", stateBar)}>
+    <td className="w-24 min-w-[5rem] bg-surface px-0 py-0 align-top text-right" title={title}>
+      <div className={cn("flex flex-col border-l-[3px] py-1.5 pl-2 pr-2 text-right", stateBar)}>
         <span className="text-base font-semibold tabular-nums text-text">{score ?? "—"}</span>
         {deltaFormatted !== null && (
           <span className={cn("text-[10px] tabular-nums", delta !== null && delta < 0 ? "text-authority-losing" : "text-authority-dominant")}>
@@ -277,13 +454,13 @@ function RiskMap({ clients }: { clients: ClientWithStats[] }) {
         <table className="w-full min-w-[640px] border-collapse text-left text-[13px]">
           <thead>
             <tr className="border-b border-white/5">
-              <th className="bg-surface-2/80 px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Client</th>
+              <th className="bg-surface-2/80 px-3 py-2 text-left text-[10px] font-medium uppercase tracking-wider text-text-2">Client</th>
               {MODEL_FAMILIES.map((f) => (
-                <th key={f} className="w-24 min-w-[5rem] bg-surface-2/80 px-2 py-2 text-center text-[10px] font-medium uppercase tracking-wider text-text-2">
+                <th key={f} className="w-24 min-w-[5rem] bg-surface-2/80 px-2 py-2 text-right text-[10px] font-medium uppercase tracking-wider text-text-2">
                   {modelFamilyLabel(f)}
                 </th>
               ))}
-              <th className="w-24 min-w-[5rem] bg-surface-2/80 px-2 py-2 text-center text-[10px] font-medium uppercase tracking-wider text-text-2">Overall</th>
+              <th className="w-24 min-w-[5rem] bg-surface-2/80 px-2 py-2 text-right text-[10px] font-medium uppercase tracking-wider text-text-2">Overall</th>
             </tr>
           </thead>
           <tbody>
@@ -293,7 +470,9 @@ function RiskMap({ clients }: { clients: ClientWithStats[] }) {
               const hoverOverall = [client.primaryDisplacer && `Displacer: ${client.primaryDisplacer}`, client.authorityGap != null && `Gap: ${client.authorityGap}`, overallDelta != null && `Change: ${overallDelta >= 0 ? "+" : ""}${overallDelta}`].filter(Boolean).join(". ");
               return (
                 <tr key={client.id} className="border-b border-white/5 last:border-b-0">
-                  <td className="px-3 py-2 font-medium text-text">{client.name}</td>
+                  <td className="px-3 py-2 font-medium text-text">
+                    <Link href={`/app/clients/${client.id}`} className="hover:underline">{client.name}</Link>
+                  </td>
                   {MODEL_FAMILIES.map((family) => {
                     const score = client.providerFamilyScores?.[family] ?? null;
                     const state = getAuthorityStateFromScore(score);
@@ -324,7 +503,7 @@ function RiskMap({ clients }: { clients: ClientWithStats[] }) {
   );
 }
 
-/* Section 3: Top Competitive Threats — when empty, single-line system status */
+/* Top Competitive Threats — when empty, single-line system status; otherwise top 5 */
 function TopThreats({ clients }: { clients: ClientWithStats[] }) {
   const top5 = useMemo(() => {
     const withGap = [...clients].filter((c) => (c.authorityGap ?? 0) > 0);
@@ -342,43 +521,47 @@ function TopThreats({ clients }: { clients: ClientWithStats[] }) {
 
   const isEmpty = top5.length === 0;
 
+  if (isEmpty) {
+    return (
+      <section className="rounded-app-lg border border-white/5 bg-surface px-4 py-2.5">
+        <span className="text-xs text-text-2">System status: No competitive threats above threshold.</span>
+      </section>
+    );
+  }
+
   return (
     <section className="app-card overflow-hidden">
       <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
-        <h2 className="text-sm font-semibold text-text">Top Competitive Threats</h2>
-        {isEmpty && (
-          <span className="text-xs text-text-2">No competitive threats above threshold</span>
-        )}
+        <h2 className="text-base font-semibold text-text">Top Competitive Threats</h2>
+        <span className="text-[11px] text-text-2">Top 5 by gap · widening first</span>
       </div>
-      {!isEmpty && (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-[13px]">
-            <thead>
-              <tr className="border-b border-white/5">
-                <th className="px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Client</th>
-                <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Model</th>
-                <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Primary Displacer</th>
-                <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2 text-right">Gap</th>
-                <th className="w-8 px-1 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2 text-center">Trend</th>
-              </tr>
-            </thead>
-            <tbody>
-              {top5.map((c) => {
-                const delta = c.latestScore !== null && c.previousScore !== null ? c.latestScore - c.previousScore : null;
-                return (
-                  <tr key={c.id} className="border-b border-white/5 last:border-b-0">
-                    <td className="px-3 py-2 font-medium text-text">{c.name}</td>
-                    <td className="px-2 py-2 text-text-2">{c.worstModel ? displayModelName(c.worstModel) : "—"}</td>
-                    <td className="px-2 py-2 text-text-2">{c.primaryDisplacer ?? "—"}</td>
-                    <td className="px-2 py-2 text-right tabular-nums text-text">{c.authorityGap ?? "—"}</td>
-                    <td className="w-8 px-1 py-2 text-center"><TrendArrow value={delta} /></td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-[13px]">
+          <thead>
+            <tr className="border-b border-white/5">
+              <th className="px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Client</th>
+              <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Model</th>
+              <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Primary displacer</th>
+              <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2 text-right">Gap</th>
+              <th className="w-8 px-1 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2 text-center">Trend</th>
+            </tr>
+          </thead>
+          <tbody>
+            {top5.map((c) => {
+              const delta = c.latestScore !== null && c.previousScore !== null ? c.latestScore - c.previousScore : null;
+              return (
+                <tr key={c.id} className="border-b border-white/5 last:border-b-0">
+                  <td className="px-3 py-2 font-medium text-text">{c.name}</td>
+                  <td className="px-2 py-2 text-text-2">{c.worstModel ? displayModelName(c.worstModel) : "—"}</td>
+                  <td className="px-2 py-2 text-text-2">{c.primaryDisplacer ?? "—"}</td>
+                  <td className="px-2 py-2 text-right tabular-nums text-text">{c.authorityGap ?? "—"}</td>
+                  <td className="w-8 px-1 py-2 text-center"><TrendArrow value={delta} /></td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </section>
   );
 }
@@ -399,7 +582,7 @@ function ClientTable({ clients }: { clients: ClientWithStats[] }) {
       <table className="w-full text-left text-[13px]">
         <thead>
           <tr className="border-b border-white/5 bg-surface-2/80">
-            <th className="px-3 py-2.5 text-[10px] font-medium uppercase tracking-wider text-text-2">Account</th>
+            <th className="px-3 py-2.5 text-[10px] font-medium uppercase tracking-wider text-text-2">Client</th>
             <th className="px-3 py-2.5 text-[10px] font-medium uppercase tracking-wider text-text-2">State</th>
             <th className="px-3 py-2.5 text-[10px] font-medium uppercase tracking-wider text-text-2">Index</th>
             <th className="px-3 py-2.5 text-[10px] font-medium uppercase tracking-wider text-text-2">Trend</th>
@@ -868,7 +1051,7 @@ export default function AppPage() {
             </select>
             <input
               type="text"
-              placeholder="Search accounts..."
+              placeholder="Search clients..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="h-9 w-44 rounded-app border border-white/10 bg-surface px-3 text-sm text-text placeholder:text-text-3 focus:border-white/20 focus:outline-none"
@@ -877,11 +1060,11 @@ export default function AppPage() {
         }
       />
 
-      <div className="flex-1 space-y-6 p-6">
-        <StrategicOverviewCards clients={clients} />
-
+      <div className="flex-1 space-y-5 p-6">
+        <PortfolioStatus clients={clients} />
+        <ClientsRequiringAttention clients={clients} />
+        <ModelExposureSummary clients={clients} />
         <RiskMap clients={clients} />
-
         <TopThreats clients={clients} />
 
         <section id="clients-overview" className="space-y-4">
