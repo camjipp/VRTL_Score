@@ -272,7 +272,7 @@ function faviconDomain(website: string | null): string | null {
 
 const MODEL_FAMILIES_CHART: ModelFamily[] = ["chatgpt", "gemini", "claude"];
 
-/* Model spread mini-chart: 3 horizontal grid lines, 3 dots at score y, line white/60, dots 5–6px with glow. */
+/* Model spread: model comparison (not time-series). 3 dots by score, horizontal baseline, no connecting line. */
 function ModelSpreadChart({ modelScores }: { modelScores: ProviderFamilyScores }) {
   const filterId = useId().replace(/:/g, "-");
   const chartW = 120;
@@ -281,19 +281,14 @@ function ModelSpreadChart({ modelScores }: { modelScores: ProviderFamilyScores }
   const innerW = chartW - padding.left - padding.right;
   const innerH = chartH - padding.top - padding.bottom;
   const xPos = [padding.left + 0, padding.left + innerW / 2, padding.left + innerW];
+  const baselineY = padding.top + innerH;
   const points: (null | { x: number; y: number; score: number })[] = MODEL_FAMILIES_CHART.map((f, i) => {
     const score = modelScores[f];
     if (score == null) return null;
     const y = padding.top + innerH - (score / 100) * innerH;
     return { x: xPos[i], y, score };
   });
-  const segments: string[] = [];
-  for (let i = 0; i < points.length - 1; i++) {
-    const a = points[i];
-    const b = points[i + 1];
-    if (a && b) segments.push(`M ${a.x} ${a.y} L ${b.x} ${b.y}`);
-  }
-  const dotR = 5;
+  const dotR = 6;
   const hLines = 3;
   return (
     <div className="w-full">
@@ -303,7 +298,9 @@ function ModelSpreadChart({ modelScores }: { modelScores: ProviderFamilyScores }
             <feDropShadow dx="0" dy="0" stdDeviation="1.5" floodColor="rgb(255,255,255)" floodOpacity="0.2" />
           </filter>
         </defs>
-        {/* 3 horizontal grid lines only, white/8 */}
+        {/* horizontal baseline, white/10 */}
+        <line x1={padding.left} y1={baselineY} x2={padding.left + innerW} y2={baselineY} stroke="rgba(255,255,255,0.1)" strokeWidth={0.5} />
+        {/* 3 faint horizontal grid lines, white/8 */}
         {Array.from({ length: hLines }).map((_, i) => (
           <line
             key={`h-${i}`}
@@ -315,11 +312,7 @@ function ModelSpreadChart({ modelScores }: { modelScores: ProviderFamilyScores }
             strokeWidth={0.5}
           />
         ))}
-        {/* line: white/60, 1.5px, round caps */}
-        {segments.map((d, i) => (
-          <path key={i} d={d} fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        ))}
-        {/* dots: 5px radius, white, subtle glow */}
+        {/* dots only: 6px radius, white, soft drop-shadow. No connecting line. */}
         {points.map((p, i) => p && <circle key={i} cx={p.x} cy={p.y} r={dotR} fill="#fff" filter={`url(#${filterId})`} />)}
       </svg>
     </div>
@@ -414,10 +407,12 @@ function ClientCard({ client }: { client: ClientWithStats }) {
           </div>
         </>
       ) : (
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 py-8">
-          <span className="text-[32px] font-medium tabular-nums text-white/40">—</span>
+        <div className="flex flex-1 flex-col min-h-0 pt-2 pb-4">
+          <div className="flex flex-1 min-h-0 items-center justify-center">
+            <span className="text-[40px] font-medium tabular-nums text-white/40">—</span>
+          </div>
           <span
-            className="flex h-12 w-full max-w-full items-center justify-center rounded-app border border-white/15 bg-white/10 text-sm font-medium text-white transition-colors hover:bg-white/20"
+            className="flex h-12 shrink-0 w-full items-center justify-center rounded-app border border-white/20 bg-white/10 text-sm font-medium text-white/90 transition-colors hover:bg-white/20"
             style={{ boxShadow: "0 0 0 1px rgba(255,255,255,0.06)" }}
           >
             Run snapshot
