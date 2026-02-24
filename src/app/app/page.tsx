@@ -228,30 +228,30 @@ function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
     <section
       className="rounded-app-lg border border-white/[0.06] p-6"
       style={{
-        background: "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02), transparent 70%), rgb(var(--surface))",
+        background: "linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 40%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02), transparent 70%), rgb(var(--surface))",
         boxShadow: "0 0 0 1px rgba(255,255,255,0.06), 0 2px 8px rgba(0,0,0,0.12)",
       }}
     >
       <div className="text-4xl font-bold tabular-nums tracking-tight text-white sm:text-5xl">{total}</div>
-      <div className="mt-0.5 text-xs font-medium uppercase tracking-wider text-white/50">Clients</div>
+      <div className="mt-0.5 text-[10px] font-medium uppercase tracking-wider text-white/40">Clients</div>
 
-      <div className="mt-4 text-xs text-white/50">
-        <span className="tabular-nums">Dominant <span className="text-white/70">{dominantCount}</span></span>
+      <div className="mt-3 text-xs text-white/40">
+        <span className="tabular-nums">Dominant <span className="text-white/55">{dominantCount}</span></span>
         <span className="mx-1.5">·</span>
-        <span className="tabular-nums">Stable <span className="text-white/70">{stableCount}</span></span>
+        <span className="tabular-nums">Stable <span className="text-white/55">{stableCount}</span></span>
         <span className="mx-1.5">·</span>
-        <span className="tabular-nums">Watchlist <span className="text-white/70">{watchlistCount}</span></span>
+        <span className="tabular-nums">Watchlist <span className="text-white/55">{watchlistCount}</span></span>
         <span className="mx-1.5">·</span>
-        <span className="tabular-nums">Losing <span className="text-white/70">{losingCount}</span></span>
+        <span className="tabular-nums">Losing <span className="text-white/55">{losingCount}</span></span>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1.5 border-t border-white/5 pt-3 text-xs text-white/50">
-        <span>Widening Gaps <strong className="tabular-nums text-white/90">{wideningGapsCount}/{total}</strong></span>
-        <span>Avg Gap <strong className="tabular-nums text-white/90">{avgGap ?? "—"}</strong></span>
-        <span>Avg Index <strong className="tabular-nums text-white/90">{avgIndex ?? "—"}</strong></span>
+      <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 border-t border-white/5 pt-3 text-xs text-white/40">
+        <span>Widening Gaps <strong className="tabular-nums text-white/70">{wideningGapsCount}/{total}</strong></span>
+        <span>Avg Gap <strong className="tabular-nums text-white/70">{avgGap ?? "—"}</strong></span>
+        <span>Avg Index <strong className="tabular-nums text-white/70">{avgIndex ?? "—"}</strong></span>
         {highestRisk && (
           <span>Highest Risk{" "}
-            <Link href={`/app/clients/${highestRisk.client.id}`} className="font-medium text-white/90 hover:underline">
+            <Link href={`/app/clients/${highestRisk.client.id}`} className="font-medium text-white/70 hover:underline">
               {highestRisk.client.name}
             </Link>
           </span>
@@ -261,7 +261,7 @@ function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
   );
 }
 
-/* Mini sparkline: fintech — 2px stroke, subtle glow, area fill ~0.08–0.12, 3 faint grid lines */
+/* Mini sparkline: stroke white/60, area 0.06–0.08, grid white/5, padding above */
 function MiniSparkline({ scores, hover }: { scores: number[]; hover?: boolean }) {
   const filterId = useId().replace(/:/g, "-");
   if (scores.length < 2) return null;
@@ -284,26 +284,28 @@ function MiniSparkline({ scores, hover }: { scores: number[]; hover?: boolean })
     : "";
   const gridY = (i: number) => padding.top + (i / 4) * chartH;
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-8 text-text-2 transition-opacity duration-200" style={{ opacity: hover ? 1 : 0.85 }} preserveAspectRatio="none">
-      <defs>
-        <filter id={filterId} x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="0" stdDeviation="0.8" floodOpacity="0.12" />
-        </filter>
-      </defs>
-      {[1, 2, 3].map((i) => (
-        <line key={i} x1={padding.left} y1={gridY(i)} x2={w - padding.right} y2={gridY(i)} stroke="currentColor" strokeOpacity={0.06} strokeWidth="0.5" />
-      ))}
-      {areaPath && <path d={areaPath} fill="currentColor" fillOpacity="0.1" />}
-      <polyline
-        points={linePoints}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        filter={`url(#${filterId})`}
-      />
-    </svg>
+    <div className="pt-5">
+      <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-8 text-white/60 transition-opacity duration-200" style={{ opacity: hover ? 1 : 0.9 }} preserveAspectRatio="none">
+        <defs>
+          <filter id={filterId} x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="0" stdDeviation="0.6" floodOpacity="0.1" />
+          </filter>
+        </defs>
+        {[1, 2, 3].map((i) => (
+          <line key={i} x1={padding.left} y1={gridY(i)} x2={w - padding.right} y2={gridY(i)} stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
+        ))}
+        {areaPath && <path d={areaPath} fill="rgba(255,255,255,0.07)" />}
+        <polyline
+          points={linePoints}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          filter={`url(#${filterId})`}
+        />
+      </svg>
+    </div>
   );
 }
 
@@ -333,7 +335,7 @@ function ClientCard({ client }: { client: ClientWithStats }) {
       onMouseLeave={() => setHover(false)}
       className="group relative flex w-full flex-col rounded-xl border border-white/[0.06] p-5 text-left transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-white/10 aspect-square min-h-[220px] max-h-[280px] sm:min-h-0 sm:max-h-none hover:-translate-y-0.5"
       style={{
-        background: "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02), transparent 70%), rgb(var(--surface))",
+        background: "linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 40%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02), transparent 70%), rgb(var(--surface))",
         boxShadow: hover
           ? "0 0 0 1px rgba(255,255,255,0.06), 0 4px 12px rgba(0,0,0,0.2)"
           : "0 0 0 1px rgba(255,255,255,0.06), 0 2px 8px rgba(0,0,0,0.12)",
@@ -342,14 +344,14 @@ function ClientCard({ client }: { client: ClientWithStats }) {
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 flex-1 items-center gap-2.5">
           {faviconUrl ? (
-            <span className="flex h-[22px] w-[22px] shrink-0 items-center justify-center overflow-hidden rounded-md bg-white/5">
-              <img src={faviconUrl} alt="" className="h-[18px] w-[18px] object-contain" width={18} height={18} />
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/5">
+              <img src={faviconUrl} alt="" className="h-5 w-5 object-contain" width={20} height={20} />
             </span>
           ) : null}
           <h3 className="truncate text-sm font-medium leading-tight text-white/90">{client.name}</h3>
         </div>
         <span
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/5 text-white/40 transition-opacity duration-200 group-hover:bg-white/10 group-hover:text-white/70"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/5 text-white/25 transition-opacity duration-200 group-hover:text-white/60"
           aria-hidden
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -360,7 +362,7 @@ function ClientCard({ client }: { client: ClientWithStats }) {
 
       {hasScore ? (
         <>
-          <div className="mt-4 flex flex-wrap items-baseline gap-2">
+          <div className="mt-2 flex flex-wrap items-baseline gap-1.5">
             <span className="text-6xl font-bold tabular-nums tracking-tight text-white sm:text-7xl" style={{ fontWeight: 700, letterSpacing: "-0.02em" }}>
               {client.latestScore}
             </span>
@@ -370,7 +372,7 @@ function ClientCard({ client }: { client: ClientWithStats }) {
               </span>
             )}
           </div>
-          <div className="mt-auto min-h-[44px] pt-4">
+          <div className="mt-auto min-h-[44px]">
             <MiniSparkline scores={client.recentScores} hover={hover} />
           </div>
         </>
@@ -397,7 +399,7 @@ function AddClientCard() {
       onMouseLeave={() => setHover(false)}
       className="flex w-full flex-col items-center justify-center rounded-xl border border-dashed border-white/10 p-5 text-white/60 transition-all duration-200 hover:border-white/15 focus:outline-none focus:ring-1 focus:ring-white/10 aspect-square min-h-[220px] max-h-[280px] sm:min-h-0 sm:max-h-none hover:-translate-y-0.5"
       style={{
-        background: "linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 50%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.01), transparent 70%), rgb(var(--surface))",
+        background: "linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 40%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02), transparent 70%), rgb(var(--surface))",
         boxShadow: hover
           ? "0 0 0 1px rgba(255,255,255,0.05), 0 4px 12px rgba(0,0,0,0.15)"
           : "0 0 0 1px rgba(255,255,255,0.05), 0 2px 8px rgba(0,0,0,0.1)",
