@@ -1191,7 +1191,6 @@ export default function AppPage() {
   return (
     <>
       <TopBar
-        title="Dashboard"
         primaryAction={
           <Link
             href="/app/clients/new"
@@ -1204,26 +1203,13 @@ export default function AppPage() {
           </Link>
         }
         filters={
-          <>
-            <select
-              value={filterHealth}
-              onChange={(e) => setFilterHealth(e.target.value as "all" | "dominant" | "stable" | "watchlist" | "losing")}
-              className="h-9 rounded-app border border-white/10 bg-surface px-3 text-sm text-text focus:border-white/20 focus:outline-none"
-            >
-              <option value="all">All states</option>
-              <option value="dominant">Dominant</option>
-              <option value="stable">Stable</option>
-              <option value="watchlist">Watchlist</option>
-              <option value="losing">Losing ground</option>
-            </select>
-            <input
-              type="text"
-              placeholder="Search clients..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 w-44 rounded-app border border-white/10 bg-surface px-3 text-sm text-text placeholder:text-text-3 focus:border-white/20 focus:outline-none"
-            />
-          </>
+          <input
+            type="text"
+            placeholder="Search clients..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-9 w-44 rounded-app border border-white/10 bg-surface px-3 text-sm text-text placeholder:text-text-3 focus:border-white/20 focus:outline-none"
+          />
         }
       />
 
