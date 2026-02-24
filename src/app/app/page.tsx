@@ -141,8 +141,13 @@ function getAuthorityStateBar(state: AuthorityState): string {
 }
 
 function StatusPill({ state }: { state: AuthorityState }) {
+  const dotClass =
+    state === "Dominant" ? "bg-authority-dominant/90" :
+    state === "Stable" ? "bg-authority-stable/90" :
+    state === "Watchlist" ? "bg-authority-watchlist/90" : "bg-authority-losing/90";
   return (
-    <span className={cn("inline-flex items-center rounded-app border border-white/5 px-2 py-0.5 text-[11px] font-medium", getAuthorityStateBg(state), getAuthorityStateText(state))}>
+    <span className={cn("inline-flex items-center gap-1.5 text-[11px] font-medium text-text-2")}>
+      <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", dotClass)} aria-hidden />
       {state}
     </span>
   );
@@ -189,7 +194,7 @@ function ModelDot({ model }: { model: string | null }) {
   return <span className={cn("mr-1.5 inline-block h-2 w-2 shrink-0 rounded-full", color)} aria-hidden />;
 }
 
-/* Section 1: Portfolio Status — single rich executive verdict module */
+/* Section 1: Portfolio Status — compact verdict row, no large colored fills */
 function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
   const dominantCount = clients.filter((c) => getAuthorityState(c) === "Dominant").length;
   const stableCount = clients.filter((c) => getAuthorityState(c) === "Stable").length;
@@ -216,80 +221,49 @@ function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
       })[0] ?? null;
   }, [clients]);
 
-  const total = dominantCount + stableCount + watchlistCount + losingCount || 1;
-  const seg = (n: number) => (n / total) * 100;
-
   return (
-    <section className="app-card overflow-hidden">
-      <div className="border-b border-white/5 px-4 py-3">
-        <h2 className="text-base font-semibold text-text">Portfolio Status</h2>
-        <p className="text-xs text-text-2 mt-0.5">Executive verdict · state distribution and risk signals</p>
-      </div>
-      <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* State distribution bar */}
-        <div className="lg:col-span-2">
-          <div className="text-[11px] font-medium uppercase tracking-wider text-text-2 mb-1.5">State distribution</div>
-          <div className="flex h-8 w-full overflow-hidden rounded-app border border-white/5 bg-surface-2/50">
-            {dominantCount > 0 && (
-              <div
-                className="bg-authority-dominant/80 shrink-0 transition-all"
-                style={{ width: `${seg(dominantCount)}%` }}
-                title={`Dominant: ${dominantCount}`}
-              />
-            )}
-            {stableCount > 0 && (
-              <div
-                className="bg-authority-stable/80 shrink-0 transition-all"
-                style={{ width: `${seg(stableCount)}%` }}
-                title={`Stable: ${stableCount}`}
-              />
-            )}
-            {watchlistCount > 0 && (
-              <div
-                className="bg-authority-watchlist/80 shrink-0 transition-all"
-                style={{ width: `${seg(watchlistCount)}%` }}
-                title={`Watchlist: ${watchlistCount}`}
-              />
-            )}
-            {losingCount > 0 && (
-              <div
-                className="bg-authority-losing/80 shrink-0 transition-all"
-                style={{ width: `${seg(losingCount)}%` }}
-                title={`Losing: ${losingCount}`}
-              />
-            )}
-          </div>
-          <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-text-2">
-            <span><span className="text-authority-dominant">Dominant</span> {dominantCount}</span>
-            <span><span className="text-authority-stable">Stable</span> {stableCount}</span>
-            <span><span className="text-authority-watchlist">Watchlist</span> {watchlistCount}</span>
-            <span><span className="text-authority-losing">Losing</span> {losingCount}</span>
-          </div>
-        </div>
-        <div>
-          <div className="text-[11px] font-medium uppercase tracking-wider text-text-2">Widening gaps</div>
-          <div className="mt-0.5 flex items-center gap-1.5">
-            <span className="text-2xl font-semibold tabular-nums text-text">{wideningGapsCount}</span>
-            {wideningGapsCount > 0 && <span className="text-xs text-authority-losing">momentum risk</span>}
-          </div>
-        </div>
-        <div>
-          <div className="text-[11px] font-medium uppercase tracking-wider text-text-2">Avg gap to leader</div>
-          <div className="mt-0.5 text-2xl font-semibold tabular-nums text-text">{avgGap ?? "—"}</div>
+    <section className="rounded-app-lg border border-white/5 bg-surface overflow-hidden">
+      <div className="px-3 py-2 border-b border-white/5 flex items-center justify-between flex-wrap gap-2">
+        <h2 className="text-sm font-semibold text-text">Portfolio Status</h2>
+        <div className="flex items-center gap-4 text-[11px] text-text-2">
+          <span className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-authority-dominant/90" aria-hidden />
+            <span className="text-text">Dominant</span> {dominantCount}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-authority-stable/90" aria-hidden />
+            Stable {stableCount}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-authority-watchlist/90" aria-hidden />
+            Watchlist {watchlistCount}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-authority-losing/90" aria-hidden />
+            Losing {losingCount}
+          </span>
         </div>
       </div>
-      {highestRisk && (
-        <div className="border-t border-white/5 px-4 py-2.5">
-          <span className="text-[11px] font-medium uppercase tracking-wider text-text-2">Highest risk client</span>
-          <Link
-            href={`/app/clients/${highestRisk.client.id}`}
-            className="ml-2 text-sm font-medium text-text hover:underline"
-          >
-            {highestRisk.client.name}
-            {highestRisk.client.worstModel ? ` · ${displayModelName(highestRisk.client.worstModel)}` : ""}
-          </Link>
-        </div>
-      )}
+      <div className="px-3 py-2.5 flex flex-wrap items-baseline gap-x-6 gap-y-1 text-[12px]">
+        <span className="flex items-center gap-1.5">
+          <span className="text-text-3">Widening gaps</span>
+          <span className="font-semibold tabular-nums text-text">{wideningGapsCount}</span>
+          {wideningGapsCount > 0 && <span className="text-authority-losing text-[10px]">risk</span>}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="text-text-3">Avg gap</span>
+          <span className="font-semibold tabular-nums text-text">{avgGap ?? "—"}</span>
+        </span>
+        {highestRisk && (
+          <span className="flex items-center gap-1.5">
+            <span className="text-text-3">Highest risk</span>
+            <Link href={`/app/clients/${highestRisk.client.id}`} className="font-medium text-text hover:underline">
+              {highestRisk.client.name}
+              {highestRisk.client.worstModel ? ` · ${displayModelName(highestRisk.client.worstModel)}` : ""}
+            </Link>
+          </span>
+        )}
+      </div>
     </section>
   );
 }
@@ -307,30 +281,27 @@ function ClientsRequiringAttention({ clients }: { clients: ClientWithStats[] }) 
 
   if (attention.length === 0) {
     return (
-      <section className="app-card overflow-hidden">
-        <div className="px-4 py-3 text-sm text-text-2">
-          Portfolio stable — no widening gaps detected.
-        </div>
+      <section className="rounded-app-lg border border-white/5 bg-surface">
+        <div className="px-3 py-2 text-xs text-text-2">Portfolio stable — no widening gaps detected.</div>
       </section>
     );
   }
 
   return (
-    <section className="app-card overflow-hidden">
-      <div className="border-b border-white/5 px-4 py-3">
-        <h2 className="text-base font-semibold text-text">Clients Requiring Attention</h2>
-        <p className="text-xs text-text-2 mt-0.5">Watchlist and Losing · or widening gaps</p>
+    <section className="rounded-app-lg border border-white/5 bg-surface overflow-hidden">
+      <div className="border-b border-white/5 px-3 py-2">
+        <h2 className="text-sm font-semibold text-text">Clients Requiring Attention</h2>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[560px] border-collapse text-left text-[13px]">
+        <table className="w-full min-w-[520px] border-collapse text-left text-[12px]">
           <thead>
-            <tr className="border-b border-white/5 bg-surface-2/80">
-              <th className="px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Client</th>
-              <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2 text-right">Index</th>
-              <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2 text-right">Gap to leader</th>
-              <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Weakest model</th>
-              <th className="w-10 px-1 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2 text-center">Momentum</th>
-              <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Primary displacer</th>
+            <tr className="border-b border-white/5 bg-surface-2/60">
+              <th className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-text-2">Client</th>
+              <th className="px-2 py-1.5 text-[10px] font-medium uppercase tracking-wider text-text-2 text-right">Index</th>
+              <th className="px-2 py-1.5 text-[10px] font-medium uppercase tracking-wider text-text-2 text-right">Gap</th>
+              <th className="px-2 py-1.5 text-[10px] font-medium uppercase tracking-wider text-text-2">Weakest</th>
+              <th className="w-8 px-1 py-1.5 text-[10px] font-medium uppercase tracking-wider text-text-2 text-center" title="Gap trend">Δ</th>
+              <th className="px-2 py-1.5 text-[10px] font-medium uppercase tracking-wider text-text-2">Displacer</th>
             </tr>
           </thead>
           <tbody>
@@ -338,14 +309,16 @@ function ClientsRequiringAttention({ clients }: { clients: ClientWithStats[] }) 
               const delta = c.latestScore !== null && c.previousScore !== null ? c.latestScore - c.previousScore : null;
               return (
                 <tr key={c.id} className="border-b border-white/5 last:border-b-0">
-                  <td className="px-3 py-2 font-medium text-text">
+                  <td className="px-3 py-1.5 font-medium text-text">
                     <Link href={`/app/clients/${c.id}`} className="hover:underline">{c.name}</Link>
                   </td>
-                  <td className="px-2 py-2 text-right tabular-nums text-text">{c.latestScore ?? "—"}</td>
-                  <td className="px-2 py-2 text-right tabular-nums text-text-2">{c.authorityGap ?? "—"}</td>
-                  <td className="px-2 py-2 text-text-2">{c.worstModel ? displayModelName(c.worstModel) : "—"}</td>
-                  <td className="w-10 px-1 py-2 text-center"><MomentumArrow delta={delta} /></td>
-                  <td className="px-2 py-2 text-text-2">{c.primaryDisplacer ?? "—"}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums text-text">{c.latestScore ?? "—"}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums text-text-2">{c.authorityGap ?? "—"}</td>
+                  <td className="px-2 py-1.5 text-text-2">{c.worstModel ? displayModelName(c.worstModel) : "—"}</td>
+                  <td className="w-8 px-1 py-1.5 text-center" title={delta == null ? "" : delta < 0 ? "Gap widening" : "Gap narrowing"}>
+                    <MomentumArrow delta={delta} />
+                  </td>
+                  <td className="px-2 py-1.5 text-text-2">{c.primaryDisplacer ?? "—"}</td>
                 </tr>
               );
             })}
@@ -382,31 +355,40 @@ function ModelExposureSummary({ clients }: { clients: ClientWithStats[] }) {
   }, [clients]);
 
   return (
-    <section className="app-card overflow-hidden">
-      <div className="border-b border-white/5 px-4 py-3">
-        <h2 className="text-base font-semibold text-text">Model Exposure Summary</h2>
-        <p className="text-xs text-text-2 mt-0.5">Where risk is concentrated by model</p>
+    <section className="rounded-app-lg border border-white/5 bg-surface overflow-hidden">
+      <div className="border-b border-white/5 px-3 py-2">
+        <h2 className="text-sm font-semibold text-text">Model Exposure</h2>
       </div>
-      <div className="p-4 space-y-4">
-        {MODEL_FAMILIES.map((family) => {
-          const d = byModel[family];
-          const total = d.dominant + d.stable + d.watchlist + d.losing || 1;
-          const pct = (n: number) => (n / total) * 100;
-          return (
-            <div key={family} className="flex items-center gap-3">
-              <div className="w-20 shrink-0 text-[11px] font-medium text-text-2">{modelFamilyLabel(family)}</div>
-              <div className="flex flex-1 h-6 overflow-hidden rounded-app border border-white/5 bg-surface-2/50">
-                {d.dominant > 0 && <div className="bg-authority-dominant/80 shrink-0" style={{ width: `${pct(d.dominant)}%` }} />}
-                {d.stable > 0 && <div className="bg-authority-stable/80 shrink-0" style={{ width: `${pct(d.stable)}%` }} />}
-                {d.watchlist > 0 && <div className="bg-authority-watchlist/80 shrink-0" style={{ width: `${pct(d.watchlist)}%` }} />}
-                {d.losing > 0 && <div className="bg-authority-losing/80 shrink-0" style={{ width: `${pct(d.losing)}%` }} />}
-              </div>
-              <div className="w-16 shrink-0 text-right text-[11px] text-text-2">
-                {d.widening > 0 ? <span className="text-authority-losing">{d.widening} widening</span> : "—"}
-              </div>
-            </div>
-          );
-        })}
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-[12px]">
+          <thead>
+            <tr className="border-b border-white/5 bg-surface-2/60">
+              <th className="px-3 py-1.5 text-left text-[10px] font-medium uppercase tracking-wider text-text-2">Model</th>
+              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2">D</th>
+              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2">S</th>
+              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2">W</th>
+              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2">L</th>
+              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2">Widening</th>
+            </tr>
+          </thead>
+          <tbody>
+            {MODEL_FAMILIES.map((family) => {
+              const d = byModel[family];
+              return (
+                <tr key={family} className="border-b border-white/5 last:border-b-0">
+                  <td className="px-3 py-1.5 font-medium text-text">{modelFamilyLabel(family)}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums text-text-2">{d.dominant}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums text-text-2">{d.stable}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums text-text-2">{d.watchlist}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums text-text-2">{d.losing}</td>
+                  <td className="px-2 py-1.5 text-right">
+                    {d.widening > 0 ? <span className="text-authority-losing text-[11px]">{d.widening}</span> : <span className="text-text-3">—</span>}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     </section>
   );
@@ -428,15 +410,15 @@ function RiskMapCell({
 }) {
   const deltaFormatted = delta !== null && delta !== 0 ? (delta > 0 ? `+${delta}` : `${delta}`) : null;
   return (
-    <td className="w-24 min-w-[5rem] bg-surface px-0 py-0 align-top text-right" title={title}>
-      <div className={cn("flex flex-col border-l-[3px] py-1.5 pl-2 pr-2 text-right", stateBar)}>
-        <span className="text-base font-semibold tabular-nums text-text">{score ?? "—"}</span>
+    <td className="w-20 min-w-[4.5rem] bg-surface px-0 py-0 align-top text-right" title={title}>
+      <div className={cn("flex flex-col border-l-[3px] py-1 pl-1.5 pr-1.5 text-right", stateBar)}>
+        <span className="text-lg font-semibold tabular-nums text-text leading-tight">{score ?? "—"}</span>
         {deltaFormatted !== null && (
           <span className={cn("text-[10px] tabular-nums", delta !== null && delta < 0 ? "text-authority-losing" : "text-authority-dominant")}>
             {deltaFormatted}
           </span>
         )}
-        <span className="mt-0.5">
+        <span className="mt-0.5" title={delta == null ? "" : delta < 0 ? "Gap widening" : "Gap narrowing"}>
           <MomentumArrow delta={delta} />
         </span>
       </div>
@@ -446,21 +428,21 @@ function RiskMapCell({
 
 function RiskMap({ clients }: { clients: ClientWithStats[] }) {
   return (
-    <section className="app-card overflow-hidden">
-      <div className="border-b border-white/5 px-4 py-3">
+    <section className="rounded-app-lg border border-white/5 bg-surface overflow-hidden">
+      <div className="border-b border-white/5 px-3 py-2">
         <h2 className="text-sm font-semibold text-text">AI Authority Risk Map</h2>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] border-collapse text-left text-[13px]">
+        <table className="w-full min-w-[560px] border-collapse text-left text-[12px]">
           <thead>
-            <tr className="border-b border-white/5">
-              <th className="bg-surface-2/80 px-3 py-2 text-left text-[10px] font-medium uppercase tracking-wider text-text-2">Client</th>
+            <tr className="border-b border-white/5 bg-surface-2/60">
+              <th className="px-3 py-1.5 text-left text-[10px] font-medium uppercase tracking-wider text-text-2">Client</th>
               {MODEL_FAMILIES.map((f) => (
-                <th key={f} className="w-24 min-w-[5rem] bg-surface-2/80 px-2 py-2 text-right text-[10px] font-medium uppercase tracking-wider text-text-2">
+                <th key={f} className="w-20 min-w-[4.5rem] px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2">
                   {modelFamilyLabel(f)}
                 </th>
               ))}
-              <th className="w-24 min-w-[5rem] bg-surface-2/80 px-2 py-2 text-right text-[10px] font-medium uppercase tracking-wider text-text-2">Overall</th>
+              <th className="w-20 min-w-[4.5rem] px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2">Overall</th>
             </tr>
           </thead>
           <tbody>
@@ -470,7 +452,7 @@ function RiskMap({ clients }: { clients: ClientWithStats[] }) {
               const hoverOverall = [client.primaryDisplacer && `Displacer: ${client.primaryDisplacer}`, client.authorityGap != null && `Gap: ${client.authorityGap}`, overallDelta != null && `Change: ${overallDelta >= 0 ? "+" : ""}${overallDelta}`].filter(Boolean).join(". ");
               return (
                 <tr key={client.id} className="border-b border-white/5 last:border-b-0">
-                  <td className="px-3 py-2 font-medium text-text">
+                  <td className="px-3 py-1.5 font-medium text-text">
                     <Link href={`/app/clients/${client.id}`} className="hover:underline">{client.name}</Link>
                   </td>
                   {MODEL_FAMILIES.map((family) => {
@@ -523,27 +505,26 @@ function TopThreats({ clients }: { clients: ClientWithStats[] }) {
 
   if (isEmpty) {
     return (
-      <section className="rounded-app-lg border border-white/5 bg-surface px-4 py-2.5">
+      <section className="rounded-app-lg border border-white/5 bg-surface px-3 py-2">
         <span className="text-xs text-text-2">System status: No competitive threats above threshold.</span>
       </section>
     );
   }
 
   return (
-    <section className="app-card overflow-hidden">
-      <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
-        <h2 className="text-base font-semibold text-text">Top Competitive Threats</h2>
-        <span className="text-[11px] text-text-2">Top 5 by gap · widening first</span>
+    <section className="rounded-app-lg border border-white/5 bg-surface overflow-hidden">
+      <div className="border-b border-white/5 px-3 py-2">
+        <h2 className="text-sm font-semibold text-text">Top Competitive Threats</h2>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-[13px]">
+        <table className="w-full text-left text-[12px]">
           <thead>
-            <tr className="border-b border-white/5">
-              <th className="px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Client</th>
-              <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Model</th>
-              <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2">Primary displacer</th>
-              <th className="px-2 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2 text-right">Gap</th>
-              <th className="w-8 px-1 py-2 text-[10px] font-medium uppercase tracking-wider text-text-2 text-center">Trend</th>
+            <tr className="border-b border-white/5 bg-surface-2/60">
+              <th className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-text-2">Client</th>
+              <th className="px-2 py-1.5 text-[10px] font-medium uppercase tracking-wider text-text-2">Model</th>
+              <th className="px-2 py-1.5 text-[10px] font-medium uppercase tracking-wider text-text-2">Displacer</th>
+              <th className="px-2 py-1.5 text-[10px] font-medium uppercase tracking-wider text-text-2 text-right">Gap</th>
+              <th className="w-8 px-1 py-1.5 text-center text-[10px] font-medium uppercase tracking-wider text-text-2">Δ</th>
             </tr>
           </thead>
           <tbody>
@@ -551,11 +532,11 @@ function TopThreats({ clients }: { clients: ClientWithStats[] }) {
               const delta = c.latestScore !== null && c.previousScore !== null ? c.latestScore - c.previousScore : null;
               return (
                 <tr key={c.id} className="border-b border-white/5 last:border-b-0">
-                  <td className="px-3 py-2 font-medium text-text">{c.name}</td>
-                  <td className="px-2 py-2 text-text-2">{c.worstModel ? displayModelName(c.worstModel) : "—"}</td>
-                  <td className="px-2 py-2 text-text-2">{c.primaryDisplacer ?? "—"}</td>
-                  <td className="px-2 py-2 text-right tabular-nums text-text">{c.authorityGap ?? "—"}</td>
-                  <td className="w-8 px-1 py-2 text-center"><TrendArrow value={delta} /></td>
+                  <td className="px-3 py-1.5 font-medium text-text">{c.name}</td>
+                  <td className="px-2 py-1.5 text-text-2">{c.worstModel ? displayModelName(c.worstModel) : "—"}</td>
+                  <td className="px-2 py-1.5 text-text-2">{c.primaryDisplacer ?? "—"}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums text-text">{c.authorityGap ?? "—"}</td>
+                  <td className="w-8 px-1 py-1.5 text-center" title={delta == null ? "" : delta < 0 ? "Gap widening" : "Gap narrowing"}><TrendArrow value={delta} /></td>
                 </tr>
               );
             })}
@@ -578,16 +559,16 @@ function ClientTable({ clients }: { clients: ClientWithStats[] }) {
   const router = useRouter();
 
   return (
-    <div className="app-card overflow-hidden">
-      <table className="w-full text-left text-[13px]">
+    <div className="rounded-app-lg border border-white/5 bg-surface overflow-hidden">
+      <table className="w-full text-left text-[12px]">
         <thead>
-          <tr className="border-b border-white/5 bg-surface-2/80">
-            <th className="px-3 py-2.5 text-[10px] font-medium uppercase tracking-wider text-text-2">Client</th>
-            <th className="px-3 py-2.5 text-[10px] font-medium uppercase tracking-wider text-text-2">State</th>
-            <th className="px-3 py-2.5 text-[10px] font-medium uppercase tracking-wider text-text-2">Index</th>
-            <th className="px-3 py-2.5 text-[10px] font-medium uppercase tracking-wider text-text-2">Trend</th>
-            <th className="px-3 py-2.5 text-[10px] font-medium uppercase tracking-wider text-text-2">Primary Displacer</th>
-            <th className="px-3 py-2.5 text-[10px] font-medium uppercase tracking-wider text-text-2">Weakest Model</th>
+          <tr className="border-b border-white/5 bg-surface-2/60">
+            <th className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-text-2">Client</th>
+            <th className="px-2 py-1.5 text-[10px] font-medium uppercase tracking-wider text-text-2">State</th>
+            <th className="px-2 py-1.5 text-[10px] font-medium uppercase tracking-wider text-text-2 text-right">Index</th>
+            <th className="px-2 py-1.5 text-[10px] font-medium uppercase tracking-wider text-text-2 text-right">Trend</th>
+            <th className="px-2 py-1.5 text-[10px] font-medium uppercase tracking-wider text-text-2">Displacer</th>
+            <th className="px-2 py-1.5 text-[10px] font-medium uppercase tracking-wider text-text-2">Weakest</th>
           </tr>
         </thead>
         <tbody>
@@ -608,53 +589,47 @@ function ClientTable({ clients }: { clients: ClientWithStats[] }) {
                 )}
               >
                 {hasNoData ? (
-                  <td colSpan={6} className="px-3 py-3">
-                    <div className="flex items-center gap-3">
+                  <td colSpan={6} className="px-3 py-2">
+                    <div className="flex items-center gap-2">
                       <StatusDot score={client.latestScore} status={client.status} />
                       <div className="min-w-0 flex-1">
-                        <span className="font-semibold text-text">{client.name}</span>
-                        <div className="mt-1 flex flex-wrap items-center gap-3">
-                          <span className="text-xs text-text-2">Run a snapshot to measure authority</span>
-                          <Link
-                            href={`/app/clients/${client.id}`}
-                            onClick={(e) => e.stopPropagation()}
-                            className="inline-flex items-center gap-1.5 rounded-app border border-white/10 bg-surface px-2.5 py-1.5 text-xs font-medium text-text transition-colors hover:bg-surface-2"
-                          >
-                            Run snapshot
-                          </Link>
-                        </div>
+                        <span className="font-medium text-text">{client.name}</span>
+                        <span className="ml-2 text-xs text-text-2">Run a snapshot to measure authority</span>
+                        <Link
+                          href={`/app/clients/${client.id}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="ml-2 inline-flex items-center gap-1 rounded-app border border-white/10 bg-surface px-2 py-1 text-[11px] font-medium text-text transition-colors hover:bg-surface-2"
+                        >
+                          Run snapshot
+                        </Link>
                       </div>
                     </div>
                   </td>
                 ) : (
                   <>
-                    <td className="px-3 py-2.5">
+                    <td className="px-3 py-1.5">
                       <div className="flex items-center gap-2">
                         <StatusDot score={client.latestScore} status={client.status} />
                         <div className="min-w-0 flex-1">
-                          <span className="font-semibold text-text">{client.name}</span>
+                          <span className="font-medium text-text">{client.name}</span>
                           {client.website ? (
-                            <div className="text-[11px] text-text-2">{displayUrl(client.website)}</div>
+                            <div className="text-[10px] text-text-2">{displayUrl(client.website)}</div>
                           ) : null}
                         </div>
                       </div>
                     </td>
-                    <td className="px-3 py-2.5"><StatusPill state={state} /></td>
-                    <td className="px-3 py-2.5">
-                      <span className="font-semibold tabular-nums text-text">{client.latestScore ?? "—"}</span>
-                    </td>
-                    <td className="px-3 py-2.5"><Delta value={delta} /></td>
-                    <td className="px-3 py-2.5 text-xs text-text-2">
+                    <td className="px-2 py-1.5"><StatusPill state={state} /></td>
+                    <td className="px-2 py-1.5 text-right font-semibold tabular-nums text-text">{client.latestScore ?? "—"}</td>
+                    <td className="px-2 py-1.5 text-right"><Delta value={delta} /></td>
+                    <td className="px-2 py-1.5 text-text-2">
                       {client.primaryDisplacer ? (
                         <span>
                           {client.primaryDisplacer}
-                          {client.authorityGap != null ? ` · ${client.authorityGap} pts` : ""}
+                          {client.authorityGap != null ? ` · ${client.authorityGap}` : ""}
                         </span>
-                      ) : (
-                        "—"
-                      )}
+                      ) : "—"}
                     </td>
-                    <td className="px-3 py-2.5 text-xs">
+                    <td className="px-2 py-1.5 text-text-2">
                       {client.worstModel ? (
                         <Link
                           href={`/app/clients/${client.id}#cross-model`}
@@ -1060,30 +1035,28 @@ export default function AppPage() {
         }
       />
 
-      <div className="flex-1 space-y-5 p-6">
+      <div className="flex-1 space-y-4 p-6">
         <PortfolioStatus clients={clients} />
         <ClientsRequiringAttention clients={clients} />
         <ModelExposureSummary clients={clients} />
         <RiskMap clients={clients} />
         <TopThreats clients={clients} />
 
-        <section id="clients-overview" className="space-y-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-sm text-text-2">
-              Clients Overview · {filteredClients.length} of {clients.length} client{clients.length !== 1 ? "s" : ""}
-            </div>
+        <section id="clients-overview">
+          <div className="mb-2 text-xs text-text-2">
+            Clients · {filteredClients.length} of {clients.length}
           </div>
 
           {filteredClients.length === 0 && searchQuery ? (
-            <div className="rounded-app-lg border border-white/5 bg-surface/50 py-8 text-center">
-              <p className="text-sm text-text-2">No clients match &quot;{searchQuery}&quot;</p>
+            <div className="rounded-app-lg border border-white/5 bg-surface/50 py-4 text-center">
+              <p className="text-xs text-text-2">No clients match &quot;{searchQuery}&quot;</p>
               <button onClick={() => setSearchQuery("")} className="mt-2 text-sm text-text hover:underline">
                 Clear search
               </button>
             </div>
           ) : filteredClients.length === 0 && filterHealth !== "all" ? (
-            <div className="rounded-app-lg border border-white/5 bg-surface/50 py-8 text-center">
-              <p className="text-sm text-text-2">No {filterHealth} clients found</p>
+            <div className="rounded-app-lg border border-white/5 bg-surface/50 py-4 text-center">
+              <p className="text-xs text-text-2">No {filterHealth} clients found</p>
               <button onClick={() => setFilterHealth("all")} className="mt-2 text-sm text-text hover:underline">
                 Clear filter
               </button>
