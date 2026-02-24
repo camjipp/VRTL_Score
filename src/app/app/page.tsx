@@ -259,6 +259,140 @@ function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
   );
 }
 
+/* Mini sparkline for client card (recent scores over time) */
+function MiniSparkline({ scores }: { scores: number[] }) {
+  if (scores.length < 2) return null;
+  const w = 120;
+  const h = 28;
+  const padding = { top: 2, right: 2, bottom: 2, left: 2 };
+  const max = Math.max(...scores, 100);
+  const min = Math.min(...scores, 0);
+  const range = max - min || 1;
+  const points = scores.map((val, i) => {
+    const x = padding.left + (i / (scores.length - 1)) * (w - padding.left - padding.right);
+    const y = padding.top + h - padding.top - padding.bottom - ((val - min) / range) * (h - padding.top - padding.bottom);
+    return `${x},${y}`;
+  }).join(" ");
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-7 text-text-2" preserveAspectRatio="none">
+      <polyline points={points} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity={0.8} />
+    </svg>
+  );
+}
+
+/* Stakent-style client card: name, score + delta, sparkline; or Run snapshot when no data */
+function ClientCard({ client }: { client: ClientWithStats }) {
+  const router = useRouter();
+  const hasScore = client.latestScore !== null;
+  const delta = hasScore && client.previousScore !== null ? client.latestScore! - client.previousScore! : null;
+
+  return (
+    <button
+      type="button"
+      onClick={() => router.push(`/app/clients/${client.id}`)}
+      className="w-full rounded-app-lg border border-white/5 bg-surface p-4 text-left transition-colors hover:bg-surface-2/50 focus:outline-none focus:ring-1 focus:ring-white/10"
+    >
+      <div className="text-xs font-medium text-text-2 mb-2">{client.name}</div>
+      {hasScore ? (
+        <>
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-semibold tabular-nums text-text">{client.latestScore}</span>
+            {delta !== null && delta !== 0 && (
+              <span className={cn("text-xs tabular-nums", delta > 0 ? "text-authority-dominant" : "text-authority-losing")}>
+                {delta > 0 ? "+" : ""}{delta} vs last
+              </span>
+            )}
+          </div>
+          <div className="mt-3 min-h-[28px]">
+            <MiniSparkline scores={client.recentScores} />
+          </div>
+        </>
+      ) : (
+        <div className="py-4">
+          <span className="inline-flex items-center gap-1.5 rounded-app border border-white/10 bg-surface-2/50 px-3 py-2 text-xs font-medium text-text">
+            Run snapshot
+          </span>
+        </div>
+      )}
+    </button>
+  );
+}
+
+/* Add client card - always last in grid */
+function AddClientCard() {
+  const router = useRouter();
+  return (
+    <button
+      type="button"
+      onClick={() => router.push("/app/clients/new")}
+      className="flex w-full min-h-[120px] flex-col items-center justify-center rounded-app-lg border border-dashed border-white/10 bg-surface/30 p-4 text-text-2 transition-colors hover:border-white/20 hover:bg-surface/50 focus:outline-none focus:ring-1 focus:ring-white/10"
+    >
+      <svg className="h-8 w-8 mb-2 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+      </svg>
+      <span className="text-sm font-medium">Add client</span>
+    </button>
+  );
+}
+
+/* Client cards grid with sort above */
+function ClientCardsGrid({
+  clients,
+  sortBy,
+  onSortChange,
+}: {
+  clients: ClientWithStats[];
+  sortBy: "score_desc" | "score_asc" | "name_asc";
+  onSortChange: (v: "score_desc" | "score_asc" | "name_asc") => void;
+}) {
+  const sorted = useMemo(() => {
+    const list = [...clients];
+    if (sortBy === "score_desc") {
+      list.sort((a, b) => {
+        if (a.latestScore === null && b.latestScore === null) return 0;
+        if (a.latestScore === null) return 1;
+        if (b.latestScore === null) return -1;
+        return b.latestScore - a.latestScore;
+      });
+    } else if (sortBy === "score_asc") {
+      list.sort((a, b) => {
+        if (a.latestScore === null && b.latestScore === null) return 0;
+        if (a.latestScore === null) return 1;
+        if (b.latestScore === null) return -1;
+        return a.latestScore - b.latestScore;
+      });
+    } else {
+      list.sort((a, b) => a.name.localeCompare(b.name));
+    }
+    return list;
+  }, [clients, sortBy]);
+
+  return (
+    <section id="clients-overview" className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <label className="text-xs text-text-2">
+          Sort by
+          <select
+            value={sortBy}
+            onChange={(e) => onSortChange(e.target.value as "score_desc" | "score_asc" | "name_asc")}
+            className="ml-2 rounded-app border border-white/10 bg-surface px-2 py-1.5 text-xs text-text focus:border-white/20 focus:outline-none"
+          >
+            <option value="score_desc">Score (high → low)</option>
+            <option value="score_asc">Score (low → high)</option>
+            <option value="name_asc">Name A–Z</option>
+          </select>
+        </label>
+      </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {sorted.map((client) => (
+          <ClientCard key={client.id} client={client} />
+        ))}
+        <AddClientCard />
+      </div>
+    </section>
+  );
+}
+
 /* Section 2: Clients Requiring Attention — Watchlist + Losing only, dense table */
 function ClientsRequiringAttention({ clients }: { clients: ClientWithStats[] }) {
   const attention = useMemo(() => {
@@ -689,7 +823,7 @@ export default function AppPage() {
   const [clients, setClients] = useState<ClientWithStats[]>([]);
   const [portfolioStats, setPortfolioStats] = useState<PortfolioStats | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<"name" | "score" | "updated">("updated");
+  const [cardSortBy, setCardSortBy] = useState<"score_desc" | "score_asc" | "name_asc">("score_desc");
   const [filterHealth, setFilterHealth] = useState<"all" | "dominant" | "stable" | "watchlist" | "losing">("all");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -944,26 +1078,8 @@ export default function AppPage() {
       });
     }
 
-    if (sortBy === "score") {
-      result.sort((a, b) => {
-        if (a.latestScore === null && b.latestScore === null) return 0;
-        if (a.latestScore === null) return 1;
-        if (b.latestScore === null) return -1;
-        return b.latestScore - a.latestScore;
-      });
-    } else if (sortBy === "name") {
-      result.sort((a, b) => a.name.localeCompare(b.name));
-    } else {
-      result.sort((a, b) => {
-        if (!a.lastSnapshotAt && !b.lastSnapshotAt) return 0;
-        if (!a.lastSnapshotAt) return 1;
-        if (!b.lastSnapshotAt) return -1;
-        return new Date(b.lastSnapshotAt).getTime() - new Date(a.lastSnapshotAt).getTime();
-      });
-    }
-
     return result;
-  }, [clients, searchQuery, filterHealth, sortBy]);
+  }, [clients, searchQuery, filterHealth]);
 
   if (loading) {
     return (
@@ -988,10 +1104,6 @@ export default function AppPage() {
         </button>
       </div>
     );
-  }
-
-  if (clients.length === 0) {
-    return <EmptyState />;
   }
 
   return (
@@ -1022,15 +1134,6 @@ export default function AppPage() {
               <option value="watchlist">Watchlist</option>
               <option value="losing">Losing ground</option>
             </select>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as "name" | "score" | "updated")}
-              className="h-9 rounded-app border border-white/10 bg-surface px-3 text-sm text-text focus:border-white/20 focus:outline-none"
-            >
-              <option value="updated">Last updated</option>
-              <option value="score">Index</option>
-              <option value="name">Name</option>
-            </select>
             <input
               type="text"
               placeholder="Search clients..."
@@ -1044,34 +1147,27 @@ export default function AppPage() {
 
       <div className="flex-1 space-y-4 p-6">
         <PortfolioStatus clients={clients} />
-        <ClientsRequiringAttention clients={clients} />
-        <ModelExposureSummary clients={clients} />
-        <RiskMap clients={clients} />
-        <TopThreats clients={clients} />
-
-        <section id="clients-overview">
-          <div className="mb-2 text-xs text-text-2">
-            Clients · {filteredClients.length} of {clients.length}
+        {filteredClients.length === 0 && searchQuery ? (
+          <div className="rounded-app-lg border border-white/5 bg-surface/50 py-4 text-center">
+            <p className="text-xs text-text-2">No clients match &quot;{searchQuery}&quot;</p>
+            <button onClick={() => setSearchQuery("")} className="mt-2 text-sm text-text hover:underline">
+              Clear search
+            </button>
           </div>
-
-          {filteredClients.length === 0 && searchQuery ? (
-            <div className="rounded-app-lg border border-white/5 bg-surface/50 py-4 text-center">
-              <p className="text-xs text-text-2">No clients match &quot;{searchQuery}&quot;</p>
-              <button onClick={() => setSearchQuery("")} className="mt-2 text-sm text-text hover:underline">
-                Clear search
-              </button>
-            </div>
-          ) : filteredClients.length === 0 && filterHealth !== "all" ? (
-            <div className="rounded-app-lg border border-white/5 bg-surface/50 py-4 text-center">
-              <p className="text-xs text-text-2">No {filterHealth} clients found</p>
-              <button onClick={() => setFilterHealth("all")} className="mt-2 text-sm text-text hover:underline">
-                Clear filter
-              </button>
-            </div>
-          ) : (
-            <ClientTable clients={filteredClients} />
-          )}
-        </section>
+        ) : filteredClients.length === 0 && filterHealth !== "all" ? (
+          <div className="rounded-app-lg border border-white/5 bg-surface/50 py-4 text-center">
+            <p className="text-xs text-text-2">No {filterHealth} clients found</p>
+            <button onClick={() => setFilterHealth("all")} className="mt-2 text-sm text-text hover:underline">
+              Clear filter
+            </button>
+          </div>
+        ) : (
+          <ClientCardsGrid
+            clients={filteredClients}
+            sortBy={cardSortBy}
+            onSortChange={setCardSortBy}
+          />
+        )}
       </div>
     </>
   );
