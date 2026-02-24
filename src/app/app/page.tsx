@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { TopBar } from "@/components/TopBar";
 import { ensureOnboarded } from "@/lib/onboard";
@@ -271,80 +271,44 @@ function faviconDomain(website: string | null): string | null {
 }
 
 const MODEL_FAMILIES_CHART: ModelFamily[] = ["chatgpt", "gemini", "claude"];
+const MODEL_LABELS: Record<ModelFamily, string> = { chatgpt: "GPT", gemini: "GEM", claude: "CLA" };
 
-/* Model spread: model comparison (not time-series). 3 dots by score, horizontal baseline, no connecting line. */
-function ModelSpreadChart({ modelScores }: { modelScores: ProviderFamilyScores }) {
-  const filterId = useId().replace(/:/g, "-");
-  const chartW = 120;
-  const chartH = 64;
-  const padding = { top: 10, right: 6, bottom: 10, left: 6 };
-  const innerW = chartW - padding.left - padding.right;
-  const innerH = chartH - padding.top - padding.bottom;
-  const xPos = [padding.left + 0, padding.left + innerW / 2, padding.left + innerW];
-  const baselineY = padding.top + innerH;
-  const points: (null | { x: number; y: number; score: number })[] = MODEL_FAMILIES_CHART.map((f, i) => {
-    const score = modelScores[f];
-    if (score == null) return null;
-    const y = padding.top + innerH - (score / 100) * innerH;
-    return { x: xPos[i], y, score };
-  });
-  const dotR = 6;
-  const hLines = 3;
+/* Model Spread widget: labeled rows with tiny 0–100 bars. Strongest=green, middle=amber, weakest=red. */
+function ModelSpreadWidget({ modelScores }: { modelScores: ProviderFamilyScores | null }) {
+  const rows = MODEL_FAMILIES_CHART.map((family) => ({
+    family,
+    label: MODEL_LABELS[family],
+    score: modelScores?.[family] ?? null,
+  }));
+  const withScores = rows.filter((r) => r.score != null) as { family: ModelFamily; label: string; score: number }[];
+  const sorted = [...withScores].sort((a, b) => b.score - a.score);
+  const rankColor = (family: ModelFamily): string => {
+    const idx = sorted.findIndex((r) => r.family === family);
+    if (idx === -1) return "bg-white/20";
+    if (idx === 0) return "bg-authority-dominant/70";
+    if (idx === 1) return "bg-authority-watchlist/70";
+    return "bg-authority-losing/70";
+  };
   return (
-    <div className="w-full">
-      <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full" style={{ height: 80 }} preserveAspectRatio="none">
-        <defs>
-          <filter id={filterId} x="-50%" y="-50%" width="200%" height="200%">
-            <feDropShadow dx="0" dy="0" stdDeviation="1.5" floodColor="rgb(255,255,255)" floodOpacity="0.2" />
-          </filter>
-        </defs>
-        {/* horizontal baseline, white/10 */}
-        <line x1={padding.left} y1={baselineY} x2={padding.left + innerW} y2={baselineY} stroke="rgba(255,255,255,0.1)" strokeWidth={0.5} />
-        {/* 3 faint horizontal grid lines, white/8 */}
-        {Array.from({ length: hLines }).map((_, i) => (
-          <line
-            key={`h-${i}`}
-            x1={padding.left}
-            y1={padding.top + (i / (hLines - 1 || 1)) * innerH}
-            x2={padding.left + innerW}
-            y2={padding.top + (i / (hLines - 1 || 1)) * innerH}
-            stroke="rgba(255,255,255,0.08)"
-            strokeWidth={0.5}
-          />
+    <div className="w-full pt-4">
+      <div className="text-xs font-medium uppercase tracking-wider text-white/60">Model spread</div>
+      <div className="mt-2 space-y-1.5">
+        {rows.map(({ family, label, score }) => (
+          <div key={family} className="flex items-center gap-2">
+            <span className="w-8 shrink-0 text-[11px] font-medium tabular-nums text-white/70">{label}</span>
+            <span className="w-6 shrink-0 text-right text-xs tabular-nums text-white/90">{score != null ? score : "—"}</span>
+            <div className="min-w-0 flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden">
+              <div
+                className={cn("h-full rounded-full transition-all", rankColor(family))}
+                style={{ width: score != null ? `${Math.min(100, score)}%` : "0%" }}
+              />
+            </div>
+          </div>
         ))}
-        {/* dots only: 6px radius, white, soft drop-shadow. No connecting line. */}
-        {points.map((p, i) => p && <circle key={i} cx={p.x} cy={p.y} r={dotR} fill="#fff" filter={`url(#${filterId})`} />)}
-      </svg>
+      </div>
     </div>
   );
 }
-
-/* Placeholder: 3 horizontal grid lines only when no model scores */
-function ModelSpreadPlaceholder() {
-  const chartW = 120;
-  const chartH = 64;
-  const padding = { top: 10, right: 6, bottom: 10, left: 6 };
-  const innerW = chartW - padding.left - padding.right;
-  const innerH = chartH - padding.top - padding.bottom;
-  const hLines = 3;
-  return (
-    <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full" style={{ height: 80 }} preserveAspectRatio="none">
-      {Array.from({ length: hLines }).map((_, i) => (
-        <line
-          key={`h-${i}`}
-          x1={padding.left}
-          y1={padding.top + (i / (hLines - 1 || 1)) * innerH}
-          x2={padding.left + innerW}
-          y2={padding.top + (i / (hLines - 1 || 1)) * innerH}
-          stroke="rgba(255,255,255,0.08)"
-          strokeWidth={0.5}
-        />
-      ))}
-    </svg>
-  );
-}
-
-/* Client card: favicon + name top, score + delta middle, model spread or placeholder at bottom */
 function ClientCard({ client }: { client: ClientWithStats }) {
   const router = useRouter();
   const [hover, setHover] = useState(false);
@@ -399,20 +363,14 @@ function ClientCard({ client }: { client: ClientWithStats }) {
             )}
           </div>
           <div className="mt-auto pb-5 pt-4">
-            {client.providerFamilyScores && Object.keys(client.providerFamilyScores).length > 0 ? (
-              <ModelSpreadChart modelScores={client.providerFamilyScores} />
-            ) : (
-              <ModelSpreadPlaceholder />
-            )}
+            <ModelSpreadWidget modelScores={client.providerFamilyScores ?? null} />
           </div>
         </>
       ) : (
-        <div className="flex flex-1 flex-col min-h-0 pt-2 pb-4">
-          <div className="flex flex-1 min-h-0 items-center justify-center">
-            <span className="text-[40px] font-medium tabular-nums text-white/40">—</span>
-          </div>
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 py-6">
+          <p className="text-sm text-white/50">No snapshot yet</p>
           <span
-            className="flex h-12 shrink-0 w-full items-center justify-center rounded-app border border-white/20 bg-white/10 text-sm font-medium text-white/90 transition-colors hover:bg-white/20"
+            className="flex h-12 w-full items-center justify-center rounded-app border border-white/20 bg-white/10 text-sm font-medium text-white/90 transition-colors hover:bg-white/15"
             style={{ boxShadow: "0 0 0 1px rgba(255,255,255,0.06)" }}
           >
             Run snapshot
