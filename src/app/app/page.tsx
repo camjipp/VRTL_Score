@@ -194,8 +194,9 @@ function ModelDot({ model }: { model: string | null }) {
   return <span className={cn("mr-1.5 inline-block h-2 w-2 shrink-0 rounded-full", color)} aria-hidden />;
 }
 
-/* Section 1: Portfolio Status — compact verdict row, no large colored fills */
+/* Section 1: Portfolio Status — total + explicit counts; optional bar has numbers and scale */
 function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
+  const total = clients.length;
   const dominantCount = clients.filter((c) => getAuthorityState(c) === "Dominant").length;
   const stableCount = clients.filter((c) => getAuthorityState(c) === "Stable").length;
   const watchlistCount = clients.filter((c) => getAuthorityState(c) === "Watchlist").length;
@@ -225,44 +226,56 @@ function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
     <section className="rounded-app-lg border border-white/5 bg-surface overflow-hidden">
       <div className="px-3 py-2 border-b border-white/5 flex items-center justify-between flex-wrap gap-2">
         <h2 className="text-sm font-semibold text-text">Portfolio Status</h2>
-        <div className="flex items-center gap-4 text-[11px] text-text-2">
-          <span className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-authority-dominant/90" aria-hidden />
-            <span className="text-text">Dominant</span> {dominantCount}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-authority-stable/90" aria-hidden />
-            Stable {stableCount}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-authority-watchlist/90" aria-hidden />
-            Watchlist {watchlistCount}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-authority-losing/90" aria-hidden />
-            Losing {losingCount}
-          </span>
-        </div>
+        <span className="text-sm font-semibold tabular-nums text-text" aria-label={`${total} clients total`}>
+          {total} client{total !== 1 ? "s" : ""}
+        </span>
       </div>
-      <div className="px-3 py-2.5 flex flex-wrap items-baseline gap-x-6 gap-y-1 text-[12px]">
-        <span className="flex items-center gap-1.5">
-          <span className="text-text-3">Widening gaps</span>
-          <span className="font-semibold tabular-nums text-text">{wideningGapsCount}</span>
-          {wideningGapsCount > 0 && <span className="text-authority-losing text-[10px]">risk</span>}
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="text-text-3">Avg gap</span>
-          <span className="font-semibold tabular-nums text-text">{avgGap ?? "—"}</span>
-        </span>
-        {highestRisk && (
-          <span className="flex items-center gap-1.5">
-            <span className="text-text-3">Highest risk</span>
-            <Link href={`/app/clients/${highestRisk.client.id}`} className="font-medium text-text hover:underline">
-              {highestRisk.client.name}
-              {highestRisk.client.worstModel ? ` · ${displayModelName(highestRisk.client.worstModel)}` : ""}
-            </Link>
-          </span>
+      <div className="px-3 py-2.5 space-y-2">
+        {/* Explicit counts with scale: "X of N" per state */}
+        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-[12px]">
+          <span className="text-text-2">State (of {total}):</span>
+          <span className="tabular-nums text-text">Dominant <strong>{dominantCount}</strong></span>
+          <span className="tabular-nums text-text-2">Stable <strong>{stableCount}</strong></span>
+          <span className="tabular-nums text-text-2">Watchlist <strong>{watchlistCount}</strong></span>
+          <span className="tabular-nums text-text-2">Losing <strong>{losingCount}</strong></span>
+        </div>
+        {/* Optional segmented bar with visible numbers and denominator */}
+        {total > 0 && (
+          <div className="flex items-center gap-0.5 text-[10px]">
+            <span className="text-text-3 mr-1">Scale 0–{total}:</span>
+            {[
+              { label: "D", n: dominantCount, c: "bg-authority-dominant/80" },
+              { label: "S", n: stableCount, c: "bg-authority-stable/80" },
+              { label: "W", n: watchlistCount, c: "bg-authority-watchlist/80" },
+              { label: "L", n: losingCount, c: "bg-authority-losing/80" },
+            ].map(({ label, n, c }) => (
+              <span key={label} className={cn("inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-sm border border-white/10 px-1", c)} title={`${label}: ${n} of ${total}`}>
+                {n}
+              </span>
+            ))}
+            <span className="ml-1 text-text-3">of {total}</span>
+          </div>
         )}
+        <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 text-[12px] border-t border-white/5 pt-2">
+          <span className="flex items-center gap-1.5">
+            <span className="text-text-3">Widening gaps</span>
+            <span className="font-semibold tabular-nums text-text">{wideningGapsCount}</span>
+            {total > 0 && <span className="text-text-3">(of {total})</span>}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="text-text-3">Avg gap to leader</span>
+            <span className="font-semibold tabular-nums text-text">{avgGap ?? "—"}</span>
+          </span>
+          {highestRisk && (
+            <span className="flex items-center gap-1.5">
+              <span className="text-text-3">Highest risk</span>
+              <Link href={`/app/clients/${highestRisk.client.id}`} className="font-medium text-text hover:underline">
+                {highestRisk.client.name}
+                {highestRisk.client.worstModel ? ` · ${displayModelName(highestRisk.client.worstModel)}` : ""}
+              </Link>
+            </span>
+          )}
+        </div>
       </div>
     </section>
   );
@@ -329,13 +342,23 @@ function ClientsRequiringAttention({ clients }: { clients: ClientWithStats[] }) 
   );
 }
 
-/* Section 3: Model Exposure Summary — per-model D/S/W/L stacked bar + widening gaps per model */
+/* Section 3: Model Exposure Summary — structured rows: total analyzed, counts by state, avg gap, widening */
 function ModelExposureSummary({ clients }: { clients: ClientWithStats[] }) {
+  const totalClients = clients.length;
   const byModel = useMemo(() => {
-    const out: Record<ModelFamily, { dominant: number; stable: number; watchlist: number; losing: number; widening: number }> = {
-      chatgpt: { dominant: 0, stable: 0, watchlist: 0, losing: 0, widening: 0 },
-      gemini: { dominant: 0, stable: 0, watchlist: 0, losing: 0, widening: 0 },
-      claude: { dominant: 0, stable: 0, watchlist: 0, losing: 0, widening: 0 },
+    const out: Record<ModelFamily, {
+      dominant: number;
+      stable: number;
+      watchlist: number;
+      losing: number;
+      widening: number;
+      analyzed: number;
+      gapSum: number;
+      gapCount: number;
+    }> = {
+      chatgpt: { dominant: 0, stable: 0, watchlist: 0, losing: 0, widening: 0, analyzed: 0, gapSum: 0, gapCount: 0 },
+      gemini: { dominant: 0, stable: 0, watchlist: 0, losing: 0, widening: 0, analyzed: 0, gapSum: 0, gapCount: 0 },
+      claude: { dominant: 0, stable: 0, watchlist: 0, losing: 0, widening: 0, analyzed: 0, gapSum: 0, gapCount: 0 },
     };
     clients.forEach((c) => {
       const delta = c.latestScore !== null && c.previousScore !== null ? c.latestScore - c.previousScore : null;
@@ -343,6 +366,11 @@ function ModelExposureSummary({ clients }: { clients: ClientWithStats[] }) {
       const worstFamily = c.worstModel ? modelFamilyFromProviderKey(c.worstModel) : null;
       MODEL_FAMILIES.forEach((family) => {
         const score = c.providerFamilyScores?.[family] ?? null;
+        if (score !== null) {
+          out[family].analyzed++;
+          out[family].gapSum += 100 - score;
+          out[family].gapCount++;
+        }
         const state = getAuthorityStateFromScore(score);
         if (state === "Dominant") out[family].dominant++;
         else if (state === "Stable") out[family].stable++;
@@ -356,33 +384,41 @@ function ModelExposureSummary({ clients }: { clients: ClientWithStats[] }) {
 
   return (
     <section className="rounded-app-lg border border-white/5 bg-surface overflow-hidden">
-      <div className="border-b border-white/5 px-3 py-2">
-        <h2 className="text-sm font-semibold text-text">Model Exposure</h2>
+      <div className="border-b border-white/5 px-3 py-2 flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-text">Model Exposure Summary</h2>
+        <span className="text-[10px] text-text-3">of {totalClients} clients</span>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-[12px]">
           <thead>
             <tr className="border-b border-white/5 bg-surface-2/60">
               <th className="px-3 py-1.5 text-left text-[10px] font-medium uppercase tracking-wider text-text-2">Model</th>
-              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2">D</th>
-              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2">S</th>
-              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2">W</th>
-              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2">L</th>
+              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2" title="Clients with score for this model">Analyzed</th>
+              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2" title="Dominant count">D</th>
+              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2" title="Stable count">S</th>
+              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2" title="Watchlist count">W</th>
+              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2" title="Losing count">L</th>
+              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2" title="Avg (100 − score)">Avg gap</th>
               <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2">Widening</th>
             </tr>
           </thead>
           <tbody>
             {MODEL_FAMILIES.map((family) => {
               const d = byModel[family];
+              const avgGap = d.gapCount > 0 ? Math.round(d.gapSum / d.gapCount) : null;
               return (
                 <tr key={family} className="border-b border-white/5 last:border-b-0">
                   <td className="px-3 py-1.5 font-medium text-text">{modelFamilyLabel(family)}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums text-text-2">
+                    {d.analyzed}<span className="text-text-3">/{totalClients}</span>
+                  </td>
                   <td className="px-2 py-1.5 text-right tabular-nums text-text-2">{d.dominant}</td>
                   <td className="px-2 py-1.5 text-right tabular-nums text-text-2">{d.stable}</td>
                   <td className="px-2 py-1.5 text-right tabular-nums text-text-2">{d.watchlist}</td>
                   <td className="px-2 py-1.5 text-right tabular-nums text-text-2">{d.losing}</td>
-                  <td className="px-2 py-1.5 text-right">
-                    {d.widening > 0 ? <span className="text-authority-losing text-[11px]">{d.widening}</span> : <span className="text-text-3">—</span>}
+                  <td className="px-2 py-1.5 text-right tabular-nums text-text-2">{avgGap ?? "—"}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums">
+                    {d.widening > 0 ? <span className="text-authority-losing">{d.widening}</span> : <span className="text-text-3">—</span>}
                   </td>
                 </tr>
               );
