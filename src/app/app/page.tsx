@@ -194,7 +194,7 @@ function ModelDot({ model }: { model: string | null }) {
   return <span className={cn("mr-1.5 inline-block h-2 w-2 shrink-0 rounded-full", color)} aria-hidden />;
 }
 
-/* Section 1: Portfolio Status — Stakent-style: one card, prominent total, structured metrics */
+/* Section 1: Portfolio Status — command-center surface with radial depth */
 function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
   const total = clients.length;
   const dominantCount = clients.filter((c) => getAuthorityState(c) === "Dominant").length;
@@ -224,82 +224,129 @@ function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
       })[0] ?? null;
   }, [clients]);
 
+  const barTotal = dominantCount + stableCount + watchlistCount + losingCount || 1;
+  const barW = (v: number) => (v / barTotal) * 100;
+
   return (
-    <section className="rounded-app-lg border border-white/5 bg-surface p-5">
-      <h2 className="text-xs font-medium uppercase tracking-wider text-text-3 mb-3">Portfolio Status</h2>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-8">
+    <section
+      className="rounded-app-lg border border-white/5 p-6"
+      style={{
+        background: "radial-gradient(circle at 30% 20%, rgba(255,255,255,0.05), transparent 60%), rgb(var(--surface))",
+        boxShadow: "0 0 0 1px rgba(255,255,255,0.05), 0 2px 8px rgba(0,0,0,0.15)",
+      }}
+    >
+      <h2 className="text-[10px] font-medium uppercase tracking-wider text-text-3">Portfolio Status</h2>
+      <div className="mt-2 text-3xl font-semibold tabular-nums tracking-tight text-text sm:text-4xl">{total} Clients</div>
+
+      <div className="mt-5 space-y-4">
         <div>
-          <div className="text-3xl font-semibold tabular-nums tracking-tight text-text">{total}</div>
-          <div className="text-xs text-text-2 mt-0.5">clients</div>
-        </div>
-        <div className="flex-1 min-w-0 space-y-3">
-          <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs">
-            <span className="text-text-3">State <span className="text-text-2">(of {total})</span></span>
+          <div className="flex h-2 w-full overflow-hidden rounded-full bg-white/5" role="presentation">
+            {dominantCount > 0 && <div className="bg-authority-dominant/80" style={{ width: `${barW(dominantCount)}%` }} />}
+            {stableCount > 0 && <div className="bg-authority-stable/80" style={{ width: `${barW(stableCount)}%` }} />}
+            {watchlistCount > 0 && <div className="bg-authority-watchlist/80" style={{ width: `${barW(watchlistCount)}%` }} />}
+            {losingCount > 0 && <div className="bg-authority-losing/80" style={{ width: `${barW(losingCount)}%` }} />}
+          </div>
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
             <span className="tabular-nums text-text">Dominant <strong>{dominantCount}</strong></span>
             <span className="tabular-nums text-text-2">Stable <strong>{stableCount}</strong></span>
             <span className="tabular-nums text-text-2">Watchlist <strong>{watchlistCount}</strong></span>
             <span className="tabular-nums text-text-2">Losing <strong>{losingCount}</strong></span>
           </div>
-          <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs border-t border-white/5 pt-3">
-            <span><span className="text-text-3">Widening gaps</span> <strong className="tabular-nums text-text">{wideningGapsCount}</strong><span className="text-text-3"> / {total}</span></span>
-            <span><span className="text-text-3">Avg gap to leader</span> <strong className="tabular-nums text-text">{avgGap ?? "—"}</strong></span>
-            {avgIndex != null && <span><span className="text-text-3">Avg index</span> <strong className="tabular-nums text-text">{avgIndex}</strong></span>}
-            {highestRisk && (
-              <span><span className="text-text-3">Highest risk</span>{" "}
-                <Link href={`/app/clients/${highestRisk.client.id}`} className="font-medium text-text hover:underline">
-                  {highestRisk.client.name}
-                  {highestRisk.client.worstModel ? ` · ${displayModelName(highestRisk.client.worstModel)}` : ""}
-                </Link>
-              </span>
-            )}
-          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-x-6 gap-y-2 border-t border-white/5 pt-4 text-xs">
+          <span><span className="text-text-3">Widening Gaps:</span> <strong className="tabular-nums text-text">{wideningGapsCount}/{total}</strong></span>
+          <span><span className="text-text-3">Avg Gap to Leader:</span> <strong className="tabular-nums text-text">{avgGap ?? "—"}</strong></span>
+          <span><span className="text-text-3">Avg Index:</span> <strong className="tabular-nums text-text">{avgIndex ?? "—"}</strong></span>
+          {highestRisk && (
+            <span><span className="text-text-3">Highest Risk:</span>{" "}
+              <Link href={`/app/clients/${highestRisk.client.id}`} className="font-medium text-text hover:underline">
+                {highestRisk.client.name}
+              </Link>
+            </span>
+          )}
         </div>
       </div>
     </section>
   );
 }
 
-/* Mini sparkline for client card (recent scores over time) */
+/* Mini sparkline: thicker stroke, subtle glow, area fill under line */
 function MiniSparkline({ scores }: { scores: number[] }) {
   if (scores.length < 2) return null;
   const w = 120;
-  const h = 28;
-  const padding = { top: 2, right: 2, bottom: 2, left: 2 };
+  const h = 32;
+  const padding = { top: 4, right: 4, bottom: 4, left: 4 };
   const max = Math.max(...scores, 100);
   const min = Math.min(...scores, 0);
   const range = max - min || 1;
-  const points = scores.map((val, i) => {
-    const x = padding.left + (i / (scores.length - 1)) * (w - padding.left - padding.right);
-    const y = padding.top + h - padding.top - padding.bottom - ((val - min) / range) * (h - padding.top - padding.bottom);
-    return `${x},${y}`;
-  }).join(" ");
+  const chartW = w - padding.left - padding.right;
+  const chartH = h - padding.top - padding.bottom;
+  const pts = scores.map((val, i) => {
+    const x = padding.left + (i / (scores.length - 1)) * chartW;
+    const y = padding.top + chartH - ((val - min) / range) * chartH;
+    return { x, y };
+  });
+  const linePoints = pts.map(p => `${p.x},${p.y}`).join(" ");
+  const areaPath = pts.length
+    ? `M ${pts[0].x} ${padding.top + chartH} L ${pts.map(p => `${p.x} ${p.y}`).join(" L ")} L ${pts[pts.length - 1].x} ${padding.top + chartH} Z`
+    : "";
+
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-7 text-text-2" preserveAspectRatio="none">
-      <polyline points={points} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity={0.8} />
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-8 text-text-2" preserveAspectRatio="none">
+      <defs>
+        <filter id="sparkline-glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="0" stdDeviation="1" floodOpacity="0.25" />
+        </filter>
+      </defs>
+      {areaPath && <path d={areaPath} fill="currentColor" fillOpacity="0.1" />}
+      <polyline
+        points={linePoints}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity={0.9}
+        filter="url(#sparkline-glow)"
+      />
     </svg>
   );
 }
 
-/* Stakent-style client card: square, prominent name, score + delta, sparkline */
+/* Client card: score owns the card, depth + score-based accent */
 function ClientCard({ client }: { client: ClientWithStats }) {
   const router = useRouter();
   const hasScore = client.latestScore !== null;
+  const score = client.latestScore ?? 0;
   const delta = hasScore && client.previousScore !== null ? client.latestScore! - client.previousScore! : null;
+
+  const scoreGlow =
+    !hasScore ? "0 0 0 1px rgba(255,255,255,0.05)" :
+    score >= 75 ? "0 0 0 1px rgba(34,197,94,0.2)" :
+    score < 50 ? "0 0 0 1px rgba(127,29,29,0.2)" :
+    "0 0 0 1px rgba(255,255,255,0.06)";
 
   return (
     <button
       type="button"
       onClick={() => router.push(`/app/clients/${client.id}`)}
-      className="group relative flex w-full flex-col rounded-xl border border-white/5 bg-surface p-5 text-left transition-colors hover:bg-surface-2/50 focus:outline-none focus:ring-1 focus:ring-white/10 aspect-square min-h-[220px] max-h-[280px] sm:min-h-0 sm:max-h-none"
+      className="group relative flex w-full flex-col rounded-xl border border-white/5 p-5 text-left transition-colors hover:bg-surface-2/40 focus:outline-none focus:ring-1 focus:ring-white/10 aspect-square min-h-[220px] max-h-[280px] sm:min-h-0 sm:max-h-none"
+      style={{
+        background: "radial-gradient(circle at 30% 20%, rgba(255,255,255,0.05), transparent 60%), rgb(var(--surface))",
+        boxShadow: `${scoreGlow}, 0 2px 8px rgba(0,0,0,0.15)`,
+      }}
     >
       <span className="text-[10px] font-medium uppercase tracking-wider text-text-3">AI Authority</span>
-      <h3 className="mt-1 text-lg font-semibold leading-tight text-text sm:text-xl">{client.name}</h3>
+      <h3 className="mt-1 text-sm font-medium leading-tight text-text-2">{client.name}</h3>
       {hasScore ? (
         <>
-          <div className="mt-4 flex flex-wrap items-baseline gap-2">
-            <span className="text-2xl font-semibold tabular-nums text-text">{client.latestScore}</span>
+          <div className="mt-3 flex flex-wrap items-baseline gap-2">
+            <span className="text-5xl font-semibold tabular-nums tracking-tight text-text sm:text-6xl" style={{ fontWeight: 600 }}>
+              {client.latestScore}
+            </span>
             {delta !== null && delta !== 0 && (
-              <span className={cn("text-xs tabular-nums", delta > 0 ? "text-authority-dominant" : "text-authority-losing")}>
+              <span className={cn("text-sm tabular-nums", delta > 0 ? "text-authority-dominant" : "text-authority-losing")}>
                 {delta > 0 ? "+" : ""}{delta} vs last
               </span>
             )}
@@ -324,19 +371,23 @@ function ClientCard({ client }: { client: ClientWithStats }) {
   );
 }
 
-/* Add client card - always last in grid, same square dimensions */
+/* Add client card - same depth as client cards, muted */
 function AddClientCard() {
   const router = useRouter();
   return (
     <button
       type="button"
       onClick={() => router.push("/app/clients/new")}
-      className="flex w-full flex-col items-center justify-center rounded-xl border border-dashed border-white/10 bg-surface/30 p-5 text-text-2 transition-colors hover:border-white/20 hover:bg-surface/50 focus:outline-none focus:ring-1 focus:ring-white/10 aspect-square min-h-[220px] max-h-[280px] sm:min-h-0 sm:max-h-none"
+      className="flex w-full flex-col items-center justify-center rounded-xl border border-dashed border-white/10 p-5 text-text-2 transition-colors hover:border-white/20 hover:bg-surface-2/30 focus:outline-none focus:ring-1 focus:ring-white/10 aspect-square min-h-[220px] max-h-[280px] sm:min-h-0 sm:max-h-none"
+      style={{
+        background: "radial-gradient(circle at 30% 20%, rgba(255,255,255,0.03), transparent 60%), rgb(var(--surface))",
+        boxShadow: "0 0 0 1px rgba(255,255,255,0.05), 0 2px 8px rgba(0,0,0,0.12)",
+      }}
     >
-      <svg className="h-10 w-10 mb-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <svg className="h-10 w-10 mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
       </svg>
-      <span className="text-sm font-medium">Add client</span>
+      <span className="text-sm font-medium">+ Add Client</span>
     </button>
   );
 }
