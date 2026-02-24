@@ -229,14 +229,14 @@ function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
 
   return (
     <section
-      className="rounded-app-lg border border-white/5 p-6"
+      className="rounded-app-lg border border-white/[0.06] p-6"
       style={{
-        background: "radial-gradient(circle at 30% 20%, rgba(255,255,255,0.05), transparent 60%), rgb(var(--surface))",
-        boxShadow: "0 0 0 1px rgba(255,255,255,0.05), 0 2px 8px rgba(0,0,0,0.15)",
+        background: "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02), transparent 70%), rgb(var(--surface))",
+        boxShadow: "0 0 0 1px rgba(255,255,255,0.06), 0 2px 8px rgba(0,0,0,0.12)",
       }}
     >
-      <h2 className="text-[10px] font-medium uppercase tracking-wider text-text-3">Portfolio Status</h2>
-      <div className="mt-2 text-3xl font-semibold tabular-nums tracking-tight text-text sm:text-4xl">{total} Clients</div>
+      <div className="text-4xl font-bold tabular-nums tracking-tight text-white sm:text-5xl">{total}</div>
+      <div className="mt-0.5 text-xs font-medium uppercase tracking-wider text-white/50">Clients</div>
 
       <div className="mt-5 space-y-4">
         <div>
@@ -246,21 +246,21 @@ function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
             {watchlistCount > 0 && <div className="bg-authority-watchlist/80" style={{ width: `${barW(watchlistCount)}%` }} />}
             {losingCount > 0 && <div className="bg-authority-losing/80" style={{ width: `${barW(losingCount)}%` }} />}
           </div>
-          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
-            <span className="tabular-nums text-text">Dominant <strong>{dominantCount}</strong></span>
-            <span className="tabular-nums text-text-2">Stable <strong>{stableCount}</strong></span>
-            <span className="tabular-nums text-text-2">Watchlist <strong>{watchlistCount}</strong></span>
-            <span className="tabular-nums text-text-2">Losing <strong>{losingCount}</strong></span>
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-white/60">
+            <span className="tabular-nums">Dominant <strong className="text-white/90">{dominantCount}</strong></span>
+            <span className="tabular-nums">Stable <strong className="text-white/90">{stableCount}</strong></span>
+            <span className="tabular-nums">Watchlist <strong className="text-white/90">{watchlistCount}</strong></span>
+            <span className="tabular-nums">Losing <strong className="text-white/90">{losingCount}</strong></span>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-x-6 gap-y-2 border-t border-white/5 pt-4 text-xs">
-          <span><span className="text-text-3">Widening Gaps:</span> <strong className="tabular-nums text-text">{wideningGapsCount}/{total}</strong></span>
-          <span><span className="text-text-3">Avg Gap to Leader:</span> <strong className="tabular-nums text-text">{avgGap ?? "—"}</strong></span>
-          <span><span className="text-text-3">Avg Index:</span> <strong className="tabular-nums text-text">{avgIndex ?? "—"}</strong></span>
+        <div className="flex flex-wrap gap-x-5 gap-y-1.5 border-t border-white/5 pt-3 text-xs text-white/50">
+          <span>Widening Gaps <strong className="tabular-nums text-white/90">{wideningGapsCount}/{total}</strong></span>
+          <span>Avg Gap <strong className="tabular-nums text-white/90">{avgGap ?? "—"}</strong></span>
+          <span>Avg Index <strong className="tabular-nums text-white/90">{avgIndex ?? "—"}</strong></span>
           {highestRisk && (
-            <span><span className="text-text-3">Highest Risk:</span>{" "}
-              <Link href={`/app/clients/${highestRisk.client.id}`} className="font-medium text-text hover:underline">
+            <span>Highest Risk{" "}
+              <Link href={`/app/clients/${highestRisk.client.id}`} className="font-medium text-white/90 hover:underline">
                 {highestRisk.client.name}
               </Link>
             </span>
@@ -271,8 +271,8 @@ function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
   );
 }
 
-/* Mini sparkline: thicker stroke, subtle glow, area fill under line */
-function MiniSparkline({ scores }: { scores: number[] }) {
+/* Mini sparkline: fintech feel — 2px stroke, subtle glow, area 0.08, faint grid */
+function MiniSparkline({ scores, hover }: { scores: number[]; hover?: boolean }) {
   if (scores.length < 2) return null;
   const w = 120;
   const h = 32;
@@ -291,15 +291,18 @@ function MiniSparkline({ scores }: { scores: number[] }) {
   const areaPath = pts.length
     ? `M ${pts[0].x} ${padding.top + chartH} L ${pts.map(p => `${p.x} ${p.y}`).join(" L ")} L ${pts[pts.length - 1].x} ${padding.top + chartH} Z`
     : "";
-
+  const gridY = (i: number) => padding.top + (i / 4) * chartH;
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-8 text-text-2" preserveAspectRatio="none">
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-8 text-text-2 transition-opacity duration-200" style={{ opacity: hover ? 1 : 0.85 }} preserveAspectRatio="none">
       <defs>
         <filter id="sparkline-glow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="0" stdDeviation="1" floodOpacity="0.25" />
+          <feDropShadow dx="0" dy="0" stdDeviation="0.8" floodOpacity="0.12" />
         </filter>
       </defs>
-      {areaPath && <path d={areaPath} fill="currentColor" fillOpacity="0.1" />}
+      {[1, 2, 3].map((i) => (
+        <line key={i} x1={padding.left} y1={gridY(i)} x2={w - padding.right} y2={gridY(i)} stroke="currentColor" strokeOpacity={0.06} strokeWidth="0.5" />
+      ))}
+      {areaPath && <path d={areaPath} fill="currentColor" fillOpacity="0.08" />}
       <polyline
         points={linePoints}
         fill="none"
@@ -307,42 +310,40 @@ function MiniSparkline({ scores }: { scores: number[] }) {
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        opacity={0.9}
         filter="url(#sparkline-glow)"
       />
     </svg>
   );
 }
 
-/* Client card: score owns the card, depth + score-based accent */
+/* Client card: Apple/fintech polish — layered lighting, score dominance, micro hover */
 function ClientCard({ client }: { client: ClientWithStats }) {
   const router = useRouter();
+  const [hover, setHover] = useState(false);
   const hasScore = client.latestScore !== null;
   const score = client.latestScore ?? 0;
   const delta = hasScore && client.previousScore !== null ? client.latestScore! - client.previousScore! : null;
-
-  const scoreGlow =
-    !hasScore ? "0 0 0 1px rgba(255,255,255,0.05)" :
-    score >= 75 ? "0 0 0 1px rgba(34,197,94,0.2)" :
-    score < 50 ? "0 0 0 1px rgba(127,29,29,0.2)" :
-    "0 0 0 1px rgba(255,255,255,0.06)";
 
   return (
     <button
       type="button"
       onClick={() => router.push(`/app/clients/${client.id}`)}
-      className="group relative flex w-full flex-col rounded-xl border border-white/5 p-5 text-left transition-colors hover:bg-surface-2/40 focus:outline-none focus:ring-1 focus:ring-white/10 aspect-square min-h-[220px] max-h-[280px] sm:min-h-0 sm:max-h-none"
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      className="group relative flex w-full flex-col rounded-xl border border-white/[0.06] p-5 text-left transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-white/10 aspect-square min-h-[220px] max-h-[280px] sm:min-h-0 sm:max-h-none hover:-translate-y-0.5"
       style={{
-        background: "radial-gradient(circle at 30% 20%, rgba(255,255,255,0.05), transparent 60%), rgb(var(--surface))",
-        boxShadow: `${scoreGlow}, 0 2px 8px rgba(0,0,0,0.15)`,
+        background: "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02), transparent 70%), rgb(var(--surface))",
+        boxShadow: hover
+          ? "0 0 0 1px rgba(255,255,255,0.06), 0 4px 12px rgba(0,0,0,0.2)"
+          : "0 0 0 1px rgba(255,255,255,0.06), 0 2px 8px rgba(0,0,0,0.12)",
       }}
     >
-      <span className="text-[10px] font-medium uppercase tracking-wider text-text-3">AI Authority</span>
-      <h3 className="mt-1 text-sm font-medium leading-tight text-text-2">{client.name}</h3>
+      <span className="text-[10px] font-medium uppercase tracking-wider text-white/40">AI Authority</span>
+      <h3 className="mt-1 text-sm font-medium leading-tight text-white/90">{client.name}</h3>
       {hasScore ? (
         <>
           <div className="mt-3 flex flex-wrap items-baseline gap-2">
-            <span className="text-5xl font-semibold tabular-nums tracking-tight text-text sm:text-6xl" style={{ fontWeight: 600 }}>
+            <span className="text-6xl font-bold tabular-nums tracking-tight text-white sm:text-7xl" style={{ fontWeight: 700, letterSpacing: "-0.02em" }}>
               {client.latestScore}
             </span>
             {delta !== null && delta !== 0 && (
@@ -352,7 +353,7 @@ function ClientCard({ client }: { client: ClientWithStats }) {
             )}
           </div>
           <div className="mt-4 flex-1 min-h-[44px]">
-            <MiniSparkline scores={client.recentScores} />
+            <MiniSparkline scores={client.recentScores} hover={hover} />
           </div>
         </>
       ) : (
@@ -362,29 +363,29 @@ function ClientCard({ client }: { client: ClientWithStats }) {
           </span>
         </div>
       )}
-      <span className="absolute top-4 right-4 text-text-3 opacity-0 transition-opacity group-hover:opacity-100" aria-hidden>
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-        </svg>
-      </span>
     </button>
   );
 }
 
-/* Add client card - same depth as client cards, muted */
+/* Add client card — same layered lighting, muted; micro hover */
 function AddClientCard() {
   const router = useRouter();
+  const [hover, setHover] = useState(false);
   return (
     <button
       type="button"
       onClick={() => router.push("/app/clients/new")}
-      className="flex w-full flex-col items-center justify-center rounded-xl border border-dashed border-white/10 p-5 text-text-2 transition-colors hover:border-white/20 hover:bg-surface-2/30 focus:outline-none focus:ring-1 focus:ring-white/10 aspect-square min-h-[220px] max-h-[280px] sm:min-h-0 sm:max-h-none"
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      className="flex w-full flex-col items-center justify-center rounded-xl border border-dashed border-white/10 p-5 text-white/60 transition-all duration-200 hover:border-white/15 focus:outline-none focus:ring-1 focus:ring-white/10 aspect-square min-h-[220px] max-h-[280px] sm:min-h-0 sm:max-h-none hover:-translate-y-0.5"
       style={{
-        background: "radial-gradient(circle at 30% 20%, rgba(255,255,255,0.03), transparent 60%), rgb(var(--surface))",
-        boxShadow: "0 0 0 1px rgba(255,255,255,0.05), 0 2px 8px rgba(0,0,0,0.12)",
+        background: "linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 50%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.01), transparent 70%), rgb(var(--surface))",
+        boxShadow: hover
+          ? "0 0 0 1px rgba(255,255,255,0.05), 0 4px 12px rgba(0,0,0,0.15)"
+          : "0 0 0 1px rgba(255,255,255,0.05), 0 2px 8px rgba(0,0,0,0.1)",
       }}
     >
-      <svg className="h-10 w-10 mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <svg className="h-10 w-10 mb-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
       </svg>
       <span className="text-sm font-medium">+ Add Client</span>
