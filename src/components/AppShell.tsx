@@ -128,7 +128,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   className="h-8 w-auto max-h-8 object-contain"
                   priority
                 />
-                <span className="font-semibold text-white/90 tracking-tight">VRTL Score</span>
+                <span className="font-semibold text-white/90 tracking-tight">Score</span>
               </Link>
             </div>
 
