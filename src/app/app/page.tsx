@@ -272,38 +272,91 @@ function faviconDomain(website: string | null): string | null {
 
 const MODEL_FAMILIES_CHART: ModelFamily[] = ["chatgpt", "gemini", "claude"];
 
-/* Model spread chart: 3 vertical bars (ChatGPT, Gemini, Claude). Height 80px. */
+/* Model spread mini-chart: faint grid + 3 dots (GPT, GEM, CLA) at score y, connected by thin line. No bars. */
 function ModelSpreadChart({ modelScores }: { modelScores: ProviderFamilyScores }) {
-  const values = MODEL_FAMILIES_CHART.map((f) => modelScores[f] ?? 0);
-  const colors = ["bg-authority-dominant/80", "bg-authority-watchlist/80", "bg-authority-losing/80"];
+  const chartW = 120;
+  const chartH = 56;
+  const padding = { top: 6, right: 6, bottom: 14, left: 6 }; // bottom room for labels
+  const innerW = chartW - padding.left - padding.right;
+  const innerH = chartH - padding.top - padding.bottom;
+  const xPos = [padding.left + 0, padding.left + innerW / 2, padding.left + innerW];
+  const points: (null | { x: number; y: number; score: number })[] = MODEL_FAMILIES_CHART.map((f, i) => {
+    const score = modelScores[f];
+    if (score == null) return null;
+    const y = padding.top + innerH - (score / 100) * innerH;
+    return { x: xPos[i], y, score };
+  });
+  const segments: string[] = [];
+  for (let i = 0; i < points.length - 1; i++) {
+    const a = points[i];
+    const b = points[i + 1];
+    if (a && b) segments.push(`M ${a.x} ${a.y} L ${b.x} ${b.y}`);
+  }
+  const dotR = 2.5;
+  const vLines = 5;
+  const hLines = 4;
   return (
-    <div className="flex h-20 w-full items-end justify-stretch gap-1">
-      {MODEL_FAMILIES_CHART.map((_, i) => (
-        <div
-          key={i}
-          className={cn("flex-1 min-w-0 rounded-sm transition-all", colors[i])}
-          style={{ height: `${Math.min(100, values[i])}%` }}
-          title={`${modelFamilyLabel(MODEL_FAMILIES_CHART[i])}: ${values[i]}`}
-        />
-      ))}
+    <div className="w-full pb-1">
+      <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full text-white/5" style={{ height: 80 }} preserveAspectRatio="none">
+        {/* grid */}
+        {Array.from({ length: vLines - 1 }).map((_, i) => (
+          <line
+            key={`v-${i}`}
+            x1={padding.left + ((i + 1) / vLines) * innerW}
+            y1={padding.top}
+            x2={padding.left + ((i + 1) / vLines) * innerW}
+            y2={padding.top + innerH}
+            stroke="currentColor"
+            strokeOpacity={0.5}
+            strokeWidth={0.5}
+          />
+        ))}
+        {Array.from({ length: hLines - 1 }).map((_, i) => (
+          <line
+            key={`h-${i}`}
+            x1={padding.left}
+            y1={padding.top + ((i + 1) / hLines) * innerH}
+            x2={padding.left + innerW}
+            y2={padding.top + ((i + 1) / hLines) * innerH}
+            stroke="currentColor"
+            strokeOpacity={0.5}
+            strokeWidth={0.5}
+          />
+        ))}
+        {/* line segments (only between consecutive present points) */}
+        {segments.map((d, i) => (
+          <path key={i} d={d} fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        ))}
+        {/* dots */}
+        {points.map((p, i) => p && <circle key={i} cx={p.x} cy={p.y} r={dotR} fill="rgba(255,255,255,0.85)" />)}
+      </svg>
+      <div className="flex justify-between px-0.5 text-[9px] uppercase tracking-wider text-white/40">
+        <span>GPT</span>
+        <span>GEM</span>
+        <span>CLA</span>
+      </div>
     </div>
   );
 }
 
-/* Placeholder grid when no model scores: subtle lines, not flat bar */
+/* Placeholder: faint grid only when no model scores */
 function ModelSpreadPlaceholder() {
+  const chartW = 120;
+  const chartH = 56;
+  const padding = { top: 6, right: 6, bottom: 6, left: 6 };
+  const innerW = chartW - padding.left - padding.right;
+  const innerH = chartH - padding.top - padding.bottom;
+  const vLines = 5;
+  const hLines = 4;
   return (
-    <div className="flex h-20 w-full items-center justify-center">
-      <div className="relative h-full w-full opacity-[0.06]">
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="absolute left-0 right-0 border-t border-white"
-            style={{ top: `${(i / 4) * 100}%` }}
-          />
-        ))}
-      </div>
-    </div>
+    <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full text-white/5" style={{ height: 80 }} preserveAspectRatio="none">
+      {Array.from({ length: vLines - 1 }).map((_, i) => (
+        <line key={`v-${i}`} x1={padding.left + ((i + 1) / vLines) * innerW} y1={padding.top} x2={padding.left + ((i + 1) / vLines) * innerW} y2={padding.top + innerH} stroke="currentColor" strokeOpacity={0.5} strokeWidth={0.5} />
+      ))}
+      {Array.from({ length: hLines - 1 }).map((_, i) => (
+        <line key={`h-${i}`} x1={padding.left} y1={padding.top + ((i + 1) / hLines) * innerH} x2={padding.left + innerW} y2={padding.top + ((i + 1) / hLines) * innerH} stroke="currentColor" strokeOpacity={0.5} strokeWidth={0.5} />
+      ))}
+    </svg>
   );
 }
 
@@ -370,7 +423,7 @@ function ClientCard({ client }: { client: ClientWithStats }) {
           </div>
         </>
       ) : (
-        <div className="flex flex-1 flex-col items-center justify-center gap-4">
+        <div className="flex flex-1 flex-col items-center justify-center gap-5 py-6">
           <span className="text-4xl font-medium tabular-nums text-white/40">—</span>
           <span
             className="flex h-12 w-full items-center justify-center rounded-app border border-white/15 bg-white/10 text-sm font-medium text-white transition-colors hover:bg-white/20"

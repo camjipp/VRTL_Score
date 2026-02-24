@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, useState, useEffect } from "react";
@@ -119,16 +118,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         >
           <div className="flex flex-1 flex-col">
             <div className="flex h-16 shrink-0 items-center justify-center border-b border-white/5 px-4">
-              <Link href="/app" className="flex items-center gap-2 transition-opacity hover:opacity-90">
-                <Image
-                  src="/brand/VRTL_Solo.png"
-                  alt=""
-                  width={32}
-                  height={32}
-                  className="h-8 w-auto max-h-8 shrink-0 object-contain"
-                  priority
-                />
-                <span className="whitespace-nowrap font-semibold text-white/90 tracking-tight">VRTL Score</span>
+              <Link href="/app" className="flex items-center gap-2 transition-opacity hover:opacity-90 text-white">
+                <svg className="h-7 w-auto shrink-0" viewBox="0 0 80 24" fill="currentColor" aria-hidden>
+                  <text x="0" y="18" fill="currentColor" fontSize="14" fontWeight="600" fontFamily="system-ui, sans-serif" letterSpacing="-0.02em">VRTL</text>
+                </svg>
+                <span className="whitespace-nowrap font-semibold text-white/90 tracking-tight">Score</span>
               </Link>
             </div>
 
