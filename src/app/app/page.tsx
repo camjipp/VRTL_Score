@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 
 import { TopBar } from "@/components/TopBar";
 import { ensureOnboarded } from "@/lib/onboard";
@@ -224,9 +224,6 @@ function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
       })[0] ?? null;
   }, [clients]);
 
-  const barTotal = dominantCount + stableCount + watchlistCount + losingCount || 1;
-  const barW = (v: number) => (v / barTotal) * 100;
-
   return (
     <section
       className="rounded-app-lg border border-white/[0.06] p-6"
@@ -238,41 +235,35 @@ function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
       <div className="text-4xl font-bold tabular-nums tracking-tight text-white sm:text-5xl">{total}</div>
       <div className="mt-0.5 text-xs font-medium uppercase tracking-wider text-white/50">Clients</div>
 
-      <div className="mt-5 space-y-4">
-        <div>
-          <div className="flex h-2 w-full overflow-hidden rounded-full bg-white/5" role="presentation">
-            {dominantCount > 0 && <div className="bg-authority-dominant/80" style={{ width: `${barW(dominantCount)}%` }} />}
-            {stableCount > 0 && <div className="bg-authority-stable/80" style={{ width: `${barW(stableCount)}%` }} />}
-            {watchlistCount > 0 && <div className="bg-authority-watchlist/80" style={{ width: `${barW(watchlistCount)}%` }} />}
-            {losingCount > 0 && <div className="bg-authority-losing/80" style={{ width: `${barW(losingCount)}%` }} />}
-          </div>
-          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-white/60">
-            <span className="tabular-nums">Dominant <strong className="text-white/90">{dominantCount}</strong></span>
-            <span className="tabular-nums">Stable <strong className="text-white/90">{stableCount}</strong></span>
-            <span className="tabular-nums">Watchlist <strong className="text-white/90">{watchlistCount}</strong></span>
-            <span className="tabular-nums">Losing <strong className="text-white/90">{losingCount}</strong></span>
-          </div>
-        </div>
+      <div className="mt-4 text-xs text-white/50">
+        <span className="tabular-nums">Dominant <span className="text-white/70">{dominantCount}</span></span>
+        <span className="mx-1.5">·</span>
+        <span className="tabular-nums">Stable <span className="text-white/70">{stableCount}</span></span>
+        <span className="mx-1.5">·</span>
+        <span className="tabular-nums">Watchlist <span className="text-white/70">{watchlistCount}</span></span>
+        <span className="mx-1.5">·</span>
+        <span className="tabular-nums">Losing <span className="text-white/70">{losingCount}</span></span>
+      </div>
 
-        <div className="flex flex-wrap gap-x-5 gap-y-1.5 border-t border-white/5 pt-3 text-xs text-white/50">
-          <span>Widening Gaps <strong className="tabular-nums text-white/90">{wideningGapsCount}/{total}</strong></span>
-          <span>Avg Gap <strong className="tabular-nums text-white/90">{avgGap ?? "—"}</strong></span>
-          <span>Avg Index <strong className="tabular-nums text-white/90">{avgIndex ?? "—"}</strong></span>
-          {highestRisk && (
-            <span>Highest Risk{" "}
-              <Link href={`/app/clients/${highestRisk.client.id}`} className="font-medium text-white/90 hover:underline">
-                {highestRisk.client.name}
-              </Link>
-            </span>
-          )}
-        </div>
+      <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1.5 border-t border-white/5 pt-3 text-xs text-white/50">
+        <span>Widening Gaps <strong className="tabular-nums text-white/90">{wideningGapsCount}/{total}</strong></span>
+        <span>Avg Gap <strong className="tabular-nums text-white/90">{avgGap ?? "—"}</strong></span>
+        <span>Avg Index <strong className="tabular-nums text-white/90">{avgIndex ?? "—"}</strong></span>
+        {highestRisk && (
+          <span>Highest Risk{" "}
+            <Link href={`/app/clients/${highestRisk.client.id}`} className="font-medium text-white/90 hover:underline">
+              {highestRisk.client.name}
+            </Link>
+          </span>
+        )}
       </div>
     </section>
   );
 }
 
-/* Mini sparkline: fintech feel — 2px stroke, subtle glow, area 0.08, faint grid */
+/* Mini sparkline: fintech — 2px stroke, subtle glow, area fill ~0.08–0.12, 3 faint grid lines */
 function MiniSparkline({ scores, hover }: { scores: number[]; hover?: boolean }) {
+  const filterId = useId().replace(/:/g, "-");
   if (scores.length < 2) return null;
   const w = 120;
   const h = 32;
@@ -295,14 +286,14 @@ function MiniSparkline({ scores, hover }: { scores: number[]; hover?: boolean })
   return (
     <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-8 text-text-2 transition-opacity duration-200" style={{ opacity: hover ? 1 : 0.85 }} preserveAspectRatio="none">
       <defs>
-        <filter id="sparkline-glow" x="-20%" y="-20%" width="140%" height="140%">
+        <filter id={filterId} x="-20%" y="-20%" width="140%" height="140%">
           <feDropShadow dx="0" dy="0" stdDeviation="0.8" floodOpacity="0.12" />
         </filter>
       </defs>
       {[1, 2, 3].map((i) => (
         <line key={i} x1={padding.left} y1={gridY(i)} x2={w - padding.right} y2={gridY(i)} stroke="currentColor" strokeOpacity={0.06} strokeWidth="0.5" />
       ))}
-      {areaPath && <path d={areaPath} fill="currentColor" fillOpacity="0.08" />}
+      {areaPath && <path d={areaPath} fill="currentColor" fillOpacity="0.1" />}
       <polyline
         points={linePoints}
         fill="none"
@@ -310,19 +301,29 @@ function MiniSparkline({ scores, hover }: { scores: number[]; hover?: boolean })
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        filter="url(#sparkline-glow)"
+        filter={`url(#${filterId})`}
       />
     </svg>
   );
 }
 
-/* Client card: Apple/fintech polish — layered lighting, score dominance, micro hover */
+function faviconDomain(website: string | null): string | null {
+  if (!website) return null;
+  try {
+    return new URL(website).hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
+/* Client card: favicon + name top, score + delta middle, sparkline anchored bottom; click affordance arrow */
 function ClientCard({ client }: { client: ClientWithStats }) {
   const router = useRouter();
   const [hover, setHover] = useState(false);
   const hasScore = client.latestScore !== null;
-  const score = client.latestScore ?? 0;
   const delta = hasScore && client.previousScore !== null ? client.latestScore! - client.previousScore! : null;
+  const domain = faviconDomain(client.website);
+  const faviconUrl = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=32` : null;
 
   return (
     <button
@@ -338,11 +339,28 @@ function ClientCard({ client }: { client: ClientWithStats }) {
           : "0 0 0 1px rgba(255,255,255,0.06), 0 2px 8px rgba(0,0,0,0.12)",
       }}
     >
-      <span className="text-[10px] font-medium uppercase tracking-wider text-white/40">AI Authority</span>
-      <h3 className="mt-1 text-sm font-medium leading-tight text-white/90">{client.name}</h3>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-2.5">
+          {faviconUrl ? (
+            <span className="flex h-[22px] w-[22px] shrink-0 items-center justify-center overflow-hidden rounded-md bg-white/5">
+              <img src={faviconUrl} alt="" className="h-[18px] w-[18px] object-contain" width={18} height={18} />
+            </span>
+          ) : null}
+          <h3 className="truncate text-sm font-medium leading-tight text-white/90">{client.name}</h3>
+        </div>
+        <span
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/5 text-white/40 transition-opacity duration-200 group-hover:bg-white/10 group-hover:text-white/70"
+          aria-hidden
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </span>
+      </div>
+
       {hasScore ? (
         <>
-          <div className="mt-3 flex flex-wrap items-baseline gap-2">
+          <div className="mt-4 flex flex-wrap items-baseline gap-2">
             <span className="text-6xl font-bold tabular-nums tracking-tight text-white sm:text-7xl" style={{ fontWeight: 700, letterSpacing: "-0.02em" }}>
               {client.latestScore}
             </span>
@@ -352,7 +370,7 @@ function ClientCard({ client }: { client: ClientWithStats }) {
               </span>
             )}
           </div>
-          <div className="mt-4 flex-1 min-h-[44px]">
+          <div className="mt-auto min-h-[44px] pt-4">
             <MiniSparkline scores={client.recentScores} hover={hover} />
           </div>
         </>
