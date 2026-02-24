@@ -280,7 +280,7 @@ function MiniSparkline({ scores }: { scores: number[] }) {
   );
 }
 
-/* Stakent-style client card: name, score + delta, sparkline; or Run snapshot when no data */
+/* Stakent-style client card: square, prominent name, score + delta, sparkline */
 function ClientCard({ client }: { client: ClientWithStats }) {
   const router = useRouter();
   const hasScore = client.latestScore !== null;
@@ -290,12 +290,13 @@ function ClientCard({ client }: { client: ClientWithStats }) {
     <button
       type="button"
       onClick={() => router.push(`/app/clients/${client.id}`)}
-      className="w-full rounded-app-lg border border-white/5 bg-surface p-4 text-left transition-colors hover:bg-surface-2/50 focus:outline-none focus:ring-1 focus:ring-white/10"
+      className="group relative flex w-full flex-col rounded-xl border border-white/5 bg-surface p-5 text-left transition-colors hover:bg-surface-2/50 focus:outline-none focus:ring-1 focus:ring-white/10 aspect-square min-h-[220px] max-h-[280px] sm:min-h-0 sm:max-h-none"
     >
-      <div className="text-xs font-medium text-text-2 mb-2">{client.name}</div>
+      <span className="text-[10px] font-medium uppercase tracking-wider text-text-3">AI Authority</span>
+      <h3 className="mt-1 text-lg font-semibold leading-tight text-text sm:text-xl">{client.name}</h3>
       {hasScore ? (
         <>
-          <div className="flex items-baseline gap-2">
+          <div className="mt-4 flex flex-wrap items-baseline gap-2">
             <span className="text-2xl font-semibold tabular-nums text-text">{client.latestScore}</span>
             {delta !== null && delta !== 0 && (
               <span className={cn("text-xs tabular-nums", delta > 0 ? "text-authority-dominant" : "text-authority-losing")}>
@@ -303,31 +304,36 @@ function ClientCard({ client }: { client: ClientWithStats }) {
               </span>
             )}
           </div>
-          <div className="mt-3 min-h-[28px]">
+          <div className="mt-4 flex-1 min-h-[44px]">
             <MiniSparkline scores={client.recentScores} />
           </div>
         </>
       ) : (
-        <div className="py-4">
-          <span className="inline-flex items-center gap-1.5 rounded-app border border-white/10 bg-surface-2/50 px-3 py-2 text-xs font-medium text-text">
+        <div className="mt-6 flex flex-1 items-center">
+          <span className="inline-flex items-center gap-1.5 rounded-app border border-white/10 bg-surface-2/50 px-3 py-2 text-sm font-medium text-text">
             Run snapshot
           </span>
         </div>
       )}
+      <span className="absolute top-4 right-4 text-text-3 opacity-0 transition-opacity group-hover:opacity-100" aria-hidden>
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </span>
     </button>
   );
 }
 
-/* Add client card - always last in grid */
+/* Add client card - always last in grid, same square dimensions */
 function AddClientCard() {
   const router = useRouter();
   return (
     <button
       type="button"
       onClick={() => router.push("/app/clients/new")}
-      className="flex w-full min-h-[120px] flex-col items-center justify-center rounded-app-lg border border-dashed border-white/10 bg-surface/30 p-4 text-text-2 transition-colors hover:border-white/20 hover:bg-surface/50 focus:outline-none focus:ring-1 focus:ring-white/10"
+      className="flex w-full flex-col items-center justify-center rounded-xl border border-dashed border-white/10 bg-surface/30 p-5 text-text-2 transition-colors hover:border-white/20 hover:bg-surface/50 focus:outline-none focus:ring-1 focus:ring-white/10 aspect-square min-h-[220px] max-h-[280px] sm:min-h-0 sm:max-h-none"
     >
-      <svg className="h-8 w-8 mb-2 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <svg className="h-10 w-10 mb-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
       </svg>
       <span className="text-sm font-medium">Add client</span>
@@ -383,11 +389,15 @@ function ClientCardsGrid({
           </select>
         </label>
       </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {sorted.map((client) => (
-          <ClientCard key={client.id} client={client} />
+          <div key={client.id} className="relative">
+            <ClientCard client={client} />
+          </div>
         ))}
-        <AddClientCard />
+        <div className="relative">
+          <AddClientCard />
+        </div>
       </div>
     </section>
   );
