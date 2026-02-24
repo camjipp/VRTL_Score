@@ -118,17 +118,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           style={{ backgroundColor: "#0F1216" }}
         >
           <div className="flex flex-1 flex-col">
-            <div className="flex h-16 shrink-0 items-center gap-2 border-b border-white/5 px-4">
+            <div className="flex h-16 shrink-0 items-center justify-center border-b border-white/5 px-4">
               <Link href="/app" className="flex items-center gap-2 transition-opacity hover:opacity-90">
                 <Image
                   src="/brand/VRTL_Solo.png"
                   alt=""
                   width={32}
                   height={32}
-                  className="h-8 w-auto max-h-8 object-contain"
+                  className="h-8 w-auto max-h-8 shrink-0 object-contain"
                   priority
                 />
-                <span className="font-semibold text-white/90 tracking-tight">Score</span>
+                <span className="whitespace-nowrap font-semibold text-white/90 tracking-tight">VRTL Score</span>
               </Link>
             </div>
 

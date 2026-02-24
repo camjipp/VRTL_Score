@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { TopBar } from "@/components/TopBar";
 import { ensureOnboarded } from "@/lib/onboard";
@@ -261,54 +261,6 @@ function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
   );
 }
 
-/* Mini sparkline: stroke white/60, area 0.06–0.08, grid white/5, padding above */
-function MiniSparkline({ scores, hover }: { scores: number[]; hover?: boolean }) {
-  const filterId = useId().replace(/:/g, "-");
-  if (scores.length < 2) return null;
-  const w = 120;
-  const h = 32;
-  const padding = { top: 4, right: 4, bottom: 4, left: 4 };
-  const max = Math.max(...scores, 100);
-  const min = Math.min(...scores, 0);
-  const range = max - min || 1;
-  const chartW = w - padding.left - padding.right;
-  const chartH = h - padding.top - padding.bottom;
-  const pts = scores.map((val, i) => {
-    const x = padding.left + (i / (scores.length - 1)) * chartW;
-    const y = padding.top + chartH - ((val - min) / range) * chartH;
-    return { x, y };
-  });
-  const linePoints = pts.map(p => `${p.x},${p.y}`).join(" ");
-  const areaPath = pts.length
-    ? `M ${pts[0].x} ${padding.top + chartH} L ${pts.map(p => `${p.x} ${p.y}`).join(" L ")} L ${pts[pts.length - 1].x} ${padding.top + chartH} Z`
-    : "";
-  const gridY = (i: number) => padding.top + (i / 4) * chartH;
-  return (
-    <div className="pt-5">
-      <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-8 text-white/60 transition-opacity duration-200" style={{ opacity: hover ? 1 : 0.9 }} preserveAspectRatio="none">
-        <defs>
-          <filter id={filterId} x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="0" stdDeviation="0.6" floodOpacity="0.1" />
-          </filter>
-        </defs>
-        {[1, 2, 3].map((i) => (
-          <line key={i} x1={padding.left} y1={gridY(i)} x2={w - padding.right} y2={gridY(i)} stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
-        ))}
-        {areaPath && <path d={areaPath} fill="rgba(255,255,255,0.07)" />}
-        <polyline
-          points={linePoints}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          filter={`url(#${filterId})`}
-        />
-      </svg>
-    </div>
-  );
-}
-
 function faviconDomain(website: string | null): string | null {
   if (!website) return null;
   try {
@@ -318,7 +270,44 @@ function faviconDomain(website: string | null): string | null {
   }
 }
 
-/* Client card: favicon + name top, score + delta middle, sparkline anchored bottom; click affordance arrow */
+const MODEL_FAMILIES_CHART: ModelFamily[] = ["chatgpt", "gemini", "claude"];
+
+/* Model spread chart: 3 vertical bars (ChatGPT, Gemini, Claude). Height 80px. */
+function ModelSpreadChart({ modelScores }: { modelScores: ProviderFamilyScores }) {
+  const values = MODEL_FAMILIES_CHART.map((f) => modelScores[f] ?? 0);
+  const colors = ["bg-authority-dominant/80", "bg-authority-watchlist/80", "bg-authority-losing/80"];
+  return (
+    <div className="flex h-20 w-full items-end justify-stretch gap-1">
+      {MODEL_FAMILIES_CHART.map((_, i) => (
+        <div
+          key={i}
+          className={cn("flex-1 min-w-0 rounded-sm transition-all", colors[i])}
+          style={{ height: `${Math.min(100, values[i])}%` }}
+          title={`${modelFamilyLabel(MODEL_FAMILIES_CHART[i])}: ${values[i]}`}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* Placeholder grid when no model scores: subtle lines, not flat bar */
+function ModelSpreadPlaceholder() {
+  return (
+    <div className="flex h-20 w-full items-center justify-center">
+      <div className="relative h-full w-full opacity-[0.06]">
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="absolute left-0 right-0 border-t border-white"
+            style={{ top: `${(i / 4) * 100}%` }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* Client card: favicon + name top, score + delta middle, model spread or placeholder at bottom */
 function ClientCard({ client }: { client: ClientWithStats }) {
   const router = useRouter();
   const [hover, setHover] = useState(false);
@@ -372,13 +361,21 @@ function ClientCard({ client }: { client: ClientWithStats }) {
               </span>
             )}
           </div>
-          <div className="mt-auto min-h-[44px]">
-            <MiniSparkline scores={client.recentScores} hover={hover} />
+          <div className="mt-auto pb-5 pt-4">
+            {client.providerFamilyScores && Object.keys(client.providerFamilyScores).length > 0 ? (
+              <ModelSpreadChart modelScores={client.providerFamilyScores} />
+            ) : (
+              <ModelSpreadPlaceholder />
+            )}
           </div>
         </>
       ) : (
-        <div className="mt-6 flex flex-1 items-center">
-          <span className="inline-flex items-center gap-1.5 rounded-app border border-white/10 bg-surface-2/50 px-3 py-2 text-sm font-medium text-text">
+        <div className="flex flex-1 flex-col items-center justify-center gap-4">
+          <span className="text-4xl font-medium tabular-nums text-white/40">—</span>
+          <span
+            className="flex h-12 w-full items-center justify-center rounded-app border border-white/15 bg-white/10 text-sm font-medium text-white transition-colors hover:bg-white/20"
+            style={{ boxShadow: "0 0 0 1px rgba(255,255,255,0.06)" }}
+          >
             Run snapshot
           </span>
         </div>
