@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 
 import { TopBar } from "@/components/TopBar";
 import { ensureOnboarded } from "@/lib/onboard";
@@ -272,11 +272,12 @@ function faviconDomain(website: string | null): string | null {
 
 const MODEL_FAMILIES_CHART: ModelFamily[] = ["chatgpt", "gemini", "claude"];
 
-/* Model spread mini-chart: faint grid + 3 dots (GPT, GEM, CLA) at score y, connected by thin line. No bars. */
+/* Model spread mini-chart: 3 horizontal grid lines, 3 dots at score y, line white/60, dots 5–6px with glow. */
 function ModelSpreadChart({ modelScores }: { modelScores: ProviderFamilyScores }) {
+  const filterId = useId().replace(/:/g, "-");
   const chartW = 120;
-  const chartH = 56;
-  const padding = { top: 6, right: 6, bottom: 14, left: 6 }; // bottom room for labels
+  const chartH = 64;
+  const padding = { top: 10, right: 6, bottom: 10, left: 6 };
   const innerW = chartW - padding.left - padding.right;
   const innerH = chartH - padding.top - padding.bottom;
   const xPos = [padding.left + 0, padding.left + innerW / 2, padding.left + innerW];
@@ -292,69 +293,59 @@ function ModelSpreadChart({ modelScores }: { modelScores: ProviderFamilyScores }
     const b = points[i + 1];
     if (a && b) segments.push(`M ${a.x} ${a.y} L ${b.x} ${b.y}`);
   }
-  const dotR = 2.5;
-  const vLines = 5;
-  const hLines = 4;
+  const dotR = 5;
+  const hLines = 3;
   return (
-    <div className="w-full pb-1">
-      <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full text-white/5" style={{ height: 80 }} preserveAspectRatio="none">
-        {/* grid */}
-        {Array.from({ length: vLines - 1 }).map((_, i) => (
-          <line
-            key={`v-${i}`}
-            x1={padding.left + ((i + 1) / vLines) * innerW}
-            y1={padding.top}
-            x2={padding.left + ((i + 1) / vLines) * innerW}
-            y2={padding.top + innerH}
-            stroke="currentColor"
-            strokeOpacity={0.5}
-            strokeWidth={0.5}
-          />
-        ))}
-        {Array.from({ length: hLines - 1 }).map((_, i) => (
+    <div className="w-full">
+      <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full" style={{ height: 80 }} preserveAspectRatio="none">
+        <defs>
+          <filter id={filterId} x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="0" stdDeviation="1.5" floodColor="rgb(255,255,255)" floodOpacity="0.2" />
+          </filter>
+        </defs>
+        {/* 3 horizontal grid lines only, white/8 */}
+        {Array.from({ length: hLines }).map((_, i) => (
           <line
             key={`h-${i}`}
             x1={padding.left}
-            y1={padding.top + ((i + 1) / hLines) * innerH}
+            y1={padding.top + (i / (hLines - 1 || 1)) * innerH}
             x2={padding.left + innerW}
-            y2={padding.top + ((i + 1) / hLines) * innerH}
-            stroke="currentColor"
-            strokeOpacity={0.5}
+            y2={padding.top + (i / (hLines - 1 || 1)) * innerH}
+            stroke="rgba(255,255,255,0.08)"
             strokeWidth={0.5}
           />
         ))}
-        {/* line segments (only between consecutive present points) */}
+        {/* line: white/60, 1.5px, round caps */}
         {segments.map((d, i) => (
-          <path key={i} d={d} fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <path key={i} d={d} fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         ))}
-        {/* dots */}
-        {points.map((p, i) => p && <circle key={i} cx={p.x} cy={p.y} r={dotR} fill="rgba(255,255,255,0.85)" />)}
+        {/* dots: 5px radius, white, subtle glow */}
+        {points.map((p, i) => p && <circle key={i} cx={p.x} cy={p.y} r={dotR} fill="#fff" filter={`url(#${filterId})`} />)}
       </svg>
-      <div className="flex justify-between px-0.5 text-[9px] uppercase tracking-wider text-white/40">
-        <span>GPT</span>
-        <span>GEM</span>
-        <span>CLA</span>
-      </div>
     </div>
   );
 }
 
-/* Placeholder: faint grid only when no model scores */
+/* Placeholder: 3 horizontal grid lines only when no model scores */
 function ModelSpreadPlaceholder() {
   const chartW = 120;
-  const chartH = 56;
-  const padding = { top: 6, right: 6, bottom: 6, left: 6 };
+  const chartH = 64;
+  const padding = { top: 10, right: 6, bottom: 10, left: 6 };
   const innerW = chartW - padding.left - padding.right;
   const innerH = chartH - padding.top - padding.bottom;
-  const vLines = 5;
-  const hLines = 4;
+  const hLines = 3;
   return (
-    <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full text-white/5" style={{ height: 80 }} preserveAspectRatio="none">
-      {Array.from({ length: vLines - 1 }).map((_, i) => (
-        <line key={`v-${i}`} x1={padding.left + ((i + 1) / vLines) * innerW} y1={padding.top} x2={padding.left + ((i + 1) / vLines) * innerW} y2={padding.top + innerH} stroke="currentColor" strokeOpacity={0.5} strokeWidth={0.5} />
-      ))}
-      {Array.from({ length: hLines - 1 }).map((_, i) => (
-        <line key={`h-${i}`} x1={padding.left} y1={padding.top + ((i + 1) / hLines) * innerH} x2={padding.left + innerW} y2={padding.top + ((i + 1) / hLines) * innerH} stroke="currentColor" strokeOpacity={0.5} strokeWidth={0.5} />
+    <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full" style={{ height: 80 }} preserveAspectRatio="none">
+      {Array.from({ length: hLines }).map((_, i) => (
+        <line
+          key={`h-${i}`}
+          x1={padding.left}
+          y1={padding.top + (i / (hLines - 1 || 1)) * innerH}
+          x2={padding.left + innerW}
+          y2={padding.top + (i / (hLines - 1 || 1)) * innerH}
+          stroke="rgba(255,255,255,0.08)"
+          strokeWidth={0.5}
+        />
       ))}
     </svg>
   );
@@ -423,10 +414,10 @@ function ClientCard({ client }: { client: ClientWithStats }) {
           </div>
         </>
       ) : (
-        <div className="flex flex-1 flex-col items-center justify-center gap-5 py-6">
-          <span className="text-4xl font-medium tabular-nums text-white/40">—</span>
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 py-8">
+          <span className="text-[32px] font-medium tabular-nums text-white/40">—</span>
           <span
-            className="flex h-12 w-full items-center justify-center rounded-app border border-white/15 bg-white/10 text-sm font-medium text-white transition-colors hover:bg-white/20"
+            className="flex h-12 w-full max-w-full items-center justify-center rounded-app border border-white/15 bg-white/10 text-sm font-medium text-white transition-colors hover:bg-white/20"
             style={{ boxShadow: "0 0 0 1px rgba(255,255,255,0.06)" }}
           >
             Run snapshot

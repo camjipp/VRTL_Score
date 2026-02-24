@@ -118,13 +118,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         >
           <div className="flex flex-1 flex-col">
             <div className="flex h-16 shrink-0 items-center justify-center border-b border-white/5 px-4">
-              <Link href="/app" className="flex items-center gap-2 transition-opacity hover:opacity-90">
+              <Link href="/app" className="flex items-center gap-3 transition-opacity hover:opacity-90 text-white">
                 <img
                   src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
                   alt=""
                   className="h-8 w-auto shrink-0 brightness-0 invert"
+                  width={32}
+                  height={32}
                 />
-                <span className="whitespace-nowrap font-semibold text-white/90 tracking-tight">Score</span>
+                <span className="whitespace-nowrap font-semibold text-white/80 tracking-tight">Score</span>
               </Link>
             </div>
 
