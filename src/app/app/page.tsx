@@ -194,7 +194,7 @@ function ModelDot({ model }: { model: string | null }) {
   return <span className={cn("mr-1.5 inline-block h-2 w-2 shrink-0 rounded-full", color)} aria-hidden />;
 }
 
-/* Section 1: Portfolio Status — total + explicit counts; optional bar has numbers and scale */
+/* Section 1: Portfolio Status — Stakent-style: one card, prominent total, structured metrics */
 function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
   const total = clients.length;
   const dominantCount = clients.filter((c) => getAuthorityState(c) === "Dominant").length;
@@ -207,6 +207,8 @@ function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
   }).length;
   const gaps = clients.map((c) => c.authorityGap).filter((g): g is number => g != null && g > 0);
   const avgGap = gaps.length ? Math.round(gaps.reduce((a, b) => a + b, 0) / gaps.length) : null;
+  const scores = clients.map((c) => c.latestScore).filter((s): s is number => s != null);
+  const avgIndex = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
   const highestRisk = useMemo(() => {
     return [...clients]
       .filter((c) => getAuthorityState(c) === "Losing Ground" || getAuthorityState(c) === "Watchlist")
@@ -223,58 +225,34 @@ function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
   }, [clients]);
 
   return (
-    <section className="rounded-app-lg border border-white/5 bg-surface overflow-hidden">
-      <div className="px-3 py-2 border-b border-white/5 flex items-center justify-between flex-wrap gap-2">
-        <h2 className="text-sm font-semibold text-text">Portfolio Status</h2>
-        <span className="text-sm font-semibold tabular-nums text-text" aria-label={`${total} clients total`}>
-          {total} client{total !== 1 ? "s" : ""}
-        </span>
-      </div>
-      <div className="px-3 py-2.5 space-y-2">
-        {/* Explicit counts with scale: "X of N" per state */}
-        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-[12px]">
-          <span className="text-text-2">State (of {total}):</span>
-          <span className="tabular-nums text-text">Dominant <strong>{dominantCount}</strong></span>
-          <span className="tabular-nums text-text-2">Stable <strong>{stableCount}</strong></span>
-          <span className="tabular-nums text-text-2">Watchlist <strong>{watchlistCount}</strong></span>
-          <span className="tabular-nums text-text-2">Losing <strong>{losingCount}</strong></span>
+    <section className="rounded-app-lg border border-white/5 bg-surface p-5">
+      <h2 className="text-xs font-medium uppercase tracking-wider text-text-3 mb-3">Portfolio Status</h2>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-8">
+        <div>
+          <div className="text-3xl font-semibold tabular-nums tracking-tight text-text">{total}</div>
+          <div className="text-xs text-text-2 mt-0.5">clients</div>
         </div>
-        {/* Optional segmented bar with visible numbers and denominator */}
-        {total > 0 && (
-          <div className="flex items-center gap-0.5 text-[10px]">
-            <span className="text-text-3 mr-1">Scale 0–{total}:</span>
-            {[
-              { label: "D", n: dominantCount, c: "bg-authority-dominant/80" },
-              { label: "S", n: stableCount, c: "bg-authority-stable/80" },
-              { label: "W", n: watchlistCount, c: "bg-authority-watchlist/80" },
-              { label: "L", n: losingCount, c: "bg-authority-losing/80" },
-            ].map(({ label, n, c }) => (
-              <span key={label} className={cn("inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-sm border border-white/10 px-1", c)} title={`${label}: ${n} of ${total}`}>
-                {n}
-              </span>
-            ))}
-            <span className="ml-1 text-text-3">of {total}</span>
+        <div className="flex-1 min-w-0 space-y-3">
+          <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs">
+            <span className="text-text-3">State <span className="text-text-2">(of {total})</span></span>
+            <span className="tabular-nums text-text">Dominant <strong>{dominantCount}</strong></span>
+            <span className="tabular-nums text-text-2">Stable <strong>{stableCount}</strong></span>
+            <span className="tabular-nums text-text-2">Watchlist <strong>{watchlistCount}</strong></span>
+            <span className="tabular-nums text-text-2">Losing <strong>{losingCount}</strong></span>
           </div>
-        )}
-        <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 text-[12px] border-t border-white/5 pt-2">
-          <span className="flex items-center gap-1.5">
-            <span className="text-text-3">Widening gaps</span>
-            <span className="font-semibold tabular-nums text-text">{wideningGapsCount}</span>
-            {total > 0 && <span className="text-text-3">(of {total})</span>}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="text-text-3">Avg gap to leader</span>
-            <span className="font-semibold tabular-nums text-text">{avgGap ?? "—"}</span>
-          </span>
-          {highestRisk && (
-            <span className="flex items-center gap-1.5">
-              <span className="text-text-3">Highest risk</span>
-              <Link href={`/app/clients/${highestRisk.client.id}`} className="font-medium text-text hover:underline">
-                {highestRisk.client.name}
-                {highestRisk.client.worstModel ? ` · ${displayModelName(highestRisk.client.worstModel)}` : ""}
-              </Link>
-            </span>
-          )}
+          <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs border-t border-white/5 pt-3">
+            <span><span className="text-text-3">Widening gaps</span> <strong className="tabular-nums text-text">{wideningGapsCount}</strong><span className="text-text-3"> / {total}</span></span>
+            <span><span className="text-text-3">Avg gap to leader</span> <strong className="tabular-nums text-text">{avgGap ?? "—"}</strong></span>
+            {avgIndex != null && <span><span className="text-text-3">Avg index</span> <strong className="tabular-nums text-text">{avgIndex}</strong></span>}
+            {highestRisk && (
+              <span><span className="text-text-3">Highest risk</span>{" "}
+                <Link href={`/app/clients/${highestRisk.client.id}`} className="font-medium text-text hover:underline">
+                  {highestRisk.client.name}
+                  {highestRisk.client.worstModel ? ` · ${displayModelName(highestRisk.client.worstModel)}` : ""}
+                </Link>
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </section>
@@ -342,7 +320,7 @@ function ClientsRequiringAttention({ clients }: { clients: ClientWithStats[] }) 
   );
 }
 
-/* Section 3: Model Exposure Summary — structured rows: total analyzed, counts by state, avg gap, widening */
+/* Section 3: Model Exposure — Stakent-style: one card per model, prominent metric + structured row */
 function ModelExposureSummary({ clients }: { clients: ClientWithStats[] }) {
   const totalClients = clients.length;
   const byModel = useMemo(() => {
@@ -355,10 +333,11 @@ function ModelExposureSummary({ clients }: { clients: ClientWithStats[] }) {
       analyzed: number;
       gapSum: number;
       gapCount: number;
+      scoreSum: number;
     }> = {
-      chatgpt: { dominant: 0, stable: 0, watchlist: 0, losing: 0, widening: 0, analyzed: 0, gapSum: 0, gapCount: 0 },
-      gemini: { dominant: 0, stable: 0, watchlist: 0, losing: 0, widening: 0, analyzed: 0, gapSum: 0, gapCount: 0 },
-      claude: { dominant: 0, stable: 0, watchlist: 0, losing: 0, widening: 0, analyzed: 0, gapSum: 0, gapCount: 0 },
+      chatgpt: { dominant: 0, stable: 0, watchlist: 0, losing: 0, widening: 0, analyzed: 0, gapSum: 0, gapCount: 0, scoreSum: 0 },
+      gemini: { dominant: 0, stable: 0, watchlist: 0, losing: 0, widening: 0, analyzed: 0, gapSum: 0, gapCount: 0, scoreSum: 0 },
+      claude: { dominant: 0, stable: 0, watchlist: 0, losing: 0, widening: 0, analyzed: 0, gapSum: 0, gapCount: 0, scoreSum: 0 },
     };
     clients.forEach((c) => {
       const delta = c.latestScore !== null && c.previousScore !== null ? c.latestScore - c.previousScore : null;
@@ -370,6 +349,7 @@ function ModelExposureSummary({ clients }: { clients: ClientWithStats[] }) {
           out[family].analyzed++;
           out[family].gapSum += 100 - score;
           out[family].gapCount++;
+          out[family].scoreSum += score;
         }
         const state = getAuthorityStateFromScore(score);
         if (state === "Dominant") out[family].dominant++;
@@ -383,48 +363,39 @@ function ModelExposureSummary({ clients }: { clients: ClientWithStats[] }) {
   }, [clients]);
 
   return (
-    <section className="rounded-app-lg border border-white/5 bg-surface overflow-hidden">
-      <div className="border-b border-white/5 px-3 py-2 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-text">Model Exposure Summary</h2>
-        <span className="text-[10px] text-text-3">of {totalClients} clients</span>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-[12px]">
-          <thead>
-            <tr className="border-b border-white/5 bg-surface-2/60">
-              <th className="px-3 py-1.5 text-left text-[10px] font-medium uppercase tracking-wider text-text-2">Model</th>
-              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2" title="Clients with score for this model">Analyzed</th>
-              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2" title="Dominant count">D</th>
-              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2" title="Stable count">S</th>
-              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2" title="Watchlist count">W</th>
-              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2" title="Losing count">L</th>
-              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2" title="Avg (100 − score)">Avg gap</th>
-              <th className="px-2 py-1.5 text-right text-[10px] font-medium uppercase tracking-wider text-text-2">Widening</th>
-            </tr>
-          </thead>
-          <tbody>
-            {MODEL_FAMILIES.map((family) => {
-              const d = byModel[family];
-              const avgGap = d.gapCount > 0 ? Math.round(d.gapSum / d.gapCount) : null;
-              return (
-                <tr key={family} className="border-b border-white/5 last:border-b-0">
-                  <td className="px-3 py-1.5 font-medium text-text">{modelFamilyLabel(family)}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums text-text-2">
-                    {d.analyzed}<span className="text-text-3">/{totalClients}</span>
-                  </td>
-                  <td className="px-2 py-1.5 text-right tabular-nums text-text-2">{d.dominant}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums text-text-2">{d.stable}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums text-text-2">{d.watchlist}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums text-text-2">{d.losing}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums text-text-2">{avgGap ?? "—"}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums">
-                    {d.widening > 0 ? <span className="text-authority-losing">{d.widening}</span> : <span className="text-text-3">—</span>}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+    <section className="space-y-4">
+      <h2 className="text-xs font-medium uppercase tracking-wider text-text-3">Model Exposure</h2>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {MODEL_FAMILIES.map((family) => {
+          const d = byModel[family];
+          const avgGap = d.gapCount > 0 ? Math.round(d.gapSum / d.gapCount) : null;
+          const avgIndex = d.analyzed > 0 ? Math.round(d.scoreSum / d.analyzed) : null;
+          return (
+            <div key={family} className="rounded-app-lg border border-white/5 bg-surface p-4">
+              <div className="text-xs font-medium text-text-2 mb-2">{modelFamilyLabel(family)}</div>
+              <div className="text-2xl font-semibold tabular-nums text-text">{d.analyzed}<span className="text-sm font-normal text-text-3">/{totalClients}</span></div>
+              <div className="text-[10px] text-text-3 mt-0.5">clients analyzed</div>
+              <div className="mt-4 pt-3 border-t border-white/5 space-y-1.5 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-text-3">State</span>
+                  <span className="tabular-nums text-text-2">D <strong>{d.dominant}</strong> · S <strong>{d.stable}</strong> · W <strong>{d.watchlist}</strong> · L <strong>{d.losing}</strong></span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-text-3">Avg gap to leader</span>
+                  <span className="tabular-nums text-text">{avgGap ?? "—"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-text-3">Avg index</span>
+                  <span className="tabular-nums text-text">{avgIndex ?? "—"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-text-3">Widening gaps</span>
+                  <span className={cn("tabular-nums", d.widening > 0 ? "text-authority-losing" : "text-text-2")}>{d.widening > 0 ? d.widening : "—"}</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
