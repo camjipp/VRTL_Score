@@ -285,19 +285,19 @@ function ModelSpreadWidget({ modelScores }: { modelScores: ProviderFamilyScores 
   const rankColor = (family: ModelFamily): string => {
     const idx = sorted.findIndex((r) => r.family === family);
     if (idx === -1) return "bg-white/20";
-    if (idx === 0) return "bg-authority-dominant/70";
-    if (idx === 1) return "bg-authority-watchlist/70";
-    return "bg-authority-losing/70";
+    if (idx === 0) return "bg-authority-dominant/85";
+    if (idx === 1) return "bg-authority-watchlist/85";
+    return "bg-authority-losing/85";
   };
   return (
     <div className="w-full">
       <div className="text-[10px] font-medium uppercase tracking-wider text-white/60">MODEL SPREAD</div>
-      <div className="mt-2.5 space-y-2">
+      <div className="mt-2.5 space-y-3">
         {rows.map(({ family, label, score }) => (
           <div key={family} className="flex items-center gap-2">
             <span className="w-8 shrink-0 text-[11px] font-medium text-white/70">{label}</span>
             <span className="w-6 shrink-0 text-right text-xs tabular-nums text-white/90">{score != null ? score : "—"}</span>
-            <div className="min-w-0 flex-1 h-2 rounded-full bg-white/10 overflow-hidden">
+            <div className="min-w-0 flex-1 h-2.5 rounded-full bg-white/[0.06] overflow-hidden">
               <div
                 className={cn("h-full rounded-full transition-all", rankColor(family))}
                 style={{ width: score != null ? `${Math.min(100, score)}%` : "0%" }}
@@ -325,12 +325,12 @@ function ClientCard({ client }: { client: ClientWithStats }) {
       onClick={() => router.push(`/app/clients/${client.id}`)}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      className="group relative flex w-full flex-col rounded-xl border border-white/[0.06] p-5 text-left transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-white/10 aspect-square min-h-[220px] max-h-[280px] sm:min-h-0 sm:max-h-none hover:-translate-y-0.5"
+      className="group relative flex w-full flex-col rounded-xl border border-white/[0.06] p-5 text-left transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-white/10 aspect-square min-h-[220px] max-h-[280px] sm:min-h-0 sm:max-h-none hover:-translate-y-[3px]"
       style={{
-        background: "linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 40%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02), transparent 70%), rgb(var(--surface))",
+        background: "radial-gradient(ellipse 80% 50% at 20% 10%, rgba(255,255,255,0.06) 0%, transparent 50%), linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 40%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02), transparent 70%), rgb(var(--surface))",
         boxShadow: hover
-          ? "0 0 0 1px rgba(255,255,255,0.06), 0 4px 12px rgba(0,0,0,0.2)"
-          : "0 0 0 1px rgba(255,255,255,0.06), 0 2px 8px rgba(0,0,0,0.12)",
+          ? "0 0 0 1px rgba(255,255,255,0.08), 0 6px 16px rgba(0,0,0,0.22)"
+          : "0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 0 rgba(255,255,255,0.03), 0 2px 8px rgba(0,0,0,0.12)",
       }}
     >
       {/* Header row: favicon + name (left), circular arrow (right) */}
@@ -344,7 +344,7 @@ function ClientCard({ client }: { client: ClientWithStats }) {
           <h3 className="truncate text-sm font-medium leading-tight text-white/90">{client.name}</h3>
         </div>
         <span
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/5 text-white/25 transition-opacity duration-200 group-hover:text-white/60"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/5 text-white/25 transition-opacity duration-200 group-hover:text-white/80"
           aria-hidden
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -353,13 +353,16 @@ function ClientCard({ client }: { client: ClientWithStats }) {
         </span>
       </div>
 
-      {/* Score section: large score or "—", delta only when has snapshot */}
-      <div className="mt-4 flex flex-wrap items-baseline gap-1.5">
-        <span className="text-5xl font-bold tabular-nums tracking-tight text-white sm:text-6xl" style={{ fontWeight: 700, letterSpacing: "-0.02em" }}>
+      {/* Score section: radial glow behind number, tighter score–delta spacing */}
+      <div className="mt-4 flex flex-wrap items-baseline gap-1">
+        <span
+          className="relative text-5xl font-bold tabular-nums tracking-tight text-white sm:text-6xl"
+          style={{ fontWeight: 800, letterSpacing: "-0.02em", textShadow: "0 0 24px rgba(255,255,255,0.08)" }}
+        >
           {hasScore ? client.latestScore : "—"}
         </span>
         {hasScore && delta !== null && delta !== 0 && (
-          <span className={cn("text-sm tabular-nums", delta > 0 ? "text-authority-dominant" : "text-authority-losing")}>
+          <span className={cn("text-xs tabular-nums opacity-90", delta > 0 ? "text-authority-dominant" : "text-authority-losing")}>
             {delta > 0 ? "+" : ""}{delta} vs last
           </span>
         )}
@@ -370,16 +373,18 @@ function ClientCard({ client }: { client: ClientWithStats }) {
         <ModelSpreadWidget modelScores={client.providerFamilyScores ?? null} />
       </div>
 
-      {/* Bottom action: Run Snapshot button, always present. Primary when no data, secondary when has data. */}
+      {/* Bottom action: Run Snapshot. With data = muted glass; without = stronger contrast, subtle glow, scale on hover */}
       <div className="mt-5 shrink-0 border-t border-white/5 pt-4">
         <span
           className={cn(
-            "flex h-12 w-full items-center justify-center rounded-app text-sm font-medium transition-colors",
+            "flex h-12 w-full items-center justify-center rounded-app text-sm font-medium transition-all duration-200",
             hasScore
               ? "border border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white/90"
-              : "border border-white/20 bg-white/10 text-white/90 hover:bg-white/15"
+              : "border border-white/20 bg-white/10 text-white/90 hover:bg-white/15 hover:scale-[1.02]"
           )}
-          style={{ boxShadow: hasScore ? "none" : "0 0 0 1px rgba(255,255,255,0.06)" }}
+          style={{
+            boxShadow: hasScore ? "none" : "0 0 0 1px rgba(255,255,255,0.06), 0 2px 8px rgba(0,0,0,0.08)",
+          }}
         >
           Run snapshot
         </span>
