@@ -194,8 +194,16 @@ function ModelDot({ model }: { model: string | null }) {
   return <span className={cn("mr-1.5 inline-block h-2 w-2 shrink-0 rounded-full", color)} aria-hidden />;
 }
 
-/* Section 1: Portfolio — control summary panel with primary stat blocks and secondary metrics */
-function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
+/* Portfolio strip: compact control bar with filter pills and highest-risk callout */
+function PortfolioStrip({
+  clients,
+  filterHealth,
+  onFilterChange,
+}: {
+  clients: ClientWithStats[];
+  filterHealth: "all" | "dominant" | "stable" | "watchlist" | "losing";
+  onFilterChange: (v: "all" | "dominant" | "stable" | "watchlist" | "losing") => void;
+}) {
   const total = clients.length;
   const dominantCount = clients.filter((c) => getAuthorityState(c) === "Dominant").length;
   const stableCount = clients.filter((c) => getAuthorityState(c) === "Stable").length;
@@ -222,59 +230,87 @@ function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
       })[0] ?? null;
   }, [clients]);
 
-  const primaryBlocks = [
-    { value: dominantCount, label: "Dominant" },
-    { value: stableCount, label: "Stable" },
-    { value: watchlistCount, label: "Watchlist" },
-    { value: losingCount, label: "Losing" },
+  const pills: { id: "all" | "dominant" | "stable" | "watchlist" | "losing"; label: string; count: number }[] = [
+    { id: "all", label: "All", count: total },
+    { id: "dominant", label: "Dominant", count: dominantCount },
+    { id: "stable", label: "Stable", count: stableCount },
+    { id: "watchlist", label: "Watchlist", count: watchlistCount },
+    { id: "losing", label: "Losing", count: losingCount },
   ];
 
+  const domain = highestRisk ? faviconDomain(highestRisk.client.website) : null;
+  const faviconUrl = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=32` : null;
+
   return (
-    <section
-      className="rounded-xl border border-white/[0.06] p-5 xl:p-6"
-      style={{
-        background: "radial-gradient(ellipse 80% 50% at 20% 10%, rgba(255,255,255,0.06) 0%, transparent 50%), linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 40%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02), transparent 70%), rgb(var(--surface))",
-        boxShadow: "0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 0 rgba(255,255,255,0.03), 0 2px 8px rgba(0,0,0,0.12)",
-      }}
-    >
-      <div className="text-[10px] font-medium uppercase tracking-wider text-white/50">Portfolio</div>
-      <div
-        className="mt-1 text-2xl font-bold tabular-nums tracking-tight text-white sm:text-3xl"
-        style={{ fontWeight: 800, letterSpacing: "-0.02em", textShadow: "0 0 20px rgba(255,255,255,0.06)" }}
+    <div className="space-y-1.5">
+      <section
+        className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-xl border border-white/[0.06] px-4 py-3 xl:gap-x-5 xl:px-5 xl:py-3.5"
+        style={{
+          background: "radial-gradient(ellipse 80% 50% at 20% 10%, rgba(255,255,255,0.06) 0%, transparent 50%), linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 40%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02), transparent 70%), rgb(var(--surface))",
+          boxShadow: "0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 0 rgba(255,255,255,0.03), 0 2px 8px rgba(0,0,0,0.12)",
+        }}
       >
-        {total} Active Client{total === 1 ? "" : "s"}
-      </div>
-
-      <div className="mt-6 grid grid-cols-4 gap-4 xl:mt-7">
-        {primaryBlocks.map(({ value, label }) => (
-          <div key={label} className="flex flex-col items-center text-center">
-            <span
-              className="text-3xl font-bold tabular-nums tracking-tight text-white sm:text-4xl xl:text-[2.5rem]"
-              style={{ fontWeight: 800, letterSpacing: "-0.02em", textShadow: "0 0 24px rgba(255,255,255,0.08)" }}
-            >
-              {value}
-            </span>
-            <span className="mt-1 text-[11px] font-medium uppercase tracking-wider text-white/50">{label}</span>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/5 pt-4 text-xs text-white/45 xl:mt-7 xl:pt-5">
-        <span>Widening Gaps <strong className="tabular-nums font-medium text-white/60">{wideningGapsCount}/{total}</strong></span>
-        <span className="h-3 w-px shrink-0 bg-white/10" aria-hidden />
-        <span>Avg Index <strong className="tabular-nums font-medium text-white/60">{avgIndex ?? "—"}</strong></span>
-        <span className="h-3 w-px shrink-0 bg-white/10" aria-hidden />
-        {highestRisk ? (
-          <span>Highest Risk{" "}
-            <Link href={`/app/clients/${highestRisk.client.id}`} className="font-medium text-white/60 hover:underline">
-              {highestRisk.client.name}
-            </Link>
+        {/* Left: label + client count */}
+        <div className="flex shrink-0 items-baseline gap-2 xl:gap-3">
+          <span className="text-[10px] font-medium uppercase tracking-wider text-white/50">Portfolio</span>
+          <span className="text-sm font-medium tabular-nums text-white/80">
+            {total} active client{total === 1 ? "" : "s"}
           </span>
-        ) : (
-          <span>Highest Risk <strong className="text-white/60">—</strong></span>
-        )}
+        </div>
+
+        {/* Center: filter pills */}
+        <div className="flex min-w-0 flex-1 flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+          {pills.map(({ id, label, count }) => {
+            const active = filterHealth === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => onFilterChange(id)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-app border px-2.5 py-1.5 text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-white/20",
+                  active
+                    ? "border-white/20 bg-white/10 text-white"
+                    : "border-white/10 bg-white/5 text-white/70 hover:border-white/15 hover:bg-white/[0.07] hover:text-white/85"
+                )}
+              >
+                <span className="tabular-nums">{count}</span>
+                <span>{label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Right: highest risk */}
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="text-[10px] font-medium uppercase tracking-wider text-white/50">Highest risk</span>
+          {highestRisk ? (
+            <Link
+              href={`/app/clients/${highestRisk.client.id}`}
+              className="flex items-center gap-2 rounded-app border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-white/80 transition-colors hover:border-white/15 hover:bg-white/[0.07] hover:text-white"
+            >
+              {faviconUrl ? (
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/5">
+                  <img src={faviconUrl} alt="" className="h-4 w-4 object-contain" width={16} height={16} />
+                </span>
+              ) : null}
+              <span className="truncate max-w-[120px] sm:max-w-[140px]">{highestRisk.client.name}</span>
+              <svg className="h-3.5 w-3.5 shrink-0 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </Link>
+          ) : (
+            <span className="text-xs text-white/45">—</span>
+          )}
+        </div>
+      </section>
+
+      {/* Secondary metrics: small muted line */}
+      <div className="flex items-center gap-x-3 px-1 text-[11px] text-white/40">
+        <span>Widening gaps <span className="tabular-nums text-white/55">{wideningGapsCount}/{total}</span></span>
+        <span>Avg index <span className="tabular-nums text-white/55">{avgIndex ?? "—"}</span></span>
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -1237,7 +1273,11 @@ export default function AppPage() {
       />
 
       <div className="flex-1 space-y-4 p-6">
-        <PortfolioStatus clients={clients} />
+        <PortfolioStrip
+          clients={clients}
+          filterHealth={filterHealth}
+          onFilterChange={setFilterHealth}
+        />
         {filteredClients.length === 0 && searchQuery ? (
           <div className="rounded-app-lg border border-white/5 bg-surface/50 py-4 text-center">
             <p className="text-xs text-text-2">No clients match &quot;{searchQuery}&quot;</p>
@@ -1247,7 +1287,7 @@ export default function AppPage() {
           </div>
         ) : filteredClients.length === 0 && filterHealth !== "all" ? (
           <div className="rounded-app-lg border border-white/5 bg-surface/50 py-4 text-center">
-            <p className="text-xs text-text-2">No {filterHealth} clients found</p>
+            <p className="text-xs text-text-2">No {filterHealth.charAt(0).toUpperCase() + filterHealth.slice(1)} clients found</p>
             <button onClick={() => setFilterHealth("all")} className="mt-2 text-sm text-text hover:underline">
               Clear filter
             </button>
