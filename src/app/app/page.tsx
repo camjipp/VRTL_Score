@@ -194,7 +194,7 @@ function ModelDot({ model }: { model: string | null }) {
   return <span className={cn("mr-1.5 inline-block h-2 w-2 shrink-0 rounded-full", color)} aria-hidden />;
 }
 
-/* Section 1: Portfolio Status — command-center surface with radial depth */
+/* Section 1: Portfolio — control summary panel with primary stat blocks and secondary metrics */
 function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
   const total = clients.length;
   const dominantCount = clients.filter((c) => getAuthorityState(c) === "Dominant").length;
@@ -205,8 +205,6 @@ function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
     const delta = c.latestScore !== null && c.previousScore !== null ? c.latestScore - c.previousScore : null;
     return delta !== null && delta < 0;
   }).length;
-  const gaps = clients.map((c) => c.authorityGap).filter((g): g is number => g != null && g > 0);
-  const avgGap = gaps.length ? Math.round(gaps.reduce((a, b) => a + b, 0) / gaps.length) : null;
   const scores = clients.map((c) => c.latestScore).filter((s): s is number => s != null);
   const avgIndex = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
   const highestRisk = useMemo(() => {
@@ -224,37 +222,48 @@ function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
       })[0] ?? null;
   }, [clients]);
 
+  const primaryBlocks = [
+    { value: dominantCount, label: "Dominant" },
+    { value: stableCount, label: "Stable" },
+    { value: watchlistCount, label: "Watchlist" },
+    { value: losingCount, label: "Losing" },
+  ];
+
   return (
     <section
-      className="rounded-app-lg border border-white/[0.06] p-6"
+      className="rounded-app-lg border border-white/[0.06] py-7 px-6 xl:py-8 xl:px-6"
       style={{
-        background: "linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 40%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02), transparent 70%), rgb(var(--surface))",
+        background: "radial-gradient(ellipse 70% 60% at 30% 20%, rgba(255,255,255,0.04) 0%, transparent 50%), linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 40%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02), transparent 70%), rgb(var(--surface))",
         boxShadow: "0 0 0 1px rgba(255,255,255,0.06), 0 2px 8px rgba(0,0,0,0.12)",
       }}
     >
-      <div className="text-4xl font-bold tabular-nums tracking-tight text-white sm:text-5xl">{total}</div>
-      <div className="mt-0.5 text-[10px] font-medium uppercase tracking-wider text-white/40">Clients</div>
-
-      <div className="mt-3 text-xs text-white/40">
-        <span className="tabular-nums">Dominant <span className="text-white/55">{dominantCount}</span></span>
-        <span className="mx-1.5">·</span>
-        <span className="tabular-nums">Stable <span className="text-white/55">{stableCount}</span></span>
-        <span className="mx-1.5">·</span>
-        <span className="tabular-nums">Watchlist <span className="text-white/55">{watchlistCount}</span></span>
-        <span className="mx-1.5">·</span>
-        <span className="tabular-nums">Losing <span className="text-white/55">{losingCount}</span></span>
+      <div className="text-[10px] font-medium uppercase tracking-wider text-white/50">Portfolio</div>
+      <div className="mt-1 text-2xl font-bold tabular-nums tracking-tight text-white sm:text-3xl">
+        {total} Active Client{total === 1 ? "" : "s"}
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 border-t border-white/5 pt-3 text-xs text-white/40">
-        <span>Widening Gaps <strong className="tabular-nums text-white/70">{wideningGapsCount}/{total}</strong></span>
-        <span>Avg Gap <strong className="tabular-nums text-white/70">{avgGap ?? "—"}</strong></span>
-        <span>Avg Index <strong className="tabular-nums text-white/70">{avgIndex ?? "—"}</strong></span>
-        {highestRisk && (
+      <div className="mt-6 grid grid-cols-4 gap-4">
+        {primaryBlocks.map(({ value, label }) => (
+          <div key={label} className="flex flex-col items-center text-center">
+            <span className="text-2xl font-bold tabular-nums tracking-tight text-white sm:text-3xl">{value}</span>
+            <span className="mt-0.5 text-[11px] font-medium uppercase tracking-wider text-white/50">{label}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/5 pt-4 text-xs text-white/45">
+        <span>Widening Gaps <strong className="tabular-nums font-medium text-white/60">{wideningGapsCount}/{total}</strong></span>
+        <span className="h-3 w-px shrink-0 bg-white/10" aria-hidden />
+        <span>Avg Index <strong className="tabular-nums font-medium text-white/60">{avgIndex ?? "—"}</strong></span>
+        <span className="h-3 w-px shrink-0 bg-white/10" aria-hidden />
+        {highestRisk ? (
           <span>Highest Risk{" "}
-            <Link href={`/app/clients/${highestRisk.client.id}`} className="font-medium text-white/70 hover:underline">
+            <Link href={`/app/clients/${highestRisk.client.id}`} className="font-medium text-white/60 hover:underline">
               {highestRisk.client.name}
             </Link>
           </span>
+        ) : (
+          <span>Highest Risk <strong className="text-white/60">—</strong></span>
         )}
       </div>
     </section>
