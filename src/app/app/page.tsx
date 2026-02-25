@@ -231,27 +231,35 @@ function PortfolioStatus({ clients }: { clients: ClientWithStats[] }) {
 
   return (
     <section
-      className="rounded-app-lg border border-white/[0.06] py-7 px-6 xl:py-8 xl:px-6"
+      className="rounded-xl border border-white/[0.06] p-5 xl:p-6"
       style={{
-        background: "radial-gradient(ellipse 70% 60% at 30% 20%, rgba(255,255,255,0.04) 0%, transparent 50%), linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 40%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02), transparent 70%), rgb(var(--surface))",
-        boxShadow: "0 0 0 1px rgba(255,255,255,0.06), 0 2px 8px rgba(0,0,0,0.12)",
+        background: "radial-gradient(ellipse 80% 50% at 20% 10%, rgba(255,255,255,0.06) 0%, transparent 50%), linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 40%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02), transparent 70%), rgb(var(--surface))",
+        boxShadow: "0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 0 rgba(255,255,255,0.03), 0 2px 8px rgba(0,0,0,0.12)",
       }}
     >
       <div className="text-[10px] font-medium uppercase tracking-wider text-white/50">Portfolio</div>
-      <div className="mt-1 text-2xl font-bold tabular-nums tracking-tight text-white sm:text-3xl">
+      <div
+        className="mt-1 text-2xl font-bold tabular-nums tracking-tight text-white sm:text-3xl"
+        style={{ fontWeight: 800, letterSpacing: "-0.02em", textShadow: "0 0 20px rgba(255,255,255,0.06)" }}
+      >
         {total} Active Client{total === 1 ? "" : "s"}
       </div>
 
-      <div className="mt-6 grid grid-cols-4 gap-4">
+      <div className="mt-6 grid grid-cols-4 gap-4 xl:mt-7">
         {primaryBlocks.map(({ value, label }) => (
           <div key={label} className="flex flex-col items-center text-center">
-            <span className="text-2xl font-bold tabular-nums tracking-tight text-white sm:text-3xl">{value}</span>
-            <span className="mt-0.5 text-[11px] font-medium uppercase tracking-wider text-white/50">{label}</span>
+            <span
+              className="text-3xl font-bold tabular-nums tracking-tight text-white sm:text-4xl xl:text-[2.5rem]"
+              style={{ fontWeight: 800, letterSpacing: "-0.02em", textShadow: "0 0 24px rgba(255,255,255,0.08)" }}
+            >
+              {value}
+            </span>
+            <span className="mt-1 text-[11px] font-medium uppercase tracking-wider text-white/50">{label}</span>
           </div>
         ))}
       </div>
 
-      <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/5 pt-4 text-xs text-white/45">
+      <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/5 pt-4 text-xs text-white/45 xl:mt-7 xl:pt-5">
         <span>Widening Gaps <strong className="tabular-nums font-medium text-white/60">{wideningGapsCount}/{total}</strong></span>
         <span className="h-3 w-px shrink-0 bg-white/10" aria-hidden />
         <span>Avg Index <strong className="tabular-nums font-medium text-white/60">{avgIndex ?? "—"}</strong></span>
