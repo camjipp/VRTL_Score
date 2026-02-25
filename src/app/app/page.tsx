@@ -242,75 +242,74 @@ function PortfolioStrip({
   const faviconUrl = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=32` : null;
 
   return (
-    <div className="space-y-1.5">
-      <section
-        className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-xl border border-white/[0.06] px-4 py-3 xl:gap-x-5 xl:px-5 xl:py-3.5"
-        style={{
-          background: "radial-gradient(ellipse 80% 50% at 20% 10%, rgba(255,255,255,0.06) 0%, transparent 50%), linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 40%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02), transparent 70%), rgb(var(--surface))",
-          boxShadow: "0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 0 rgba(255,255,255,0.03), 0 2px 8px rgba(0,0,0,0.12)",
-        }}
-      >
-        {/* Left: label + client count */}
-        <div className="flex shrink-0 items-baseline gap-2 xl:gap-3">
-          <span className="text-[10px] font-medium uppercase tracking-wider text-white/50">Portfolio</span>
-          <span className="text-sm font-medium tabular-nums text-white/80">
+    <section
+      className="flex flex-wrap items-center gap-x-4 gap-y-2.5 rounded-xl border border-white/[0.04] px-4 py-2.5 xl:gap-x-5 xl:px-5 xl:py-2.5"
+      style={{
+        background: "linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 50%), rgb(var(--surface))",
+        boxShadow: "0 0 0 1px rgba(255,255,255,0.04), 0 1px 3px rgba(0,0,0,0.06)",
+      }}
+    >
+      {/* Left: label + client count + secondary metrics inline */}
+      <div className="flex shrink-0 flex-col gap-0.5">
+        <div className="flex items-baseline gap-2 xl:gap-3">
+          <span className="text-[10px] font-medium uppercase tracking-wider text-white/45">Portfolio</span>
+          <span className="text-sm font-medium tabular-nums text-white/75">
             {total} active client{total === 1 ? "" : "s"}
           </span>
         </div>
-
-        {/* Center: filter pills */}
-        <div className="flex min-w-0 flex-1 flex-wrap items-center justify-center gap-1.5 sm:gap-2">
-          {pills.map(({ id, label, count }) => {
-            const active = filterHealth === id;
-            return (
-              <button
-                key={id}
-                type="button"
-                onClick={() => onFilterChange(id)}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-app border px-2.5 py-1.5 text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-white/20",
-                  active
-                    ? "border-white/20 bg-white/10 text-white"
-                    : "border-white/10 bg-white/5 text-white/70 hover:border-white/15 hover:bg-white/[0.07] hover:text-white/85"
-                )}
-              >
-                <span className="tabular-nums">{count}</span>
-                <span>{label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Right: highest risk */}
-        <div className="flex shrink-0 items-center gap-2">
-          <span className="text-[10px] font-medium uppercase tracking-wider text-white/50">Highest risk</span>
-          {highestRisk ? (
-            <Link
-              href={`/app/clients/${highestRisk.client.id}`}
-              className="flex items-center gap-2 rounded-app border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-white/80 transition-colors hover:border-white/15 hover:bg-white/[0.07] hover:text-white"
-            >
-              {faviconUrl ? (
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/5">
-                  <img src={faviconUrl} alt="" className="h-4 w-4 object-contain" width={16} height={16} />
-                </span>
-              ) : null}
-              <span className="truncate max-w-[120px] sm:max-w-[140px]">{highestRisk.client.name}</span>
-              <svg className="h-3.5 w-3.5 shrink-0 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </Link>
-          ) : (
-            <span className="text-xs text-white/45">—</span>
-          )}
-        </div>
-      </section>
-
-      {/* Secondary metrics: small muted line */}
-      <div className="flex items-center gap-x-3 px-1 text-[11px] text-white/40">
-        <span>Widening gaps <span className="tabular-nums text-white/55">{wideningGapsCount}/{total}</span></span>
-        <span>Avg index <span className="tabular-nums text-white/55">{avgIndex ?? "—"}</span></span>
+        <p className="text-[11px] text-white/35">
+          Widening gaps <span className="tabular-nums text-white/45">{wideningGapsCount}/{total}</span>
+          <span className="mx-1.5 text-white/25">·</span>
+          Avg index <span className="tabular-nums text-white/45">{avgIndex ?? "—"}</span>
+        </p>
       </div>
-    </div>
+
+      {/* Center: filter pills */}
+      <div className="flex min-w-0 flex-1 flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+        {pills.map(({ id, label, count }) => {
+          const active = filterHealth === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => onFilterChange(id)}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-app border px-2 py-1 text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-white/15",
+                active
+                  ? "border-white/15 bg-white/[0.07] text-white/90"
+                  : "border-white/[0.06] bg-white/[0.03] text-white/45 hover:border-white/10 hover:bg-white/[0.05] hover:text-white/65"
+              )}
+            >
+              <span className="tabular-nums">{count}</span>
+              <span>{label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Right: highest risk */}
+      <div className="flex shrink-0 items-center gap-2">
+        <span className="text-[9px] font-medium uppercase tracking-wider text-white/40">Highest risk</span>
+        {highestRisk ? (
+          <Link
+            href={`/app/clients/${highestRisk.client.id}`}
+            className="flex items-center gap-2 rounded-app border border-white/[0.06] bg-white/[0.03] py-1 pl-1.5 pr-2 text-xs font-medium text-white/65 transition-colors hover:border-white/10 hover:bg-white/[0.05] hover:text-white/80"
+          >
+            {faviconUrl ? (
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/[0.04]">
+                <img src={faviconUrl} alt="" className="h-4 w-4 object-contain" width={16} height={16} />
+              </span>
+            ) : null}
+            <span className="truncate max-w-[100px] sm:max-w-[120px]">{highestRisk.client.name}</span>
+            <svg className="h-3 w-3 shrink-0 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </Link>
+        ) : (
+          <span className="text-[11px] text-white/35">—</span>
+        )}
+      </div>
+    </section>
   );
 }
 
