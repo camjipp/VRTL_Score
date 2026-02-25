@@ -273,7 +273,7 @@ function faviconDomain(website: string | null): string | null {
 const MODEL_FAMILIES_CHART: ModelFamily[] = ["chatgpt", "gemini", "claude"];
 const MODEL_LABELS: Record<ModelFamily, string> = { chatgpt: "GPT", gemini: "GEM", claude: "CLA" };
 
-/* Model Spread widget: labeled rows with tiny 0–100 bars. Strongest=green, middle=amber, weakest=red. */
+/* Model Spread widget: "MODEL SPREAD" label + 3 rows (GPT, GEM, CLA) with score or "—" and 0–100 bar. */
 function ModelSpreadWidget({ modelScores }: { modelScores: ProviderFamilyScores | null }) {
   const rows = MODEL_FAMILIES_CHART.map((family) => ({
     family,
@@ -290,14 +290,14 @@ function ModelSpreadWidget({ modelScores }: { modelScores: ProviderFamilyScores 
     return "bg-authority-losing/70";
   };
   return (
-    <div className="w-full pt-4">
-      <div className="text-xs font-medium uppercase tracking-wider text-white/60">Model spread</div>
-      <div className="mt-2 space-y-1.5">
+    <div className="w-full">
+      <div className="text-[10px] font-medium uppercase tracking-wider text-white/60">MODEL SPREAD</div>
+      <div className="mt-2.5 space-y-2">
         {rows.map(({ family, label, score }) => (
           <div key={family} className="flex items-center gap-2">
-            <span className="w-8 shrink-0 text-[11px] font-medium tabular-nums text-white/70">{label}</span>
+            <span className="w-8 shrink-0 text-[11px] font-medium text-white/70">{label}</span>
             <span className="w-6 shrink-0 text-right text-xs tabular-nums text-white/90">{score != null ? score : "—"}</span>
-            <div className="min-w-0 flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden">
+            <div className="min-w-0 flex-1 h-2 rounded-full bg-white/10 overflow-hidden">
               <div
                 className={cn("h-full rounded-full transition-all", rankColor(family))}
                 style={{ width: score != null ? `${Math.min(100, score)}%` : "0%" }}
@@ -309,6 +309,8 @@ function ModelSpreadWidget({ modelScores }: { modelScores: ProviderFamilyScores 
     </div>
   );
 }
+
+/* Client card: strict vertical structure for all clients. Header → Score → Model Spread → Run Snapshot button. */
 function ClientCard({ client }: { client: ClientWithStats }) {
   const router = useRouter();
   const [hover, setHover] = useState(false);
@@ -331,7 +333,8 @@ function ClientCard({ client }: { client: ClientWithStats }) {
           : "0 0 0 1px rgba(255,255,255,0.06), 0 2px 8px rgba(0,0,0,0.12)",
       }}
     >
-      <div className="flex items-center justify-between gap-2">
+      {/* Header row: favicon + name (left), circular arrow (right) */}
+      <div className="flex shrink-0 items-center justify-between gap-2">
         <div className="flex min-w-0 flex-1 items-center gap-2.5">
           {faviconUrl ? (
             <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/5">
@@ -350,33 +353,37 @@ function ClientCard({ client }: { client: ClientWithStats }) {
         </span>
       </div>
 
-      {hasScore ? (
-        <>
-          <div className="mt-2 flex flex-wrap items-baseline gap-1.5">
-            <span className="text-6xl font-bold tabular-nums tracking-tight text-white sm:text-7xl" style={{ fontWeight: 700, letterSpacing: "-0.02em" }}>
-              {client.latestScore}
-            </span>
-            {delta !== null && delta !== 0 && (
-              <span className={cn("text-sm tabular-nums", delta > 0 ? "text-authority-dominant" : "text-authority-losing")}>
-                {delta > 0 ? "+" : ""}{delta} vs last
-              </span>
-            )}
-          </div>
-          <div className="mt-auto pb-5 pt-4">
-            <ModelSpreadWidget modelScores={client.providerFamilyScores ?? null} />
-          </div>
-        </>
-      ) : (
-        <div className="flex flex-1 flex-col items-center justify-center gap-4 py-6">
-          <p className="text-sm text-white/50">No snapshot yet</p>
-          <span
-            className="flex h-12 w-full items-center justify-center rounded-app border border-white/20 bg-white/10 text-sm font-medium text-white/90 transition-colors hover:bg-white/15"
-            style={{ boxShadow: "0 0 0 1px rgba(255,255,255,0.06)" }}
-          >
-            Run snapshot
+      {/* Score section: large score or "—", delta only when has snapshot */}
+      <div className="mt-4 flex flex-wrap items-baseline gap-1.5">
+        <span className="text-5xl font-bold tabular-nums tracking-tight text-white sm:text-6xl" style={{ fontWeight: 700, letterSpacing: "-0.02em" }}>
+          {hasScore ? client.latestScore : "—"}
+        </span>
+        {hasScore && delta !== null && delta !== 0 && (
+          <span className={cn("text-sm tabular-nums", delta > 0 ? "text-authority-dominant" : "text-authority-losing")}>
+            {delta > 0 ? "+" : ""}{delta} vs last
           </span>
-        </div>
-      )}
+        )}
+      </div>
+
+      {/* Model Spread section: always present, bars 0 width when no data */}
+      <div className="mt-6 flex-1 min-h-0">
+        <ModelSpreadWidget modelScores={client.providerFamilyScores ?? null} />
+      </div>
+
+      {/* Bottom action: Run Snapshot button, always present. Primary when no data, secondary when has data. */}
+      <div className="mt-5 shrink-0 border-t border-white/5 pt-4">
+        <span
+          className={cn(
+            "flex h-12 w-full items-center justify-center rounded-app text-sm font-medium transition-colors",
+            hasScore
+              ? "border border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white/90"
+              : "border border-white/20 bg-white/10 text-white/90 hover:bg-white/15"
+          )}
+          style={{ boxShadow: hasScore ? "none" : "0 0 0 1px rgba(255,255,255,0.06)" }}
+        >
+          Run snapshot
+        </span>
+      </div>
     </button>
   );
 }
