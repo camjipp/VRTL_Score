@@ -292,12 +292,12 @@ function ModelSpreadWidget({ modelScores }: { modelScores: ProviderFamilyScores 
   return (
     <div className="w-full">
       <div className="text-[10px] font-medium uppercase tracking-wider text-white/60">MODEL SPREAD</div>
-      <div className="mt-2.5 space-y-3">
+      <div className="mt-2.5 space-y-2 xl:space-y-3">
         {rows.map(({ family, label, score }) => (
           <div key={family} className="flex items-center gap-2">
             <span className="w-8 shrink-0 text-[11px] font-medium text-white/70">{label}</span>
             <span className="w-6 shrink-0 text-right text-xs tabular-nums text-white/90">{score != null ? score : "—"}</span>
-            <div className="min-w-0 flex-1 h-2.5 rounded-full bg-white/[0.06] overflow-hidden">
+            <div className="min-w-0 flex-1 h-2 rounded-full bg-white/[0.06] overflow-hidden xl:h-2.5">
               <div
                 className={cn("h-full rounded-full transition-all", rankColor(family))}
                 style={{ width: score != null ? `${Math.min(100, score)}%` : "0%" }}
@@ -325,7 +325,7 @@ function ClientCard({ client }: { client: ClientWithStats }) {
       onClick={() => router.push(`/app/clients/${client.id}`)}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      className="group relative flex w-full flex-col rounded-xl border border-white/[0.06] p-5 text-left transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-white/10 aspect-square min-h-[220px] max-h-[280px] sm:min-h-0 sm:max-h-none hover:-translate-y-[3px]"
+      className="group relative flex w-full flex-col rounded-xl border border-white/[0.06] p-4 xl:p-5 text-left transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-white/10 aspect-square min-h-[220px] max-h-[280px] sm:min-h-0 sm:max-h-none hover:-translate-y-[3px]"
       style={{
         background: "radial-gradient(ellipse 80% 50% at 20% 10%, rgba(255,255,255,0.06) 0%, transparent 50%), linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 40%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02), transparent 70%), rgb(var(--surface))",
         boxShadow: hover
@@ -356,7 +356,7 @@ function ClientCard({ client }: { client: ClientWithStats }) {
       {/* Score section: radial glow behind number, tighter score–delta spacing */}
       <div className="mt-4 flex flex-wrap items-baseline gap-1">
         <span
-          className="relative text-5xl font-bold tabular-nums tracking-tight text-white sm:text-6xl"
+          className="relative text-4xl font-bold tabular-nums tracking-tight text-white sm:text-5xl xl:text-6xl"
           style={{ fontWeight: 800, letterSpacing: "-0.02em", textShadow: "0 0 24px rgba(255,255,255,0.08)" }}
         >
           {hasScore ? client.latestScore : "—"}
@@ -368,13 +368,13 @@ function ClientCard({ client }: { client: ClientWithStats }) {
         )}
       </div>
 
-      {/* Model Spread section: always present, bars 0 width when no data */}
-      <div className="mt-6 flex-1 min-h-0">
+      {/* Model Spread section: always present, bars 0 width when no data. Tighter spacing and bars on small. */}
+      <div className="mt-5 flex-1 min-h-0 xl:mt-6">
         <ModelSpreadWidget modelScores={client.providerFamilyScores ?? null} />
       </div>
 
       {/* Bottom action: Run Snapshot. With data = muted glass; without = stronger contrast, subtle glow, scale on hover */}
-      <div className="mt-5 shrink-0 border-t border-white/5 pt-4">
+      <div className="mt-4 shrink-0 border-t border-white/5 pt-3 xl:mt-5 xl:pt-4">
         <span
           className={cn(
             "flex h-12 w-full items-center justify-center rounded-app text-sm font-medium transition-all duration-200",
@@ -403,7 +403,7 @@ function AddClientCard() {
       onClick={() => router.push("/app/clients/new")}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      className="flex w-full flex-col items-center justify-center rounded-xl border border-dashed border-white/10 p-5 text-white/60 transition-all duration-200 hover:border-white/15 focus:outline-none focus:ring-1 focus:ring-white/10 aspect-square min-h-[220px] max-h-[280px] sm:min-h-0 sm:max-h-none hover:-translate-y-0.5"
+      className="flex w-full flex-col items-center justify-center rounded-xl border border-dashed border-white/10 p-4 xl:p-5 text-white/60 transition-all duration-200 hover:border-white/15 focus:outline-none focus:ring-1 focus:ring-white/10 aspect-square min-h-[220px] max-h-[280px] sm:min-h-0 sm:max-h-none hover:-translate-y-0.5"
       style={{
         background: "linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 40%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02), transparent 70%), rgb(var(--surface))",
         boxShadow: hover
@@ -467,7 +467,7 @@ function ClientCardsGrid({
           </select>
         </label>
       </div>
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {sorted.map((client) => (
           <div key={client.id} className="relative">
             <ClientCard client={client} />
