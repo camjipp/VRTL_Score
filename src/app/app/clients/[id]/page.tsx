@@ -171,7 +171,76 @@ function SnapshotSelector({
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   SCORE SPARKLINE
+   AUTHORITY STATUS — minimal hero (no bars, no sparkline)
+═══════════════════════════════════════════════════════════════════════════ */
+function AuthorityStatusHero({
+  clientName,
+  score,
+  previousScore,
+  providers,
+  detail,
+  confidence,
+}: {
+  clientName: string;
+  score: number | null;
+  previousScore: number | null;
+  providers: [string, number][];
+  detail: SnapshotDetailResponse | null;
+  confidence: { label: string; variant: BadgeVariant };
+}) {
+  const { label, description } = getScoreLabel(score);
+  const delta = score !== null && previousScore !== null ? score - previousScore : null;
+  const gapToLeader = score != null ? 100 - score : null;
+  const sorted = [...providers].sort((a, b) => b[1] - a[1]);
+  const weakestModel = sorted.length > 0 ? getProviderDisplayName(sorted[sorted.length - 1][0]) : "—";
+  const primaryDisplacer = detail?.summary?.top_competitors?.[0]?.name ?? "—";
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-xl font-semibold text-text">{clientName}</h1>
+          <div className="mt-3 flex flex-wrap items-baseline gap-3">
+            <span className="text-4xl font-semibold tabular-nums tracking-tight text-text">
+              {score ?? "—"}
+            </span>
+            <span className="text-sm text-text-3">AI Authority Index</span>
+            {delta !== null && delta !== 0 && (
+              <span className={cn("text-sm tabular-nums", delta > 0 ? "text-authority-dominant" : "text-authority-losing")}>
+                {delta > 0 ? "+" : ""}{delta} vs last
+              </span>
+            )}
+            <Badge variant={label === "Dominant" ? "success" : label === "Losing Ground" ? "danger" : "warning"}>
+              {label}
+            </Badge>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:gap-x-8">
+          <div>
+            <div className="text-[10px] font-medium uppercase tracking-wider text-text-3">Gap to leader</div>
+            <div className="mt-0.5 font-medium tabular-nums text-text">{gapToLeader != null ? `${gapToLeader} pts` : "—"}</div>
+          </div>
+          <div>
+            <div className="text-[10px] font-medium uppercase tracking-wider text-text-3">Primary displacer</div>
+            <div className="mt-0.5 font-medium text-text">{primaryDisplacer}</div>
+          </div>
+          <div>
+            <div className="text-[10px] font-medium uppercase tracking-wider text-text-3">Weakest model</div>
+            <div className="mt-0.5 font-medium text-text">{weakestModel}</div>
+          </div>
+          <div>
+            <div className="text-[10px] font-medium uppercase tracking-wider text-text-3">Confidence</div>
+            <div className="mt-0.5 font-medium text-text">{confidence.label}</div>
+          </div>
+        </div>
+      </div>
+      <p className="text-sm text-text-2">{description}</p>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCORE SPARKLINE (retained for Advanced Intelligence only)
 ═══════════════════════════════════════════════════════════════════════════ */
 const CHART_COLORS = { dominant: "#22c55e", watchlist: "#f59e0b", losing: "#7f1d1d" } as const;
 function ScoreSparkline({ scores, color = CHART_COLORS.dominant }: { scores: number[]; color?: string }) {
@@ -213,132 +282,7 @@ function ScoreSparkline({ scores, color = CHART_COLORS.dominant }: { scores: num
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   SCORE HERO (with sparkline + Report Ready)
-═══════════════════════════════════════════════════════════════════════════ */
-function ScoreHero({
-  score,
-  previousScore,
-  confidence,
-  updatedAt,
-  status,
-  historicalScores,
-  reportReadyAt,
-  gapToLeader = null,
-}: {
-  score: number | null;
-  previousScore: number | null;
-  confidence: { label: string; variant: BadgeVariant };
-  updatedAt: string | null;
-  status: string | null;
-  historicalScores: number[];
-  reportReadyAt: string | null;
-  gapToLeader?: number | null;
-}) {
-  const { label, description } = getScoreLabel(score);
-  const delta = score !== null && previousScore !== null ? score - previousScore : null;
-  const displayGap = gapToLeader ?? (score != null ? 100 - score : null);
-
-  const sparklineColor = score !== null && score >= 80 
-    ? CHART_COLORS.dominant 
-    : score !== null && score >= 50 
-      ? CHART_COLORS.watchlist 
-      : CHART_COLORS.losing;
-
-  return (
-    <div className="rounded-app-lg border border-white/5 bg-surface p-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex items-start gap-4">
-          <div className="flex flex-col">
-            <span className="text-4xl font-semibold tabular-nums tracking-tight text-text leading-none">
-              {score ?? "—"}
-            </span>
-            <span className="mt-1 text-xs text-text-2">AI Authority Index</span>
-            {delta !== null && delta !== 0 && (
-              <span className={cn("mt-0.5 text-xs tabular-nums", delta > 0 ? "text-authority-dominant" : "text-authority-losing")}>
-                {delta > 0 ? "+" : ""}{delta} vs last
-              </span>
-            )}
-            {displayGap != null && displayGap > 0 && (
-              <span className="mt-0.5 text-xs text-text-2">{displayGap} pts behind leader</span>
-            )}
-          </div>
-          {historicalScores.length >= 2 && (
-            <div className="hidden sm:block">
-              <ScoreSparkline scores={historicalScores} color={sparklineColor} />
-            </div>
-          )}
-        </div>
-        <div className="flex flex-col gap-1 text-right text-xs">
-          <span><span className="text-text-3">Status:</span> <span className="text-text">{label}</span></span>
-          <span><span className="text-text-3">Confidence:</span> <span className="text-text">{confidence.label}</span></span>
-          {updatedAt && <span><span className="text-text-3">Updated:</span> <span className="text-text">{timeAgo(updatedAt)}</span></span>}
-          {reportReadyAt && <span className="text-text-3">Report {timeAgo(reportReadyAt)}</span>}
-          {status === "running" && <Badge variant="warning" className="mt-1 w-fit self-end">Analyzing...</Badge>}
-        </div>
-      </div>
-      {/* Position Bar: 0–100 with leader and client markers */}
-      {score != null && (
-        <div className="mt-4 pt-3 border-t border-white/5">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] uppercase tracking-wider text-text-3">Position vs leader</span>
-            {displayGap != null && displayGap > 0 && (
-              <span className="text-[10px] text-text-2">{displayGap} pts behind leader</span>
-            )}
-          </div>
-          <div className="relative h-6 w-full rounded-app bg-surface-2/50 overflow-hidden">
-            <div className="absolute inset-y-0 left-0 right-0 flex">
-              <div className="h-full bg-white/5" style={{ width: `${score}%` }} />
-              <div className="h-full bg-surface-2" style={{ width: `${100 - score}%` }} />
-            </div>
-            <div
-              className="absolute top-1/2 -translate-y-1/2 w-0.5 h-4 bg-text rounded-full"
-              style={{ left: `${score}%`, marginLeft: -2 }}
-              aria-hidden
-            />
-            <div
-              className="absolute top-1/2 -translate-y-1/2 w-0.5 h-4 bg-authority-stable rounded-full"
-              style={{ right: 0, marginRight: -2 }}
-              aria-hidden
-            />
-          </div>
-          <div className="flex justify-between mt-0.5 text-[10px] text-text-3">
-            <span>0</span>
-            <span>Client · {score}</span>
-            <span>Leader · 100</span>
-          </div>
-        </div>
-      )}
-      <p className="mt-2 text-sm text-text-2">{description}</p>
-    </div>
-  );
-}
-
-/* Compact Trend strip: sparkline + gap widening/narrowing */
-function TrendStrip({ historicalScores, delta }: { historicalScores: number[]; delta: number | null }) {
-  const momentumLabel = delta === null || delta === 0 ? "Stable" : delta < 0 ? "Gap widening" : "Gap narrowing";
-  const momentumColor = delta === null || delta === 0 ? "text-text-2" : delta < 0 ? "text-authority-losing" : "text-authority-dominant";
-  if (historicalScores.length < 2) {
-    return (
-      <div className="rounded-app border border-white/5 bg-surface px-3 py-2 flex items-center justify-between">
-        <span className="text-xs text-text-2">Trend</span>
-        <span className={cn("text-[11px]", momentumColor)}>{momentumLabel}</span>
-      </div>
-    );
-  }
-  const color = delta !== null && delta < 0 ? CHART_COLORS.losing : CHART_COLORS.dominant;
-  return (
-    <div className="rounded-app border border-white/5 bg-surface px-3 py-2 flex items-center gap-3">
-      <span className="text-xs text-text-2 shrink-0">Trend</span>
-      <div className="flex-1 min-w-0">
-        <ScoreSparkline scores={historicalScores} color={color} />
-      </div>
-      <span className={cn("text-[11px] shrink-0", momentumColor)}>{momentumLabel}</span>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   KEY INSIGHTS (4 punchy cards)
+   KEY INSIGHTS (4 punchy cards) — used in Advanced Intelligence
 ═══════════════════════════════════════════════════════════════════════════ */
 function KeyInsightsCards({
   score,
@@ -1112,13 +1056,13 @@ function CompetitorComparisonChart({
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   CROSS-MODEL SNAPSHOT (chart + diagnosis in ONE card)
+   COMPETITIVE AUTHORITY RANKING + HELPERS
 ═══════════════════════════════════════════════════════════════════════════ */
-function getProviderStatus(score: number): { label: string; bar: string } {
-  if (score >= 80) return { label: "Dominant", bar: "border-l-authority-dominant" };
-  if (score >= 60) return { label: "Stable", bar: "border-l-authority-stable" };
-  if (score >= 40) return { label: "Watchlist", bar: "border-l-authority-watchlist" };
-  return { label: "Losing", bar: "border-l-authority-losing" };
+function getProviderStatus(score: number): { label: string } {
+  if (score >= 80) return { label: "Dominant" };
+  if (score >= 60) return { label: "Stable" };
+  if (score >= 40) return { label: "Watchlist" };
+  return { label: "Losing" };
 }
 
 function getProviderDisplayName(provider: string): string {
@@ -1127,83 +1071,6 @@ function getProviderDisplayName(provider: string): string {
   if (p.includes("gemini") || p.includes("google")) return "Gemini";
   if (p.includes("anthropic") || p.includes("claude")) return "Anthropic";
   return provider;
-}
-
-function CrossModelSnapshot({
-  providers,
-  detail,
-}: {
-  providers: [string, number][];
-  detail: SnapshotDetailResponse | null;
-}) {
-  if (providers.length === 0) {
-    return (
-      <div className="rounded-app-lg border border-white/5 bg-surface p-4">
-        <h3 className="text-sm font-semibold text-text">Model Authority Breakdown</h3>
-        <p className="mt-2 text-xs text-text-2">Run a snapshot to see model-specific performance</p>
-      </div>
-    );
-  }
-
-  const sorted = [...providers].sort((a, b) => b[1] - a[1]);
-  const weakest = sorted[sorted.length - 1];
-  const gap = sorted[0][1] - weakest[1];
-  const avg = Math.round(sorted.reduce((sum, [, s]) => sum + s, 0) / sorted.length);
-
-  const leaderScore = 100;
-
-  return (
-    <div className="rounded-app-lg border border-white/5 bg-surface p-4">
-      <h3 className="text-base font-semibold text-text">Model Authority Breakdown</h3>
-      <p className="text-xs text-text-2 mt-0.5">Per-model score and gap to leader</p>
-      <div className="mt-3 grid gap-3 lg:grid-cols-2">
-        {/* Left: ranked list with score, state stripe, delta */}
-        <div className="space-y-1">
-          {sorted.map(([provider, score]) => {
-            const status = getProviderStatus(score);
-            return (
-              <div
-                key={provider}
-                className={cn("flex items-center gap-3 border-l-[3px] py-1.5 px-2 rounded-app", status.bar, "bg-surface-2/30")}
-              >
-                <span className="w-20 shrink-0 text-xs font-medium text-text">{getProviderDisplayName(provider)}</span>
-                <span className="tabular-nums text-sm font-semibold text-text w-8">{score}</span>
-                <span className="text-[10px] text-text-2">{status.label}</span>
-                <div className="flex-1 h-0.5 max-w-20 rounded-full bg-white/10 overflow-hidden">
-                  <div className="h-full rounded-full bg-current opacity-50" style={{ width: `${Math.min(100, score)}%` }} />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        {/* Right: Per-Model Gap Visual — thin comparison bar per model */}
-        <div className="space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-text-3">Gap to leader</div>
-          {sorted.map(([provider, score]) => {
-            const modelGap = Math.max(0, leaderScore - score);
-            return (
-              <div key={provider} className="flex items-center gap-2">
-                <span className="w-20 shrink-0 text-[11px] text-text-2">{getProviderDisplayName(provider)}</span>
-                <div className="relative flex-1 h-4 rounded bg-surface-2/50 overflow-hidden">
-                  <div className="absolute inset-y-0 left-0 w-full flex">
-                    <div className="h-full bg-white/10" style={{ width: `${score}%` }} />
-                    <div className="h-full bg-surface-2" style={{ width: `${100 - score}%` }} />
-                  </div>
-                  <div className="absolute top-1/2 -translate-y-1/2 w-0.5 h-3 bg-text" style={{ left: `${score}%`, marginLeft: -1 }} aria-hidden />
-                  <div className="absolute top-1/2 -translate-y-1/2 w-0.5 h-3 bg-authority-stable right-0" style={{ marginRight: -1 }} aria-hidden />
-                </div>
-                <span className="w-12 shrink-0 text-right text-[10px] tabular-nums text-text-2">Gap: {modelGap}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      <div className="mt-3 pt-2 border-t border-white/5 flex flex-wrap gap-x-4 gap-y-0 text-[10px] text-text-2">
-        <span>Gap: {gap} pts</span>
-        <span>Weakest: {getProviderDisplayName(weakest[0])}</span>
-      </div>
-    </div>
-  );
 }
 
 function estimateCompetitorScores(clientScore: number, gap: number): { leader: number; challenger: number } {
@@ -1229,70 +1096,219 @@ function CompetitiveAuthorityRanking({
   previousProviders: Record<string, number>;
   detail: SnapshotDetailResponse | null;
 }) {
+  const [activeTab, setActiveTab] = useState<string>("overall");
   if (providers.length === 0) return null;
 
   const clientMentions = detail?.summary.client_mentioned_count ?? 0;
   const topCompetitors = detail?.summary.top_competitors ?? [];
   const leaderName = topCompetitors[0]?.name ?? "Category Leader";
-  const challengerName = topCompetitors[1]?.name ?? "Top Challenger";
   const mentionGap = topCompetitors[0] ? Math.max(0, topCompetitors[0].count - clientMentions) : 6;
+  const allEntities = [
+    { name: "You", count: clientMentions, isClient: true },
+    ...topCompetitors.slice(0, 4).map(c => ({ name: c.name, count: c.count, isClient: false })),
+  ].sort((a, b) => b.count - a.count);
+  const clientRank = allEntities.findIndex(e => e.isClient) + 1;
+  const totalEntities = allEntities.length;
+  const overallLabel = totalEntities > 1 ? `#${clientRank} of ${totalEntities}` : "—";
+
+  const providerTabs = [...providers].sort((a, b) => b[1] - a[1]).map(([provider]) => ({ id: provider, label: getProviderDisplayName(provider) }));
 
   return (
-    <div className="rounded-app-lg border border-white/5 bg-surface p-4" id="cross-model">
-      <h3 className="text-sm font-semibold text-text">Competitive Authority Ranking</h3>
-      <p className="mt-0.5 text-[10px] text-text-2">Gap = Leader − Client Index</p>
+    <section>
+      <h2 className="text-sm font-semibold text-text mb-3">Competitive Authority Ranking</h2>
+      <p className="text-xs text-text-2 mb-3">Overall ranking: {overallLabel}</p>
+      <div className="flex gap-2 mb-3">
+        <button
+          type="button"
+          onClick={() => setActiveTab("overall")}
+          className={cn(
+            "px-2.5 py-1 text-xs font-medium rounded-app",
+            activeTab === "overall" ? "bg-white/10 text-text" : "text-text-2 hover:text-text"
+          )}
+        >
+          Overall
+        </button>
+        {providerTabs.map(({ id, label }) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setActiveTab(id)}
+            className={cn(
+              "px-2.5 py-1 text-xs font-medium rounded-app",
+              activeTab === id ? "bg-white/10 text-text" : "text-text-2 hover:text-text"
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {activeTab === "overall" ? (
+        <div className="text-sm">
+          <table className="w-full text-left">
+            <tbody>
+              {allEntities.map((entity, idx) => (
+                <tr key={entity.name} className={cn("border-b border-white/5", entity.isClient && "bg-white/[0.02]")}>
+                  <td className="py-2 pr-2 text-text-3 tabular-nums w-6">{idx + 1}</td>
+                  <td className="py-2 font-medium text-text">{entity.name}</td>
+                  <td className="py-2 text-right tabular-nums text-text-2">{entity.count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {[...providers]
+            .filter(([p]) => p === activeTab)
+            .map(([provider, score]) => {
+              const { leader, challenger } = estimateCompetitorScores(score, mentionGap);
+              const clientDelta = previousProviders[provider] != null ? score - previousProviders[provider] : null;
+              const authorityGap = Math.max(0, leader - score);
+              const entities = [
+                { name: leaderName, score: leader, isClient: false, delta: null as number | null },
+                { name: "Top Challenger", score: challenger, isClient: false, delta: null as number | null },
+                { name: clientName, score, isClient: true, delta: clientDelta },
+              ].sort((a, b) => b.score - a.score);
+              return (
+                <table key={provider} className="w-full text-left text-sm">
+                  <tbody>
+                    {entities.map((entity, idx) => (
+                      <tr
+                        key={`${entity.name}-${entity.isClient}`}
+                        className={cn("border-b border-white/5", entity.isClient && "bg-white/[0.02]")}
+                      >
+                        <td className="w-6 py-1.5 pr-2 text-text-3 tabular-nums">{idx + 1}</td>
+                        <td className="py-1.5">
+                          <span className={cn("font-medium", entity.isClient ? "text-text" : "text-text-2")}>{entity.name}</span>
+                          <span className="ml-1 text-[10px] text-text-3">{getRecommendationLabel(entity.score)}</span>
+                        </td>
+                        <td className="py-1.5 text-right tabular-nums font-medium text-text">{entity.score}</td>
+                        <td className="py-1.5 text-right w-14">
+                          {entity.delta !== null && (
+                            <span className={cn("text-[10px]", entity.delta > 0 ? "text-authority-dominant" : entity.delta < 0 ? "text-authority-losing" : "text-text-3")}>
+                              {entity.delta > 0 ? "+" : ""}{entity.delta}
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              );
+            })}
+        </div>
+      )}
+      <p className="mt-2 text-[10px] text-text-3">Leader scores inferred from displacement.</p>
+    </section>
+  );
+}
 
-      <div className="mt-3 space-y-4">
-        {[...providers].sort((a, b) => b[1] - a[1]).map(([provider, score]) => {
-          const { leader, challenger } = estimateCompetitorScores(score, mentionGap);
-          const clientDelta = previousProviders[provider] != null ? score - previousProviders[provider] : null;
-          const authorityGap = Math.max(0, leader - score);
+/* ═══════════════════════════════════════════════════════════════════════════
+   AUTHORITY VULNERABILITIES — model-by-model rows, expandable detail
+═══════════════════════════════════════════════════════════════════════════ */
+function AuthorityVulnerabilities({
+  providers,
+  detail,
+}: {
+  providers: [string, number][];
+  detail: SnapshotDetailResponse | null;
+}) {
+  if (providers.length === 0) {
+    return (
+      <section>
+        <h2 className="text-sm font-semibold text-text mb-3">Authority Vulnerabilities</h2>
+        <p className="text-sm text-text-2">Run a snapshot to see model-specific vulnerabilities.</p>
+      </section>
+    );
+  }
 
-          const entities = [
-            { name: leaderName, score: leader, isClient: false, delta: null as number | null },
-            { name: challengerName, score: challenger, isClient: false, delta: null as number | null },
-            { name: clientName, score, isClient: true, delta: clientDelta },
-          ].sort((a, b) => b.score - a.score);
+  const sorted = [...providers].sort((a, b) => b[1] - a[1]);
+  const leaderScore = 100;
 
+  return (
+    <section>
+      <h2 className="text-sm font-semibold text-text mb-3">Authority Vulnerabilities</h2>
+      <div className="space-y-1">
+        {sorted.map(([provider, score]) => {
+          const gap = Math.max(0, leaderScore - score);
+          const status = getProviderStatus(score);
           return (
-            <div key={provider} className="rounded-app border border-white/5 bg-surface-2/40 overflow-hidden">
-              <div className="flex items-center justify-between px-2 py-1.5 border-b border-white/5">
-                <span className="text-xs font-medium text-text">{getProviderDisplayName(provider)}</span>
-                <span className="text-[10px] text-text-2">{authorityGap} pts behind leader</span>
+            <details key={provider} className="group">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 py-2.5 px-3 text-sm hover:bg-white/[0.02] rounded-app">
+                <span className="font-medium text-text">{getProviderDisplayName(provider)}</span>
+                <span className="tabular-nums text-text-2">{score}</span>
+                <span className="text-[10px] text-text-3">{status.label}</span>
+                <span className="text-text-3 text-xs">Gap: {gap} pts</span>
+                <svg className="h-4 w-4 text-text-3 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+              </summary>
+              <div className="border-t border-white/5 py-3 px-3 text-xs text-text-2 space-y-2">
+                <p>Gap to leader: {gap} pts. {getRecommendationLabel(score)} recommendation strength.</p>
+                {detail?.summary?.top_competitors?.[0] && (
+                  <p>Primary displacer in category: {detail.summary.top_competitors[0].name}.</p>
+                )}
               </div>
-              <table className="w-full text-left text-[13px]">
-                <tbody>
-                  {entities.map((entity, idx) => (
-                    <tr
-                      key={`${entity.name}-${entity.isClient}`}
-                      className={cn(
-                        "border-b border-white/5 last:border-b-0",
-                        entity.isClient && "bg-white/5"
-                      )}
-                    >
-                      <td className="w-6 py-1.5 px-2 text-text-3 tabular-nums">{idx + 1}</td>
-                      <td className="py-1.5 px-2">
-                        <span className={cn("font-medium", entity.isClient ? "text-text" : "text-text-2")}>{entity.name}</span>
-                        <span className="ml-1 text-[10px] text-text-3">{getRecommendationLabel(entity.score)}</span>
-                      </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums font-medium text-text">{entity.score}</td>
-                      <td className="py-1.5 px-2 text-right w-14">
-                        {entity.delta !== null && (
-                          <span className={cn("text-[10px]", entity.delta > 0 ? "text-authority-dominant" : entity.delta < 0 ? "text-authority-losing" : "text-text-3")}>
-                            {entity.delta > 0 ? "+" : ""}{entity.delta}
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            </details>
           );
         })}
       </div>
-      <p className="mt-2 text-[10px] text-text-3">Leader scores inferred from displacement. Refined with more snapshots.</p>
-    </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STRATEGIC DIRECTION — top 3 priority actions, clean bullets (no accordion)
+═══════════════════════════════════════════════════════════════════════════ */
+function StrategicDirection({
+  score,
+  providers,
+  competitors,
+  detail,
+}: {
+  score: number | null;
+  providers: [string, number][];
+  competitors: CompetitorRow[];
+  detail: SnapshotDetailResponse | null;
+}) {
+  const insights = generateStrategicInsights(score, providers, competitors, detail);
+  const top3 = [...insights]
+    .sort((a, b) => (a.priority === "HIGH" ? 0 : a.priority === "MEDIUM" ? 1 : 2) - (b.priority === "HIGH" ? 0 : b.priority === "MEDIUM" ? 1 : 2))
+    .slice(0, 3);
+
+  if (score === null) {
+    return (
+      <section>
+        <h2 className="text-sm font-semibold text-text mb-3">Strategic Direction</h2>
+        <p className="text-sm text-text-2">Run a snapshot to generate priority actions.</p>
+      </section>
+    );
+  }
+
+  if (top3.length === 0) {
+    return (
+      <section>
+        <h2 className="text-sm font-semibold text-text mb-3">Strategic Direction</h2>
+        <p className="text-sm text-text-2">Authority is performing well. Continue monitoring.</p>
+      </section>
+    );
+  }
+
+  return (
+    <section>
+      <h2 className="text-sm font-semibold text-text mb-3">Strategic Direction</h2>
+      <ul className="space-y-3">
+        {top3.map((insight, idx) => (
+          <li key={idx} className="flex gap-3">
+            <span className="text-text-3 font-medium tabular-nums shrink-0">{idx + 1}.</span>
+            <div>
+              <p className="font-medium text-text">{insight.title}</p>
+              <p className="text-sm text-text-2 mt-0.5">{insight.action}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -2193,48 +2209,42 @@ export default function ClientDetailPage() {
 
       {client && (
         <>
-          {/* Client header: Left = name + site, Right = actions + snapshot */}
+          {/* Page header: breadcrumb, snapshot selector, actions (client name in hero below) */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-text">{client.name}</h1>
-              <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-text-2">
-                {client.website && (
-                  <a href={client.website} target="_blank" rel="noreferrer" className="hover:underline">
-                    {client.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
-                  </a>
-                )}
-                {client.website && <span className="text-text-3">·</span>}
-                <span className="capitalize">{client.industry.replace(/_/g, " ")}</span>
-              </div>
+            <div className="flex flex-wrap items-center gap-2 text-sm text-text-2">
+              {client.website && (
+                <a href={client.website} target="_blank" rel="noreferrer" className="hover:underline">
+                  {client.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+                </a>
+              )}
+              {client.website && <span className="text-text-3">·</span>}
+              <span className="capitalize">{client.industry.replace(/_/g, " ")}</span>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-3">
-                <SnapshotSelector
-                  snapshots={snapshots}
-                  selectedId={selectedSnapshotId}
-                  onSelect={setSelectedSnapshotId}
-                />
-                <RunSnapshotButton
-                  running={running}
-                  snapshotStatus={selectedSnapshot?.status ?? null}
-                  onRunSnapshot={runSnapshot}
-                />
-              </div>
+              <SnapshotSelector
+                snapshots={snapshots}
+                selectedId={selectedSnapshotId}
+                onSelect={setSelectedSnapshotId}
+              />
+              <RunSnapshotButton
+                running={running}
+                snapshotStatus={selectedSnapshot?.status ?? null}
+                onRunSnapshot={runSnapshot}
+              />
               {selectedSnapshot && (selectedSnapshot.status?.toLowerCase().includes("complete") || selectedSnapshot.status?.toLowerCase().includes("success")) && (
-                <DownloadPdfButton snapshotId={selectedSnapshot.id} variant="compact" className="ml-4" />
+                <DownloadPdfButton snapshotId={selectedSnapshot.id} variant="compact" />
               )}
             </div>
           </div>
 
-          {/* Single scrollable page — tight spacing */}
-          <div className="space-y-5">
-              {/* Snapshot progress (if running) */}
+          {/* Single scrollable page — restructured */}
+          <div className="space-y-8">
               {selectedSnapshot?.status === "running" && (
                 <SnapshotProgress startedAt={selectedSnapshot?.started_at ?? selectedSnapshot?.created_at ?? null} />
               )}
 
               {showSuccess && (
-                <div className="flex items-center gap-3 rounded-app-lg border border-white/5 border-l-authority-dominant bg-surface px-4 py-2">
+                <div className="flex items-center gap-3 rounded-app border border-white/5 bg-surface px-4 py-2">
                   <span className="text-sm font-medium text-text">Snapshot complete</span>
                   <span className="text-xs text-text-2">Index: {selectedSnapshot?.vrtl_score ?? "—"}</span>
                   <button onClick={() => setShowSuccess(false)} className="ml-auto p-1 text-text-3 hover:text-text">
@@ -2244,69 +2254,65 @@ export default function ClientDetailPage() {
                   </button>
                 </div>
               )}
-              
+
               {runError && (
                 <Alert variant="danger">
                   <AlertDescription>{runError}</AlertDescription>
                 </Alert>
               )}
 
-              {/* SECTION 1: Score Summary */}
-              <ScoreHero
-                score={selectedSnapshot?.vrtl_score ?? null}
-                previousScore={previousSnapshot?.vrtl_score ?? null}
-                confidence={confidence}
-                updatedAt={selectedSnapshot?.completed_at || selectedSnapshot?.created_at || null}
-                status={selectedSnapshot?.status ?? null}
-                historicalScores={historicalScores}
-                reportReadyAt={
-                  selectedSnapshot && (selectedSnapshot.status?.toLowerCase().includes("complete") || selectedSnapshot.status?.toLowerCase().includes("success"))
-                    ? (selectedSnapshot.completed_at || selectedSnapshot.created_at)
-                    : null
-                }
-                gapToLeader={
-                  selectedSnapshot?.vrtl_score != null ? 100 - selectedSnapshot.vrtl_score : null
-                }
-              />
-              <TrendStrip
-                historicalScores={historicalScores}
-                delta={
-                  selectedSnapshot?.vrtl_score != null && previousSnapshot?.vrtl_score != null
-                    ? selectedSnapshot.vrtl_score - previousSnapshot.vrtl_score
-                    : null
-                }
-              />
+              {/* 1. Authority Status — minimal hero */}
+              <section>
+                <AuthorityStatusHero
+                  clientName={client.name}
+                  score={selectedSnapshot?.vrtl_score ?? null}
+                  previousScore={previousSnapshot?.vrtl_score ?? null}
+                  providers={providers}
+                  detail={snapshotDetail}
+                  confidence={confidence}
+                />
+              </section>
               <div ref={heroSentinelRef} className="h-0" aria-hidden />
 
-              {/* SECTION 2: Cross-Model Snapshot (chart + diagnosis in one card) */}
-              <div id="cross-model" className="scroll-mt-4">
-                <CrossModelSnapshot providers={providers} detail={snapshotDetail} />
-              </div>
+              {/* 2. Competitive Authority Ranking */}
+              <section id="ranking">
+                <CompetitiveAuthorityRanking
+                  clientName={client.name}
+                  providers={providers}
+                  previousProviders={previousProviders}
+                  detail={snapshotDetail}
+                />
+              </section>
 
-              <CompetitiveAuthorityRanking
-                clientName={client.name}
-                providers={providers}
-                previousProviders={previousProviders}
-                detail={snapshotDetail}
-              />
+              {/* 3. Authority Vulnerabilities — model-by-model, expandable */}
+              <AuthorityVulnerabilities providers={providers} detail={snapshotDetail} />
 
-              {/* SECTION 4: Recommended Actions */}
-              <Recommendations
+              {/* 4. Strategic Direction — top 3 actions, clean bullets */}
+              <StrategicDirection
                 score={selectedSnapshot?.vrtl_score ?? null}
                 providers={providers}
                 competitors={competitors}
                 detail={snapshotDetail}
               />
 
-              {/* SECTION 5: Deep Analytics (collapsible) */}
-              <details className="group rounded-app-lg border border-white/5 bg-surface">
-                <summary className="flex cursor-pointer items-center justify-between px-4 py-3 hover:bg-surface-2/40">
-                  <h3 className="text-sm font-semibold text-text">Deep Analytics</h3>
+              {/* 5. Advanced Intelligence — collapsed by default */}
+              <details className="group" open={false}>
+                <summary className="flex cursor-pointer list-none items-center justify-between py-2 text-sm font-semibold text-text hover:text-text-2">
+                  <span>Advanced Intelligence</span>
                   <svg className="h-4 w-4 text-text-3 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                   </svg>
                 </summary>
-                <div className="border-t border-white/5 space-y-4 p-4">
+                <div className="space-y-6 pt-4">
+                  <ScoreTrendChart
+                    scores={historicalScores}
+                    dates={snapshots
+                      .filter(s => s.vrtl_score !== null && (s.status?.toLowerCase().includes("complete") || s.status?.toLowerCase().includes("success")))
+                      .slice(0, 10)
+                      .map(s => s.created_at)
+                      .reverse()
+                    }
+                  />
                   <KeyInsightsCards
                     score={selectedSnapshot?.vrtl_score ?? null}
                     providers={providers}
@@ -2314,18 +2320,7 @@ export default function ClientDetailPage() {
                     competitors={competitors}
                     confidence={confidence}
                   />
-                  <div className="grid gap-6 lg:grid-cols-2">
-                    <ScoreTrendChart 
-                      scores={historicalScores} 
-                      dates={snapshots
-                        .filter(s => s.vrtl_score !== null && (s.status?.toLowerCase().includes("complete") || s.status?.toLowerCase().includes("success")))
-                        .slice(0, 10)
-                        .map(s => s.created_at)
-                        .reverse()
-                      } 
-                    />
-                    <ProviderBreakdown providers={providers} />
-                  </div>
+                  <ProviderBreakdown providers={providers} />
                   <div className="grid gap-6 lg:grid-cols-2">
                     <CompetitorComparisonChart
                       clientName={client.name}
