@@ -11,9 +11,11 @@ type DownloadPdfButtonProps = {
   className?: string;
   /** Compact inline style for header placement */
   variant?: "default" | "compact";
+  /** Primary CTA label (default variant only) */
+  label?: string;
 };
 
-export function DownloadPdfButton({ snapshotId, className, variant = "default" }: DownloadPdfButtonProps) {
+export function DownloadPdfButton({ snapshotId, className, variant = "default", label }: DownloadPdfButtonProps) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -128,12 +130,12 @@ export function DownloadPdfButton({ snapshotId, className, variant = "default" }
 
         {/* Text */}
         <span className="relative">
-          {busy ? "Generating report..." : success ? "Downloaded!" : "Download Client Report"}
+          {busy ? "Generating report..." : success ? "Downloaded!" : (label ?? "Download Client Report")}
         </span>
       </button>
 
       {/* Subtext */}
-      {!busy && !success && !error && (
+      {!busy && !success && !error && !label && (
         <p className="text-center text-xs text-text-3">Client-ready PDF</p>
       )}
 
