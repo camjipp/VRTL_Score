@@ -170,11 +170,47 @@ function SnapshotSelector({
   );
 }
 
+function faviconDomain(website: string | null): string | null {
+  if (!website) return null;
+  try {
+    return new URL(website).hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
+/* Build one strong diagnosis sentence for the verdict. */
+function getVerdictSentence(
+  score: number | null,
+  providers: [string, number][],
+  detail: SnapshotDetailResponse | null
+): string {
+  if (score === null || providers.length === 0) {
+    return "Run a snapshot to diagnose your AI authority.";
+  }
+  const sorted = [...providers].sort((a, b) => a[1] - b[1]);
+  const weakest = sorted[0];
+  const weakestName = getProviderDisplayName(weakest[0]);
+  const weakestScore = weakest[1];
+  const mentionRate = detail ? pct(detail.summary.client_mentioned_count, detail.summary.responses_count || 1) : null;
+  if (weakestScore < 40) {
+    return `${weakestName} authority is critically underperforming, creating displacement risk.`;
+  }
+  if (weakestScore < 60) {
+    return `${weakestName} authority is underperforming; monitor for displacement.`;
+  }
+  if (mentionRate !== null && mentionRate < 50) {
+    return "Citation coverage is below threshold; authority is vulnerable across models.";
+  }
+  return "Authority is stable across models; maintain and monitor weakest channel.";
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
-   AUTHORITY STATUS — minimal hero (no bars, no sparkline)
+   VERDICT — short, sharp hero (favicon + identity, index, pill, delta, grid, one sentence)
 ═══════════════════════════════════════════════════════════════════════════ */
-function AuthorityStatusHero({
+function VerdictHero({
   clientName,
+  website,
   score,
   previousScore,
   providers,
@@ -182,51 +218,67 @@ function AuthorityStatusHero({
   confidence,
 }: {
   clientName: string;
+  website: string | null;
   score: number | null;
   previousScore: number | null;
   providers: [string, number][];
   detail: SnapshotDetailResponse | null;
   confidence: { label: string; variant: BadgeVariant };
 }) {
-  const { label, description } = getScoreLabel(score);
+  const { label } = getScoreLabel(score);
   const delta = score !== null && previousScore !== null ? score - previousScore : null;
   const gapToLeader = score != null ? 100 - score : null;
   const sorted = [...providers].sort((a, b) => b[1] - a[1]);
   const weakestModel = sorted.length > 0 ? getProviderDisplayName(sorted[sorted.length - 1][0]) : "—";
   const primaryDisplacer = detail?.summary?.top_competitors?.[0]?.name ?? "—";
+  const domain = faviconDomain(website);
+  const faviconUrl = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=32` : null;
+  const verdict = getVerdictSentence(score, providers, detail);
 
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-text">{clientName}</h1>
-          <div className="mt-3 flex flex-wrap items-baseline gap-3">
-            <span className="text-4xl font-semibold tabular-nums tracking-tight text-text">
-              {score ?? "—"}
+        <div className="flex items-start gap-3">
+          {faviconUrl && (
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white/5">
+              <img src={faviconUrl} alt="" className="h-6 w-6 object-contain" width={24} height={24} />
             </span>
-            <span className="text-sm text-text-3">AI Authority Index</span>
-            {delta !== null && delta !== 0 && (
-              <span className={cn("text-sm tabular-nums", delta > 0 ? "text-authority-dominant" : "text-authority-losing")}>
-                {delta > 0 ? "+" : ""}{delta} vs last
-              </span>
+          )}
+          <div>
+            <h1 className="text-xl font-semibold text-text">{clientName}</h1>
+            {website && (
+              <a href={website} target="_blank" rel="noreferrer" className="text-sm text-text-2 hover:text-text mt-0.5 block truncate max-w-[280px]">
+                {website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+              </a>
             )}
-            <Badge variant={label === "Dominant" ? "success" : label === "Losing Ground" ? "danger" : "warning"}>
-              {label}
-            </Badge>
+            <div className="mt-3 flex flex-wrap items-baseline gap-3">
+              <span className="text-4xl font-semibold tabular-nums tracking-tight text-text">
+                {score ?? "—"}
+              </span>
+              <span className="text-sm text-text-3">AI Authority Index</span>
+              {delta !== null && delta !== 0 && (
+                <span className={cn("text-sm tabular-nums", delta > 0 ? "text-authority-dominant" : "text-authority-losing")}>
+                  {delta > 0 ? "+" : ""}{delta} vs last
+                </span>
+              )}
+              <Badge variant={label === "Dominant" ? "success" : label === "Losing Ground" ? "danger" : "warning"}>
+                {label}
+              </Badge>
+            </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:gap-x-8">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:gap-x-8">
           <div>
             <div className="text-[10px] font-medium uppercase tracking-wider text-text-3">Gap to leader</div>
             <div className="mt-0.5 font-medium tabular-nums text-text">{gapToLeader != null ? `${gapToLeader} pts` : "—"}</div>
           </div>
           <div>
-            <div className="text-[10px] font-medium uppercase tracking-wider text-text-3">Primary displacer</div>
-            <div className="mt-0.5 font-medium text-text">{primaryDisplacer}</div>
-          </div>
-          <div>
             <div className="text-[10px] font-medium uppercase tracking-wider text-text-3">Weakest model</div>
             <div className="mt-0.5 font-medium text-text">{weakestModel}</div>
+          </div>
+          <div>
+            <div className="text-[10px] font-medium uppercase tracking-wider text-text-3">Primary displacer</div>
+            <div className="mt-0.5 font-medium text-text">{primaryDisplacer}</div>
           </div>
           <div>
             <div className="text-[10px] font-medium uppercase tracking-wider text-text-3">Confidence</div>
@@ -234,7 +286,7 @@ function AuthorityStatusHero({
           </div>
         </div>
       </div>
-      <p className="text-sm text-text-2">{description}</p>
+      <p className="text-sm font-medium text-text-2">{verdict}</p>
     </div>
   );
 }
@@ -1056,6 +1108,117 @@ function CompetitorComparisonChart({
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   MODEL INTELLIGENCE MATRIX — centerpiece 3-column grid
+═══════════════════════════════════════════════════════════════════════════ */
+const MATRIX_MODELS = ["openai", "gemini", "anthropic"] as const;
+function getMatrixStatusTag(score: number): "Strong" | "Watchlist" | "Critical" {
+  if (score >= 80) return "Strong";
+  if (score >= 40) return "Watchlist";
+  return "Critical";
+}
+function getModelSignals(score: number, detail: SnapshotDetailResponse | null): string[] {
+  const signals: string[] = [];
+  if (score < 50) signals.push("Retrieval gap detected");
+  const mentionRate = detail ? pct(detail.summary.client_mentioned_count, detail.summary.responses_count || 1) : null;
+  const citationRate = detail ? pct(detail.summary.sources_count, detail.summary.responses_count || 1) : null;
+  if (mentionRate !== null && mentionRate < 50) signals.push("Citation coverage low");
+  else if (citationRate !== null && citationRate < 20) signals.push("Authority signal deficiency");
+  if (signals.length === 0 && score >= 60) signals.push("Stable retrieval");
+  return signals.slice(0, 2);
+}
+
+function ModelIntelligenceMatrix({
+  providers,
+  detail,
+}: {
+  providers: [string, number][];
+  detail: SnapshotDetailResponse | null;
+}) {
+  const sorted = [...providers].sort((a, b) => b[1] - a[1]);
+  const primaryDisplacer = detail?.summary?.top_competitors?.[0]?.name ?? "—";
+  const providerByKey = useMemo(() => {
+    const map = new Map<string, [string, number]>();
+    for (const [provider, score] of providers) {
+      const p = provider.toLowerCase();
+      if (p.includes("openai") || p.includes("chatgpt")) map.set("openai", [provider, score]);
+      else if (p.includes("gemini") || p.includes("google")) map.set("gemini", [provider, score]);
+      else if (p.includes("anthropic") || p.includes("claude")) map.set("anthropic", [provider, score]);
+    }
+    return map;
+  }, [providers]);
+  const rankByKey = useMemo(() => {
+    const map = new Map<string, number>();
+    sorted.forEach(([provider], idx) => {
+      const p = provider.toLowerCase();
+      const key = p.includes("openai") || p.includes("chatgpt") ? "openai" : p.includes("gemini") || p.includes("google") ? "gemini" : "anthropic";
+      map.set(key, idx + 1);
+    });
+    return map;
+  }, [sorted]);
+  const totalModels = sorted.length || 1;
+
+  return (
+    <section>
+      <h2 className="text-base font-semibold text-text mb-4">Model Intelligence Matrix</h2>
+      {providers.length === 0 && (
+        <p className="text-sm text-text-2 mb-4">Run a snapshot to see model-level intelligence.</p>
+      )}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        {MATRIX_MODELS.map((key) => {
+          const entry = providerByKey.get(key);
+          const score = entry ? entry[1] : null;
+          const rank = score != null ? (rankByKey.get(key) ?? totalModels) : null;
+          const gap = score != null ? 100 - score : null;
+          const statusTag = score != null ? getMatrixStatusTag(score) : null;
+          const signals = score != null ? getModelSignals(score, detail) : [];
+          const label = key === "openai" ? "GPT" : key === "gemini" ? "Gemini" : "Anthropic";
+          return (
+            <div
+              key={key}
+              className="rounded-app border border-white/[0.06] bg-surface p-4 flex flex-col gap-3"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-medium text-text">{label}</span>
+                {statusTag && (
+                  <span
+                    className={cn(
+                      "text-[10px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded",
+                      statusTag === "Strong" && "text-authority-dominant bg-authority-dominant/10",
+                      statusTag === "Watchlist" && "text-authority-watchlist bg-authority-watchlist/10",
+                      statusTag === "Critical" && "text-authority-losing bg-authority-losing/10"
+                    )}
+                  >
+                    {statusTag}
+                  </span>
+                )}
+              </div>
+              <div className="text-3xl font-semibold tabular-nums text-text">
+                {score ?? "—"}
+              </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-0 text-xs text-text-2">
+                {rank != null && <span>Rank {rank}/{totalModels}</span>}
+                {gap != null && <span>Gap: {gap} pts</span>}
+              </div>
+              <div>
+                <div className="text-[10px] font-medium uppercase tracking-wider text-text-3">Primary displacer</div>
+                <div className="mt-0.5 text-sm text-text">{primaryDisplacer}</div>
+              </div>
+              {signals.length > 0 && (
+                <ul className="space-y-0.5 text-xs text-text-2">
+                  {signals.map((s, i) => (
+                    <li key={i}>{s}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    COMPETITIVE AUTHORITY RANKING + HELPERS
 ═══════════════════════════════════════════════════════════════════════════ */
 function getProviderStatus(score: number): { label: string } {
@@ -1204,60 +1367,6 @@ function CompetitiveAuthorityRanking({
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   AUTHORITY VULNERABILITIES — model-by-model rows, expandable detail
-═══════════════════════════════════════════════════════════════════════════ */
-function AuthorityVulnerabilities({
-  providers,
-  detail,
-}: {
-  providers: [string, number][];
-  detail: SnapshotDetailResponse | null;
-}) {
-  if (providers.length === 0) {
-    return (
-      <section>
-        <h2 className="text-sm font-semibold text-text mb-3">Authority Vulnerabilities</h2>
-        <p className="text-sm text-text-2">Run a snapshot to see model-specific vulnerabilities.</p>
-      </section>
-    );
-  }
-
-  const sorted = [...providers].sort((a, b) => b[1] - a[1]);
-  const leaderScore = 100;
-
-  return (
-    <section>
-      <h2 className="text-sm font-semibold text-text mb-3">Authority Vulnerabilities</h2>
-      <div className="space-y-1">
-        {sorted.map(([provider, score]) => {
-          const gap = Math.max(0, leaderScore - score);
-          const status = getProviderStatus(score);
-          return (
-            <details key={provider} className="group">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 py-2.5 px-3 text-sm hover:bg-white/[0.02] rounded-app">
-                <span className="font-medium text-text">{getProviderDisplayName(provider)}</span>
-                <span className="tabular-nums text-text-2">{score}</span>
-                <span className="text-[10px] text-text-3">{status.label}</span>
-                <span className="text-text-3 text-xs">Gap: {gap} pts</span>
-                <svg className="h-4 w-4 text-text-3 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                </svg>
-              </summary>
-              <div className="border-t border-white/5 py-3 px-3 text-xs text-text-2 space-y-2">
-                <p>Gap to leader: {gap} pts. {getRecommendationLabel(score)} recommendation strength.</p>
-                {detail?.summary?.top_competitors?.[0] && (
-                  <p>Primary displacer in category: {detail.summary.top_competitors[0].name}.</p>
-                )}
-              </div>
-            </details>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
    STRATEGIC DIRECTION — top 3 priority actions, clean bullets (no accordion)
 ═══════════════════════════════════════════════════════════════════════════ */
 function StrategicDirection({
@@ -1294,17 +1403,24 @@ function StrategicDirection({
     );
   }
 
+  function actionBullets(action: string): string[] {
+    const parts = action.split(/(?<=[.!])\s+/).filter(Boolean).map(s => s.trim()).slice(0, 3);
+    if (parts.length > 0) return parts;
+    return [action];
+  }
+
   return (
     <section>
       <h2 className="text-sm font-semibold text-text mb-3">Strategic Direction</h2>
-      <ul className="space-y-3">
+      <ul className="space-y-4">
         {top3.map((insight, idx) => (
-          <li key={idx} className="flex gap-3">
-            <span className="text-text-3 font-medium tabular-nums shrink-0">{idx + 1}.</span>
-            <div>
-              <p className="font-medium text-text">{insight.title}</p>
-              <p className="text-sm text-text-2 mt-0.5">{insight.action}</p>
-            </div>
+          <li key={idx}>
+            <p className="font-medium text-text">{insight.title}</p>
+            <ul className="mt-1.5 space-y-0.5 pl-4 list-disc text-sm text-text-2">
+              {actionBullets(insight.action).map((bullet, i) => (
+                <li key={i}>{bullet}</li>
+              ))}
+            </ul>
           </li>
         ))}
       </ul>
@@ -2237,8 +2353,8 @@ export default function ClientDetailPage() {
             </div>
           </div>
 
-          {/* Single scrollable page — restructured */}
-          <div className="space-y-8">
+          {/* Hybrid layout: VERDICT → INTELLIGENCE CORE → STRATEGIC DIRECTION → COMPETITIVE POSITION */}
+          <div>
               {selectedSnapshot?.status === "running" && (
                 <SnapshotProgress startedAt={selectedSnapshot?.started_at ?? selectedSnapshot?.created_at ?? null} />
               )}
@@ -2261,10 +2377,11 @@ export default function ClientDetailPage() {
                 </Alert>
               )}
 
-              {/* 1. Authority Status — minimal hero */}
-              <section>
-                <AuthorityStatusHero
+              {/* 1. VERDICT — hero */}
+              <section className="pt-2">
+                <VerdictHero
                   clientName={client.name}
+                  website={client.website}
                   score={selectedSnapshot?.vrtl_score ?? null}
                   previousScore={previousSnapshot?.vrtl_score ?? null}
                   providers={providers}
@@ -2274,8 +2391,23 @@ export default function ClientDetailPage() {
               </section>
               <div ref={heroSentinelRef} className="h-0" aria-hidden />
 
-              {/* 2. Competitive Authority Ranking */}
-              <section id="ranking">
+              {/* 2. INTELLIGENCE CORE — Model Intelligence Matrix (centerpiece) */}
+              <section className="pt-10">
+                <ModelIntelligenceMatrix providers={providers} detail={snapshotDetail} />
+              </section>
+
+              {/* 3. STRATEGIC DIRECTION — top 3 priorities, bullets */}
+              <section className="pt-10">
+                <StrategicDirection
+                  score={selectedSnapshot?.vrtl_score ?? null}
+                  providers={providers}
+                  competitors={competitors}
+                  detail={snapshotDetail}
+                />
+              </section>
+
+              {/* 4. COMPETITIVE POSITION — ranking table + tabs */}
+              <section className="pt-10" id="ranking">
                 <CompetitiveAuthorityRanking
                   clientName={client.name}
                   providers={providers}
@@ -2283,68 +2415,6 @@ export default function ClientDetailPage() {
                   detail={snapshotDetail}
                 />
               </section>
-
-              {/* 3. Authority Vulnerabilities — model-by-model, expandable */}
-              <AuthorityVulnerabilities providers={providers} detail={snapshotDetail} />
-
-              {/* 4. Strategic Direction — top 3 actions, clean bullets */}
-              <StrategicDirection
-                score={selectedSnapshot?.vrtl_score ?? null}
-                providers={providers}
-                competitors={competitors}
-                detail={snapshotDetail}
-              />
-
-              {/* 5. Advanced Intelligence — collapsed by default */}
-              <details className="group" open={false}>
-                <summary className="flex cursor-pointer list-none items-center justify-between py-2 text-sm font-semibold text-text hover:text-text-2">
-                  <span>Advanced Intelligence</span>
-                  <svg className="h-4 w-4 text-text-3 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                  </svg>
-                </summary>
-                <div className="space-y-6 pt-4">
-                  <ScoreTrendChart
-                    scores={historicalScores}
-                    dates={snapshots
-                      .filter(s => s.vrtl_score !== null && (s.status?.toLowerCase().includes("complete") || s.status?.toLowerCase().includes("success")))
-                      .slice(0, 10)
-                      .map(s => s.created_at)
-                      .reverse()
-                    }
-                  />
-                  <KeyInsightsCards
-                    score={selectedSnapshot?.vrtl_score ?? null}
-                    providers={providers}
-                    detail={snapshotDetail}
-                    competitors={competitors}
-                    confidence={confidence}
-                  />
-                  <ProviderBreakdown providers={providers} />
-                  <div className="grid gap-6 lg:grid-cols-2">
-                    <CompetitorComparisonChart
-                      clientName={client.name}
-                      clientMentions={snapshotDetail?.summary.client_mentioned_count ?? 0}
-                      topCompetitors={snapshotDetail?.summary.top_competitors ?? []}
-                    />
-                    <PromptPerformance detail={snapshotDetail} />
-                  </div>
-                  <SignalQualityChart detail={snapshotDetail} />
-                  <CompetitorsSection
-                    competitors={competitors}
-                    busy={busy}
-                    newName={newName}
-                    newWebsite={newWebsite}
-                    setNewName={setNewName}
-                    setNewWebsite={setNewWebsite}
-                    onAddCompetitor={addCompetitor}
-                    onDeleteCompetitor={deleteCompetitor}
-                  />
-                  {snapshotDetail?.responses && snapshotDetail.responses.length > 0 && (
-                    <EvidenceSection detail={snapshotDetail} />
-                  )}
-                </div>
-              </details>
             </div>
 
           {/* Sticky Download Bar - appears after scroll */}
