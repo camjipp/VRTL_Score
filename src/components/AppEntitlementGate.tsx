@@ -15,6 +15,8 @@ type Props = {
 let entitlementCache: { entitled: boolean; timestamp: number } | null = null;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
+const FIRST_LOAD_KEY = "vrtl_entitlement_ui_seen";
+
 export function AppEntitlementGate({ children }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -24,6 +26,14 @@ export function AppEntitlementGate({ children }: Props) {
   const [progress, setProgress] = useState(0);
   const [statusText, setStatusText] = useState("Initializing...");
   const [authError, setAuthError] = useState<string | null>(null);
+  const [isFirstLoad] = useState(() => {
+    if (typeof window === "undefined") return true;
+    try {
+      return !sessionStorage.getItem(FIRST_LOAD_KEY);
+    } catch {
+      return true;
+    }
+  });
   const lastNetworkError = useRef(false);
 
   // Check if user just came from successful checkout
@@ -110,6 +120,11 @@ export function AppEntitlementGate({ children }: Props) {
             setStatusText("Welcome!");
             // Small delay to show 100%
             await new Promise(r => setTimeout(r, 300));
+            try {
+              sessionStorage.setItem(FIRST_LOAD_KEY, "1");
+            } catch {
+              // ignore
+            }
             setReady(true);
             hasChecked.current = true;
           }
@@ -140,6 +155,11 @@ export function AppEntitlementGate({ children }: Props) {
         setProgress(100);
         setStatusText("Welcome!");
         await new Promise(r => setTimeout(r, 300));
+        try {
+          sessionStorage.setItem(FIRST_LOAD_KEY, "1");
+        } catch {
+          // ignore
+        }
         setReady(true);
         hasChecked.current = true;
       } else if (!cancelled) {
@@ -156,47 +176,50 @@ export function AppEntitlementGate({ children }: Props) {
   }, [isCheckoutSuccess]);
 
   if (!ready) {
+    // First-time load: show full "Activating your subscription..." card (dark theme)
+    const showFullActivation = isFirstLoad === true;
+
     return (
       <div className="flex min-h-screen items-center justify-center bg-bg">
         <div className="w-full max-w-sm px-6">
-          {/* Logo */}
           <div className="mb-8 flex justify-center">
             <Image
               src="/brand/VRTL_Solo.png"
               alt="VRTL Score"
               width={180}
               height={64}
-              className="h-12 w-auto"
+              className="h-12 w-auto opacity-90"
               priority
             />
           </div>
 
-          {/* Progress card */}
-          <div className="rounded-xl border border-border bg-white p-6">
-            {/* Status text */}
-            <p className="mb-4 text-center text-sm font-medium text-text">
-              {statusText}
-            </p>
-
-            {/* Progress bar */}
-            <div className="h-1.5 overflow-hidden rounded-full bg-surface-2">
-              <div
-                className="h-full rounded-full bg-text transition-all duration-500 ease-out"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-
-            {/* Progress percentage */}
-            <p className="mt-3 text-center text-xs text-text-3">
-              {Math.round(progress)}%
-            </p>
-
-            {authError && (
-              <p className="mt-3 text-center text-xs text-rose-600">
-                {authError}
+          {showFullActivation ? (
+            /* Full activation card — dark theme, only on first load */
+            <div className="rounded-xl border border-white/10 bg-surface p-6">
+              <p className="mb-4 text-center text-sm font-medium text-text">
+                {statusText}
               </p>
-            )}
-          </div>
+              <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                <div
+                  className="h-full rounded-full bg-white/40 transition-all duration-500 ease-out"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <p className="mt-3 text-center text-xs text-text-3">
+                {Math.round(progress)}%
+              </p>
+              {authError && (
+                <p className="mt-3 text-center text-xs text-rose-400">
+                  {authError}
+                </p>
+              )}
+            </div>
+          ) : (
+            /* Returning user: minimal dark loader */
+            <div className="flex flex-col items-center gap-6">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-text-2" />
+            </div>
+          )}
         </div>
       </div>
     );
