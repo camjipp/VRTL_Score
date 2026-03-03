@@ -1431,18 +1431,22 @@ function CompetitiveAuthorityRanking({
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   PAGE HEADER — back button + breadcrumb only
+   PAGE HEADER — back button (high contrast) + breadcrumb with separators
 ═══════════════════════════════════════════════════════════════════════════ */
 function PageHeader({ clientName }: { clientName: string }) {
   return (
-    <header className="flex flex-wrap items-center gap-4">
-      <BackLink href="/app" label="Back to Dashboard" />
-      <nav className="flex items-center gap-2 text-sm" aria-label="Breadcrumb">
+    <header className="flex flex-wrap items-center gap-6">
+      <BackLink
+        href="/app"
+        label="Back to Dashboard"
+        className="rounded-lg border border-white/20 bg-white/[0.08] px-4 py-2.5 text-sm font-medium text-text shadow-sm transition-colors hover:border-white/30 hover:bg-white/[0.12] focus:outline-none focus:ring-2 focus:ring-white/20 focus:ring-offset-0 focus:ring-offset-transparent"
+      />
+      <nav className="flex items-center gap-1.5 text-sm" aria-label="Breadcrumb">
         <Link href="/app" className="font-medium text-text-2 hover:text-text transition-colors">Dashboard</Link>
-        <span className="text-text-3" aria-hidden>/</span>
+        <span className="text-white/30 mx-1" aria-hidden>/</span>
         <Link href="/app" className="font-medium text-text-2 hover:text-text transition-colors">Clients</Link>
-        <span className="text-text-3" aria-hidden>/</span>
-        <span className="font-semibold text-text truncate" aria-current="page">{clientName}</span>
+        <span className="text-white/30 mx-1" aria-hidden>/</span>
+        <span className="font-semibold text-text truncate max-w-[200px] sm:max-w-none" aria-current="page">{clientName}</span>
       </nav>
     </header>
   );
@@ -1480,28 +1484,28 @@ function getChartSeriesForFilter(
   return { scores: valid.map((p) => p.score), dates: valid.map((p) => p.date) };
 }
 
-/* Big trend chart (220–280px) with filter chips */
+/* Big trend chart — full-width, 280–340px, premium: tight padding, thicker line, larger points */
 const CHART_FILTERS = ["all", "openai", "gemini", "anthropic"] as const;
 function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
   const [filter, setFilter] = useState<typeof CHART_FILTERS[number]>("all");
   const { scores, dates } = useMemo(() => getChartSeriesForFilter(snapshots, filter), [snapshots, filter]);
-  const chartHeight = 260;
-  const chartWidth = 520;
-  const padding = { top: 16, right: 16, bottom: 28, left: 36 };
+  const chartHeight = 320;
+  const chartWidth = 640;
+  const padding = { top: 12, right: 12, bottom: 24, left: 32 };
   const innerW = chartWidth - padding.left - padding.right;
   const innerH = chartHeight - padding.top - padding.bottom;
 
   if (scores.length < 2) {
     return (
-      <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6" style={{ minHeight: chartHeight }}>
-        <div className="mb-3 flex flex-wrap items-center gap-2">
+      <div className="rounded-xl bg-white/[0.02] py-4" style={{ minHeight: chartHeight }}>
+        <div className="mb-2 flex flex-wrap items-center gap-1.5">
           {CHART_FILTERS.map((f) => (
             <button
               key={f}
               type="button"
               onClick={() => setFilter(f)}
               className={cn(
-                "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
+                "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
                 filter === f ? "bg-white/10 text-text" : "text-text-3 hover:bg-white/5 hover:text-text-2"
               )}
             >
@@ -1509,7 +1513,7 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
             </button>
           ))}
         </div>
-        <div className="flex h-48 items-center justify-center text-sm text-text-3">Run more snapshots to see trends</div>
+        <div className="flex h-64 items-center justify-center text-sm text-text-3">Run more snapshots to see trends</div>
       </div>
     );
   }
@@ -1528,15 +1532,15 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
   const lineColor = trend >= 0 ? CHART_COLORS.dominant : CHART_COLORS.losing;
 
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6">
-      <div className="mb-3 flex flex-wrap items-center gap-2">
+    <div className="rounded-xl bg-white/[0.02] py-4">
+      <div className="mb-2 flex flex-wrap items-center gap-1.5 px-1">
         {CHART_FILTERS.map((f) => (
           <button
             key={f}
             type="button"
             onClick={() => setFilter(f)}
             className={cn(
-              "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
+              "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
               filter === f ? "bg-white/10 text-text" : "text-text-3 hover:bg-white/5 hover:text-text-2"
             )}
           >
@@ -1545,10 +1549,10 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
         ))}
       </div>
       <div className="overflow-hidden rounded-lg">
-        <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full" style={{ maxHeight: chartHeight }}>
+        <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full" style={{ maxHeight: chartHeight }} aria-hidden>
           <defs>
             <linearGradient id="heroChartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={lineColor} stopOpacity="0.2" />
+              <stop offset="0%" stopColor={lineColor} stopOpacity="0.18" />
               <stop offset="100%" stopColor={lineColor} stopOpacity="0.02" />
             </linearGradient>
           </defs>
@@ -1556,20 +1560,20 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
             const y = padding.top + innerH - ((val - min) / range) * innerH;
             return (
               <g key={val}>
-                <line x1={padding.left} y1={y} x2={chartWidth - padding.right} y2={y} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-                <text x={padding.left - 6} y={y + 3} textAnchor="end" className="text-[10px] fill-text-3">{val}</text>
+                <line x1={padding.left} y1={y} x2={chartWidth - padding.right} y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+                <text x={padding.left - 5} y={y + 3} textAnchor="end" className="text-[9px] fill-text-3">{val}</text>
               </g>
             );
           })}
           <path d={areaD} fill="url(#heroChartGrad)" />
-          <path d={pathD} fill="none" stroke={lineColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d={pathD} fill="none" stroke={lineColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
           {pathPoints.map((p, i) => (
-            <circle key={i} cx={p.x} cy={p.y} r="3" fill="var(--surface)" stroke={lineColor} strokeWidth="1.5" />
+            <circle key={i} cx={p.x} cy={p.y} r="4" fill="var(--surface)" stroke={lineColor} strokeWidth="2" />
           ))}
           {dates.map((d, i) => {
             const x = padding.left + (i / (scores.length - 1)) * innerW;
             return (
-              <text key={i} x={x} y={chartHeight - 6} textAnchor="middle" className="text-[9px] fill-text-3">{d}</text>
+              <text key={i} x={x} y={chartHeight - 5} textAnchor="middle" className="text-[9px] fill-text-3">{d}</text>
             );
           })}
         </svg>
@@ -1588,15 +1592,14 @@ function getSentiment(score: number | null, delta: number | null): { label: "Pos
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   AUTHORITY OVERVIEW HERO (left) + EXECUTIVE SUMMARY (right) — 2-col top
+   FULL-WIDTH HERO — diagnosis surface: identity, CTAs, index, diagnosis, chart
 ═══════════════════════════════════════════════════════════════════════════ */
-function AuthorityOverviewHero({
+function HeroSection({
   client,
   score,
   previousScore,
   providers,
   detail,
-  confidence,
   snapshots,
   snapshotId,
   snapshotStatus,
@@ -1610,7 +1613,6 @@ function AuthorityOverviewHero({
   previousScore: number | null;
   providers: [string, number][];
   detail: SnapshotDetailResponse | null;
-  confidence: { label: string; variant: BadgeVariant };
   snapshots: SnapshotRow[];
   snapshotId: string | null;
   snapshotStatus: string | null;
@@ -1623,53 +1625,41 @@ function AuthorityOverviewHero({
   const logoSrc = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=48` : null;
   const { label: statusLabel } = getScoreLabel(score);
   const delta = score != null && previousScore != null ? score - previousScore : null;
-  const sentiment = getSentiment(score, delta);
-  const sentimentScores = useMemo(() => {
-    const filtered = snapshots
-      .filter((s) => s.vrtl_score != null && (s.status?.toLowerCase().includes("complete") || s.status?.toLowerCase().includes("success")))
-      .slice(0, 6);
-    return [...filtered].reverse().map((s) => s.vrtl_score!);
-  }, [snapshots]);
+  const diagnosis = getVerdictSentence(score, providers, detail);
 
   return (
-    <div className="rounded-2xl border border-white/[0.08] bg-surface shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_4px_24px_rgba(0,0,0,0.15)]">
+    <section className="w-full rounded-2xl border border-white/[0.08] bg-surface shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_4px_24px_rgba(0,0,0,0.12)]">
       <div className="p-6 md:p-8">
-        {/* Card header: identity + CTAs + snapshot selector */}
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        {/* Row 1: Identity (left) + CTAs (right) */}
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/[0.06]">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/12 bg-white/[0.06]">
               {logoSrc ? (
-                <img src={logoSrc} alt="" className="h-9 w-9 object-contain" width={36} height={36} />
+                <img src={logoSrc} alt="" className="h-10 w-10 object-contain" width={40} height={40} />
               ) : (
-                <span className="text-xl font-bold text-text-3">{client.name.charAt(0)}</span>
+                <span className="text-2xl font-bold text-text-3">{client.name.charAt(0)}</span>
               )}
             </div>
             <div>
               <h1 className="text-xl font-semibold text-text">{client.name}</h1>
               <p className="text-sm text-text-2">{domain || client.website || "—"}</p>
-              <Badge variant={score != null && score >= 80 ? "success" : score != null && score >= 40 ? "warning" : "danger"} className="mt-1.5">
+              <Badge variant={score != null && score >= 80 ? "success" : score != null && score >= 40 ? "warning" : "danger"} className="mt-2">
                 {statusLabel}
               </Badge>
             </div>
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:flex-col lg:items-end">
-            <div className="flex flex-wrap items-center gap-2">
-              {snapshotId && (
-                <div className="[&_button]:!rounded-xl [&_button]:!px-5 [&_button]:!py-3 [&_button]:!text-base [&_button]:!font-semibold [&_button]:!bg-white [&_button]:!text-surface [&_button]:shadow-md [&_button]:hover:!bg-white/95">
-                  <DownloadPdfButton snapshotId={snapshotId} label="Download AI Authority Report (PDF)" />
-                </div>
-              )}
-              <RunSnapshotButton
-                running={running}
-                snapshotStatus={snapshotStatus}
-                onRunSnapshot={runSnapshot}
-              />
-            </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+            {snapshotId && (
+              <div className="[&_button]:!rounded-xl [&_button]:!px-5 [&_button]:!py-3 [&_button]:!text-base [&_button]:!font-semibold [&_button]:!bg-white [&_button]:!text-surface [&_button]:shadow-md [&_button]:hover:!bg-white/95 [&_button]:focus:!outline-none [&_button]:focus:!ring-2 [&_button]:focus:!ring-white/30">
+                <DownloadPdfButton snapshotId={snapshotId} label="Download AI Authority Report (PDF)" />
+              </div>
+            )}
+            <RunSnapshotButton running={running} snapshotStatus={snapshotStatus} onRunSnapshot={runSnapshot} />
             <SnapshotSelector snapshots={snapshots} selectedId={selectedSnapshotId} onSelect={onSelectSnapshotId} />
           </div>
         </div>
 
-        {/* Primary metric */}
+        {/* Row 2: Index + delta + one-line diagnosis */}
         <div className="mt-8">
           <p className="text-xs font-medium uppercase tracking-wider text-text-3">AI Authority Index</p>
           <div className="mt-2 flex flex-wrap items-baseline gap-4">
@@ -1688,74 +1678,73 @@ function AuthorityOverviewHero({
               {statusLabel}
             </Badge>
           </div>
+          <p className="mt-3 max-w-2xl text-sm leading-snug text-text-2">{diagnosis}</p>
         </div>
 
-        {/* Big chart */}
-        <div className="mt-8">
+        {/* Row 3: Chart (full width inside hero) */}
+        <div className="mt-6">
           <BigTrendChart snapshots={snapshots} />
         </div>
-
-        {/* Sentiment row */}
-        <div className="mt-6 flex flex-wrap items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
-          <span className="text-sm font-medium text-text-2">Sentiment</span>
-          <span className={cn(
-            "rounded-lg px-2.5 py-1 text-xs font-semibold",
-            sentiment.label === "Positive" && "bg-authority-dominant/15 text-authority-dominant",
-            sentiment.label === "Neutral" && "bg-white/10 text-text-2",
-            sentiment.label === "Negative" && "bg-authority-losing/15 text-authority-losing"
-          )}>
-            {sentiment.label}
-          </span>
-          <span className="text-sm tabular-nums text-text-2">{sentiment.change}</span>
-          {sentimentScores.length >= 2 && (
-            <span className="ml-auto">
-              <ScoreSparkline scores={sentimentScores} color={sentiment.label === "Positive" ? CHART_COLORS.dominant : sentiment.label === "Negative" ? CHART_COLORS.losing : "#94a3b8"} />
-            </span>
-          )}
-        </div>
       </div>
-    </div>
+    </section>
   );
 }
 
-function ExecutiveSummaryCard({
+/* Executive Summary — full-width 2x2 grid under hero (Gap, Weakest, Confidence, Sentiment) */
+function ExecutiveSummaryGrid({
   providers,
   detail,
   confidence,
+  score,
+  delta,
 }: {
   providers: [string, number][];
   detail: SnapshotDetailResponse | null;
   confidence: { label: string; variant: BadgeVariant };
+  score: number | null;
+  delta: number | null;
 }) {
   const sorted = [...providers].sort((a, b) => b[1] - a[1]);
   const gapToLeader = sorted.length > 0 ? 100 - (sorted[0]?.[1] ?? 0) : null;
   const weakest = sorted.length > 0 ? sorted[sorted.length - 1] : null;
-  const primaryDisplacer = detail?.summary?.top_competitors?.[0]?.name ?? null;
+  const sentiment = getSentiment(score, delta);
+
+  const tiles = [
+    { label: "Gap to Leader", value: gapToLeader != null ? `${gapToLeader} pts` : "—", hint: "Points to 100" },
+    { label: "Weakest Model", value: weakest ? getProviderDisplayName(weakest[0]) : "—", hint: weakest ? `${weakest[1]} index` : "Run snapshot" },
+    { label: "Confidence", value: confidence.label, hint: null, badge: true as const, variant: confidence.variant },
+    { label: "Sentiment", value: sentiment.label, hint: sentiment.change, sentiment: true as const, sentimentLabel: sentiment.label },
+  ];
 
   return (
-    <div className="rounded-2xl border border-white/[0.08] bg-surface shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_4px_24px_rgba(0,0,0,0.12)]">
-      <h2 className="border-b border-white/[0.06] px-6 py-4 text-lg font-semibold text-text">Executive Summary</h2>
-      <div className="grid grid-cols-2 gap-px bg-white/[0.04] lg:grid-cols-1">
-        <div className="flex flex-col gap-1 p-6">
-          <p className="text-xs font-medium uppercase tracking-wider text-text-3">Gap to Leader</p>
-          <p className="text-2xl font-bold tabular-nums text-text">{gapToLeader != null ? `${gapToLeader} pts` : "—"}</p>
-        </div>
-        <div className="flex flex-col gap-1 p-6">
-          <p className="text-xs font-medium uppercase tracking-wider text-text-3">Weakest Model</p>
-          <p className="text-lg font-semibold text-text">{weakest ? getProviderDisplayName(weakest[0]) : "—"}</p>
-          {weakest && <p className="text-sm text-text-2">{weakest[1]} index</p>}
-        </div>
-        <div className="flex flex-col gap-1 p-6">
-          <p className="text-xs font-medium uppercase tracking-wider text-text-3">Confidence</p>
-          <Badge variant={confidence.variant}>{confidence.label}</Badge>
-        </div>
-        <div className="flex flex-col gap-1 p-6">
-          <p className="text-xs font-medium uppercase tracking-wider text-text-3">Primary Displacer</p>
-          <p className="text-base font-medium text-text">{primaryDisplacer ?? "—"}</p>
-          {!primaryDisplacer && <p className="text-xs text-text-3">Top competitor in responses</p>}
-        </div>
+    <section className="w-full">
+      <h2 className="text-sm font-semibold uppercase tracking-wider text-text-2 mb-4">Executive Summary</h2>
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {tiles.map((t, i) => (
+          <div key={i} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
+            <p className="text-[10px] font-medium uppercase tracking-wider text-text-3">{t.label}</p>
+            {t.badge ? (
+              <div className="mt-2"><Badge variant={t.variant}>{t.value}</Badge></div>
+            ) : t.sentiment ? (
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <span className={cn(
+                  "rounded-lg px-2 py-0.5 text-xs font-semibold",
+                  t.sentimentLabel === "Positive" && "bg-authority-dominant/15 text-authority-dominant",
+                  t.sentimentLabel === "Neutral" && "bg-white/10 text-text-2",
+                  t.sentimentLabel === "Negative" && "bg-authority-losing/15 text-authority-losing"
+                )}>{t.value}</span>
+                {t.hint && t.hint !== "—" && <span className="text-xs tabular-nums text-text-3">{t.hint}</span>}
+              </div>
+            ) : (
+              <>
+                <p className="mt-1 text-2xl font-bold tabular-nums text-text">{t.value}</p>
+                {t.hint && <p className="mt-0.5 text-xs text-text-3">{t.hint}</p>}
+              </>
+            )}
+          </div>
+        ))}
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -1850,7 +1839,7 @@ function WhatIsWrongSection({
     <section>
       <div className="rounded-2xl border border-white/[0.08] bg-surface shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_4px_24px_rgba(0,0,0,0.12)]">
         <h2 className="border-b border-white/[0.06] px-6 py-4 text-lg font-semibold text-text">Vulnerabilities by Model</h2>
-        <div className="divide-y divide-white/[0.04]">
+        <div className="divide-y divide-white/[0.04] px-6">
           {VULN_MODELS.map((key) => {
             const entry = providerByKey.get(key);
             const score = entry ? entry[1] : null;
@@ -1954,11 +1943,11 @@ function VulnerabilityRow({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full cursor-pointer list-none flex-wrap items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-white/[0.02]"
+        className="flex w-full cursor-pointer list-none flex-wrap items-center gap-4 py-5 text-left transition-colors hover:bg-white/[0.02]"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-white/[0.04]">
-            <img src={logoUrl} alt="" className="h-5 w-5 object-contain" width={20} height={20} />
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/12 bg-white/[0.04]">
+            <img src={logoUrl} alt="" className="h-6 w-6 object-contain" width={24} height={24} />
           </div>
           <span className="font-medium text-text">{label}</span>
         </div>
@@ -1983,15 +1972,15 @@ function VulnerabilityRow({
             {delta >= 0 ? "+" : ""}{delta}
           </span>
         )}
-        <span className={cn("ml-auto text-text-3 transition-transform", open && "rotate-180")}>
+        <span className={cn("ml-auto shrink-0 text-text-3 transition-transform", open && "rotate-180")}>
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
         </span>
       </button>
       {open && (
-        <div className="border-t border-white/[0.04] bg-white/[0.02] px-6 pb-5 pt-4">
-          <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-3">
+        <div className="border-t border-white/[0.04] bg-white/[0.02] pb-6 pt-5">
+          <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-3">
             <div>
               <h4 className="text-xs font-semibold uppercase tracking-wider text-text-3 mb-2">What&apos;s wrong</h4>
               <ul className="list-disc space-y-1 pl-4 text-sm text-text-2">
@@ -2024,12 +2013,87 @@ function VulnerabilityRow({
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   EXECUTION PLAYBOOK — Critical/High/Medium, why it matters, what to do, View Playbook
+   EXECUTION PLAYBOOK — Priority (Critical/High/Medium), View Playbook accordion, never dead
 ═══════════════════════════════════════════════════════════════════════════ */
-function getSeverityLabel(priority: string): "Critical" | "High" | "Medium" {
+function getSeverityLabel(priority: string): "Critical" | "High" | "Medium" | "Low" {
   if (priority === "HIGH") return "Critical";
   if (priority === "MEDIUM") return "High";
-  return "Medium";
+  if (priority === "LOW") return "Medium";
+  return "Low";
+}
+
+function PlaybookItem({ insight, index }: { insight: StrategicInsight; index: number }) {
+  const [open, setOpen] = useState(false);
+  const hasContent = Boolean(insight.action?.trim());
+  function actionBullets(action: string): string[] {
+    const parts = action.split(/(?<=[.!])\s+/).filter(Boolean).map((s) => s.trim()).slice(0, 6);
+    if (parts.length > 0) return parts;
+    return [action];
+  }
+
+  return (
+    <li className="border-b border-white/[0.04] py-5 first:pt-0 last:border-0 last:pb-0">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className={cn(
+          "rounded-lg px-2.5 py-1 text-xs font-semibold uppercase",
+          insight.priority === "HIGH" && "bg-authority-losing/15 text-authority-losing",
+          insight.priority === "MEDIUM" && "bg-authority-watchlist/15 text-authority-watchlist",
+          insight.priority === "LOW" && "bg-white/10 text-text-2"
+        )}>
+          Priority: {getSeverityLabel(insight.priority)}
+        </span>
+      </div>
+      <p className="mt-2 font-semibold text-text">{insight.title}</p>
+      <p className="mt-1 text-sm leading-snug text-text-2">{insight.whyItMatters}</p>
+      {hasContent ? (
+        <>
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            className="mt-3 rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-text-2 hover:bg-white/10 hover:text-text focus:outline-none focus:ring-2 focus:ring-white/20 transition-colors"
+            aria-expanded={open}
+          >
+            {open ? "Hide Playbook" : "View Playbook"}
+          </button>
+          {open && (
+            <div className="mt-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-text-3 mb-2">Steps &amp; actions</h4>
+              <ul className="list-disc space-y-1 pl-4 text-sm text-text-2">
+                {actionBullets(insight.action).map((bullet, i) => (
+                  <li key={i}>{bullet}</li>
+                ))}
+              </ul>
+              {insight.expectedImpact && (
+                <>
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-text-3 mt-4 mb-1">Expected impact</h4>
+                  <p className="text-sm text-text-2">{insight.expectedImpact}</p>
+                </>
+              )}
+              {insight.consequence && (
+                <>
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-text-3 mt-3 mb-1">If not addressed</h4>
+                  <p className="text-sm text-text-2">{insight.consequence}</p>
+                </>
+              )}
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="mt-3">
+          <button
+            type="button"
+            disabled
+            className="cursor-not-allowed rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-medium text-text-3"
+            aria-disabled="true"
+            title="Coming soon"
+          >
+            View Playbook
+          </button>
+          <p className="mt-1.5 text-xs text-text-3">Coming soon</p>
+        </div>
+      )}
+    </li>
+  );
 }
 
 function HowToWinSection({
@@ -2070,45 +2134,13 @@ function HowToWinSection({
     );
   }
 
-  function actionBullets(action: string): string[] {
-    const parts = action.split(/(?<=[.!])\s+/).filter(Boolean).map((s) => s.trim()).slice(0, 4);
-    if (parts.length > 0) return parts;
-    return [action];
-  }
-
   return (
     <section>
       <div className="rounded-2xl border border-white/[0.08] bg-surface shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_4px_24px_rgba(0,0,0,0.12)]">
         <h2 className="border-b border-white/[0.06] px-6 py-4 text-lg font-semibold text-text">Execution Playbook</h2>
-        <ul className="divide-y divide-white/[0.04] p-6 md:p-8">
+        <ul className="p-6 md:p-8">
           {prioritized.map((insight, idx) => (
-            <li key={idx} className="flex flex-col gap-3 py-5 first:pt-0 last:pb-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className={cn(
-                  "rounded-lg px-2.5 py-1 text-xs font-semibold uppercase",
-                  insight.priority === "HIGH" && "bg-authority-losing/15 text-authority-losing",
-                  insight.priority === "MEDIUM" && "bg-authority-watchlist/15 text-authority-watchlist",
-                  insight.priority === "LOW" && "bg-white/10 text-text-2"
-                )}>
-                  {getSeverityLabel(insight.priority)}
-                </span>
-              </div>
-              <p className="font-semibold text-text">{insight.title}</p>
-              <p className="text-sm leading-snug text-text-2">{insight.whyItMatters}</p>
-              <ul className="list-disc space-y-0.5 pl-4 text-sm text-text-2">
-                {actionBullets(insight.action).map((bullet, i) => (
-                  <li key={i}>{bullet}</li>
-                ))}
-              </ul>
-              <div>
-                <button
-                  type="button"
-                  className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-text-2 hover:bg-white/10 hover:text-text transition-colors"
-                >
-                  View Playbook
-                </button>
-              </div>
-            </li>
+            <PlaybookItem key={idx} insight={insight} index={idx} />
           ))}
         </ul>
       </div>
@@ -3106,27 +3138,32 @@ export default function ClientDetailPage() {
 
             <div ref={heroSentinelRef} className="h-0" aria-hidden />
 
-            {/* Top: Authority Overview (left) + Executive Summary (right) */}
-            <section className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr,minmax(280px,360px)]">
-              <AuthorityOverviewHero
-                client={client}
-                score={selectedSnapshot?.vrtl_score ?? null}
-                previousScore={previousSnapshot?.vrtl_score ?? null}
-                providers={providers}
-                detail={snapshotDetail}
-                confidence={confidence}
-                snapshots={snapshots}
-                snapshotId={selectedSnapshot?.id ?? null}
-                snapshotStatus={selectedSnapshot?.status ?? null}
-                selectedSnapshotId={selectedSnapshotId}
-                onSelectSnapshotId={setSelectedSnapshotId}
-                runSnapshot={runSnapshot}
-                running={running}
-              />
-              <ExecutiveSummaryCard providers={providers} detail={snapshotDetail} confidence={confidence} />
-            </section>
+            {/* Diagnosis: full-width hero (identity, CTAs, index, diagnosis, chart) */}
+            <HeroSection
+              client={client}
+              score={selectedSnapshot?.vrtl_score ?? null}
+              previousScore={previousSnapshot?.vrtl_score ?? null}
+              providers={providers}
+              detail={snapshotDetail}
+              snapshots={snapshots}
+              snapshotId={selectedSnapshot?.id ?? null}
+              snapshotStatus={selectedSnapshot?.status ?? null}
+              selectedSnapshotId={selectedSnapshotId}
+              onSelectSnapshotId={setSelectedSnapshotId}
+              runSnapshot={runSnapshot}
+              running={running}
+            />
 
-            {/* Vulnerabilities by Model */}
+            {/* Situation: Executive Summary 4-up grid (Gap, Weakest, Confidence, Sentiment) */}
+            <ExecutiveSummaryGrid
+              providers={providers}
+              detail={snapshotDetail}
+              confidence={confidence}
+              score={selectedSnapshot?.vrtl_score ?? null}
+              delta={selectedSnapshot?.vrtl_score != null && previousSnapshot?.vrtl_score != null ? selectedSnapshot.vrtl_score - previousSnapshot.vrtl_score : null}
+            />
+
+            {/* Breakdown: Vulnerabilities by Model */}
             <WhatIsWrongSection providers={providers} detail={snapshotDetail} snapshots={snapshots} previousSnapshot={previousSnapshot} />
 
             {/* Execution Playbook */}
