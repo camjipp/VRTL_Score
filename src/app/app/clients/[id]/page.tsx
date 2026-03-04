@@ -1292,11 +1292,21 @@ function getProviderStatus(score: number): { label: string } {
   return { label: "Losing" };
 }
 
+/** Central display names for model/provider keys. Use everywhere to avoid casing regressions. */
+const MODEL_DISPLAY_NAMES: Record<string, string> = {
+  all: "All",
+  openai: "OpenAI",
+  gemini: "Gemini",
+  anthropic: "Anthropic",
+};
+function getModelDisplayName(key: string): string {
+  return MODEL_DISPLAY_NAMES[key.toLowerCase()] ?? key;
+}
 function getProviderDisplayName(provider: string): string {
   const p = provider.toLowerCase();
-  if (p.includes("openai") || p.includes("chatgpt")) return "OpenAI";
-  if (p.includes("gemini") || p.includes("google")) return "Gemini";
-  if (p.includes("anthropic") || p.includes("claude")) return "Anthropic";
+  if (p.includes("openai") || p.includes("chatgpt")) return MODEL_DISPLAY_NAMES.openai;
+  if (p.includes("gemini") || p.includes("google")) return MODEL_DISPLAY_NAMES.gemini;
+  if (p.includes("anthropic") || p.includes("claude")) return MODEL_DISPLAY_NAMES.anthropic;
   return provider;
 }
 
@@ -1484,34 +1494,38 @@ function getChartSeriesForFilter(
   return { scores: valid.map((p) => p.score), dates: valid.map((p) => p.date) };
 }
 
-/* Big trend chart — full-width, 280–340px, premium: tight padding, thicker line, larger points */
+/* Big trend chart — plot area fills card width; segmented control for filters */
 const CHART_FILTERS = ["all", "openai", "gemini", "anthropic"] as const;
+const CHART_HEIGHT = 320;
+/* Wide viewBox so the plot area dominates; padding keeps axis labels clear but minimal */
+const CHART_PADDING = { top: 10, right: 24, bottom: 22, left: 36 };
+const CHART_VIEWBOX_WIDTH = 960;
+const CHART_INNER_WIDTH = CHART_VIEWBOX_WIDTH - CHART_PADDING.left - CHART_PADDING.right;
+const CHART_INNER_HEIGHT = CHART_HEIGHT - CHART_PADDING.top - CHART_PADDING.bottom;
+
 function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
   const [filter, setFilter] = useState<typeof CHART_FILTERS[number]>("all");
   const { scores, dates } = useMemo(() => getChartSeriesForFilter(snapshots, filter), [snapshots, filter]);
-  const chartHeight = 320;
-  const chartWidth = 640;
-  const padding = { top: 12, right: 12, bottom: 24, left: 32 };
-  const innerW = chartWidth - padding.left - padding.right;
-  const innerH = chartHeight - padding.top - padding.bottom;
 
   if (scores.length < 2) {
     return (
-      <div className="rounded-xl bg-white/[0.02] py-4" style={{ minHeight: chartHeight }}>
-        <div className="mb-2 flex flex-wrap items-center gap-1.5">
-          {CHART_FILTERS.map((f) => (
-            <button
-              key={f}
-              type="button"
-              onClick={() => setFilter(f)}
-              className={cn(
-                "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
-                filter === f ? "bg-white/10 text-text" : "text-text-3 hover:bg-white/5 hover:text-text-2"
-              )}
-            >
-              {f === "all" ? "All" : f === "openai" ? "OpenAI" : f === "gemini" ? "Gemini" : "Anthropic"}
-            </button>
-          ))}
+      <div className="rounded-xl bg-white/[0.02] py-4" style={{ minHeight: CHART_HEIGHT }}>
+        <div className="mb-3 flex w-full max-w-md">
+          <div className="inline-flex w-full overflow-hidden rounded-lg border border-white/10 bg-white/[0.03] p-0.5">
+            {CHART_FILTERS.map((f) => (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setFilter(f)}
+                className={cn(
+                  "min-w-0 flex-1 rounded-md py-2 text-center text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-0",
+                  filter === f ? "bg-white/10 text-text" : "text-text-3 hover:bg-white/[0.04] hover:text-text-2"
+                )}
+              >
+                {getModelDisplayName(f)}
+              </button>
+            ))}
+          </div>
         </div>
         <div className="flex h-64 items-center justify-center text-sm text-text-3">Run more snapshots to see trends</div>
       </div>
@@ -1522,34 +1536,36 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
   const min = Math.min(...scores, 0);
   const range = max - min || 1;
   const pathPoints = scores.map((val, i) => {
-    const x = padding.left + (i / (scores.length - 1)) * innerW;
-    const y = padding.top + innerH - ((val - min) / range) * innerH;
+    const x = CHART_PADDING.left + (i / (scores.length - 1)) * CHART_INNER_WIDTH;
+    const y = CHART_PADDING.top + CHART_INNER_HEIGHT - ((val - min) / range) * CHART_INNER_HEIGHT;
     return { x, y, val };
   });
   const pathD = pathPoints.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
-  const areaD = `M ${padding.left} ${padding.top + innerH} ${pathD} L ${pathPoints[pathPoints.length - 1]!.x} ${padding.top + innerH} Z`;
+  const areaD = `M ${CHART_PADDING.left} ${CHART_PADDING.top + CHART_INNER_HEIGHT} ${pathD} L ${pathPoints[pathPoints.length - 1]!.x} ${CHART_PADDING.top + CHART_INNER_HEIGHT} Z`;
   const trend = scores[scores.length - 1]! - scores[0]!;
   const lineColor = trend >= 0 ? CHART_COLORS.dominant : CHART_COLORS.losing;
 
   return (
     <div className="rounded-xl bg-white/[0.02] py-4">
-      <div className="mb-2 flex flex-wrap items-center gap-1.5 px-1">
-        {CHART_FILTERS.map((f) => (
-          <button
-            key={f}
-            type="button"
-            onClick={() => setFilter(f)}
-            className={cn(
-              "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
-              filter === f ? "bg-white/10 text-text" : "text-text-3 hover:bg-white/5 hover:text-text-2"
-            )}
-          >
-            {f === "all" ? "All" : f === "openai" ? "OpenAI" : f === "gemini" ? "Gemini" : "Anthropic"}
-          </button>
-        ))}
+      <div className="mb-3 flex w-full max-w-md">
+        <div className="inline-flex w-full overflow-hidden rounded-lg border border-white/10 bg-white/[0.03] p-0.5">
+          {CHART_FILTERS.map((f) => (
+            <button
+              key={f}
+              type="button"
+              onClick={() => setFilter(f)}
+              className={cn(
+                "min-w-0 flex-1 rounded-md py-2 text-center text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-0",
+                filter === f ? "bg-white/10 text-text" : "text-text-3 hover:bg-white/[0.04] hover:text-text-2"
+              )}
+            >
+              {getModelDisplayName(f)}
+            </button>
+          ))}
+        </div>
       </div>
       <div className="overflow-hidden rounded-lg">
-        <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full" style={{ maxHeight: chartHeight }} aria-hidden>
+        <svg viewBox={`0 0 ${CHART_VIEWBOX_WIDTH} ${CHART_HEIGHT}`} className="w-full" style={{ maxHeight: CHART_HEIGHT }} preserveAspectRatio="xMidYMid meet" aria-hidden>
           <defs>
             <linearGradient id="heroChartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stopColor={lineColor} stopOpacity="0.18" />
@@ -1557,11 +1573,11 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
             </linearGradient>
           </defs>
           {[0, 25, 50, 75, 100].map((val) => {
-            const y = padding.top + innerH - ((val - min) / range) * innerH;
+            const y = CHART_PADDING.top + CHART_INNER_HEIGHT - ((val - min) / range) * CHART_INNER_HEIGHT;
             return (
               <g key={val}>
-                <line x1={padding.left} y1={y} x2={chartWidth - padding.right} y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
-                <text x={padding.left - 5} y={y + 3} textAnchor="end" className="text-[9px] fill-text-3">{val}</text>
+                <line x1={CHART_PADDING.left} y1={y} x2={CHART_VIEWBOX_WIDTH - CHART_PADDING.right} y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+                <text x={CHART_PADDING.left - 5} y={y + 3} textAnchor="end" className="text-[9px] fill-text-3">{val}</text>
               </g>
             );
           })}
@@ -1571,9 +1587,9 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
             <circle key={i} cx={p.x} cy={p.y} r="4" fill="var(--surface)" stroke={lineColor} strokeWidth="2" />
           ))}
           {dates.map((d, i) => {
-            const x = padding.left + (i / (scores.length - 1)) * innerW;
+            const x = CHART_PADDING.left + (i / (scores.length - 1)) * CHART_INNER_WIDTH;
             return (
-              <text key={i} x={x} y={chartHeight - 5} textAnchor="middle" className="text-[9px] fill-text-3">{d}</text>
+              <text key={i} x={x} y={CHART_HEIGHT - 5} textAnchor="middle" className="text-[9px] fill-text-3">{d}</text>
             );
           })}
         </svg>
@@ -1843,7 +1859,7 @@ function WhatIsWrongSection({
           {VULN_MODELS.map((key) => {
             const entry = providerByKey.get(key);
             const score = entry ? entry[1] : null;
-            const label = key === "openai" ? "OpenAI" : key === "gemini" ? "Gemini" : "Anthropic";
+            const label = getModelDisplayName(key);
             const logoUrl = MODEL_LOGO[key];
             const statusTag = score != null ? getMatrixStatusTag(score) : null;
             const gap = score != null ? 100 - score : null;
@@ -1943,7 +1959,7 @@ function VulnerabilityRow({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full cursor-pointer list-none flex-wrap items-center gap-4 py-5 text-left transition-colors hover:bg-white/[0.02]"
+        className="flex w-full cursor-pointer list-none flex-wrap items-center gap-4 rounded-lg border border-transparent py-5 text-left transition-[border-color,opacity] duration-200 hover:border-white/[0.06] hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-0"
       >
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/12 bg-white/[0.04]">
@@ -1972,14 +1988,14 @@ function VulnerabilityRow({
             {delta >= 0 ? "+" : ""}{delta}
           </span>
         )}
-        <span className={cn("ml-auto shrink-0 text-text-3 transition-transform", open && "rotate-180")}>
+        <span className={cn("ml-auto shrink-0 text-text-3 transition-transform duration-200", open && "rotate-180")}>
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
         </span>
       </button>
       {open && (
-        <div className="border-t border-white/[0.04] bg-white/[0.02] pb-6 pt-5">
+        <div className="border-t border-white/[0.04] pb-6 pt-5 transition-[padding] duration-200">
           <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-3">
             <div>
               <h4 className="text-xs font-semibold uppercase tracking-wider text-text-3 mb-2">What&apos;s wrong</h4>
@@ -2148,12 +2164,12 @@ function HowToWinSection({
   );
 }
 
-/* Derive "models affected" from insight title for Execution Priorities. */
+/* Derive "models affected" from insight title; uses central display names. */
 function getModelsAffectedFromInsight(title: string): string {
   const t = title.toLowerCase();
-  if (t.includes("openai") || t.includes("gpt")) return "GPT";
-  if (t.includes("gemini") || t.includes("google")) return "Gemini";
-  if (t.includes("anthropic") || t.includes("claude")) return "Anthropic";
+  if (t.includes("openai") || t.includes("gpt")) return getModelDisplayName("openai");
+  if (t.includes("gemini") || t.includes("google")) return getModelDisplayName("gemini");
+  if (t.includes("anthropic") || t.includes("claude")) return getModelDisplayName("anthropic");
   return "All";
 }
 
