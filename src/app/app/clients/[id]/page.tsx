@@ -1302,6 +1302,15 @@ const MODEL_DISPLAY_NAMES: Record<string, string> = {
 function getModelDisplayName(key: string): string {
   return MODEL_DISPLAY_NAMES[key.toLowerCase()] ?? key;
 }
+
+/** Format playbook/display text: ensure Anthropic, OpenAI, Gemini are properly capitalized. */
+function formatPlaybookText(s: string): string {
+  if (!s?.trim()) return s;
+  return s
+    .replace(/\banthropic\b/gi, "Anthropic")
+    .replace(/\bopenai\b/gi, "OpenAI")
+    .replace(/\bgemini\b/gi, "Gemini");
+}
 function getProviderDisplayName(provider: string): string {
   const p = provider.toLowerCase();
   if (p.includes("openai") || p.includes("chatgpt")) return MODEL_DISPLAY_NAMES.openai;
@@ -1494,14 +1503,14 @@ function getChartSeriesForFilter(
   return { scores: valid.map((p) => p.score), dates: valid.map((p) => p.date) };
 }
 
-/* Big trend chart — plot area fills card width; segmented control for filters */
+/* Big trend chart — information-dense: plot fills card, compact axes, stronger line/area */
 const CHART_FILTERS = ["all", "openai", "gemini", "anthropic"] as const;
 const CHART_HEIGHT = 320;
-/* Wide viewBox so the plot area dominates; padding keeps axis labels clear but minimal */
-const CHART_PADDING = { top: 10, right: 24, bottom: 22, left: 36 };
+const CHART_PADDING = { top: 8, right: 16, bottom: 18, left: 28 };
 const CHART_VIEWBOX_WIDTH = 960;
 const CHART_INNER_WIDTH = CHART_VIEWBOX_WIDTH - CHART_PADDING.left - CHART_PADDING.right;
 const CHART_INNER_HEIGHT = CHART_HEIGHT - CHART_PADDING.top - CHART_PADDING.bottom;
+const CHART_Y_TICKS = [0, 50, 100];
 
 function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
   const [filter, setFilter] = useState<typeof CHART_FILTERS[number]>("all");
@@ -1509,17 +1518,17 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
 
   if (scores.length < 2) {
     return (
-      <div className="rounded-xl bg-white/[0.02] py-4" style={{ minHeight: CHART_HEIGHT }}>
-        <div className="mb-3 flex w-full max-w-md">
-          <div className="inline-flex w-full overflow-hidden rounded-lg border border-white/10 bg-white/[0.03] p-0.5">
+      <div className="rounded-xl bg-white/[0.02] py-2 px-1" style={{ minHeight: CHART_HEIGHT }}>
+        <div className="mb-2 flex w-full max-w-md">
+          <div className="inline-flex w-full overflow-hidden rounded-md border border-white/10 bg-white/[0.04] p-0.5">
             {CHART_FILTERS.map((f) => (
               <button
                 key={f}
                 type="button"
                 onClick={() => setFilter(f)}
                 className={cn(
-                  "min-w-0 flex-1 rounded-md py-2 text-center text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-0",
-                  filter === f ? "bg-white/10 text-text" : "text-text-3 hover:bg-white/[0.04] hover:text-text-2"
+                  "min-w-0 flex-1 rounded py-1.5 text-center text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-inset",
+                  filter === f ? "bg-white/15 text-text shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]" : "text-text-3 hover:bg-white/[0.05] hover:text-text-2"
                 )}
               >
                 {getModelDisplayName(f)}
@@ -1546,17 +1555,17 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
   const lineColor = trend >= 0 ? CHART_COLORS.dominant : CHART_COLORS.losing;
 
   return (
-    <div className="rounded-xl bg-white/[0.02] py-4">
-      <div className="mb-3 flex w-full max-w-md">
-        <div className="inline-flex w-full overflow-hidden rounded-lg border border-white/10 bg-white/[0.03] p-0.5">
+    <div className="rounded-xl bg-white/[0.02] py-2 px-1">
+      <div className="mb-2 flex w-full max-w-md">
+        <div className="inline-flex w-full overflow-hidden rounded-md border border-white/10 bg-white/[0.04] p-0.5">
           {CHART_FILTERS.map((f) => (
             <button
               key={f}
               type="button"
               onClick={() => setFilter(f)}
               className={cn(
-                "min-w-0 flex-1 rounded-md py-2 text-center text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-0",
-                filter === f ? "bg-white/10 text-text" : "text-text-3 hover:bg-white/[0.04] hover:text-text-2"
+                "min-w-0 flex-1 rounded py-1.5 text-center text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-inset",
+                filter === f ? "bg-white/15 text-text shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]" : "text-text-3 hover:bg-white/[0.05] hover:text-text-2"
               )}
             >
               {getModelDisplayName(f)}
@@ -1564,32 +1573,32 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
           ))}
         </div>
       </div>
-      <div className="overflow-hidden rounded-lg">
-        <svg viewBox={`0 0 ${CHART_VIEWBOX_WIDTH} ${CHART_HEIGHT}`} className="w-full" style={{ maxHeight: CHART_HEIGHT }} preserveAspectRatio="xMidYMid meet" aria-hidden>
+      <div className="overflow-hidden rounded-lg min-h-[280px]">
+        <svg viewBox={`0 0 ${CHART_VIEWBOX_WIDTH} ${CHART_HEIGHT}`} className="w-full h-full min-h-[280px]" style={{ maxHeight: CHART_HEIGHT }} preserveAspectRatio="xMidYMid meet" aria-hidden>
           <defs>
             <linearGradient id="heroChartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={lineColor} stopOpacity="0.18" />
-              <stop offset="100%" stopColor={lineColor} stopOpacity="0.02" />
+              <stop offset="0%" stopColor={lineColor} stopOpacity="0.26" />
+              <stop offset="100%" stopColor={lineColor} stopOpacity="0.04" />
             </linearGradient>
           </defs>
-          {[0, 25, 50, 75, 100].map((val) => {
+          {CHART_Y_TICKS.map((val) => {
             const y = CHART_PADDING.top + CHART_INNER_HEIGHT - ((val - min) / range) * CHART_INNER_HEIGHT;
             return (
               <g key={val}>
                 <line x1={CHART_PADDING.left} y1={y} x2={CHART_VIEWBOX_WIDTH - CHART_PADDING.right} y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
-                <text x={CHART_PADDING.left - 5} y={y + 3} textAnchor="end" className="text-[9px] fill-text-3">{val}</text>
+                <text x={CHART_PADDING.left - 4} y={y + 2} textAnchor="end" className="text-[8px] fill-text-3">{val}</text>
               </g>
             );
           })}
           <path d={areaD} fill="url(#heroChartGrad)" />
-          <path d={pathD} fill="none" stroke={lineColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          <path d={pathD} fill="none" stroke={lineColor} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
           {pathPoints.map((p, i) => (
             <circle key={i} cx={p.x} cy={p.y} r="4" fill="var(--surface)" stroke={lineColor} strokeWidth="2" />
           ))}
           {dates.map((d, i) => {
             const x = CHART_PADDING.left + (i / (scores.length - 1)) * CHART_INNER_WIDTH;
             return (
-              <text key={i} x={x} y={CHART_HEIGHT - 5} textAnchor="middle" className="text-[9px] fill-text-3">{d}</text>
+              <text key={i} x={x} y={CHART_HEIGHT - 4} textAnchor="middle" className="text-[8px] fill-text-3">{d}</text>
             );
           })}
         </svg>
@@ -1721,9 +1730,15 @@ const MARKET_SHARE_BAR_COLORS = [
 function AIAnswerMarketShareChart({
   clientName,
   detail,
+  onRunSnapshot,
+  running,
+  snapshotStatus,
 }: {
   clientName: string;
   detail: SnapshotDetailResponse | null;
+  onRunSnapshot?: () => void;
+  running?: boolean;
+  snapshotStatus?: string | null;
 }) {
   const rows = useMemo(() => {
     if (!detail?.summary) return [];
@@ -1755,8 +1770,29 @@ function AIAnswerMarketShareChart({
     return (
       <section className="w-full">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-text-2 mb-4">AI Answer Market Share</h2>
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6">
-          <p className="text-sm text-text-3">Run a snapshot to see citation share by brand.</p>
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 md:p-6">
+          <div className="space-y-3">
+            {[40, 28, 22, 14, 8].map((pct, i) => (
+              <div key={i} className="flex flex-col gap-1">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="h-4 w-20 animate-pulse rounded bg-white/[0.08]" />
+                  <span className="h-4 w-8 animate-pulse rounded bg-white/[0.06]" />
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                  <div
+                    className="h-full rounded-full bg-white/[0.12] animate-pulse"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 text-sm text-text-3">Run a snapshot to generate citation share by brand.</p>
+          {onRunSnapshot && (
+            <div className="mt-3 flex justify-end">
+              <RunSnapshotButton running={running ?? false} snapshotStatus={snapshotStatus ?? null} onRunSnapshot={onRunSnapshot} />
+            </div>
+          )}
         </div>
       </section>
     );
@@ -2047,7 +2083,7 @@ function VulnerabilityRow({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full cursor-pointer list-none flex-wrap items-center gap-4 rounded-lg border border-transparent py-5 text-left transition-[border-color,opacity] duration-200 hover:border-white/[0.06] hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-0"
+        className="flex w-full cursor-pointer list-none flex-wrap items-center gap-4 rounded py-5 text-left transition-shadow duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-0 hover:shadow-[0_1px_0_0_rgba(255,255,255,0.03)]"
       >
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/12 bg-white/[0.04]">
@@ -2083,7 +2119,7 @@ function VulnerabilityRow({
         </span>
       </button>
       {open && (
-        <div className="border-t border-white/[0.04] pb-6 pt-5 transition-[padding] duration-200">
+        <div className="border-t border-white/[0.04] border-l-2 border-l-white/10 pb-6 pt-5 pl-5 ml-0.5">
           <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-3">
             <div>
               <h4 className="text-xs font-semibold uppercase tracking-wider text-text-3 mb-2">What&apos;s wrong</h4>
@@ -2144,11 +2180,11 @@ function PlaybookItem({ insight, index }: { insight: StrategicInsight; index: nu
           insight.priority === "MEDIUM" && "bg-authority-watchlist/15 text-authority-watchlist",
           insight.priority === "LOW" && "bg-white/10 text-text-2"
         )}>
-          Priority: {getSeverityLabel(insight.priority)}
+          PRIORITY: {getSeverityLabel(insight.priority)}
         </span>
       </div>
-      <p className="mt-2 font-semibold text-text">{insight.title}</p>
-      <p className="mt-1 text-sm leading-snug text-text-2">{insight.whyItMatters}</p>
+      <p className="mt-2 font-semibold text-text">{formatPlaybookText(insight.title)}</p>
+      <p className="mt-1 text-sm leading-snug text-text-2">{formatPlaybookText(insight.whyItMatters)}</p>
       {hasContent ? (
         <>
           <button
@@ -2164,19 +2200,19 @@ function PlaybookItem({ insight, index }: { insight: StrategicInsight; index: nu
               <h4 className="text-xs font-semibold uppercase tracking-wider text-text-3 mb-2">Steps &amp; actions</h4>
               <ul className="list-disc space-y-1 pl-4 text-sm text-text-2">
                 {actionBullets(insight.action).map((bullet, i) => (
-                  <li key={i}>{bullet}</li>
+                  <li key={i}>{formatPlaybookText(bullet)}</li>
                 ))}
               </ul>
               {insight.expectedImpact && (
                 <>
                   <h4 className="text-xs font-semibold uppercase tracking-wider text-text-3 mt-4 mb-1">Expected impact</h4>
-                  <p className="text-sm text-text-2">{insight.expectedImpact}</p>
+                  <p className="text-sm text-text-2">{formatPlaybookText(insight.expectedImpact)}</p>
                 </>
               )}
               {insight.consequence && (
                 <>
                   <h4 className="text-xs font-semibold uppercase tracking-wider text-text-3 mt-3 mb-1">If not addressed</h4>
-                  <p className="text-sm text-text-2">{insight.consequence}</p>
+                  <p className="text-sm text-text-2">{formatPlaybookText(insight.consequence)}</p>
                 </>
               )}
             </div>
@@ -3259,7 +3295,7 @@ export default function ClientDetailPage() {
             />
 
             {/* AI Answer Market Share — citation share by brand (below chart, above Executive Summary) */}
-            <AIAnswerMarketShareChart clientName={client.name} detail={snapshotDetail} />
+            <AIAnswerMarketShareChart clientName={client.name} detail={snapshotDetail} onRunSnapshot={runSnapshot} running={running} snapshotStatus={selectedSnapshot?.status ?? null} />
 
             {/* Situation: Executive Summary 4-up grid (Gap, Weakest, Confidence, Sentiment) */}
             <ExecutiveSummaryGrid
