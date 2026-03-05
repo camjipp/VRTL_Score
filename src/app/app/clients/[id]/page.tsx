@@ -3060,14 +3060,14 @@ export default function ClientDetailPage() {
 
   // Fetch snapshot detail when selected changes
   useEffect(() => {
-    if (!selectedSnapshotId) return;
+    if (!selectedSnapshotId || !clientId) return;
     let cancelled = false;
     async function fetchDetail() {
       setDetailLoading(true);
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) throw new Error("Not authenticated");
-        const res = await fetch(`/api/snapshots/detail?snapshotId=${selectedSnapshotId}`, {
+        const res = await fetch(`/api/snapshots/detail?snapshotId=${selectedSnapshotId}&clientId=${encodeURIComponent(clientId)}`, {
           headers: { Authorization: `Bearer ${session.access_token}` },
         });
         if (!res.ok) {
@@ -3084,7 +3084,7 @@ export default function ClientDetailPage() {
     }
     fetchDetail();
     return () => { cancelled = true; };
-  }, [selectedSnapshotId, supabase]);
+  }, [selectedSnapshotId, clientId, supabase]);
 
   // Poll for running snapshot
   useEffect(() => {
