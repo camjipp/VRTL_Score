@@ -1503,10 +1503,10 @@ function getChartSeriesForFilter(
   return { scores: valid.map((p) => p.score), dates: valid.map((p) => p.date) };
 }
 
-/* Big trend chart — primary centerpiece: plot fills card, minimal dead space */
+/* Big trend chart — primary centerpiece: plot fills card, anchored */
 const CHART_FILTERS = ["all", "openai", "gemini", "anthropic"] as const;
-const CHART_HEIGHT = 340;
-const CHART_PADDING = { top: 6, right: 12, bottom: 16, left: 24 };
+const CHART_HEIGHT = 408; /* ~20% taller than 340 */
+const CHART_PADDING = { top: 4, right: 12, bottom: 14, left: 24 };
 const CHART_VIEWBOX_WIDTH = 960;
 const CHART_INNER_WIDTH = CHART_VIEWBOX_WIDTH - CHART_PADDING.left - CHART_PADDING.right;
 const CHART_INNER_HEIGHT = CHART_HEIGHT - CHART_PADDING.top - CHART_PADDING.bottom;
@@ -1519,15 +1519,17 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
 
   const segmentControl = (
     <div className="mb-2 flex w-full max-w-md items-stretch">
-      <div className="inline-flex h-[36px] w-full overflow-hidden rounded-md border border-white/10 bg-white/[0.04] p-0.5" style={{ minHeight: SEGMENT_CONTROL_HEIGHT }}>
+      <div className="inline-flex h-[36px] w-full overflow-hidden rounded-md border border-white/10 bg-white/[0.05] p-0.5" style={{ minHeight: SEGMENT_CONTROL_HEIGHT }}>
         {CHART_FILTERS.map((f) => (
           <button
             key={f}
             type="button"
             onClick={() => setFilter(f)}
             className={cn(
-              "min-w-0 flex-1 rounded-[5px] text-center text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-inset",
-              filter === f ? "bg-white/15 text-text shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]" : "text-text-3 hover:bg-white/[0.05] hover:text-text-2"
+              "min-w-0 flex-1 rounded-[5px] text-center text-xs font-medium transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-inset",
+              filter === f
+                ? "bg-white/20 text-text shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)]"
+                : "text-text-3 hover:bg-white/[0.08] hover:text-text-2"
             )}
           >
             {getModelDisplayName(f)}
@@ -1539,7 +1541,7 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
 
   if (scores.length < 2) {
     return (
-      <div className="rounded-xl bg-white/[0.02] py-1.5 px-1" style={{ minHeight: CHART_HEIGHT }}>
+      <div className="rounded-xl bg-white/[0.02] pt-1 pb-0 px-1" style={{ minHeight: CHART_HEIGHT }}>
         {segmentControl}
         <div className="flex h-64 items-center justify-center text-sm text-text-3">Run more snapshots to see trends</div>
       </div>
@@ -1560,10 +1562,10 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
   const lineColor = trend >= 0 ? CHART_COLORS.dominant : CHART_COLORS.losing;
 
   return (
-    <div className="rounded-xl bg-white/[0.02] py-1.5 px-1">
+    <div className="rounded-xl bg-white/[0.02] pt-1 pb-0 px-1">
       {segmentControl}
-      <div className="overflow-hidden rounded-lg min-h-[300px]">
-        <svg viewBox={`0 0 ${CHART_VIEWBOX_WIDTH} ${CHART_HEIGHT}`} className="w-full h-full min-h-[300px]" style={{ maxHeight: CHART_HEIGHT }} preserveAspectRatio="xMidYMid meet" aria-hidden>
+      <div className="overflow-hidden rounded-lg min-h-[360px]">
+        <svg viewBox={`0 0 ${CHART_VIEWBOX_WIDTH} ${CHART_HEIGHT}`} className="w-full h-full min-h-[360px] block" style={{ maxHeight: CHART_HEIGHT }} preserveAspectRatio="xMidYMid meet" aria-hidden>
           <defs>
             <linearGradient id="heroChartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stopColor={lineColor} stopOpacity="0.26" />
@@ -1663,12 +1665,17 @@ function HeroSection({
             </div>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+            <RunSnapshotButton
+              running={running}
+              snapshotStatus={snapshotStatus}
+              onRunSnapshot={runSnapshot}
+              className="rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-text shadow-sm transition-colors hover:border-white/30 hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/20"
+            />
             {snapshotId && (
               <div className="[&_button]:!rounded-xl [&_button]:!px-5 [&_button]:!py-3 [&_button]:!text-base [&_button]:!font-semibold [&_button]:!bg-white [&_button]:!text-surface [&_button]:shadow-md [&_button]:hover:!bg-white/95 [&_button]:focus:!outline-none [&_button]:focus:!ring-2 [&_button]:focus:!ring-white/30">
                 <DownloadPdfButton snapshotId={snapshotId} label="Download AI Authority Report (PDF)" />
               </div>
             )}
-            <RunSnapshotButton running={running} snapshotStatus={snapshotStatus} onRunSnapshot={runSnapshot} />
             <SnapshotSelector snapshots={snapshots} selectedId={selectedSnapshotId} onSelect={onSelectSnapshotId} />
           </div>
         </div>
@@ -1707,12 +1714,13 @@ function HeroSection({
 /* ═══════════════════════════════════════════════════════════════════════════
    AI Answer Market Share — horizontal bar leaderboard (citation share by brand)
 ═══════════════════════════════════════════════════════════════════════════ */
-const MARKET_SHARE_BAR_COLORS = [
-  "bg-white/20",
+/* Leader: brighter gray; others: darker gray for hierarchy */
+const MARKET_SHARE_BAR_LEADER = "bg-white/25";
+const MARKET_SHARE_BAR_OTHERS = [
   "bg-white/14",
-  "bg-white/10",
-  "bg-white/[0.08]",
-  "bg-white/[0.06]",
+  "bg-white/11",
+  "bg-white/[0.09]",
+  "bg-white/[0.07]",
   "bg-white/[0.05]",
 ] as const;
 
@@ -1785,7 +1793,7 @@ function AIAnswerMarketShareChart({
 
   if (rows.length === 0) {
     return (
-      <section className="w-full">
+      <section className="mt-10 w-full">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-text-2 mb-4">AI Answer Market Share</h2>
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 md:p-6">
           <div className="space-y-3">
@@ -1795,7 +1803,7 @@ function AIAnswerMarketShareChart({
                   <span className="h-4 w-20 animate-pulse rounded bg-white/[0.08]" />
                   <span className="h-4 w-8 animate-pulse rounded bg-white/[0.06]" />
                 </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
                   <div
                     className="h-full rounded-full bg-white/[0.12] animate-pulse"
                     style={{ width: `${pct}%` }}
@@ -1816,7 +1824,7 @@ function AIAnswerMarketShareChart({
   }
 
   return (
-    <section className="w-full">
+    <section className="mt-10 w-full">
       <h2 className="text-sm font-semibold uppercase tracking-wider text-text-2 mb-4">AI Answer Market Share</h2>
       <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 md:p-6">
         <div className="space-y-2.5">
@@ -1839,12 +1847,11 @@ function AIAnswerMarketShareChart({
                   row.isLeader ? "font-semibold text-text" : "text-text-2"
                 )}>{row.share}%</span>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.06]">
+              <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
                 <div
                   className={cn(
                     "h-full rounded-full transition-[width] duration-300",
-                    row.isClient ? "bg-white/20" : MARKET_SHARE_BAR_COLORS[Math.min(i, MARKET_SHARE_BAR_COLORS.length - 1)],
-                    row.isLeader && !row.isClient && "opacity-90"
+                    row.isLeader ? MARKET_SHARE_BAR_LEADER : (row.isClient ? "bg-white/20" : MARKET_SHARE_BAR_OTHERS[Math.min(i, MARKET_SHARE_BAR_OTHERS.length - 1)])
                   )}
                   style={{ width: `${row.share}%` }}
                 />
@@ -1884,7 +1891,7 @@ function ExecutiveSummaryGrid({
   ];
 
   return (
-    <section className="w-full">
+    <section className="mt-10 w-full">
       <h2 className="text-sm font-semibold uppercase tracking-wider text-text-2 mb-4">Executive Summary</h2>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {tiles.map((t, i) => (
@@ -2003,10 +2010,10 @@ function WhatIsWrongSection({
   }, [snapshots]);
 
   return (
-    <section>
+    <section className="mt-10">
       <div className="rounded-2xl border border-white/[0.08] bg-surface shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_4px_24px_rgba(0,0,0,0.12)]">
         <h2 className="border-b border-white/[0.06] px-6 py-4 text-lg font-semibold text-text">Vulnerabilities by Model</h2>
-        <div className="divide-y divide-white/[0.04] px-6">
+        <div className="divide-y divide-white/[0.06] px-6">
           {VULN_MODELS.map((key) => {
             const entry = providerByKey.get(key);
             const score = entry ? entry[1] : null;
@@ -2110,7 +2117,7 @@ function VulnerabilityRow({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full cursor-pointer list-none flex-wrap items-center gap-4 rounded py-5 text-left transition-shadow duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-0 hover:shadow-[0_1px_0_0_rgba(255,255,255,0.03)]"
+        className="flex w-full cursor-pointer list-none flex-wrap items-center gap-4 rounded py-6 text-left transition-shadow duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-0 hover:shadow-[0_1px_0_0_rgba(255,255,255,0.03)]"
       >
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/12 bg-white/[0.04]">
@@ -2122,16 +2129,16 @@ function VulnerabilityRow({
           {score != null && <span className="tabular-nums font-semibold text-text">{score}</span>}
           {statusTag && (
             <span className={cn(
-              "rounded px-1.5 py-0.5 text-[10px] font-medium uppercase",
-              statusTag === "Strong" && "bg-authority-dominant/10 text-authority-dominant",
-              statusTag === "Watchlist" && "bg-authority-watchlist/10 text-authority-watchlist",
-              statusTag === "Critical" && "bg-authority-losing/10 text-authority-losing"
+              "rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+              statusTag === "Strong" && "bg-authority-dominant/20 text-authority-dominant",
+              statusTag === "Watchlist" && "bg-authority-watchlist/20 text-authority-watchlist",
+              statusTag === "Critical" && "bg-authority-losing/20 text-authority-losing"
             )}>{statusTag}</span>
           )}
           {gapToLeader != null && <span className="text-sm text-text-2">Gap: {gapToLeader} pts</span>}
         </div>
-        <div className="h-3 w-28 min-w-[100px] overflow-hidden rounded-full bg-white/10">
-          <div className={cn("h-full rounded-full opacity-90", barColor)} style={{ width: `${barPct}%` }} />
+        <div className="h-3 w-28 min-w-[100px] overflow-hidden rounded-full bg-white/[0.08]">
+          <div className={cn("h-full rounded-full", barColor)} style={{ width: `${barPct}%` }} />
         </div>
         {series.length >= 2 && <MicroSparkline scores={series} color={trendColor} />}
         {delta != null && (
@@ -2204,7 +2211,7 @@ function PlaybookItem({ insight, index }: { insight: StrategicInsight; index: nu
   }
 
   return (
-    <li className="border-b border-white/[0.04] py-5 first:pt-0 last:border-0 last:pb-0">
+    <li className="border-b border-white/[0.06] py-6 first:pt-0 last:border-0 last:pb-0">
       <div className="flex flex-wrap items-center gap-2">
         <span className={cn(
           "rounded-lg px-2.5 py-1 text-xs font-semibold uppercase",
@@ -2286,7 +2293,7 @@ function HowToWinSection({
 
   if (score === null) {
     return (
-      <section>
+      <section className="mt-10">
         <div className="rounded-2xl border border-white/[0.08] bg-surface p-6 md:p-8">
           <h2 className="text-lg font-semibold text-text">Execution Playbook</h2>
           <p className="mt-2 text-sm text-text-2">Run a snapshot to generate your playbook.</p>
@@ -2297,7 +2304,7 @@ function HowToWinSection({
 
   if (prioritized.length === 0) {
     return (
-      <section>
+      <section className="mt-10">
         <div className="rounded-2xl border border-white/[0.08] bg-surface p-6 md:p-8">
           <h2 className="text-lg font-semibold text-text">Execution Playbook</h2>
           <p className="mt-2 text-sm text-text-2">Authority is performing well. Continue monitoring.</p>
@@ -2307,7 +2314,7 @@ function HowToWinSection({
   }
 
   return (
-    <section>
+    <section className="mt-10">
       <div className="rounded-2xl border border-white/[0.08] bg-surface shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_4px_24px_rgba(0,0,0,0.12)]">
         <h2 className="border-b border-white/[0.06] px-6 py-4 text-lg font-semibold text-text">Execution Playbook</h2>
         <ul className="p-6 md:p-8">
