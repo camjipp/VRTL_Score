@@ -1706,6 +1706,94 @@ function HeroSection({
   );
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   AI Answer Market Share — horizontal bar leaderboard (citation share by brand)
+═══════════════════════════════════════════════════════════════════════════ */
+const MARKET_SHARE_BAR_COLORS = [
+  "bg-white/20",
+  "bg-white/14",
+  "bg-white/10",
+  "bg-white/[0.08]",
+  "bg-white/[0.06]",
+  "bg-white/[0.05]",
+] as const;
+
+function AIAnswerMarketShareChart({
+  clientName,
+  detail,
+}: {
+  clientName: string;
+  detail: SnapshotDetailResponse | null;
+}) {
+  const rows = useMemo(() => {
+    if (!detail?.summary) return [];
+    const clientCount = detail.summary.client_mentioned_count ?? 0;
+    const competitors = detail.summary.top_competitors ?? [];
+    const entities: { name: string; count: number; isClient: boolean }[] = [
+      { name: clientName, count: clientCount, isClient: true },
+      ...competitors.map((c) => ({ name: c.name, count: c.count, isClient: false })),
+    ];
+    const total = entities.reduce((sum, e) => sum + e.count, 0);
+    if (total === 0) return [];
+
+    const withShare = entities
+      .map((e) => ({ ...e, share: Math.round((e.count / total) * 100) }))
+      .filter((e) => e.count > 0)
+      .sort((a, b) => b.share - a.share);
+
+    const top5 = withShare.slice(0, 5);
+    const rest = withShare.slice(5);
+    const otherCount = rest.reduce((s, e) => s + e.count, 0);
+    const otherShare = total > 0 ? Math.round((otherCount / total) * 100) : 0;
+    if (rest.length > 0) {
+      top5.push({ name: "Other", count: otherCount, isClient: false, share: otherShare });
+    }
+    return top5;
+  }, [detail, clientName]);
+
+  if (rows.length === 0) {
+    return (
+      <section className="w-full">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-text-2 mb-4">AI Answer Market Share</h2>
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6">
+          <p className="text-sm text-text-3">Run a snapshot to see citation share by brand.</p>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="w-full">
+      <h2 className="text-sm font-semibold uppercase tracking-wider text-text-2 mb-4">AI Answer Market Share</h2>
+      <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 md:p-6">
+        <div className="space-y-3">
+          {rows.map((row, i) => (
+            <div
+              key={row.name}
+              className="group flex flex-col gap-1 rounded-lg py-1 transition-colors duration-150 hover:bg-white/[0.02]"
+              title={`${row.name}: ${row.count} citation${row.count !== 1 ? "s" : ""}`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <span className="min-w-0 truncate text-sm font-medium text-text">{row.name}</span>
+                <span className="shrink-0 tabular-nums text-sm text-text-2">{row.share}%</span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                <div
+                  className={cn(
+                    "h-full rounded-full transition-[width] duration-300",
+                    row.isClient ? "bg-white/20" : MARKET_SHARE_BAR_COLORS[Math.min(i, MARKET_SHARE_BAR_COLORS.length - 1)]
+                  )}
+                  style={{ width: `${row.share}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* Executive Summary — full-width 2x2 grid under hero (Gap, Weakest, Confidence, Sentiment) */
 function ExecutiveSummaryGrid({
   providers,
@@ -3169,6 +3257,9 @@ export default function ClientDetailPage() {
               runSnapshot={runSnapshot}
               running={running}
             />
+
+            {/* AI Answer Market Share — citation share by brand (below chart, above Executive Summary) */}
+            <AIAnswerMarketShareChart clientName={client.name} detail={snapshotDetail} />
 
             {/* Situation: Executive Summary 4-up grid (Gap, Weakest, Confidence, Sentiment) */}
             <ExecutiveSummaryGrid
