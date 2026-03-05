@@ -1503,39 +1503,44 @@ function getChartSeriesForFilter(
   return { scores: valid.map((p) => p.score), dates: valid.map((p) => p.date) };
 }
 
-/* Big trend chart — information-dense: plot fills card, compact axes, stronger line/area */
+/* Big trend chart — primary centerpiece: plot fills card, minimal dead space */
 const CHART_FILTERS = ["all", "openai", "gemini", "anthropic"] as const;
-const CHART_HEIGHT = 320;
-const CHART_PADDING = { top: 8, right: 16, bottom: 18, left: 28 };
+const CHART_HEIGHT = 340;
+const CHART_PADDING = { top: 6, right: 12, bottom: 16, left: 24 };
 const CHART_VIEWBOX_WIDTH = 960;
 const CHART_INNER_WIDTH = CHART_VIEWBOX_WIDTH - CHART_PADDING.left - CHART_PADDING.right;
 const CHART_INNER_HEIGHT = CHART_HEIGHT - CHART_PADDING.top - CHART_PADDING.bottom;
 const CHART_Y_TICKS = [0, 50, 100];
+const SEGMENT_CONTROL_HEIGHT = 36;
 
 function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
   const [filter, setFilter] = useState<typeof CHART_FILTERS[number]>("all");
   const { scores, dates } = useMemo(() => getChartSeriesForFilter(snapshots, filter), [snapshots, filter]);
 
+  const segmentControl = (
+    <div className="mb-2 flex w-full max-w-md items-stretch">
+      <div className="inline-flex h-[36px] w-full overflow-hidden rounded-md border border-white/10 bg-white/[0.04] p-0.5" style={{ minHeight: SEGMENT_CONTROL_HEIGHT }}>
+        {CHART_FILTERS.map((f) => (
+          <button
+            key={f}
+            type="button"
+            onClick={() => setFilter(f)}
+            className={cn(
+              "min-w-0 flex-1 rounded-[5px] text-center text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-inset",
+              filter === f ? "bg-white/15 text-text shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]" : "text-text-3 hover:bg-white/[0.05] hover:text-text-2"
+            )}
+          >
+            {getModelDisplayName(f)}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
   if (scores.length < 2) {
     return (
-      <div className="rounded-xl bg-white/[0.02] py-2 px-1" style={{ minHeight: CHART_HEIGHT }}>
-        <div className="mb-2 flex w-full max-w-md">
-          <div className="inline-flex w-full overflow-hidden rounded-md border border-white/10 bg-white/[0.04] p-0.5">
-            {CHART_FILTERS.map((f) => (
-              <button
-                key={f}
-                type="button"
-                onClick={() => setFilter(f)}
-                className={cn(
-                  "min-w-0 flex-1 rounded py-1.5 text-center text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-inset",
-                  filter === f ? "bg-white/15 text-text shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]" : "text-text-3 hover:bg-white/[0.05] hover:text-text-2"
-                )}
-              >
-                {getModelDisplayName(f)}
-              </button>
-            ))}
-          </div>
-        </div>
+      <div className="rounded-xl bg-white/[0.02] py-1.5 px-1" style={{ minHeight: CHART_HEIGHT }}>
+        {segmentControl}
         <div className="flex h-64 items-center justify-center text-sm text-text-3">Run more snapshots to see trends</div>
       </div>
     );
@@ -1555,26 +1560,10 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
   const lineColor = trend >= 0 ? CHART_COLORS.dominant : CHART_COLORS.losing;
 
   return (
-    <div className="rounded-xl bg-white/[0.02] py-2 px-1">
-      <div className="mb-2 flex w-full max-w-md">
-        <div className="inline-flex w-full overflow-hidden rounded-md border border-white/10 bg-white/[0.04] p-0.5">
-          {CHART_FILTERS.map((f) => (
-            <button
-              key={f}
-              type="button"
-              onClick={() => setFilter(f)}
-              className={cn(
-                "min-w-0 flex-1 rounded py-1.5 text-center text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-inset",
-                filter === f ? "bg-white/15 text-text shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]" : "text-text-3 hover:bg-white/[0.05] hover:text-text-2"
-              )}
-            >
-              {getModelDisplayName(f)}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="overflow-hidden rounded-lg min-h-[280px]">
-        <svg viewBox={`0 0 ${CHART_VIEWBOX_WIDTH} ${CHART_HEIGHT}`} className="w-full h-full min-h-[280px]" style={{ maxHeight: CHART_HEIGHT }} preserveAspectRatio="xMidYMid meet" aria-hidden>
+    <div className="rounded-xl bg-white/[0.02] py-1.5 px-1">
+      {segmentControl}
+      <div className="overflow-hidden rounded-lg min-h-[300px]">
+        <svg viewBox={`0 0 ${CHART_VIEWBOX_WIDTH} ${CHART_HEIGHT}`} className="w-full h-full min-h-[300px]" style={{ maxHeight: CHART_HEIGHT }} preserveAspectRatio="xMidYMid meet" aria-hidden>
           <defs>
             <linearGradient id="heroChartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stopColor={lineColor} stopOpacity="0.26" />
@@ -1598,7 +1587,7 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
           {dates.map((d, i) => {
             const x = CHART_PADDING.left + (i / (scores.length - 1)) * CHART_INNER_WIDTH;
             return (
-              <text key={i} x={x} y={CHART_HEIGHT - 4} textAnchor="middle" className="text-[8px] fill-text-3">{d}</text>
+              <text key={i} x={x} y={CHART_HEIGHT - 3} textAnchor="middle" className="text-[8px] fill-text-3">{d}</text>
             );
           })}
         </svg>
@@ -1727,6 +1716,24 @@ const MARKET_SHARE_BAR_COLORS = [
   "bg-white/[0.05]",
 ] as const;
 
+/** Normalize brand name for display: trim, collapse whitespace, title-case; merge known variants. */
+function normalizeBrandName(name: string): string {
+  const t = name.trim().replace(/\s+/g, " ");
+  if (!t) return name;
+  const lower = t.toLowerCase();
+  const known: Record<string, string> = {
+    "hydro flask": "Hydro Flask",
+    hydroflask: "Hydro Flask",
+    "hydro-flask": "Hydro Flask",
+    "stanley": "Stanley",
+    "yeti": "Yeti",
+    "rtic": "RTIC",
+    "owala": "Owala",
+  };
+  if (known[lower]) return known[lower];
+  return t.replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+}
+
 function AIAnswerMarketShareChart({
   clientName,
   detail,
@@ -1744,10 +1751,20 @@ function AIAnswerMarketShareChart({
     if (!detail?.summary) return [];
     const clientCount = detail.summary.client_mentioned_count ?? 0;
     const competitors = detail.summary.top_competitors ?? [];
-    const entities: { name: string; count: number; isClient: boolean }[] = [
+    const rawEntities: { name: string; count: number; isClient: boolean }[] = [
       { name: clientName, count: clientCount, isClient: true },
       ...competitors.map((c) => ({ name: c.name, count: c.count, isClient: false })),
     ];
+    const merged = new Map<string, { name: string; count: number; isClient: boolean }>();
+    for (const e of rawEntities) {
+      const norm = normalizeBrandName(e.name);
+      const existing = merged.get(norm);
+      if (existing) {
+        existing.count += e.count;
+        if (e.isClient) existing.isClient = true;
+      } else merged.set(norm, { name: norm, count: e.count, isClient: e.isClient });
+    }
+    const entities = Array.from(merged.values());
     const total = entities.reduce((sum, e) => sum + e.count, 0);
     if (total === 0) return [];
 
@@ -1763,7 +1780,7 @@ function AIAnswerMarketShareChart({
     if (rest.length > 0) {
       top5.push({ name: "Other", count: otherCount, isClient: false, share: otherShare });
     }
-    return top5;
+    return top5.map((row, i) => ({ ...row, rank: i + 1, isLeader: i === 0 }));
   }, [detail, clientName]);
 
   if (rows.length === 0) {
@@ -1802,22 +1819,32 @@ function AIAnswerMarketShareChart({
     <section className="w-full">
       <h2 className="text-sm font-semibold uppercase tracking-wider text-text-2 mb-4">AI Answer Market Share</h2>
       <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 md:p-6">
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {rows.map((row, i) => (
             <div
               key={row.name}
-              className="group flex flex-col gap-1 rounded-lg py-1 transition-colors duration-150 hover:bg-white/[0.02]"
+              className="group flex flex-col gap-1 rounded-lg py-1.5 transition-colors duration-150"
               title={`${row.name}: ${row.count} citation${row.count !== 1 ? "s" : ""}`}
             >
               <div className="flex items-center justify-between gap-3">
-                <span className="min-w-0 truncate text-sm font-medium text-text">{row.name}</span>
-                <span className="shrink-0 tabular-nums text-sm text-text-2">{row.share}%</span>
+                <div className="flex min-w-0 shrink items-center gap-2.5">
+                  <span className="w-5 shrink-0 text-right text-xs font-medium tabular-nums text-text-3">{row.rank}</span>
+                  <span className={cn(
+                    "min-w-0 truncate text-sm font-medium",
+                    row.isLeader ? "text-text" : "text-text-2"
+                  )}>{row.name}</span>
+                </div>
+                <span className={cn(
+                  "shrink-0 tabular-nums text-sm",
+                  row.isLeader ? "font-semibold text-text" : "text-text-2"
+                )}>{row.share}%</span>
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.06]">
                 <div
                   className={cn(
                     "h-full rounded-full transition-[width] duration-300",
-                    row.isClient ? "bg-white/20" : MARKET_SHARE_BAR_COLORS[Math.min(i, MARKET_SHARE_BAR_COLORS.length - 1)]
+                    row.isClient ? "bg-white/20" : MARKET_SHARE_BAR_COLORS[Math.min(i, MARKET_SHARE_BAR_COLORS.length - 1)],
+                    row.isLeader && !row.isClient && "opacity-90"
                   )}
                   style={{ width: `${row.share}%` }}
                 />
@@ -2118,36 +2145,41 @@ function VulnerabilityRow({
           </svg>
         </span>
       </button>
-      {open && (
-        <div className="border-t border-white/[0.04] border-l-2 border-l-white/10 pb-6 pt-5 pl-5 ml-0.5">
-          <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-3">
-            <div>
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-text-3 mb-2">What&apos;s wrong</h4>
-              <ul className="list-disc space-y-1 pl-4 text-sm text-text-2">
-                {whatsWrong.map((b, i) => (
-                  <li key={i}>{b}</li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-text-3 mb-2">Evidence signals</h4>
-              <ul className="list-disc space-y-1 pl-4 text-sm text-text-2">
-                {evidence.map((b, i) => (
-                  <li key={i}>{b}</li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-text-3 mb-2">Quick wins</h4>
-              <ul className="list-disc space-y-1 pl-4 text-sm text-text-2">
-                {quickWins.map((b, i) => (
-                  <li key={i}>{b}</li>
-                ))}
-              </ul>
+      <div
+        className="grid transition-[grid-template-rows] duration-200 ease-out"
+        style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div className="border-t border-white/[0.04] border-l-2 border-l-white/10 pb-6 pt-5 pl-5 ml-0.5">
+            <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-3">
+              <div>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-3 mb-2">What&apos;s wrong</h4>
+                <ul className="list-disc space-y-1 pl-4 text-sm text-text-2">
+                  {whatsWrong.map((b, i) => (
+                    <li key={i}>{formatPlaybookText(b)}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-3 mb-2">Evidence signals</h4>
+                <ul className="list-disc space-y-1 pl-4 text-sm text-text-2">
+                  {evidence.map((b, i) => (
+                    <li key={i}>{formatPlaybookText(b)}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-text-3 mb-2">Quick wins</h4>
+                <ul className="list-disc space-y-1 pl-4 text-sm text-text-2">
+                  {quickWins.map((b, i) => (
+                    <li key={i}>{formatPlaybookText(b)}</li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
