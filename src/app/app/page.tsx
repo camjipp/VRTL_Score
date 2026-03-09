@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import { Alert, AlertDescription } from "@/components/ui/Alert";
 import { TopBar } from "@/components/TopBar";
 import { ensureOnboarded } from "@/lib/onboard";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -936,6 +937,7 @@ export default function AppPage() {
   const [filterHealth, setFilterHealth] = useState<"all" | "dominant" | "stable" | "watchlist" | "losing">("all");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showLogoFailedBanner, setShowLogoFailedBanner] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -1167,6 +1169,18 @@ export default function AppPage() {
     return () => { cancelled = true; };
   }, [supabase]);
 
+  // One-time banner if user just completed onboarding but logo upload failed
+  useEffect(() => {
+    try {
+      if (typeof sessionStorage !== "undefined" && sessionStorage.getItem("onboarding_logo_failed") === "1") {
+        sessionStorage.removeItem("onboarding_logo_failed");
+        setShowLogoFailedBanner(true);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
   // Filter and sort
   const filteredClients = useMemo(() => {
     let result = clients.filter(
@@ -1241,6 +1255,27 @@ export default function AppPage() {
       />
 
       <div className="flex-1 space-y-4 p-6">
+        {showLogoFailedBanner && (
+          <Alert variant="warning" className="flex items-center justify-between gap-4">
+            <AlertDescription>
+              Logo couldn&apos;t be uploaded during setup. You can add it later in{" "}
+              <Link href="/app/settings" className="font-medium underline underline-offset-2 hover:no-underline">
+                Settings
+              </Link>
+              .
+            </AlertDescription>
+            <button
+              type="button"
+              onClick={() => setShowLogoFailedBanner(false)}
+              className="shrink-0 rounded p-1 text-text-2 hover:bg-white/10 hover:text-text"
+              aria-label="Dismiss"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </Alert>
+        )}
         <PortfolioStrip
           clients={clients}
           filterHealth={filterHealth}

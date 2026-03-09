@@ -96,17 +96,25 @@ export function OnboardingForm() {
     checkAuth();
   }, [supabase.auth]);
 
+  const LOAD_SETTINGS_TIMEOUT_MS = 25_000;
+
   async function loadAgencySettings(accessToken: string) {
     setLoading(true);
     setError(null);
     try {
-      await onboardApi(accessToken);
-      const res = await fetch("/api/agency/settings", {
-        headers: { Authorization: `Bearer ${accessToken}` }
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error("Request timed out. Please refresh and try again.")), LOAD_SETTINGS_TIMEOUT_MS);
       });
-      if (!res.ok) throw new Error(await res.text());
-      const json = (await res.json()) as AgencySettings;
-      setAgencyName(json.name && json.name !== "New Agency" ? json.name : "");
+      const work = (async () => {
+        await onboardApi(accessToken);
+        const res = await fetch("/api/agency/settings", {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const json = (await res.json()) as AgencySettings;
+        setAgencyName(json.name && json.name !== "New Agency" ? json.name : "");
+      })();
+      await Promise.race([work, timeoutPromise]);
     } catch (e) {
       const err = e as { message?: string };
       setError(err?.message || String(e));
@@ -164,7 +172,7 @@ export function OnboardingForm() {
     }
   }
 
-  // Finish agency setup
+  // Finish agency setup. Logo upload is optional and must never block completion.
   async function finishSetup() {
     setSaving(true);
     setError(null);
@@ -182,28 +190,39 @@ export function OnboardingForm() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`
         },
-        body: JSON.stringify({ 
-          name, 
+        body: JSON.stringify({
+          name,
           brand_accent: null,
-          // Store survey data as metadata (optional - could add these columns later)
-          // goal: selectedGoal,
-          // team_size: selectedSize,
         })
       });
       if (!upd.ok) throw new Error(await upd.text());
 
+      // Logo upload is optional. Do not block onboarding on storage/bucket errors.
       if (logoFile) {
-        const fd = new FormData();
-        fd.append("file", logoFile);
-        const up = await fetch("/api/agency/logo", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${accessToken}` },
-          body: fd
-        });
-        if (!up.ok) throw new Error(await up.text());
+        try {
+          const fd = new FormData();
+          fd.append("file", logoFile);
+          const up = await fetch("/api/agency/logo", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${accessToken}` },
+            body: fd
+          });
+          if (!up.ok) {
+            const errText = await up.text();
+            if (typeof sessionStorage !== "undefined") {
+              sessionStorage.setItem("onboarding_logo_failed", "1");
+            }
+            console.warn("Logo upload failed (onboarding continues):", errText);
+          }
+        } catch (logoErr) {
+          if (typeof sessionStorage !== "undefined") {
+            sessionStorage.setItem("onboarding_logo_failed", "1");
+          }
+          console.warn("Logo upload error (onboarding continues):", logoErr);
+        }
       }
 
-      // Check entitlements
+      // Check entitlements and redirect regardless of logo outcome
       const ent = await fetch("/api/entitlements", {
         headers: { Authorization: `Bearer ${accessToken}` }
       });

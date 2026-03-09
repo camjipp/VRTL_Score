@@ -6,6 +6,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
+/** Logo upload is optional. Callers (e.g. onboarding) must NOT block completion on this endpoint. */
 const LOGO_BUCKET = process.env.AGENCY_LOGO_BUCKET || "agency-logos";
 
 function bearerToken(req: Request): string | null {
