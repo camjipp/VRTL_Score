@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -9,6 +10,19 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { cn } from "@/lib/cn";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+
+function OnboardingHeader({ showExit }: { showExit: boolean }) {
+  return (
+    <header className="flex h-14 items-center justify-between border-b border-white/[0.06] bg-bg px-6">
+      <Link href="/" className="flex shrink-0 items-center">
+        <Image src="/brand/VRTL_Solo.png" alt="VRTL Score" width={140} height={40} className="h-8 w-auto opacity-95" priority />
+      </Link>
+      {showExit && (
+        <Link href="/" className="text-sm font-medium text-text-2 hover:text-text transition-colors">Exit setup</Link>
+      )}
+    </header>
+  );
+}
 
 function normalizeWebsite(input: string): string {
   const raw = input.trim();
@@ -41,10 +55,10 @@ async function onboardApi(accessToken: string) {
 }
 
 const goalOptions = [
-  { id: "reporting", label: "Client reporting & retention", icon: "📊" },
-  { id: "competitive", label: "Competitive intelligence", icon: "🔍" },
-  { id: "service", label: "Adding AI visibility as a service", icon: "🚀" },
-  { id: "exploring", label: "Just exploring", icon: "👀" },
+  { id: "reporting", label: "Client reporting" },
+  { id: "competitive", label: "Competitive intelligence" },
+  { id: "service", label: "Offer AI visibility as a service" },
+  { id: "exploring", label: "Exploring the platform" },
 ];
 
 const sizeOptions = [
@@ -240,58 +254,53 @@ export function OnboardingForm() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-surface to-bg">
-      <div className="mx-auto max-w-6xl px-6 py-12 md:py-20">
+    <main className="min-h-screen bg-bg">
+      <OnboardingHeader showExit={isAuthenticated === true} />
+      <div className="mx-auto max-w-6xl px-6 py-10 md:py-14">
         {/* Loading state */}
         {isAuthenticated === null && (
-          <div className="flex min-h-[60vh] items-center justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-text/20 border-t-text" />
+          <div className="flex min-h-[50vh] items-center justify-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-text" />
           </div>
         )}
 
-        {/* Step 1: Create account */}
+        {/* Create account */}
         {isAuthenticated === false && (
-          <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">
-            {/* Left: Form */}
+          <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
             <div>
-              <div className="mb-8">
-                <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  7-day free trial
-                </div>
-                <h1 className="mt-4 text-3xl font-bold tracking-tight text-text sm:text-4xl">
+              <div className="mb-6">
+                <span className="inline-block rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-medium text-text-2">7-day free trial</span>
+                <h1 className="mt-4 text-2xl font-semibold tracking-tight text-text sm:text-3xl">
                   Start tracking AI visibility
                 </h1>
-                <p className="mt-3 text-lg text-text-2">
+                <p className="mt-2 text-base text-text-2">
                   See how your clients rank across leading AI models. Try free for 7 days.
                 </p>
               </div>
 
               {website && (
-                <div className="mb-6 rounded-xl bg-emerald-50 p-4 ring-1 ring-emerald-100">
+                <div className="mb-5 rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm">
-                      <svg className="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/5">
+                      <svg className="h-4 w-4 text-text-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                       </svg>
                     </div>
                     <div>
-                      <div className="text-xs font-medium text-emerald-700">Your first client</div>
+                      <div className="text-xs font-medium text-text-3">First client</div>
                       <div className="font-medium text-text">{website}</div>
                     </div>
                   </div>
                 </div>
               )}
 
-              <div className="rounded-2xl border border-border bg-white p-6 shadow-xl sm:p-8">
-                <form className="space-y-5" onSubmit={handleSignUp}>
+              <div className="rounded-xl border border-white/[0.08] bg-surface shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 sm:p-7">
+                <form className="space-y-4" onSubmit={handleSignUp}>
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-text">Work email</label>
+                    <label className="mb-1.5 block text-sm font-medium text-text">Work email</label>
                     <Input
                       autoComplete="email"
-                      className="h-12 rounded-xl text-base"
+                      className="h-11 rounded-lg border-white/10 bg-white/[0.04] text-text placeholder:text-text-3 focus:ring-white/20"
                       disabled={authBusy}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@agency.com"
@@ -302,10 +311,10 @@ export function OnboardingForm() {
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-text">Password</label>
+                    <label className="mb-1.5 block text-sm font-medium text-text">Password</label>
                     <Input
                       autoComplete="new-password"
-                      className="h-12 rounded-xl text-base"
+                      className="h-11 rounded-lg border-white/10 bg-white/[0.04] text-text placeholder:text-text-3 focus:ring-white/20"
                       disabled={authBusy}
                       minLength={8}
                       onChange={(e) => setPassword(e.target.value)}
@@ -316,21 +325,21 @@ export function OnboardingForm() {
                     />
                   </div>
 
-                  <label className="flex items-start gap-3 rounded-xl border border-border bg-surface-2 px-4 py-3 text-sm text-text-2">
+                  <label className="flex items-start gap-3 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5 text-sm text-text-2">
                     <input
                       checked={legalAccepted}
-                      className="mt-0.5 h-4 w-4 rounded border-border text-accent accent-black"
+                      className="mt-0.5 h-4 w-4 rounded border-white/20 text-accent accent-green-500"
                       disabled={authBusy}
                       onChange={(e) => setLegalAccepted(e.target.checked)}
                       type="checkbox"
                     />
-                    <span className="leading-relaxed">
+                    <span>
                       I agree to the{" "}
-                      <Link className="font-medium text-text underline underline-offset-4" href="/terms" target="_blank">
+                      <Link className="font-medium text-text underline underline-offset-2 hover:no-underline" href="/terms" target="_blank">
                         Terms of Service
                       </Link>{" "}
                       and{" "}
-                      <Link className="font-medium text-text underline underline-offset-4" href="/privacy" target="_blank">
+                      <Link className="font-medium text-text underline underline-offset-2 hover:no-underline" href="/privacy" target="_blank">
                         Privacy Policy
                       </Link>
                       .
@@ -344,7 +353,7 @@ export function OnboardingForm() {
                   )}
 
                   <Button
-                    className="h-12 w-full rounded-xl text-base shadow-lg shadow-accent/20"
+                    className="h-11 w-full rounded-lg text-sm font-semibold bg-accent text-white hover:bg-accent-2 border-0"
                     disabled={authBusy || !legalAccepted}
                     type="submit"
                     variant="primary"
@@ -358,13 +367,13 @@ export function OnboardingForm() {
                         Creating account...
                       </span>
                     ) : (
-                      "Start free trial →"
+                      "Start free trial"
                     )}
                   </Button>
 
                   <p className="text-center text-sm text-text-3">
                     Already have an account?{" "}
-                    <Link href="/login" className="font-medium text-accent hover:underline">
+                    <Link href="/login" className="font-medium text-text-2 hover:text-text">
                       Sign in
                     </Link>
                   </p>
@@ -372,29 +381,20 @@ export function OnboardingForm() {
               </div>
             </div>
 
-            {/* Right: Benefits */}
             <div className="hidden lg:block">
-              <div className="sticky top-8">
-                <div className="mb-6 text-sm font-medium text-text-3">
-                  What you&apos;ll get
-                </div>
-
-                <div className="space-y-4">
-                  {[
-                    { icon: "📊", title: "AI Visibility Scores", desc: "Measure how often your clients are recommended by leading AI models." },
-                    { icon: "🔍", title: "Competitive Intelligence", desc: "See who's winning the AI recommendation battle in your client's space." },
-                    { icon: "📄", title: "Client-Ready Reports", desc: "Generate branded PDFs that prove your SEO value to clients." },
-                    { icon: "📈", title: "Track Progress", desc: "Compare snapshots over time to show measurable improvement." },
-                  ].map((item) => (
-                    <div key={item.title} className="flex gap-4 rounded-2xl border border-border bg-white p-5">
-                      <span className="text-2xl">{item.icon}</span>
-                      <div>
-                        <div className="font-semibold text-text">{item.title}</div>
-                        <div className="mt-1 text-sm text-text-2">{item.desc}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              <div className="sticky top-8 space-y-3">
+                <div className="text-xs font-medium uppercase tracking-wider text-text-3">What you get</div>
+                {[
+                  { title: "AI visibility scores", desc: "Measure how often your clients are recommended by leading AI models." },
+                  { title: "Competitive intelligence", desc: "See who ranks where in your client's space." },
+                  { title: "Client-ready reports", desc: "Branded PDFs that prove your SEO value." },
+                  { title: "Progress over time", desc: "Compare snapshots to show improvement." },
+                ].map((item) => (
+                  <div key={item.title} className="rounded-xl border border-white/[0.06] bg-surface p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.03)]">
+                    <div className="font-medium text-text">{item.title}</div>
+                    <div className="mt-0.5 text-sm text-text-2">{item.desc}</div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -404,33 +404,33 @@ export function OnboardingForm() {
         {isAuthenticated === true && (
           <div className="mx-auto max-w-xl">
             {loading ? (
-              <div className="flex min-h-[60vh] items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-text/20 border-t-text" />
+              <div className="flex min-h-[50vh] items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-text" />
               </div>
             ) : (
               <>
                 {/* Progress indicator */}
-                <div className="mb-8">
+                <div className="mb-6">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-text-3">Step {setupStep} of {totalSetupSteps}</span>
+                    <span className="text-xs font-medium text-text-3">Step {setupStep} of {totalSetupSteps}</span>
                     <button
                       type="button"
                       onClick={() => finishSetup()}
-                      className="text-sm text-text-3 hover:text-text"
+                      className="text-xs font-medium text-text-3 hover:text-text transition-colors"
                     >
                       Skip setup
                     </button>
                   </div>
-                  <div className="mt-2 h-1 overflow-hidden rounded-full bg-border">
-                    <div 
-                      className="h-full rounded-full bg-emerald-500 transition-all duration-300"
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+                    <div
+                      className="h-full rounded-full bg-accent transition-all duration-300"
                       style={{ width: `${(setupStep / totalSetupSteps) * 100}%` }}
                     />
                   </div>
                 </div>
 
                 {error && (
-                  <Alert variant="danger" className="mb-6">
+                  <Alert variant="danger" className="mb-5">
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 )}
@@ -438,51 +438,46 @@ export function OnboardingForm() {
                 {/* Step 1: Agency Name */}
                 {setupStep === 1 && (
                   <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                    <div className="mb-8 text-center">
-                      <span className="text-4xl">👋</span>
-                      <h1 className="mt-4 text-2xl font-bold text-text sm:text-3xl">
-                        What&apos;s your agency called?
+                    <div className="mb-5 text-center">
+                      <h1 className="text-xl font-semibold text-text sm:text-2xl">
+                        What&apos;s your agency name?
                       </h1>
-                      <p className="mt-2 text-text-2">
-                        This will appear on all your client reports.
+                      <p className="mt-1.5 text-sm text-text-2">
+                        This will appear on client reports.
                       </p>
                     </div>
 
-                    <div className="rounded-2xl border border-border bg-white p-6 shadow-xl sm:p-8">
+                    <div className="rounded-xl border border-white/[0.08] bg-surface p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] sm:p-7">
                       <Input
                         autoFocus
-                        className="h-14 rounded-xl text-center text-lg"
+                        className="h-12 rounded-lg border-white/10 bg-white/[0.04] text-center text-text placeholder:text-text-3 focus:ring-white/20"
                         onChange={(e) => setAgencyName(e.target.value)}
-                        placeholder="Acme Agency"
+                        placeholder="Enter your agency name"
                         value={agencyName}
                       />
                       <Button
-                        className="mt-6 h-12 w-full rounded-xl text-base"
+                        className="mt-5 h-11 w-full rounded-lg text-sm font-semibold bg-accent text-white hover:bg-accent-2"
                         disabled={!agencyName.trim()}
                         onClick={() => setSetupStep(2)}
                         type="button"
                         variant="primary"
                       >
-                        Continue →
+                        Continue
                       </Button>
                     </div>
                   </div>
                 )}
 
-                {/* Step 2: What brings you here */}
+                {/* Step 2: How will you use */}
                 {setupStep === 2 && (
                   <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                    <div className="mb-8 text-center">
-                      <span className="text-4xl">🎯</span>
-                      <h1 className="mt-4 text-2xl font-bold text-text sm:text-3xl">
-                        What brings you to VRTL Score?
+                    <div className="mb-5 text-center">
+                      <h1 className="text-xl font-semibold text-text sm:text-2xl">
+                        How will you use VRTL Score?
                       </h1>
-                      <p className="mt-2 text-text-2">
-                        This helps us tailor your experience.
-                      </p>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-2.5">
                       {goalOptions.map((option) => (
                         <button
                           key={option.id}
@@ -492,16 +487,15 @@ export function OnboardingForm() {
                             setTimeout(() => setSetupStep(3), 200);
                           }}
                           className={cn(
-                            "flex w-full items-center gap-4 rounded-2xl border-2 bg-white p-5 text-left transition-all",
+                            "flex w-full items-center justify-between rounded-xl border p-4 text-left transition-all",
                             selectedGoal === option.id
-                              ? "border-emerald-500 bg-emerald-50"
-                              : "border-border hover:border-text/20 hover:shadow-md"
+                              ? "border-accent/50 bg-accent/10 shadow-[0_0_0_1px_rgba(34,197,94,0.2)]"
+                              : "border-white/[0.08] bg-surface hover:border-white/12 hover:bg-white/[0.02]"
                           )}
                         >
-                          <span className="text-2xl">{option.icon}</span>
                           <span className="font-medium text-text">{option.label}</span>
                           {selectedGoal === option.id && (
-                            <svg className="ml-auto h-5 w-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                            <svg className="h-5 w-5 shrink-0 text-accent" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                             </svg>
                           )}
@@ -512,9 +506,9 @@ export function OnboardingForm() {
                     <button
                       type="button"
                       onClick={() => setSetupStep(1)}
-                      className="mt-6 w-full text-center text-sm text-text-3 hover:text-text"
+                      className="mt-5 w-full text-center text-sm text-text-3 hover:text-text"
                     >
-                      ← Back
+                      Back
                     </button>
                   </div>
                 )}
@@ -522,17 +516,16 @@ export function OnboardingForm() {
                 {/* Step 3: Team size */}
                 {setupStep === 3 && (
                   <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                    <div className="mb-8 text-center">
-                      <span className="text-4xl">📈</span>
-                      <h1 className="mt-4 text-2xl font-bold text-text sm:text-3xl">
+                    <div className="mb-5 text-center">
+                      <h1 className="text-xl font-semibold text-text sm:text-2xl">
                         How many clients do you manage?
                       </h1>
-                      <p className="mt-2 text-text-2">
-                        We&apos;ll recommend the right plan for you.
+                      <p className="mt-1.5 text-sm text-text-2">
+                        We&apos;ll recommend the right plan.
                       </p>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-2.5">
                       {sizeOptions.map((option) => (
                         <button
                           key={option.id}
@@ -542,10 +535,10 @@ export function OnboardingForm() {
                             setTimeout(() => setSetupStep(4), 200);
                           }}
                           className={cn(
-                            "flex w-full items-center justify-between rounded-2xl border-2 bg-white p-5 text-left transition-all",
+                            "flex w-full items-center justify-between rounded-xl border p-4 text-left transition-all",
                             selectedSize === option.id
-                              ? "border-emerald-500 bg-emerald-50"
-                              : "border-border hover:border-text/20 hover:shadow-md"
+                              ? "border-accent/50 bg-accent/10 shadow-[0_0_0_1px_rgba(34,197,94,0.2)]"
+                              : "border-white/[0.08] bg-surface hover:border-white/12 hover:bg-white/[0.02]"
                           )}
                         >
                           <div>
@@ -553,7 +546,7 @@ export function OnboardingForm() {
                             <div className="text-sm text-text-3">{option.desc}</div>
                           </div>
                           {selectedSize === option.id && (
-                            <svg className="h-5 w-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                            <svg className="h-5 w-5 shrink-0 text-accent" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                             </svg>
                           )}
@@ -564,9 +557,9 @@ export function OnboardingForm() {
                     <button
                       type="button"
                       onClick={() => setSetupStep(2)}
-                      className="mt-6 w-full text-center text-sm text-text-3 hover:text-text"
+                      className="mt-5 w-full text-center text-sm text-text-3 hover:text-text"
                     >
-                      ← Back
+                      Back
                     </button>
                   </div>
                 )}
@@ -574,28 +567,27 @@ export function OnboardingForm() {
                 {/* Step 4: Logo (optional) */}
                 {setupStep === 4 && (
                   <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                    <div className="mb-8 text-center">
-                      <span className="text-4xl">✨</span>
-                      <h1 className="mt-4 text-2xl font-bold text-text sm:text-3xl">
-                        Add your logo
+                    <div className="mb-5 text-center">
+                      <h1 className="text-xl font-semibold text-text sm:text-2xl">
+                        Add your agency logo
                       </h1>
-                      <p className="mt-2 text-text-2">
-                        Make your reports look professional. You can skip this for now.
+                      <p className="mt-1.5 text-sm text-text-2">
+                        Used on reports. You can skip this for now.
                       </p>
                     </div>
 
-                    <div className="rounded-2xl border border-border bg-white p-6 shadow-xl sm:p-8">
+                    <div className="rounded-xl border border-white/[0.08] bg-surface p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] sm:p-7">
                       <div className="flex flex-col items-center">
                         {logoPreview ? (
                           <div className="relative">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={logoPreview} alt="Logo preview" className="h-24 w-24 rounded-2xl object-contain bg-surface-2 p-2" />
+                            <img src={logoPreview} alt="Logo preview" className="h-24 w-24 rounded-xl object-contain bg-white/[0.04] p-2 border border-white/[0.06]" />
                             <button
                               type="button"
                               onClick={() => setLogoFile(null)}
-                              className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow hover:bg-red-600"
+                              className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-text-2 hover:bg-white/20 hover:text-text border border-white/10"
                             >
-                              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                               </svg>
                             </button>
@@ -604,9 +596,9 @@ export function OnboardingForm() {
                           <button
                             type="button"
                             onClick={() => document.getElementById("logo-input")?.click()}
-                            className="flex h-24 w-24 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-surface-2 text-text-3 transition-colors hover:border-text/30 hover:bg-surface-2/80"
+                            className="flex h-24 w-24 flex-col items-center justify-center rounded-xl border border-dashed border-white/10 bg-white/[0.02] text-text-3 transition-colors hover:border-white/15 hover:bg-white/[0.04]"
                           >
-                            <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                             </svg>
                           </button>
@@ -618,25 +610,25 @@ export function OnboardingForm() {
                           className="hidden"
                           onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)}
                         />
-                        
+
                         {!logoPreview && (
-                          <p className="mt-4 text-sm text-text-3">PNG or JPG · Transparent works best</p>
+                          <p className="mt-3 text-xs text-text-3">PNG or JPG. Transparent works best.</p>
                         )}
 
                         {logoPreview && (
                           <button
                             type="button"
                             onClick={() => document.getElementById("logo-input")?.click()}
-                            className="mt-4 text-sm text-accent hover:underline"
+                            className="mt-3 text-sm text-text-2 hover:text-text"
                           >
                             Change logo
                           </button>
                         )}
                       </div>
 
-                      <div className="mt-8 flex flex-col gap-3">
+                      <div className="mt-6 flex flex-col gap-2.5">
                         <Button
-                          className="h-12 w-full rounded-xl text-base"
+                          className="h-11 w-full rounded-lg text-sm font-semibold bg-accent text-white hover:bg-accent-2"
                           disabled={saving}
                           onClick={() => finishSetup()}
                           type="button"
@@ -651,28 +643,26 @@ export function OnboardingForm() {
                               Setting up...
                             </span>
                           ) : (
-                            "Launch dashboard 🚀"
+                            "Launch dashboard"
                           )}
                         </Button>
-                        {!logoPreview && (
-                          <button
-                            type="button"
-                            disabled={saving}
-                            onClick={() => finishSetup()}
-                            className="text-sm text-text-3 hover:text-text"
-                          >
-                            Skip for now
-                          </button>
-                        )}
+                        <button
+                          type="button"
+                          disabled={saving}
+                          onClick={() => finishSetup()}
+                          className="text-sm text-text-3 hover:text-text"
+                        >
+                          Skip for now
+                        </button>
                       </div>
                     </div>
 
                     <button
                       type="button"
                       onClick={() => setSetupStep(3)}
-                      className="mt-6 w-full text-center text-sm text-text-3 hover:text-text"
+                      className="mt-5 w-full text-center text-sm text-text-3 hover:text-text"
                     >
-                      ← Back
+                      Back
                     </button>
                   </div>
                 )}
