@@ -46,8 +46,9 @@ export function DomainSearchBar() {
     if (clientName) finalNextParams.set("name", clientName);
     const finalNext = `/app/clients/new?${finalNextParams.toString()}`;
 
-    // Go directly to onboarding (which handles auth)
+    // Go directly to onboarding (which handles auth); signup=1 ensures sign-up form is shown
     const onboardingParams = new URLSearchParams();
+    onboardingParams.set("signup", "1");
     onboardingParams.set("website", website);
     onboardingParams.set("next", finalNext);
     router.push(`/onboarding?${onboardingParams.toString()}`);

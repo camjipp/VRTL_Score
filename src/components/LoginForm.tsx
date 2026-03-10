@@ -127,7 +127,7 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
         Don&apos;t have an account?{" "}
         <Link
           className="font-medium text-accent hover:underline"
-          href="/onboarding"
+          href="/signup"
         >
           Sign up
         </Link>

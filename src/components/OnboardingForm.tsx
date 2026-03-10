@@ -110,17 +110,27 @@ export function OnboardingForm() {
 
   const totalSetupSteps = 4;
 
-  // Check auth on mount
+  // Check auth on mount; when coming from Sign up (?signup=1), show sign-up form (sign out any existing session).
+  // Add ?test=1 to the URL to keep your session for testing (e.g. /onboarding?signup=1&test=1).
   useEffect(() => {
     async function checkAuth() {
+      const signupIntent = sp.get("signup") === "1";
+      const keepSessionForTesting = sp.get("test") === "1";
       const { data } = await supabase.auth.getSession();
+
+      if (signupIntent && !keepSessionForTesting && data.session) {
+        await supabase.auth.signOut();
+        setIsAuthenticated(false);
+        return;
+      }
+
       setIsAuthenticated(!!data.session);
       if (data.session) {
         loadAgencySettings(data.session.access_token);
       }
     }
     checkAuth();
-  }, [supabase.auth]);
+  }, [supabase.auth, sp]);
 
   const LOAD_SETTINGS_TIMEOUT_MS = 25_000;
 

@@ -189,6 +189,9 @@ export default function PlansPage() {
 
   const currentPlanIndex = PLANS.findIndex((p) => p.id === subscription?.plan);
 
+  /** Pre-purchase: no Stripe customer yet → show only purchase CTAs. Post-purchase: has Stripe → show Manage/Upgrade/Downgrade. */
+  const isPostPurchase = Boolean(subscription?.has_stripe);
+
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-start py-10 px-4 sm:px-6"
@@ -206,16 +209,11 @@ export default function PlansPage() {
         />
       </Link>
 
-      {/* Headline */}
+      {/* Headline — no subtitle on paywall */}
       <div className="text-center mb-2">
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl" style={{ color: PAYWALL.text }}>
           Choose your plan
         </h1>
-        <p className="mt-2 text-base" style={{ color: PAYWALL.textMuted }}>
-          {subscription?.has_stripe
-            ? "Manage your subscription through the billing portal."
-            : "Start your 7 day free trial."}
-        </p>
       </div>
 
       {/* Error */}
@@ -227,7 +225,7 @@ export default function PlansPage() {
         </div>
       )}
 
-      {/* Billing toggle — segmented control */}
+      {/* Billing toggle — segmented control; savings badge readable in both states */}
       <div className="flex justify-center mt-6">
         <div
           className="inline-flex items-center gap-0 rounded-[10px] p-0.5"
@@ -263,8 +261,12 @@ export default function PlansPage() {
           >
             Annual
             <span
-              className="rounded-full px-2 py-0.5 text-xs font-medium"
-              style={{ backgroundColor: "rgba(16,163,127,0.2)", color: PAYWALL.accent }}
+              className="rounded-full px-2 py-0.5 text-xs font-medium border border-current"
+              style={
+                isAnnual
+                  ? { backgroundColor: "rgba(0,0,0,0.2)", color: "#fff", borderColor: "rgba(255,255,255,0.4)" }
+                  : { backgroundColor: "rgba(16,163,127,0.2)", color: PAYWALL.accent }
+              }
             >
               Save 17%
             </span>
@@ -289,11 +291,21 @@ export default function PlansPage() {
       {!loading && (
         <div className="grid gap-6 md:grid-cols-3 w-full max-w-5xl mt-10">
           {PLANS.map((plan) => {
-            const isCurrentPlan = subscription?.plan === plan.id;
-            const isDowngrade = currentPlanIndex > PLANS.indexOf(plan);
-            const isUpgrade = currentPlanIndex < PLANS.indexOf(plan) && currentPlanIndex >= 0;
+            const isCurrentPlan = isPostPurchase && subscription?.plan === plan.id;
+            const isDowngrade = isPostPurchase && currentPlanIndex > PLANS.indexOf(plan);
+            const isUpgrade = isPostPurchase && currentPlanIndex < PLANS.indexOf(plan) && currentPlanIndex >= 0;
             const price = isAnnual ? plan.annualPrice : plan.monthlyPrice;
             const monthlyEquivalent = isAnnual ? Math.round(plan.annualPrice / 12) : plan.monthlyPrice;
+
+            const ctaLabel = (() => {
+              if (checkoutLoading === plan.id || (isCurrentPlan && portalLoading)) return null;
+              if (isPostPurchase) {
+                if (isCurrentPlan) return "Manage plan";
+                if (isDowngrade) return "Downgrade";
+                if (isUpgrade) return "Upgrade";
+              }
+              return plan.id === "starter" ? "Choose Starter" : "Start free trial";
+            })();
 
             return (
               <div
@@ -367,7 +379,7 @@ export default function PlansPage() {
                   ))}
                 </ul>
 
-                {/* CTA: Starter = outline, Growth = primary green, Pro = green outline */}
+                {/* CTA: pre-purchase = Choose Starter / Start free trial; post-purchase = Manage / Upgrade / Downgrade */}
                 <button
                   type="button"
                   onClick={() => handleSelectPlan(plan.id)}
@@ -399,14 +411,8 @@ export default function PlansPage() {
                       </svg>
                       Loading...
                     </>
-                  ) : isCurrentPlan ? (
-                    "Manage plan"
-                  ) : isDowngrade ? (
-                    "Downgrade"
-                  ) : isUpgrade ? (
-                    "Upgrade"
                   ) : (
-                    "Get started"
+                    ctaLabel
                   )}
                 </button>
               </div>

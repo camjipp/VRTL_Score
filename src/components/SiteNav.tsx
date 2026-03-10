@@ -100,7 +100,7 @@ export function SiteNav() {
                 "rounded-full px-5 py-2 text-sm font-medium transition-colors",
                 isDarkPage ? "bg-white text-black hover:bg-white/90" : "text-text-3 hover:text-text"
               )}
-              href="/onboarding"
+              href="/signup"
             >
               Sign up
             </Link>
@@ -171,7 +171,7 @@ export function SiteNav() {
                     "rounded-xl px-4 py-3.5 text-center text-base font-medium transition-all",
                     isDarkPage ? "bg-white text-black hover:bg-white/90" : "text-text-3 hover:text-text"
                   )}
-                  href="/onboarding"
+                  href="/signup"
                   onClick={() => setMobileOpen(false)}
                 >
                   Sign up
