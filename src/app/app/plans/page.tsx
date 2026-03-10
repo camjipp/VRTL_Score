@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -63,9 +64,21 @@ const PLANS = [
   },
 ];
 
+const PAYWALL = {
+  pageBg: "#05070A",
+  cardBg: "#0B0F14",
+  border: "#1A212B",
+  text: "#E6EDF3",
+  textMuted: "#8B98A5",
+  accent: "#10A37F",
+  accentHover: "#0e8f6f",
+  cardShadow: "0 10px 30px rgba(0,0,0,0.35)",
+  buttonShadow: "0 6px 20px rgba(16,163,127,0.25)",
+} as const;
+
 export default function PlansPage() {
   const supabase = getSupabaseBrowserClient();
-  
+
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -78,20 +91,20 @@ export default function PlansPage() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
-        
+
         const { data: membership } = await supabase
           .from("agency_users")
           .select("agency_id")
           .eq("user_id", user.id)
           .maybeSingle();
-          
+
         if (membership?.agency_id) {
           const { data: agency } = await supabase
             .from("agencies")
             .select("plan, is_active, stripe_customer_id")
             .eq("id", membership.agency_id)
             .maybeSingle();
-            
+
           if (agency) {
             setSubscription({
               plan: agency.plan || "starter",
@@ -111,20 +124,16 @@ export default function PlansPage() {
   }, [supabase]);
 
   async function handleSelectPlan(planId: string) {
-    // If they already have this plan, open portal to manage
     if (subscription?.plan === planId && subscription?.has_stripe) {
       return openBillingPortal();
     }
-    
-    // If they have Stripe, send them to portal to change plan
     if (subscription?.has_stripe) {
       return openBillingPortal();
     }
-    
-    // Otherwise, create a new checkout
+
     setCheckoutLoading(planId);
     setError(null);
-    
+
     try {
       const { accessToken } = await ensureOnboarded();
       const res = await fetch("/api/stripe/checkout", {
@@ -138,12 +147,12 @@ export default function PlansPage() {
           interval: isAnnual ? "annual" : "monthly",
         }),
       });
-      
+
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || "Failed to create checkout");
       }
-      
+
       const { url } = await res.json();
       window.location.href = url;
     } catch (e: unknown) {
@@ -156,19 +165,19 @@ export default function PlansPage() {
   async function openBillingPortal() {
     setPortalLoading(true);
     setError(null);
-    
+
     try {
       const { accessToken } = await ensureOnboarded();
       const res = await fetch("/api/stripe/portal", {
         method: "POST",
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      
+
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || "Failed to open billing portal");
       }
-      
+
       const { url } = await res.json();
       window.location.href = url;
     } catch (e: unknown) {
@@ -178,62 +187,86 @@ export default function PlansPage() {
     }
   }
 
-  const currentPlanIndex = PLANS.findIndex(p => p.id === subscription?.plan);
+  const currentPlanIndex = PLANS.findIndex((p) => p.id === subscription?.plan);
 
   return (
-    <div className="space-y-6">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm">
-        <Link href="/app" className="text-text-2 hover:text-text">Dashboard</Link>
-        <span className="text-text-3">/</span>
-        <Link href="/app/settings" className="text-text-2 hover:text-text">Settings</Link>
-        <span className="text-text-3">/</span>
-        <span className="text-text">Plans</span>
-      </div>
+    <div
+      className="min-h-screen flex flex-col items-center justify-start py-10 px-4 sm:px-6"
+      style={{ backgroundColor: PAYWALL.pageBg }}
+    >
+      {/* Logo */}
+      <Link href="/app" className="mb-8 flex shrink-0">
+        <Image
+          src="/brand/VRTL_Solo.png"
+          alt="VRTL Score"
+          width={140}
+          height={40}
+          className="h-8 w-auto opacity-95"
+          priority
+        />
+      </Link>
 
-      {/* Header */}
-      <div className="text-center">
-        <h1 className="text-2xl font-bold tracking-tight text-text">Choose your plan</h1>
-        <p className="mt-2 text-text-2">
-          {subscription?.has_stripe 
+      {/* Headline */}
+      <div className="text-center mb-2">
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl" style={{ color: PAYWALL.text }}>
+          Choose your plan
+        </h1>
+        <p className="mt-2 text-base" style={{ color: PAYWALL.textMuted }}>
+          {subscription?.has_stripe
             ? "Manage your subscription through the billing portal."
-            : "Select a plan to get started. All plans include a 7-day free trial."}
+            : "Start your 7 day free trial."}
         </p>
       </div>
 
       {/* Error */}
       {error && (
-        <Alert variant="danger">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+        <div className="w-full max-w-4xl mt-4">
+          <Alert variant="danger">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </div>
       )}
 
-      {/* Billing toggle */}
-      <div className="flex justify-center">
-        <div className="inline-flex items-center gap-3 rounded-full border border-border bg-surface p-1">
+      {/* Billing toggle — segmented control */}
+      <div className="flex justify-center mt-6">
+        <div
+          className="inline-flex items-center gap-0 rounded-[10px] p-0.5"
+          style={{ backgroundColor: PAYWALL.border }}
+        >
           <button
+            type="button"
             onClick={() => setIsAnnual(false)}
             className={cn(
-              "rounded-full px-4 py-2 text-sm font-medium transition-colors",
-              !isAnnual
-                ? "bg-accent text-white"
-                : "text-text-2 hover:text-text"
+              "rounded-lg px-5 py-2.5 text-sm font-medium transition-all",
+              !isAnnual ? "text-white" : "hover:bg-white/5"
             )}
+            style={
+              !isAnnual
+                ? { backgroundColor: PAYWALL.accent, boxShadow: PAYWALL.buttonShadow }
+                : { color: PAYWALL.textMuted }
+            }
           >
             Monthly
           </button>
           <button
+            type="button"
             onClick={() => setIsAnnual(true)}
             className={cn(
-              "rounded-full px-4 py-2 text-sm font-medium transition-colors",
-              isAnnual
-                ? "bg-accent text-white"
-                : "text-text-2 hover:text-text"
+              "rounded-lg px-5 py-2.5 text-sm font-medium transition-all flex items-center gap-2",
+              isAnnual ? "text-white" : "hover:bg-white/5"
             )}
+            style={
+              isAnnual
+                ? { backgroundColor: PAYWALL.accent, boxShadow: PAYWALL.buttonShadow }
+                : { color: PAYWALL.textMuted }
+            }
           >
             Annual
-            <span className="ml-2 rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-600">
-              Save 2 months
+            <span
+              className="rounded-full px-2 py-0.5 text-xs font-medium"
+              style={{ backgroundColor: "rgba(16,163,127,0.2)", color: PAYWALL.accent }}
+            >
+              Save 17%
             </span>
           </button>
         </div>
@@ -241,78 +274,92 @@ export default function PlansPage() {
 
       {/* Loading */}
       {loading && (
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-3 w-full max-w-5xl mt-10">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-96 animate-pulse rounded-2xl bg-surface-2" />
+            <div
+              key={i}
+              className="h-96 rounded-[12px] animate-pulse"
+              style={{ backgroundColor: PAYWALL.cardBg, border: `1px solid ${PAYWALL.border}` }}
+            />
           ))}
         </div>
       )}
 
       {/* Plans */}
       {!loading && (
-        <div className="grid gap-6 md:grid-cols-3">
-          {PLANS.map((plan, index) => {
+        <div className="grid gap-6 md:grid-cols-3 w-full max-w-5xl mt-10">
+          {PLANS.map((plan) => {
             const isCurrentPlan = subscription?.plan === plan.id;
-            const isDowngrade = currentPlanIndex > index;
-            const isUpgrade = currentPlanIndex < index && currentPlanIndex >= 0;
+            const isDowngrade = currentPlanIndex > PLANS.indexOf(plan);
+            const isUpgrade = currentPlanIndex < PLANS.indexOf(plan) && currentPlanIndex >= 0;
             const price = isAnnual ? plan.annualPrice : plan.monthlyPrice;
             const monthlyEquivalent = isAnnual ? Math.round(plan.annualPrice / 12) : plan.monthlyPrice;
-            
+
             return (
               <div
                 key={plan.id}
-                className={cn(
-                  "relative flex flex-col rounded-2xl border bg-surface p-6 transition-all",
-                  plan.popular
-                    ? "border-violet-500 shadow-lg shadow-violet-500/10"
-                    : "border-border",
-                  isCurrentPlan && "ring-2 ring-emerald-500"
-                )}
+                className="relative flex flex-col rounded-[12px] border p-6 transition-all"
+                style={{
+                  backgroundColor: PAYWALL.cardBg,
+                  border: `1px solid ${plan.popular ? PAYWALL.accent : PAYWALL.border}`,
+                  boxShadow: PAYWALL.cardShadow,
+                }}
               >
-                {/* Popular badge */}
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="rounded-full bg-violet-600 px-3 py-1 text-xs font-medium text-white">
+                    <span
+                      className="rounded-full px-3 py-1 text-xs font-medium text-white"
+                      style={{ backgroundColor: PAYWALL.accent }}
+                    >
                       Most popular
                     </span>
                   </div>
                 )}
 
-                {/* Current plan badge */}
-                {isCurrentPlan && (
-                  <div className="absolute -top-3 right-4">
-                    <span className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-medium text-white">
-                      Current plan
-                    </span>
-                  </div>
-                )}
-
-                {/* Plan header */}
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-text">{plan.name}</h3>
-                  <p className="mt-1 text-sm text-text-2">{plan.description}</p>
+                  <h3 className="text-lg font-semibold" style={{ color: PAYWALL.text }}>
+                    {plan.name}
+                  </h3>
+                  <p className="mt-1 text-sm" style={{ color: PAYWALL.textMuted }}>
+                    {plan.description}
+                  </p>
                 </div>
 
-                {/* Price */}
+                {/* Price — number dominant */}
                 <div className="mb-6">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-text">
+                  <div className="flex items-baseline gap-1 flex-wrap">
+                    <span
+                      className="text-4xl font-bold tracking-tight sm:text-5xl"
+                      style={{ color: PAYWALL.text }}
+                    >
                       ${monthlyEquivalent}
                     </span>
-                    <span className="text-text-2">/month</span>
+                    <span className="text-base font-medium" style={{ color: PAYWALL.textMuted }}>
+                      /month
+                    </span>
                   </div>
                   {isAnnual && (
-                    <p className="mt-1 text-sm text-text-3">
+                    <p className="mt-1 text-sm" style={{ color: PAYWALL.textMuted }}>
                       ${price}/year billed annually
                     </p>
                   )}
                 </div>
 
-                {/* Features */}
                 <ul className="mb-6 flex-1 space-y-3">
                   {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-3 text-sm text-text-2">
-                      <svg className="h-5 w-5 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <li
+                      key={feature}
+                      className="flex items-center gap-3 text-sm"
+                      style={{ color: PAYWALL.textMuted }}
+                    >
+                      <svg
+                        className="h-5 w-5 shrink-0"
+                        style={{ color: PAYWALL.accent }}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                       </svg>
                       {feature}
@@ -320,27 +367,38 @@ export default function PlansPage() {
                   ))}
                 </ul>
 
-                {/* CTA */}
+                {/* CTA: Starter = outline, Growth = primary green, Pro = green outline */}
                 <button
+                  type="button"
                   onClick={() => handleSelectPlan(plan.id)}
                   disabled={checkoutLoading === plan.id || portalLoading}
                   className={cn(
-                    "w-full rounded-lg px-4 py-3 text-sm font-semibold transition-all",
-                    isCurrentPlan
-                      ? "border border-border bg-surface-2 text-text hover:bg-surface"
-                      : plan.popular
-                        ? "bg-violet-600 text-white hover:bg-violet-700"
-                        : "bg-accent text-white hover:bg-accent-2"
+                    "w-full rounded-[10px] h-12 text-sm font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50",
+                    plan.popular && "bg-[#10A37F] text-white border-0 hover:bg-[#0e8f6f]",
+                    plan.id === "pro" && "bg-transparent border-2 border-[#10A37F] text-[#10A37F] hover:bg-[#10A37F]/10",
+                    plan.id === "starter" && "bg-transparent border border-[#1A212B] text-[#E6EDF3] hover:border-[#8B98A5]"
                   )}
+                  style={plan.popular ? { boxShadow: PAYWALL.buttonShadow } : undefined}
                 >
                   {checkoutLoading === plan.id || (isCurrentPlan && portalLoading) ? (
-                    <span className="flex items-center justify-center gap-2">
+                    <>
                       <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                        />
                       </svg>
                       Loading...
-                    </span>
+                    </>
                   ) : isCurrentPlan ? (
                     "Manage plan"
                   ) : isDowngrade ? (
@@ -358,15 +416,16 @@ export default function PlansPage() {
       )}
 
       {/* Help text */}
-      <div className="text-center">
-        <p className="text-sm text-text-2">
-          Need help choosing?{" "}
-          <a href="mailto:support@vrtlscore.com" className="text-accent hover:underline">
-            Contact us
-          </a>
-        </p>
-      </div>
+      <p className="mt-8 text-center text-sm" style={{ color: PAYWALL.textMuted }}>
+        Need help choosing?{" "}
+        <a
+          href="mailto:support@vrtlscore.com"
+          className="font-medium hover:underline"
+          style={{ color: PAYWALL.accent }}
+        >
+          Contact us
+        </a>
+      </p>
     </div>
   );
 }
-
