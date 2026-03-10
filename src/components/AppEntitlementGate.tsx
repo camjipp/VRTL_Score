@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { ensureOnboarded } from "@/lib/onboard";
@@ -17,8 +17,17 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 const FIRST_LOAD_KEY = "vrtl_entitlement_ui_seen";
 
+const GATE_DARK = {
+  bg: "#05070A",
+  cardBg: "#0B0F14",
+  border: "#1A212B",
+  text: "#E6EDF3",
+  textMuted: "#8B98A5",
+} as const;
+
 export function AppEntitlementGate({ children }: Props) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const hasChecked = useRef(false);
 
@@ -40,6 +49,13 @@ export function AppEntitlementGate({ children }: Props) {
   const isCheckoutSuccess = searchParams.get("checkout") === "success";
 
   useEffect(() => {
+    // Always allow through to paywall — no entitlement check on /app/plans
+    if (pathname === "/app/plans") {
+      setReady(true);
+      hasChecked.current = true;
+      return;
+    }
+
     // If already checked and entitled, don't re-check
     if (hasChecked.current && ready) return;
 
@@ -171,16 +187,17 @@ export function AppEntitlementGate({ children }: Props) {
     return () => {
       cancelled = true;
     };
-  // Only re-run on mount or if checkout success status changes
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isCheckoutSuccess]);
+  }, [isCheckoutSuccess, pathname]);
 
   if (!ready) {
     // First-time load: show full "Activating your subscription..." card (dark theme)
     const showFullActivation = isFirstLoad === true;
 
     return (
-      <div className="flex min-h-screen items-center justify-center bg-bg">
+      <div
+        className="flex min-h-screen items-center justify-center"
+        style={{ backgroundColor: GATE_DARK.bg }}
+      >
         <div className="w-full max-w-sm px-6">
           <div className="mb-8 flex justify-center">
             <Image
@@ -188,24 +205,33 @@ export function AppEntitlementGate({ children }: Props) {
               alt="VRTL Score"
               width={180}
               height={64}
-              className="h-12 w-auto opacity-90"
+              className="h-12 w-auto brightness-0 invert opacity-95"
               priority
             />
           </div>
 
           {showFullActivation ? (
             /* Full activation card — dark theme, only on first load */
-            <div className="rounded-xl border border-white/10 bg-surface p-6">
-              <p className="mb-4 text-center text-sm font-medium text-text">
+            <div
+              className="rounded-xl border p-6"
+              style={{
+                backgroundColor: GATE_DARK.cardBg,
+                borderColor: GATE_DARK.border,
+              }}
+            >
+              <p className="mb-4 text-center text-sm font-medium" style={{ color: GATE_DARK.text }}>
                 {statusText}
               </p>
-              <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+              <div
+                className="h-1.5 overflow-hidden rounded-full"
+                style={{ backgroundColor: GATE_DARK.border }}
+              >
                 <div
-                  className="h-full rounded-full bg-white/40 transition-all duration-500 ease-out"
+                  className="h-full rounded-full bg-[#10A37F] transition-all duration-500 ease-out"
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <p className="mt-3 text-center text-xs text-text-3">
+              <p className="mt-3 text-center text-xs" style={{ color: GATE_DARK.textMuted }}>
                 {Math.round(progress)}%
               </p>
               {authError && (
@@ -217,7 +243,10 @@ export function AppEntitlementGate({ children }: Props) {
           ) : (
             /* Returning user: minimal dark loader */
             <div className="flex flex-col items-center gap-6">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-text-2" />
+              <div
+                className="h-8 w-8 animate-spin rounded-full border-2"
+                style={{ borderColor: GATE_DARK.border, borderTopColor: "#10A37F" }}
+              />
             </div>
           )}
         </div>
