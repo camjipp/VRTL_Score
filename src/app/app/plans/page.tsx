@@ -304,7 +304,7 @@ export default function PlansPage() {
                 if (isDowngrade) return "Downgrade";
                 if (isUpgrade) return "Upgrade";
               }
-              return plan.id === "starter" ? "Choose Starter" : "Start free trial";
+              return `Start ${plan.name}`;
             })();
 
             return (
@@ -379,7 +379,7 @@ export default function PlansPage() {
                   ))}
                 </ul>
 
-                {/* CTA: pre-purchase = Choose Starter / Start free trial; post-purchase = Manage / Upgrade / Downgrade */}
+                {/* CTA: pre-purchase = Start [Plan]; post-purchase = Manage / Upgrade / Downgrade */}
                 <button
                   type="button"
                   onClick={() => handleSelectPlan(plan.id)}
