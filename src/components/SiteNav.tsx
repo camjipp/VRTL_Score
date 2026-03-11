@@ -25,8 +25,14 @@ export function SiteNav() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Hide marketing nav inside the app and during onboarding; each has its own shell.
-  if (pathname.startsWith("/app") || pathname.startsWith("/onboarding")) return null;
+  // Hide marketing nav inside the app, during onboarding, and on auth pages (login shows logo only).
+  if (
+    pathname.startsWith("/app") ||
+    pathname.startsWith("/onboarding") ||
+    pathname === "/login" ||
+    pathname === "/forgot-password"
+  )
+    return null;
 
   // Treat null/undefined as home to avoid white flash before pathname hydrates
   const isHome = pathname === "/" || pathname === null || pathname === undefined;
