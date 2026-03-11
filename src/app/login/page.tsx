@@ -18,7 +18,7 @@ export default async function LoginPage({
       className="min-h-screen flex flex-col"
       style={{
         backgroundColor: "#05070A",
-        backgroundImage: "radial-gradient(ellipse 80% 50% at 50% 40%, rgba(16,163,127,0.15), transparent)",
+        backgroundImage: "radial-gradient(ellipse 120% 70% at 50% 40%, rgba(16,163,127,0.07), transparent 70%)",
       }}
     >
       {/* Minimal header: logo only */}

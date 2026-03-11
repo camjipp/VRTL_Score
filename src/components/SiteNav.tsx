@@ -25,10 +25,11 @@ export function SiteNav() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Hide marketing nav inside the app, during onboarding, and on auth pages (login shows logo only).
+  // Hide marketing nav inside the app, during onboarding, and on auth pages (login/callback show minimal UI).
   if (
     pathname.startsWith("/app") ||
     pathname.startsWith("/onboarding") ||
+    pathname.startsWith("/auth") ||
     pathname === "/login" ||
     pathname === "/forgot-password"
   )

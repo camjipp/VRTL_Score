@@ -69,13 +69,21 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
   async function handleGoogleSignIn() {
     setError(null);
     try {
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      const callbackUrl = nextPath && nextPath !== "/app"
+        ? `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
+        : `${origin}/auth/callback`;
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: `${typeof window !== "undefined" ? window.location.origin : ""}/app` },
+        options: { redirectTo: callbackUrl },
       });
-      if (oauthError) setError(oauthError.message);
+      if (oauthError) {
+        setError(oauthError.message || "Google sign-in failed. Try again or use email.");
+        return;
+      }
+      // Supabase redirects the window; no further action here
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Google sign-in failed.");
+      setError(err instanceof Error ? err.message : "Google sign-in failed. Try again or use email.");
     }
   }
 
