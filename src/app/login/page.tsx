@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { headers } from "next/headers";
 
 import { LoginForm } from "@/components/LoginForm";
 
@@ -12,6 +13,14 @@ export default async function LoginPage({
   const nextParam = sp?.next;
   const nextStr = Array.isArray(nextParam) ? nextParam[0] : nextParam;
   const nextPath = typeof nextStr === "string" && nextStr.startsWith("/") ? nextStr : "/app";
+
+  // Use request host so OAuth callback always uses the domain the user is on (fixes localhost redirect in production).
+  const headersList = await headers();
+  const host = headersList.get("x-forwarded-host") ?? headersList.get("host") ?? "";
+  const proto =
+    headersList.get("x-forwarded-proto") ??
+    (host.includes("localhost") ? "http" : "https");
+  const siteOrigin = host ? `${proto}://${host}` : "";
 
   return (
     <main
@@ -54,7 +63,7 @@ export default async function LoginPage({
             </p>
 
             <div className="mt-6">
-              <LoginForm nextPath={nextPath} />
+              <LoginForm nextPath={nextPath} siteOrigin={siteOrigin} />
             </div>
           </div>
         </div>

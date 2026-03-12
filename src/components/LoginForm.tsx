@@ -26,7 +26,7 @@ async function onboard(accessToken: string) {
 const inputBase =
   "w-full rounded-[10px] border px-4 py-3 text-[#E6EDF3] placeholder:text-[#8B98A5] transition-all focus:outline-none focus:border-[#10A37F] focus:shadow-[0_0_0_1px_#10A37F] bg-[#0E141B] border-[#1A212B]";
 
-export function LoginForm({ nextPath }: { nextPath: string }) {
+export function LoginForm({ nextPath, siteOrigin = "" }: { nextPath: string; siteOrigin?: string }) {
   const router = useRouter();
   const supabase = getSupabaseBrowserClient();
 
@@ -69,10 +69,19 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
   async function handleGoogleSignIn() {
     setError(null);
     try {
-      const origin = typeof window !== "undefined" ? window.location.origin : "";
-      const callbackUrl = nextPath && nextPath !== "/app"
-        ? `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
-        : `${origin}/auth/callback`;
+      // Prefer origin from the server (request host) so production always uses the live domain.
+      // Fall back to client origin only when server didn't send one (e.g. some edge cases).
+      const baseUrl =
+        (siteOrigin && siteOrigin.replace(/\/$/, "")) ||
+        (typeof window !== "undefined" ? window.location.origin : "");
+      if (!baseUrl) {
+        setError("Could not determine app URL. Please refresh and try again.");
+        return;
+      }
+      const callbackUrl =
+        nextPath && nextPath !== "/app"
+          ? `${baseUrl}/auth/callback?next=${encodeURIComponent(nextPath)}`
+          : `${baseUrl}/auth/callback`;
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: { redirectTo: callbackUrl },
