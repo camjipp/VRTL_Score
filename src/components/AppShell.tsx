@@ -123,7 +123,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <div className="flex shrink-0 items-center border-b border-white/5 py-5 px-4">
                 <Link
                   href="/app"
-                  className="flex items-center gap-0.5 transition-opacity hover:opacity-90 text-white"
+                  className="flex items-center gap-0 transition-opacity hover:opacity-90 text-white"
                 >
                   <img
                     src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
