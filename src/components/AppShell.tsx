@@ -123,16 +123,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <div className="flex shrink-0 items-center border-b border-white/5 py-5 px-4">
                 <Link
                   href="/app"
-                  className="flex items-center gap-2.5 transition-opacity hover:opacity-90 text-white"
+                  className="flex items-center gap-1.5 transition-opacity hover:opacity-90 text-white"
                 >
                   <img
                     src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
                     alt="VRTL"
-                    className="h-[22px] w-auto block brightness-0 invert"
-                    width={22}
-                    height={22}
+                    className="h-6 w-auto block m-0 p-0 brightness-0 invert"
+                    width={24}
+                    height={24}
                   />
-                  <span className="whitespace-nowrap text-base font-medium leading-none text-white/80">Score</span>
+                  <span className="whitespace-nowrap text-base font-medium leading-none text-white opacity-80">Score</span>
                 </Link>
               </div>
 
