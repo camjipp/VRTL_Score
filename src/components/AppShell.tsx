@@ -120,16 +120,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             style={{ backgroundColor: "#0F1216" }}
           >
             <div className="flex flex-1 flex-col">
-              <div className="flex h-[68px] shrink-0 items-center justify-center border-b border-white/5 px-4">
-                <Link href="/app" className="flex items-center gap-4 transition-opacity hover:opacity-90 text-white">
+              <div className="flex shrink-0 items-center border-b border-white/5 py-5 px-4">
+                <Link
+                  href="/app"
+                  className="flex items-center gap-2.5 transition-opacity hover:opacity-90 text-white"
+                >
                   <img
                     src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
-                    alt=""
-                    className="h-9 w-auto shrink-0 brightness-0 invert"
-                    width={36}
-                    height={36}
+                    alt="VRTL"
+                    className="h-[22px] w-auto block brightness-0 invert"
+                    width={22}
+                    height={22}
                   />
-                  <span className="whitespace-nowrap text-sm font-semibold text-white/80 tracking-tight">Score</span>
+                  <span className="whitespace-nowrap text-base font-medium leading-none text-white/80">Score</span>
                 </Link>
               </div>
 
