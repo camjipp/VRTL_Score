@@ -128,11 +128,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <img
                     src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
                     alt="VRTL"
-                    className="h-[47px] w-auto block m-0 p-0 brightness-0 invert"
+                    className="h-[47px] w-auto block m-0 p-0 mr-0 brightness-0 invert align-middle"
                     width={47}
                     height={47}
                   />
-                  <span className="whitespace-nowrap text-base font-medium leading-none text-white opacity-80">Score</span>
+                  <span className="whitespace-nowrap text-base font-medium leading-none text-white opacity-80 m-0 p-0 -ml-px">Score</span>
                 </Link>
               </div>
 
