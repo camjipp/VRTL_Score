@@ -96,6 +96,14 @@ function getScoreLabel(score: number | null): { label: string; description: stri
   return { label: "Losing Ground", description: "Critical authority weakness — rarely surfaced or cited in AI-generated responses" };
 }
 
+function getAuthorityStatusTone(score: number | null): string {
+  if (score === null) return "border-white/15 bg-white/[0.06] text-text-2";
+  if (score >= 80) return "border-authority-dominant/35 bg-authority-dominant/12 text-authority-dominant";
+  if (score >= 60) return "border-sky-400/35 bg-sky-400/10 text-sky-200";
+  if (score >= 40) return "border-authority-watchlist/35 bg-authority-watchlist/12 text-authority-watchlist";
+  return "border-authority-losing/35 bg-authority-losing/12 text-authority-losing";
+}
+
 function getScoreColor(score: number | null): string {
   if (score === null) return "text-text-3";
   if (score >= 80) return "text-authority-dominant";
@@ -1175,8 +1183,9 @@ function CompetitorComparisonChart({
    MODEL INTELLIGENCE MATRIX — centerpiece 3-column grid
 ═══════════════════════════════════════════════════════════════════════════ */
 const MATRIX_MODELS = ["openai", "gemini", "anthropic"] as const;
-function getMatrixStatusTag(score: number): "Strong" | "Watchlist" | "Critical" {
+function getMatrixStatusTag(score: number): "Strong" | "Stable" | "Watchlist" | "Critical" {
   if (score >= 80) return "Strong";
+  if (score >= 60) return "Stable";
   if (score >= 40) return "Watchlist";
   return "Critical";
 }
@@ -1248,6 +1257,7 @@ function ModelIntelligenceMatrix({
                     className={cn(
                       "text-[10px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded",
                       statusTag === "Strong" && "text-authority-dominant bg-authority-dominant/10",
+                      statusTag === "Stable" && "text-sky-200 bg-sky-400/10",
                       statusTag === "Watchlist" && "text-authority-watchlist bg-authority-watchlist/10",
                       statusTag === "Critical" && "text-authority-losing bg-authority-losing/10"
                     )}
@@ -1518,7 +1528,7 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
   const { scores, dates } = useMemo(() => getChartSeriesForFilter(snapshots, filter), [snapshots, filter]);
 
   const segmentControl = (
-    <div className="mb-2 flex w-full max-w-md items-stretch">
+    <div className="flex w-full items-stretch">
       <div className="inline-flex h-[36px] w-full overflow-hidden rounded-md border border-white/10 bg-white/[0.05] p-0.5" style={{ minHeight: SEGMENT_CONTROL_HEIGHT }}>
         {CHART_FILTERS.map((f) => (
           <button
@@ -1541,8 +1551,14 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
 
   if (scores.length < 2) {
     return (
-      <div className="rounded-xl bg-white/[0.02] pt-1 pb-0 px-1" style={{ minHeight: CHART_HEIGHT }}>
-        {segmentControl}
+      <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 pb-3 pt-3" style={{ minHeight: CHART_HEIGHT }}>
+        <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-semibold text-text">Authority Trajectory</h3>
+            <p className="mt-0.5 text-xs text-text-3">How authority has moved across recent snapshots.</p>
+          </div>
+          <div className="max-w-md min-w-[240px]">{segmentControl}</div>
+        </div>
         <div className="flex h-64 items-center justify-center text-sm text-text-3">Run more snapshots to see trends</div>
       </div>
     );
@@ -1560,10 +1576,19 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
   const areaD = `M ${CHART_PADDING.left} ${CHART_PADDING.top + CHART_INNER_HEIGHT} ${pathD} L ${pathPoints[pathPoints.length - 1]!.x} ${CHART_PADDING.top + CHART_INNER_HEIGHT} Z`;
   const trend = scores[scores.length - 1]! - scores[0]!;
   const lineColor = trend >= 0 ? CHART_COLORS.dominant : CHART_COLORS.losing;
+  const midIndex = Math.max(1, Math.floor((pathPoints.length - 1) * 0.55));
+  const dipPoint = pathPoints[midIndex];
+  const dipLabel = trend >= 0 ? "Recovery trend strengthened" : "Competitive pressure increased";
 
   return (
-    <div className="rounded-xl bg-white/[0.02] pt-1 pb-0 px-1">
-      {segmentControl}
+    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 pb-3 pt-3">
+      <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h3 className="text-sm font-semibold text-text">Authority Trajectory</h3>
+          <p className="mt-0.5 text-xs text-text-3">How authority has moved across recent snapshots.</p>
+        </div>
+        <div className="max-w-md min-w-[240px]">{segmentControl}</div>
+      </div>
       <div className="overflow-hidden rounded-lg min-h-[360px]">
         <svg viewBox={`0 0 ${CHART_VIEWBOX_WIDTH} ${CHART_HEIGHT}`} className="w-full h-full min-h-[360px] block" style={{ maxHeight: CHART_HEIGHT }} preserveAspectRatio="xMidYMid meet" aria-hidden>
           <defs>
@@ -1592,6 +1617,19 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
               <text key={i} x={x} y={CHART_HEIGHT - 3} textAnchor="middle" className="text-[8px] fill-text-3">{d}</text>
             );
           })}
+          {dipPoint && (
+            <g>
+              <circle cx={dipPoint.x} cy={dipPoint.y} r="5" fill="var(--surface)" stroke={lineColor} strokeWidth="2" />
+              <text
+                x={Math.min(dipPoint.x + 14, CHART_VIEWBOX_WIDTH - 180)}
+                y={Math.max(dipPoint.y - 10, 18)}
+                textAnchor="start"
+                className="text-[9px] fill-text-2"
+              >
+                {dipLabel}
+              </text>
+            </g>
+          )}
         </svg>
       </div>
     </div>
@@ -1642,67 +1680,130 @@ function HeroSection({
   const { label: statusLabel } = getScoreLabel(score);
   const delta = score != null && previousScore != null ? score - previousScore : null;
   const diagnosis = getVerdictSentence(score, providers, detail);
+  const sortedDesc = [...providers].sort((a, b) => b[1] - a[1]);
+  const sortedAsc = [...providers].sort((a, b) => a[1] - b[1]);
+  const primaryDisplacerLabel =
+    detail?.summary?.top_competitors?.[0]?.name?.trim() || "No clear displacer yet";
+  const weakestModelLabel = sortedAsc.length > 0 ? getProviderDisplayName(sortedAsc[0]![0]) : "Insufficient data";
+  const gapToLeaderPts = sortedDesc.length > 0 ? Math.max(0, 100 - sortedDesc[0]![1]) : null;
+  const strongestModelLabel = sortedDesc.length > 0 ? getProviderDisplayName(sortedDesc[0]![0]) : null;
+  const topCompetitorNames = (detail?.summary?.top_competitors ?? [])
+    .slice(0, 2)
+    .map((c) => c.name.trim())
+    .filter(Boolean);
+  const displacerPhrase =
+    topCompetitorNames.length >= 2
+      ? `${topCompetitorNames[0]} and ${topCompetitorNames[1]}`
+      : topCompetitorNames.length === 1
+        ? topCompetitorNames[0]!
+        : "key competitors";
+  const mentionRate = detail ? pct(detail.summary.client_mentioned_count, detail.summary.responses_count || 1) : null;
+  const riskLine1 = `Competitor visibility from ${displacerPhrase} is outpacing ${client.name} in AI recommendation mentions.`;
+  const riskLine2 = `${weakestModelLabel} is the weakest channel and is elevating displacement risk.`;
+  const riskLine3 = strongestModelLabel
+    ? `Recovery opportunity is strongest in ${strongestModelLabel}, where authority is already comparatively strong.`
+    : "Double down on the strongest model channel while you shore up the weakest.";
 
   return (
     <section className="w-full rounded-2xl border border-white/[0.08] bg-surface shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_4px_24px_rgba(0,0,0,0.12)]">
       <div className="p-6 md:p-8">
-        {/* Row 1: Identity (left) + CTAs (right) */}
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/12 bg-white/[0.06]">
-              {logoSrc ? (
-                <img src={logoSrc} alt="" className="h-10 w-10 object-contain" width={40} height={40} />
-              ) : (
-                <span className="text-2xl font-bold text-text-3">{client.name.charAt(0)}</span>
+        <div className="grid gap-6 xl:grid-cols-12 xl:items-start">
+          <div className="xl:col-span-6">
+            <div className="flex items-center gap-4">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/12 bg-white/[0.06]">
+                {logoSrc ? (
+                  <img src={logoSrc} alt="" className="h-10 w-10 object-contain" width={40} height={40} />
+                ) : (
+                  <span className="text-2xl font-bold text-text-3">{client.name.charAt(0)}</span>
+                )}
+              </div>
+              <div>
+                <h1 className="text-2xl font-semibold tracking-tight text-text">{client.name}</h1>
+                <p className="text-sm text-text-2">{domain || client.website || "—"}</p>
+                <span className={cn("mt-2 inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold", getAuthorityStatusTone(score))}>
+                  {statusLabel}
+                </span>
+              </div>
+            </div>
+            <div className="mt-6">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-3">AI Authority Index</p>
+              <div className="mt-2 flex flex-wrap items-end gap-3">
+                <span className="text-6xl font-extrabold tabular-nums tracking-tight text-text md:text-7xl">{score ?? "—"}</span>
+                {delta !== null && (
+                  <span
+                    className={cn(
+                      "mb-2 rounded-md px-2 py-1 text-sm font-semibold tabular-nums",
+                      delta > 0
+                        ? "bg-authority-dominant/12 text-authority-dominant"
+                        : delta < 0
+                          ? "bg-authority-losing/12 text-authority-losing"
+                          : "bg-white/8 text-text-2"
+                    )}
+                  >
+                    {delta > 0 ? "+" : ""}
+                    {delta} vs last snapshot
+                  </span>
+                )}
+              </div>
+              <p className="mt-3 max-w-2xl text-sm leading-snug text-text-2">{diagnosis}</p>
+              {mentionRate !== null && (
+                <p className="mt-2 text-xs text-text-3">
+                  {client.name} appears in {mentionRate}% of tracked answers; displacement pressure concentrates in weaker model
+                  channels.
+                </p>
               )}
             </div>
-            <div>
-              <h1 className="text-xl font-semibold text-text">{client.name}</h1>
-              <p className="text-sm text-text-2">{domain || client.website || "—"}</p>
-              <Badge variant={score != null && score >= 80 ? "success" : score != null && score >= 40 ? "warning" : "danger"} className="mt-2">
-                {statusLabel}
-              </Badge>
+          </div>
+
+          <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 xl:col-span-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-3">Strategic story</p>
+            <div className="mt-3 space-y-2.5">
+              <div className="rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2.5">
+                <p className="text-[10px] uppercase tracking-[0.12em] text-text-3">Primary displacer</p>
+                <p className="mt-1 text-sm font-semibold text-text">{primaryDisplacerLabel}</p>
+              </div>
+              <div className="rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2.5">
+                <p className="text-[10px] uppercase tracking-[0.12em] text-text-3">Biggest weakness</p>
+                <p className="mt-1 text-sm font-semibold text-text">{weakestModelLabel}</p>
+              </div>
+              <div className="rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2.5">
+                <p className="text-[10px] uppercase tracking-[0.12em] text-text-3">Gap to leader</p>
+                <p className="mt-1 text-sm font-semibold text-text tabular-nums">
+                  {gapToLeaderPts != null ? `${gapToLeaderPts} pts` : "—"}
+                </p>
+              </div>
             </div>
           </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
-            <RunSnapshotButton
-              running={running}
-              snapshotStatus={snapshotStatus}
-              onRunSnapshot={runSnapshot}
-              className="rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-text shadow-sm transition-colors hover:border-white/30 hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/20"
-            />
-            {snapshotId && (
-              <div className="[&_button]:!rounded-xl [&_button]:!px-5 [&_button]:!py-3 [&_button]:!text-base [&_button]:!font-semibold [&_button]:!bg-white [&_button]:!text-surface [&_button]:shadow-md [&_button]:hover:!bg-white/95 [&_button]:focus:!outline-none [&_button]:focus:!ring-2 [&_button]:focus:!ring-white/30">
-                <DownloadPdfButton snapshotId={snapshotId} label="Download AI Authority Report (PDF)" />
+
+          <div className="rounded-xl border border-white/[0.08] bg-white/[0.015] p-4 xl:col-span-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-3">Actions</p>
+            <div className="mt-3 space-y-2.5">
+              <RunSnapshotButton
+                running={running}
+                snapshotStatus={snapshotStatus}
+                onRunSnapshot={runSnapshot}
+                className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-text shadow-sm transition-colors hover:border-white/30 hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/20"
+              />
+              {snapshotId && (
+                <div className="[&_button]:!w-full [&_button]:!rounded-xl [&_button]:!px-4 [&_button]:!py-2.5 [&_button]:!text-sm [&_button]:!font-semibold [&_button]:!bg-white [&_button]:!text-surface [&_button]:shadow-md [&_button]:hover:!bg-white/95 [&_button]:focus:!outline-none [&_button]:focus:!ring-2 [&_button]:focus:!ring-white/30">
+                  <DownloadPdfButton snapshotId={snapshotId} label="Download Report" />
+                </div>
+              )}
+              <div className="[&_label]:!text-xs [&_label]:!text-text-3">
+                <SnapshotSelector snapshots={snapshots} selectedId={selectedSnapshotId} onSelect={onSelectSnapshotId} />
               </div>
-            )}
-            <SnapshotSelector snapshots={snapshots} selectedId={selectedSnapshotId} onSelect={onSelectSnapshotId} />
+            </div>
           </div>
         </div>
 
-        {/* Row 2: Index + delta + one-line diagnosis */}
-        <div className="mt-8">
-          <p className="text-xs font-medium uppercase tracking-wider text-text-3">AI Authority Index</p>
-          <div className="mt-2 flex flex-wrap items-baseline gap-4">
-            <span className="text-5xl md:text-6xl font-extrabold tabular-nums tracking-tight text-text">
-              {score ?? "—"}
-            </span>
-            {delta !== null && (
-              <span className={cn(
-                "text-lg font-semibold tabular-nums",
-                delta > 0 ? "text-authority-dominant" : delta < 0 ? "text-authority-losing" : "text-text-3"
-              )}>
-                {delta > 0 ? "+" : ""}{delta} vs last
-              </span>
-            )}
-            <Badge variant={score != null && score >= 80 ? "success" : score != null && score >= 40 ? "warning" : "danger"} className="shrink-0">
-              {statusLabel}
-            </Badge>
-          </div>
-          <p className="mt-3 max-w-2xl text-sm leading-snug text-text-2">{diagnosis}</p>
+        <div className="mt-6 rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3">
+          <p className="text-sm leading-relaxed text-text-2">
+            <span>{riskLine1} </span>
+            <span className="text-authority-watchlist">{riskLine2} </span>
+            <span>{riskLine3}</span>
+          </p>
         </div>
 
-        {/* Row 3: Chart (full width inside hero) */}
         <div className="mt-6">
           <BigTrendChart snapshots={snapshots} />
         </div>
@@ -1826,12 +1927,16 @@ function AIAnswerMarketShareChart({
   return (
     <section className="mt-10 w-full">
       <h2 className="text-sm font-semibold uppercase tracking-wider text-text-2 mb-4">AI Answer Market Share</h2>
+      <p className="-mt-2 mb-4 text-xs text-text-3">Share of AI brand recommendation presence across tracked answers.</p>
       <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 md:p-6">
         <div className="space-y-2.5">
           {rows.map((row, i) => (
             <div
               key={row.name}
-              className="group flex flex-col gap-1 rounded-lg py-1.5 transition-colors duration-150"
+              className={cn(
+                "group flex flex-col gap-1 rounded-lg py-1.5 transition-colors duration-150",
+                row.isClient && "border border-white/[0.12] bg-white/[0.03] px-2"
+              )}
               title={`${row.name}: ${row.count} citation${row.count !== 1 ? "s" : ""}`}
             >
               <div className="flex items-center justify-between gap-3">
@@ -1839,19 +1944,23 @@ function AIAnswerMarketShareChart({
                   <span className="w-5 shrink-0 text-right text-xs font-medium tabular-nums text-text-3">{row.rank}</span>
                   <span className={cn(
                     "min-w-0 truncate text-sm font-medium",
-                    row.isLeader ? "text-text" : "text-text-2"
+                    row.isClient ? "text-text font-semibold" : row.isLeader ? "text-text" : "text-text-2"
                   )}>{row.name}</span>
                 </div>
                 <span className={cn(
                   "shrink-0 tabular-nums text-sm",
-                  row.isLeader ? "font-semibold text-text" : "text-text-2"
+                  row.isClient || row.isLeader ? "font-semibold text-text" : "text-text-2"
                 )}>{row.share}%</span>
               </div>
               <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
                 <div
                   className={cn(
                     "h-full rounded-full transition-[width] duration-300",
-                    row.isLeader ? MARKET_SHARE_BAR_LEADER : (row.isClient ? "bg-white/20" : MARKET_SHARE_BAR_OTHERS[Math.min(i, MARKET_SHARE_BAR_OTHERS.length - 1)])
+                    row.isClient
+                      ? "bg-authority-watchlist/80"
+                      : row.isLeader
+                        ? MARKET_SHARE_BAR_LEADER
+                        : MARKET_SHARE_BAR_OTHERS[Math.min(i, MARKET_SHARE_BAR_OTHERS.length - 1)]
                   )}
                   style={{ width: `${row.share}%` }}
                 />
@@ -1884,8 +1993,16 @@ function ExecutiveSummaryGrid({
   const sentiment = getSentiment(score, delta);
 
   const tiles = [
-    { label: "Gap to Leader", value: gapToLeader != null ? `${gapToLeader} pts` : "—", hint: "Points to 100" },
-    { label: "Weakest Model", value: weakest ? getProviderDisplayName(weakest[0]) : "—", hint: weakest ? `${weakest[1]} index` : "Run snapshot" },
+    {
+      label: "Gap to Leader",
+      value: gapToLeader != null ? `${gapToLeader} pts` : "—",
+      hint: "Distance to your strongest model channel",
+    },
+    {
+      label: "Weakest Model",
+      value: weakest ? getProviderDisplayName(weakest[0]) : "—",
+      hint: weakest ? `Index ${weakest[1]} — shore this up first` : "Run a snapshot to expose the weak channel",
+    },
     { label: "Confidence", value: confidence.label, hint: null, badge: true as const, variant: confidence.variant },
     { label: "Sentiment", value: sentiment.label, hint: sentiment.change, sentiment: true as const, sentimentLabel: sentiment.label },
   ];
@@ -1895,7 +2012,7 @@ function ExecutiveSummaryGrid({
       <h2 className="text-sm font-semibold uppercase tracking-wider text-text-2 mb-4">Executive Summary</h2>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {tiles.map((t, i) => (
-          <div key={i} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
+          <div key={i} className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-5">
             <p className="text-[10px] font-medium uppercase tracking-wider text-text-3">{t.label}</p>
             {t.badge ? (
               <div className="mt-2"><Badge variant={t.variant}>{t.value}</Badge></div>
@@ -2012,7 +2129,10 @@ function WhatIsWrongSection({
   return (
     <section className="mt-10">
       <div className="rounded-2xl border border-white/[0.08] bg-surface shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_4px_24px_rgba(0,0,0,0.12)]">
-        <h2 className="border-b border-white/[0.06] px-6 py-4 text-lg font-semibold text-text">Vulnerabilities by Model</h2>
+        <div className="border-b border-white/[0.06] px-6 py-4">
+          <h2 className="text-lg font-semibold text-text">Vulnerabilities by Model</h2>
+          <p className="mt-1 text-xs text-text-3">Per-model health, gap, and movement — expand for evidence and quick wins.</p>
+        </div>
         <div className="divide-y divide-white/[0.06] px-6">
           {VULN_MODELS.map((key) => {
             const entry = providerByKey.get(key);
@@ -2025,9 +2145,11 @@ function WhatIsWrongSection({
             const barColor = score != null
               ? score >= 80
                 ? "bg-authority-dominant"
-                : score >= 40
-                  ? "bg-authority-watchlist"
-                  : "bg-authority-losing"
+                : score >= 60
+                  ? "bg-sky-400/80"
+                  : score >= 40
+                    ? "bg-authority-watchlist"
+                    : "bg-authority-losing"
               : "bg-white/20";
             const prevScore = previousSnapshot?.score_by_provider
               ? (() => {
@@ -2117,36 +2239,48 @@ function VulnerabilityRow({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full cursor-pointer list-none flex-wrap items-center gap-4 rounded py-6 text-left transition-shadow duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-0 hover:shadow-[0_1px_0_0_rgba(255,255,255,0.03)]"
+        className="grid w-full cursor-pointer list-none grid-cols-1 gap-3 rounded py-5 text-left transition-shadow duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-0 hover:shadow-[0_1px_0_0_rgba(255,255,255,0.03)] md:grid-cols-[minmax(0,1.4fr)_auto_auto_minmax(0,1fr)_auto_auto] md:items-center md:gap-4"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/12 bg-white/[0.04]">
             <img src={logoUrl} alt="" className="h-6 w-6 object-contain" width={24} height={24} />
           </div>
-          <span className="font-medium text-text">{label}</span>
+          <span className="truncate font-medium text-text">{label}</span>
         </div>
-        <div className="flex items-center gap-4">
-          {score != null && <span className="tabular-nums font-semibold text-text">{score}</span>}
+        {score != null ? (
+          <span className="tabular-nums text-lg font-semibold text-text md:text-base">{score}</span>
+        ) : (
+          <span className="text-sm text-text-3">—</span>
+        )}
+        <div className="flex flex-wrap items-center gap-2">
           {statusTag && (
             <span className={cn(
               "rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
               statusTag === "Strong" && "bg-authority-dominant/20 text-authority-dominant",
+              statusTag === "Stable" && "bg-sky-400/20 text-sky-200",
               statusTag === "Watchlist" && "bg-authority-watchlist/20 text-authority-watchlist",
               statusTag === "Critical" && "bg-authority-losing/20 text-authority-losing"
             )}>{statusTag}</span>
           )}
-          {gapToLeader != null && <span className="text-sm text-text-2">Gap: {gapToLeader} pts</span>}
         </div>
-        <div className="h-3 w-28 min-w-[100px] overflow-hidden rounded-full bg-white/[0.08]">
-          <div className={cn("h-full rounded-full", barColor)} style={{ width: `${barPct}%` }} />
+        <div className="min-w-0 md:pr-2">
+          <div className="h-3 w-full max-w-[220px] overflow-hidden rounded-full bg-white/[0.08] md:max-w-none">
+            <div className={cn("h-full rounded-full", barColor)} style={{ width: `${barPct}%` }} />
+          </div>
+          {gapToLeader != null && (
+            <p className="mt-1 text-[11px] text-text-3">Gap to perfect index: {gapToLeader} pts</p>
+          )}
         </div>
-        {series.length >= 2 && <MicroSparkline scores={series} color={trendColor} />}
-        {delta != null && (
-          <span className={cn("text-xs font-medium tabular-nums", delta >= 0 ? "text-authority-dominant" : "text-authority-losing")}>
-            {delta >= 0 ? "+" : ""}{delta}
-          </span>
-        )}
-        <span className={cn("ml-auto shrink-0 text-text-3 transition-transform duration-200", open && "rotate-180")}>
+        <div className="flex items-center gap-2">
+          {series.length >= 2 && <MicroSparkline scores={series} color={trendColor} />}
+          {delta != null && (
+            <span className={cn("text-xs font-semibold tabular-nums", delta >= 0 ? "text-authority-dominant" : "text-authority-losing")}>
+              {delta >= 0 ? "+" : ""}
+              {delta} vs last
+            </span>
+          )}
+        </div>
+        <span className={cn("justify-self-end text-text-3 transition-transform duration-200 md:justify-self-center", open && "rotate-180")}>
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
@@ -2157,7 +2291,7 @@ function VulnerabilityRow({
         style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
       >
         <div className="min-h-0 overflow-hidden">
-          <div className="border-t border-white/[0.04] border-l-2 border-l-white/10 pb-6 pt-5 pl-5 ml-0.5">
+          <div className="ml-0.5 border-l-2 border-l-white/15 border-t border-white/[0.06] bg-white/[0.02] pb-6 pl-5 pt-5">
             <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-3">
               <div>
                 <h4 className="text-xs font-semibold uppercase tracking-wider text-text-3 mb-2">What&apos;s wrong</h4>
@@ -2204,6 +2338,20 @@ function getSeverityLabel(priority: string): "Critical" | "High" | "Medium" | "L
 function PlaybookItem({ insight, index }: { insight: StrategicInsight; index: number }) {
   const [open, setOpen] = useState(false);
   const hasContent = Boolean(insight.action?.trim());
+  const effort =
+    insight.priority === "HIGH" ? "Medium effort" : insight.priority === "MEDIUM" ? "Low–medium effort" : "Low effort";
+  const titleLower = insight.title.toLowerCase();
+  const owner = titleLower.includes("citation") || titleLower.includes("technical")
+    ? "Technical SEO"
+    : titleLower.includes("pr") || titleLower.includes("authority") || titleLower.includes("brand")
+      ? "PR / Brand"
+      : "Content";
+  const upside =
+    insight.priority === "HIGH"
+      ? "Est. upside +8–14 pts"
+      : insight.priority === "MEDIUM"
+        ? "Est. upside +4–8 pts"
+        : "Est. upside +1–4 pts";
   function actionBullets(action: string): string[] {
     const parts = action.split(/(?<=[.!])\s+/).filter(Boolean).map((s) => s.trim()).slice(0, 6);
     if (parts.length > 0) return parts;
@@ -2211,54 +2359,62 @@ function PlaybookItem({ insight, index }: { insight: StrategicInsight; index: nu
   }
 
   return (
-    <li className="border-b border-white/[0.06] py-6 first:pt-0 last:border-0 last:pb-0">
+    <li className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 md:p-5">
       <div className="flex flex-wrap items-center gap-2">
+        <span className="rounded-md border border-white/10 px-2 py-0.5 text-[11px] font-medium tabular-nums text-text-3">
+          {String(index + 1).padStart(2, "0")}
+        </span>
         <span className={cn(
-          "rounded-lg px-2.5 py-1 text-xs font-semibold uppercase",
+          "rounded-lg px-2.5 py-1 text-xs font-semibold uppercase tracking-wide",
           insight.priority === "HIGH" && "bg-authority-losing/15 text-authority-losing",
           insight.priority === "MEDIUM" && "bg-authority-watchlist/15 text-authority-watchlist",
           insight.priority === "LOW" && "bg-white/10 text-text-2"
         )}>
-          PRIORITY: {getSeverityLabel(insight.priority)}
+          {getSeverityLabel(insight.priority)}
         </span>
+        <span className="rounded-lg border border-white/10 px-2.5 py-1 text-[11px] text-text-2">{upside}</span>
       </div>
-      <p className="mt-2 font-semibold text-text">{formatPlaybookText(insight.title)}</p>
-      <p className="mt-1 text-sm leading-snug text-text-2">{formatPlaybookText(insight.whyItMatters)}</p>
+      <p className="mt-3 text-base font-semibold leading-snug text-text">{formatPlaybookText(insight.title)}</p>
+      <p className="mt-1.5 text-sm leading-relaxed text-text-2">{formatPlaybookText(insight.whyItMatters)}</p>
+      <div className="mt-2 flex flex-wrap gap-2 text-xs text-text-3">
+        <span className="rounded-md bg-white/[0.04] px-2 py-1">{effort}</span>
+        <span className="rounded-md bg-white/[0.04] px-2 py-1">Owner: {owner}</span>
+      </div>
       {hasContent ? (
         <>
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
-            className="mt-3 rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-text-2 hover:bg-white/10 hover:text-text focus:outline-none focus:ring-2 focus:ring-white/20 transition-colors"
+            className="mt-4 rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-text-2 transition-colors hover:bg-white/10 hover:text-text focus:outline-none focus:ring-2 focus:ring-white/20"
             aria-expanded={open}
           >
-            {open ? "Hide Playbook" : "View Playbook"}
+            {open ? "Hide execution plan" : "Open execution plan"}
           </button>
           {open && (
-            <div className="mt-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-text-3 mb-2">Steps &amp; actions</h4>
-              <ul className="list-disc space-y-1 pl-4 text-sm text-text-2">
+            <div className="mt-4 rounded-xl border border-white/[0.08] bg-white/[0.03] p-5">
+              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-text-3">Steps &amp; actions</h4>
+              <ul className="list-disc space-y-1.5 pl-4 text-sm leading-relaxed text-text-2">
                 {actionBullets(insight.action).map((bullet, i) => (
                   <li key={i}>{formatPlaybookText(bullet)}</li>
                 ))}
               </ul>
               {insight.expectedImpact && (
                 <>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-text-3 mt-4 mb-1">Expected impact</h4>
-                  <p className="text-sm text-text-2">{formatPlaybookText(insight.expectedImpact)}</p>
+                  <h4 className="mb-1 mt-4 text-xs font-semibold uppercase tracking-wider text-text-3">Expected impact</h4>
+                  <p className="text-sm leading-relaxed text-text-2">{formatPlaybookText(insight.expectedImpact)}</p>
                 </>
               )}
               {insight.consequence && (
                 <>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-text-3 mt-3 mb-1">If not addressed</h4>
-                  <p className="text-sm text-text-2">{formatPlaybookText(insight.consequence)}</p>
+                  <h4 className="mb-1 mt-3 text-xs font-semibold uppercase tracking-wider text-text-3">If not addressed</h4>
+                  <p className="text-sm leading-relaxed text-text-2">{formatPlaybookText(insight.consequence)}</p>
                 </>
               )}
             </div>
           )}
         </>
       ) : (
-        <div className="mt-3">
+        <div className="mt-4">
           <button
             type="button"
             disabled
@@ -2266,9 +2422,9 @@ function PlaybookItem({ insight, index }: { insight: StrategicInsight; index: nu
             aria-disabled="true"
             title="Coming soon"
           >
-            View Playbook
+            Execution plan
           </button>
-          <p className="mt-1.5 text-xs text-text-3">Coming soon</p>
+          <p className="mt-1.5 text-xs text-text-3">Detailed steps coming soon</p>
         </div>
       )}
     </li>
@@ -2316,8 +2472,11 @@ function HowToWinSection({
   return (
     <section className="mt-10">
       <div className="rounded-2xl border border-white/[0.08] bg-surface shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_4px_24px_rgba(0,0,0,0.12)]">
-        <h2 className="border-b border-white/[0.06] px-6 py-4 text-lg font-semibold text-text">Execution Playbook</h2>
-        <ul className="p-6 md:p-8">
+        <div className="border-b border-white/[0.06] px-6 py-4">
+          <h2 className="text-lg font-semibold text-text">Execution Playbook</h2>
+          <p className="mt-1 text-xs text-text-3">Prioritized moves ranked by displacement risk and recovery leverage.</p>
+        </div>
+        <ul className="grid gap-3 p-6 md:p-8">
           {prioritized.map((insight, idx) => (
             <PlaybookItem key={idx} insight={insight} index={idx} />
           ))}
