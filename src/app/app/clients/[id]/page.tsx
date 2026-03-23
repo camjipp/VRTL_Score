@@ -1529,6 +1529,34 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
   const [filter, setFilter] = useState<typeof CHART_FILTERS[number]>("all");
   const { scores, dates } = useMemo(() => getChartSeriesForFilter(snapshots, filter), [snapshots, filter]);
 
+  const trajectoryNote = useMemo(() => {
+    if (scores.length < 2) {
+      return "Run more snapshots to plot movement and compare models with confidence.";
+    }
+    const delta = scores[scores.length - 1]! - scores[0]!;
+    if (filter === "all") {
+      if (delta < -3) return "Composite index has declined — prioritize the weakest model channel first.";
+      if (delta > 3) return "Composite index is improving — reinforce mentions and citations to lock in gains.";
+      return "Trajectory is relatively flat; displacement may still be shifting under the surface.";
+    }
+    if (filter === "openai") {
+      return delta < 0
+        ? "OpenAI / ChatGPT channel has softened — tighten entity, citation, and proof density."
+        : "OpenAI channel is holding or improving versus prior snapshots.";
+    }
+    if (filter === "gemini") {
+      return delta < 0
+        ? "Gemini channel is losing ground — add structured, quotable brand proof."
+        : "Gemini visibility is stable or strengthening.";
+    }
+    if (filter === "anthropic") {
+      return delta < 0
+        ? "Anthropic underperformance is dragging the story — close citation and retrieval gaps."
+        : "Anthropic stress has eased in recent snapshots.";
+    }
+    return "";
+  }, [scores, filter]);
+
   const segmentControl = (
     <div className="flex w-full items-stretch">
       <div className="inline-flex h-[38px] w-full overflow-hidden rounded-lg border border-white/[0.08] bg-white/[0.04] p-0.5" style={{ minHeight: SEGMENT_CONTROL_HEIGHT }}>
@@ -1557,9 +1585,7 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
         <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <h3 className="text-base font-semibold tracking-tight text-text">Authority Trajectory</h3>
-            <p className="mt-1 max-w-xl text-sm leading-relaxed text-text-2">
-              Run more snapshots to plot movement and compare models with confidence.
-            </p>
+            <p className="mt-1 max-w-xl text-sm leading-relaxed text-text-2">{trajectoryNote}</p>
           </div>
           <div className="w-full max-w-md shrink-0 lg:w-[min(100%,380px)]">{segmentControl}</div>
         </div>
@@ -1580,28 +1606,6 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
   const areaD = `M ${CHART_PADDING.left} ${CHART_PADDING.top + CHART_INNER_HEIGHT} ${pathD} L ${pathPoints[pathPoints.length - 1]!.x} ${CHART_PADDING.top + CHART_INNER_HEIGHT} Z`;
   const trend = scores[scores.length - 1]! - scores[0]!;
   const lineColor = trend >= 0 ? CHART_COLORS.dominant : CHART_COLORS.losing;
-  const trajectoryNote = useMemo(() => {
-    if (scores.length < 2) return "Run additional snapshots to establish trajectory.";
-    const delta = scores[scores.length - 1]! - scores[0]!;
-    if (filter === "all") {
-      if (delta < -3) return "Composite index has declined — prioritize the weakest model channel first.";
-      if (delta > 3) return "Composite index is improving — reinforce mentions and citations to lock in gains.";
-      return "Trajectory is relatively flat; displacement may still be shifting under the surface.";
-    }
-    if (filter === "openai")
-      return delta < 0
-        ? "OpenAI / ChatGPT channel has softened — tighten entity, citation, and proof density."
-        : "OpenAI channel is holding or improving versus prior snapshots.";
-    if (filter === "gemini")
-      return delta < 0
-        ? "Gemini channel is losing ground — add structured, quotable brand proof."
-        : "Gemini visibility is stable or strengthening.";
-    if (filter === "anthropic")
-      return delta < 0
-        ? "Anthropic underperformance is dragging the story — close citation and retrieval gaps."
-        : "Anthropic stress has eased in recent snapshots.";
-    return "";
-  }, [scores, filter]);
 
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 pb-4 pt-4">
