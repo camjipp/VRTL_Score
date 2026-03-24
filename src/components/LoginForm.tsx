@@ -69,11 +69,16 @@ export function LoginForm({ nextPath, siteOrigin = "" }: { nextPath: string; sit
   async function handleGoogleSignIn() {
     setError(null);
     try {
-      // Prefer origin from the server (request host) so production always uses the live domain.
-      // Fall back to client origin only when server didn't send one (e.g. some edge cases).
-      const baseUrl =
-        (siteOrigin && siteOrigin.replace(/\/$/, "")) ||
-        (typeof window !== "undefined" ? window.location.origin : "");
+      const currentOrigin =
+        typeof window !== "undefined" ? window.location.origin : "";
+      const serverOrigin = siteOrigin ? siteOrigin.replace(/\/$/, "") : "";
+      const isLocalhost = (url: string) =>
+        /^https?:\/\/localhost(:\d+)?(\/|$)/i.test(url) || url.startsWith("http://127.0.0.1");
+      // Never redirect to localhost when user is on production: use server origin, or current origin if we're on a live site.
+      let baseUrl = serverOrigin || currentOrigin;
+      if (currentOrigin && !isLocalhost(currentOrigin) && (!baseUrl || isLocalhost(baseUrl))) {
+        baseUrl = currentOrigin;
+      }
       if (!baseUrl) {
         setError("Could not determine app URL. Please refresh and try again.");
         return;
