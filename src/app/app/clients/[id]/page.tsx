@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState, useCallback, useRef } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef, type ReactNode } from "react";
 import Link from "next/link";
 
 import { BackLink } from "@/components/BackLink";
@@ -1462,6 +1462,36 @@ function CompetitiveAuthorityRanking({
 /* ═══════════════════════════════════════════════════════════════════════════
    PAGE HEADER — back button (high contrast) + breadcrumb with separators
 ═══════════════════════════════════════════════════════════════════════════ */
+/** Shared section title + subtitle; use for consistent vertical rhythm across intelligence blocks */
+function DashboardSection({
+  title,
+  subtitle,
+  children,
+  className,
+}: {
+  title: string;
+  subtitle?: ReactNode;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={cn("w-full", className)}>
+      <header className="mb-4 md:mb-5">
+        <h2 className="text-base font-semibold tracking-tight text-text">{title}</h2>
+        {subtitle != null ? <div className="mt-1 max-w-2xl text-sm leading-relaxed text-text-2">{subtitle}</div> : null}
+      </header>
+      {children}
+    </section>
+  );
+}
+
+/** Single surface for chart, market share, and similar blocks */
+function DashboardPanel({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <div className={cn("rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 md:p-6", className)}>{children}</div>
+  );
+}
+
 function PageHeader({ clientName }: { clientName: string }) {
   return (
     <header className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-white/[0.06] pb-4">
@@ -1525,7 +1555,7 @@ const CHART_INNER_HEIGHT = CHART_HEIGHT - CHART_PADDING.top - CHART_PADDING.bott
 const CHART_Y_TICKS = [0, 50, 100];
 const SEGMENT_CONTROL_HEIGHT = 36;
 
-function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
+function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embedded?: boolean }) {
   const [filter, setFilter] = useState<typeof CHART_FILTERS[number]>("all");
   const { scores, dates } = useMemo(() => getChartSeriesForFilter(snapshots, filter), [snapshots, filter]);
 
@@ -1579,13 +1609,15 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
     </div>
   );
 
+  const chartShell = embedded ? "w-full" : "rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 pb-4 pt-4";
+
   if (scores.length < 2) {
     return (
-      <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 pb-4 pt-4" style={{ minHeight: CHART_HEIGHT }}>
+      <div className={chartShell} style={{ minHeight: embedded ? undefined : CHART_HEIGHT }}>
         <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
-            <h3 className="text-base font-semibold tracking-tight text-text">Authority Trajectory</h3>
-            <p className="mt-1 max-w-xl text-sm leading-relaxed text-text-2">{trajectoryNote}</p>
+            {!embedded && <h3 className="text-base font-semibold tracking-tight text-text">Authority Trajectory</h3>}
+            <p className={cn("max-w-xl text-sm leading-relaxed text-text-2", !embedded && "mt-1")}>{trajectoryNote}</p>
           </div>
           <div className="w-full max-w-md shrink-0 lg:w-[min(100%,380px)]">{segmentControl}</div>
         </div>
@@ -1608,11 +1640,11 @@ function BigTrendChart({ snapshots }: { snapshots: SnapshotRow[] }) {
   const lineColor = trend >= 0 ? CHART_COLORS.dominant : CHART_COLORS.losing;
 
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 pb-4 pt-4">
+    <div className={chartShell}>
       <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <h3 className="text-base font-semibold tracking-tight text-text">Authority Trajectory</h3>
-          <p className="mt-1 max-w-xl text-sm leading-relaxed text-text-2">{trajectoryNote}</p>
+          {!embedded && <h3 className="text-base font-semibold tracking-tight text-text">Authority Trajectory</h3>}
+          <p className={cn("max-w-xl text-sm leading-relaxed text-text-2", !embedded && "mt-1")}>{trajectoryNote}</p>
         </div>
         <div className="w-full max-w-md shrink-0 lg:w-[min(100%,380px)]">{segmentControl}</div>
       </div>
@@ -1660,7 +1692,7 @@ function getSentiment(score: number | null, delta: number | null): { label: "Pos
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   FULL-WIDTH HERO — diagnosis surface: identity, CTAs, index, diagnosis, chart
+   FULL-WIDTH HERO — identity, score, insight, strategic story, risk line, actions
 ═══════════════════════════════════════════════════════════════════════════ */
 function HeroSection({
   client,
@@ -1721,8 +1753,8 @@ function HeroSection({
   return (
     <section className="w-full rounded-2xl border border-white/[0.06] bg-surface">
       <div className="p-6 md:p-8">
-        <div className="flex flex-col gap-10 xl:flex-row xl:items-start xl:justify-between xl:gap-12">
-          <div className="min-w-0 flex-1">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10 lg:items-start">
+          <div className="space-y-8 lg:col-span-7">
             <div className="flex items-start gap-4">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/[0.04]">
                 {logoSrc ? (
@@ -1731,15 +1763,15 @@ function HeroSection({
                   <span className="text-xl font-bold text-text-3">{client.name.charAt(0)}</span>
                 )}
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 pt-0.5">
                 <h1 className="text-2xl font-semibold tracking-tight text-text md:text-3xl">{client.name}</h1>
                 <p className="mt-0.5 text-sm text-text-2">{domain || client.website || "—"}</p>
               </div>
             </div>
 
-            <div className="mt-8">
+            <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-3">AI Authority Index</p>
-              <div className="mt-3 flex flex-wrap items-end gap-x-4 gap-y-2">
+              <div className="mt-3 flex flex-wrap items-end gap-x-3 gap-y-2">
                 <span className={cn("inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider", getAuthorityStatusTone(score))}>
                   {statusLabel}
                 </span>
@@ -1760,7 +1792,7 @@ function HeroSection({
                   </span>
                 )}
               </div>
-              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-text-2">{diagnosis}</p>
+              <p className="mt-4 max-w-xl text-sm leading-relaxed text-text-2">{diagnosis}</p>
               {mentionRate !== null && (
                 <p className="mt-2 text-xs text-text-3">
                   Mentioned in {mentionRate}% of tracked answers — displacement pressure clusters in weaker model channels.
@@ -1769,15 +1801,15 @@ function HeroSection({
             </div>
           </div>
 
-          <div className="flex w-full shrink-0 flex-col gap-10 xl:w-[300px]">
+          <div className="flex flex-col gap-8 border-t border-white/[0.06] pt-8 lg:col-span-5 lg:border-t-0 lg:pt-0">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-3">Strategic story</p>
               <dl className="mt-4 space-y-4 text-sm">
-                <div className="border-b border-white/[0.06] pb-4">
+                <div>
                   <dt className="text-xs text-text-3">Displaced by</dt>
                   <dd className="mt-1 font-medium text-text">{primaryDisplacerLabel}</dd>
                 </div>
-                <div className="border-b border-white/[0.06] pb-4">
+                <div>
                   <dt className="text-xs text-text-3">Critical weakness</dt>
                   <dd className="mt-1 font-medium text-text">{weakestModelLabel}</dd>
                 </div>
@@ -1788,7 +1820,7 @@ function HeroSection({
               </dl>
             </div>
 
-            <div className="flex flex-col gap-2.5 border-t border-white/[0.06] pt-6 xl:border-t-0 xl:pt-0">
+            <div className="flex flex-col gap-2.5 border-t border-white/[0.06] pt-6">
               <p className="sr-only">Actions</p>
               <RunSnapshotButton
                 running={running}
@@ -1808,17 +1840,13 @@ function HeroSection({
           </div>
         </div>
 
-        <div className="mt-10 border-t border-white/[0.06] pt-6">
+        <div className="mt-8 border-t border-white/[0.06] pt-6 md:mt-10 md:pt-8">
           <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-authority-watchlist/90">AI competitive risk detected</p>
-          <p className="mt-2 text-sm leading-relaxed text-text-2">
+          <p className="mt-2 max-w-4xl text-sm leading-relaxed text-text-2">
             <span>{riskLine1} </span>
             <span className="text-authority-watchlist">{riskLine2} </span>
             <span>{riskLine3}</span>
           </p>
-        </div>
-
-        <div className="mt-8">
-          <BigTrendChart snapshots={snapshots} />
         </div>
       </div>
     </section>
@@ -1856,6 +1884,7 @@ function normalizeBrandName(name: string): string {
   return t.replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
 }
 
+/** Body only — wrap with DashboardSection + DashboardPanel on the page */
 function AIAnswerMarketShareChart({
   clientName,
   detail,
@@ -1907,43 +1936,35 @@ function AIAnswerMarketShareChart({
 
   if (rows.length === 0) {
     return (
-      <section className="mt-10 w-full">
-        <h2 className="text-lg font-semibold tracking-tight text-text">AI Answer Market Share</h2>
-        <p className="mt-1 mb-5 text-sm text-text-2">Share of AI brand recommendation presence across tracked answers.</p>
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 md:p-6">
-          <div className="space-y-3">
-            {[40, 28, 22, 14, 8].map((pct, i) => (
-              <div key={i} className="flex flex-col gap-1">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="h-4 w-20 animate-pulse rounded bg-white/[0.08]" />
-                  <span className="h-4 w-8 animate-pulse rounded bg-white/[0.06]" />
-                </div>
-                <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
-                  <div
-                    className="h-full rounded-full bg-white/[0.12] animate-pulse"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
+      <>
+        <div className="space-y-3">
+          {[40, 28, 22, 14, 8].map((pct, i) => (
+            <div key={i} className="flex flex-col gap-1">
+              <div className="flex items-center justify-between gap-3">
+                <span className="h-4 w-20 animate-pulse rounded bg-white/[0.08]" />
+                <span className="h-4 w-8 animate-pulse rounded bg-white/[0.06]" />
               </div>
-            ))}
-          </div>
-          <p className="mt-4 text-sm text-text-3">Run a snapshot to generate citation share by brand.</p>
-          {onRunSnapshot && (
-            <div className="mt-3 flex justify-end">
-              <RunSnapshotButton running={running ?? false} snapshotStatus={snapshotStatus ?? null} onRunSnapshot={onRunSnapshot} />
+              <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                <div
+                  className="h-full rounded-full bg-white/[0.12] animate-pulse"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
             </div>
-          )}
+          ))}
         </div>
-      </section>
+        <p className="mt-4 text-sm text-text-3">Run a snapshot to generate citation share by brand.</p>
+        {onRunSnapshot && (
+          <div className="mt-3 flex justify-end">
+            <RunSnapshotButton running={running ?? false} snapshotStatus={snapshotStatus ?? null} onRunSnapshot={onRunSnapshot} />
+          </div>
+        )}
+      </>
     );
   }
 
   return (
-      <section className="mt-10 w-full">
-        <h2 className="text-lg font-semibold tracking-tight text-text">AI Answer Market Share</h2>
-        <p className="mt-1 mb-5 max-w-2xl text-sm text-text-2">Share of AI brand recommendation presence across tracked answers. <span className="text-text-3">(You)</span> marks your brand.</p>
-      <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 md:p-6">
-        <div className="space-y-2.5">
+    <div className="space-y-2.5">
           {rows.map((row, i) => (
             <div
               key={row.name}
@@ -1981,22 +2002,18 @@ function AIAnswerMarketShareChart({
               </div>
             </div>
           ))}
-        </div>
-      </div>
-    </section>
+    </div>
   );
 }
 
 /* Executive Summary — full-width 2x2 grid under hero (Gap, Weakest, Confidence, Sentiment) */
 function ExecutiveSummaryGrid({
   providers,
-  detail,
   confidence,
   score,
   delta,
 }: {
   providers: [string, number][];
-  detail: SnapshotDetailResponse | null;
   confidence: { label: string; variant: BadgeVariant };
   score: number | null;
   delta: number | null;
@@ -2022,9 +2039,11 @@ function ExecutiveSummaryGrid({
   ];
 
   return (
-    <section className="mt-10 w-full border-t border-white/[0.06] pt-8">
-      <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-text-3">Quick read</h2>
-      <div className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-white/[0.06] bg-white/[0.06] lg:grid-cols-4">
+    <DashboardSection
+      title="Quick read"
+      subtitle="Gap to leader, weakest channel, confidence, and trajectory sentiment."
+    >
+      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-white/[0.06] bg-white/[0.06] lg:grid-cols-4">
         {tiles.map((t, i) => (
           <div key={i} className="bg-surface px-4 py-3">
             <p className="text-[10px] font-medium uppercase tracking-wider text-text-3">{t.label}</p>
@@ -2049,7 +2068,7 @@ function ExecutiveSummaryGrid({
           </div>
         ))}
       </div>
-    </section>
+    </DashboardSection>
   );
 }
 
@@ -2141,13 +2160,12 @@ function WhatIsWrongSection({
   }, [snapshots]);
 
   return (
-    <section className="mt-10">
-      <div className="rounded-xl border border-white/[0.06] bg-surface">
-        <div className="border-b border-white/[0.06] px-6 py-5">
-          <h2 className="text-lg font-semibold tracking-tight text-text">Vulnerabilities by Model</h2>
-          <p className="mt-1 text-sm text-text-2">Per-model health, gap, and movement — expand for evidence and quick wins.</p>
-        </div>
-        <div className="divide-y divide-white/[0.06] px-6">
+    <DashboardSection
+      title="Vulnerabilities by Model"
+      subtitle="Per-model health, gap, and movement — expand for evidence and quick wins."
+    >
+      <div className="overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.02]">
+        <div className="divide-y divide-white/[0.06] px-5 md:px-6">
           {VULN_MODELS.map((key) => {
             const entry = providerByKey.get(key);
             const score = entry ? entry[1] : null;
@@ -2196,7 +2214,7 @@ function WhatIsWrongSection({
           })}
         </div>
       </div>
-    </section>
+    </DashboardSection>
   );
 }
 
@@ -2373,7 +2391,7 @@ function PlaybookItem({ insight, index }: { insight: StrategicInsight; index: nu
   }
 
   return (
-    <li className="py-8 first:pt-0">
+    <li className="px-5 py-8 first:pt-8 md:px-6">
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <span className="font-mono text-xs font-medium tabular-nums text-text-3">{String(index + 1).padStart(2, "0")}</span>
         <span className={cn(
@@ -2451,40 +2469,37 @@ function HowToWinSection({
 
   if (score === null) {
     return (
-      <section className="mt-10">
-        <div className="rounded-2xl border border-white/[0.08] bg-surface p-6 md:p-8">
-          <h2 className="text-lg font-semibold text-text">Execution Playbook</h2>
-          <p className="mt-2 text-sm text-text-2">Run a snapshot to generate your playbook.</p>
-        </div>
-      </section>
+      <DashboardSection title="Execution Playbook">
+        <DashboardPanel>
+          <p className="text-sm text-text-2">Run a snapshot to generate prioritized plays by displacement risk and recovery leverage.</p>
+        </DashboardPanel>
+      </DashboardSection>
     );
   }
 
   if (prioritized.length === 0) {
     return (
-      <section className="mt-10">
-        <div className="rounded-2xl border border-white/[0.08] bg-surface p-6 md:p-8">
-          <h2 className="text-lg font-semibold text-text">Execution Playbook</h2>
-          <p className="mt-2 text-sm text-text-2">Authority is performing well. Continue monitoring.</p>
-        </div>
-      </section>
+      <DashboardSection title="Execution Playbook">
+        <DashboardPanel>
+          <p className="text-sm text-text-2">Authority is performing well. Continue monitoring.</p>
+        </DashboardPanel>
+      </DashboardSection>
     );
   }
 
   return (
-    <section className="mt-10">
-      <div className="rounded-xl border border-white/[0.06] bg-surface">
-        <div className="border-b border-white/[0.06] px-6 py-5">
-          <h2 className="text-lg font-semibold tracking-tight text-text">Execution Playbook</h2>
-          <p className="mt-1 text-sm text-text-2">Prioritized by displacement risk and recovery leverage.</p>
-        </div>
-        <ul className="divide-y divide-white/[0.06] px-6 py-2 md:px-8">
+    <DashboardSection
+      title="Execution Playbook"
+      subtitle="Prioritized by displacement risk and recovery leverage."
+    >
+      <DashboardPanel className="p-0">
+        <ul className="divide-y divide-white/[0.06]">
           {prioritized.map((insight, idx) => (
             <PlaybookItem key={idx} insight={insight} index={idx} />
           ))}
         </ul>
-      </div>
-    </section>
+      </DashboardPanel>
+    </DashboardSection>
   );
 }
 
@@ -3425,7 +3440,7 @@ export default function ClientDetailPage() {
 
   return (
     <div className="min-h-screen pb-20 md:pb-0">
-      <div className="space-y-8 p-6 md:p-8">
+      <div className="mx-auto max-w-[1200px] space-y-10 px-5 py-8 md:px-8 md:py-10">
         {/* Loading */}
         {loading && (
           <div className="space-y-4">
@@ -3478,7 +3493,6 @@ export default function ClientDetailPage() {
 
             <div ref={heroSentinelRef} className="h-0" aria-hidden />
 
-            {/* Diagnosis: full-width hero (identity, CTAs, index, diagnosis, chart) */}
             <HeroSection
               client={client}
               score={selectedSnapshot?.vrtl_score ?? null}
@@ -3494,8 +3508,27 @@ export default function ClientDetailPage() {
               running={running}
             />
 
-            {/* AI Answer Market Share — citation share by brand (below chart, above Executive Summary) */}
-            <AIAnswerMarketShareChart clientName={client.name} detail={snapshotDetail} onRunSnapshot={runSnapshot} running={running} snapshotStatus={selectedSnapshot?.status ?? null} />
+            <DashboardSection
+              title="Authority Trajectory"
+              subtitle="Composite and per-model movement across snapshots — compare channels before you prioritize fixes."
+            >
+              <DashboardPanel>
+                <BigTrendChart snapshots={snapshots} embedded />
+              </DashboardPanel>
+            </DashboardSection>
+
+            <DashboardSection
+              title="AI Answer Market Share"
+              subtitle={
+                <>
+                  Share of AI brand recommendation presence across tracked answers. <span className="text-text-3">(You)</span> marks your brand.
+                </>
+              }
+            >
+              <DashboardPanel>
+                <AIAnswerMarketShareChart clientName={client.name} detail={snapshotDetail} onRunSnapshot={runSnapshot} running={running} snapshotStatus={selectedSnapshot?.status ?? null} />
+              </DashboardPanel>
+            </DashboardSection>
 
             {/* Breakdown: Vulnerabilities by Model */}
             <WhatIsWrongSection providers={providers} detail={snapshotDetail} snapshots={snapshots} previousSnapshot={previousSnapshot} />
@@ -3511,7 +3544,6 @@ export default function ClientDetailPage() {
             {/* Quick read — compact stats (supporting) */}
             <ExecutiveSummaryGrid
               providers={providers}
-              detail={snapshotDetail}
               confidence={confidence}
               score={selectedSnapshot?.vrtl_score ?? null}
               delta={selectedSnapshot?.vrtl_score != null && previousSnapshot?.vrtl_score != null ? selectedSnapshot.vrtl_score - previousSnapshot.vrtl_score : null}
