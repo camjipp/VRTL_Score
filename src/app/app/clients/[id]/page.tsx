@@ -1751,76 +1751,78 @@ function HeroSection({
     : "Rebalance toward your strongest model channel while you close gaps on the weakest.";
 
   return (
-    <section className="w-full rounded-2xl border border-white/[0.06] bg-surface">
-      <div className="p-6 md:p-8">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10 lg:items-start">
-          <div className="space-y-8 lg:col-span-7">
+    <section className="w-full rounded-2xl border border-white/[0.1] bg-white/[0.035] shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset,0_12px_40px_-12px_rgba(0,0,0,0.45)]">
+      <div className="p-7 md:p-10 lg:px-11 lg:py-11">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12 lg:items-start">
+          <div className="flex flex-col gap-10 lg:col-span-7">
             <div className="flex items-start gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/[0.04]">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/12 bg-white/[0.05]">
                 {logoSrc ? (
                   <img src={logoSrc} alt="" className="h-9 w-9 object-contain" width={36} height={36} />
                 ) : (
                   <span className="text-xl font-bold text-text-3">{client.name.charAt(0)}</span>
                 )}
               </div>
-              <div className="min-w-0 pt-0.5">
+              <div className="min-w-0 space-y-1.5 pt-0.5">
                 <h1 className="text-2xl font-semibold tracking-tight text-text md:text-3xl">{client.name}</h1>
-                <p className="mt-0.5 text-sm text-text-2">{domain || client.website || "—"}</p>
+                <p className="text-sm text-text-2">{domain || client.website || "—"}</p>
               </div>
             </div>
 
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-3">AI Authority Index</p>
-              <div className="mt-3 flex flex-wrap items-end gap-x-3 gap-y-2">
+              <div className="mt-2.5">
                 <span className={cn("inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider", getAuthorityStatusTone(score))}>
                   {statusLabel}
                 </span>
-                <span className="text-6xl font-extrabold tabular-nums tracking-tight text-text md:text-7xl">{score ?? "—"}</span>
+              </div>
+              <div className="mt-8 flex flex-wrap items-baseline gap-x-2 gap-y-0">
+                <span className="text-7xl font-extrabold tabular-nums tracking-tight text-text md:text-8xl">{score ?? "—"}</span>
                 {delta !== null && (
                   <span
                     className={cn(
-                      "mb-1.5 rounded-md px-2 py-1 text-sm font-semibold tabular-nums",
+                      "rounded px-1.5 py-0.5 text-[11px] font-bold tabular-nums tracking-wide",
                       delta > 0
-                        ? "bg-authority-dominant/12 text-authority-dominant"
+                        ? "bg-authority-dominant/15 text-authority-dominant"
                         : delta < 0
-                          ? "bg-authority-losing/12 text-authority-losing"
-                          : "bg-white/8 text-text-2"
+                          ? "bg-authority-losing/15 text-authority-losing"
+                          : "bg-white/[0.1] text-text-2"
                     )}
                   >
                     {delta > 0 ? "+" : ""}
-                    {delta} vs last snapshot
+                    {delta} vs last
                   </span>
                 )}
               </div>
-              <p className="mt-4 max-w-xl text-sm leading-relaxed text-text-2">{diagnosis}</p>
+              <p className="mt-8 max-w-xl text-sm leading-relaxed text-text-2">{diagnosis}</p>
               {mentionRate !== null && (
-                <p className="mt-2 text-xs text-text-3">
+                <p className="mt-2.5 text-xs text-text-3">
                   Mentioned in {mentionRate}% of tracked answers — displacement pressure clusters in weaker model channels.
                 </p>
               )}
             </div>
           </div>
 
-          <div className="flex flex-col gap-8 border-t border-white/[0.06] pt-8 lg:col-span-5 lg:border-t-0 lg:pt-0">
+          <div className="flex flex-col gap-5 border-t border-white/[0.08] pt-10 lg:col-span-5 lg:border-t-0 lg:pt-0">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-3">Strategic story</p>
-              <dl className="mt-4 space-y-4 text-sm">
+              <dl className="mt-5 space-y-6">
                 <div>
-                  <dt className="text-xs text-text-3">Displaced by</dt>
-                  <dd className="mt-1 font-medium text-text">{primaryDisplacerLabel}</dd>
+                  <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Displaced by</dt>
+                  <dd className="mt-2 text-base font-semibold leading-snug text-text">{primaryDisplacerLabel}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-text-3">Critical weakness</dt>
-                  <dd className="mt-1 font-medium text-text">{weakestModelLabel}</dd>
+                  <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Critical weakness</dt>
+                  <dd className="mt-2 text-base font-semibold leading-snug text-text">{weakestModelLabel}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-text-3">Gap to leader</dt>
-                  <dd className="mt-1 font-medium tabular-nums text-text">{gapToLeaderPts != null ? `${gapToLeaderPts} pts` : "—"}</dd>
+                  <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Gap to leader</dt>
+                  <dd className="mt-2 text-base font-semibold tabular-nums leading-snug text-text">{gapToLeaderPts != null ? `${gapToLeaderPts} pts` : "—"}</dd>
                 </div>
               </dl>
             </div>
 
-            <div className="flex flex-col gap-2.5 border-t border-white/[0.06] pt-6">
+            <div className="flex flex-col gap-1.5 border-t border-white/[0.08] pt-4">
               <p className="sr-only">Actions</p>
               <RunSnapshotButton
                 running={running}
@@ -1840,7 +1842,7 @@ function HeroSection({
           </div>
         </div>
 
-        <div className="mt-8 border-t border-white/[0.06] pt-6 md:mt-10 md:pt-8">
+        <div className="mt-10 border-t border-white/[0.1] pt-8 md:mt-12 md:pt-10">
           <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-authority-watchlist/90">AI competitive risk detected</p>
           <p className="mt-2 max-w-4xl text-sm leading-relaxed text-text-2">
             <span>{riskLine1} </span>
