@@ -1480,7 +1480,7 @@ function DashboardSection({
   noTopRule?: boolean;
 }) {
   return (
-    <section className={cn("w-full pt-10 space-y-4", !noTopRule && "border-t border-white/[0.06]", className)}>
+    <section className={cn("w-full pt-6 space-y-4", !noTopRule && "border-t border-white/[0.06]", className)}>
       <header className={cn(headerClassName)}>
         <h2 className="text-base font-semibold tracking-tight text-text">{title}</h2>
         {subtitle != null ? <div className="mt-1 max-w-2xl text-sm leading-relaxed text-text-2">{subtitle}</div> : null}
@@ -1646,8 +1646,8 @@ function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embe
         </div>
         <div className="w-full max-w-md shrink-0 lg:w-[min(100%,380px)]">{segmentControl}</div>
       </div>
-      <div className="min-h-[360px] overflow-hidden">
-        <svg viewBox={`0 0 ${CHART_VIEWBOX_WIDTH} ${CHART_HEIGHT}`} className="w-full h-full min-h-[360px] block" style={{ maxHeight: CHART_HEIGHT }} preserveAspectRatio="xMidYMid meet" aria-hidden>
+      <div className="min-h-[408px] overflow-hidden">
+        <svg viewBox={`0 0 ${CHART_VIEWBOX_WIDTH} ${CHART_HEIGHT}`} className="w-full h-full min-h-[408px] block" style={{ maxHeight: CHART_HEIGHT }} preserveAspectRatio="xMidYMid meet" aria-hidden>
           <defs>
             <linearGradient id={`heroChartGrad-${filter}`} x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stopColor={lineColor} stopOpacity="0.26" />
@@ -1752,7 +1752,7 @@ function HeroSection({
     <section className="w-full border-b border-white/[0.08] pb-10">
       <div>
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10 lg:items-start">
-          <div className="flex flex-col gap-8 lg:col-span-7">
+          <div className="flex flex-col gap-6 lg:col-span-7">
             <div className="flex items-start gap-4">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08]">
                 {logoSrc ? (
@@ -1769,12 +1769,12 @@ function HeroSection({
 
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-3">AI Authority Index</p>
-              <div className="mt-2.5">
+              <div className="mt-1.5">
                 <span className={cn("inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider", getAuthorityStatusTone(score))}>
                   {statusLabel}
                 </span>
               </div>
-              <div className="mt-6 flex flex-wrap items-baseline gap-x-2 gap-y-0">
+              <div className="mt-3 flex flex-wrap items-baseline gap-x-1.5 gap-y-0">
                 <span className="text-7xl font-extrabold tabular-nums tracking-tight text-text md:text-8xl">{score ?? "—"}</span>
                 {delta !== null && (
                   <span
@@ -1792,19 +1792,19 @@ function HeroSection({
                   </span>
                 )}
               </div>
-              <p className="mt-6 max-w-xl text-sm leading-relaxed text-text-2">{diagnosis}</p>
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-text-2">{diagnosis}</p>
               {mentionRate !== null && (
-                <p className="mt-2.5 text-xs text-text-3">
+                <p className="mt-2 text-xs text-text-3">
                   Mentioned in {mentionRate}% of tracked answers — displacement pressure clusters in weaker model channels.
                 </p>
               )}
             </div>
           </div>
 
-          <div className="flex flex-col gap-5 border-t border-white/[0.08] pt-8 lg:col-span-5 lg:border-t-0 lg:pt-0">
-            <div>
+          <div className="flex flex-col gap-4 border-t border-white/[0.08] pt-6 lg:col-span-5 lg:border-t-0 lg:pt-0">
+            <div className="border-l border-white/[0.06] pl-6">
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-3">Strategic story</p>
-              <dl className="mt-4 space-y-5">
+              <dl className="mt-3 space-y-4">
                 <div>
                   <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Displaced by</dt>
                   <dd className="mt-2 text-base font-semibold leading-snug text-text">{primaryDisplacerLabel}</dd>
@@ -1840,7 +1840,7 @@ function HeroSection({
           </div>
         </div>
 
-        <div className="mt-8 border-t border-white/[0.06] pt-6 md:mt-8 md:pt-7">
+        <div className="mt-6 border-t border-white/[0.06] pt-6 md:mt-6 md:pt-7">
           <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-authority-watchlist/90">AI competitive risk detected</p>
           <p className="mt-2 max-w-4xl text-sm leading-relaxed text-text-2">
             <span>{riskLine1} </span>
@@ -2070,7 +2070,7 @@ function ExecutiveSummaryGrid({
 
   if (variant === "embedded") {
     return (
-      <div className="border-t border-white/[0.06] pt-6 space-y-3">
+      <div className="mt-4 space-y-2">
         <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Quick read</p>
         {grid}
       </div>
@@ -2361,7 +2361,7 @@ function VulnerabilityRow({
   const trendColor = delta != null ? (delta >= 0 ? CHART_COLORS.dominant : CHART_COLORS.losing) : "#94a3b8";
   return (
     <div className="group">
-      <div className="grid w-full grid-cols-1 gap-3 py-4 md:grid-cols-[minmax(0,1.4fr)_auto_auto_minmax(0,1fr)_auto_auto] md:items-center md:gap-4">
+      <div className="grid w-full grid-cols-1 gap-2 py-3 md:grid-cols-[minmax(0,1.4fr)_auto_auto_minmax(0,1fr)_auto_auto] md:items-center md:gap-4">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08]">
             <img src={logoUrl} alt="" className="h-6 w-6 object-contain" width={24} height={24} />
@@ -2413,11 +2413,11 @@ function VulnerabilityRow({
           </svg>
         </button>
       </div>
-      <div className="pb-3">
+      <div className="pb-2">
         <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Issue</p>
-        <p className="mt-1 text-sm leading-relaxed text-text-2">{primaryIssue}</p>
-        <p className="mt-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Recommended action</p>
-        <p className="mt-1 text-sm leading-relaxed text-text">{primaryAction}</p>
+        <p className="mt-0.5 text-sm leading-relaxed text-text-2">{primaryIssue}</p>
+        <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Recommended action</p>
+        <p className="mt-0.5 text-sm leading-relaxed text-text">{primaryAction}</p>
       </div>
       <div
         className="grid transition-[grid-template-rows] duration-200 ease-out"
@@ -3396,7 +3396,7 @@ export default function ClientDetailPage() {
 
   return (
     <div className="min-h-screen pb-20 md:pb-0">
-      <div className="mx-auto max-w-[1200px] space-y-8 px-5 py-8 md:px-8 md:py-10">
+      <div className="mx-auto max-w-[1200px] space-y-6 px-5 py-8 md:px-8 md:py-10">
         {/* Loading */}
         {loading && (
           <div className="space-y-4">
@@ -3469,7 +3469,7 @@ export default function ClientDetailPage() {
               noTopRule
               subtitle="Composite and per-model movement across snapshots. Quick read below summarizes gap, weakest channel, confidence, and sentiment against this trajectory."
             >
-              <div className="space-y-4">
+              <div className="space-y-2">
                 <BigTrendChart snapshots={snapshots} embedded />
                 <ExecutiveSummaryGrid
                   variant="embedded"
