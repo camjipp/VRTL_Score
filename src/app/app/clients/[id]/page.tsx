@@ -1543,6 +1543,25 @@ function getChartSeriesForFilter(
   return { scores: valid.map((p) => p.score), dates: valid.map((p) => p.date) };
 }
 
+function getLeaderSeriesByDate(snapshots: SnapshotRow[]): Record<string, number> {
+  const filtered = snapshots.filter(
+    (s) => s.vrtl_score != null && (s.status?.toLowerCase().includes("complete") || s.status?.toLowerCase().includes("success"))
+  ).slice(0, 14);
+  const reversed = [...filtered].reverse();
+  const out: Record<string, number> = {};
+  for (const s of reversed) {
+    const dateKey = new Date(s.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "2-digit" });
+    const by = s.score_by_provider as Record<string, number> | null;
+    if (!by) {
+      out[dateKey] = s.vrtl_score ?? 0;
+      continue;
+    }
+    const leader = Math.max(...Object.values(by), s.vrtl_score ?? 0);
+    out[dateKey] = leader;
+  }
+  return out;
+}
+
 /* Big trend chart — primary centerpiece: plot fills card, anchored */
 const CHART_FILTERS = ["all", "openai", "gemini", "anthropic"] as const;
 const CHART_RANGES = [
@@ -1550,13 +1569,31 @@ const CHART_RANGES = [
   { key: "30d", label: "30D", days: 30 },
   { key: "90d", label: "90D", days: 90 },
 ] as const;
-const CHART_HEIGHT = 300;
+const CHART_HEIGHT = 336;
 const CHART_PADDING = { top: 2, right: 8, bottom: 10, left: 16 };
 const CHART_VIEWBOX_WIDTH = 960;
 const CHART_INNER_WIDTH = CHART_VIEWBOX_WIDTH - CHART_PADDING.left - CHART_PADDING.right;
 const CHART_INNER_HEIGHT = CHART_HEIGHT - CHART_PADDING.top - CHART_PADDING.bottom;
 const CHART_Y_TICKS = [0, 50, 100];
 const SEGMENT_CONTROL_HEIGHT = 36;
+
+function buildSmoothPath(points: { x: number; y: number }[]): string {
+  if (points.length < 2) return "";
+  if (points.length === 2) return `M ${points[0]!.x} ${points[0]!.y} L ${points[1]!.x} ${points[1]!.y}`;
+  let d = `M ${points[0]!.x} ${points[0]!.y}`;
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[i - 1] ?? points[i]!;
+    const p1 = points[i]!;
+    const p2 = points[i + 1]!;
+    const p3 = points[i + 2] ?? p2;
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+  }
+  return d;
+}
 
 function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embedded?: boolean }) {
   const [filter, setFilter] = useState<typeof CHART_FILTERS[number]>("all");
@@ -1575,9 +1612,16 @@ function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embe
       const ts = new Date(s.created_at).getTime();
       return Number.isFinite(ts) && ts >= cutoff;
     });
+    if (timeRange === "7d" && filtered.length < 7) {
+      const complete = snapshots.filter(
+        (s) => s.vrtl_score != null && (s.status?.toLowerCase().includes("complete") || s.status?.toLowerCase().includes("success"))
+      );
+      return complete.slice(0, 10);
+    }
     return filtered.length >= 2 ? filtered : snapshots;
   }, [snapshots, timeRange]);
   const { scores, dates } = useMemo(() => getChartSeriesForFilter(rangedSnapshots, filter), [rangedSnapshots, filter]);
+  const leaderByDate = useMemo(() => getLeaderSeriesByDate(rangedSnapshots), [rangedSnapshots]);
 
   const trajectoryNote = useMemo(() => {
     if (scores.length < 2) {
@@ -1585,24 +1629,24 @@ function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embe
     }
     const delta = scores[scores.length - 1]! - scores[0]!;
     if (filter === "all") {
-      if (delta < -3) return "Composite index has declined — prioritize the weakest model channel first.";
-      if (delta > 3) return "Composite index is improving — reinforce mentions and citations to lock in gains.";
-      return "Trajectory is relatively flat; displacement may still be shifting under the surface.";
+      if (delta < -3) return "Stalled momentum — displacement risk remains elevated.";
+      if (delta > 3) return "Recovery signal detected — keep pressure on weakest model channel.";
+      return "Flat trajectory — no recovery yet in weakest model channel.";
     }
     if (filter === "openai") {
       return delta < 0
-        ? "OpenAI / ChatGPT channel has softened — tighten entity, citation, and proof density."
-        : "OpenAI channel is holding or improving versus prior snapshots.";
+        ? "OpenAI slipping — tighten proof density and citation quality now."
+        : "OpenAI stabilizing — maintain retrieval-focused execution.";
     }
     if (filter === "gemini") {
       return delta < 0
-        ? "Gemini channel is losing ground — add structured, quotable brand proof."
-        : "Gemini visibility is stable or strengthening.";
+        ? "Gemini losing ground — structured proof gaps remain unresolved."
+        : "Gemini trend improving — reinforce winning content patterns.";
     }
     if (filter === "anthropic") {
       return delta < 0
-        ? "Anthropic underperformance is dragging the story — close citation and retrieval gaps."
-        : "Anthropic stress has eased in recent snapshots.";
+        ? "Anthropic drag persists — citation and retrieval gaps still exposed."
+        : "Anthropic pressure easing — continue execution to sustain lift.";
     }
     return "";
   }, [scores, filter]);
@@ -1651,7 +1695,7 @@ function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embe
     <button
       type="button"
       onClick={() => setExpanded(true)}
-      className="inline-flex h-7 w-7 items-center justify-center rounded text-text-3 transition-colors hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+      className="inline-flex h-7 w-7 items-center justify-center rounded text-text-2/90 transition-all hover:text-text hover:drop-shadow-[0_0_6px_rgba(255,255,255,0.18)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
       aria-label="Expand trajectory chart"
       title="Expand chart"
     >
@@ -1685,25 +1729,49 @@ function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embe
   }
 
   const max = Math.max(...scores, 100);
-  const min = Math.min(...scores, 0);
-  const valueRange = max - min || 1;
+  const leaderScores = dates.map((d) => leaderByDate[d] ?? 100);
+  const min = Math.min(...scores, ...leaderScores, 0);
+  const maxAll = Math.max(max, ...leaderScores, 100);
+  const valueRange = maxAll - min || 1;
   const pathPoints = scores.map((val, i) => {
     const x = CHART_PADDING.left + (i / (scores.length - 1)) * CHART_INNER_WIDTH;
     const y = CHART_PADDING.top + CHART_INNER_HEIGHT - ((val - min) / valueRange) * CHART_INNER_HEIGHT;
     return { x, y, val };
   });
+  const leaderPoints = leaderScores.map((val, i) => {
+    const x = CHART_PADDING.left + (i / (leaderScores.length - 1 || 1)) * CHART_INNER_WIDTH;
+    const y = CHART_PADDING.top + CHART_INNER_HEIGHT - ((val - min) / valueRange) * CHART_INNER_HEIGHT;
+    return { x, y, val };
+  });
   const pathD = pathPoints.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
+  const leaderPathD = leaderPoints.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
   const areaD = `M ${CHART_PADDING.left} ${CHART_PADDING.top + CHART_INNER_HEIGHT} ${pathD} L ${pathPoints[pathPoints.length - 1]!.x} ${CHART_PADDING.top + CHART_INNER_HEIGHT} Z`;
+  const gapAreaD = `M ${leaderPoints[0]!.x} ${leaderPoints[0]!.y} ${leaderPathD} L ${pathPoints[pathPoints.length - 1]!.x} ${pathPoints[pathPoints.length - 1]!.y} ${buildSmoothPath([...pathPoints].reverse())} Z`;
   const trend = scores[scores.length - 1]! - scores[0]!;
+  const gapStart = leaderScores[0]! - scores[0]!;
+  const gapEnd = leaderScores[leaderScores.length - 1]! - scores[scores.length - 1]!;
+  const gapDelta = gapStart - gapEnd;
   const lineColor = trend >= 0 ? CHART_COLORS.dominant : CHART_COLORS.losing;
+  const trendBadge = gapDelta > 2
+    ? { label: "↑ Closing gap", tone: "text-authority-dominant" }
+    : gapDelta < -2
+      ? { label: "↓ Losing ground", tone: "text-authority-losing" }
+      : { label: "→ Stalled", tone: "text-text-2" };
   const chartSvg = (
     <svg viewBox={`0 0 ${CHART_VIEWBOX_WIDTH} ${CHART_HEIGHT}`} className="w-full h-full min-h-[260px] block" style={{ maxHeight: CHART_HEIGHT }} preserveAspectRatio="xMidYMid meet" aria-hidden>
       <defs>
         <linearGradient id={`heroChartGrad-${filter}`} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor={lineColor} stopOpacity="0.12" />
-          <stop offset="100%" stopColor={lineColor} stopOpacity="0.02" />
+          <stop offset="0%" stopColor={lineColor} stopOpacity="0.08" />
+          <stop offset="100%" stopColor={lineColor} stopOpacity="0.012" />
+        </linearGradient>
+        <linearGradient id={`heroGapGrad-${filter}`} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="rgba(255,255,255,0.06)" />
+          <stop offset="100%" stopColor="rgba(255,255,255,0.015)" />
         </linearGradient>
       </defs>
+      <rect x={CHART_PADDING.left} y={CHART_PADDING.top} width={CHART_INNER_WIDTH} height={CHART_INNER_HEIGHT / 3} fill="rgba(255,255,255,0.05)" opacity="0.06" />
+      <rect x={CHART_PADDING.left} y={CHART_PADDING.top + CHART_INNER_HEIGHT / 3} width={CHART_INNER_WIDTH} height={CHART_INNER_HEIGHT / 3} fill="rgba(255,255,255,0.04)" opacity="0.05" />
+      <rect x={CHART_PADDING.left} y={CHART_PADDING.top + (CHART_INNER_HEIGHT * 2) / 3} width={CHART_INNER_WIDTH} height={CHART_INNER_HEIGHT / 3} fill="rgba(255,255,255,0.03)" opacity="0.04" />
       {CHART_Y_TICKS.map((val) => {
         const y = CHART_PADDING.top + CHART_INNER_HEIGHT - ((val - min) / valueRange) * CHART_INNER_HEIGHT;
         return (
@@ -1713,10 +1781,21 @@ function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embe
           </g>
         );
       })}
+      <path d={gapAreaD} fill={`url(#heroGapGrad-${filter})`} />
+      <path d={buildSmoothPath(leaderPoints)} fill="none" stroke="rgba(255,255,255,0.26)" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
       <path d={areaD} fill={`url(#heroChartGrad-${filter})`} />
-      <path d={pathD} fill="none" stroke={lineColor} strokeOpacity="0.72" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={buildSmoothPath(pathPoints)} fill="none" stroke={lineColor} strokeOpacity="0.82" strokeWidth="3.3" strokeLinecap="round" strokeLinejoin="round" />
       {pathPoints.map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r="4.2" fill="var(--surface)" stroke={lineColor} strokeOpacity="0.78" strokeWidth="2.2" />
+        <circle
+          key={i}
+          cx={p.x}
+          cy={p.y}
+          r={i === pathPoints.length - 1 ? 5.2 : 2.8}
+          fill="var(--surface)"
+          stroke={lineColor}
+          strokeOpacity={i === pathPoints.length - 1 ? 0.9 : 0.62}
+          strokeWidth={i === pathPoints.length - 1 ? 2.3 : 1.5}
+        />
       ))}
       {dates.map((d, i) => {
         const x = CHART_PADDING.left + (i / (scores.length - 1)) * CHART_INNER_WIDTH;
@@ -1732,6 +1811,7 @@ function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embe
       <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           {!embedded && <h3 className="text-base font-semibold tracking-tight text-text">Authority Trajectory</h3>}
+          <p className={cn("mb-1 text-xs font-semibold uppercase tracking-[0.12em]", trendBadge.tone)}>{trendBadge.label}</p>
           <p className={cn("max-w-xl text-sm leading-relaxed text-text-2", !embedded && "mt-1")}>{trajectoryNote}</p>
         </div>
         <div className="flex w-full max-w-md shrink-0 flex-col gap-1.5 lg:w-[min(100%,420px)]">
@@ -1742,7 +1822,7 @@ function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embe
           {segmentControl}
         </div>
       </div>
-      <div className="min-h-[260px] overflow-hidden">{chartSvg}</div>
+      <div className="min-h-[300px] overflow-hidden">{chartSvg}</div>
       {expanded && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-label="Expanded trajectory chart">
           <div className="w-full max-w-5xl border border-white/[0.1] bg-surface p-4 md:p-5">
@@ -2001,12 +2081,14 @@ function AIAnswerMarketShareChart({
   onRunSnapshot,
   running,
   snapshotStatus,
+  gapTrendDelta,
 }: {
   clientName: string;
   detail: SnapshotDetailResponse | null;
   onRunSnapshot?: () => void;
   running?: boolean;
   snapshotStatus?: string | null;
+  gapTrendDelta?: number | null;
 }) {
   const rows = useMemo(() => {
     if (!detail?.summary) return [];
@@ -2062,7 +2144,7 @@ function AIAnswerMarketShareChart({
 
   const clientRow = rows.find((r) => r.isClient) ?? null;
   const topCompetitor = rows.find((r) => !r.isClient) ?? null;
-  const donutSize = 170;
+  const donutSize = 152;
   const strokeWidth = 24;
   const radius = (donutSize - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -2088,6 +2170,7 @@ function AIAnswerMarketShareChart({
         strokeDasharray={`${length} ${circumference - length}`}
         strokeDashoffset={-offset}
         strokeLinecap="butt"
+        className={row.isClient ? "animate-[pulse_3.5s_ease-in-out_infinite]" : undefined}
       />
     );
     offset += length;
@@ -2111,19 +2194,42 @@ function AIAnswerMarketShareChart({
           </svg>
           <div className="absolute inset-0 grid place-items-center">
             <div className="text-center">
-              <p className="text-[10px] uppercase tracking-[0.12em] text-text-3">Your position</p>
-              <p className="mt-1 text-xl font-semibold tabular-nums text-text">{clientRow ? `#${clientRow.rank}` : "—"}</p>
-              <p className="text-sm tabular-nums text-text-2">{clientRow ? `${clientRow.share}%` : "—"}</p>
+              <p className="text-2xl font-semibold tabular-nums text-text">{clientRow ? `#${clientRow.rank}` : "—"}</p>
+              <p className="mt-0.5 text-sm tabular-nums text-text-2">{clientRow ? `${clientRow.share}%` : "—"}</p>
+              <p className="mt-1 max-w-[120px] text-[10px] leading-snug text-text-3">
+                {clientRow && topCompetitor
+                  ? `Trailing leader by ${Math.max(0, topCompetitor.share - clientRow.share)}%`
+                  : "Leader gap unavailable"}
+              </p>
             </div>
           </div>
         </div>
       </div>
+      <ul className="space-y-1.5">
+        {rows.slice(0, 4).map((row, i) => (
+          <li key={row.name} className="flex items-center justify-between gap-2 text-xs">
+            <div className="flex min-w-0 items-center gap-2">
+              <span
+                className="h-2 w-2 shrink-0 rounded-full"
+                style={{ backgroundColor: row.isClient ? "rgba(245,158,11,0.95)" : row.isLeader ? neutral[0] : neutral[Math.min(i, neutral.length - 1)] }}
+              />
+              <span className={cn("truncate", row.isClient ? "font-semibold text-text" : "text-text-2")}>
+                {normalizeBrandName(row.name)}
+                {row.isClient ? " (You)" : ""}
+              </span>
+            </div>
+            <span className={cn("tabular-nums", row.isClient ? "font-semibold text-text" : "text-text-3")}>{row.share}%</span>
+          </li>
+        ))}
+      </ul>
       <p className="text-center text-xs text-text-3">
-        {clientRow && topCompetitor
-          ? clientRow.rank === 1
-            ? `Leading next competitor by ${Math.max(0, clientRow.share - topCompetitor.share)}%`
-            : `Trailing top competitor by ${Math.max(0, topCompetitor.share - clientRow.share)}%`
-          : "Run a snapshot to compare position vs competitors."}
+        {gapTrendDelta != null
+          ? gapTrendDelta > 0
+            ? `Closing gap: -${Math.abs(gapTrendDelta)}% vs leader`
+            : gapTrendDelta < 0
+              ? `Losing ground: +${Math.abs(gapTrendDelta)}% gap to leader`
+              : "Stalled vs leader"
+          : "Run another snapshot to assess gap direction."}
       </p>
     </div>
   );
@@ -2613,7 +2719,7 @@ function ExecutionPriorities({
   if (score === null) {
     return (
       <section>
-        <h2 className="text-sm font-semibold text-text mb-3">Execution Priorities</h2>
+        <h2 className="mb-3 text-sm font-semibold text-text">Priority Actions</h2>
         <p className="text-sm text-text-2">Run a snapshot to generate priorities.</p>
       </section>
     );
@@ -2622,7 +2728,7 @@ function ExecutionPriorities({
   if (top3.length === 0) {
     return (
       <section>
-        <h2 className="text-sm font-semibold text-text mb-3">Execution Priorities</h2>
+        <h2 className="mb-3 text-sm font-semibold text-text">Priority Actions</h2>
         <p className="text-sm text-text-2">Authority is performing well. Continue monitoring.</p>
       </section>
     );
@@ -2636,7 +2742,7 @@ function ExecutionPriorities({
 
   return (
     <section>
-      <h2 className="text-sm font-semibold text-text mb-3">Execution Priorities</h2>
+      <h2 className="mb-3 text-sm font-semibold text-text">Priority Actions</h2>
       <ul className="space-y-5">
         {top3.map((insight, idx) => (
           <li key={idx} className="border-b border-white/5 pb-4 last:border-0 last:pb-0">
@@ -3587,6 +3693,42 @@ export default function ClientDetailPage() {
               running={running}
             />
 
+            <DashboardSection
+              title="Competitive Position"
+              className="pt-4"
+              subtitle="Where you stand right now and where you are trending."
+            >
+              <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-12 lg:gap-6">
+                <div className="lg:col-span-8">
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Authority Field</p>
+                  <BigTrendChart snapshots={snapshots} embedded />
+                </div>
+                <div className="lg:col-span-4">
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Position Ring</p>
+                  <AIAnswerMarketShareChart
+                    clientName={client.name}
+                    detail={snapshotDetail}
+                    onRunSnapshot={runSnapshot}
+                    running={running}
+                    snapshotStatus={selectedSnapshot?.status ?? null}
+                    gapTrendDelta={selectedSnapshot?.vrtl_score != null && previousSnapshot?.vrtl_score != null ? selectedSnapshot.vrtl_score - previousSnapshot.vrtl_score : null}
+                  />
+                </div>
+              </div>
+            </DashboardSection>
+
+            <DashboardSection
+              title="Priority Actions (Playbook)"
+              subtitle="Highest-impact execution moves to close displacement risk first."
+            >
+              <ExecutionPriorities
+                score={selectedSnapshot?.vrtl_score ?? null}
+                providers={providers}
+                competitors={competitors}
+                detail={snapshotDetail}
+              />
+            </DashboardSection>
+
             <WhatIsWrongSection
               providers={providers}
               detail={snapshotDetail}
@@ -3596,32 +3738,12 @@ export default function ClientDetailPage() {
               competitors={competitors}
             />
 
-            <div className="-mt-3 border-t border-white/[0.06] pt-3">
-              <ExecutiveSummaryGrid
-                variant="embedded"
-                providers={providers}
-                confidence={confidence}
-                score={selectedSnapshot?.vrtl_score ?? null}
-                delta={selectedSnapshot?.vrtl_score != null && previousSnapshot?.vrtl_score != null ? selectedSnapshot.vrtl_score - previousSnapshot.vrtl_score : null}
-              />
-            </div>
-
-            <DashboardSection
-              title="Market Position"
-              className="pt-4"
-              subtitle="Where you stand right now and where you are trending."
-            >
-              <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-12 lg:gap-6">
-                <div className="lg:col-span-8">
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Trajectory (context)</p>
-                  <BigTrendChart snapshots={snapshots} embedded />
-                </div>
-                <div className="lg:col-span-4">
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">AI answer market share</p>
-                  <AIAnswerMarketShareChart clientName={client.name} detail={snapshotDetail} onRunSnapshot={runSnapshot} running={running} snapshotStatus={selectedSnapshot?.status ?? null} />
-                </div>
-              </div>
-            </DashboardSection>
+            <ExecutiveSummaryGrid
+              providers={providers}
+              confidence={confidence}
+              score={selectedSnapshot?.vrtl_score ?? null}
+              delta={selectedSnapshot?.vrtl_score != null && previousSnapshot?.vrtl_score != null ? selectedSnapshot.vrtl_score - previousSnapshot.vrtl_score : null}
+            />
           </>
         )}
       </div>
