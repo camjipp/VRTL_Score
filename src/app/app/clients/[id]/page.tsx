@@ -1629,23 +1629,23 @@ function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embe
     }
     const delta = scores[scores.length - 1]! - scores[0]!;
     if (filter === "all") {
-      if (delta < -3) return "Stalled momentum — displacement risk remains elevated.";
-      if (delta > 3) return "Recovery signal detected — keep pressure on weakest model channel.";
+      if (delta < -3) return "No recovery — weakest channel still dragging performance.";
+      if (delta > 3) return "Closing the gap — keep pressure on weak-channel fixes.";
       return "Flat trajectory — no recovery yet in weakest model channel.";
     }
     if (filter === "openai") {
       return delta < 0
-        ? "OpenAI slipping — tighten proof density and citation quality now."
+        ? "OpenAI downtrend — entity clarity and citation quality still underperforming."
         : "OpenAI stabilizing — maintain retrieval-focused execution.";
     }
     if (filter === "gemini") {
       return delta < 0
-        ? "Gemini losing ground — structured proof gaps remain unresolved."
+        ? "Gemini downtrend — structured proof gaps remain unresolved."
         : "Gemini trend improving — reinforce winning content patterns.";
     }
     if (filter === "anthropic") {
       return delta < 0
-        ? "Anthropic drag persists — citation and retrieval gaps still exposed."
+        ? "Downtrend driven by Anthropic weakness."
         : "Anthropic pressure easing — continue execution to sustain lift.";
     }
     return "";
@@ -1765,8 +1765,8 @@ function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embe
           <stop offset="100%" stopColor={lineColor} stopOpacity="0.012" />
         </linearGradient>
         <linearGradient id={`heroGapGrad-${filter}`} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="rgba(255,255,255,0.06)" />
-          <stop offset="100%" stopColor="rgba(255,255,255,0.015)" />
+          <stop offset="0%" stopColor="rgba(255,255,255,0.014)" />
+          <stop offset="100%" stopColor="rgba(255,255,255,0.085)" />
         </linearGradient>
       </defs>
       <rect x={CHART_PADDING.left} y={CHART_PADDING.top} width={CHART_INNER_WIDTH} height={CHART_INNER_HEIGHT / 3} fill="rgba(255,255,255,0.05)" opacity="0.06" />
@@ -1781,8 +1781,8 @@ function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embe
           </g>
         );
       })}
-      <path d={gapAreaD} fill={`url(#heroGapGrad-${filter})`} />
-      <path d={buildSmoothPath(leaderPoints)} fill="none" stroke="rgba(255,255,255,0.26)" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={gapAreaD} fill={`url(#heroGapGrad-${filter})`} opacity="0.95" />
+      <path d={buildSmoothPath(leaderPoints)} fill="none" stroke="rgba(255,255,255,0.34)" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
       <path d={areaD} fill={`url(#heroChartGrad-${filter})`} />
       <path d={buildSmoothPath(pathPoints)} fill="none" stroke={lineColor} strokeOpacity="0.82" strokeWidth="3.3" strokeLinecap="round" strokeLinejoin="round" />
       {pathPoints.map((p, i) => (
@@ -2197,9 +2197,15 @@ function AIAnswerMarketShareChart({
               <p className="text-2xl font-semibold tabular-nums text-text">{clientRow ? `#${clientRow.rank}` : "—"}</p>
               <p className="mt-0.5 text-sm tabular-nums text-text-2">{clientRow ? `${clientRow.share}%` : "—"}</p>
               <p className="mt-1 max-w-[120px] text-[10px] leading-snug text-text-3">
-                {clientRow && topCompetitor
-                  ? `Trailing leader by ${Math.max(0, topCompetitor.share - clientRow.share)}%`
-                  : "Leader gap unavailable"}
+                {gapTrendDelta != null
+                  ? gapTrendDelta > 0
+                    ? `Closing gap: -${Math.abs(gapTrendDelta)}% vs leader`
+                    : gapTrendDelta < 0
+                      ? `Losing ground: +${Math.abs(gapTrendDelta)}% gap to leader`
+                      : "Stalled vs leader"
+                  : clientRow && topCompetitor
+                    ? `Trailing leader by ${Math.max(0, topCompetitor.share - clientRow.share)}%`
+                    : "Leader gap unavailable"}
               </p>
             </div>
           </div>
@@ -2299,7 +2305,7 @@ function ExecutiveSummaryGrid({
 
   if (variant === "embedded") {
     return (
-      <div className="mt-4 space-y-2">
+      <div className="mt-2 border-t border-white/[0.06] pt-3 space-y-2">
         <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Quick read</p>
         {grid}
       </div>
@@ -2494,6 +2500,9 @@ function WhatIsWrongSection({
             const primaryAction = formatPlaybookText(
               matched?.action
                 ? firstStrategicSentence(matched.action)
+                    .replace(/\bAudit\b/i, "Fix")
+                    .replace(/\bAdd\b/i, "Publish")
+                    .replace(/\bInvest in\b/i, "Execute")
                 : quickWins[0] || "Run a snapshot for model-specific execution guidance."
             );
 
@@ -2590,7 +2599,7 @@ function VulnerabilityRow({
   const trendColor = delta != null ? (delta >= 0 ? CHART_COLORS.dominant : CHART_COLORS.losing) : "#94a3b8";
   return (
     <div className="group">
-      <div className="grid w-full grid-cols-1 gap-2 py-2.5 md:grid-cols-[minmax(0,1.4fr)_auto_auto_minmax(0,1fr)_auto_auto] md:items-center md:gap-4">
+      <div className="grid w-full grid-cols-1 gap-1.5 py-2 md:grid-cols-[minmax(0,1.4fr)_auto_auto_minmax(0,1fr)_auto_auto] md:items-center md:gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08]">
             <img src={logoUrl} alt="" className="h-6 w-6 object-contain" width={24} height={24} />
@@ -2642,10 +2651,10 @@ function VulnerabilityRow({
           </svg>
         </button>
       </div>
-      <div className="pb-2">
+      <div className="pb-1.5">
         <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Issue</p>
         <p className="mt-0.5 text-[15px] leading-relaxed text-text-2">{primaryIssue}</p>
-        <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Recommended action</p>
+        <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Recommended action</p>
         <p className="mt-0.5 text-[15px] leading-relaxed text-text">{primaryAction}</p>
       </div>
       <div
@@ -2736,8 +2745,19 @@ function ExecutionPriorities({
 
   function actionBullets(action: string): string[] {
     const parts = action.split(/(?<=[.!])\s+/).filter(Boolean).map(s => s.trim()).slice(0, 3);
-    if (parts.length > 0) return parts;
-    return [action];
+    const raw = parts.length > 0 ? parts : [action];
+    return raw.map((b) =>
+      b
+        .replace(/\bAudit\b/i, "Fix")
+        .replace(/\bInvest in brand authority through\b/i, "Ship authority fixes through")
+        .replace(/\bAdd\b/i, "Publish")
+    );
+  }
+
+  function upsideRange(priority: StrategicInsight["priority"]): string {
+    if (priority === "HIGH") return "+8-14 pts";
+    if (priority === "MEDIUM") return "+4-8 pts";
+    return "+2-5 pts";
   }
 
   return (
@@ -2750,6 +2770,7 @@ function ExecutionPriorities({
             <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0 text-xs text-text-3">
               <span>Impact: <span className={cn("font-medium text-text-2", insight.priority === "HIGH" && "text-authority-losing", insight.priority === "MEDIUM" && "text-authority-watchlist")}>{insight.priority}</span></span>
               <span>Models: {getModelsAffectedFromInsight(insight.title)}</span>
+              <span>Est. upside: <span className="font-medium text-text-2">{upsideRange(insight.priority)}</span></span>
             </div>
             <ul className="mt-2 space-y-0.5 pl-4 list-disc text-sm text-text-2">
               {actionBullets(insight.action).map((bullet, i) => (
@@ -3739,6 +3760,7 @@ export default function ClientDetailPage() {
             />
 
             <ExecutiveSummaryGrid
+              variant="embedded"
               providers={providers}
               confidence={confidence}
               score={selectedSnapshot?.vrtl_score ?? null}
