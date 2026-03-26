@@ -1545,7 +1545,7 @@ function getChartSeriesForFilter(
 
 /* Big trend chart — primary centerpiece: plot fills card, anchored */
 const CHART_FILTERS = ["all", "openai", "gemini", "anthropic"] as const;
-const CHART_HEIGHT = 408; /* ~20% taller than 340 */
+const CHART_HEIGHT = 300;
 const CHART_PADDING = { top: 4, right: 12, bottom: 14, left: 24 };
 const CHART_VIEWBOX_WIDTH = 960;
 const CHART_INNER_WIDTH = CHART_VIEWBOX_WIDTH - CHART_PADDING.left - CHART_PADDING.right;
@@ -1646,12 +1646,12 @@ function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embe
         </div>
         <div className="w-full max-w-md shrink-0 lg:w-[min(100%,380px)]">{segmentControl}</div>
       </div>
-      <div className="min-h-[408px] overflow-hidden">
-        <svg viewBox={`0 0 ${CHART_VIEWBOX_WIDTH} ${CHART_HEIGHT}`} className="w-full h-full min-h-[408px] block" style={{ maxHeight: CHART_HEIGHT }} preserveAspectRatio="xMidYMid meet" aria-hidden>
+      <div className="min-h-[280px] overflow-hidden">
+        <svg viewBox={`0 0 ${CHART_VIEWBOX_WIDTH} ${CHART_HEIGHT}`} className="w-full h-full min-h-[280px] block" style={{ maxHeight: CHART_HEIGHT }} preserveAspectRatio="xMidYMid meet" aria-hidden>
           <defs>
             <linearGradient id={`heroChartGrad-${filter}`} x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={lineColor} stopOpacity="0.26" />
-              <stop offset="100%" stopColor={lineColor} stopOpacity="0.04" />
+              <stop offset="0%" stopColor={lineColor} stopOpacity="0.1" />
+              <stop offset="100%" stopColor={lineColor} stopOpacity="0.015" />
             </linearGradient>
           </defs>
           {CHART_Y_TICKS.map((val) => {
@@ -1664,9 +1664,9 @@ function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embe
             );
           })}
           <path d={areaD} fill={`url(#heroChartGrad-${filter})`} />
-          <path d={pathD} fill="none" stroke={lineColor} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          <path d={pathD} fill="none" stroke={lineColor} strokeOpacity="0.6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
           {pathPoints.map((p, i) => (
-            <circle key={i} cx={p.x} cy={p.y} r="4" fill="var(--surface)" stroke={lineColor} strokeWidth="2" />
+            <circle key={i} cx={p.x} cy={p.y} r="4" fill="var(--surface)" stroke={lineColor} strokeOpacity="0.62" strokeWidth="2" />
           ))}
           {dates.map((d, i) => {
             const x = CHART_PADDING.left + (i / (scores.length - 1)) * CHART_INNER_WIDTH;
@@ -1856,16 +1856,6 @@ function HeroSection({
 /* ═══════════════════════════════════════════════════════════════════════════
    AI Answer Market Share — horizontal bar leaderboard (citation share by brand)
 ═══════════════════════════════════════════════════════════════════════════ */
-/* Leader: brighter gray; others: darker gray for hierarchy */
-const MARKET_SHARE_BAR_LEADER = "bg-white/25";
-const MARKET_SHARE_BAR_OTHERS = [
-  "bg-white/14",
-  "bg-white/11",
-  "bg-white/[0.09]",
-  "bg-white/[0.07]",
-  "bg-white/[0.05]",
-] as const;
-
 /** Normalize brand name for display: trim, collapse whitespace, title-case; merge known variants. */
 function normalizeBrandName(name: string): string {
   const t = name.trim().replace(/\s+/g, " ");
@@ -1937,21 +1927,8 @@ function AIAnswerMarketShareChart({
   if (rows.length === 0) {
     return (
       <>
-        <div className="space-y-3">
-          {[40, 28, 22, 14, 8].map((pct, i) => (
-            <div key={i} className="flex flex-col gap-1">
-              <div className="flex items-center justify-between gap-3">
-                <span className="h-4 w-20 animate-pulse rounded bg-white/[0.08]" />
-                <span className="h-4 w-8 animate-pulse rounded bg-white/[0.06]" />
-              </div>
-              <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
-                <div
-                  className="h-full rounded-full bg-white/[0.12] animate-pulse"
-                  style={{ width: `${pct}%` }}
-                />
-              </div>
-            </div>
-          ))}
+        <div className="grid place-items-center py-2">
+          <div className="h-40 w-40 animate-pulse rounded-full border-8 border-white/[0.08]" />
         </div>
         <p className="mt-4 text-sm text-text-3">Run a snapshot to generate citation share by brand.</p>
         {onRunSnapshot && (
@@ -1963,45 +1940,75 @@ function AIAnswerMarketShareChart({
     );
   }
 
+  const clientRow = rows.find((r) => r.isClient) ?? null;
+  const donutSize = 170;
+  const strokeWidth = 24;
+  const radius = (donutSize - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const neutral = ["rgba(255,255,255,0.34)", "rgba(255,255,255,0.26)", "rgba(255,255,255,0.2)", "rgba(255,255,255,0.14)", "rgba(255,255,255,0.1)"];
+
+  let offset = 0;
+  const slices = rows.map((row, idx) => {
+    const length = (row.share / 100) * circumference;
+    const stroke = row.isClient ? "rgba(245,158,11,0.95)" : neutral[Math.min(idx, neutral.length - 1)];
+    const node = (
+      <circle
+        key={row.name}
+        cx={donutSize / 2}
+        cy={donutSize / 2}
+        r={radius}
+        fill="none"
+        stroke={stroke}
+        strokeWidth={strokeWidth}
+        strokeDasharray={`${length} ${circumference - length}`}
+        strokeDashoffset={-offset}
+        strokeLinecap="butt"
+      />
+    );
+    offset += length;
+    return node;
+  });
+
   return (
-    <div className="divide-y divide-white/[0.06]">
-          {rows.map((row, i) => (
-            <div
-              key={row.name}
-              className={cn(
-                "group flex flex-col gap-1 py-3",
-                row.isClient && "font-medium"
-              )}
-              title={`${row.name}: ${row.count} citation${row.count !== 1 ? "s" : ""}`}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex min-w-0 shrink items-center gap-2.5">
-                  <span className="w-5 shrink-0 text-right text-xs font-medium tabular-nums text-text-3">{row.rank}</span>
-                  <span className={cn(
-                    "min-w-0 truncate text-sm font-medium",
-                    row.isClient ? "text-text font-semibold" : row.isLeader ? "text-text" : "text-text-2"
-                  )}>{row.isClient ? `${normalizeBrandName(row.name)} (You)` : normalizeBrandName(row.name)}</span>
-                </div>
-                <span className={cn(
-                  "shrink-0 tabular-nums text-sm",
-                  row.isClient || row.isLeader ? "font-semibold text-text" : "text-text-2"
-                )}>{row.share}%</span>
-              </div>
-              <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
-                <div
-                  className={cn(
-                    "h-full rounded-full transition-[width] duration-300",
-                    row.isClient
-                      ? "bg-authority-watchlist/80"
-                      : row.isLeader
-                        ? MARKET_SHARE_BAR_LEADER
-                        : MARKET_SHARE_BAR_OTHERS[Math.min(i, MARKET_SHARE_BAR_OTHERS.length - 1)]
-                  )}
-                  style={{ width: `${row.share}%` }}
-                />
-              </div>
+    <div className="space-y-3">
+      <div className="grid place-items-center">
+        <div className="relative h-[170px] w-[170px]">
+          <svg viewBox={`0 0 ${donutSize} ${donutSize}`} className="-rotate-90 h-full w-full" aria-hidden>
+            <circle
+              cx={donutSize / 2}
+              cy={donutSize / 2}
+              r={radius}
+              fill="none"
+              stroke="rgba(255,255,255,0.06)"
+              strokeWidth={strokeWidth}
+            />
+            {slices}
+          </svg>
+          <div className="absolute inset-0 grid place-items-center">
+            <div className="text-center">
+              <p className="text-[10px] uppercase tracking-[0.12em] text-text-3">Your position</p>
+              <p className="mt-1 text-xl font-semibold tabular-nums text-text">{clientRow ? `#${clientRow.rank}` : "—"}</p>
+              <p className="text-sm tabular-nums text-text-2">{clientRow ? `${clientRow.share}%` : "—"}</p>
             </div>
-          ))}
+          </div>
+        </div>
+      </div>
+      <ul className="space-y-1.5">
+        {rows.slice(0, 4).map((row, i) => (
+          <li key={row.name} className="flex items-center justify-between gap-3 text-xs">
+            <div className="flex min-w-0 items-center gap-2">
+              <span
+                className="h-2 w-2 shrink-0 rounded-full"
+                style={{ backgroundColor: row.isClient ? "rgba(245,158,11,0.95)" : neutral[Math.min(i, neutral.length - 1)] }}
+              />
+              <span className={cn("truncate", row.isClient ? "font-semibold text-text" : "text-text-2")}>
+                {row.isClient ? `${normalizeBrandName(row.name)} (You)` : normalizeBrandName(row.name)}
+              </span>
+            </div>
+            <span className="tabular-nums text-text-3">#{row.rank} · {row.share}%</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -2361,7 +2368,7 @@ function VulnerabilityRow({
   const trendColor = delta != null ? (delta >= 0 ? CHART_COLORS.dominant : CHART_COLORS.losing) : "#94a3b8";
   return (
     <div className="group">
-      <div className="grid w-full grid-cols-1 gap-2 py-3 md:grid-cols-[minmax(0,1.4fr)_auto_auto_minmax(0,1fr)_auto_auto] md:items-center md:gap-4">
+      <div className="grid w-full grid-cols-1 gap-2 py-2.5 md:grid-cols-[minmax(0,1.4fr)_auto_auto_minmax(0,1fr)_auto_auto] md:items-center md:gap-4">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08]">
             <img src={logoUrl} alt="" className="h-6 w-6 object-contain" width={24} height={24} />
@@ -2415,9 +2422,9 @@ function VulnerabilityRow({
       </div>
       <div className="pb-2">
         <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Issue</p>
-        <p className="mt-0.5 text-sm leading-relaxed text-text-2">{primaryIssue}</p>
+        <p className="mt-0.5 text-[15px] leading-relaxed text-text-2">{primaryIssue}</p>
         <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Recommended action</p>
-        <p className="mt-0.5 text-sm leading-relaxed text-text">{primaryAction}</p>
+        <p className="mt-0.5 text-[15px] leading-relaxed text-text">{primaryAction}</p>
       </div>
       <div
         className="grid transition-[grid-template-rows] duration-200 ease-out"
@@ -3464,34 +3471,6 @@ export default function ClientDetailPage() {
               running={running}
             />
 
-            <DashboardSection
-              title="Authority Trajectory"
-              noTopRule
-              subtitle="Composite and per-model movement across snapshots. Quick read below summarizes gap, weakest channel, confidence, and sentiment against this trajectory."
-            >
-              <div className="space-y-2">
-                <BigTrendChart snapshots={snapshots} embedded />
-                <ExecutiveSummaryGrid
-                  variant="embedded"
-                  providers={providers}
-                  confidence={confidence}
-                  score={selectedSnapshot?.vrtl_score ?? null}
-                  delta={selectedSnapshot?.vrtl_score != null && previousSnapshot?.vrtl_score != null ? selectedSnapshot.vrtl_score - previousSnapshot.vrtl_score : null}
-                />
-              </div>
-            </DashboardSection>
-
-            <DashboardSection
-              title="AI Answer Market Share"
-              subtitle={
-                <>
-                  Share of AI brand recommendation presence across tracked answers. <span className="text-text-3">(You)</span> marks your brand.
-                </>
-              }
-            >
-              <AIAnswerMarketShareChart clientName={client.name} detail={snapshotDetail} onRunSnapshot={runSnapshot} running={running} snapshotStatus={selectedSnapshot?.status ?? null} />
-            </DashboardSection>
-
             <WhatIsWrongSection
               providers={providers}
               detail={snapshotDetail}
@@ -3500,6 +3479,33 @@ export default function ClientDetailPage() {
               score={selectedSnapshot?.vrtl_score ?? null}
               competitors={competitors}
             />
+
+            <div className="-mt-3 border-t border-white/[0.06] pt-3">
+              <ExecutiveSummaryGrid
+                variant="embedded"
+                providers={providers}
+                confidence={confidence}
+                score={selectedSnapshot?.vrtl_score ?? null}
+                delta={selectedSnapshot?.vrtl_score != null && previousSnapshot?.vrtl_score != null ? selectedSnapshot.vrtl_score - previousSnapshot.vrtl_score : null}
+              />
+            </div>
+
+            <DashboardSection
+              title="Market Position"
+              className="pt-4"
+              subtitle="Where you stand right now and where you are trending."
+            >
+              <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-12 lg:gap-6">
+                <div className="lg:col-span-8">
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Trajectory (context)</p>
+                  <BigTrendChart snapshots={snapshots} embedded />
+                </div>
+                <div className="lg:col-span-4">
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">AI answer market share</p>
+                  <AIAnswerMarketShareChart clientName={client.name} detail={snapshotDetail} onRunSnapshot={runSnapshot} running={running} snapshotStatus={selectedSnapshot?.status ?? null} />
+                </div>
+              </div>
+            </DashboardSection>
           </>
         )}
       </div>
