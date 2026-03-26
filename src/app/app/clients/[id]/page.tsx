@@ -1545,8 +1545,13 @@ function getChartSeriesForFilter(
 
 /* Big trend chart — primary centerpiece: plot fills card, anchored */
 const CHART_FILTERS = ["all", "openai", "gemini", "anthropic"] as const;
+const CHART_RANGES = [
+  { key: "7d", label: "7D", days: 7 },
+  { key: "30d", label: "30D", days: 30 },
+  { key: "90d", label: "90D", days: 90 },
+] as const;
 const CHART_HEIGHT = 300;
-const CHART_PADDING = { top: 4, right: 12, bottom: 14, left: 24 };
+const CHART_PADDING = { top: 2, right: 8, bottom: 10, left: 16 };
 const CHART_VIEWBOX_WIDTH = 960;
 const CHART_INNER_WIDTH = CHART_VIEWBOX_WIDTH - CHART_PADDING.left - CHART_PADDING.right;
 const CHART_INNER_HEIGHT = CHART_HEIGHT - CHART_PADDING.top - CHART_PADDING.bottom;
@@ -1555,7 +1560,24 @@ const SEGMENT_CONTROL_HEIGHT = 36;
 
 function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embedded?: boolean }) {
   const [filter, setFilter] = useState<typeof CHART_FILTERS[number]>("all");
-  const { scores, dates } = useMemo(() => getChartSeriesForFilter(snapshots, filter), [snapshots, filter]);
+  const [timeRange, setTimeRange] = useState<(typeof CHART_RANGES)[number]["key"]>("7d");
+  const [expanded, setExpanded] = useState(false);
+  const rangedSnapshots = useMemo(() => {
+    if (snapshots.length === 0) return snapshots;
+    const latestTs = snapshots
+      .map((s) => new Date(s.created_at).getTime())
+      .filter((t) => Number.isFinite(t))
+      .reduce((max, t) => Math.max(max, t), 0);
+    if (!latestTs) return snapshots;
+    const rangeCfg = CHART_RANGES.find((r) => r.key === timeRange) ?? CHART_RANGES[0];
+    const cutoff = latestTs - rangeCfg.days * 24 * 60 * 60 * 1000;
+    const filtered = snapshots.filter((s) => {
+      const ts = new Date(s.created_at).getTime();
+      return Number.isFinite(ts) && ts >= cutoff;
+    });
+    return filtered.length >= 2 ? filtered : snapshots;
+  }, [snapshots, timeRange]);
+  const { scores, dates } = useMemo(() => getChartSeriesForFilter(rangedSnapshots, filter), [rangedSnapshots, filter]);
 
   const trajectoryNote = useMemo(() => {
     if (scores.length < 2) {
@@ -1607,17 +1629,55 @@ function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embe
     </div>
   );
 
+  const rangeControl = (
+    <div className="inline-flex h-[30px] items-center gap-1">
+      {CHART_RANGES.map((r) => (
+        <button
+          key={r.key}
+          type="button"
+          onClick={() => setTimeRange(r.key)}
+          className={cn(
+            "rounded px-2 py-1 text-[10px] font-semibold tracking-wide transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20",
+            timeRange === r.key ? "text-text bg-white/[0.08]" : "text-text-3 hover:text-text-2"
+          )}
+        >
+          {r.label}
+        </button>
+      ))}
+    </div>
+  );
+
+  const expandButton = (
+    <button
+      type="button"
+      onClick={() => setExpanded(true)}
+      className="inline-flex h-7 w-7 items-center justify-center rounded text-text-3 transition-colors hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+      aria-label="Expand trajectory chart"
+      title="Expand chart"
+    >
+      <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="1.6">
+        <path d="M7 3H3v4M13 3h4v4M17 13v4h-4M3 13v4h4" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </button>
+  );
+
   const chartShell = "w-full";
 
   if (scores.length < 2) {
     return (
       <div className={chartShell}>
-        <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
+        <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             {!embedded && <h3 className="text-base font-semibold tracking-tight text-text">Authority Trajectory</h3>}
             <p className={cn("max-w-xl text-sm leading-relaxed text-text-2", !embedded && "mt-1")}>{trajectoryNote}</p>
           </div>
-          <div className="w-full max-w-md shrink-0 lg:w-[min(100%,380px)]">{segmentControl}</div>
+          <div className="flex w-full max-w-md shrink-0 flex-col gap-1.5 lg:w-[min(100%,420px)]">
+            <div className="flex items-center justify-between gap-2">
+              {rangeControl}
+              {expandButton}
+            </div>
+            {segmentControl}
+          </div>
         </div>
         <div className="flex h-64 items-center justify-center text-sm text-text-3">Run more snapshots to see trends</div>
       </div>
@@ -1626,56 +1686,116 @@ function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embe
 
   const max = Math.max(...scores, 100);
   const min = Math.min(...scores, 0);
-  const range = max - min || 1;
+  const valueRange = max - min || 1;
   const pathPoints = scores.map((val, i) => {
     const x = CHART_PADDING.left + (i / (scores.length - 1)) * CHART_INNER_WIDTH;
-    const y = CHART_PADDING.top + CHART_INNER_HEIGHT - ((val - min) / range) * CHART_INNER_HEIGHT;
+    const y = CHART_PADDING.top + CHART_INNER_HEIGHT - ((val - min) / valueRange) * CHART_INNER_HEIGHT;
     return { x, y, val };
   });
   const pathD = pathPoints.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
   const areaD = `M ${CHART_PADDING.left} ${CHART_PADDING.top + CHART_INNER_HEIGHT} ${pathD} L ${pathPoints[pathPoints.length - 1]!.x} ${CHART_PADDING.top + CHART_INNER_HEIGHT} Z`;
   const trend = scores[scores.length - 1]! - scores[0]!;
   const lineColor = trend >= 0 ? CHART_COLORS.dominant : CHART_COLORS.losing;
+  const chartSvg = (
+    <svg viewBox={`0 0 ${CHART_VIEWBOX_WIDTH} ${CHART_HEIGHT}`} className="w-full h-full min-h-[260px] block" style={{ maxHeight: CHART_HEIGHT }} preserveAspectRatio="xMidYMid meet" aria-hidden>
+      <defs>
+        <linearGradient id={`heroChartGrad-${filter}`} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor={lineColor} stopOpacity="0.12" />
+          <stop offset="100%" stopColor={lineColor} stopOpacity="0.02" />
+        </linearGradient>
+      </defs>
+      {CHART_Y_TICKS.map((val) => {
+        const y = CHART_PADDING.top + CHART_INNER_HEIGHT - ((val - min) / valueRange) * CHART_INNER_HEIGHT;
+        return (
+          <g key={val}>
+            <line x1={CHART_PADDING.left} y1={y} x2={CHART_VIEWBOX_WIDTH - CHART_PADDING.right} y2={y} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+            <text x={CHART_PADDING.left - 4} y={y + 2} textAnchor="end" className="text-[8px] fill-text-3">{val}</text>
+          </g>
+        );
+      })}
+      <path d={areaD} fill={`url(#heroChartGrad-${filter})`} />
+      <path d={pathD} fill="none" stroke={lineColor} strokeOpacity="0.72" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+      {pathPoints.map((p, i) => (
+        <circle key={i} cx={p.x} cy={p.y} r="4.2" fill="var(--surface)" stroke={lineColor} strokeOpacity="0.78" strokeWidth="2.2" />
+      ))}
+      {dates.map((d, i) => {
+        const x = CHART_PADDING.left + (i / (scores.length - 1)) * CHART_INNER_WIDTH;
+        return (
+          <text key={i} x={x} y={CHART_HEIGHT - 3} textAnchor="middle" className="text-[8px] fill-text-3">{d}</text>
+        );
+      })}
+    </svg>
+  );
 
   return (
     <div className={chartShell}>
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
+      <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           {!embedded && <h3 className="text-base font-semibold tracking-tight text-text">Authority Trajectory</h3>}
           <p className={cn("max-w-xl text-sm leading-relaxed text-text-2", !embedded && "mt-1")}>{trajectoryNote}</p>
         </div>
-        <div className="w-full max-w-md shrink-0 lg:w-[min(100%,380px)]">{segmentControl}</div>
+        <div className="flex w-full max-w-md shrink-0 flex-col gap-1.5 lg:w-[min(100%,420px)]">
+          <div className="flex items-center justify-between gap-2">
+            {rangeControl}
+            {expandButton}
+          </div>
+          {segmentControl}
+        </div>
       </div>
-      <div className="min-h-[280px] overflow-hidden">
-        <svg viewBox={`0 0 ${CHART_VIEWBOX_WIDTH} ${CHART_HEIGHT}`} className="w-full h-full min-h-[280px] block" style={{ maxHeight: CHART_HEIGHT }} preserveAspectRatio="xMidYMid meet" aria-hidden>
-          <defs>
-            <linearGradient id={`heroChartGrad-${filter}`} x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={lineColor} stopOpacity="0.1" />
-              <stop offset="100%" stopColor={lineColor} stopOpacity="0.015" />
-            </linearGradient>
-          </defs>
-          {CHART_Y_TICKS.map((val) => {
-            const y = CHART_PADDING.top + CHART_INNER_HEIGHT - ((val - min) / range) * CHART_INNER_HEIGHT;
-            return (
-              <g key={val}>
-                <line x1={CHART_PADDING.left} y1={y} x2={CHART_VIEWBOX_WIDTH - CHART_PADDING.right} y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
-                <text x={CHART_PADDING.left - 4} y={y + 2} textAnchor="end" className="text-[8px] fill-text-3">{val}</text>
-              </g>
-            );
-          })}
-          <path d={areaD} fill={`url(#heroChartGrad-${filter})`} />
-          <path d={pathD} fill="none" stroke={lineColor} strokeOpacity="0.6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-          {pathPoints.map((p, i) => (
-            <circle key={i} cx={p.x} cy={p.y} r="4" fill="var(--surface)" stroke={lineColor} strokeOpacity="0.62" strokeWidth="2" />
-          ))}
-          {dates.map((d, i) => {
-            const x = CHART_PADDING.left + (i / (scores.length - 1)) * CHART_INNER_WIDTH;
-            return (
-              <text key={i} x={x} y={CHART_HEIGHT - 3} textAnchor="middle" className="text-[8px] fill-text-3">{d}</text>
-            );
-          })}
-        </svg>
-      </div>
+      <div className="min-h-[260px] overflow-hidden">{chartSvg}</div>
+      {expanded && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-label="Expanded trajectory chart">
+          <div className="w-full max-w-5xl border border-white/[0.1] bg-surface p-4 md:p-5">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-sm font-semibold tracking-tight text-text">Trajectory detail</p>
+              <button
+                type="button"
+                onClick={() => setExpanded(false)}
+                className="inline-flex h-8 w-8 items-center justify-center rounded text-text-3 transition-colors hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+                aria-label="Close expanded chart"
+              >
+                <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M5 5l10 10M15 5L5 15" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              {rangeControl}
+              <div className="w-full md:w-[460px]">{segmentControl}</div>
+            </div>
+            <div className="min-h-[440px] overflow-hidden">
+              <svg viewBox={`0 0 ${CHART_VIEWBOX_WIDTH} ${CHART_HEIGHT}`} className="w-full h-full min-h-[440px] block" style={{ maxHeight: 520 }} preserveAspectRatio="xMidYMid meet" aria-hidden>
+                <defs>
+                  <linearGradient id={`heroChartGradExpanded-${filter}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor={lineColor} stopOpacity="0.14" />
+                    <stop offset="100%" stopColor={lineColor} stopOpacity="0.03" />
+                  </linearGradient>
+                </defs>
+                {CHART_Y_TICKS.map((val) => {
+                  const y = CHART_PADDING.top + CHART_INNER_HEIGHT - ((val - min) / valueRange) * CHART_INNER_HEIGHT;
+                  return (
+                    <g key={val}>
+                      <line x1={CHART_PADDING.left} y1={y} x2={CHART_VIEWBOX_WIDTH - CHART_PADDING.right} y2={y} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+                      <text x={CHART_PADDING.left - 4} y={y + 2} textAnchor="end" className="text-[8px] fill-text-3">{val}</text>
+                    </g>
+                  );
+                })}
+                <path d={areaD} fill={`url(#heroChartGradExpanded-${filter})`} />
+                <path d={pathD} fill="none" stroke={lineColor} strokeOpacity="0.78" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" />
+                {pathPoints.map((p, i) => (
+                  <circle key={i} cx={p.x} cy={p.y} r="4.4" fill="var(--surface)" stroke={lineColor} strokeOpacity="0.82" strokeWidth="2.2" />
+                ))}
+                {dates.map((d, i) => {
+                  const x = CHART_PADDING.left + (i / (scores.length - 1)) * CHART_INNER_WIDTH;
+                  return (
+                    <text key={i} x={x} y={CHART_HEIGHT - 3} textAnchor="middle" className="text-[8px] fill-text-3">{d}</text>
+                  );
+                })}
+              </svg>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1941,16 +2061,21 @@ function AIAnswerMarketShareChart({
   }
 
   const clientRow = rows.find((r) => r.isClient) ?? null;
+  const topCompetitor = rows.find((r) => !r.isClient) ?? null;
   const donutSize = 170;
   const strokeWidth = 24;
   const radius = (donutSize - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const neutral = ["rgba(255,255,255,0.34)", "rgba(255,255,255,0.26)", "rgba(255,255,255,0.2)", "rgba(255,255,255,0.14)", "rgba(255,255,255,0.1)"];
+  const neutral = ["rgba(255,255,255,0.42)", "rgba(255,255,255,0.24)", "rgba(255,255,255,0.18)", "rgba(255,255,255,0.13)", "rgba(255,255,255,0.1)"];
 
   let offset = 0;
   const slices = rows.map((row, idx) => {
     const length = (row.share / 100) * circumference;
-    const stroke = row.isClient ? "rgba(245,158,11,0.95)" : neutral[Math.min(idx, neutral.length - 1)];
+    const stroke = row.isClient
+      ? "rgba(245,158,11,0.95)"
+      : row.isLeader
+        ? neutral[0]
+        : neutral[Math.min(idx, neutral.length - 1)];
     const node = (
       <circle
         key={row.name}
@@ -1970,7 +2095,7 @@ function AIAnswerMarketShareChart({
   });
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <div className="grid place-items-center">
         <div className="relative h-[170px] w-[170px]">
           <svg viewBox={`0 0 ${donutSize} ${donutSize}`} className="-rotate-90 h-full w-full" aria-hidden>
@@ -1993,22 +2118,13 @@ function AIAnswerMarketShareChart({
           </div>
         </div>
       </div>
-      <ul className="space-y-1.5">
-        {rows.slice(0, 4).map((row, i) => (
-          <li key={row.name} className="flex items-center justify-between gap-3 text-xs">
-            <div className="flex min-w-0 items-center gap-2">
-              <span
-                className="h-2 w-2 shrink-0 rounded-full"
-                style={{ backgroundColor: row.isClient ? "rgba(245,158,11,0.95)" : neutral[Math.min(i, neutral.length - 1)] }}
-              />
-              <span className={cn("truncate", row.isClient ? "font-semibold text-text" : "text-text-2")}>
-                {row.isClient ? `${normalizeBrandName(row.name)} (You)` : normalizeBrandName(row.name)}
-              </span>
-            </div>
-            <span className="tabular-nums text-text-3">#{row.rank} · {row.share}%</span>
-          </li>
-        ))}
-      </ul>
+      <p className="text-center text-xs text-text-3">
+        {clientRow && topCompetitor
+          ? clientRow.rank === 1
+            ? `Leading next competitor by ${Math.max(0, clientRow.share - topCompetitor.share)}%`
+            : `Trailing top competitor by ${Math.max(0, topCompetitor.share - clientRow.share)}%`
+          : "Run a snapshot to compare position vs competitors."}
+      </p>
     </div>
   );
 }
