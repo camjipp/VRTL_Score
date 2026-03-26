@@ -1595,6 +1595,112 @@ function buildSmoothPath(points: { x: number; y: number }[]): string {
   return d;
 }
 
+/** Snapshots limited to last 7 days (same rules as BigTrendChart 7D). */
+function getSnapshots7d(snapshots: SnapshotRow[]): SnapshotRow[] {
+  if (snapshots.length === 0) return snapshots;
+  const latestTs = snapshots
+    .map((s) => new Date(s.created_at).getTime())
+    .filter((t) => Number.isFinite(t))
+    .reduce((max, t) => Math.max(max, t), 0);
+  if (!latestTs) return snapshots;
+  const cutoff = latestTs - 7 * 24 * 60 * 60 * 1000;
+  const filtered = snapshots.filter((s) => {
+    const ts = new Date(s.created_at).getTime();
+    return Number.isFinite(ts) && ts >= cutoff;
+  });
+  if (filtered.length < 7) {
+    const complete = snapshots.filter(
+      (s) => s.vrtl_score != null && (s.status?.toLowerCase().includes("complete") || s.status?.toLowerCase().includes("success"))
+    );
+    return complete.slice(0, 10);
+  }
+  return filtered.length >= 2 ? filtered : snapshots;
+}
+
+const MINI_TRAJ_W = 300;
+const MINI_TRAJ_H = 92;
+const MINI_PAD = { top: 6, right: 6, bottom: 14, left: 10 };
+const MINI_INNER_W = MINI_TRAJ_W - MINI_PAD.left - MINI_PAD.right;
+const MINI_INNER_H = MINI_TRAJ_H - MINI_PAD.top - MINI_PAD.bottom;
+
+/** Compact 7D authority trajectory for hero — mirrors main chart logic, no controls. */
+function HeroMiniTrajectory({ snapshots }: { snapshots: SnapshotRow[] }) {
+  const ranged = useMemo(() => getSnapshots7d(snapshots), [snapshots]);
+  const { scores, dates } = useMemo(() => getChartSeriesForFilter(ranged, "all"), [ranged]);
+  const leaderByDate = useMemo(() => getLeaderSeriesByDate(ranged), [ranged]);
+  const leaderScores = useMemo(() => dates.map((d) => leaderByDate[d] ?? 100), [dates, leaderByDate]);
+
+  if (scores.length < 2) {
+    return (
+      <div className="flex h-[92px] flex-col justify-center rounded border border-white/[0.06] px-2 text-center">
+        <p className="text-[9px] font-semibold uppercase tracking-wider text-text-3">Trajectory · 7D</p>
+        <p className="mt-1 text-[11px] text-text-3">Add snapshots to plot movement</p>
+      </div>
+    );
+  }
+
+  const max = Math.max(...scores, ...leaderScores, 100);
+  const min = Math.min(...scores, ...leaderScores, 0);
+  const valueRange = max - min || 1;
+  const pathPoints = scores.map((val, i) => ({
+    x: MINI_PAD.left + (i / (scores.length - 1)) * MINI_INNER_W,
+    y: MINI_PAD.top + MINI_INNER_H - ((val - min) / valueRange) * MINI_INNER_H,
+  }));
+  const leaderPoints = leaderScores.map((val, i) => ({
+    x: MINI_PAD.left + (i / (leaderScores.length - 1 || 1)) * MINI_INNER_W,
+    y: MINI_PAD.top + MINI_INNER_H - ((val - min) / valueRange) * MINI_INNER_H,
+  }));
+  const trend = scores[scores.length - 1]! - scores[0]!;
+  const lineColor = trend >= 0 ? CHART_COLORS.dominant : CHART_COLORS.losing;
+  const smoothTop = buildSmoothPath(pathPoints);
+  const bottomY = MINI_PAD.top + MINI_INNER_H;
+  const areaD = `${smoothTop} L ${pathPoints[pathPoints.length - 1]!.x} ${bottomY} L ${MINI_PAD.left} ${bottomY} Z`;
+
+  return (
+    <div>
+      <p className="mb-1 text-[9px] font-semibold uppercase tracking-wider text-text-3">Trajectory · 7D</p>
+      <svg viewBox={`0 0 ${MINI_TRAJ_W} ${MINI_TRAJ_H}`} className="h-[92px] w-full max-w-[300px]" preserveAspectRatio="xMidYMid meet" aria-hidden>
+        <defs>
+          <linearGradient id="miniHeroGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor={lineColor} stopOpacity="0.12" />
+            <stop offset="100%" stopColor={lineColor} stopOpacity="0.02" />
+          </linearGradient>
+        </defs>
+        <path d={areaD} fill="url(#miniHeroGrad)" />
+        <path
+          d={leaderPoints.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ")}
+          fill="none"
+          stroke="rgba(255,255,255,0.32)"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d={smoothTop}
+          fill="none"
+          stroke={lineColor}
+          strokeOpacity="0.88"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        {pathPoints.map((p, i) => (
+          <circle
+            key={i}
+            cx={p.x}
+            cy={p.y}
+            r={i === pathPoints.length - 1 ? 3.2 : 2}
+            fill="var(--surface)"
+            stroke={lineColor}
+            strokeOpacity={i === pathPoints.length - 1 ? 0.9 : 0.55}
+            strokeWidth={i === pathPoints.length - 1 ? 1.8 : 1.2}
+          />
+        ))}
+      </svg>
+    </div>
+  );
+}
+
 function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embedded?: boolean }) {
   const [filter, setFilter] = useState<typeof CHART_FILTERS[number]>("all");
   const [timeRange, setTimeRange] = useState<(typeof CHART_RANGES)[number]["key"]>("7d");
@@ -1890,7 +1996,7 @@ function getSentiment(score: number | null, delta: number | null): { label: "Pos
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   FULL-WIDTH HERO — identity, score, insight, strategic story, risk line, actions
+   HERO — command center: score + tools | mini trajectory + position ring, risk, status strip
 ═══════════════════════════════════════════════════════════════════════════ */
 function HeroSection({
   client,
@@ -1905,6 +2011,7 @@ function HeroSection({
   onSelectSnapshotId,
   runSnapshot,
   running,
+  gapTrendDelta,
 }: {
   client: ClientRow;
   score: number | null;
@@ -1918,6 +2025,7 @@ function HeroSection({
   onSelectSnapshotId: (id: string) => void;
   runSnapshot: () => void;
   running: boolean;
+  gapTrendDelta: number | null;
 }) {
   const domain = faviconDomain(client.website);
   const logoSrc = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=48` : null;
@@ -1926,10 +2034,7 @@ function HeroSection({
   const diagnosis = getVerdictSentence(score, providers, detail);
   const sortedDesc = [...providers].sort((a, b) => b[1] - a[1]);
   const sortedAsc = [...providers].sort((a, b) => a[1] - b[1]);
-  const primaryDisplacerLabel =
-    detail?.summary?.top_competitors?.[0]?.name?.trim() || "No clear displacer yet";
   const weakestModelLabel = sortedAsc.length > 0 ? getProviderDisplayName(sortedAsc[0]![0]) : "Insufficient data";
-  const gapToLeaderPts = sortedDesc.length > 0 ? Math.max(0, 100 - sortedDesc[0]![1]) : null;
   const strongestModelLabel = sortedDesc.length > 0 ? getProviderDisplayName(sortedDesc[0]![0]) : null;
   const topCompetitorNames = (detail?.summary?.top_competitors ?? [])
     .slice(0, 2)
@@ -1941,7 +2046,6 @@ function HeroSection({
       : topCompetitorNames.length === 1
         ? topCompetitorNames[0]!
         : "key competitors";
-  const mentionRate = detail ? pct(detail.summary.client_mentioned_count, detail.summary.responses_count || 1) : null;
   const riskLine1 = `${displacerPhrase} are taking more recommendation share than ${client.name} in tracked AI answers.`;
   const riskLine2 = `${weakestModelLabel} is the critical weakness — it is elevating displacement risk.`;
   const riskLine3 = strongestModelLabel
@@ -1949,106 +2053,94 @@ function HeroSection({
     : "Rebalance toward your strongest model channel while you close gaps on the weakest.";
 
   return (
-    <section className="w-full border-b border-white/[0.08] pb-10">
-      <div>
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10 lg:items-start">
-          <div className="flex flex-col gap-6 lg:col-span-7">
-            <div className="flex items-start gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08]">
-                {logoSrc ? (
-                  <img src={logoSrc} alt="" className="h-9 w-9 object-contain" width={36} height={36} />
-                ) : (
-                  <span className="text-xl font-bold text-text-3">{client.name.charAt(0)}</span>
-                )}
-              </div>
-              <div className="min-w-0 space-y-1.5 pt-0.5">
-                <h1 className="text-2xl font-semibold tracking-tight text-text md:text-3xl">{client.name}</h1>
-                <p className="text-sm text-text-2">{domain || client.website || "—"}</p>
-              </div>
-            </div>
-
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-3">AI Authority Index</p>
-              <div className="mt-1.5">
-                <span className={cn("inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider", getAuthorityStatusTone(score))}>
-                  {statusLabel}
-                </span>
-              </div>
-              <div className="mt-3 flex flex-wrap items-baseline gap-x-1.5 gap-y-0">
-                <span className="text-7xl font-extrabold tabular-nums tracking-tight text-text md:text-8xl">{score ?? "—"}</span>
-                {delta !== null && (
-                  <span
-                    className={cn(
-                      "rounded px-1.5 py-0.5 text-[11px] font-bold tabular-nums tracking-wide",
-                      delta > 0
-                        ? "bg-authority-dominant/15 text-authority-dominant"
-                        : delta < 0
-                          ? "bg-authority-losing/15 text-authority-losing"
-                          : "bg-white/[0.1] text-text-2"
-                    )}
-                  >
-                    {delta > 0 ? "+" : ""}
-                    {delta} vs last
-                  </span>
-                )}
-              </div>
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-text-2">{diagnosis}</p>
-              {mentionRate !== null && (
-                <p className="mt-2 text-xs text-text-3">
-                  Mentioned in {mentionRate}% of tracked answers — displacement pressure clusters in weaker model channels.
-                </p>
+    <section className="w-full border-b border-white/[0.08] pb-6">
+      <div className="flex items-start gap-3">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08]">
+          {logoSrc ? (
+            <img src={logoSrc} alt="" className="h-8 w-8 object-contain" width={32} height={32} />
+          ) : (
+            <span className="text-lg font-bold text-text-3">{client.name.charAt(0)}</span>
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <h1 className="text-xl font-semibold tracking-tight text-text md:text-2xl">{client.name}</h1>
+          <p className="text-sm text-text-2">{domain || client.website || "—"}</p>
+          <div className="mt-2">
+            <span
+              className={cn(
+                "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider",
+                getAuthorityStatusTone(score)
               )}
-            </div>
+            >
+              {statusLabel}
+            </span>
           </div>
+        </div>
+      </div>
 
-          <div className="flex flex-col gap-4 border-t border-white/[0.08] pt-6 lg:col-span-5 lg:border-t-0 lg:pt-0">
-            <div className="border-l border-white/[0.06] pl-6">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-3">Strategic story</p>
-              <dl className="mt-3 space-y-4">
-                <div>
-                  <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Displaced by</dt>
-                  <dd className="mt-2 text-base font-semibold leading-snug text-text">{primaryDisplacerLabel}</dd>
-                </div>
-                <div>
-                  <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Critical weakness</dt>
-                  <dd className="mt-2 text-base font-semibold leading-snug text-text">{weakestModelLabel}</dd>
-                </div>
-                <div>
-                  <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Gap to leader</dt>
-                  <dd className="mt-2 text-base font-semibold tabular-nums leading-snug text-text">{gapToLeaderPts != null ? `${gapToLeaderPts} pts` : "—"}</dd>
-                </div>
-              </dl>
-            </div>
-
-            <div className="flex flex-col gap-1.5 border-t border-white/[0.08] pt-4">
-              <p className="sr-only">Actions</p>
+      <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start lg:gap-8">
+        <div className="space-y-3 lg:col-span-7">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-3">AI Authority Index</p>
+          <div className="flex flex-wrap items-end gap-x-2 gap-y-2">
+            <span className="text-6xl font-extrabold tabular-nums tracking-tight text-text md:text-7xl">{score ?? "—"}</span>
+            {delta !== null && (
+              <span
+                className={cn(
+                  "rounded px-1.5 py-0.5 text-[11px] font-bold tabular-nums tracking-wide",
+                  delta > 0
+                    ? "bg-authority-dominant/15 text-authority-dominant"
+                    : delta < 0
+                      ? "bg-authority-losing/15 text-authority-losing"
+                      : "bg-white/[0.1] text-text-2"
+                )}
+              >
+                {delta > 0 ? "+" : ""}
+                {delta} vs last
+              </span>
+            )}
+            <div className="flex flex-wrap items-center gap-2">
               <RunSnapshotButton
                 running={running}
                 snapshotStatus={snapshotStatus}
                 onRunSnapshot={runSnapshot}
-                className="w-full rounded-lg border border-white/15 bg-white/[0.06] px-4 py-2.5 text-sm font-semibold text-text transition-colors hover:border-white/25 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/15"
+                className="!rounded-md !border !border-white/15 !bg-white/[0.06] !px-2.5 !py-1 !text-xs !font-semibold hover:!border-white/25 hover:!bg-white/10"
               />
               {snapshotId && (
-                <div className="[&_button]:!w-full [&_button]:!rounded-lg [&_button]:!border [&_button]:!border-white/20 [&_button]:!bg-white [&_button]:!px-4 [&_button]:!py-2.5 [&_button]:!text-sm [&_button]:!font-semibold [&_button]:!text-surface [&_button]:shadow-sm [&_button]:hover:!bg-white/95">
-                  <DownloadPdfButton snapshotId={snapshotId} label="Download Report" />
+                <div className="[&_button]:!rounded-md [&_button]:!px-2.5 [&_button]:!py-1 [&_button]:!text-xs [&_button]:!font-semibold">
+                  <DownloadPdfButton snapshotId={snapshotId} variant="compact" label="Download" />
                 </div>
               )}
-              <div className="[&_label]:!text-xs [&_label]:!text-text-3">
-                <SnapshotSelector snapshots={snapshots} selectedId={selectedSnapshotId} onSelect={onSelectSnapshotId} />
-              </div>
             </div>
+          </div>
+          <p className="max-w-xl text-sm leading-relaxed text-text-2">{diagnosis}</p>
+          <div className="[&_label]:text-[11px] [&_label]:text-text-3 [&_select]:py-1 [&_select]:text-xs">
+            <SnapshotSelector snapshots={snapshots} selectedId={selectedSnapshotId} onSelect={onSelectSnapshotId} />
           </div>
         </div>
 
-        <div className="mt-6 border-t border-white/[0.06] pt-6 md:mt-6 md:pt-7">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-authority-watchlist/90">AI competitive risk detected</p>
-          <p className="mt-2 max-w-4xl text-sm leading-relaxed text-text-2">
-            <span>{riskLine1} </span>
-            <span className="text-authority-watchlist">{riskLine2} </span>
-            <span>{riskLine3}</span>
-          </p>
+        <div className="lg:col-span-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <HeroMiniTrajectory snapshots={snapshots} />
+            <AIAnswerMarketShareChart
+              clientName={client.name}
+              detail={detail}
+              compact
+              gapTrendDelta={gapTrendDelta}
+            />
+          </div>
         </div>
       </div>
+
+      <div className="mt-5 border-t border-white/[0.06] pt-4">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-authority-watchlist/90">AI competitive risk detected</p>
+        <p className="mt-2 max-w-4xl text-sm leading-relaxed text-text-2">
+          <span>{riskLine1} </span>
+          <span className="text-authority-watchlist">{riskLine2} </span>
+          <span>{riskLine3}</span>
+        </p>
+      </div>
+
+      <StatusBarStrip providers={providers} score={score} delta={delta} />
     </section>
   );
 }
@@ -2082,6 +2174,7 @@ function AIAnswerMarketShareChart({
   running,
   snapshotStatus,
   gapTrendDelta,
+  compact,
 }: {
   clientName: string;
   detail: SnapshotDetailResponse | null;
@@ -2089,6 +2182,8 @@ function AIAnswerMarketShareChart({
   running?: boolean;
   snapshotStatus?: string | null;
   gapTrendDelta?: number | null;
+  /** Hero mini ring — no list, smaller footprint */
+  compact?: boolean;
 }) {
   const rows = useMemo(() => {
     if (!detail?.summary) return [];
@@ -2144,8 +2239,8 @@ function AIAnswerMarketShareChart({
 
   const clientRow = rows.find((r) => r.isClient) ?? null;
   const topCompetitor = rows.find((r) => !r.isClient) ?? null;
-  const donutSize = 152;
-  const strokeWidth = 24;
+  const donutSize = compact ? 120 : 152;
+  const strokeWidth = compact ? 18 : 24;
   const radius = (donutSize - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const neutral = ["rgba(255,255,255,0.42)", "rgba(255,255,255,0.24)", "rgba(255,255,255,0.18)", "rgba(255,255,255,0.13)", "rgba(255,255,255,0.1)"];
@@ -2177,10 +2272,26 @@ function AIAnswerMarketShareChart({
     return node;
   });
 
+  const wrapClass = compact ? "relative h-[132px] w-[132px]" : "relative h-[170px] w-[170px]";
+
+  const gapLine =
+    gapTrendDelta != null
+      ? gapTrendDelta > 0
+        ? `Closing gap: -${Math.abs(gapTrendDelta)}% vs leader`
+        : gapTrendDelta < 0
+          ? `Losing ground: +${Math.abs(gapTrendDelta)}% gap to leader`
+          : "Stalled vs leader"
+      : clientRow && topCompetitor
+        ? `Trailing leader by ${Math.max(0, topCompetitor.share - clientRow.share)}%`
+        : "Leader gap unavailable";
+
   return (
-    <div className="space-y-2">
+    <div className={cn("space-y-2", compact && "space-y-0")}>
+      {compact && (
+        <p className="mb-1 text-[9px] font-semibold uppercase tracking-wider text-text-3">Position ring</p>
+      )}
       <div className="grid place-items-center">
-        <div className="relative h-[170px] w-[170px]">
+        <div className={wrapClass}>
           <svg viewBox={`0 0 ${donutSize} ${donutSize}`} className="-rotate-90 h-full w-full" aria-hidden>
             <circle
               cx={donutSize / 2}
@@ -2194,131 +2305,96 @@ function AIAnswerMarketShareChart({
           </svg>
           <div className="absolute inset-0 grid place-items-center">
             <div className="text-center">
-              <p className="text-2xl font-semibold tabular-nums text-text">{clientRow ? `#${clientRow.rank}` : "—"}</p>
-              <p className="mt-0.5 text-sm tabular-nums text-text-2">{clientRow ? `${clientRow.share}%` : "—"}</p>
-              <p className="mt-1 max-w-[120px] text-[10px] leading-snug text-text-3">
-                {gapTrendDelta != null
-                  ? gapTrendDelta > 0
-                    ? `Closing gap: -${Math.abs(gapTrendDelta)}% vs leader`
-                    : gapTrendDelta < 0
-                      ? `Losing ground: +${Math.abs(gapTrendDelta)}% gap to leader`
-                      : "Stalled vs leader"
-                  : clientRow && topCompetitor
-                    ? `Trailing leader by ${Math.max(0, topCompetitor.share - clientRow.share)}%`
-                    : "Leader gap unavailable"}
-              </p>
+              <p className={cn("font-semibold tabular-nums text-text", compact ? "text-lg" : "text-2xl")}>{clientRow ? `#${clientRow.rank}` : "—"}</p>
+              <p className={cn("tabular-nums text-text-2", compact ? "mt-0 text-xs" : "mt-0.5 text-sm")}>{clientRow ? `${clientRow.share}%` : "—"}</p>
+              {!compact && (
+                <p className="mt-1 max-w-[120px] text-[10px] leading-snug text-text-3">{gapLine}</p>
+              )}
+              {compact && (
+                <p className="mt-0.5 max-w-[100px] text-[9px] leading-tight text-text-3">{gapLine}</p>
+              )}
             </div>
           </div>
         </div>
       </div>
-      <ul className="space-y-1.5">
-        {rows.slice(0, 4).map((row, i) => (
-          <li key={row.name} className="flex items-center justify-between gap-2 text-xs">
-            <div className="flex min-w-0 items-center gap-2">
-              <span
-                className="h-2 w-2 shrink-0 rounded-full"
-                style={{ backgroundColor: row.isClient ? "rgba(245,158,11,0.95)" : row.isLeader ? neutral[0] : neutral[Math.min(i, neutral.length - 1)] }}
-              />
-              <span className={cn("truncate", row.isClient ? "font-semibold text-text" : "text-text-2")}>
-                {normalizeBrandName(row.name)}
-                {row.isClient ? " (You)" : ""}
-              </span>
-            </div>
-            <span className={cn("tabular-nums", row.isClient ? "font-semibold text-text" : "text-text-3")}>{row.share}%</span>
-          </li>
-        ))}
-      </ul>
-      <p className="text-center text-xs text-text-3">
-        {gapTrendDelta != null
-          ? gapTrendDelta > 0
-            ? `Closing gap: -${Math.abs(gapTrendDelta)}% vs leader`
-            : gapTrendDelta < 0
-              ? `Losing ground: +${Math.abs(gapTrendDelta)}% gap to leader`
-              : "Stalled vs leader"
-          : "Run another snapshot to assess gap direction."}
-      </p>
+      {!compact && (
+        <>
+          <ul className="space-y-1.5">
+            {rows.slice(0, 4).map((row, i) => (
+              <li key={row.name} className="flex items-center justify-between gap-2 text-xs">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span
+                    className="h-2 w-2 shrink-0 rounded-full"
+                    style={{ backgroundColor: row.isClient ? "rgba(245,158,11,0.95)" : row.isLeader ? neutral[0] : neutral[Math.min(i, neutral.length - 1)] }}
+                  />
+                  <span className={cn("truncate", row.isClient ? "font-semibold text-text" : "text-text-2")}>
+                    {normalizeBrandName(row.name)}
+                    {row.isClient ? " (You)" : ""}
+                  </span>
+                </div>
+                <span className={cn("tabular-nums", row.isClient ? "font-semibold text-text" : "text-text-3")}>{row.share}%</span>
+              </li>
+            ))}
+          </ul>
+          <p className="text-center text-xs text-text-3">
+            {gapTrendDelta != null
+              ? gapTrendDelta > 0
+                ? `Closing gap: -${Math.abs(gapTrendDelta)}% vs leader`
+                : gapTrendDelta < 0
+                  ? `Losing ground: +${Math.abs(gapTrendDelta)}% gap to leader`
+                  : "Stalled vs leader"
+              : "Run another snapshot to assess gap direction."}
+          </p>
+        </>
+      )}
     </div>
   );
 }
 
-/* Executive Summary — gap, weakest channel, confidence, sentiment (standalone section or below trajectory chart) */
-function ExecutiveSummaryGrid({
+/** Inline status strip (replaces Quick read grid). */
+function StatusBarStrip({
   providers,
-  confidence,
   score,
   delta,
-  variant = "section",
 }: {
   providers: [string, number][];
-  confidence: { label: string; variant: BadgeVariant };
   score: number | null;
   delta: number | null;
-  variant?: "section" | "embedded";
 }) {
   const sorted = [...providers].sort((a, b) => b[1] - a[1]);
   const gapToLeader = sorted.length > 0 ? 100 - (sorted[0]?.[1] ?? 0) : null;
   const weakest = sorted.length > 0 ? sorted[sorted.length - 1] : null;
   const sentiment = getSentiment(score, delta);
-
-  const tiles = [
-    {
-      label: "Gap to Leader",
-      value: gapToLeader != null ? `${gapToLeader} pts` : "—",
-      hint: "Distance to your strongest model channel",
-    },
-    {
-      label: "Weakest Model",
-      value: weakest ? getProviderDisplayName(weakest[0]) : "—",
-      hint: weakest ? `Index ${weakest[1]} — shore this up first` : "Run a snapshot to expose the weak channel",
-    },
-    { label: "Confidence", value: confidence.label, hint: null, badge: true as const, variant: confidence.variant },
-    { label: "Sentiment", value: sentiment.label, hint: sentiment.change, sentiment: true as const, sentimentLabel: sentiment.label },
-  ];
-
-  const grid = (
-    <div className="grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-x-10">
-      {tiles.map((t, i) => (
-        <div key={i}>
-          <p className="text-[10px] font-medium uppercase tracking-wider text-text-3">{t.label}</p>
-          {t.badge ? (
-            <div className="mt-1.5"><Badge variant={t.variant}>{t.value}</Badge></div>
-          ) : t.sentiment ? (
-            <div className="mt-1.5 flex flex-wrap items-center gap-2">
-              <span className={cn(
-                "rounded-md px-2 py-0.5 text-xs font-semibold",
-                t.sentimentLabel === "Positive" && "bg-authority-dominant/15 text-authority-dominant",
-                t.sentimentLabel === "Neutral" && "bg-white/10 text-text-2",
-                t.sentimentLabel === "Negative" && "bg-authority-losing/15 text-authority-losing"
-              )}>{t.value}</span>
-              {t.hint && t.hint !== "—" && <span className="text-xs tabular-nums text-text-3">{t.hint}</span>}
-            </div>
-          ) : (
-            <>
-              <p className="mt-1 text-xl font-bold tabular-nums leading-tight text-text">{t.value}</p>
-              {t.hint && <p className="mt-0.5 text-[11px] leading-snug text-text-3">{t.hint}</p>}
-            </>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-
-  if (variant === "embedded") {
-    return (
-      <div className="mt-2 border-t border-white/[0.06] pt-3 space-y-2">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Quick read</p>
-        {grid}
-      </div>
-    );
-  }
-
   return (
-    <DashboardSection
-      title="Quick read"
-      subtitle="Gap to leader, weakest channel, confidence, and trajectory sentiment."
-    >
-      {grid}
-    </DashboardSection>
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-white/[0.06] pt-3 text-[11px] text-text-2">
+      <span>
+        Gap:{" "}
+        <span className="font-medium tabular-nums text-text">{gapToLeader != null ? `${gapToLeader} pts` : "—"}</span>
+      </span>
+      <span className="text-white/15" aria-hidden>
+        |
+      </span>
+      <span>
+        Weakest:{" "}
+        <span className="font-medium text-text">{weakest ? getProviderDisplayName(weakest[0]) : "—"}</span>
+      </span>
+      <span className="text-white/15" aria-hidden>
+        |
+      </span>
+      <span>
+        Sentiment:{" "}
+        <span
+          className={cn(
+            "font-medium",
+            sentiment.label === "Positive" && "text-authority-dominant",
+            sentiment.label === "Negative" && "text-authority-losing",
+            sentiment.label === "Neutral" && "text-text"
+          )}
+        >
+          {sentiment.label}
+        </span>
+      </span>
+    </div>
   );
 }
 
@@ -2437,7 +2513,7 @@ function WhatIsWrongSection({
       .slice(0, 5);
   }, [score, providers, competitors, detail]);
 
-  const { insightIdxByModel, portfolioInsights } = useMemo(() => {
+  const insightIdxByModel = useMemo(() => {
     const used = new Set<number>();
     const idxByModel: Record<(typeof VULN_MODELS)[number], number | undefined> = {
       openai: undefined,
@@ -2454,8 +2530,7 @@ function WhatIsWrongSection({
         idxByModel[key] = idx;
       }
     }
-    const portfolio = prioritizedInsights.filter((_, i) => !used.has(i));
-    return { insightIdxByModel: idxByModel, portfolioInsights: portfolio };
+    return idxByModel;
   }, [prioritizedInsights]);
 
   return (
@@ -2527,19 +2602,6 @@ function WhatIsWrongSection({
             );
           })}
         </div>
-        {portfolioInsights.length > 0 && (
-          <div className="border-t border-white/[0.06] pt-6 mt-6">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Portfolio-level plays</p>
-            <ul className="mt-3 space-y-3">
-              {portfolioInsights.map((ins, i) => (
-                <li key={i}>
-                  <p className="text-sm font-semibold text-text">{formatPlaybookText(ins.title)}</p>
-                  <p className="mt-1 text-sm leading-relaxed text-text-2">{formatPlaybookText(firstStrategicSentence(ins.action))}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
       </div>
     </DashboardSection>
   );
@@ -2697,17 +2759,8 @@ function VulnerabilityRow({
   );
 }
 
-/* Derive "models affected" from insight title; uses central display names. */
-function getModelsAffectedFromInsight(title: string): string {
-  const t = title.toLowerCase();
-  if (t.includes("openai") || t.includes("gpt")) return getModelDisplayName("openai");
-  if (t.includes("gemini") || t.includes("google")) return getModelDisplayName("gemini");
-  if (t.includes("anthropic") || t.includes("claude")) return getModelDisplayName("anthropic");
-  return "All";
-}
-
 /* ═══════════════════════════════════════════════════════════════════════════
-   EXECUTION PRIORITIES — top 3: title, impact, models affected, tactical bullets
+   WHAT TO FIX NOW — compact impact blocks + tactical bullets
 ═══════════════════════════════════════════════════════════════════════════ */
 function ExecutionPriorities({
   score,
@@ -2726,21 +2779,11 @@ function ExecutionPriorities({
     .slice(0, 3);
 
   if (score === null) {
-    return (
-      <section>
-        <h2 className="mb-3 text-sm font-semibold text-text">Priority Actions</h2>
-        <p className="text-sm text-text-2">Run a snapshot to generate priorities.</p>
-      </section>
-    );
+    return <p className="text-sm text-text-2">Run a snapshot to generate priorities.</p>;
   }
 
   if (top3.length === 0) {
-    return (
-      <section>
-        <h2 className="mb-3 text-sm font-semibold text-text">Priority Actions</h2>
-        <p className="text-sm text-text-2">Authority is performing well. Continue monitoring.</p>
-      </section>
-    );
+    return <p className="text-sm text-text-2">Authority is performing well. Continue monitoring.</p>;
   }
 
   function actionBullets(action: string): string[] {
@@ -2755,32 +2798,43 @@ function ExecutionPriorities({
   }
 
   function upsideRange(priority: StrategicInsight["priority"]): string {
-    if (priority === "HIGH") return "+8-14 pts";
-    if (priority === "MEDIUM") return "+4-8 pts";
-    return "+2-5 pts";
+    if (priority === "HIGH") return "+8–14 pts";
+    if (priority === "MEDIUM") return "+4–8 pts";
+    return "+2–5 pts";
+  }
+
+  function impactLabel(priority: StrategicInsight["priority"]): string {
+    if (priority === "HIGH") return "HIGH IMPACT";
+    if (priority === "MEDIUM") return "MEDIUM IMPACT";
+    return "LOWER IMPACT";
   }
 
   return (
-    <section>
-      <h2 className="mb-3 text-sm font-semibold text-text">Priority Actions</h2>
-      <ul className="space-y-5">
-        {top3.map((insight, idx) => (
-          <li key={idx} className="border-b border-white/5 pb-4 last:border-0 last:pb-0">
-            <p className="font-medium text-text">{insight.title}</p>
-            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0 text-xs text-text-3">
-              <span>Impact: <span className={cn("font-medium text-text-2", insight.priority === "HIGH" && "text-authority-losing", insight.priority === "MEDIUM" && "text-authority-watchlist")}>{insight.priority}</span></span>
-              <span>Models: {getModelsAffectedFromInsight(insight.title)}</span>
-              <span>Est. upside: <span className="font-medium text-text-2">{upsideRange(insight.priority)}</span></span>
-            </div>
-            <ul className="mt-2 space-y-0.5 pl-4 list-disc text-sm text-text-2">
-              {actionBullets(insight.action).map((bullet, i) => (
-                <li key={i}>{bullet}</li>
-              ))}
-            </ul>
-          </li>
-        ))}
-      </ul>
-    </section>
+    <ul className="space-y-3">
+      {top3.map((insight, idx) => (
+        <li key={idx} className="border-b border-white/[0.06] pb-3 last:border-0 last:pb-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={cn(
+                "rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+                insight.priority === "HIGH" && "bg-authority-losing/20 text-authority-losing",
+                insight.priority === "MEDIUM" && "bg-authority-watchlist/15 text-authority-watchlist",
+                insight.priority === "LOW" && "bg-white/[0.08] text-text-3"
+              )}
+            >
+              {impactLabel(insight.priority)}
+            </span>
+          </div>
+          <p className="mt-1.5 font-semibold leading-snug text-text">{insight.title}</p>
+          <p className="mt-0.5 text-xs tabular-nums text-text-2">{upsideRange(insight.priority)}</p>
+          <ul className="mt-2 space-y-0.5 pl-4 list-disc text-sm text-text-2">
+            {actionBullets(insight.action).map((bullet, i) => (
+              <li key={i}>{bullet}</li>
+            ))}
+          </ul>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -3639,10 +3693,6 @@ export default function ClientDetailPage() {
   const providers: [string, number][] = selectedSnapshot?.score_by_provider
     ? Object.entries(selectedSnapshot.score_by_provider)
     : [];
-  const previousProviders: Record<string, number> = previousSnapshot?.score_by_provider
-    ? (previousSnapshot.score_by_provider as Record<string, number>)
-    : {};
-  const confidence = getConfidenceLabel(competitors.length);
 
   return (
     <div className="min-h-screen pb-20 md:pb-0">
@@ -3712,6 +3762,11 @@ export default function ClientDetailPage() {
               onSelectSnapshotId={setSelectedSnapshotId}
               runSnapshot={runSnapshot}
               running={running}
+              gapTrendDelta={
+                selectedSnapshot?.vrtl_score != null && previousSnapshot?.vrtl_score != null
+                  ? selectedSnapshot.vrtl_score - previousSnapshot.vrtl_score
+                  : null
+              }
             />
 
             <DashboardSection
@@ -3739,8 +3794,8 @@ export default function ClientDetailPage() {
             </DashboardSection>
 
             <DashboardSection
-              title="Priority Actions (Playbook)"
-              subtitle="Highest-impact execution moves to close displacement risk first."
+              title="What to Fix Now"
+              subtitle="Highest-impact moves — bullets only, tied to estimated upside."
             >
               <ExecutionPriorities
                 score={selectedSnapshot?.vrtl_score ?? null}
@@ -3757,14 +3812,6 @@ export default function ClientDetailPage() {
               previousSnapshot={previousSnapshot}
               score={selectedSnapshot?.vrtl_score ?? null}
               competitors={competitors}
-            />
-
-            <ExecutiveSummaryGrid
-              variant="embedded"
-              providers={providers}
-              confidence={confidence}
-              score={selectedSnapshot?.vrtl_score ?? null}
-              delta={selectedSnapshot?.vrtl_score != null && previousSnapshot?.vrtl_score != null ? selectedSnapshot.vrtl_score - previousSnapshot.vrtl_score : null}
             />
           </>
         )}
