@@ -162,12 +162,8 @@ function triageOrder(c: ClientWithStats): number {
 
 function riskBorderClass(c: ClientWithStats): string {
   const b = triageBucket(c);
-  if (b === "losing") {
-    return "border-authority-losing/40 shadow-[0_0_22px_-8px_rgba(239,68,68,0.45)]";
-  }
-  if (b === "watchlist") {
-    return "border-authority-watchlist/45 shadow-[0_0_20px_-8px_rgba(245,158,11,0.35)]";
-  }
+  if (b === "losing") return "border-white/[0.08] bg-white/[0.02]";
+  if (b === "watchlist") return "border-white/[0.07] bg-white/[0.015]";
   return "border-white/[0.06]";
 }
 
@@ -229,32 +225,23 @@ function ModelDot({ model }: { model: string | null }) {
 function RiskTriageStatusBar({ clients }: { clients: ClientWithStats[] }) {
   const losing = clients.filter((c) => triageBucket(c) === "losing").length;
   const watch = clients.filter((c) => triageBucket(c) === "watchlist").length;
-  const strong = clients.filter((c) => triageBucket(c) === "dominant" || triageBucket(c) === "stable").length;
+  const dominant = clients.filter((c) => triageBucket(c) === "dominant").length;
   return (
-    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-white/[0.06] pb-4 text-sm font-medium text-white/90">
-      <span className="inline-flex items-center gap-1.5" title="Clients in losing ground state">
-        <span aria-hidden>🚨</span>
-        <span>
-          {losing} Client{losing === 1 ? "" : "s"} Losing Ground
-        </span>
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-white/[0.06] pb-3 text-xs text-text-2">
+      <span>
+        <span className="font-medium text-authority-losing">{losing}</span> Losing Ground
       </span>
       <span className="text-white/25" aria-hidden>
         |
       </span>
-      <span className="inline-flex items-center gap-1.5 text-authority-watchlist/95" title="Watchlist — needs attention">
-        <span aria-hidden>⚠️</span>
-        <span>
-          {watch === 0 ? "None on watchlist" : `${watch} client${watch === 1 ? "" : "s"} need attention`}
-        </span>
+      <span>
+        <span className="font-medium text-authority-watchlist">{watch}</span> Watchlist
       </span>
       <span className="text-white/25" aria-hidden>
         |
       </span>
-      <span className="inline-flex items-center gap-1.5 text-authority-dominant/90" title="Dominant or stable">
-        <span aria-hidden>✅</span>
-        <span>
-          {strong} Strong
-        </span>
+      <span>
+        <span className="font-medium text-authority-dominant">{dominant}</span> Dominant
       </span>
     </div>
   );
@@ -301,7 +288,6 @@ function ClientStateBadge({ bucket }: { bucket: TriageBucket }) {
 /* Risk triage card: state-first, score + delta, weakest / displacer only */
 function ClientCard({ client }: { client: ClientWithStats }) {
   const router = useRouter();
-  const [hover, setHover] = useState(false);
   const hasData = client.latestScore !== null;
   const score = hasData ? client.latestScore! : 0;
   const delta =
@@ -316,18 +302,10 @@ function ClientCard({ client }: { client: ClientWithStats }) {
     <button
       type="button"
       onClick={() => router.push(`/app/clients/${client.id}`)}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
       className={cn(
-        "group relative flex w-full flex-col rounded-xl border bg-[rgb(var(--surface))] p-4 text-left transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-white/10",
-        riskBorderClass(client),
-        hover && "hover:-translate-y-[2px]"
+        "group relative flex w-full flex-col rounded-xl border p-4 text-left transition-colors duration-200 focus:outline-none focus:ring-1 focus:ring-white/10",
+        riskBorderClass(client)
       )}
-      style={{
-        boxShadow: hover
-          ? "0 8px 20px rgba(0,0,0,0.2)"
-          : undefined,
-      }}
     >
       <div className="flex shrink-0 items-center justify-between gap-2">
         <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -368,35 +346,12 @@ function ClientCard({ client }: { client: ClientWithStats }) {
           <span className="font-medium text-white/85">{d ?? "—"}</span>
         </p>
         {!hasData && (
-          <p className="pt-1 text-[11px] text-authority-watchlist/90">Run a snapshot to fill this card.</p>
+          <div className="pt-1 space-y-0.5 text-[11px] text-text-3">
+            <p>No data yet</p>
+            <p>Run snapshot to generate analysis</p>
+          </div>
         )}
       </div>
-    </button>
-  );
-}
-
-/* Add client card — same layered lighting, muted; micro hover */
-function AddClientCard() {
-  const router = useRouter();
-  const [hover, setHover] = useState(false);
-  return (
-    <button
-      type="button"
-      onClick={() => router.push("/app/clients/new")}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      className="flex w-full flex-col items-center justify-center rounded-xl border border-dashed border-white/10 p-4 xl:p-5 text-white/60 transition-all duration-200 hover:border-white/15 focus:outline-none focus:ring-1 focus:ring-white/10 aspect-square min-h-[220px] max-h-[280px] sm:min-h-0 sm:max-h-none hover:-translate-y-0.5"
-      style={{
-        background: "linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 40%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02), transparent 70%), rgb(var(--surface))",
-        boxShadow: hover
-          ? "0 0 0 1px rgba(255,255,255,0.05), 0 4px 12px rgba(0,0,0,0.15)"
-          : "0 0 0 1px rgba(255,255,255,0.05), 0 2px 8px rgba(0,0,0,0.1)",
-      }}
-    >
-      <svg className="h-10 w-10 mb-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-      </svg>
-      <span className="text-sm font-medium">+ Add Client</span>
     </button>
   );
 }
@@ -404,17 +359,13 @@ function AddClientCard() {
 /* Client cards — order is pre-sorted by triage (urgency first) */
 function ClientCardsGrid({ clients }: { clients: ClientWithStats[] }) {
   return (
-    <section id="clients-overview" className="space-y-4">
-      <p className="text-xs text-text-2">Sorted by displacement risk — most urgent first.</p>
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+    <section id="clients-overview">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {clients.map((client) => (
           <div key={client.id} className="relative">
             <ClientCard client={client} />
           </div>
         ))}
-        <div className="relative">
-          <AddClientCard />
-        </div>
       </div>
     </section>
   );
