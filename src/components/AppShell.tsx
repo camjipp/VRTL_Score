@@ -18,12 +18,32 @@ export const AgencyContext = createContext<{ agency: Agency | null; logout: () =
   logout: async () => {},
 });
 
+/** Primary nav: production-ready routes only */
 const NAV_LINKS = [
-  { href: "/app", label: "Dashboard", icon: "dashboard" as const },
-  { href: "/app#clients-overview", label: "Clients", icon: "clients" as const },
-  { href: "/app/reports", label: "Reports", icon: "reports" as const },
-  { href: "/app/snapshots", label: "Snapshots", icon: "snapshots" as const },
-  { href: "/app/settings", label: "Settings", icon: "settings" as const },
+  {
+    href: "/app",
+    label: "Dashboard",
+    hint: "Portfolio triage — who needs attention",
+    icon: "dashboard" as const,
+  },
+  {
+    href: "/app#clients-overview",
+    label: "Clients",
+    hint: "Browse and manage all clients",
+    icon: "clients" as const,
+  },
+  {
+    href: "/app/settings",
+    label: "Settings",
+    hint: "Account and workspace settings",
+    icon: "settings" as const,
+  },
+];
+
+/** Shown separately as disabled — not linked (placeholders exist but are not product-ready) */
+const COMING_SOON_LINKS = [
+  { label: "Reports", icon: "reports" as const },
+  { label: "Snapshots", icon: "snapshots" as const },
 ];
 
 function NavGlyph({
@@ -158,8 +178,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return false;
   }
 
-  const allNavLinks = isSuperAdmin
-    ? [...NAV_LINKS, { href: "/app/admin", label: "Admin", icon: "admin" as const }]
+  const primaryNavLinks = isSuperAdmin
+    ? [
+        ...NAV_LINKS,
+        {
+          href: "/app/admin",
+          label: "Admin",
+          hint: "Platform administration",
+          icon: "admin" as const,
+        },
+      ]
     : NAV_LINKS;
 
   const isPaywall = pathname === "/app/plans";
@@ -222,12 +250,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </Link>
               </div>
 
-              <nav className="flex-1 space-y-1 px-2 py-3">
-                {allNavLinks.map((link) => (
+              <nav className="flex flex-1 flex-col space-y-1 px-2 py-3" aria-label="App">
+                {primaryNavLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
-                    title={link.label}
+                    title={link.hint}
                     className={cn(
                       "flex items-center gap-3 rounded-lg py-2.5 text-sm font-medium transition-colors",
                       sidebarCollapsed ? "justify-center px-0" : "border-l-2 px-3",
@@ -244,6 +272,30 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <span className={cn("truncate", sidebarCollapsed && "sr-only")}>{link.label}</span>
                   </Link>
                 ))}
+
+                {!sidebarCollapsed && (
+                  <div className="mt-4 border-t border-white/[0.06] pt-3" role="group" aria-label="Coming soon">
+                    <p className="px-3 pb-2 text-[10px] font-medium uppercase tracking-wider text-text-3">
+                      Coming soon
+                    </p>
+                    <div className="space-y-1">
+                      {COMING_SOON_LINKS.map((item) => (
+                        <div
+                          key={item.label}
+                          className="flex cursor-not-allowed items-center gap-3 rounded-lg border-l-2 border-transparent py-2.5 pl-3 pr-2 text-sm font-medium text-text-3/70"
+                          aria-disabled="true"
+                          title={`${item.label} — coming soon`}
+                        >
+                          <NavGlyph name={item.icon} className="text-text-3/80" />
+                          <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                          <span className="shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-text-3/90">
+                            Soon
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </nav>
             </div>
           </aside>
