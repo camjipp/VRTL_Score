@@ -289,68 +289,101 @@ function ClientStateBadge({ bucket }: { bucket: TriageBucket }) {
 function ClientCard({ client }: { client: ClientWithStats }) {
   const router = useRouter();
   const hasData = client.latestScore !== null;
-  const score = hasData ? client.latestScore! : 0;
-  const delta =
-    client.latestScore !== null && client.previousScore !== null ? client.latestScore - client.previousScore : 0;
   const bucket = triageBucket(client);
   const domain = faviconDomain(client.website);
   const faviconUrl = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=32` : null;
   const weakest = client.worstModel ? displayModelName(client.worstModel) : "—";
   const d = client.primaryDisplacer?.trim() || null;
 
+  let deltaLine: string;
+  let deltaTone: "up" | "down" | "neutral";
+  if (!hasData) {
+    deltaLine = "\u00a0";
+    deltaTone = "neutral";
+  } else if (client.previousScore === null) {
+    deltaLine = "—";
+    deltaTone = "neutral";
+  } else {
+    const delta = client.latestScore! - client.previousScore;
+    if (delta === 0) {
+      deltaLine = "0 vs last";
+      deltaTone = "neutral";
+    } else {
+      deltaLine = `${delta > 0 ? "+" : ""}${delta} vs last`;
+      deltaTone = delta > 0 ? "up" : "down";
+    }
+  }
+
   return (
     <button
       type="button"
       onClick={() => router.push(`/app/clients/${client.id}`)}
       className={cn(
-        "group relative flex w-full flex-col rounded-xl border p-4 text-left transition-colors duration-200 focus:outline-none focus:ring-1 focus:ring-white/10",
+        "group flex h-full min-h-[260px] w-full flex-col overflow-hidden rounded-xl border p-4 text-left transition-colors duration-200 focus:outline-none focus:ring-1 focus:ring-white/10",
         riskBorderClass(client)
       )}
     >
-      <div className="flex shrink-0 items-center justify-between gap-2">
-        <div className="flex min-w-0 flex-1 items-center gap-2">
-          {faviconUrl ? (
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/5">
-              <img src={faviconUrl} alt="" className="h-5 w-5 object-contain" width={20} height={20} />
+      <div className="flex min-h-0 flex-1 flex-col justify-between">
+        <div className="min-h-0 shrink-0 space-y-3">
+          <div className="flex shrink-0 items-center justify-between gap-2">
+            <div className="flex min-w-0 flex-1 items-center gap-2">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/5">
+                {faviconUrl ? (
+                  <img src={faviconUrl} alt="" className="h-5 w-5 object-contain" width={20} height={20} />
+                ) : (
+                  <span className="text-[10px] font-semibold text-white/40">{client.name.charAt(0)}</span>
+                )}
+              </span>
+              <h3 className="truncate text-sm font-semibold leading-tight text-white/95">{client.name}</h3>
+            </div>
+            <span className="text-white/35 transition-colors group-hover:text-white/70" aria-hidden>
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
             </span>
-          ) : null}
-          <h3 className="truncate text-sm font-semibold leading-tight text-white/95">{client.name}</h3>
-        </div>
-        <span className="text-white/35 transition-colors group-hover:text-white/70" aria-hidden>
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
-        </span>
-      </div>
-
-      <div className="mt-3">
-        <ClientStateBadge bucket={bucket} />
-      </div>
-
-      <div className="mt-3 flex flex-wrap items-end gap-x-2 gap-y-0.5">
-        <span className="text-4xl font-extrabold tabular-nums tracking-tight text-white">{hasData ? score : "—"}</span>
-        {hasData && delta !== 0 && (
-          <span className={cn("text-xs font-semibold tabular-nums", delta > 0 ? "text-authority-dominant" : "text-authority-losing")}>
-            {delta > 0 ? "+" : ""}
-            {delta} vs last
-          </span>
-        )}
-      </div>
-
-      <div className="mt-4 space-y-1.5 border-t border-white/[0.06] pt-3 text-xs">
-        <p className="text-white/45">
-          Weakest: <span className="font-medium text-white/85">{weakest}</span>
-        </p>
-        <p className="text-white/45">
-          Displaced by:{" "}
-          <span className="font-medium text-white/85">{d ?? "—"}</span>
-        </p>
-        {!hasData && (
-          <div className="pt-1 space-y-0.5 text-[11px] text-text-3">
-            <p>No data yet</p>
-            <p>Run snapshot to generate analysis</p>
           </div>
-        )}
+
+          <div className="min-h-[1.5rem]">
+            <ClientStateBadge bucket={bucket} />
+          </div>
+
+          <div className="flex h-[3.25rem] items-end justify-between gap-2">
+            <span className="text-4xl font-extrabold tabular-nums leading-none tracking-tight text-white">
+              {hasData ? client.latestScore : "—"}
+            </span>
+            <span
+              className={cn(
+                "max-w-[5.5rem] shrink-0 text-right text-[11px] font-semibold leading-tight tabular-nums",
+                !hasData && "text-transparent",
+                hasData && deltaTone === "up" && "text-authority-dominant",
+                hasData && deltaTone === "down" && "text-authority-losing",
+                hasData && deltaTone === "neutral" && "text-text-3"
+              )}
+            >
+              {deltaLine}
+            </span>
+          </div>
+        </div>
+
+        <div className="shrink-0 border-t border-white/[0.06] pt-3">
+          <div className="space-y-1.5 text-xs">
+            <p className="text-white/45">
+              Weakest: <span className="font-medium text-white/85">{weakest}</span>
+            </p>
+            <p className="text-white/45">
+              Displaced by: <span className="font-medium text-white/85">{d ?? "—"}</span>
+            </p>
+          </div>
+          <p className="mt-2 h-4 truncate text-[10px] leading-4">
+            {!hasData ? (
+              <span className="text-text-3">Run snapshot to generate data</span>
+            ) : (
+              <span className="invisible select-none" aria-hidden>
+                &nbsp;
+              </span>
+            )}
+          </p>
+        </div>
       </div>
     </button>
   );
@@ -360,9 +393,9 @@ function ClientCard({ client }: { client: ClientWithStats }) {
 function ClientCardsGrid({ clients }: { clients: ClientWithStats[] }) {
   return (
     <section id="clients-overview">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {clients.map((client) => (
-          <div key={client.id} className="relative">
+          <div key={client.id} className="relative flex h-full min-h-0">
             <ClientCard client={client} />
           </div>
         ))}
