@@ -1624,6 +1624,34 @@ const MINI_INNER_W = MINI_TRAJ_W - MINI_PAD.left - MINI_PAD.right;
 const MINI_INNER_H = MINI_TRAJ_H - MINI_PAD.top - MINI_PAD.bottom;
 
 /** Compact 7D authority trajectory for hero — mirrors main chart logic, no controls. */
+/** Interpretive copy for evidence (charts) section — verdict + driver. */
+function getEvidenceVerdict(
+  snapshots: SnapshotRow[],
+  providers: [string, number][]
+): { title: string; sub: string } {
+  const ranged = getSnapshots7d(snapshots);
+  const { scores } = getChartSeriesForFilter(ranged, "all");
+  const sortedAsc = [...providers].sort((a, b) => a[1] - b[1]);
+  const weakest = sortedAsc[0] ? getProviderDisplayName(sortedAsc[0][0]) : "your weakest channel";
+  if (scores.length < 2) {
+    return {
+      title: "Trend unavailable",
+      sub: `Add snapshots to confirm movement. Leading risk: ${weakest}.`,
+    };
+  }
+  const trajDelta = scores[scores.length - 1]! - scores[0]!;
+  if (trajDelta < -3) {
+    return { title: "You are losing ground", sub: `Decline driven by ${weakest} weakness.` };
+  }
+  if (trajDelta > 3) {
+    return { title: "You are closing the gap", sub: `Sustain execution on ${weakest} to lock in lift.` };
+  }
+  return {
+    title: "Trajectory is flat",
+    sub: `${weakest} still caps upside — prioritize that channel.`,
+  };
+}
+
 function HeroMiniTrajectory({ snapshots }: { snapshots: SnapshotRow[] }) {
   const ranged = useMemo(() => getSnapshots7d(snapshots), [snapshots]);
   const { scores, dates } = useMemo(() => getChartSeriesForFilter(ranged, "all"), [ranged]);
@@ -1701,7 +1729,16 @@ function HeroMiniTrajectory({ snapshots }: { snapshots: SnapshotRow[] }) {
   );
 }
 
-function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embedded?: boolean }) {
+function BigTrendChart({
+  snapshots,
+  embedded,
+  minimalHeader,
+}: {
+  snapshots: SnapshotRow[];
+  embedded?: boolean;
+  /** Hide in-chart narrative when parent supplies section interpretation */
+  minimalHeader?: boolean;
+}) {
   const [filter, setFilter] = useState<typeof CHART_FILTERS[number]>("all");
   const [timeRange, setTimeRange] = useState<(typeof CHART_RANGES)[number]["key"]>("7d");
   const [expanded, setExpanded] = useState(false);
@@ -1816,12 +1853,14 @@ function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embe
   if (scores.length < 2) {
     return (
       <div className={chartShell}>
-        <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            {!embedded && <h3 className="text-base font-semibold tracking-tight text-text">Authority Trajectory</h3>}
-            <p className={cn("max-w-xl text-sm leading-relaxed text-text-2", !embedded && "mt-1")}>{trajectoryNote}</p>
-          </div>
-          <div className="flex w-full max-w-md shrink-0 flex-col gap-1.5 lg:w-[min(100%,420px)]">
+        <div className={cn("mb-3 flex flex-wrap items-start justify-between gap-3", minimalHeader && "justify-end")}>
+          {!minimalHeader && (
+            <div className="min-w-0 flex-1">
+              {!embedded && <h3 className="text-base font-semibold tracking-tight text-text">Authority Trajectory</h3>}
+              <p className={cn("max-w-xl text-sm leading-relaxed text-text-2", !embedded && "mt-1")}>{trajectoryNote}</p>
+            </div>
+          )}
+          <div className={cn("flex w-full shrink-0 flex-col gap-1.5", minimalHeader ? "max-w-full md:max-w-full" : "max-w-md lg:w-[min(100%,420px)]")}>
             <div className="flex items-center justify-between gap-2">
               {rangeControl}
               {expandButton}
@@ -1914,13 +1953,15 @@ function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embe
 
   return (
     <div className={chartShell}>
-      <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          {!embedded && <h3 className="text-base font-semibold tracking-tight text-text">Authority Trajectory</h3>}
-          <p className={cn("mb-1 text-xs font-semibold uppercase tracking-[0.12em]", trendBadge.tone)}>{trendBadge.label}</p>
-          <p className={cn("max-w-xl text-sm leading-relaxed text-text-2", !embedded && "mt-1")}>{trajectoryNote}</p>
-        </div>
-        <div className="flex w-full max-w-md shrink-0 flex-col gap-1.5 lg:w-[min(100%,420px)]">
+      <div className={cn("mb-3 flex flex-wrap items-start justify-between gap-3", minimalHeader && "justify-end")}>
+        {!minimalHeader && (
+          <div className="min-w-0 flex-1">
+            {!embedded && <h3 className="text-base font-semibold tracking-tight text-text">Authority Trajectory</h3>}
+            <p className={cn("mb-1 text-xs font-semibold uppercase tracking-[0.12em]", trendBadge.tone)}>{trendBadge.label}</p>
+            <p className={cn("max-w-xl text-sm leading-relaxed text-text-2", !embedded && "mt-1")}>{trajectoryNote}</p>
+          </div>
+        )}
+        <div className={cn("flex w-full shrink-0 flex-col gap-1.5", minimalHeader ? "max-w-full md:max-w-full" : "max-w-md lg:w-[min(100%,420px)]")}>
           <div className="flex items-center justify-between gap-2">
             {rangeControl}
             {expandButton}
@@ -1986,17 +2027,29 @@ function BigTrendChart({ snapshots, embedded }: { snapshots: SnapshotRow[]; embe
   );
 }
 
-/* Sentiment label from score delta / level */
-function getSentiment(score: number | null, delta: number | null): { label: "Positive" | "Neutral" | "Negative"; change: string } {
-  if (score == null) return { label: "Neutral", change: "—" };
-  if (delta == null) return { label: score >= 60 ? "Positive" : score >= 40 ? "Neutral" : "Negative", change: "—" };
-  if (delta > 0) return { label: "Positive", change: `+${delta} pts` };
-  if (delta < 0) return { label: "Negative", change: `${delta} pts` };
-  return { label: "Neutral", change: "0 pts" };
+function getHeroVerdictLines(
+  score: number | null,
+  providers: [string, number][],
+  detail: SnapshotDetailResponse | null,
+  clientName: string
+): { headline: string; subline: string } {
+  const sortedAsc = [...providers].sort((a, b) => a[1] - b[1]);
+  const weakest = sortedAsc.length > 0 ? getProviderDisplayName(sortedAsc[0]![0]) : null;
+  const top = detail?.summary?.top_competitors?.[0]?.name?.trim() ?? null;
+  if (score == null || !weakest) {
+    return {
+      headline: "Run a snapshot to expose displacement risk",
+      subline: "The system needs a completed read to name who is taking your recommendation share.",
+    };
+  }
+  return {
+    headline: `${weakest} failure is driving displacement`,
+    subline: top ? `${top} is replacing you in AI answers` : `${clientName} is losing ground in tracked AI answers.`,
+  };
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   HERO — command center: score + tools | mini trajectory + position ring, risk, status strip
+   HERO — verdict (state + score + headline) | signal (mini charts)
 ═══════════════════════════════════════════════════════════════════════════ */
 function HeroSection({
   client,
@@ -2031,95 +2084,93 @@ function HeroSection({
   const logoSrc = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=48` : null;
   const { label: statusLabel } = getScoreLabel(score);
   const delta = score != null && previousScore != null ? score - previousScore : null;
-  const diagnosis = getVerdictSentence(score, providers, detail);
-  const sortedDesc = [...providers].sort((a, b) => b[1] - a[1]);
-  const sortedAsc = [...providers].sort((a, b) => a[1] - b[1]);
-  const weakestModelLabel = sortedAsc.length > 0 ? getProviderDisplayName(sortedAsc[0]![0]) : "Insufficient data";
-  const strongestModelLabel = sortedDesc.length > 0 ? getProviderDisplayName(sortedDesc[0]![0]) : null;
-  const topCompetitorNames = (detail?.summary?.top_competitors ?? [])
-    .slice(0, 2)
-    .map((c) => c.name.trim())
-    .filter(Boolean);
-  const displacerPhrase =
-    topCompetitorNames.length >= 2
-      ? `${topCompetitorNames[0]} and ${topCompetitorNames[1]}`
-      : topCompetitorNames.length === 1
-        ? topCompetitorNames[0]!
-        : "key competitors";
-  const riskLine1 = `${displacerPhrase} are taking more recommendation share than ${client.name} in tracked AI answers.`;
-  const riskLine2 = `${weakestModelLabel} is the critical weakness — it is elevating displacement risk.`;
-  const riskLine3 = strongestModelLabel
-    ? `Fastest recovery path: ${strongestModelLabel} — double down while you fix the weak channel.`
-    : "Rebalance toward your strongest model channel while you close gaps on the weakest.";
+  const { headline, subline } = getHeroVerdictLines(score, providers, detail, client.name);
 
   return (
-    <section className="w-full border-b border-white/[0.08] pb-6">
-      <div className="flex items-start gap-3">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08]">
+    <section className="w-full border-b border-white/[0.08] pb-5">
+      <div className="flex items-start justify-between gap-3 border-b border-white/[0.06] pb-3">
+        <div className="flex min-w-0 items-center gap-2.5">
           {logoSrc ? (
-            <img src={logoSrc} alt="" className="h-8 w-8 object-contain" width={32} height={32} />
-          ) : (
-            <span className="text-lg font-bold text-text-3">{client.name.charAt(0)}</span>
-          )}
-        </div>
-        <div className="min-w-0 flex-1">
-          <h1 className="text-xl font-semibold tracking-tight text-text md:text-2xl">{client.name}</h1>
-          <p className="text-sm text-text-2">{domain || client.website || "—"}</p>
-          <div className="mt-2">
-            <span
-              className={cn(
-                "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider",
-                getAuthorityStatusTone(score)
-              )}
-            >
-              {statusLabel}
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08]">
+              <img src={logoSrc} alt="" className="h-6 w-6 object-contain" width={24} height={24} />
             </span>
+          ) : (
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-white/[0.08] text-sm font-bold text-text-3">
+              {client.name.charAt(0)}
+            </span>
+          )}
+          <div className="min-w-0">
+            <h1 className="truncate text-base font-semibold tracking-tight text-text md:text-lg">{client.name}</h1>
+            <p className="truncate text-xs text-text-2">{domain || client.website || "—"}</p>
           </div>
         </div>
+        <span className="text-text-3" aria-hidden>
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </span>
       </div>
 
-      <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start lg:gap-8">
+      <div className="mt-4 grid grid-cols-1 gap-5 lg:grid-cols-12 lg:items-start lg:gap-6">
         <div className="space-y-3 lg:col-span-7">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-3">AI Authority Index</p>
-          <div className="flex flex-wrap items-end gap-x-2 gap-y-2">
-            <span className="text-6xl font-extrabold tabular-nums tracking-tight text-text md:text-7xl">{score ?? "—"}</span>
-            {delta !== null && (
-              <span
-                className={cn(
-                  "rounded px-1.5 py-0.5 text-[11px] font-bold tabular-nums tracking-wide",
-                  delta > 0
-                    ? "bg-authority-dominant/15 text-authority-dominant"
-                    : delta < 0
-                      ? "bg-authority-losing/15 text-authority-losing"
-                      : "bg-white/[0.1] text-text-2"
+          <span
+            className={cn(
+              "inline-flex rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em]",
+              getAuthorityStatusTone(score)
+            )}
+          >
+            {statusLabel}
+          </span>
+
+          <div className="flex flex-wrap items-end gap-x-3 gap-y-1">
+            <span className="text-5xl font-extrabold tabular-nums tracking-tight text-text md:text-6xl">{score ?? "—"}</span>
+            {delta !== null && delta !== 0 && (
+              <span className="flex items-center gap-1.5 tabular-nums">
+                {delta < 0 ? (
+                  <span className="text-xl font-bold text-authority-losing" aria-hidden>
+                    ↓
+                  </span>
+                ) : (
+                  <span className="text-xl font-bold text-authority-dominant" aria-hidden>
+                    ↑
+                  </span>
                 )}
-              >
-                {delta > 0 ? "+" : ""}
-                {delta} vs last
+                <span
+                  className={cn(
+                    "text-lg font-bold",
+                    delta > 0 ? "text-authority-dominant" : delta < 0 ? "text-authority-losing" : "text-text-2"
+                  )}
+                >
+                  {delta > 0 ? "+" : ""}
+                  {delta}
+                </span>
               </span>
             )}
-            <div className="flex flex-wrap items-center gap-2">
-              <RunSnapshotButton
-                running={running}
-                snapshotStatus={snapshotStatus}
-                onRunSnapshot={runSnapshot}
-                className="!rounded-md !border !border-white/15 !bg-white/[0.06] !px-2.5 !py-1 !text-xs !font-semibold hover:!border-white/25 hover:!bg-white/10"
-              />
-              {snapshotId && (
-                <div className="[&_button]:!rounded-md [&_button]:!px-2.5 [&_button]:!py-1 [&_button]:!text-xs [&_button]:!font-semibold">
-                  <DownloadPdfButton snapshotId={snapshotId} variant="compact" label="Download" />
-                </div>
-              )}
-            </div>
           </div>
-          <p className="max-w-xl text-sm leading-relaxed text-text-2">{diagnosis}</p>
+
+          <p className="text-base font-semibold leading-snug text-text md:text-lg">{headline}</p>
+          <p className="max-w-xl text-sm leading-relaxed text-text-2">{subline}</p>
+
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <RunSnapshotButton
+              running={running}
+              snapshotStatus={snapshotStatus}
+              onRunSnapshot={runSnapshot}
+              className="!rounded-md !border !border-white/15 !bg-white/[0.06] !px-2.5 !py-1 !text-xs !font-semibold hover:!border-white/25 hover:!bg-white/10"
+            />
+            {snapshotId && (
+              <div className="[&_button]:!rounded-md [&_button]:!px-2.5 [&_button]:!py-1 [&_button]:!text-xs [&_button]:!font-semibold">
+                <DownloadPdfButton snapshotId={snapshotId} variant="compact" label="Download" />
+              </div>
+            )}
+          </div>
           <div className="[&_label]:text-[11px] [&_label]:text-text-3 [&_select]:py-1 [&_select]:text-xs">
             <SnapshotSelector snapshots={snapshots} selectedId={selectedSnapshotId} onSelect={onSelectSnapshotId} />
           </div>
         </div>
 
         <div className="lg:col-span-5">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             <HeroMiniTrajectory snapshots={snapshots} />
             <AIAnswerMarketShareChart
               clientName={client.name}
@@ -2130,17 +2181,6 @@ function HeroSection({
           </div>
         </div>
       </div>
-
-      <div className="mt-5 border-t border-white/[0.06] pt-4">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-authority-watchlist/90">AI competitive risk detected</p>
-        <p className="mt-2 max-w-4xl text-sm leading-relaxed text-text-2">
-          <span>{riskLine1} </span>
-          <span className="text-authority-watchlist">{riskLine2} </span>
-          <span>{riskLine3}</span>
-        </p>
-      </div>
-
-      <StatusBarStrip providers={providers} score={score} delta={delta} />
     </section>
   );
 }
@@ -2175,6 +2215,7 @@ function AIAnswerMarketShareChart({
   snapshotStatus,
   gapTrendDelta,
   compact,
+  sideBySide,
 }: {
   clientName: string;
   detail: SnapshotDetailResponse | null;
@@ -2184,6 +2225,8 @@ function AIAnswerMarketShareChart({
   gapTrendDelta?: number | null;
   /** Hero mini ring — no list, smaller footprint */
   compact?: boolean;
+  /** Evidence layout: donut + explicit share list beside */
+  sideBySide?: boolean;
 }) {
   const rows = useMemo(() => {
     if (!detail?.summary) return [];
@@ -2274,6 +2317,8 @@ function AIAnswerMarketShareChart({
 
   const wrapClass = compact ? "relative h-[132px] w-[132px]" : "relative h-[170px] w-[170px]";
 
+  const shareGap =
+    clientRow && topCompetitor ? Math.max(0, topCompetitor.share - clientRow.share) : null;
   const gapLine =
     gapTrendDelta != null
       ? gapTrendDelta > 0
@@ -2281,119 +2326,94 @@ function AIAnswerMarketShareChart({
         : gapTrendDelta < 0
           ? `Losing ground: +${Math.abs(gapTrendDelta)}% gap to leader`
           : "Stalled vs leader"
-      : clientRow && topCompetitor
-        ? `Trailing leader by ${Math.max(0, topCompetitor.share - clientRow.share)}%`
+      : shareGap != null
+        ? `Trailing leader by ${shareGap}%`
         : "Leader gap unavailable";
+
+  const donutBlock = (
+    <div className="grid place-items-center shrink-0">
+      <div className={wrapClass}>
+        <svg viewBox={`0 0 ${donutSize} ${donutSize}`} className="-rotate-90 h-full w-full" aria-hidden>
+          <circle
+            cx={donutSize / 2}
+            cy={donutSize / 2}
+            r={radius}
+            fill="none"
+            stroke="rgba(255,255,255,0.06)"
+            strokeWidth={strokeWidth}
+          />
+          {slices}
+        </svg>
+        <div className="absolute inset-0 grid place-items-center">
+          <div className="text-center">
+            <p className={cn("font-semibold tabular-nums text-text", compact ? "text-lg" : "text-2xl")}>{clientRow ? `#${clientRow.rank}` : "—"}</p>
+            <p className={cn("tabular-nums text-text-2", compact ? "mt-0 text-xs" : "mt-0.5 text-sm")}>{clientRow ? `${clientRow.share}%` : "—"}</p>
+            {!compact && !sideBySide && (
+              <p className="mt-1 max-w-[120px] text-[10px] leading-snug text-text-3">{gapLine}</p>
+            )}
+            {compact && (
+              <p className="mt-0.5 max-w-[100px] text-[9px] leading-tight text-text-3">{gapLine}</p>
+            )}
+          </div>
+        </div>
+      </div>
+      {!compact && sideBySide && (
+        <p className="mt-2 max-w-[160px] text-center text-[11px] leading-snug text-text-2">{gapLine}</p>
+      )}
+    </div>
+  );
+
+  const shareList = (
+    <ul className={cn("min-w-0 flex-1 space-y-1.5", sideBySide && "pt-1")}>
+      {rows.map((row, i) => (
+        <li key={row.name} className="flex items-center justify-between gap-3 text-sm">
+          <div className="flex min-w-0 items-center gap-2">
+            <span
+              className="h-2 w-2 shrink-0 rounded-full"
+              style={{
+                backgroundColor: row.isClient ? "rgba(245,158,11,0.95)" : row.isLeader ? neutral[0] : neutral[Math.min(i, neutral.length - 1)],
+              }}
+            />
+            <span className={cn("truncate", row.isClient ? "font-semibold text-text" : "text-text-2")}>
+              {normalizeBrandName(row.name)}
+              {row.isClient ? " (You)" : ""}
+            </span>
+          </div>
+          <span className={cn("shrink-0 tabular-nums", row.isClient ? "font-semibold text-text" : "text-text-3")}>{row.share}%</span>
+        </li>
+      ))}
+    </ul>
+  );
 
   return (
     <div className={cn("space-y-2", compact && "space-y-0")}>
       {compact && (
         <p className="mb-1 text-[9px] font-semibold uppercase tracking-wider text-text-3">Position ring</p>
       )}
-      <div className="grid place-items-center">
-        <div className={wrapClass}>
-          <svg viewBox={`0 0 ${donutSize} ${donutSize}`} className="-rotate-90 h-full w-full" aria-hidden>
-            <circle
-              cx={donutSize / 2}
-              cy={donutSize / 2}
-              r={radius}
-              fill="none"
-              stroke="rgba(255,255,255,0.06)"
-              strokeWidth={strokeWidth}
-            />
-            {slices}
-          </svg>
-          <div className="absolute inset-0 grid place-items-center">
-            <div className="text-center">
-              <p className={cn("font-semibold tabular-nums text-text", compact ? "text-lg" : "text-2xl")}>{clientRow ? `#${clientRow.rank}` : "—"}</p>
-              <p className={cn("tabular-nums text-text-2", compact ? "mt-0 text-xs" : "mt-0.5 text-sm")}>{clientRow ? `${clientRow.share}%` : "—"}</p>
-              {!compact && (
-                <p className="mt-1 max-w-[120px] text-[10px] leading-snug text-text-3">{gapLine}</p>
-              )}
-              {compact && (
-                <p className="mt-0.5 max-w-[100px] text-[9px] leading-tight text-text-3">{gapLine}</p>
-              )}
-            </div>
-          </div>
+      {!compact && sideBySide ? (
+        <div className="flex flex-col items-stretch gap-5 sm:flex-row sm:items-start sm:gap-8">
+          {donutBlock}
+          {shareList}
         </div>
-      </div>
-      {!compact && (
+      ) : (
         <>
-          <ul className="space-y-1.5">
-            {rows.slice(0, 4).map((row, i) => (
-              <li key={row.name} className="flex items-center justify-between gap-2 text-xs">
-                <div className="flex min-w-0 items-center gap-2">
-                  <span
-                    className="h-2 w-2 shrink-0 rounded-full"
-                    style={{ backgroundColor: row.isClient ? "rgba(245,158,11,0.95)" : row.isLeader ? neutral[0] : neutral[Math.min(i, neutral.length - 1)] }}
-                  />
-                  <span className={cn("truncate", row.isClient ? "font-semibold text-text" : "text-text-2")}>
-                    {normalizeBrandName(row.name)}
-                    {row.isClient ? " (You)" : ""}
-                  </span>
-                </div>
-                <span className={cn("tabular-nums", row.isClient ? "font-semibold text-text" : "text-text-3")}>{row.share}%</span>
-              </li>
-            ))}
-          </ul>
-          <p className="text-center text-xs text-text-3">
-            {gapTrendDelta != null
-              ? gapTrendDelta > 0
-                ? `Closing gap: -${Math.abs(gapTrendDelta)}% vs leader`
-                : gapTrendDelta < 0
-                  ? `Losing ground: +${Math.abs(gapTrendDelta)}% gap to leader`
-                  : "Stalled vs leader"
-              : "Run another snapshot to assess gap direction."}
-          </p>
+          {donutBlock}
+          {!compact && (
+            <>
+              {shareList}
+              <p className="text-center text-xs text-text-3">
+                {gapTrendDelta != null
+                  ? gapTrendDelta > 0
+                    ? `Closing gap: -${Math.abs(gapTrendDelta)}% vs leader`
+                    : gapTrendDelta < 0
+                      ? `Losing ground: +${Math.abs(gapTrendDelta)}% gap to leader`
+                      : "Stalled vs leader"
+                  : "Run another snapshot to assess gap direction."}
+              </p>
+            </>
+          )}
         </>
       )}
-    </div>
-  );
-}
-
-/** Inline status strip (replaces Quick read grid). */
-function StatusBarStrip({
-  providers,
-  score,
-  delta,
-}: {
-  providers: [string, number][];
-  score: number | null;
-  delta: number | null;
-}) {
-  const sorted = [...providers].sort((a, b) => b[1] - a[1]);
-  const gapToLeader = sorted.length > 0 ? 100 - (sorted[0]?.[1] ?? 0) : null;
-  const weakest = sorted.length > 0 ? sorted[sorted.length - 1] : null;
-  const sentiment = getSentiment(score, delta);
-  return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-white/[0.06] pt-3 text-[11px] text-text-2">
-      <span>
-        Gap:{" "}
-        <span className="font-medium tabular-nums text-text">{gapToLeader != null ? `${gapToLeader} pts` : "—"}</span>
-      </span>
-      <span className="text-white/15" aria-hidden>
-        |
-      </span>
-      <span>
-        Weakest:{" "}
-        <span className="font-medium text-text">{weakest ? getProviderDisplayName(weakest[0]) : "—"}</span>
-      </span>
-      <span className="text-white/15" aria-hidden>
-        |
-      </span>
-      <span>
-        Sentiment:{" "}
-        <span
-          className={cn(
-            "font-medium",
-            sentiment.label === "Positive" && "text-authority-dominant",
-            sentiment.label === "Negative" && "text-authority-losing",
-            sentiment.label === "Neutral" && "text-text"
-          )}
-        >
-          {sentiment.label}
-        </span>
-      </span>
     </div>
   );
 }
@@ -2536,7 +2556,7 @@ function WhatIsWrongSection({
   return (
     <DashboardSection
       title="Model channels & execution"
-      subtitle="Per-model score, issue, and recommended action — open detail for evidence and quick wins."
+      subtitle="Diagnosis by model — expand for evidence. Collapsed by default."
     >
       <div>
         <div className="divide-y divide-white/[0.06]">
@@ -2661,7 +2681,7 @@ function VulnerabilityRow({
   const trendColor = delta != null ? (delta >= 0 ? CHART_COLORS.dominant : CHART_COLORS.losing) : "#94a3b8";
   return (
     <div className="group">
-      <div className="grid w-full grid-cols-1 gap-1.5 py-2 md:grid-cols-[minmax(0,1.4fr)_auto_auto_minmax(0,1fr)_auto_auto] md:items-center md:gap-3">
+      <div className="grid w-full grid-cols-1 gap-1.5 py-1.5 md:grid-cols-[minmax(0,1.4fr)_auto_auto_minmax(0,1fr)_auto_auto] md:items-center md:gap-2.5">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08]">
             <img src={logoUrl} alt="" className="h-6 w-6 object-contain" width={24} height={24} />
@@ -2715,9 +2735,9 @@ function VulnerabilityRow({
       </div>
       <div className="pb-1.5">
         <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Issue</p>
-        <p className="mt-0.5 text-[15px] leading-relaxed text-text-2">{primaryIssue}</p>
+        <p className="mt-0.5 text-base font-medium leading-snug text-text-2">{primaryIssue}</p>
         <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Recommended action</p>
-        <p className="mt-0.5 text-[15px] leading-relaxed text-text">{primaryAction}</p>
+        <p className="mt-0.5 text-sm font-medium leading-snug text-text">{primaryAction}</p>
       </div>
       <div
         className="grid transition-[grid-template-rows] duration-200 ease-out"
@@ -2787,7 +2807,7 @@ function ExecutionPriorities({
   }
 
   function actionBullets(action: string): string[] {
-    const parts = action.split(/(?<=[.!])\s+/).filter(Boolean).map(s => s.trim()).slice(0, 3);
+    const parts = action.split(/(?<=[.!])\s+/).filter(Boolean).map(s => s.trim()).slice(0, 2);
     const raw = parts.length > 0 ? parts : [action];
     return raw.map((b) =>
       b
@@ -2812,7 +2832,10 @@ function ExecutionPriorities({
   return (
     <ul className="space-y-3">
       {top3.map((insight, idx) => (
-        <li key={idx} className="border-b border-white/[0.06] pb-3 last:border-0 last:pb-0">
+        <li
+          key={idx}
+          className="rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-3"
+        >
           <div className="flex flex-wrap items-center gap-2">
             <span
               className={cn(
@@ -3693,6 +3716,12 @@ export default function ClientDetailPage() {
   const providers: [string, number][] = selectedSnapshot?.score_by_provider
     ? Object.entries(selectedSnapshot.score_by_provider)
     : [];
+  const evidenceVerdict = useMemo(() => {
+    const p: [string, number][] = selectedSnapshot?.score_by_provider
+      ? Object.entries(selectedSnapshot.score_by_provider)
+      : [];
+    return getEvidenceVerdict(snapshots, p);
+  }, [snapshots, selectedSnapshot?.score_by_provider, selectedSnapshotId]);
 
   return (
     <div className="min-h-screen pb-20 md:pb-0">
@@ -3770,32 +3799,10 @@ export default function ClientDetailPage() {
             />
 
             <DashboardSection
-              title="Competitive Position"
-              className="pt-4"
-              subtitle="Where you stand right now and where you are trending."
-            >
-              <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-12 lg:gap-6">
-                <div className="lg:col-span-8">
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Authority Field</p>
-                  <BigTrendChart snapshots={snapshots} embedded />
-                </div>
-                <div className="lg:col-span-4">
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Position Ring</p>
-                  <AIAnswerMarketShareChart
-                    clientName={client.name}
-                    detail={snapshotDetail}
-                    onRunSnapshot={runSnapshot}
-                    running={running}
-                    snapshotStatus={selectedSnapshot?.status ?? null}
-                    gapTrendDelta={selectedSnapshot?.vrtl_score != null && previousSnapshot?.vrtl_score != null ? selectedSnapshot.vrtl_score - previousSnapshot.vrtl_score : null}
-                  />
-                </div>
-              </div>
-            </DashboardSection>
-
-            <DashboardSection
               title="What to Fix Now"
-              subtitle="Highest-impact moves — bullets only, tied to estimated upside."
+              subtitle="Action-first — max two moves per card, tied to upside."
+              noTopRule
+              className="pt-4"
             >
               <ExecutionPriorities
                 score={selectedSnapshot?.vrtl_score ?? null}
@@ -3803,6 +3810,29 @@ export default function ClientDetailPage() {
                 competitors={competitors}
                 detail={snapshotDetail}
               />
+            </DashboardSection>
+
+            <DashboardSection title={evidenceVerdict.title} subtitle={evidenceVerdict.sub}>
+              <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12 lg:gap-8">
+                <div className="lg:col-span-7">
+                  <BigTrendChart snapshots={snapshots} embedded minimalHeader />
+                </div>
+                <div className="lg:col-span-5">
+                  <AIAnswerMarketShareChart
+                    clientName={client.name}
+                    detail={snapshotDetail}
+                    onRunSnapshot={runSnapshot}
+                    running={running}
+                    snapshotStatus={selectedSnapshot?.status ?? null}
+                    gapTrendDelta={
+                      selectedSnapshot?.vrtl_score != null && previousSnapshot?.vrtl_score != null
+                        ? selectedSnapshot.vrtl_score - previousSnapshot.vrtl_score
+                        : null
+                    }
+                    sideBySide
+                  />
+                </div>
+              </div>
             </DashboardSection>
 
             <WhatIsWrongSection

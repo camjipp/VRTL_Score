@@ -9,6 +9,7 @@ import { TopBar } from "@/components/TopBar";
 import { ensureOnboarded } from "@/lib/onboard";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { cn } from "@/lib/cn";
+import { Badge } from "@/components/ui/Badge";
 
 type ModelFamily = "chatgpt" | "gemini" | "claude";
 type ProviderFamilyScores = Partial<Record<ModelFamily, number>>;
@@ -141,6 +142,35 @@ function getAuthorityStateBar(state: AuthorityState): string {
   return "border-l-authority-losing";
 }
 
+type TriageBucket = "losing" | "watchlist" | "stable" | "dominant";
+
+function triageBucket(c: ClientWithStats): TriageBucket {
+  const s = getAuthorityState(c);
+  if (s === "Losing Ground") return "losing";
+  if (s === "Watchlist") return "watchlist";
+  if (s === "Stable") return "stable";
+  return "dominant";
+}
+
+function triageOrder(c: ClientWithStats): number {
+  const b = triageBucket(c);
+  if (b === "losing") return 0;
+  if (b === "watchlist") return 1;
+  if (b === "stable") return 2;
+  return 3;
+}
+
+function riskBorderClass(c: ClientWithStats): string {
+  const b = triageBucket(c);
+  if (b === "losing") {
+    return "border-authority-losing/40 shadow-[0_0_22px_-8px_rgba(239,68,68,0.45)]";
+  }
+  if (b === "watchlist") {
+    return "border-authority-watchlist/45 shadow-[0_0_20px_-8px_rgba(245,158,11,0.35)]";
+  }
+  return "border-white/[0.06]";
+}
+
 function StatusPill({ state }: { state: AuthorityState }) {
   const dotClass =
     state === "Dominant" ? "bg-authority-dominant/90" :
@@ -195,90 +225,37 @@ function ModelDot({ model }: { model: string | null }) {
   return <span className={cn("mr-1.5 inline-block h-2 w-2 shrink-0 rounded-full", color)} aria-hidden />;
 }
 
-/* Portfolio strip: minimal inline filter row above client cards */
-function PortfolioStrip({
-  clients,
-  filterHealth,
-  onFilterChange,
-}: {
-  clients: ClientWithStats[];
-  filterHealth: "all" | "dominant" | "stable" | "watchlist" | "losing";
-  onFilterChange: (v: "all" | "dominant" | "stable" | "watchlist" | "losing") => void;
-}) {
-  const total = clients.length;
-  const dominantCount = clients.filter((c) => getAuthorityState(c) === "Dominant").length;
-  const stableCount = clients.filter((c) => getAuthorityState(c) === "Stable").length;
-  const watchlistCount = clients.filter((c) => getAuthorityState(c) === "Watchlist").length;
-  const losingCount = clients.filter((c) => getAuthorityState(c) === "Losing Ground").length;
-  const highestRisk = useMemo(() => {
-    return [...clients]
-      .filter((c) => getAuthorityState(c) === "Losing Ground" || getAuthorityState(c) === "Watchlist")
-      .map((c) => ({
-        client: c,
-        delta: c.latestScore !== null && c.previousScore !== null ? c.latestScore - c.previousScore : null,
-        gap: c.authorityGap ?? 0,
-      }))
-      .sort((a, b) => {
-        if (a.delta !== null && b.delta !== null && a.delta < 0 && b.delta >= 0) return -1;
-        if (a.delta !== null && b.delta !== null && a.delta >= 0 && b.delta < 0) return 1;
-        return b.gap - a.gap;
-      })[0] ?? null;
-  }, [clients]);
-
-  const pills: { id: "all" | "dominant" | "stable" | "watchlist" | "losing"; label: string; count: number }[] = [
-    { id: "all", label: "All", count: total },
-    { id: "dominant", label: "Dominant", count: dominantCount },
-    { id: "stable", label: "Stable", count: stableCount },
-    { id: "watchlist", label: "Watchlist", count: watchlistCount },
-    { id: "losing", label: "Losing", count: losingCount },
-  ];
-
+/** Read-only portfolio risk status (not a filter). */
+function RiskTriageStatusBar({ clients }: { clients: ClientWithStats[] }) {
+  const losing = clients.filter((c) => triageBucket(c) === "losing").length;
+  const watch = clients.filter((c) => triageBucket(c) === "watchlist").length;
+  const strong = clients.filter((c) => triageBucket(c) === "dominant" || triageBucket(c) === "stable").length;
   return (
-    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
-      {/* Left: count + filter pills */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <span className="text-sm font-medium tabular-nums text-white/80">
-          {total} active client{total === 1 ? "" : "s"}
+    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-white/[0.06] pb-4 text-sm font-medium text-white/90">
+      <span className="inline-flex items-center gap-1.5" title="Clients in losing ground state">
+        <span aria-hidden>🚨</span>
+        <span>
+          {losing} Client{losing === 1 ? "" : "s"} Losing Ground
         </span>
-        <div className="flex flex-wrap items-center gap-1.5">
-          {pills.map(({ id, label, count }) => {
-            const active = filterHealth === id;
-            return (
-              <button
-                key={id}
-                type="button"
-                onClick={() => onFilterChange(id)}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-app border border-white/[0.08] px-2 py-1 text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-white/15",
-                  active
-                    ? "bg-white/10 text-white/95"
-                    : "bg-transparent text-white/50 hover:text-white/75"
-                )}
-              >
-                <span className="tabular-nums">{count}</span>
-                <span>{label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Right: highest risk link */}
-      <div className="flex shrink-0 items-center">
-        {highestRisk ? (
-          <Link
-            href={`/app/clients/${highestRisk.client.id}`}
-            className="text-xs text-white/50 hover:text-white/75 transition-colors inline-flex items-center gap-1"
-          >
-            Highest risk: {highestRisk.client.name}
-            <svg className="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </Link>
-        ) : (
-          <span className="text-xs text-white/40">Highest risk: —</span>
-        )}
-      </div>
+      </span>
+      <span className="text-white/25" aria-hidden>
+        |
+      </span>
+      <span className="inline-flex items-center gap-1.5 text-authority-watchlist/95" title="Watchlist — needs attention">
+        <span aria-hidden>⚠️</span>
+        <span>
+          {watch === 0 ? "None on watchlist" : `${watch} client${watch === 1 ? "" : "s"} need attention`}
+        </span>
+      </span>
+      <span className="text-white/25" aria-hidden>
+        |
+      </span>
+      <span className="inline-flex items-center gap-1.5 text-authority-dominant/90" title="Dominant or stable">
+        <span aria-hidden>✅</span>
+        <span>
+          {strong} Strong
+        </span>
+      </span>
     </div>
   );
 }
@@ -292,54 +269,48 @@ function faviconDomain(website: string | null): string | null {
   }
 }
 
-const MODEL_FAMILIES_CHART: ModelFamily[] = ["chatgpt", "gemini", "claude"];
-const MODEL_LABELS: Record<ModelFamily, string> = { chatgpt: "GPT", gemini: "GEM", claude: "CLA" };
-
-/* Model Spread widget: "MODEL SPREAD" label + 3 rows (GPT, GEM, CLA) with score or "—" and 0–100 bar. */
-function ModelSpreadWidget({ modelScores }: { modelScores: ProviderFamilyScores | null }) {
-  const rows = MODEL_FAMILIES_CHART.map((family) => ({
-    family,
-    label: MODEL_LABELS[family],
-    score: modelScores?.[family] ?? null,
-  }));
-  const withScores = rows.filter((r) => r.score != null) as { family: ModelFamily; label: string; score: number }[];
-  const sorted = [...withScores].sort((a, b) => b.score - a.score);
-  const rankColor = (family: ModelFamily): string => {
-    const idx = sorted.findIndex((r) => r.family === family);
-    if (idx === -1) return "bg-white/20";
-    if (idx === 0) return "bg-authority-dominant/85";
-    if (idx === 1) return "bg-authority-watchlist/85";
-    return "bg-authority-losing/85";
-  };
+function ClientStateBadge({ bucket }: { bucket: TriageBucket }) {
+  if (bucket === "losing") {
+    return (
+      <Badge variant="danger" className="!rounded-md !px-2 !py-0.5 !text-[10px] !font-bold !uppercase !tracking-wide">
+        Losing Ground
+      </Badge>
+    );
+  }
+  if (bucket === "watchlist") {
+    return (
+      <Badge variant="warning" className="!rounded-md !px-2 !py-0.5 !text-[10px] !font-bold !uppercase !tracking-wide">
+        Watchlist
+      </Badge>
+    );
+  }
+  if (bucket === "stable") {
+    return (
+      <Badge variant="neutral" className="!rounded-md !px-2 !py-0.5 !text-[10px] !font-bold !uppercase !tracking-wide !text-sky-200">
+        Stable
+      </Badge>
+    );
+  }
   return (
-    <div className="w-full">
-      <div className="text-[10px] font-medium uppercase tracking-wider text-white/60">MODEL SPREAD</div>
-      <div className="mt-2.5 space-y-2 xl:space-y-3">
-        {rows.map(({ family, label, score }) => (
-          <div key={family} className="flex items-center gap-2">
-            <span className="w-8 shrink-0 text-[11px] font-medium text-white/70">{label}</span>
-            <span className="w-6 shrink-0 text-right text-xs tabular-nums text-white/90">{score != null ? score : "—"}</span>
-            <div className="min-w-0 flex-1 h-2 rounded-full bg-white/[0.06] overflow-hidden xl:h-2.5">
-              <div
-                className={cn("h-full rounded-full transition-all", rankColor(family))}
-                style={{ width: score != null ? `${Math.min(100, score)}%` : "0%" }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+    <Badge variant="success" className="!rounded-md !px-2 !py-0.5 !text-[10px] !font-bold !uppercase !tracking-wide">
+      Dominant
+    </Badge>
   );
 }
 
-/* Client card: strict vertical structure for all clients. Header → Score → Model Spread → Run Snapshot button. */
+/* Risk triage card: state-first, score + delta, weakest / displacer only */
 function ClientCard({ client }: { client: ClientWithStats }) {
   const router = useRouter();
   const [hover, setHover] = useState(false);
-  const hasScore = client.latestScore !== null;
-  const delta = hasScore && client.previousScore !== null ? client.latestScore! - client.previousScore! : null;
+  const hasData = client.latestScore !== null;
+  const score = hasData ? client.latestScore! : 0;
+  const delta =
+    client.latestScore !== null && client.previousScore !== null ? client.latestScore - client.previousScore : 0;
+  const bucket = triageBucket(client);
   const domain = faviconDomain(client.website);
   const faviconUrl = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=32` : null;
+  const weakest = client.worstModel ? displayModelName(client.worstModel) : "—";
+  const d = client.primaryDisplacer?.trim() || null;
 
   return (
     <button
@@ -347,69 +318,58 @@ function ClientCard({ client }: { client: ClientWithStats }) {
       onClick={() => router.push(`/app/clients/${client.id}`)}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      className="group relative flex w-full flex-col rounded-xl border border-white/[0.06] p-4 xl:p-5 text-left transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-white/10 aspect-square min-h-[220px] max-h-[280px] sm:min-h-0 sm:max-h-none hover:-translate-y-[3px]"
+      className={cn(
+        "group relative flex w-full flex-col rounded-xl border bg-[rgb(var(--surface))] p-4 text-left transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-white/10",
+        riskBorderClass(client),
+        hover && "hover:-translate-y-[2px]"
+      )}
       style={{
-        background: "radial-gradient(ellipse 80% 50% at 20% 10%, rgba(255,255,255,0.06) 0%, transparent 50%), linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 40%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02), transparent 70%), rgb(var(--surface))",
         boxShadow: hover
-          ? "0 0 0 1px rgba(255,255,255,0.08), 0 6px 16px rgba(0,0,0,0.22)"
-          : "0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 0 rgba(255,255,255,0.03), 0 2px 8px rgba(0,0,0,0.12)",
+          ? "0 8px 20px rgba(0,0,0,0.2)"
+          : undefined,
       }}
     >
-      {/* Header row: favicon + name (left), circular arrow (right) */}
       <div className="flex shrink-0 items-center justify-between gap-2">
-        <div className="flex min-w-0 flex-1 items-center gap-2.5">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
           {faviconUrl ? (
             <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/5">
               <img src={faviconUrl} alt="" className="h-5 w-5 object-contain" width={20} height={20} />
             </span>
           ) : null}
-          <h3 className="truncate text-sm font-medium leading-tight text-white/90">{client.name}</h3>
+          <h3 className="truncate text-sm font-semibold leading-tight text-white/95">{client.name}</h3>
         </div>
-        <span
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/5 text-white/25 transition-opacity duration-200 group-hover:text-white/80"
-          aria-hidden
-        >
+        <span className="text-white/35 transition-colors group-hover:text-white/70" aria-hidden>
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
           </svg>
         </span>
       </div>
 
-      {/* Score section: radial glow behind number, tighter score–delta spacing */}
-      <div className="mt-4 flex flex-wrap items-baseline gap-1">
-        <span
-          className="relative text-4xl font-bold tabular-nums tracking-tight text-white sm:text-5xl xl:text-6xl"
-          style={{ fontWeight: 800, letterSpacing: "-0.02em", textShadow: "0 0 24px rgba(255,255,255,0.08)" }}
-        >
-          {hasScore ? client.latestScore : "—"}
-        </span>
-        {hasScore && delta !== null && delta !== 0 && (
-          <span className={cn("text-xs tabular-nums opacity-90", delta > 0 ? "text-authority-dominant" : "text-authority-losing")}>
-            {delta > 0 ? "+" : ""}{delta} vs last
+      <div className="mt-3">
+        <ClientStateBadge bucket={bucket} />
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-end gap-x-2 gap-y-0.5">
+        <span className="text-4xl font-extrabold tabular-nums tracking-tight text-white">{hasData ? score : "—"}</span>
+        {hasData && delta !== 0 && (
+          <span className={cn("text-xs font-semibold tabular-nums", delta > 0 ? "text-authority-dominant" : "text-authority-losing")}>
+            {delta > 0 ? "+" : ""}
+            {delta} vs last
           </span>
         )}
       </div>
 
-      {/* Model Spread section: always present, bars 0 width when no data. Tighter spacing and bars on small. */}
-      <div className="mt-5 flex-1 min-h-0 xl:mt-6">
-        <ModelSpreadWidget modelScores={client.providerFamilyScores ?? null} />
-      </div>
-
-      {/* Bottom action: Run Snapshot. With data = muted glass; without = stronger contrast, subtle glow, scale on hover */}
-      <div className="mt-4 shrink-0 border-t border-white/5 pt-3 xl:mt-5 xl:pt-4">
-        <span
-          className={cn(
-            "flex h-12 w-full items-center justify-center rounded-app text-sm font-medium transition-all duration-200",
-            hasScore
-              ? "border border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white/90"
-              : "border border-white/20 bg-white/10 text-white/90 hover:bg-white/15 hover:scale-[1.02]"
-          )}
-          style={{
-            boxShadow: hasScore ? "none" : "0 0 0 1px rgba(255,255,255,0.06), 0 2px 8px rgba(0,0,0,0.08)",
-          }}
-        >
-          Run snapshot
-        </span>
+      <div className="mt-4 space-y-1.5 border-t border-white/[0.06] pt-3 text-xs">
+        <p className="text-white/45">
+          Weakest: <span className="font-medium text-white/85">{weakest}</span>
+        </p>
+        <p className="text-white/45">
+          Displaced by:{" "}
+          <span className="font-medium text-white/85">{d ?? "—"}</span>
+        </p>
+        {!hasData && (
+          <p className="pt-1 text-[11px] text-authority-watchlist/90">Run a snapshot to fill this card.</p>
+        )}
       </div>
     </button>
   );
@@ -441,56 +401,13 @@ function AddClientCard() {
   );
 }
 
-/* Client cards grid with sort above */
-function ClientCardsGrid({
-  clients,
-  sortBy,
-  onSortChange,
-}: {
-  clients: ClientWithStats[];
-  sortBy: "score_desc" | "score_asc" | "name_asc";
-  onSortChange: (v: "score_desc" | "score_asc" | "name_asc") => void;
-}) {
-  const sorted = useMemo(() => {
-    const list = [...clients];
-    if (sortBy === "score_desc") {
-      list.sort((a, b) => {
-        if (a.latestScore === null && b.latestScore === null) return 0;
-        if (a.latestScore === null) return 1;
-        if (b.latestScore === null) return -1;
-        return b.latestScore - a.latestScore;
-      });
-    } else if (sortBy === "score_asc") {
-      list.sort((a, b) => {
-        if (a.latestScore === null && b.latestScore === null) return 0;
-        if (a.latestScore === null) return 1;
-        if (b.latestScore === null) return -1;
-        return a.latestScore - b.latestScore;
-      });
-    } else {
-      list.sort((a, b) => a.name.localeCompare(b.name));
-    }
-    return list;
-  }, [clients, sortBy]);
-
+/* Client cards — order is pre-sorted by triage (urgency first) */
+function ClientCardsGrid({ clients }: { clients: ClientWithStats[] }) {
   return (
     <section id="clients-overview" className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <label className="text-xs text-text-2">
-          Sort by
-          <select
-            value={sortBy}
-            onChange={(e) => onSortChange(e.target.value as "score_desc" | "score_asc" | "name_asc")}
-            className="ml-2 rounded-app border border-white/10 bg-surface px-2 py-1.5 text-xs text-text focus:border-white/20 focus:outline-none"
-          >
-            <option value="score_desc">Score (high → low)</option>
-            <option value="score_asc">Score (low → high)</option>
-            <option value="name_asc">Name A–Z</option>
-          </select>
-        </label>
-      </div>
+      <p className="text-xs text-text-2">Sorted by displacement risk — most urgent first.</p>
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-        {sorted.map((client) => (
+        {clients.map((client) => (
           <div key={client.id} className="relative">
             <ClientCard client={client} />
           </div>
@@ -933,8 +850,6 @@ export default function AppPage() {
   const [clients, setClients] = useState<ClientWithStats[]>([]);
   const [portfolioStats, setPortfolioStats] = useState<PortfolioStats | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [cardSortBy, setCardSortBy] = useState<"score_desc" | "score_asc" | "name_asc">("score_desc");
-  const [filterHealth, setFilterHealth] = useState<"all" | "dominant" | "stable" | "watchlist" | "losing">("all");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showLogoFailedBanner, setShowLogoFailedBanner] = useState(false);
@@ -1181,28 +1096,36 @@ export default function AppPage() {
     }
   }, []);
 
-  // Filter and sort
   const filteredClients = useMemo(() => {
-    let result = clients.filter(
+    return clients.filter(
       (c) =>
         c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (c.website && c.website.toLowerCase().includes(searchQuery.toLowerCase()))
     );
+  }, [clients, searchQuery]);
 
-    if (filterHealth !== "all") {
-      result = result.filter(c => {
-        const state = getAuthorityState(c);
-        if (filterHealth === "dominant") return state === "Dominant";
-        if (filterHealth === "stable") return state === "Stable";
-        if (filterHealth === "watchlist") return state === "Watchlist";
-        if (filterHealth === "losing") return state === "Losing Ground";
-        return true;
-      });
-    }
+  const triageSortedClients = useMemo(() => {
+    return [...filteredClients].sort((a, b) => {
+      const o = triageOrder(a) - triageOrder(b);
+      if (o !== 0) return o;
+      const sa = a.latestScore ?? -1;
+      const sb = b.latestScore ?? -1;
+      return sa - sb;
+    });
+  }, [filteredClients]);
 
-    return result;
-  }, [clients, searchQuery, filterHealth]);
+  const runSnapshotHref = useMemo(() => {
+    if (clients.length === 0) return "/app/clients/new";
+    const sorted = [...clients].sort((a, b) => {
+      const o = triageOrder(a) - triageOrder(b);
+      if (o !== 0) return o;
+      const sa = a.latestScore ?? 999;
+      const sb = b.latestScore ?? 999;
+      return sa - sb;
+    });
+    return `/app/clients/${sorted[0]!.id}`;
+  }, [clients]);
 
   if (loading) {
     return (
@@ -1233,15 +1156,26 @@ export default function AppPage() {
     <>
       <TopBar
         primaryAction={
-          <Link
-            href="/app/clients/new"
-            className="inline-flex h-9 items-center gap-2 rounded-app border border-white/10 bg-surface px-3.5 text-sm font-medium text-text transition-colors hover:bg-surface-2"
-          >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            New Snapshot
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href={runSnapshotHref}
+              className="inline-flex h-9 items-center gap-2 rounded-app border border-white/15 bg-white/[0.07] px-3 text-sm font-medium text-text transition-colors hover:bg-white/10"
+            >
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+              </svg>
+              Run snapshot
+            </Link>
+            <Link
+              href="/app/clients/new"
+              className="inline-flex h-9 items-center gap-2 rounded-app border border-white/10 bg-surface px-3.5 text-sm font-medium text-text transition-colors hover:bg-surface-2"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Add client
+            </Link>
+          </div>
         }
         filters={
           <input
@@ -1276,31 +1210,16 @@ export default function AppPage() {
             </button>
           </Alert>
         )}
-        <PortfolioStrip
-          clients={clients}
-          filterHealth={filterHealth}
-          onFilterChange={setFilterHealth}
-        />
-        {filteredClients.length === 0 && searchQuery ? (
+        <RiskTriageStatusBar clients={clients} />
+        {triageSortedClients.length === 0 && searchQuery ? (
           <div className="rounded-app-lg border border-white/5 bg-surface/50 py-4 text-center">
             <p className="text-xs text-text-2">No clients match &quot;{searchQuery}&quot;</p>
             <button onClick={() => setSearchQuery("")} className="mt-2 text-sm text-text hover:underline">
               Clear search
             </button>
           </div>
-        ) : filteredClients.length === 0 && filterHealth !== "all" ? (
-          <div className="rounded-app-lg border border-white/5 bg-surface/50 py-4 text-center">
-            <p className="text-xs text-text-2">No {filterHealth.charAt(0).toUpperCase() + filterHealth.slice(1)} clients found</p>
-            <button onClick={() => setFilterHealth("all")} className="mt-2 text-sm text-text hover:underline">
-              Clear filter
-            </button>
-          </div>
         ) : (
-          <ClientCardsGrid
-            clients={filteredClients}
-            sortBy={cardSortBy}
-            onSortChange={setCardSortBy}
-          />
+          <ClientCardsGrid clients={triageSortedClients} />
         )}
       </div>
     </>
