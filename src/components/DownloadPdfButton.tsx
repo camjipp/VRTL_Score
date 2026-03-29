@@ -63,7 +63,7 @@ export function DownloadPdfButton({ snapshotId, className, variant = "default", 
           disabled={busy}
           onClick={download}
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-transparent px-3 py-2 text-xs font-medium text-text-2 transition-colors hover:border-white/25 hover:bg-white/[0.05] hover:text-text disabled:opacity-50",
+            "inline-flex h-9 items-center gap-1.5 rounded-md border border-white/15 bg-transparent px-3 text-sm font-medium text-text-2 transition-colors hover:border-white/25 hover:bg-white/[0.05] hover:text-text disabled:opacity-50",
             success && "border-emerald-500/40 text-emerald-200"
           )}
         >

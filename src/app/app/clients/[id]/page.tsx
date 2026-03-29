@@ -939,7 +939,7 @@ function RunSnapshotButton({
 }) {
   if (snapshotStatus === "running") {
     return (
-      <span className={cn("inline-flex w-auto items-center gap-1.5 rounded-md border border-white/10 bg-authority-watchlist/15 px-3 py-2 text-xs font-semibold text-authority-watchlist", className)}>
+      <span className={cn("inline-flex h-9 w-auto items-center gap-1.5 rounded-md border border-white/10 bg-authority-watchlist/15 px-4 text-xs font-semibold text-authority-watchlist", className)}>
         <svg className="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -1631,9 +1631,8 @@ function HeroMiniTrajectory({ snapshots }: { snapshots: SnapshotRow[] }) {
 
   if (scores.length < 2) {
     return (
-      <div className="flex h-[88px] flex-col justify-center rounded-md border border-white/[0.06] px-2 text-center">
-        <p className="text-[9px] font-semibold uppercase tracking-wider text-text-3">7D trajectory</p>
-        <p className="mt-0.5 text-[10px] text-text-3">Add snapshots</p>
+      <div className="flex h-[90px] min-w-0 flex-1 flex-col justify-center text-center">
+        <p className="text-[10px] text-text-3">Add snapshots for 7D trend</p>
       </div>
     );
   }
@@ -1656,9 +1655,8 @@ function HeroMiniTrajectory({ snapshots }: { snapshots: SnapshotRow[] }) {
   const areaD = `${smoothTop} L ${pathPoints[pathPoints.length - 1]!.x} ${bottomY} L ${MINI_PAD.left} ${bottomY} Z`;
 
   return (
-    <div className="rounded-md border border-white/[0.06] bg-white/[0.02] px-1.5 pt-1.5 pb-0.5">
-      <p className="mb-0.5 text-[9px] font-semibold uppercase tracking-wider text-text-3">7D trajectory</p>
-      <svg viewBox={`0 0 ${MINI_TRAJ_W} ${MINI_TRAJ_H}`} className="h-[88px] w-full max-w-[280px]" preserveAspectRatio="xMidYMid meet" aria-hidden>
+    <div className="flex min-h-[90px] min-w-0 flex-1 flex-col justify-end">
+      <svg viewBox={`0 0 ${MINI_TRAJ_W} ${MINI_TRAJ_H}`} className="h-[90px] w-full min-w-0" preserveAspectRatio="xMidYMid meet" aria-hidden>
         <defs>
           <linearGradient id="miniHeroGrad" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor={lineColor} stopOpacity="0.12" />
@@ -1704,11 +1702,14 @@ function BigTrendChart({
   snapshots,
   embedded,
   minimalHeader,
+  demoted,
 }: {
   snapshots: SnapshotRow[];
   embedded?: boolean;
   /** Hide in-chart narrative when parent supplies section interpretation */
   minimalHeader?: boolean;
+  /** Shorter chart + tighter chrome for supporting sections */
+  demoted?: boolean;
 }) {
   const [filter, setFilter] = useState<typeof CHART_FILTERS[number]>("all");
   const [timeRange, setTimeRange] = useState<(typeof CHART_RANGES)[number]["key"]>("7d");
@@ -1824,11 +1825,11 @@ function BigTrendChart({
   if (scores.length < 2) {
     return (
       <div className={chartShell}>
-        <div className={cn("mb-3 flex flex-wrap items-start justify-between gap-3", minimalHeader && "justify-end")}>
+        <div className={cn("flex flex-wrap items-start justify-between gap-3", demoted ? "mb-2" : "mb-3", minimalHeader && "justify-end")}>
           {!minimalHeader && (
             <div className="min-w-0 flex-1">
               {!embedded && <h3 className="text-base font-semibold tracking-tight text-text">Authority Trajectory</h3>}
-              <p className={cn("max-w-xl text-sm leading-relaxed text-text-2", !embedded && "mt-1")}>{trajectoryNote}</p>
+              <p className={cn("max-w-xl text-sm leading-relaxed text-text-2", !embedded && "mt-1", demoted && "text-xs")}>{trajectoryNote}</p>
             </div>
           )}
           <div className={cn("flex w-full shrink-0 flex-col gap-1.5", minimalHeader ? "max-w-full md:max-w-full" : "max-w-md lg:w-[min(100%,420px)]")}>
@@ -1839,7 +1840,7 @@ function BigTrendChart({
             {segmentControl}
           </div>
         </div>
-        <div className="flex h-64 items-center justify-center text-sm text-text-3">Run more snapshots to see trends</div>
+        <div className={cn("flex items-center justify-center text-sm text-text-3", demoted ? "h-48" : "h-64")}>Run more snapshots to see trends</div>
       </div>
     );
   }
@@ -1874,7 +1875,13 @@ function BigTrendChart({
       ? { label: "↓ Losing ground", tone: "text-authority-losing" }
       : { label: "→ Stalled", tone: "text-text-2" };
   const chartSvg = (
-    <svg viewBox={`0 0 ${CHART_VIEWBOX_WIDTH} ${CHART_HEIGHT}`} className="w-full h-full min-h-[260px] block" style={{ maxHeight: CHART_HEIGHT }} preserveAspectRatio="xMidYMid meet" aria-hidden>
+    <svg
+      viewBox={`0 0 ${CHART_VIEWBOX_WIDTH} ${CHART_HEIGHT}`}
+      className={cn("block h-full w-full", demoted ? "min-h-[200px] max-h-[240px]" : "min-h-[260px]")}
+      style={{ maxHeight: demoted ? 240 : CHART_HEIGHT }}
+      preserveAspectRatio="xMidYMid meet"
+      aria-hidden
+    >
       <defs>
         <linearGradient id={`heroChartGrad-${filter}`} x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stopColor={lineColor} stopOpacity="0.08" />
@@ -1924,12 +1931,12 @@ function BigTrendChart({
 
   return (
     <div className={chartShell}>
-      <div className={cn("mb-3 flex flex-wrap items-start justify-between gap-3", minimalHeader && "justify-end")}>
+      <div className={cn("flex flex-wrap items-start justify-between gap-3", demoted ? "mb-2 gap-2" : "mb-3", minimalHeader && "justify-end")}>
         {!minimalHeader && (
           <div className="min-w-0 flex-1">
             {!embedded && <h3 className="text-base font-semibold tracking-tight text-text">Authority Trajectory</h3>}
             <p className={cn("mb-1 text-xs font-semibold uppercase tracking-[0.12em]", trendBadge.tone)}>{trendBadge.label}</p>
-            <p className={cn("max-w-xl text-sm leading-relaxed text-text-2", !embedded && "mt-1")}>{trajectoryNote}</p>
+            <p className={cn("max-w-xl text-sm leading-relaxed text-text-2", !embedded && "mt-1", demoted && "line-clamp-2 text-xs")}>{trajectoryNote}</p>
           </div>
         )}
         <div className={cn("flex w-full shrink-0 flex-col gap-1.5", minimalHeader ? "max-w-full md:max-w-full" : "max-w-md lg:w-[min(100%,420px)]")}>
@@ -1940,7 +1947,7 @@ function BigTrendChart({
           {segmentControl}
         </div>
       </div>
-      <div className="min-h-[300px] overflow-hidden">{chartSvg}</div>
+      <div className={cn("overflow-hidden", demoted ? "max-h-[240px] min-h-[200px]" : "min-h-[300px]")}>{chartSvg}</div>
       {expanded && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-label="Expanded trajectory chart">
           <div className="w-full max-w-5xl border border-white/[0.1] bg-surface p-4 md:p-5">
@@ -2016,10 +2023,8 @@ function getHeroProblemLines(
 
   const losingTone = statusLabel === "Losing Ground" || statusLabel === "Watchlist" || (score ?? 0) < 65;
   return {
-    headline: losingTone
-      ? `You're losing authority due to ${weakest}`
-      : `Your weakest channel is ${weakest}`,
-    subtext: "Fix this channel first before displacement accelerates",
+    headline: losingTone ? `You're losing due to ${weakest}` : `Weakest channel: ${weakest}`,
+    subtext: "Fix this first or displacement accelerates",
   };
 }
 
@@ -2062,10 +2067,10 @@ function HeroSection({
   const { headline, subtext } = getHeroProblemLines(score, providers);
 
   return (
-    <section className="w-full border-b border-white/[0.08] pb-4">
-      <div className="mt-1 grid grid-cols-1 gap-5 lg:grid-cols-12 lg:items-start lg:gap-6">
-        <div className="space-y-2.5 lg:col-span-7">
-          <div className="flex min-w-0 items-center gap-2.5 border-b border-white/[0.06] pb-2.5">
+    <section className="w-full border-b border-white/[0.08] pb-3">
+      <div className="mt-0 grid grid-cols-1 items-center gap-4 lg:grid-cols-12">
+        <div className="space-y-3 lg:col-span-6">
+          <div className="flex min-w-0 items-center gap-2.5 border-b border-white/[0.06] pb-2">
             {logoSrc ? (
               <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08]">
                 <img src={logoSrc} alt="" className="h-6 w-6 object-contain" width={24} height={24} />
@@ -2076,7 +2081,7 @@ function HeroSection({
               </span>
             )}
             <div className="min-w-0">
-              <h1 className="truncate text-base font-semibold tracking-tight text-text md:text-lg">{client.name}</h1>
+              <h1 className="truncate text-base font-semibold tracking-tight text-text">{client.name}</h1>
               <p className="truncate text-xs text-text-2">{domain || client.website || "—"}</p>
             </div>
           </div>
@@ -2091,21 +2096,21 @@ function HeroSection({
           </span>
 
           <div className="flex flex-wrap items-end gap-x-3 gap-y-0.5">
-            <span className="text-5xl font-extrabold tabular-nums tracking-tight text-text md:text-6xl">{score ?? "—"}</span>
+            <span className="text-4xl font-extrabold tabular-nums tracking-tight text-text md:text-5xl">{score ?? "—"}</span>
             {delta !== null && delta !== 0 && (
               <span className="flex items-center gap-1.5 tabular-nums">
                 {delta < 0 ? (
-                  <span className="text-xl font-bold text-authority-losing" aria-hidden>
+                  <span className="text-lg font-bold text-authority-losing" aria-hidden>
                     ↓
                   </span>
                 ) : (
-                  <span className="text-xl font-bold text-authority-dominant" aria-hidden>
+                  <span className="text-lg font-bold text-authority-dominant" aria-hidden>
                     ↑
                   </span>
                 )}
                 <span
                   className={cn(
-                    "text-lg font-bold",
+                    "text-base font-bold",
                     delta > 0 ? "text-authority-dominant" : delta < 0 ? "text-authority-losing" : "text-text-2"
                   )}
                 >
@@ -2117,37 +2122,33 @@ function HeroSection({
             )}
           </div>
 
-          <p className="text-lg font-semibold leading-snug text-text md:text-xl">{headline}</p>
+          <p className="text-base font-semibold leading-tight text-text md:text-lg">{headline}</p>
           <p className="text-sm font-medium leading-snug text-text-2">{subtext}</p>
 
-          <div className="flex flex-wrap items-center gap-2 pt-0.5">
+          <div className="flex flex-wrap items-center gap-2">
             <RunSnapshotButton
               running={running}
               snapshotStatus={snapshotStatus}
               onRunSnapshot={runSnapshot}
-              className="!w-auto !rounded-md !border-0 !bg-white !px-3.5 !py-2 !text-xs !font-semibold !text-surface !shadow-sm hover:!bg-white/90"
+              className="!h-9 !w-auto !rounded-md !border-0 !bg-white !px-4 !py-0 !text-sm !font-semibold !text-surface !shadow-sm hover:!bg-white/90"
             />
             {snapshotId && (
-              <DownloadPdfButton
-                snapshotId={snapshotId}
-                variant="ghost"
-                label="Download report"
-                className="inline-block"
-              />
+              <DownloadPdfButton snapshotId={snapshotId} variant="ghost" label="Download" className="inline-block" />
             )}
           </div>
-          <div className="[&_label]:text-[10px] [&_label]:text-text-3 [&_select]:py-1 [&_select]:text-xs">
+          <div className="[&_label]:text-[10px] [&_label]:text-text-3 [&_select]:h-8 [&_select]:py-1 [&_select]:text-xs">
             <SnapshotSelector snapshots={snapshots} selectedId={selectedSnapshotId} onSelect={onSelectSnapshotId} />
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 lg:col-span-5">
+        <div className="flex min-w-0 items-center gap-3 lg:col-span-6">
           <HeroMiniTrajectory snapshots={snapshots} />
-          <div className="rounded-md border border-white/[0.06] bg-white/[0.02] p-2">
+          <div className="flex h-[120px] w-[120px] shrink-0 items-center justify-center">
             <AIAnswerMarketShareChart
               clientName={client.name}
               detail={detail}
               compact
+              heroInline
               gapTrendDelta={gapTrendDelta}
             />
           </div>
@@ -2188,6 +2189,7 @@ function AIAnswerMarketShareChart({
   gapTrendDelta,
   compact,
   sideBySide,
+  heroInline,
 }: {
   clientName: string;
   detail: SnapshotDetailResponse | null;
@@ -2199,6 +2201,8 @@ function AIAnswerMarketShareChart({
   compact?: boolean;
   /** Evidence layout: donut + explicit share list beside */
   sideBySide?: boolean;
+  /** Hero right rail: fixed 120px, no chrome */
+  heroInline?: boolean;
 }) {
   const rows = useMemo(() => {
     if (!detail?.summary) return [];
@@ -2254,8 +2258,8 @@ function AIAnswerMarketShareChart({
 
   const clientRow = rows.find((r) => r.isClient) ?? null;
   const topCompetitor = rows.find((r) => !r.isClient) ?? null;
-  const donutSize = compact ? 120 : 152;
-  const strokeWidth = compact ? 18 : 24;
+  const donutSize = heroInline ? 112 : compact ? 120 : 152;
+  const strokeWidth = heroInline ? 16 : compact ? 18 : 24;
   const radius = (donutSize - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const neutral = ["rgba(255,255,255,0.42)", "rgba(255,255,255,0.24)", "rgba(255,255,255,0.18)", "rgba(255,255,255,0.13)", "rgba(255,255,255,0.1)"];
@@ -2287,7 +2291,11 @@ function AIAnswerMarketShareChart({
     return node;
   });
 
-  const wrapClass = compact ? "relative h-[132px] w-[132px]" : "relative h-[170px] w-[170px]";
+  const wrapClass = heroInline
+    ? "relative h-[120px] w-[120px]"
+    : compact
+      ? "relative h-[132px] w-[132px]"
+      : "relative h-[170px] w-[170px]";
 
   const shareGap =
     clientRow && topCompetitor ? Math.max(0, topCompetitor.share - clientRow.share) : null;
@@ -2323,7 +2331,7 @@ function AIAnswerMarketShareChart({
             {!compact && !sideBySide && (
               <p className="mt-1 max-w-[120px] text-[10px] leading-snug text-text-3">{gapLine}</p>
             )}
-            {compact && (
+            {compact && !heroInline && (
               <p className="mt-0.5 max-w-[100px] text-[9px] leading-tight text-text-3">{gapLine}</p>
             )}
           </div>
@@ -2358,8 +2366,8 @@ function AIAnswerMarketShareChart({
   );
 
   return (
-    <div className={cn("space-y-2", compact && "space-y-0")}>
-      {compact && (
+    <div className={cn("space-y-2", (compact || heroInline) && "space-y-0")}>
+      {compact && !heroInline && (
         <p className="mb-1 text-[9px] font-semibold uppercase tracking-wider text-text-3">Citation share</p>
       )}
       {!compact && sideBySide ? (
@@ -2543,10 +2551,10 @@ function WhatIsWrongSection({
       title="Where you're winning and losing"
       subtitle="Lowest score is the priority surface — expand for proof."
       noTopRule
-      className="!pt-4 !space-y-3"
+      className="!space-y-2 !pt-3"
     >
       <div>
-        <div className="divide-y divide-white/[0.06]">
+        <div>
           {VULN_MODELS.map((key) => {
             const entry = providerByKey.get(key);
             const modelScore = entry ? entry[1] : null;
@@ -2675,53 +2683,74 @@ function VulnerabilityRow({
 }) {
   const [open, setOpen] = useState(false);
   const trendColor = delta != null ? (delta >= 0 ? CHART_COLORS.dominant : CHART_COLORS.losing) : "#94a3b8";
-  const barClass = highlightWeakest
-    ? cn(barColor, "ring-1 ring-authority-losing/50")
-    : barColor;
+  const barClass = highlightWeakest ? cn(barColor, "ring-1 ring-red-500/40") : barColor;
   return (
     <div
       className={cn(
-        "group rounded-md py-1",
-        highlightWeakest && "bg-authority-losing/[0.09] px-1.5 ring-1 ring-authority-losing/30"
+        "group border-b border-white/[0.06] py-3 last:border-b-0",
+        highlightWeakest && "rounded-md bg-red-500/10 px-2 ring-1 ring-red-500/30"
       )}
     >
-      <div className="grid w-full grid-cols-1 gap-1 py-1 md:grid-cols-[minmax(0,1.4fr)_auto_auto_minmax(0,1fr)_auto_auto] md:items-center md:gap-2">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08]">
-            <img src={logoUrl} alt="" className="h-6 w-6 object-contain" width={24} height={24} />
+      <div
+        className={cn(
+          "grid w-full grid-cols-1 gap-1 md:grid-cols-[minmax(0,1.4fr)_auto_auto_minmax(0,1fr)_auto_auto] md:items-center md:gap-2",
+          !highlightWeakest && "opacity-70"
+        )}
+      >
+        <div className="flex min-w-0 items-center gap-2.5">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08] opacity-100">
+            <img src={logoUrl} alt="" className="h-5 w-5 object-contain" width={20} height={20} />
           </div>
-          <span className={cn("truncate text-text", highlightWeakest ? "font-semibold" : "font-medium")}>{label}</span>
+          <span
+            className={cn(
+              "truncate text-xs",
+              highlightWeakest ? "font-semibold text-red-400" : "font-medium text-text-3"
+            )}
+          >
+            {label}
+          </span>
         </div>
         {score != null ? (
-          <span className="tabular-nums text-lg font-semibold text-text md:text-base">{score}</span>
+          <span
+            className={cn(
+              "tabular-nums text-base md:text-sm",
+              highlightWeakest ? "font-semibold text-text" : "font-medium text-text-3"
+            )}
+          >
+            {score}
+          </span>
         ) : (
-          <span className="text-sm text-text-3">—</span>
+          <span className="text-xs text-text-3">—</span>
         )}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           {statusTag && (
-            <span className={cn(
-              "rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
-              statusTag === "Strong" && "bg-authority-dominant/20 text-authority-dominant",
-              statusTag === "Stable" && "bg-sky-400/20 text-sky-200",
-              statusTag === "Watchlist" && "bg-authority-watchlist/20 text-authority-watchlist",
-              statusTag === "Critical" && "bg-authority-losing/20 text-authority-losing"
-            )}>{statusTag}</span>
+            <span
+              className={cn(
+                "rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide",
+                statusTag === "Strong" && "bg-authority-dominant/20 text-authority-dominant",
+                statusTag === "Stable" && "bg-sky-400/20 text-sky-200",
+                statusTag === "Watchlist" && "bg-authority-watchlist/20 text-authority-watchlist",
+                statusTag === "Critical" && "bg-authority-losing/20 text-authority-losing"
+              )}
+            >
+              {statusTag}
+            </span>
           )}
         </div>
         <div className="min-w-0 md:pr-2">
-          <div className="h-2.5 w-full max-w-[220px] overflow-hidden rounded-full bg-white/[0.08] md:max-w-none">
+          <div className="h-2 w-full max-w-[220px] overflow-hidden rounded-full bg-white/[0.08] md:max-w-none">
             <div className={cn("h-full rounded-full", barClass)} style={{ width: `${barPct}%` }} />
           </div>
           {gapToLeader != null && (
             <p className="mt-0.5 text-[10px] text-text-3">{gapToLeader} pts to 100</p>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {series.length >= 2 && <MicroSparkline scores={series} color={trendColor} />}
           {delta != null && (
-            <span className={cn("text-xs font-semibold tabular-nums", delta >= 0 ? "text-authority-dominant" : "text-authority-losing")}>
+            <span className={cn("text-[10px] font-semibold tabular-nums", delta >= 0 ? "text-authority-dominant" : "text-authority-losing")}>
               {delta >= 0 ? "+" : ""}
-              {delta} vs last
+              {delta}
             </span>
           )}
         </div>
@@ -2737,20 +2766,10 @@ function VulnerabilityRow({
           </svg>
         </button>
       </div>
-      <div className="pb-0.5">
-        {!highlightWeakest && (
-          <p className="line-clamp-1 text-[11px] leading-snug text-text-3">{primaryIssue}</p>
-        )}
-        <p className={cn("mt-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3", !highlightWeakest && "mt-1")}>
-          Do this
-        </p>
-        <p
-          className={cn(
-            "mt-0.5 line-clamp-2 leading-snug",
-            highlightWeakest ? "text-sm font-bold text-text" : "text-xs font-medium text-text-2"
-          )}
-        >
-          {primaryAction}
+      <div className={cn("mt-1", !highlightWeakest && "opacity-70")}>
+        {!highlightWeakest && <p className="line-clamp-1 text-[10px] leading-snug text-text-3">{primaryIssue}</p>}
+        <p className="mt-1 text-sm font-medium leading-snug text-text">
+          Do this: {primaryAction}
         </p>
       </div>
       <div
@@ -2842,40 +2861,41 @@ function ExecutionPriorities({
   }
 
   function impactLabel(priority: StrategicInsight["priority"]): string {
-    if (priority === "HIGH") return "High";
-    if (priority === "MEDIUM") return "Medium";
-    return "Lower";
+    if (priority === "HIGH") return "High impact";
+    if (priority === "MEDIUM") return "Medium impact";
+    return "Lower impact";
   }
 
   return (
-    <ul className="space-y-1.5">
-      {top3.map((insight, idx) => (
-        <li
-          key={idx}
-          className="rounded-md border border-white/[0.06] bg-white/[0.02] px-2 py-1.5"
-        >
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <span
-              className={cn(
-                "rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide",
-                insight.priority === "HIGH" && "bg-authority-losing/20 text-authority-losing",
-                insight.priority === "MEDIUM" && "bg-authority-watchlist/15 text-authority-watchlist",
-                insight.priority === "LOW" && "bg-white/[0.08] text-text-3"
-              )}
-            >
-              {impactLabel(insight.priority)}
-            </span>
-            <span className="text-[10px] tabular-nums text-text-3">{upsideRange(insight.priority)}</span>
-          </div>
-          <p className="mt-0.5 text-sm font-semibold leading-tight text-text">{insight.title}</p>
-          <ul className="mt-1 list-disc space-y-0 pl-3 text-[11px] leading-tight text-text-2 marker:text-text-3">
-            {actionBullets(insight.action).map((bullet, i) => (
-              <li key={i}>{bullet}</li>
-            ))}
-          </ul>
-        </li>
-      ))}
-    </ul>
+    <div className="max-w-[720px]">
+      <ul className="space-y-2">
+        {top3.map((insight, idx) => (
+          <li key={idx} className="rounded-md border border-white/10 px-3 py-2">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <div
+                  className={cn(
+                    "mb-1 text-[10px] font-semibold uppercase tracking-wide",
+                    insight.priority === "HIGH" && "text-red-400",
+                    insight.priority === "MEDIUM" && "text-authority-watchlist",
+                    insight.priority === "LOW" && "text-text-3"
+                  )}
+                >
+                  {impactLabel(insight.priority)}
+                </div>
+                <div className="text-sm font-medium leading-snug text-text">{insight.title}</div>
+                <ul className="mt-1 list-disc space-y-1 pl-3.5 text-xs leading-snug text-text-3 marker:text-text-3">
+                  {actionBullets(insight.action).map((bullet, i) => (
+                    <li key={i}>{bullet}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="shrink-0 text-xs tabular-nums text-text-3">{upsideRange(insight.priority)}</div>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -3818,11 +3838,7 @@ export default function ClientDetailPage() {
               competitors={competitors}
             />
 
-            <DashboardSection
-              title="What to do now"
-              subtitle={<span className="text-xs text-text-3">Two bullets per card. Upside is estimated.</span>}
-              className="!pt-4 !space-y-2"
-            >
+            <DashboardSection title="What to do now" className="!pt-3 !space-y-2">
               <ExecutionPriorities
                 score={selectedSnapshot?.vrtl_score ?? null}
                 providers={providers}
@@ -3833,29 +3849,27 @@ export default function ClientDetailPage() {
 
             <DashboardSection
               title="Why you're losing"
-              subtitle={<span className="text-xs text-text-3">Trend and share vs leader — backs up the problem above.</span>}
-              className="!pt-4 !space-y-2"
+              subtitle={<span className="text-xs text-text-3">Trend and share vs leader.</span>}
+              className="!space-y-2 !pt-3 opacity-75"
             >
-              <div className="opacity-[0.88] contrast-[0.96]">
-                <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-12 lg:gap-5">
-                  <div className="lg:col-span-7">
-                    <BigTrendChart snapshots={snapshots} embedded minimalHeader />
-                  </div>
-                  <div className="lg:col-span-5">
-                    <AIAnswerMarketShareChart
-                      clientName={client.name}
-                      detail={snapshotDetail}
-                      onRunSnapshot={runSnapshot}
-                      running={running}
-                      snapshotStatus={selectedSnapshot?.status ?? null}
-                      gapTrendDelta={
-                        selectedSnapshot?.vrtl_score != null && previousSnapshot?.vrtl_score != null
-                          ? selectedSnapshot.vrtl_score - previousSnapshot.vrtl_score
-                          : null
-                      }
-                      sideBySide
-                    />
-                  </div>
+              <div className="grid grid-cols-1 items-start gap-3 lg:grid-cols-12 lg:gap-4">
+                <div className="lg:col-span-7">
+                  <BigTrendChart snapshots={snapshots} embedded minimalHeader demoted />
+                </div>
+                <div className="lg:col-span-5">
+                  <AIAnswerMarketShareChart
+                    clientName={client.name}
+                    detail={snapshotDetail}
+                    onRunSnapshot={runSnapshot}
+                    running={running}
+                    snapshotStatus={selectedSnapshot?.status ?? null}
+                    gapTrendDelta={
+                      selectedSnapshot?.vrtl_score != null && previousSnapshot?.vrtl_score != null
+                        ? selectedSnapshot.vrtl_score - previousSnapshot.vrtl_score
+                        : null
+                    }
+                    sideBySide
+                  />
                 </div>
               </div>
             </DashboardSection>
