@@ -939,7 +939,7 @@ function RunSnapshotButton({
 }) {
   if (snapshotStatus === "running") {
     return (
-      <span className={cn("inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-authority-watchlist/10 px-3 py-2 text-sm font-medium text-authority-watchlist", className)}>
+      <span className={cn("inline-flex w-auto items-center gap-1.5 rounded-md border border-white/10 bg-authority-watchlist/15 px-3 py-2 text-xs font-semibold text-authority-watchlist", className)}>
         <svg className="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -1595,6 +1595,111 @@ function buildSmoothPath(points: { x: number; y: number }[]): string {
   return d;
 }
 
+/** Snapshots limited to last 7 days (mirrors BigTrendChart 7D fallback). */
+function getSnapshots7d(snapshots: SnapshotRow[]): SnapshotRow[] {
+  if (snapshots.length === 0) return snapshots;
+  const latestTs = snapshots
+    .map((s) => new Date(s.created_at).getTime())
+    .filter((t) => Number.isFinite(t))
+    .reduce((max, t) => Math.max(max, t), 0);
+  if (!latestTs) return snapshots;
+  const cutoff = latestTs - 7 * 24 * 60 * 60 * 1000;
+  const filtered = snapshots.filter((s) => {
+    const ts = new Date(s.created_at).getTime();
+    return Number.isFinite(ts) && ts >= cutoff;
+  });
+  if (filtered.length < 7) {
+    const complete = snapshots.filter(
+      (s) => s.vrtl_score != null && (s.status?.toLowerCase().includes("complete") || s.status?.toLowerCase().includes("success"))
+    );
+    return complete.slice(0, 10);
+  }
+  return filtered.length >= 2 ? filtered : snapshots;
+}
+
+const MINI_TRAJ_W = 300;
+const MINI_TRAJ_H = 92;
+const MINI_PAD = { top: 6, right: 6, bottom: 14, left: 10 };
+const MINI_INNER_W = MINI_TRAJ_W - MINI_PAD.left - MINI_PAD.right;
+const MINI_INNER_H = MINI_TRAJ_H - MINI_PAD.top - MINI_PAD.bottom;
+
+function HeroMiniTrajectory({ snapshots }: { snapshots: SnapshotRow[] }) {
+  const ranged = useMemo(() => getSnapshots7d(snapshots), [snapshots]);
+  const { scores, dates } = useMemo(() => getChartSeriesForFilter(ranged, "all"), [ranged]);
+  const leaderByDate = useMemo(() => getLeaderSeriesByDate(ranged), [ranged]);
+  const leaderScores = useMemo(() => dates.map((d) => leaderByDate[d] ?? 100), [dates, leaderByDate]);
+
+  if (scores.length < 2) {
+    return (
+      <div className="flex h-[88px] flex-col justify-center rounded-md border border-white/[0.06] px-2 text-center">
+        <p className="text-[9px] font-semibold uppercase tracking-wider text-text-3">7D trajectory</p>
+        <p className="mt-0.5 text-[10px] text-text-3">Add snapshots</p>
+      </div>
+    );
+  }
+
+  const max = Math.max(...scores, ...leaderScores, 100);
+  const min = Math.min(...scores, ...leaderScores, 0);
+  const valueRange = max - min || 1;
+  const pathPoints = scores.map((val, i) => ({
+    x: MINI_PAD.left + (i / (scores.length - 1)) * MINI_INNER_W,
+    y: MINI_PAD.top + MINI_INNER_H - ((val - min) / valueRange) * MINI_INNER_H,
+  }));
+  const leaderPoints = leaderScores.map((val, i) => ({
+    x: MINI_PAD.left + (i / (leaderScores.length - 1 || 1)) * MINI_INNER_W,
+    y: MINI_PAD.top + MINI_INNER_H - ((val - min) / valueRange) * MINI_INNER_H,
+  }));
+  const trend = scores[scores.length - 1]! - scores[0]!;
+  const lineColor = trend >= 0 ? CHART_COLORS.dominant : CHART_COLORS.losing;
+  const smoothTop = buildSmoothPath(pathPoints);
+  const bottomY = MINI_PAD.top + MINI_INNER_H;
+  const areaD = `${smoothTop} L ${pathPoints[pathPoints.length - 1]!.x} ${bottomY} L ${MINI_PAD.left} ${bottomY} Z`;
+
+  return (
+    <div className="rounded-md border border-white/[0.06] bg-white/[0.02] px-1.5 pt-1.5 pb-0.5">
+      <p className="mb-0.5 text-[9px] font-semibold uppercase tracking-wider text-text-3">7D trajectory</p>
+      <svg viewBox={`0 0 ${MINI_TRAJ_W} ${MINI_TRAJ_H}`} className="h-[88px] w-full max-w-[280px]" preserveAspectRatio="xMidYMid meet" aria-hidden>
+        <defs>
+          <linearGradient id="miniHeroGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor={lineColor} stopOpacity="0.12" />
+            <stop offset="100%" stopColor={lineColor} stopOpacity="0.02" />
+          </linearGradient>
+        </defs>
+        <path d={areaD} fill="url(#miniHeroGrad)" />
+        <path
+          d={leaderPoints.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ")}
+          fill="none"
+          stroke="rgba(255,255,255,0.28)"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d={smoothTop}
+          fill="none"
+          stroke={lineColor}
+          strokeOpacity="0.88"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        {pathPoints.map((p, i) => (
+          <circle
+            key={i}
+            cx={p.x}
+            cy={p.y}
+            r={i === pathPoints.length - 1 ? 3.2 : 2}
+            fill="var(--surface)"
+            stroke={lineColor}
+            strokeOpacity={i === pathPoints.length - 1 ? 0.9 : 0.55}
+            strokeWidth={i === pathPoints.length - 1 ? 1.8 : 1.2}
+          />
+        ))}
+      </svg>
+    </div>
+  );
+}
+
 function BigTrendChart({
   snapshots,
   embedded,
@@ -1893,48 +1998,28 @@ function BigTrendChart({
   );
 }
 
-/** Hero: problem (where) + one directive (what to do first). */
+/** Hero: one story — weakest model is the problem surface. */
 function getHeroProblemLines(
   score: number | null,
-  providers: [string, number][],
-  detail: SnapshotDetailResponse | null
-): { headline: string; directive: string } {
+  providers: [string, number][]
+): { headline: string; subtext: string } {
   const sortedAsc = [...providers].sort((a, b) => a[1] - b[1]);
   const weakest = sortedAsc.length > 0 ? getProviderDisplayName(sortedAsc[0]![0]) : null;
-  const topComp = detail?.summary?.top_competitors?.[0]?.name?.trim() ?? null;
   const { label: statusLabel } = getScoreLabel(score);
 
   if (score == null || !weakest) {
     return {
       headline: "No authority read yet",
-      directive: "Run a snapshot to name the weak channel and fix order.",
+      subtext: "Run a snapshot to expose the weak channel.",
     };
   }
 
-  if (statusLabel === "Losing Ground") {
-    return {
-      headline: `You're losing ground due to ${weakest} weakness`,
-      directive: topComp
-        ? `Fix ${weakest} first to stop displacement — ${topComp} is winning share.`
-        : `Fix ${weakest} first to stop displacement.`,
-    };
-  }
-  if (statusLabel === "Watchlist") {
-    return {
-      headline: `${weakest} is holding back your authority`,
-      directive: `Fix ${weakest} first before the gap widens.`,
-    };
-  }
-  if (statusLabel === "Stable") {
-    return {
-      headline: `Stable index — ${weakest} still caps upside`,
-      directive: `Strengthen ${weakest} first to unlock the next tier.`,
-    };
-  }
-  /* Dominant */
+  const losingTone = statusLabel === "Losing Ground" || statusLabel === "Watchlist" || (score ?? 0) < 65;
   return {
-    headline: `You're leading — ${weakest} is the channel to defend`,
-    directive: `Harden ${weakest} first to protect share.`,
+    headline: losingTone
+      ? `You're losing authority due to ${weakest}`
+      : `Your weakest channel is ${weakest}`,
+    subtext: "Fix this channel first before displacement accelerates",
   };
 }
 
@@ -1954,6 +2039,7 @@ function HeroSection({
   onSelectSnapshotId,
   runSnapshot,
   running,
+  gapTrendDelta,
 }: {
   client: ClientRow;
   score: number | null;
@@ -1967,93 +2053,104 @@ function HeroSection({
   onSelectSnapshotId: (id: string) => void;
   runSnapshot: () => void;
   running: boolean;
+  gapTrendDelta: number | null;
 }) {
   const domain = faviconDomain(client.website);
   const logoSrc = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=48` : null;
   const { label: statusLabel } = getScoreLabel(score);
   const delta = score != null && previousScore != null ? score - previousScore : null;
-  const { headline, directive } = getHeroProblemLines(score, providers, detail);
+  const { headline, subtext } = getHeroProblemLines(score, providers);
 
   return (
-    <section className="w-full border-b border-white/[0.08] pb-5">
-      <div className="flex items-start justify-between gap-3 border-b border-white/[0.06] pb-3">
-        <div className="flex min-w-0 items-center gap-2.5">
-          {logoSrc ? (
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08]">
-              <img src={logoSrc} alt="" className="h-6 w-6 object-contain" width={24} height={24} />
-            </span>
-          ) : (
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-white/[0.08] text-sm font-bold text-text-3">
-              {client.name.charAt(0)}
-            </span>
-          )}
-          <div className="min-w-0">
-            <h1 className="truncate text-base font-semibold tracking-tight text-text md:text-lg">{client.name}</h1>
-            <p className="truncate text-xs text-text-2">{domain || client.website || "—"}</p>
+    <section className="w-full border-b border-white/[0.08] pb-4">
+      <div className="mt-1 grid grid-cols-1 gap-5 lg:grid-cols-12 lg:items-start lg:gap-6">
+        <div className="space-y-2.5 lg:col-span-7">
+          <div className="flex min-w-0 items-center gap-2.5 border-b border-white/[0.06] pb-2.5">
+            {logoSrc ? (
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08]">
+                <img src={logoSrc} alt="" className="h-6 w-6 object-contain" width={24} height={24} />
+              </span>
+            ) : (
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-white/[0.08] text-sm font-bold text-text-3">
+                {client.name.charAt(0)}
+              </span>
+            )}
+            <div className="min-w-0">
+              <h1 className="truncate text-base font-semibold tracking-tight text-text md:text-lg">{client.name}</h1>
+              <p className="truncate text-xs text-text-2">{domain || client.website || "—"}</p>
+            </div>
+          </div>
+
+          <span
+            className={cn(
+              "inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em]",
+              getAuthorityStatusTone(score)
+            )}
+          >
+            {statusLabel}
+          </span>
+
+          <div className="flex flex-wrap items-end gap-x-3 gap-y-0.5">
+            <span className="text-5xl font-extrabold tabular-nums tracking-tight text-text md:text-6xl">{score ?? "—"}</span>
+            {delta !== null && delta !== 0 && (
+              <span className="flex items-center gap-1.5 tabular-nums">
+                {delta < 0 ? (
+                  <span className="text-xl font-bold text-authority-losing" aria-hidden>
+                    ↓
+                  </span>
+                ) : (
+                  <span className="text-xl font-bold text-authority-dominant" aria-hidden>
+                    ↑
+                  </span>
+                )}
+                <span
+                  className={cn(
+                    "text-lg font-bold",
+                    delta > 0 ? "text-authority-dominant" : delta < 0 ? "text-authority-losing" : "text-text-2"
+                  )}
+                >
+                  {delta > 0 ? "+" : ""}
+                  {delta}
+                </span>
+                <span className="text-xs font-medium text-text-3">vs last</span>
+              </span>
+            )}
+          </div>
+
+          <p className="text-lg font-semibold leading-snug text-text md:text-xl">{headline}</p>
+          <p className="text-sm font-medium leading-snug text-text-2">{subtext}</p>
+
+          <div className="flex flex-wrap items-center gap-2 pt-0.5">
+            <RunSnapshotButton
+              running={running}
+              snapshotStatus={snapshotStatus}
+              onRunSnapshot={runSnapshot}
+              className="!w-auto !rounded-md !border-0 !bg-white !px-3.5 !py-2 !text-xs !font-semibold !text-surface !shadow-sm hover:!bg-white/90"
+            />
+            {snapshotId && (
+              <DownloadPdfButton
+                snapshotId={snapshotId}
+                variant="ghost"
+                label="Download report"
+                className="inline-block"
+              />
+            )}
+          </div>
+          <div className="[&_label]:text-[10px] [&_label]:text-text-3 [&_select]:py-1 [&_select]:text-xs">
+            <SnapshotSelector snapshots={snapshots} selectedId={selectedSnapshotId} onSelect={onSelectSnapshotId} />
           </div>
         </div>
-        <span className="text-text-3" aria-hidden>
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
-        </span>
-      </div>
 
-      <div className="mt-4 max-w-3xl space-y-3">
-        <span
-          className={cn(
-            "inline-flex rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em]",
-            getAuthorityStatusTone(score)
-          )}
-        >
-          {statusLabel}
-        </span>
-
-        <div className="flex flex-wrap items-end gap-x-3 gap-y-1">
-          <span className="text-5xl font-extrabold tabular-nums tracking-tight text-text md:text-6xl">{score ?? "—"}</span>
-          {delta !== null && delta !== 0 && (
-            <span className="flex items-center gap-1.5 tabular-nums">
-              {delta < 0 ? (
-                <span className="text-xl font-bold text-authority-losing" aria-hidden>
-                  ↓
-                </span>
-              ) : (
-                <span className="text-xl font-bold text-authority-dominant" aria-hidden>
-                  ↑
-                </span>
-              )}
-              <span
-                className={cn(
-                  "text-lg font-bold",
-                  delta > 0 ? "text-authority-dominant" : delta < 0 ? "text-authority-losing" : "text-text-2"
-                )}
-              >
-                {delta > 0 ? "+" : ""}
-                {delta}
-              </span>
-              <span className="text-xs font-medium text-text-3">vs last</span>
-            </span>
-          )}
-        </div>
-
-        <p className="text-lg font-semibold leading-snug text-text md:text-xl">{headline}</p>
-        <p className="text-sm font-medium leading-snug text-text-2">{directive}</p>
-
-        <div className="flex flex-wrap items-center gap-2 pt-1">
-          <RunSnapshotButton
-            running={running}
-            snapshotStatus={snapshotStatus}
-            onRunSnapshot={runSnapshot}
-            className="!rounded-md !border !border-white/15 !bg-white/[0.06] !px-2.5 !py-1 !text-xs !font-semibold hover:!border-white/25 hover:!bg-white/10"
-          />
-          {snapshotId && (
-            <div className="[&_button]:!rounded-md [&_button]:!px-2.5 [&_button]:!py-1 [&_button]:!text-xs [&_button]:!font-semibold">
-              <DownloadPdfButton snapshotId={snapshotId} variant="compact" label="Download" />
-            </div>
-          )}
-        </div>
-        <div className="[&_label]:text-[11px] [&_label]:text-text-3 [&_select]:py-1 [&_select]:text-xs">
-          <SnapshotSelector snapshots={snapshots} selectedId={selectedSnapshotId} onSelect={onSelectSnapshotId} />
+        <div className="flex flex-col gap-3 lg:col-span-5">
+          <HeroMiniTrajectory snapshots={snapshots} />
+          <div className="rounded-md border border-white/[0.06] bg-white/[0.02] p-2">
+            <AIAnswerMarketShareChart
+              clientName={client.name}
+              detail={detail}
+              compact
+              gapTrendDelta={gapTrendDelta}
+            />
+          </div>
         </div>
       </div>
     </section>
@@ -2263,7 +2360,7 @@ function AIAnswerMarketShareChart({
   return (
     <div className={cn("space-y-2", compact && "space-y-0")}>
       {compact && (
-        <p className="mb-1 text-[9px] font-semibold uppercase tracking-wider text-text-3">Position ring</p>
+        <p className="mb-1 text-[9px] font-semibold uppercase tracking-wider text-text-3">Citation share</p>
       )}
       {!compact && sideBySide ? (
         <div className="flex flex-col items-stretch gap-5 sm:flex-row sm:items-start sm:gap-8">
@@ -2428,12 +2525,25 @@ function WhatIsWrongSection({
     return idxByModel;
   }, [prioritizedInsights]);
 
+  const weakestModelKey = useMemo(() => {
+    let worst: (typeof VULN_MODELS)[number] | null = null;
+    let min = Infinity;
+    for (const key of VULN_MODELS) {
+      const sc = providerByKey.get(key)?.[1];
+      if (sc != null && sc < min) {
+        min = sc;
+        worst = key;
+      }
+    }
+    return worst;
+  }, [providerByKey]);
+
   return (
     <DashboardSection
-      title="Model channels & execution"
-      subtitle="Per-model scores — expand a row for evidence."
+      title="Where you're winning and losing"
+      subtitle="Lowest score is the priority surface — expand for proof."
       noTopRule
-      className="pt-4"
+      className="!pt-4 !space-y-3"
     >
       <div>
         <div className="divide-y divide-white/[0.06]">
@@ -2469,13 +2579,19 @@ function WhatIsWrongSection({
             const primaryIssue = formatPlaybookText(
               matched?.whyItMatters?.trim() || whatsWrong[0] || "Run a snapshot to surface channel-specific issues."
             );
+            const highlightWeakest = key === weakestModelKey && modelScore != null;
             const primaryAction = formatPlaybookText(
               matched?.action
                 ? firstStrategicSentence(matched.action)
                     .replace(/\bAudit\b/i, "Fix")
                     .replace(/\bAdd\b/i, "Publish")
                     .replace(/\bInvest in\b/i, "Execute")
-                : quickWins[0] || "Run a snapshot for model-specific execution guidance."
+                    .replace(/\bFocus on\b/gi, "")
+                    .replace(/\bBuild\b/gi, "Add")
+                    .replace(/\bCreate\b/gi, "Ship")
+                : highlightWeakest
+                  ? `Fix content for ${label}-specific retrieval patterns`
+                  : quickWins[0] || "Run a snapshot for channel fixes."
             );
 
             return (
@@ -2495,6 +2611,7 @@ function WhatIsWrongSection({
                 quickWins={quickWins}
                 primaryIssue={primaryIssue}
                 primaryAction={primaryAction}
+                highlightWeakest={highlightWeakest}
               />
             );
           })}
@@ -2538,6 +2655,7 @@ function VulnerabilityRow({
   quickWins,
   primaryIssue,
   primaryAction,
+  highlightWeakest,
 }: {
   label: string;
   logoUrl: string;
@@ -2553,17 +2671,26 @@ function VulnerabilityRow({
   quickWins: string[];
   primaryIssue: string;
   primaryAction: string;
+  highlightWeakest?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const trendColor = delta != null ? (delta >= 0 ? CHART_COLORS.dominant : CHART_COLORS.losing) : "#94a3b8";
+  const barClass = highlightWeakest
+    ? cn(barColor, "ring-1 ring-authority-losing/50")
+    : barColor;
   return (
-    <div className="group">
-      <div className="grid w-full grid-cols-1 gap-1.5 py-1.5 md:grid-cols-[minmax(0,1.4fr)_auto_auto_minmax(0,1fr)_auto_auto] md:items-center md:gap-2.5">
+    <div
+      className={cn(
+        "group rounded-md py-1",
+        highlightWeakest && "bg-authority-losing/[0.09] px-1.5 ring-1 ring-authority-losing/30"
+      )}
+    >
+      <div className="grid w-full grid-cols-1 gap-1 py-1 md:grid-cols-[minmax(0,1.4fr)_auto_auto_minmax(0,1fr)_auto_auto] md:items-center md:gap-2">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08]">
             <img src={logoUrl} alt="" className="h-6 w-6 object-contain" width={24} height={24} />
           </div>
-          <span className="truncate font-medium text-text">{label}</span>
+          <span className={cn("truncate text-text", highlightWeakest ? "font-semibold" : "font-medium")}>{label}</span>
         </div>
         {score != null ? (
           <span className="tabular-nums text-lg font-semibold text-text md:text-base">{score}</span>
@@ -2582,11 +2709,11 @@ function VulnerabilityRow({
           )}
         </div>
         <div className="min-w-0 md:pr-2">
-          <div className="h-3 w-full max-w-[220px] overflow-hidden rounded-full bg-white/[0.08] md:max-w-none">
-            <div className={cn("h-full rounded-full", barColor)} style={{ width: `${barPct}%` }} />
+          <div className="h-2.5 w-full max-w-[220px] overflow-hidden rounded-full bg-white/[0.08] md:max-w-none">
+            <div className={cn("h-full rounded-full", barClass)} style={{ width: `${barPct}%` }} />
           </div>
           {gapToLeader != null && (
-            <p className="mt-1 text-[11px] text-text-3">Gap to perfect index: {gapToLeader} pts</p>
+            <p className="mt-0.5 text-[10px] text-text-3">{gapToLeader} pts to 100</p>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -2610,20 +2737,30 @@ function VulnerabilityRow({
           </svg>
         </button>
       </div>
-      <div className="pb-1">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Issue</p>
-        <p className="mt-0.5 line-clamp-2 text-sm font-medium leading-snug text-text-2">{primaryIssue}</p>
-        <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Do this</p>
-        <p className="mt-0.5 line-clamp-2 text-sm font-semibold leading-snug text-text">{primaryAction}</p>
+      <div className="pb-0.5">
+        {!highlightWeakest && (
+          <p className="line-clamp-1 text-[11px] leading-snug text-text-3">{primaryIssue}</p>
+        )}
+        <p className={cn("mt-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3", !highlightWeakest && "mt-1")}>
+          Do this
+        </p>
+        <p
+          className={cn(
+            "mt-0.5 line-clamp-2 leading-snug",
+            highlightWeakest ? "text-sm font-bold text-text" : "text-xs font-medium text-text-2"
+          )}
+        >
+          {primaryAction}
+        </p>
       </div>
       <div
         className="grid transition-[grid-template-rows] duration-200 ease-out"
         style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
       >
         <div className="min-h-0 overflow-hidden">
-          <div className="border-t border-white/[0.06] pb-4 pt-4">
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Evidence &amp; detail</p>
-            <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-3 md:gap-8">
+          <div className="border-t border-white/[0.06] pb-3 pt-2.5">
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">More</p>
+            <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-3 md:gap-5">
               <div>
                 <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-text-3">What&apos;s wrong</h4>
                 <ul className="list-disc space-y-1 pl-4 text-sm text-text-2">
@@ -2688,9 +2825,13 @@ function ExecutionPriorities({
     const raw = parts.length > 0 ? parts : [action];
     return raw.map((b) =>
       b
+        .replace(/^\s*Focus on\s+/gi, "")
+        .replace(/^\s*Build\s+/gi, "Add ")
+        .replace(/^\s*Create\s+/gi, "Ship ")
         .replace(/\bAudit\b/i, "Fix")
-        .replace(/\bInvest in brand authority through\b/i, "Ship authority fixes through")
+        .replace(/\bInvest in brand authority through\b/i, "Ship authority via")
         .replace(/\bAdd\b/i, "Publish")
+        .trim()
     );
   }
 
@@ -2701,17 +2842,17 @@ function ExecutionPriorities({
   }
 
   function impactLabel(priority: StrategicInsight["priority"]): string {
-    if (priority === "HIGH") return "HIGH IMPACT";
-    if (priority === "MEDIUM") return "MEDIUM IMPACT";
-    return "LOWER IMPACT";
+    if (priority === "HIGH") return "High";
+    if (priority === "MEDIUM") return "Medium";
+    return "Lower";
   }
 
   return (
-    <ul className="space-y-2">
+    <ul className="space-y-1.5">
       {top3.map((insight, idx) => (
         <li
           key={idx}
-          className="rounded-lg border border-white/[0.08] bg-white/[0.02] px-2.5 py-2"
+          className="rounded-md border border-white/[0.06] bg-white/[0.02] px-2 py-1.5"
         >
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <span
@@ -2724,10 +2865,10 @@ function ExecutionPriorities({
             >
               {impactLabel(insight.priority)}
             </span>
-            <span className="text-[11px] tabular-nums text-text-3">{upsideRange(insight.priority)} est.</span>
+            <span className="text-[10px] tabular-nums text-text-3">{upsideRange(insight.priority)}</span>
           </div>
-          <p className="mt-1 text-sm font-semibold leading-tight text-text">{insight.title}</p>
-          <ul className="mt-1.5 list-disc space-y-0.5 pl-3.5 text-xs leading-snug text-text-2 marker:text-text-3">
+          <p className="mt-0.5 text-sm font-semibold leading-tight text-text">{insight.title}</p>
+          <ul className="mt-1 list-disc space-y-0 pl-3 text-[11px] leading-tight text-text-2 marker:text-text-3">
             {actionBullets(insight.action).map((bullet, i) => (
               <li key={i}>{bullet}</li>
             ))}
@@ -3595,7 +3736,7 @@ export default function ClientDetailPage() {
     : [];
   return (
     <div className="min-h-screen pb-20 md:pb-0">
-      <div className="mx-auto max-w-[1200px] space-y-6 px-5 py-8 md:px-8 md:py-10">
+      <div className="mx-auto max-w-[1200px] space-y-4 px-5 py-6 md:px-8 md:py-8">
         {/* Loading */}
         {loading && (
           <div className="space-y-4">
@@ -3661,6 +3802,11 @@ export default function ClientDetailPage() {
               onSelectSnapshotId={setSelectedSnapshotId}
               runSnapshot={runSnapshot}
               running={running}
+              gapTrendDelta={
+                selectedSnapshot?.vrtl_score != null && previousSnapshot?.vrtl_score != null
+                  ? selectedSnapshot.vrtl_score - previousSnapshot.vrtl_score
+                  : null
+              }
             />
 
             <WhatIsWrongSection
@@ -3673,9 +3819,9 @@ export default function ClientDetailPage() {
             />
 
             <DashboardSection
-              title="What to Fix Now"
-              subtitle="Max two moves per card. Upside is estimated."
-              className="pt-4"
+              title="What to do now"
+              subtitle={<span className="text-xs text-text-3">Two bullets per card. Upside is estimated.</span>}
+              className="!pt-4 !space-y-2"
             >
               <ExecutionPriorities
                 score={selectedSnapshot?.vrtl_score ?? null}
@@ -3686,27 +3832,30 @@ export default function ClientDetailPage() {
             </DashboardSection>
 
             <DashboardSection
-              title="Competitive position"
-              subtitle="Index trend and citation share — context for the actions above."
+              title="Why you're losing"
+              subtitle={<span className="text-xs text-text-3">Trend and share vs leader — backs up the problem above.</span>}
+              className="!pt-4 !space-y-2"
             >
-              <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12 lg:gap-8">
-                <div className="lg:col-span-7">
-                  <BigTrendChart snapshots={snapshots} embedded minimalHeader />
-                </div>
-                <div className="lg:col-span-5">
-                  <AIAnswerMarketShareChart
-                    clientName={client.name}
-                    detail={snapshotDetail}
-                    onRunSnapshot={runSnapshot}
-                    running={running}
-                    snapshotStatus={selectedSnapshot?.status ?? null}
-                    gapTrendDelta={
-                      selectedSnapshot?.vrtl_score != null && previousSnapshot?.vrtl_score != null
-                        ? selectedSnapshot.vrtl_score - previousSnapshot.vrtl_score
-                        : null
-                    }
-                    sideBySide
-                  />
+              <div className="opacity-[0.88] contrast-[0.96]">
+                <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-12 lg:gap-5">
+                  <div className="lg:col-span-7">
+                    <BigTrendChart snapshots={snapshots} embedded minimalHeader />
+                  </div>
+                  <div className="lg:col-span-5">
+                    <AIAnswerMarketShareChart
+                      clientName={client.name}
+                      detail={snapshotDetail}
+                      onRunSnapshot={runSnapshot}
+                      running={running}
+                      snapshotStatus={selectedSnapshot?.status ?? null}
+                      gapTrendDelta={
+                        selectedSnapshot?.vrtl_score != null && previousSnapshot?.vrtl_score != null
+                          ? selectedSnapshot.vrtl_score - previousSnapshot.vrtl_score
+                          : null
+                      }
+                      sideBySide
+                    />
+                  </div>
                 </div>
               </div>
             </DashboardSection>
