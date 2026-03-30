@@ -826,7 +826,7 @@ function generateStrategicInsights(
     });
   }
   
-  return insights.slice(0, 4);
+  return insights.slice(0, 12);
 }
 
 function Recommendations({
@@ -1904,140 +1904,6 @@ function BigTrendChart({
   );
 }
 
-/** Hero: one story — weakest model is the problem surface. */
-function getHeroProblemLines(
-  score: number | null,
-  providers: [string, number][]
-): { headline: string; subtext: string } {
-  const sortedAsc = [...providers].sort((a, b) => a[1] - b[1]);
-  const weakest = sortedAsc.length > 0 ? getProviderDisplayName(sortedAsc[0]![0]) : null;
-  const { label: statusLabel } = getScoreLabel(score);
-
-  if (score == null || !weakest) {
-    return {
-      headline: "No authority read yet",
-      subtext: "Run a snapshot to expose the weak channel.",
-    };
-  }
-
-  const losingTone = statusLabel === "Losing Ground" || statusLabel === "Watchlist" || (score ?? 0) < 65;
-  return {
-    headline: losingTone ? `You're losing due to ${weakest}` : `Weakest channel: ${weakest}`,
-    subtext: "Fix this first or displacement accelerates",
-  };
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   HERO — verdict only (no charts; proof lives in “Why you’re losing”)
-═══════════════════════════════════════════════════════════════════════════ */
-function HeroSection({
-  client,
-  score,
-  previousScore,
-  providers,
-  snapshots,
-  snapshotId,
-  snapshotStatus,
-  selectedSnapshotId,
-  onSelectSnapshotId,
-  runSnapshot,
-  running,
-}: {
-  client: ClientRow;
-  score: number | null;
-  previousScore: number | null;
-  providers: [string, number][];
-  snapshots: SnapshotRow[];
-  snapshotId: string | null;
-  snapshotStatus: string | null;
-  selectedSnapshotId: string | null;
-  onSelectSnapshotId: (id: string) => void;
-  runSnapshot: () => void;
-  running: boolean;
-}) {
-  const domain = faviconDomain(client.website);
-  const logoSrc = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=48` : null;
-  const { label: statusLabel } = getScoreLabel(score);
-  const delta = score != null && previousScore != null ? score - previousScore : null;
-  const { headline, subtext } = getHeroProblemLines(score, providers);
-
-  return (
-    <section className="w-full max-w-xl border-b border-white/[0.08] pb-3">
-      <div className="space-y-2">
-        <div className="flex min-w-0 items-center gap-2.5 border-b border-white/[0.06] pb-1.5">
-          {logoSrc ? (
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08]">
-              <img src={logoSrc} alt="" className="h-5 w-5 object-contain" width={20} height={20} />
-            </span>
-          ) : (
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center border border-white/[0.08] text-xs font-bold text-text-3">
-              {client.name.charAt(0)}
-            </span>
-          )}
-          <div className="min-w-0">
-            <h1 className="truncate text-sm font-semibold tracking-tight text-text">{client.name}</h1>
-            <p className="truncate text-[11px] text-text-2">{domain || client.website || "—"}</p>
-          </div>
-        </div>
-
-        <span
-          className={cn(
-            "inline-flex rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em]",
-            getAuthorityStatusTone(score)
-          )}
-        >
-          {statusLabel}
-        </span>
-
-        <div className="flex flex-wrap items-end gap-x-2.5 gap-y-0">
-          <span className="text-3xl font-extrabold tabular-nums tracking-tight text-text md:text-4xl">{score ?? "—"}</span>
-          {delta !== null && delta !== 0 && (
-            <span className="flex items-center gap-1 tabular-nums">
-              {delta < 0 ? (
-                <span className="text-base font-bold text-authority-losing" aria-hidden>
-                  ↓
-                </span>
-              ) : (
-                <span className="text-base font-bold text-authority-dominant" aria-hidden>
-                  ↑
-                </span>
-              )}
-              <span
-                className={cn(
-                  "text-sm font-bold",
-                  delta > 0 ? "text-authority-dominant" : delta < 0 ? "text-authority-losing" : "text-text-2"
-                )}
-              >
-                {delta > 0 ? "+" : ""}
-                {delta}
-              </span>
-              <span className="text-[10px] font-medium text-text-3">vs last</span>
-            </span>
-          )}
-        </div>
-
-        <p className="text-sm font-semibold leading-tight text-text md:text-base">{headline}</p>
-        <p className="text-xs font-medium leading-snug text-text-2">{subtext}</p>
-
-        <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-          <RunSnapshotButton
-            running={running}
-            snapshotStatus={snapshotStatus}
-            onRunSnapshot={runSnapshot}
-            className="!h-8 !w-auto !rounded-md !border-0 !bg-white !px-3 !py-0 !text-xs !font-semibold !text-surface !shadow-sm hover:!bg-white/90"
-          />
-          {snapshotId && (
-            <DownloadPdfButton snapshotId={snapshotId} variant="ghost" label="Download report" className="inline-block [&_button]:!h-8 [&_button]:!px-2.5 [&_button]:!text-xs" />
-          )}
-        </div>
-        <div className="[&_label]:text-[10px] [&_label]:text-text-3 [&_select]:h-7 [&_select]:py-0.5 [&_select]:text-[11px]">
-          <SnapshotSelector snapshots={snapshots} selectedId={selectedSnapshotId} onSelect={onSelectSnapshotId} />
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ═══════════════════════════════════════════════════════════════════════════
    AI Answer Market Share — horizontal bar leaderboard (citation share by brand)
 ═══════════════════════════════════════════════════════════════════════════ */
@@ -2068,6 +1934,7 @@ function AIAnswerMarketShareChart({
   snapshotStatus,
   gapTrendDelta,
   sideBySide,
+  proofZone,
 }: {
   clientName: string;
   detail: SnapshotDetailResponse | null;
@@ -2075,8 +1942,10 @@ function AIAnswerMarketShareChart({
   running?: boolean;
   snapshotStatus?: string | null;
   gapTrendDelta?: number | null;
-  /** Donut + share list beside (proof section) */
+  /** Donut + share list beside */
   sideBySide?: boolean;
+  /** Proof-only: red client, share bars, no CTAs */
+  proofZone?: boolean;
 }) {
   const rows = useMemo(() => {
     if (!detail?.summary) return [];
@@ -2118,10 +1987,10 @@ function AIAnswerMarketShareChart({
     return (
       <>
         <div className="grid place-items-center py-2">
-          <div className="h-40 w-40 animate-pulse rounded-full border-8 border-white/[0.08]" />
+          <div className="h-40 w-40 rounded-full border-8 border-white/[0.08]" />
         </div>
-        <p className="mt-4 text-sm text-text-3">Run a snapshot to generate citation share by brand.</p>
-        {onRunSnapshot && (
+        <p className="mt-4 text-sm font-normal text-text-3">Run a snapshot to generate citation share by brand.</p>
+        {!proofZone && onRunSnapshot && (
           <div className="mt-3 flex justify-end">
             <RunSnapshotButton running={running ?? false} snapshotStatus={snapshotStatus ?? null} onRunSnapshot={onRunSnapshot} />
           </div>
@@ -2142,7 +2011,9 @@ function AIAnswerMarketShareChart({
   const slices = rows.map((row, idx) => {
     const length = (row.share / 100) * circumference;
     const stroke = row.isClient
-      ? "rgba(245,158,11,0.95)"
+      ? proofZone
+        ? "rgba(248,113,113,0.95)"
+        : "rgba(245,158,11,0.95)"
       : row.isLeader
         ? neutral[0]
         : neutral[Math.min(idx, neutral.length - 1)];
@@ -2168,8 +2039,11 @@ function AIAnswerMarketShareChart({
 
   const shareGap =
     clientRow && topCompetitor ? Math.max(0, topCompetitor.share - clientRow.share) : null;
-  const gapLine =
-    gapTrendDelta != null
+  const gapLine = proofZone
+    ? shareGap != null
+      ? `Losing ground — ${shareGap}% gap to leader`
+      : "Share gap — run another snapshot"
+    : gapTrendDelta != null
       ? gapTrendDelta > 0
         ? `Closing gap: -${Math.abs(gapTrendDelta)}% vs leader`
         : gapTrendDelta < 0
@@ -2195,37 +2069,55 @@ function AIAnswerMarketShareChart({
         </svg>
         <div className="absolute inset-0 grid place-items-center">
           <div className="text-center">
-            <p className="text-2xl font-semibold tabular-nums text-text">{clientRow ? `#${clientRow.rank}` : "—"}</p>
-            <p className="mt-0.5 text-sm tabular-nums text-text-2">{clientRow ? `${clientRow.share}%` : "—"}</p>
-            {!sideBySide && (
+            <p className="text-2xl font-medium tabular-nums text-text">{clientRow ? `#${clientRow.rank}` : "—"}</p>
+            <p className="mt-0.5 text-sm font-normal tabular-nums text-text-2">{clientRow ? `${clientRow.share}%` : "—"}</p>
+            {!sideBySide && !proofZone && (
               <p className="mt-1 max-w-[120px] text-[10px] leading-snug text-text-3">{gapLine}</p>
             )}
           </div>
         </div>
       </div>
-      {sideBySide && (
+      {sideBySide && !proofZone && (
         <p className="mt-2 max-w-[160px] text-center text-[11px] leading-snug text-text-2">{gapLine}</p>
       )}
     </div>
   );
 
   const shareList = (
-    <ul className={cn("min-w-0 flex-1 space-y-1.5", sideBySide && "pt-1")}>
+    <ul className={cn("min-w-0 flex-1 space-y-2", sideBySide && "pt-1")}>
       {rows.map((row, i) => (
-        <li key={row.name} className="flex items-center justify-between gap-3 text-sm">
-          <div className="flex min-w-0 items-center gap-2">
-            <span
-              className="h-2 w-2 shrink-0 rounded-full"
-              style={{
-                backgroundColor: row.isClient ? "rgba(245,158,11,0.95)" : row.isLeader ? neutral[0] : neutral[Math.min(i, neutral.length - 1)],
-              }}
-            />
-            <span className={cn("truncate", row.isClient ? "font-semibold text-text" : "text-text-2")}>
-              {normalizeBrandName(row.name)}
-              {row.isClient ? " (You)" : ""}
+        <li key={row.name} className="text-sm">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2">
+              <span
+                className="h-2 w-2 shrink-0 rounded-full"
+                style={{
+                  backgroundColor: row.isClient
+                    ? proofZone
+                      ? "rgba(248,113,113,0.95)"
+                      : "rgba(245,158,11,0.95)"
+                    : row.isLeader
+                      ? neutral[0]
+                      : neutral[Math.min(i, neutral.length - 1)],
+                }}
+              />
+              <span className={cn("truncate", row.isClient ? "font-medium text-text" : "font-normal text-text-2")}>
+                {normalizeBrandName(row.name)}
+                {row.isClient ? " (You)" : ""}
+              </span>
+            </div>
+            <span className={cn("shrink-0 tabular-nums", row.isClient ? "font-medium text-red-300" : "font-normal text-text-3")}>
+              {row.share}%
             </span>
           </div>
-          <span className={cn("shrink-0 tabular-nums", row.isClient ? "font-semibold text-text" : "text-text-3")}>{row.share}%</span>
+          {proofZone && (
+            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-sm bg-white/[0.08]">
+              <div
+                className={cn("h-full rounded-sm", row.isClient ? "bg-red-500/70" : "bg-white/25")}
+                style={{ width: `${row.share}%` }}
+              />
+            </div>
+          )}
         </li>
       ))}
     </ul>
@@ -2233,7 +2125,15 @@ function AIAnswerMarketShareChart({
 
   return (
     <div className="space-y-2">
-      {sideBySide ? (
+      {proofZone ? (
+        <>
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-8">
+            {donutBlock}
+            <div className="min-w-0 flex-1">{shareList}</div>
+          </div>
+          <p className="mt-3 text-[13px] font-normal text-text-2">{gapLine}</p>
+        </>
+      ) : sideBySide ? (
         <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-start sm:gap-6">
           {donutBlock}
           {shareList}
@@ -2270,41 +2170,6 @@ function getModelLogoKey(provider: string): string {
   return "";
 }
 
-/* Per-model vulnerability detail for expandable content */
-function getModelVulnerabilityDetail(
-  key: string,
-  score: number | null,
-  detail: SnapshotDetailResponse | null
-): { whatsWrong: string[]; evidence: string[]; quickWins: string[] } {
-  const whatsWrong = score != null ? getModelSignals(score, detail) : ["Run a snapshot to see issues."];
-  const evidence: string[] = [];
-  const quickWins: string[] = [];
-  if (detail && score != null) {
-    const mentionRate = pct(detail.summary.client_mentioned_count, detail.summary.responses_count || 1);
-    const citationRate = pct(detail.summary.sources_count, detail.summary.responses_count || 1);
-    if (mentionRate < 50) evidence.push(`Mentioned in ${mentionRate}% of AI responses`);
-    else evidence.push(`Mentioned in ${mentionRate}% of responses`);
-    if (citationRate < 20) evidence.push(`Citations in ${citationRate}% of responses — below threshold`);
-    else evidence.push(`Citations in ${citationRate}% of responses`);
-    if (score < 50) {
-      quickWins.push("Audit content for model-specific optimization");
-      quickWins.push("Strengthen structured data and entity markup");
-    }
-    if (mentionRate < 50) quickWins.push("Increase brand authority through PR and backlinks");
-    if (quickWins.length === 0 && score < 80) quickWins.push("Monitor retrieval signals and maintain content quality");
-  }
-  if (evidence.length === 0) evidence.push("Run a snapshot to see evidence signals.");
-  if (quickWins.length === 0) quickWins.push("Run a snapshot to get quick wins.");
-  return { whatsWrong, evidence: evidence.slice(0, 4), quickWins: quickWins.slice(0, 4) };
-}
-
-function firstStrategicSentence(text: string): string {
-  const t = text.trim();
-  if (!t) return t;
-  const part = t.split(/(?<=[.!?])\s+/)[0];
-  return part ?? t;
-}
-
 /* ═══════════════════════════════════════════════════════════════════════════
    MODEL CHANNELS — score, issue, action inline; evidence expandable
 ═══════════════════════════════════════════════════════════════════════════ */
@@ -2315,18 +2180,292 @@ const MODEL_INSIGHT_MATCH: Record<(typeof VULN_MODELS)[number], RegExp> = {
   anthropic: /anthropic|claude/i,
 };
 
+function sortStrategicInsights(
+  insights: StrategicInsight[],
+  providers: [string, number][]
+): StrategicInsight[] {
+  let weakestKey: (typeof VULN_MODELS)[number] | null = null;
+  let min = Infinity;
+  for (const [p, s] of providers) {
+    const k = getModelLogoKey(p);
+    if (!k || !VULN_MODELS.includes(k as (typeof VULN_MODELS)[number])) continue;
+    if (s < min) {
+      min = s;
+      weakestKey = k as (typeof VULN_MODELS)[number];
+    }
+  }
+  const re = weakestKey ? MODEL_INSIGHT_MATCH[weakestKey] : null;
+  const pri = (x: StrategicInsight) => (x.priority === "HIGH" ? 0 : x.priority === "MEDIUM" ? 1 : 2);
+  return [...insights].sort((a, b) => {
+    const aW = re?.test(`${a.title} ${a.action}`) ? 0 : 1;
+    const bW = re?.test(`${b.title} ${b.action}`) ? 0 : 1;
+    if (aW !== bW) return aW - bW;
+    return pri(a) - pri(b);
+  });
+}
+
+function tacticalActionBullets(action: string): string[] {
+  const parts = action.split(/(?<=[.!])\s+/).filter(Boolean).map((s) => s.trim()).slice(0, 2);
+  const raw = parts.length > 0 ? parts : [action];
+  return raw.map((b) =>
+    b
+      .replace(/^\s*Focus on\s+/gi, "")
+      .replace(/^\s*Build\s+/gi, "Add ")
+      .replace(/^\s*Create\s+/gi, "Ship ")
+      .replace(/\bAudit\b/i, "Fix")
+      .replace(/\bInvest in brand authority through\b/i, "Ship authority via")
+      .trim()
+  );
+}
+
+type ModelTerminalStatus = "strong" | "degrading" | "critical";
+
+function getModelTerminalStatus(score: number): ModelTerminalStatus {
+  if (score >= 80) return "strong";
+  if (score >= 50) return "degrading";
+  return "critical";
+}
+
+function modelTerminalPillClass(s: ModelTerminalStatus): string {
+  if (s === "strong") return "bg-emerald-500/15 text-emerald-300";
+  if (s === "degrading") return "bg-amber-500/15 text-amber-300";
+  return "bg-red-500/15 text-red-300";
+}
+
+function modelTerminalLabel(s: ModelTerminalStatus): string {
+  if (s === "strong") return "Strong";
+  if (s === "degrading") return "Degrading";
+  return "Critical";
+}
+
+function getModelDiagnosisOneLine(key: (typeof VULN_MODELS)[number], terminal: ModelTerminalStatus): string {
+  if (terminal === "strong") return "Strong entity coverage — mirror this structure elsewhere";
+  if (terminal === "degrading") {
+    return key === "gemini"
+      ? "Retrieval gap detected — content needs model-specific audit"
+      : "Retrieval softening — tighten entities and citations";
+  }
+  return key === "anthropic"
+    ? "Authority failure — not being cited in structured answers"
+    : "Critical retrieval gap — rebuild structured signals";
+}
+
+function primaryActionUpside(priority: StrategicInsight["priority"]): string {
+  if (priority === "HIGH") return "+8–14 pts";
+  if (priority === "MEDIUM") return "+4–8 pts";
+  return "+2–5 pts";
+}
+
+function buildModelPlaybook(
+  key: (typeof VULN_MODELS)[number],
+  label: string,
+  modelScore: number | null,
+  matched: StrategicInsight | undefined
+): {
+  fullDiagnosis: string;
+  whyItMatters: string;
+  steps: string[];
+  expectedImpact: string;
+} {
+  const genericWhy =
+    key === "anthropic"
+      ? `${label} (Claude) is increasingly used for branded product research and recommendation queries. Low authority here means you are invisible in high-intent AI answers.`
+      : key === "openai"
+        ? `${label} drives a large share of discovery queries. Weak scores here shrink visible demand.`
+        : `${label} retrieval favors structured facts and clear entities. Gaps show up as lower mention rank.`;
+
+  const fullDiagnosis = matched
+    ? formatPlaybookText([matched.whyItMatters, matched.insight].filter(Boolean).join(" ").trim())
+    : modelScore != null && modelScore < 50
+      ? `${label} does not retrieve you reliably because your content lacks the structural signals this model weights: entity schemas, authoritative citations, and direct-answer formatting.`
+      : modelScore != null && modelScore >= 80
+        ? `${label} is retrieving and citing you with strong alignment. Treat this channel as the template for weaker models.`
+        : `${label} shows mixed retrieval signals. Tighten structured data and quotable facts.`;
+
+  const steps: string[] = [];
+  if (matched?.action) {
+    const parts = matched.action.split(/(?<=[.!])\s+/).map((s) => s.trim()).filter(Boolean);
+    for (const p of parts.slice(0, 4)) {
+      steps.push(formatPlaybookText(p.replace(/^./, (c) => c.toUpperCase())));
+    }
+  }
+  const fallbackSteps = [
+    "Publish JSON-LD schema for brand, product, and key entities",
+    "Add FAQ blocks targeting retrieval-style queries",
+    "Place brand facts on high-authority third-party domains",
+    "Reformat key pages to direct-answer structure",
+  ];
+  let fi = 0;
+  while (steps.length < 4) {
+    steps.push(fallbackSteps[fi] ?? "Re-run snapshot after changes");
+    fi++;
+  }
+
+  return {
+    fullDiagnosis: formatPlaybookText(fullDiagnosis),
+    whyItMatters: formatPlaybookText(matched?.whyItMatters?.trim() || genericWhy),
+    steps: steps.slice(0, 4),
+    expectedImpact: formatPlaybookText(matched?.expectedImpact?.trim() || "+8–14 pts over 2–3 snapshot cycles"),
+  };
+}
+
+function DecisionSurface({
+  client,
+  score,
+  previousScore,
+  providers,
+  snapshots,
+  snapshotId,
+  snapshotStatus,
+  selectedSnapshotId,
+  onSelectSnapshotId,
+  runSnapshot,
+  running,
+  competitors,
+  detail,
+}: {
+  client: ClientRow;
+  score: number | null;
+  previousScore: number | null;
+  providers: [string, number][];
+  snapshots: SnapshotRow[];
+  snapshotId: string | null;
+  snapshotStatus: string | null;
+  selectedSnapshotId: string | null;
+  onSelectSnapshotId: (id: string) => void;
+  runSnapshot: () => void;
+  running: boolean;
+  competitors: CompetitorRow[];
+  detail: SnapshotDetailResponse | null;
+}) {
+  const domain = faviconDomain(client.website);
+  const logoSrc = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=48` : null;
+  const { label: statusLabel } = getScoreLabel(score);
+  const delta = score != null && previousScore != null ? score - previousScore : null;
+
+  const sortedInsights = useMemo(
+    () => sortStrategicInsights(generateStrategicInsights(score, providers, competitors, detail), providers),
+    [score, providers, competitors, detail]
+  );
+  const primary = sortedInsights[0];
+
+  const sortedProviders = useMemo(() => [...providers].sort((a, b) => a[1] - b[1]), [providers]);
+  const weakestEntry = sortedProviders[0];
+  const weakestName = weakestEntry ? getProviderDisplayName(weakestEntry[0]) : null;
+
+  const problemLine =
+    score == null || !weakestName ? "Run a snapshot to surface the weak channel." : `You are losing authority due to ${weakestName}`;
+
+  const causeLine =
+    primary?.whyItMatters?.trim() ||
+    (weakestName
+      ? `Not being retrieved in ${weakestName} answers — displacement is accelerating.`
+      : "Run a snapshot to isolate retrieval failure.");
+
+  const topBullets = primary ? tacticalActionBullets(primary.action) : [];
+
+  return (
+    <section className="w-full border-b border-white/[0.08] pb-6">
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-white/[0.06] pb-3">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          {logoSrc ? (
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08]">
+              <img src={logoSrc} alt="" className="h-6 w-6 object-contain" width={24} height={24} />
+            </span>
+          ) : (
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-white/[0.08] text-xs font-medium text-text-3">
+              {client.name.charAt(0)}
+            </span>
+          )}
+          <div className="min-w-0">
+            <h1 className="truncate text-base font-medium tracking-tight text-text">{client.name}</h1>
+            <p className="truncate text-xs font-normal text-text-2">{domain || client.website || "—"}</p>
+          </div>
+          <span
+            className={cn("ml-0.5 shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-medium", getAuthorityStatusTone(score))}
+          >
+            {statusLabel}
+          </span>
+        </div>
+        <div className="[&_label]:text-[10px] [&_label]:font-normal [&_label]:text-text-3 [&_select]:h-7 [&_select]:max-w-[220px] [&_select]:rounded-md [&_select]:border [&_select]:border-white/10 [&_select]:bg-transparent [&_select]:py-1 [&_select]:text-[11px] [&_select]:font-normal [&_select]:text-text-2">
+          <SnapshotSelector snapshots={snapshots} selectedId={selectedSnapshotId} onSelect={onSelectSnapshotId} />
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-end justify-between gap-3 border-b border-white/[0.06] pb-4">
+        <div className="flex flex-wrap items-end gap-3">
+          <span className="text-[56px] font-medium leading-none tracking-[-0.03em] text-text tabular-nums md:text-[64px]">
+            {score ?? "—"}
+          </span>
+          {delta !== null && delta !== 0 && (
+            <span
+              className={cn(
+                "mb-2 inline-flex items-center gap-0.5 rounded-full px-2.5 py-1 text-[13px] font-medium tabular-nums",
+                delta < 0 ? "bg-red-500/20 text-red-300" : "bg-emerald-500/20 text-emerald-300"
+              )}
+            >
+              {delta < 0 ? <span aria-hidden>↓</span> : <span aria-hidden>↑</span>}
+              <span>
+                {delta > 0 ? "+" : ""}
+                {delta}
+              </span>
+              <span className="font-normal opacity-80">vs last</span>
+            </span>
+          )}
+        </div>
+        <p className="mb-3 text-right text-[13px] font-normal text-text-3">Overall VrtlScore</p>
+      </div>
+
+      <div className="mt-4 space-y-2">
+        <p className="max-w-2xl text-base font-medium leading-snug text-text">{problemLine}</p>
+        <p className="max-w-2xl text-sm font-normal leading-snug text-text-2">{causeLine}</p>
+      </div>
+
+      {primary && (
+        <div className="mt-5 max-w-xl rounded-xl border border-red-500/35 bg-red-500/[0.08] px-5 py-[18px]">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-[11px] font-medium uppercase tracking-wide text-red-300">Fix this first</span>
+            <span className="text-[13px] font-medium tabular-nums text-red-200">{primaryActionUpside(primary.priority)}</span>
+          </div>
+          <p className="mt-2 text-base font-medium text-text">{primary.title}</p>
+          <ul className="mt-2 space-y-1">
+            {topBullets.map((b, i) => (
+              <li key={i} className="text-[13px] font-normal leading-snug text-red-300/90">
+                → {b}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div className="mt-5 flex flex-wrap items-center gap-2">
+        <RunSnapshotButton
+          running={running}
+          snapshotStatus={snapshotStatus}
+          onRunSnapshot={runSnapshot}
+          className="!h-auto !rounded-lg !border-0 !bg-text !px-4 !py-2 !text-[13px] !font-medium !text-surface !shadow-none hover:!opacity-90"
+        />
+        {snapshotId && (
+          <DownloadPdfButton
+            snapshotId={snapshotId}
+            variant="ghost"
+            label="Download report"
+            className="inline-block [&_button]:!rounded-lg [&_button]:!border [&_button]:!border-white/15 [&_button]:!bg-transparent [&_button]:!px-4 [&_button]:!py-2 [&_button]:!text-[13px] [&_button]:!font-medium [&_button]:!text-text-2"
+          />
+        )}
+      </div>
+    </section>
+  );
+}
+
 function WhatIsWrongSection({
   providers,
   detail,
-  snapshots,
-  previousSnapshot,
   score,
   competitors,
 }: {
   providers: [string, number][];
   detail: SnapshotDetailResponse | null;
-  snapshots: SnapshotRow[];
-  previousSnapshot: SnapshotRow | null;
   score: number | null;
   competitors: CompetitorRow[];
 }) {
@@ -2338,39 +2477,10 @@ function WhatIsWrongSection({
     }
     return map;
   }, [providers]);
-  const modelSeries = useMemo(() => {
-    const filtered = snapshots.filter(
-      (s) => s.vrtl_score != null && (s.status?.toLowerCase().includes("complete") || s.status?.toLowerCase().includes("success"))
-    ).slice(0, 6);
-    const rev = [...filtered].reverse();
-    const out: Record<string, number[]> = { openai: [], gemini: [], anthropic: [] };
-    rev.forEach((s) => {
-      const by = s.score_by_provider as Record<string, number> | null;
-      if (!by) return;
-      VULN_MODELS.forEach((key) => {
-        const k = Object.keys(by).find((k2) => {
-          const p = k2.toLowerCase();
-          if (key === "openai") return p.includes("openai") || p.includes("chatgpt");
-          if (key === "gemini") return p.includes("gemini") || p.includes("google");
-          if (key === "anthropic") return p.includes("anthropic") || p.includes("claude");
-          return false;
-        });
-        if (k != null) out[key].push(by[k]!);
-      });
-    });
-    return out;
-  }, [snapshots]);
-
-  const prioritizedInsights = useMemo(() => {
-    const insights = generateStrategicInsights(score, providers, competitors, detail);
-    return [...insights]
-      .sort(
-        (a, b) =>
-          (a.priority === "HIGH" ? 0 : a.priority === "MEDIUM" ? 1 : 2) -
-          (b.priority === "HIGH" ? 0 : b.priority === "MEDIUM" ? 1 : 2)
-      )
-      .slice(0, 5);
-  }, [score, providers, competitors, detail]);
+  const prioritizedInsights = useMemo(
+    () => sortStrategicInsights(generateStrategicInsights(score, providers, competitors, detail), providers),
+    [score, providers, competitors, detail]
+  );
 
   const insightIdxByModel = useMemo(() => {
     const used = new Set<number>();
@@ -2392,25 +2502,8 @@ function WhatIsWrongSection({
     return idxByModel;
   }, [prioritizedInsights]);
 
-  const weakestModelKey = useMemo(() => {
-    let worst: (typeof VULN_MODELS)[number] | null = null;
-    let min = Infinity;
-    for (const key of VULN_MODELS) {
-      const sc = providerByKey.get(key)?.[1];
-      if (sc != null && sc < min) {
-        min = sc;
-        worst = key;
-      }
-    }
-    return worst;
-  }, [providerByKey]);
-
   return (
-    <DashboardSection
-      title="Model breakdown"
-      subtitle={<span className="text-xs text-text-3">Where performance is helping or hurting</span>}
-      className="!space-y-1.5 !pt-4"
-    >
+    <DashboardSection title="Where you're winning and losing" noTopRule className="!space-y-1 !pt-4">
       <div>
         <div>
           {VULN_MODELS.map((key) => {
@@ -2418,66 +2511,25 @@ function WhatIsWrongSection({
             const modelScore = entry ? entry[1] : null;
             const label = getModelDisplayName(key);
             const logoUrl = MODEL_LOGO[key];
-            const statusTag = modelScore != null ? getMatrixStatusTag(modelScore) : null;
-            const gap = modelScore != null ? 100 - modelScore : null;
             const barPct = modelScore != null ? modelScore : 0;
-            const barColor = modelScore != null
-              ? modelScore >= 80
-                ? "bg-authority-dominant"
-                : modelScore >= 60
-                  ? "bg-sky-400/80"
-                  : modelScore >= 40
-                    ? "bg-authority-watchlist"
-                    : "bg-authority-losing"
-              : "bg-white/20";
-            const prevScore = previousSnapshot?.score_by_provider
-              ? (() => {
-                  const by = previousSnapshot.score_by_provider as Record<string, number>;
-                  const k = Object.keys(by).find((k2) => getModelLogoKey(k2) === key);
-                  return k != null ? by[k] ?? null : null;
-                })()
-              : null;
-            const delta = modelScore != null && prevScore != null ? modelScore - prevScore : null;
-            const series = modelSeries[key] ?? [];
-            const { whatsWrong, evidence, quickWins } = getModelVulnerabilityDetail(key, modelScore, detail);
             const insIdx = insightIdxByModel[key];
             const matched = insIdx !== undefined ? prioritizedInsights[insIdx] : undefined;
-            const primaryIssue = formatPlaybookText(
-              matched?.whyItMatters?.trim() || whatsWrong[0] || "Run a snapshot to surface channel-specific issues."
-            );
-            const highlightWeakest = key === weakestModelKey && modelScore != null;
-            const primaryAction = formatPlaybookText(
-              matched?.action
-                ? firstStrategicSentence(matched.action)
-                    .replace(/\bAudit\b/i, "Fix")
-                    .replace(/\bAdd\b/i, "Publish")
-                    .replace(/\bInvest in\b/i, "Execute")
-                    .replace(/\bFocus on\b/gi, "")
-                    .replace(/\bBuild\b/gi, "Add")
-                    .replace(/\bCreate\b/gi, "Ship")
-                : highlightWeakest
-                  ? `Fix content for ${label}-specific retrieval patterns`
-                  : quickWins[0] || "Run a snapshot for channel fixes."
-            );
+            const terminal = modelScore != null ? getModelTerminalStatus(modelScore) : "critical";
+            const playbook = buildModelPlaybook(key, label, modelScore, matched);
+            const diagnosisLine = getModelDiagnosisOneLine(key, terminal);
+            const rowCritical = terminal === "critical";
 
             return (
-              <VulnerabilityRow
+              <DiagnosisModelRow
                 key={key}
                 label={label}
                 logoUrl={logoUrl}
                 score={modelScore}
-                statusTag={statusTag}
-                gapToLeader={gap}
+                terminal={terminal}
                 barPct={barPct}
-                barColor={barColor}
-                delta={delta}
-                series={series}
-                whatsWrong={whatsWrong}
-                evidence={evidence}
-                quickWins={quickWins}
-                primaryIssue={primaryIssue}
-                primaryAction={primaryAction}
-                highlightWeakest={highlightWeakest}
+                diagnosisLine={diagnosisLine}
+                playbook={playbook}
+                rowCritical={rowCritical}
               />
             );
           })}
@@ -2487,304 +2539,119 @@ function WhatIsWrongSection({
   );
 }
 
-function MicroSparkline({ scores, color }: { scores: number[]; color: string }) {
-  if (scores.length < 2) return null;
-  const w = 48;
-  const h = 20;
-  const max = Math.max(...scores, 100);
-  const min = Math.min(...scores, 0);
-  const range = max - min || 1;
-  const points = scores.map((val, i) => {
-    const x = (i / (scores.length - 1)) * w;
-    const y = h - ((val - min) / range) * (h - 4) - 2;
-    return `${x},${y}`;
-  }).join(" ");
-  return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="h-5 w-12 shrink-0" aria-hidden>
-      <polyline points={points} fill="none" stroke={color} strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function VulnerabilityRow({
+function DiagnosisModelRow({
   label,
   logoUrl,
   score,
-  statusTag,
-  gapToLeader,
+  terminal,
   barPct,
-  barColor,
-  delta,
-  series,
-  whatsWrong,
-  evidence,
-  quickWins,
-  primaryIssue,
-  primaryAction,
-  highlightWeakest,
+  diagnosisLine,
+  playbook,
+  rowCritical,
 }: {
   label: string;
   logoUrl: string;
   score: number | null;
-  statusTag: string | null;
-  gapToLeader: number | null;
+  terminal: ModelTerminalStatus;
   barPct: number;
-  barColor: string;
-  delta: number | null;
-  series: number[];
-  whatsWrong: string[];
-  evidence: string[];
-  quickWins: string[];
-  primaryIssue: string;
-  primaryAction: string;
-  highlightWeakest?: boolean;
+  diagnosisLine: string;
+  playbook: {
+    fullDiagnosis: string;
+    whyItMatters: string;
+    steps: string[];
+    expectedImpact: string;
+  };
+  rowCritical: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const trendColor = delta != null ? (delta >= 0 ? CHART_COLORS.dominant : CHART_COLORS.losing) : "#94a3b8";
-  const barClass = highlightWeakest ? cn(barColor, "ring-2 ring-red-400/45") : barColor;
+  const barFill =
+    terminal === "strong" ? "bg-emerald-500" : terminal === "degrading" ? "bg-amber-500" : "bg-red-500";
+  const accent =
+    terminal === "strong"
+      ? "border-l-emerald-500 bg-emerald-500/[0.04]"
+      : terminal === "degrading"
+        ? "border-l-amber-500 bg-amber-500/[0.04]"
+        : "border-l-red-500 bg-red-500/[0.04]";
+
   return (
     <div
       className={cn(
-        "group border-b border-white/[0.06] py-2 last:border-b-0",
-        highlightWeakest && "rounded-md bg-red-500/[0.14] px-2 py-2.5 ring-2 ring-red-500/50"
+        "border-b border-white/[0.06] py-3 last:border-b-0",
+        rowCritical && "rounded-md bg-red-500/[0.14] px-2 py-2",
+        !rowCritical && "opacity-[0.88]"
       )}
     >
-      <div
-        className={cn(
-          "grid w-full grid-cols-1 gap-0.5 md:grid-cols-[minmax(0,1.4fr)_auto_auto_minmax(0,1fr)_auto_auto] md:items-center md:gap-2",
-          !highlightWeakest && "opacity-[0.5]"
-        )}
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+        aria-expanded={open}
       >
-        <div className="flex min-w-0 items-center gap-2.5">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08] opacity-100">
-            <img src={logoUrl} alt="" className="h-5 w-5 object-contain" width={20} height={20} />
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 md:flex-nowrap md:items-center">
+          <div className="flex min-w-0 items-center gap-2 md:w-[132px]">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08]">
+              <img src={logoUrl} alt="" className="h-4 w-4 object-contain" width={16} height={16} />
+            </span>
+            <span className="truncate text-[13px] font-medium text-text">{label}</span>
           </div>
-          <span
-            className={cn(
-              "truncate text-xs",
-              highlightWeakest ? "font-semibold text-red-400" : "font-medium text-text-3"
-            )}
-          >
-            {label}
+          <div className="order-last min-h-[6px] w-full min-w-0 flex-1 md:order-none md:max-w-md">
+            <div className="h-1.5 w-full overflow-hidden rounded-sm bg-white/[0.08]">
+              <div className={cn("h-full rounded-sm", barFill)} style={{ width: `${barPct}%` }} />
+            </div>
+          </div>
+          {score != null ? (
+            <span className="w-11 shrink-0 text-right text-lg font-medium tabular-nums text-text md:w-12">{score}</span>
+          ) : (
+            <span className="w-11 shrink-0 text-right text-text-3">—</span>
+          )}
+          <span className={cn("shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-medium", modelTerminalPillClass(terminal))}>
+            {modelTerminalLabel(terminal)}
           </span>
         </div>
-        {score != null ? (
-          <span
-            className={cn(
-              "tabular-nums text-base md:text-sm",
-              highlightWeakest ? "font-semibold text-text" : "font-medium text-text-3"
-            )}
-          >
-            {score}
-          </span>
-        ) : (
-          <span className="text-xs text-text-3">—</span>
-        )}
-        <div className="flex flex-wrap items-center gap-1.5">
-          {statusTag && (
-            <span
-              className={cn(
-                "rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide",
-                statusTag === "Strong" && "bg-authority-dominant/20 text-authority-dominant",
-                statusTag === "Stable" && "bg-sky-400/20 text-sky-200",
-                statusTag === "Watchlist" && "bg-authority-watchlist/20 text-authority-watchlist",
-                statusTag === "Critical" && "bg-authority-losing/20 text-authority-losing"
-              )}
-            >
-              {statusTag}
-            </span>
-          )}
-        </div>
-        <div className="min-w-0 md:pr-2">
-          <div className="h-2 w-full max-w-[220px] overflow-hidden rounded-full bg-white/[0.08] md:max-w-none">
-            <div className={cn("h-full rounded-full", barClass)} style={{ width: `${barPct}%` }} />
-          </div>
-          {gapToLeader != null && (
-            <p className="mt-0.5 text-[10px] text-text-3">{gapToLeader} pts to 100</p>
-          )}
-        </div>
-        <div className="flex items-center gap-1.5">
-          {series.length >= 2 && <MicroSparkline scores={series} color={trendColor} />}
-          {delta != null && (
-            <span className={cn("text-[10px] font-semibold tabular-nums", delta >= 0 ? "text-authority-dominant" : "text-authority-losing")}>
-              {delta >= 0 ? "+" : ""}
-              {delta}
-            </span>
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          className="justify-self-end rounded p-1 text-text-3 transition-colors hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 md:justify-self-center"
-          aria-expanded={open}
-          aria-label={open ? "Hide evidence detail" : "Show evidence detail"}
-        >
-          <svg className={cn("h-4 w-4 transition-transform duration-200", open && "rotate-180")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-      </div>
-      <div className={cn("mt-1", !highlightWeakest && "opacity-90")}>
-        <p
-          className={cn(
-            "line-clamp-2 text-[10px] leading-snug",
-            highlightWeakest ? "text-text-2" : "text-text-3"
-          )}
-        >
-          {primaryIssue}
-        </p>
-        <p
-          className={cn(
-            "mt-0.5 leading-snug",
-            highlightWeakest ? "text-sm font-semibold text-text" : "text-[13px] font-medium text-text-2"
-          )}
-        >
-          Do this: {primaryAction}
-        </p>
-      </div>
+        <p className="mt-2 text-[13px] font-normal leading-snug text-text-2">{diagnosisLine}</p>
+      </button>
       <div
         className="grid transition-[grid-template-rows] duration-200 ease-out"
         style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
       >
         <div className="min-h-0 overflow-hidden">
-          <div className="border-t border-white/[0.06] pb-3 pt-2.5">
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">More</p>
-            <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-3 md:gap-5">
+          <div className={cn("mt-3 border-l-2 pl-4", accent)}>
+            <div className="space-y-4 py-2 pr-2">
               <div>
-                <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-text-3">What&apos;s wrong</h4>
-                <ul className="list-disc space-y-1 pl-4 text-sm text-text-2">
-                  {whatsWrong.map((b, i) => (
-                    <li key={i}>{formatPlaybookText(b)}</li>
-                  ))}
-                </ul>
+                <p className="text-[11px] font-medium uppercase tracking-wide text-text-3">Diagnosis</p>
+                <p className="mt-1 text-sm font-normal leading-relaxed text-text-2">{playbook.fullDiagnosis}</p>
               </div>
               <div>
-                <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-text-3">Evidence signals</h4>
-                <ul className="list-disc space-y-1 pl-4 text-sm text-text-2">
-                  {evidence.map((b, i) => (
-                    <li key={i}>{formatPlaybookText(b)}</li>
-                  ))}
-                </ul>
+                <p className="text-[11px] font-medium uppercase tracking-wide text-text-3">Why this model matters</p>
+                <p className="mt-1 text-sm font-normal leading-relaxed text-text-2">{playbook.whyItMatters}</p>
               </div>
               <div>
-                <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-text-3">Quick wins</h4>
-                <ul className="list-disc space-y-1 pl-4 text-sm text-text-2">
-                  {quickWins.map((b, i) => (
-                    <li key={i}>{formatPlaybookText(b)}</li>
+                <p className="text-[11px] font-medium uppercase tracking-wide text-text-3">Fixes</p>
+                <ol className="mt-2 list-none space-y-2">
+                  {playbook.steps.map((step, i) => (
+                    <li key={i} className="flex gap-2 text-sm font-normal text-text-2">
+                      <span className="w-14 shrink-0 font-medium text-text-3">Step {i + 1}</span>
+                      <span>{step}</span>
+                    </li>
                   ))}
-                </ul>
+                </ol>
+              </div>
+              <p className="border-t border-white/[0.06] pt-3 text-[13px] font-medium text-text-2">
+                Expected impact: {playbook.expectedImpact}
+              </p>
+              <div className="flex justify-end pt-1">
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="text-[12px] font-medium text-text-3 hover:text-text"
+                >
+                  ▲ Collapse
+                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   WHAT TO FIX NOW — compact impact blocks + tactical bullets
-═══════════════════════════════════════════════════════════════════════════ */
-function ExecutionPriorities({
-  score,
-  providers,
-  competitors,
-  detail,
-}: {
-  score: number | null;
-  providers: [string, number][];
-  competitors: CompetitorRow[];
-  detail: SnapshotDetailResponse | null;
-}) {
-  const top3 = useMemo(() => {
-    const insights = generateStrategicInsights(score, providers, competitors, detail);
-    let weakestKey: (typeof VULN_MODELS)[number] | null = null;
-    let min = Infinity;
-    for (const [p, s] of providers) {
-      const k = getModelLogoKey(p);
-      if (!k || !VULN_MODELS.includes(k as (typeof VULN_MODELS)[number])) continue;
-      if (s < min) {
-        min = s;
-        weakestKey = k as (typeof VULN_MODELS)[number];
-      }
-    }
-    const re = weakestKey ? MODEL_INSIGHT_MATCH[weakestKey] : null;
-    const pri = (x: StrategicInsight) => (x.priority === "HIGH" ? 0 : x.priority === "MEDIUM" ? 1 : 2);
-    return [...insights]
-      .sort((a, b) => {
-        const aW = re?.test(`${a.title} ${a.action}`) ? 0 : 1;
-        const bW = re?.test(`${b.title} ${b.action}`) ? 0 : 1;
-        if (aW !== bW) return aW - bW;
-        return pri(a) - pri(b);
-      })
-      .slice(0, 3);
-  }, [score, providers, competitors, detail]);
-
-  if (score === null) {
-    return <p className="text-xs text-text-3">Run a snapshot to load priorities.</p>;
-  }
-
-  if (top3.length === 0) {
-    return <p className="text-xs text-text-3">Nothing urgent — keep monitoring.</p>;
-  }
-
-  function actionBullets(action: string): string[] {
-    const parts = action.split(/(?<=[.!])\s+/).filter(Boolean).map((s) => s.trim()).slice(0, 2);
-    const raw = parts.length > 0 ? parts : [action];
-    return raw.map((b) =>
-      b
-        .replace(/^\s*Focus on\s+/gi, "")
-        .replace(/^\s*Build\s+/gi, "Add ")
-        .replace(/^\s*Create\s+/gi, "Ship ")
-        .replace(/\bAudit\b/i, "Fix")
-        .replace(/\bInvest in brand authority through\b/i, "Ship authority via")
-        .trim()
-    );
-  }
-
-  function upsideRange(priority: StrategicInsight["priority"]): string {
-    if (priority === "HIGH") return "+8–14 pts";
-    if (priority === "MEDIUM") return "+4–8 pts";
-    return "+2–5 pts";
-  }
-
-  function impactLabel(priority: StrategicInsight["priority"]): string {
-    if (priority === "HIGH") return "HIGH IMPACT";
-    if (priority === "MEDIUM") return "MEDIUM IMPACT";
-    return "LOWER IMPACT";
-  }
-
-  return (
-    <div className="max-w-[740px]">
-      <ul className="space-y-1.5">
-        {top3.map((insight, idx) => (
-          <li key={idx} className="rounded border border-white/[0.09] px-2.5 py-1.5">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <div className="mb-0.5 flex flex-wrap items-baseline gap-x-2 gap-y-0">
-                  <span
-                    className={cn(
-                      "text-[9px] font-bold uppercase tracking-[0.12em]",
-                      insight.priority === "HIGH" && "text-red-400",
-                      insight.priority === "MEDIUM" && "text-authority-watchlist",
-                      insight.priority === "LOW" && "text-text-3"
-                    )}
-                  >
-                    {impactLabel(insight.priority)}
-                  </span>
-                  <span className="text-[10px] tabular-nums text-text-3">{upsideRange(insight.priority)}</span>
-                </div>
-                <div className="text-[13px] font-semibold leading-snug text-text">{insight.title}</div>
-                <ul className="mt-0.5 list-disc space-y-0 pl-3 text-[11px] leading-snug text-text-2 marker:text-text-3">
-                  {actionBullets(insight.action).map((bullet, i) => (
-                    <li key={i}>{bullet}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }
@@ -3699,7 +3566,7 @@ export default function ClientDetailPage() {
 
             <div ref={heroSentinelRef} className="h-0" aria-hidden />
 
-            <HeroSection
+            <DecisionSurface
               client={client}
               score={selectedSnapshot?.vrtl_score ?? null}
               previousScore={previousSnapshot?.vrtl_score ?? null}
@@ -3711,53 +3578,28 @@ export default function ClientDetailPage() {
               onSelectSnapshotId={setSelectedSnapshotId}
               runSnapshot={runSnapshot}
               running={running}
+              competitors={competitors}
+              detail={snapshotDetail}
             />
-
-            <DashboardSection title="What to do now" noTopRule className="!pt-3 !space-y-2">
-              <ExecutionPriorities
-                score={selectedSnapshot?.vrtl_score ?? null}
-                providers={providers}
-                competitors={competitors}
-                detail={snapshotDetail}
-              />
-            </DashboardSection>
 
             <WhatIsWrongSection
               providers={providers}
               detail={snapshotDetail}
-              snapshots={snapshots}
-              previousSnapshot={previousSnapshot}
               score={selectedSnapshot?.vrtl_score ?? null}
               competitors={competitors}
             />
 
-            <DashboardSection
-              title="Why you're losing"
-              subtitle={
-                <span className="text-xs text-text-3">Trend and competitive share back up the problem above.</span>
-              }
-              className="!space-y-2 !pt-3 opacity-[0.72]"
-            >
-              <div className="grid grid-cols-1 items-start gap-3 lg:grid-cols-12 lg:gap-4">
-                <div className="lg:col-span-7">
-                  <BigTrendChart snapshots={snapshots} embedded minimalHeader demoted />
-                </div>
-                <div className="lg:col-span-5">
-                  <AIAnswerMarketShareChart
-                    clientName={client.name}
-                    detail={snapshotDetail}
-                    onRunSnapshot={runSnapshot}
-                    running={running}
-                    snapshotStatus={selectedSnapshot?.status ?? null}
-                    gapTrendDelta={
-                      selectedSnapshot?.vrtl_score != null && previousSnapshot?.vrtl_score != null
-                        ? selectedSnapshot.vrtl_score - previousSnapshot.vrtl_score
-                        : null
-                    }
-                    sideBySide
-                  />
-                </div>
-              </div>
+            <DashboardSection title="Why you're losing" className="!space-y-2 !pt-4 opacity-[0.85]">
+              <AIAnswerMarketShareChart
+                clientName={client.name}
+                detail={snapshotDetail}
+                gapTrendDelta={
+                  selectedSnapshot?.vrtl_score != null && previousSnapshot?.vrtl_score != null
+                    ? selectedSnapshot.vrtl_score - previousSnapshot.vrtl_score
+                    : null
+                }
+                proofZone
+              />
             </DashboardSection>
           </>
         )}
