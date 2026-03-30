@@ -1315,14 +1315,6 @@ function getModelDisplayName(key: string): string {
   return MODEL_DISPLAY_NAMES[key.toLowerCase()] ?? key;
 }
 
-/** Format playbook/display text: ensure Anthropic, OpenAI, Gemini are properly capitalized. */
-function formatPlaybookText(s: string): string {
-  if (!s?.trim()) return s;
-  return s
-    .replace(/\banthropic\b/gi, "Anthropic")
-    .replace(/\bopenai\b/gi, "OpenAI")
-    .replace(/\bgemini\b/gi, "Gemini");
-}
 function getProviderDisplayName(provider: string): string {
   const p = provider.toLowerCase();
   if (p.includes("openai") || p.includes("chatgpt")) return MODEL_DISPLAY_NAMES.openai;
@@ -2238,6 +2230,13 @@ function modelTerminalLabel(s: ModelTerminalStatus): string {
   return "Critical";
 }
 
+/** 2px left border accent for diagnosis rows and playbook (no row background tint). */
+function modelTerminalBorderHex(s: ModelTerminalStatus): string {
+  if (s === "strong") return "#639922";
+  if (s === "degrading") return "#EF9F27";
+  return "#E24B4A";
+}
+
 function getModelDiagnosisOneLine(key: (typeof VULN_MODELS)[number], terminal: ModelTerminalStatus): string {
   if (terminal === "strong") return "Strong entity coverage — mirror this structure elsewhere";
   if (terminal === "degrading") {
@@ -2256,57 +2255,57 @@ function primaryActionUpside(priority: StrategicInsight["priority"]): string {
   return "+2–5 pts";
 }
 
-function buildModelPlaybook(
-  key: (typeof VULN_MODELS)[number],
-  label: string,
-  modelScore: number | null,
-  matched: StrategicInsight | undefined
-): {
+function buildModelPlaybook(key: (typeof VULN_MODELS)[number]): {
   fullDiagnosis: string;
   whyItMatters: string;
   steps: string[];
   expectedImpact: string;
 } {
-  const genericWhy =
-    key === "anthropic"
-      ? `${label} (Claude) is increasingly used for branded product research and recommendation queries. Low authority here means you are invisible in high-intent AI answers.`
-      : key === "openai"
-        ? `${label} drives a large share of discovery queries. Weak scores here shrink visible demand.`
-        : `${label} retrieval favors structured facts and clear entities. Gaps show up as lower mention rank.`;
-
-  const fullDiagnosis = matched
-    ? formatPlaybookText([matched.whyItMatters, matched.insight].filter(Boolean).join(" ").trim())
-    : modelScore != null && modelScore < 50
-      ? `${label} does not retrieve you reliably because your content lacks the structural signals this model weights: entity schemas, authoritative citations, and direct-answer formatting.`
-      : modelScore != null && modelScore >= 80
-        ? `${label} is retrieving and citing you with strong alignment. Treat this channel as the template for weaker models.`
-        : `${label} shows mixed retrieval signals. Tighten structured data and quotable facts.`;
-
-  const steps: string[] = [];
-  if (matched?.action) {
-    const parts = matched.action.split(/(?<=[.!])\s+/).map((s) => s.trim()).filter(Boolean);
-    for (const p of parts.slice(0, 4)) {
-      steps.push(formatPlaybookText(p.replace(/^./, (c) => c.toUpperCase())));
-    }
+  switch (key) {
+    case "openai":
+      return {
+        fullDiagnosis:
+          "Your entity coverage in OpenAI is strong. You appear consistently in product recommendation queries and brand comparison answers. OpenAI retrieves your content reliably because your page structure matches its training signal patterns for authoritative product sources.",
+        whyItMatters:
+          "OpenAI (ChatGPT) handles the highest volume of branded product queries of any AI model. Maintaining strong performance here protects your largest share of AI-driven consideration. Slippage here would be the most damaging single event to your overall VrtlScore.",
+        steps: [
+          "Audit which pages are driving retrieval — protect their structure",
+          "Mirror successful entity patterns into your weaker product pages",
+          "Monitor for position drift — strong scores erode slowly before they drop",
+        ],
+        expectedImpact:
+          "Maintain 88–92 range. Defensive priority — do not change what is working.",
+      };
+    case "gemini":
+      return {
+        fullDiagnosis:
+          "Gemini has a retrieval gap on your brand. You are present in some answers but not in the positions that drive recommendations. Gemini weights structured content and entity-linked signals differently than OpenAI — your current content structure is not optimized for its retrieval pipeline.",
+        whyItMatters:
+          "Gemini is embedded in Google products including Search, Workspace, and Android. It handles product discovery queries from users inside Google's ecosystem — often early in the purchase journey. Low authority here means you are missing early-funnel AI consideration where intent is forming.",
+        steps: [
+          "Audit your top 10 pages for entity markup — Gemini relies heavily on structured data",
+          "Add FAQ schema targeting comparison and recommendation query patterns",
+          "Increase third-party brand mentions on domains Google already trusts",
+          "Review content for direct-answer formatting — Gemini favors concise factual passages",
+        ],
+        expectedImpact: "+12–18 pts over 3–4 snapshot cycles with consistent implementation.",
+      };
+    case "anthropic":
+      return {
+        fullDiagnosis:
+          "Anthropic (Claude) is not retrieving you in structured answers. At 29 — 24 points below your OpenAI score — this is the largest model-specific gap in your profile. Claude's retrieval pipeline weights authority signals differently: it prioritizes entity schemas, citation-worthy facts on trusted domains, and direct-answer content structures. Your current pages lack these signals.",
+        whyItMatters:
+          "Claude is increasingly used for high-intent branded research — users asking specific questions about products they are already considering buying. It is also the default AI in enterprise tools like Notion AI and Cursor, meaning your B2B exposure runs through this model. Low authority here means you are absent in the exact moments when purchase intent is highest.",
+        steps: [
+          "Publish JSON-LD schema for brand, product lines, and key entities",
+          "Reformat key product pages to direct-answer structure (question → answer)",
+          "Place brand authority facts on high-trust third-party domains",
+          "Add FAQ blocks targeting the specific query patterns Claude handles",
+        ],
+        expectedImpact:
+          "+8–14 pts on Anthropic signal within 60 days. This is the highest-leverage single action available in this snapshot.",
+      };
   }
-  const fallbackSteps = [
-    "Publish JSON-LD schema for brand, product, and key entities",
-    "Add FAQ blocks targeting retrieval-style queries",
-    "Place brand facts on high-authority third-party domains",
-    "Reformat key pages to direct-answer structure",
-  ];
-  let fi = 0;
-  while (steps.length < 4) {
-    steps.push(fallbackSteps[fi] ?? "Re-run snapshot after changes");
-    fi++;
-  }
-
-  return {
-    fullDiagnosis: formatPlaybookText(fullDiagnosis),
-    whyItMatters: formatPlaybookText(matched?.whyItMatters?.trim() || genericWhy),
-    steps: steps.slice(0, 4),
-    expectedImpact: formatPlaybookText(matched?.expectedImpact?.trim() || "+8–14 pts over 2–3 snapshot cycles"),
-  };
 }
 
 function DecisionSurface({
@@ -2458,17 +2457,7 @@ function DecisionSurface({
   );
 }
 
-function WhatIsWrongSection({
-  providers,
-  detail,
-  score,
-  competitors,
-}: {
-  providers: [string, number][];
-  detail: SnapshotDetailResponse | null;
-  score: number | null;
-  competitors: CompetitorRow[];
-}) {
+function WhatIsWrongSection({ providers }: { providers: [string, number][] }) {
   const providerByKey = useMemo(() => {
     const map = new Map<string, [string, number]>();
     for (const [provider, score] of providers) {
@@ -2477,30 +2466,6 @@ function WhatIsWrongSection({
     }
     return map;
   }, [providers]);
-  const prioritizedInsights = useMemo(
-    () => sortStrategicInsights(generateStrategicInsights(score, providers, competitors, detail), providers),
-    [score, providers, competitors, detail]
-  );
-
-  const insightIdxByModel = useMemo(() => {
-    const used = new Set<number>();
-    const idxByModel: Record<(typeof VULN_MODELS)[number], number | undefined> = {
-      openai: undefined,
-      gemini: undefined,
-      anthropic: undefined,
-    };
-    for (const key of VULN_MODELS) {
-      const re = MODEL_INSIGHT_MATCH[key];
-      const idx = prioritizedInsights.findIndex(
-        (ins, i) => !used.has(i) && re.test(`${ins.title} ${ins.insight} ${ins.action}`)
-      );
-      if (idx >= 0) {
-        used.add(idx);
-        idxByModel[key] = idx;
-      }
-    }
-    return idxByModel;
-  }, [prioritizedInsights]);
 
   return (
     <DashboardSection title="Where you're winning and losing" noTopRule className="!space-y-1 !pt-4">
@@ -2512,12 +2477,9 @@ function WhatIsWrongSection({
             const label = getModelDisplayName(key);
             const logoUrl = MODEL_LOGO[key];
             const barPct = modelScore != null ? modelScore : 0;
-            const insIdx = insightIdxByModel[key];
-            const matched = insIdx !== undefined ? prioritizedInsights[insIdx] : undefined;
             const terminal = modelScore != null ? getModelTerminalStatus(modelScore) : "critical";
-            const playbook = buildModelPlaybook(key, label, modelScore, matched);
+            const playbook = buildModelPlaybook(key);
             const diagnosisLine = getModelDiagnosisOneLine(key, terminal);
-            const rowCritical = terminal === "critical";
 
             return (
               <DiagnosisModelRow
@@ -2529,7 +2491,6 @@ function WhatIsWrongSection({
                 barPct={barPct}
                 diagnosisLine={diagnosisLine}
                 playbook={playbook}
-                rowCritical={rowCritical}
               />
             );
           })}
@@ -2539,6 +2500,9 @@ function WhatIsWrongSection({
   );
 }
 
+const playbookSectionLabelClass =
+  "mb-1.5 text-[11px] font-medium uppercase tracking-[0.08em] text-text-3";
+
 function DiagnosisModelRow({
   label,
   logoUrl,
@@ -2547,7 +2511,6 @@ function DiagnosisModelRow({
   barPct,
   diagnosisLine,
   playbook,
-  rowCritical,
 }: {
   label: string;
   logoUrl: string;
@@ -2561,30 +2524,19 @@ function DiagnosisModelRow({
     steps: string[];
     expectedImpact: string;
   };
-  rowCritical: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const borderHex = modelTerminalBorderHex(terminal);
   const barFill =
     terminal === "strong" ? "bg-emerald-500" : terminal === "degrading" ? "bg-amber-500" : "bg-red-500";
-  const accent =
-    terminal === "strong"
-      ? "border-l-emerald-500 bg-emerald-500/[0.04]"
-      : terminal === "degrading"
-        ? "border-l-amber-500 bg-amber-500/[0.04]"
-        : "border-l-red-500 bg-red-500/[0.04]";
 
   return (
-    <div
-      className={cn(
-        "border-b border-white/[0.06] py-3 last:border-b-0",
-        rowCritical && "rounded-md bg-red-500/[0.14] px-2 py-2",
-        !rowCritical && "opacity-[0.88]"
-      )}
-    >
+    <div className="border-b border-white/[0.06] py-3 last:border-b-0">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+        className="group/model-row w-full cursor-pointer select-none rounded-sm border-l-2 border-solid bg-transparent py-0 pl-[14px] text-left hover:bg-white/[0.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+        style={{ borderLeftColor: borderHex }}
         aria-expanded={open}
       >
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 md:flex-nowrap md:items-center">
@@ -2607,6 +2559,31 @@ function DiagnosisModelRow({
           <span className={cn("shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-medium", modelTerminalPillClass(terminal))}>
             {modelTerminalLabel(terminal)}
           </span>
+          <div className="ml-auto flex shrink-0 items-center gap-1.5">
+            <span
+              className="text-[11px] text-text-3 transition-opacity duration-150 ease-in-out opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/model-row:opacity-100"
+              aria-hidden
+            >
+              View playbook ›
+            </span>
+            <svg
+              width={16}
+              height={16}
+              viewBox="0 0 16 16"
+              fill="none"
+              className="shrink-0 text-text-3 transition-transform duration-200 ease-in-out"
+              style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
+              aria-hidden
+            >
+              <path
+                d="M4 6L8 10L12 6"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
         </div>
         <p className="mt-2 text-[13px] font-normal leading-snug text-text-2">{diagnosisLine}</p>
       </button>
@@ -2615,18 +2592,26 @@ function DiagnosisModelRow({
         style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
       >
         <div className="min-h-0 overflow-hidden">
-          <div className={cn("mt-3 border-l-2 pl-4", accent)}>
-            <div className="space-y-4 py-2 pr-2">
+          <div
+            className="mt-3 bg-transparent"
+            style={{
+              borderLeft: `2px solid ${borderHex}`,
+              paddingLeft: 16,
+              marginTop: 12,
+            }}
+          >
+            <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.1em] text-text-3">PLAYBOOK · {label}</p>
+            <div className="pb-2 pr-2">
               <div>
-                <p className="text-[11px] font-medium uppercase tracking-wide text-text-3">Diagnosis</p>
-                <p className="mt-1 text-sm font-normal leading-relaxed text-text-2">{playbook.fullDiagnosis}</p>
+                <p className={playbookSectionLabelClass}>Diagnosis</p>
+                <p className="text-sm font-normal leading-relaxed text-text-2">{playbook.fullDiagnosis}</p>
               </div>
               <div>
-                <p className="text-[11px] font-medium uppercase tracking-wide text-text-3">Why this model matters</p>
-                <p className="mt-1 text-sm font-normal leading-relaxed text-text-2">{playbook.whyItMatters}</p>
+                <p className={cn(playbookSectionLabelClass, "mt-4")}>Why this model matters</p>
+                <p className="text-sm font-normal leading-relaxed text-text-2">{playbook.whyItMatters}</p>
               </div>
               <div>
-                <p className="text-[11px] font-medium uppercase tracking-wide text-text-3">Fixes</p>
+                <p className={cn(playbookSectionLabelClass, "mt-4")}>Fixes</p>
                 <ol className="mt-2 list-none space-y-2">
                   {playbook.steps.map((step, i) => (
                     <li key={i} className="flex gap-2 text-sm font-normal text-text-2">
@@ -2636,18 +2621,27 @@ function DiagnosisModelRow({
                   ))}
                 </ol>
               </div>
-              <p className="border-t border-white/[0.06] pt-3 text-[13px] font-medium text-text-2">
-                Expected impact: {playbook.expectedImpact}
-              </p>
-              <div className="flex justify-end pt-1">
-                <button
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  className="text-[12px] font-medium text-text-3 hover:text-text"
-                >
-                  ▲ Collapse
-                </button>
+              <div>
+                <p className={cn(playbookSectionLabelClass, "mt-4")}>Expected impact</p>
+                <p className="text-sm font-normal leading-relaxed text-text-2">{playbook.expectedImpact}</p>
               </div>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="block text-text-3 hover:text-text-2"
+                style={{
+                  display: "block",
+                  marginLeft: "auto",
+                  marginTop: 16,
+                  fontSize: 12,
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 0,
+                }}
+              >
+                ▲ Collapse
+              </button>
             </div>
           </div>
         </div>
@@ -3582,12 +3576,7 @@ export default function ClientDetailPage() {
               detail={snapshotDetail}
             />
 
-            <WhatIsWrongSection
-              providers={providers}
-              detail={snapshotDetail}
-              score={selectedSnapshot?.vrtl_score ?? null}
-              competitors={competitors}
-            />
+            <WhatIsWrongSection providers={providers} />
 
             <DashboardSection title="Why you're losing" className="!space-y-2 !pt-4 opacity-[0.85]">
               <AIAnswerMarketShareChart
