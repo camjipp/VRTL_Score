@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState, useCallback, useRef, type ReactNode } from "react";
+import { Fragment, useEffect, useMemo, useState, useCallback, useRef, type ReactNode } from "react";
 import Link from "next/link";
 
 import { BackLink } from "@/components/BackLink";
@@ -2255,55 +2255,86 @@ function primaryActionUpside(priority: StrategicInsight["priority"]): string {
   return "+2–5 pts";
 }
 
-function buildModelPlaybook(key: (typeof VULN_MODELS)[number]): {
-  fullDiagnosis: string;
-  whyItMatters: string;
+type PlaybookGridRow = { label: string; value: string };
+
+type ModelPlaybookSpec = {
+  diagnosisRows: PlaybookGridRow[];
+  whyLead: string;
+  whyRows: PlaybookGridRow[];
   steps: string[];
-  expectedImpact: string;
-} {
+  /** One or two lines; each line ≤12 words; same meaning as prior expected-impact copy */
+  expectedImpactLines: string[];
+};
+
+function buildModelPlaybook(key: (typeof VULN_MODELS)[number]): ModelPlaybookSpec {
   switch (key) {
     case "openai":
       return {
-        fullDiagnosis:
-          "Your entity coverage in OpenAI is strong. You appear consistently in product recommendation queries and brand comparison answers. OpenAI retrieves your content reliably because your page structure matches its training signal patterns for authoritative product sources.",
-        whyItMatters:
-          "OpenAI (ChatGPT) handles the highest volume of branded product queries of any AI model. Maintaining strong performance here protects your largest share of AI-driven consideration. Slippage here would be the most damaging single event to your overall VrtlScore.",
+        diagnosisRows: [
+          { label: "Coverage", value: "Strong — appears in product + comparison queries" },
+          { label: "Retrieval signal", value: "Page structure matches OpenAI training patterns" },
+          { label: "Risk", value: "Defensive — protect what is working" },
+        ],
+        whyLead: "OpenAI (ChatGPT) handles the highest volume of branded product queries of any AI model.",
+        whyRows: [
+          { label: "Volume rank", value: "#1 across all tracked models" },
+          { label: "Query type", value: "Product discovery + brand comparison" },
+          { label: "Risk if lost", value: "Highest single-model impact to VrtlScore" },
+        ],
         steps: [
           "Audit which pages are driving retrieval — protect their structure",
           "Mirror successful entity patterns into your weaker product pages",
           "Monitor for position drift — strong scores erode slowly before they drop",
         ],
-        expectedImpact:
-          "Maintain 88–92 range. Defensive priority — do not change what is working.",
+        expectedImpactLines: [
+          "Maintain 88–92 range.",
+          "Defensive priority — do not change what is working.",
+        ],
       };
     case "gemini":
       return {
-        fullDiagnosis:
-          "Gemini has a retrieval gap on your brand. You are present in some answers but not in the positions that drive recommendations. Gemini weights structured content and entity-linked signals differently than OpenAI — your current content structure is not optimized for its retrieval pipeline.",
-        whyItMatters:
-          "Gemini is embedded in Google products including Search, Workspace, and Android. It handles product discovery queries from users inside Google's ecosystem — often early in the purchase journey. Low authority here means you are missing early-funnel AI consideration where intent is forming.",
+        diagnosisRows: [
+          { label: "Coverage", value: "Present in some answers; weak recommendation positions" },
+          { label: "Retrieval", value: "Structured + entity signals differ from OpenAI" },
+          { label: "Pipeline fit", value: "Content not tuned for Gemini retrieval" },
+        ],
+        whyLead: "Gemini is embedded in Google products including Search, Workspace, and Android.",
+        whyRows: [
+          { label: "Ecosystem", value: "Google stack — early purchase journey touchpoints" },
+          { label: "Query type", value: "Product discovery inside Google's ecosystem" },
+          { label: "Risk", value: "Miss early-funnel AI consideration where intent forms" },
+        ],
         steps: [
           "Audit your top 10 pages for entity markup — Gemini relies heavily on structured data",
           "Add FAQ schema targeting comparison and recommendation query patterns",
           "Increase third-party brand mentions on domains Google already trusts",
           "Review content for direct-answer formatting — Gemini favors concise factual passages",
         ],
-        expectedImpact: "+12–18 pts over 3–4 snapshot cycles with consistent implementation.",
+        expectedImpactLines: ["+12–18 pts over 3–4 snapshot cycles with consistent implementation."],
       };
     case "anthropic":
       return {
-        fullDiagnosis:
-          "Anthropic (Claude) is not retrieving you in structured answers. At 29 — 24 points below your OpenAI score — this is the largest model-specific gap in your profile. Claude's retrieval pipeline weights authority signals differently: it prioritizes entity schemas, citation-worthy facts on trusted domains, and direct-answer content structures. Your current pages lack these signals.",
-        whyItMatters:
-          "Claude is increasingly used for high-intent branded research — users asking specific questions about products they are already considering buying. It is also the default AI in enterprise tools like Notion AI and Cursor, meaning your B2B exposure runs through this model. Low authority here means you are absent in the exact moments when purchase intent is highest.",
+        diagnosisRows: [
+          { label: "Coverage", value: "Not appearing in structured answers" },
+          { label: "Signal gap", value: "24 points below your OpenAI score" },
+          { label: "Pattern", value: "Pages lack entity schema + citation signals" },
+        ],
+        whyLead: "Claude handles high-intent branded research at point of purchase decision.",
+        whyRows: [
+          { label: "Volume rank", value: "Growing — embedded in Notion, Cursor, enterprise tools" },
+          { label: "Query type", value: "High-intent research + branded recommendations" },
+          { label: "Risk if lost", value: "Invisible when purchase intent is highest" },
+        ],
         steps: [
           "Publish JSON-LD schema for brand, product lines, and key entities",
           "Reformat key product pages to direct-answer structure (question → answer)",
           "Place brand authority facts on high-trust third-party domains",
           "Add FAQ blocks targeting the specific query patterns Claude handles",
         ],
-        expectedImpact:
-          "+8–14 pts on Anthropic signal within 60 days. This is the highest-leverage single action available in this snapshot.",
+        expectedImpactLines: [
+          "+8–14 pts on Anthropic signal within 60 days.",
+          "This is the highest-leverage single action available in this snapshot.",
+        ],
       };
   }
 }
@@ -2500,8 +2531,18 @@ function WhatIsWrongSection({ providers }: { providers: [string, number][] }) {
   );
 }
 
-const playbookSectionLabelClass =
-  "mb-1.5 text-[11px] font-medium uppercase tracking-[0.08em] text-text-3";
+function PlaybookSpecGrid({ rows }: { rows: PlaybookGridRow[] }) {
+  return (
+    <div className="playbook-grid">
+      {rows.map((r, i) => (
+        <Fragment key={i}>
+          <div className="playbook-grid-label">{r.label}</div>
+          <div className="playbook-grid-value">{r.value}</div>
+        </Fragment>
+      ))}
+    </div>
+  );
+}
 
 function DiagnosisModelRow({
   label,
@@ -2518,17 +2559,17 @@ function DiagnosisModelRow({
   terminal: ModelTerminalStatus;
   barPct: number;
   diagnosisLine: string;
-  playbook: {
-    fullDiagnosis: string;
-    whyItMatters: string;
-    steps: string[];
-    expectedImpact: string;
-  };
+  playbook: ModelPlaybookSpec;
 }) {
   const [open, setOpen] = useState(false);
   const borderHex = modelTerminalBorderHex(terminal);
   const barFill =
     terminal === "strong" ? "bg-emerald-500" : terminal === "degrading" ? "bg-amber-500" : "bg-red-500";
+  const impactValueClass = cn(
+    "playbook-impact-value flex flex-col gap-1",
+    terminal === "critical" && "playbook-impact-value--critical",
+    terminal === "strong" && "playbook-impact-value--strong"
+  );
 
   return (
     <div className="border-b border-white/[0.06] py-3 last:border-b-0">
@@ -2600,30 +2641,32 @@ function DiagnosisModelRow({
               marginTop: 12,
             }}
           >
-            <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.1em] text-text-3">PLAYBOOK · {label}</p>
+            <div className="playbook-header">PLAYBOOK · {label.toUpperCase()}</div>
+            <div className="playbook-section-rule" aria-hidden />
             <div className="pb-2 pr-2">
-              <div>
-                <p className={playbookSectionLabelClass}>Diagnosis</p>
-                <p className="text-sm font-normal leading-relaxed text-text-2">{playbook.fullDiagnosis}</p>
+              <div className="playbook-section-label">Diagnosis</div>
+              <PlaybookSpecGrid rows={playbook.diagnosisRows} />
+              <div className="playbook-section-rule" aria-hidden />
+              <div className="playbook-section-label">Why this model matters</div>
+              <div className="playbook-lead-sentence">{playbook.whyLead}</div>
+              <PlaybookSpecGrid rows={playbook.whyRows} />
+              <div className="playbook-section-rule" aria-hidden />
+              <div className="playbook-section-label">Fixes</div>
+              <div className="playbook-steps">
+                {playbook.steps.map((step, i) => (
+                  <div key={i} className="playbook-step">
+                    <div className="playbook-step-num">Step {i + 1}</div>
+                    <div className="playbook-step-text">{step}</div>
+                  </div>
+                ))}
               </div>
-              <div>
-                <p className={cn(playbookSectionLabelClass, "mt-4")}>Why this model matters</p>
-                <p className="text-sm font-normal leading-relaxed text-text-2">{playbook.whyItMatters}</p>
-              </div>
-              <div>
-                <p className={cn(playbookSectionLabelClass, "mt-4")}>Fixes</p>
-                <ol className="mt-2 list-none space-y-2">
-                  {playbook.steps.map((step, i) => (
-                    <li key={i} className="flex gap-2 text-sm font-normal text-text-2">
-                      <span className="w-14 shrink-0 font-medium text-text-3">Step {i + 1}</span>
-                      <span>{step}</span>
-                    </li>
+              <div className="playbook-impact-row">
+                <div className="playbook-impact-label">Expected impact</div>
+                <div className={impactValueClass}>
+                  {playbook.expectedImpactLines.map((line, idx) => (
+                    <div key={idx}>{line}</div>
                   ))}
-                </ol>
-              </div>
-              <div>
-                <p className={cn(playbookSectionLabelClass, "mt-4")}>Expected impact</p>
-                <p className="text-sm font-normal leading-relaxed text-text-2">{playbook.expectedImpact}</p>
+                </div>
               </div>
               <button
                 type="button"
