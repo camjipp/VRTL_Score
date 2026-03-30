@@ -2422,67 +2422,77 @@ function DecisionSurface({
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-end justify-between gap-3 border-b border-white/[0.06] pb-4">
-        <div className="flex flex-wrap items-end gap-3">
-          <span className="text-[56px] font-medium leading-none tracking-[-0.03em] text-text tabular-nums md:text-[64px]">
-            {score ?? "—"}
-          </span>
-          {delta !== null && delta !== 0 && (
-            <span
-              className={cn(
-                "mb-2 inline-flex items-center gap-0.5 rounded-full px-2.5 py-1 text-[13px] font-medium tabular-nums",
-                delta < 0 ? "bg-red-500/20 text-red-300" : "bg-emerald-500/20 text-emerald-300"
-              )}
-            >
-              {delta < 0 ? <span aria-hidden>↓</span> : <span aria-hidden>↑</span>}
-              <span>
-                {delta > 0 ? "+" : ""}
-                {delta}
-              </span>
-              <span className="font-normal opacity-80">vs last</span>
+      <div
+        className="mt-4"
+        style={{
+          border: "1px solid rgba(255, 255, 255, 0.08)",
+          borderRadius: 12,
+          padding: "28px 28px 24px",
+          marginBottom: 32,
+        }}
+      >
+        <div>
+          <div className="flex items-baseline" style={{ gap: 12 }}>
+            <span className="text-[56px] font-medium leading-none tracking-[-0.03em] text-text tabular-nums md:text-[64px]">
+              {score ?? "—"}
             </span>
+            {delta !== null && delta !== 0 && (
+              <span
+                className={cn(
+                  "inline-flex items-center gap-0.5 rounded-full px-2.5 py-1 text-[13px] font-medium tabular-nums",
+                  delta < 0 ? "bg-red-500/20 text-red-300" : "bg-emerald-500/20 text-emerald-300"
+                )}
+              >
+                {delta < 0 ? <span aria-hidden>↓</span> : <span aria-hidden>↑</span>}
+                <span>
+                  {delta > 0 ? "+" : ""}
+                  {delta}
+                </span>
+                <span className="font-normal opacity-80">vs last</span>
+              </span>
+            )}
+          </div>
+          <span className="mt-1 block text-[12px] text-text-3">Overall VrtlScore / 100</span>
+        </div>
+
+        <div className="mt-4 space-y-2">
+          <p className="max-w-2xl text-base font-medium leading-snug text-text">{problemLine}</p>
+          <p className="max-w-2xl text-sm font-normal leading-snug text-text-2">{causeLine}</p>
+        </div>
+
+        {primary && (
+          <div className="mt-5 max-w-xl rounded-xl border border-red-500/35 bg-red-500/[0.08] px-5 py-[18px]">
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="text-[11px] font-medium uppercase tracking-wide text-red-300">Fix this first</span>
+              <span className="text-[13px] font-medium tabular-nums text-red-200">{primaryActionUpside(primary.priority)}</span>
+            </div>
+            <p className="mt-2 text-base font-medium text-text">{primary.title}</p>
+            <ul className="mt-2 space-y-1">
+              {topBullets.map((b, i) => (
+                <li key={i} className="text-[13px] font-normal leading-snug text-red-300/90">
+                  → {b}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div className="mt-5 flex flex-wrap items-center gap-2">
+          <RunSnapshotButton
+            running={running}
+            snapshotStatus={snapshotStatus}
+            onRunSnapshot={runSnapshot}
+            className="!h-auto !rounded-lg !border-0 !bg-text !px-4 !py-2 !text-[13px] !font-medium !text-surface !shadow-none hover:!opacity-90"
+          />
+          {snapshotId && (
+            <DownloadPdfButton
+              snapshotId={snapshotId}
+              variant="ghost"
+              label="Download report"
+              className="inline-block [&_button]:!rounded-lg [&_button]:!border [&_button]:!border-white/15 [&_button]:!bg-transparent [&_button]:!px-4 [&_button]:!py-2 [&_button]:!text-[13px] [&_button]:!font-medium [&_button]:!text-text-2"
+            />
           )}
         </div>
-        <p className="mb-3 text-right text-[13px] font-normal text-text-3">Overall VrtlScore</p>
-      </div>
-
-      <div className="mt-4 space-y-2">
-        <p className="max-w-2xl text-base font-medium leading-snug text-text">{problemLine}</p>
-        <p className="max-w-2xl text-sm font-normal leading-snug text-text-2">{causeLine}</p>
-      </div>
-
-      {primary && (
-        <div className="mt-5 max-w-xl rounded-xl border border-red-500/35 bg-red-500/[0.08] px-5 py-[18px]">
-          <div className="flex items-baseline justify-between gap-2">
-            <span className="text-[11px] font-medium uppercase tracking-wide text-red-300">Fix this first</span>
-            <span className="text-[13px] font-medium tabular-nums text-red-200">{primaryActionUpside(primary.priority)}</span>
-          </div>
-          <p className="mt-2 text-base font-medium text-text">{primary.title}</p>
-          <ul className="mt-2 space-y-1">
-            {topBullets.map((b, i) => (
-              <li key={i} className="text-[13px] font-normal leading-snug text-red-300/90">
-                → {b}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <div className="mt-5 flex flex-wrap items-center gap-2">
-        <RunSnapshotButton
-          running={running}
-          snapshotStatus={snapshotStatus}
-          onRunSnapshot={runSnapshot}
-          className="!h-auto !rounded-lg !border-0 !bg-text !px-4 !py-2 !text-[13px] !font-medium !text-surface !shadow-none hover:!opacity-90"
-        />
-        {snapshotId && (
-          <DownloadPdfButton
-            snapshotId={snapshotId}
-            variant="ghost"
-            label="Download report"
-            className="inline-block [&_button]:!rounded-lg [&_button]:!border [&_button]:!border-white/15 [&_button]:!bg-transparent [&_button]:!px-4 [&_button]:!py-2 [&_button]:!text-[13px] [&_button]:!font-medium [&_button]:!text-text-2"
-          />
-        )}
       </div>
     </section>
   );
@@ -2572,14 +2582,21 @@ function DiagnosisModelRow({
   );
 
   return (
-    <div className="border-b border-white/[0.06] py-3 last:border-b-0">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="group/model-row w-full cursor-pointer select-none rounded-sm border-l-2 border-solid bg-transparent py-0 pl-[14px] text-left hover:bg-white/[0.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
-        style={{ borderLeftColor: borderHex }}
-        aria-expanded={open}
+    <div className="border-b border-white/[0.06] pt-3 last:border-b-0">
+      <div
+        style={{
+          borderLeft: `2px solid ${borderHex}`,
+          paddingLeft: 14,
+          paddingBottom: 14,
+          marginBottom: 4,
+        }}
       >
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="group/model-row w-full cursor-pointer select-none rounded-sm bg-transparent py-0 text-left hover:bg-white/[0.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+          aria-expanded={open}
+        >
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 md:flex-nowrap md:items-center">
           <div className="flex min-w-0 items-center gap-2 md:w-[132px]">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08]">
@@ -2626,8 +2643,9 @@ function DiagnosisModelRow({
             </svg>
           </div>
         </div>
-        <p className="mt-2 text-[13px] font-normal leading-snug text-text-2">{diagnosisLine}</p>
-      </button>
+          <p className="mt-2 text-[13px] font-normal leading-snug text-text-2">{diagnosisLine}</p>
+        </button>
+      </div>
       <div
         className="grid transition-[grid-template-rows] duration-200 ease-out"
         style={{ gridTemplateRows: open ? "1fr" : "0fr" }}

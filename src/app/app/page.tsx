@@ -9,8 +9,6 @@ import { TopBar } from "@/components/TopBar";
 import { ensureOnboarded } from "@/lib/onboard";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { cn } from "@/lib/cn";
-import { Badge } from "@/components/ui/Badge";
-
 type ModelFamily = "chatgpt" | "gemini" | "claude";
 type ProviderFamilyScores = Partial<Record<ModelFamily, number>>;
 
@@ -120,20 +118,6 @@ function getAuthorityStateFromScore(score: number | null): AuthorityState {
   return "Losing Ground";
 }
 
-function getAuthorityStateBg(state: AuthorityState): string {
-  if (state === "Dominant") return "bg-authority-dominant/15";
-  if (state === "Stable") return "bg-authority-stable/12";
-  if (state === "Watchlist") return "bg-authority-watchlist/15";
-  return "bg-authority-losing/15";
-}
-
-function getAuthorityStateText(state: AuthorityState): string {
-  if (state === "Dominant") return "text-authority-dominant";
-  if (state === "Stable") return "text-authority-stable";
-  if (state === "Watchlist") return "text-authority-watchlist";
-  return "text-authority-losing";
-}
-
 /** 3px left bar color for Risk Map cells (no full-cell tint) */
 function getAuthorityStateBar(state: AuthorityState): string {
   if (state === "Dominant") return "border-l-authority-dominant";
@@ -158,13 +142,6 @@ function triageOrder(c: ClientWithStats): number {
   if (b === "watchlist") return 1;
   if (b === "stable") return 2;
   return 3;
-}
-
-function riskBorderClass(c: ClientWithStats): string {
-  const b = triageBucket(c);
-  if (b === "losing") return "border-white/[0.08] bg-white/[0.02]";
-  if (b === "watchlist") return "border-white/[0.07] bg-white/[0.015]";
-  return "border-white/[0.06]";
 }
 
 function StatusPill({ state }: { state: AuthorityState }) {
@@ -221,28 +198,195 @@ function ModelDot({ model }: { model: string | null }) {
   return <span className={cn("mr-1.5 inline-block h-2 w-2 shrink-0 rounded-full", color)} aria-hidden />;
 }
 
-/** Read-only portfolio risk status (not a filter). */
-function RiskTriageStatusBar({ clients }: { clients: ClientWithStats[] }) {
-  const losing = clients.filter((c) => triageBucket(c) === "losing").length;
-  const watch = clients.filter((c) => triageBucket(c) === "watchlist").length;
-  const dominant = clients.filter((c) => triageBucket(c) === "dominant").length;
+function clientNeedsAttention(c: ClientWithStats): boolean {
+  const b = triageBucket(c);
+  const delta =
+    c.latestScore !== null && c.previousScore !== null ? c.latestScore - c.previousScore : null;
+  if (b === "losing") return true;
+  if (b === "watchlist" && delta !== null && delta < 0) return true;
+  return false;
+}
+
+function formatRelativeSnapshot(dateStr: string): string {
+  const d = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - d.getTime();
+  const days = Math.floor(diffMs / 86400000);
+  if (days <= 0) return "today";
+  if (days === 1) return "1 day ago";
+  return `${days} days ago`;
+}
+
+function portfolioLastSnapshotLabel(clients: ClientWithStats[]): string {
+  const dates = clients.map((c) => c.lastSnapshotAt).filter(Boolean) as string[];
+  if (dates.length === 0) return "No snapshots yet";
+  const latest = [...dates].sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0]!;
+  return `Last snapshot ${formatRelativeSnapshot(latest)}`;
+}
+
+function attentionDetailSuffix(c: ClientWithStats): string {
+  const parts: string[] = [];
+  const delta =
+    c.latestScore !== null && c.previousScore !== null ? c.latestScore - c.previousScore : null;
+  if (delta !== null && delta !== 0) {
+    parts.push(delta < 0 ? `↓ ${delta} pts` : `↑ +${delta} pts`);
+  }
+  const wm = c.worstModel;
+  if (wm && c.providerFamilyScores) {
+    const fam = modelFamilyFromProviderKey(wm);
+    if (fam != null) {
+      const sc = c.providerFamilyScores[fam];
+      if (typeof sc === "number" && sc < 50) {
+        parts.push(`${displayModelName(wm)} critical`);
+      }
+    }
+  }
+  return parts.join(" · ");
+}
+
+function clientStoryLine(c: ClientWithStats): string {
+  const hasData = c.latestScore !== null;
+  if (!hasData) return "";
+  const state = getAuthorityState(c);
+  const wm = c.worstModel ? displayModelName(c.worstModel) : null;
+  if (state === "Dominant") return "Leading across all tracked models";
+  if (state === "Losing Ground") {
+    return wm ? `Authority failure on ${wm} — act now` : "Critical authority gap — act now";
+  }
+  if (state === "Watchlist") {
+    return wm ? `Losing ground on ${wm} — needs attention` : "Flagged for monitoring — run snapshot to diagnose";
+  }
+  return "Stable authority signal — monitor weak channels";
+}
+
+const CARD_STATUS_STYLES: Record<
+  "dominant" | "watchlist" | "stable" | "losing",
+  { bg: string; color: string; label: string }
+> = {
+  dominant: { bg: "#EAF3DE", color: "#3B6D11", label: "Dominant" },
+  watchlist: { bg: "#FAEEDA", color: "#854F0B", label: "Watchlist" },
+  stable: { bg: "rgba(148, 163, 184, 0.2)", color: "#CBD5E1", label: "Stable" },
+  losing: { bg: "#FCEBEB", color: "#A32D2D", label: "Losing ground" },
+};
+
+function CardStatusBadge({ bucket }: { bucket: TriageBucket }) {
+  const key = bucket === "losing" ? "losing" : bucket === "watchlist" ? "watchlist" : bucket === "stable" ? "stable" : "dominant";
+  const s = CARD_STATUS_STYLES[key];
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-white/[0.06] pb-3 text-xs text-text-2">
-      <span>
-        <span className="font-medium text-authority-losing">{losing}</span> Losing Ground
-      </span>
-      <span className="text-white/25" aria-hidden>
-        |
-      </span>
-      <span>
-        <span className="font-medium text-authority-watchlist">{watch}</span> Watchlist
-      </span>
-      <span className="text-white/25" aria-hidden>
-        |
-      </span>
-      <span>
-        <span className="font-medium text-authority-dominant">{dominant}</span> Dominant
-      </span>
+    <span
+      className="shrink-0 rounded-[20px] font-medium"
+      style={{
+        fontSize: 11,
+        fontWeight: 500,
+        padding: "3px 9px",
+        background: s.bg,
+        color: s.color,
+      }}
+    >
+      {s.label}
+    </span>
+  );
+}
+
+function CardDeltaBadge({ delta }: { delta: number }) {
+  const neg = delta < 0;
+  return (
+    <span
+      className="inline-flex items-center gap-0.5 rounded-[20px] font-medium tabular-nums"
+      style={{
+        fontSize: 12,
+        fontWeight: 500,
+        padding: "3px 9px",
+        borderRadius: 20,
+        background: neg ? "#FCEBEB" : "#EAF3DE",
+        color: neg ? "#A32D2D" : "#3B6D11",
+      }}
+    >
+      {neg ? "↓" : "↑"} {neg ? Math.abs(delta) : `+${delta}`} vs last
+    </span>
+  );
+}
+
+function PriorityAlertBar({
+  clients,
+  triageFilter,
+  onToggleFilter,
+}: {
+  clients: ClientWithStats[];
+  triageFilter: TriageBucket | null;
+  onToggleFilter: (b: TriageBucket) => void;
+}) {
+  const sorted = useMemo(
+    () =>
+      [...clients].sort((a, b) => {
+        const o = triageOrder(a) - triageOrder(b);
+        if (o !== 0) return o;
+        return (a.latestScore ?? -1) - (b.latestScore ?? -1);
+      }),
+    [clients]
+  );
+  const attention = useMemo(() => sorted.filter(clientNeedsAttention), [sorted]);
+  const stable = attention.length === 0;
+
+  const pillClass = (b: TriageBucket) =>
+    cn(
+      "rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors",
+      triageFilter === b
+        ? "border-white/20 bg-white/[0.08] text-text"
+        : "border-white/[0.08] bg-transparent text-text-2 hover:border-white/15 hover:text-text"
+    );
+
+  return (
+    <div className="mb-6 flex flex-wrap items-center gap-3 border-b border-white/[0.12] py-2.5 text-[13px]">
+      {stable ? (
+        <>
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#639922]" aria-hidden />
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+            <span className="font-medium text-text">All clients stable</span>
+            <span className="text-text-2">· {portfolioLastSnapshotLabel(clients)}</span>
+          </div>
+        </>
+      ) : (
+        <>
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#E24B4A]" aria-hidden />
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+            <span className="font-medium text-text">
+              {attention.length} client{attention.length === 1 ? "" : "s"}{" "}
+              {attention.length === 1 ? "needs" : "need"} attention
+            </span>
+            <span className="text-text-2">
+              → {attention[0]!.name}
+              {(() => {
+                const d = attentionDetailSuffix(attention[0]!);
+                return d ? ` ${d}` : "";
+              })()}
+              {attention.length > 1
+                ? `, ${attention
+                    .slice(1, 3)
+                    .map((c) => c.name)
+                    .join(", ")}${attention.length > 3 ? ", …" : ""}`
+                : ""}
+            </span>
+          </div>
+          {attention.length > 1 ? (
+            <a href="#clients-overview" className="shrink-0 text-[12px] text-text-2 no-underline hover:text-text">
+              View all
+            </a>
+          ) : null}
+        </>
+      )}
+      <div className="flex shrink-0 flex-wrap items-center gap-2 sm:ml-auto">
+        {(["losing", "watchlist", "dominant"] as const).map((b) => (
+          <button
+            key={b}
+            type="button"
+            onClick={() => onToggleFilter(b)}
+            className={pillClass(b)}
+          >
+            {b === "losing" ? "Losing Ground" : b === "watchlist" ? "Watchlist" : "Dominant"}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -256,148 +400,138 @@ function faviconDomain(website: string | null): string | null {
   }
 }
 
-function ClientStateBadge({ bucket }: { bucket: TriageBucket }) {
-  if (bucket === "losing") {
-    return (
-      <Badge variant="danger" className="!rounded-md !px-2 !py-0.5 !text-[10px] !font-bold !uppercase !tracking-wide">
-        Losing Ground
-      </Badge>
-    );
-  }
-  if (bucket === "watchlist") {
-    return (
-      <Badge variant="warning" className="!rounded-md !px-2 !py-0.5 !text-[10px] !font-bold !uppercase !tracking-wide">
-        Watchlist
-      </Badge>
-    );
-  }
-  if (bucket === "stable") {
-    return (
-      <Badge variant="neutral" className="!rounded-md !px-2 !py-0.5 !text-[10px] !font-bold !uppercase !tracking-wide !text-sky-200">
-        Stable
-      </Badge>
-    );
-  }
-  return (
-    <Badge variant="success" className="!rounded-md !px-2 !py-0.5 !text-[10px] !font-bold !uppercase !tracking-wide">
-      Dominant
-    </Badge>
-  );
-}
-
-/* Risk triage card: state-first, score + delta, weakest / displacer only */
 function ClientCard({ client }: { client: ClientWithStats }) {
   const router = useRouter();
   const hasData = client.latestScore !== null;
   const bucket = triageBucket(client);
   const domain = faviconDomain(client.website);
   const faviconUrl = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=32` : null;
-  const weakest = client.worstModel ? displayModelName(client.worstModel) : "—";
-  const d = client.primaryDisplacer?.trim() || null;
+  const weakestLabel = client.worstModel ? displayModelName(client.worstModel) : null;
+  const displacer = client.primaryDisplacer?.trim() || null;
+  const showDisplacer = Boolean(displacer && displacer !== "—");
+  const delta =
+    client.latestScore !== null && client.previousScore !== null
+      ? client.latestScore - client.previousScore
+      : null;
+  const showDelta = delta !== null && delta !== 0;
+  const story = clientStoryLine(client);
 
-  let deltaLine: string;
-  let deltaTone: "up" | "down" | "neutral";
-  if (!hasData) {
-    deltaLine = "\u00a0";
-    deltaTone = "neutral";
-  } else if (client.previousScore === null) {
-    deltaLine = "—";
-    deltaTone = "neutral";
-  } else {
-    const delta = client.latestScore! - client.previousScore;
-    if (delta === 0) {
-      deltaLine = "0 vs last";
-      deltaTone = "neutral";
-    } else {
-      deltaLine = `${delta > 0 ? "+" : ""}${delta} vs last`;
-      deltaTone = delta > 0 ? "up" : "down";
-    }
-  }
+  const goClient = () => router.push(`/app/clients/${client.id}`);
 
   return (
-    <button
-      type="button"
-      onClick={() => router.push(`/app/clients/${client.id}`)}
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={goClient}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          goClient();
+        }
+      }}
       className={cn(
-        "group flex h-full min-h-[260px] w-full flex-col overflow-hidden rounded-xl border p-4 text-left transition-colors duration-200 focus:outline-none focus:ring-1 focus:ring-white/10",
-        riskBorderClass(client)
+        "client-card group flex h-full min-h-[200px] cursor-pointer flex-col rounded-[12px] border border-white/[0.12] bg-surface p-5 transition-[border-color] duration-150",
+        "hover:border-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
       )}
     >
-      <div className="flex min-h-0 flex-1 flex-col justify-between">
-        <div className="min-h-0 shrink-0 space-y-3">
-          <div className="flex shrink-0 items-center justify-between gap-2">
-            <div className="flex min-w-0 flex-1 items-center gap-2">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/5">
-                {faviconUrl ? (
-                  <img src={faviconUrl} alt="" className="h-5 w-5 object-contain" width={20} height={20} />
-                ) : (
-                  <span className="text-[10px] font-semibold text-white/40">{client.name.charAt(0)}</span>
-                )}
-              </span>
-              <h3 className="truncate text-sm font-semibold leading-tight text-white/95">{client.name}</h3>
-            </div>
-            <span className="text-white/35 transition-colors group-hover:text-white/70" aria-hidden>
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </span>
-          </div>
-
-          <div className="min-h-[1.5rem]">
-            <ClientStateBadge bucket={bucket} />
-          </div>
-
-          <div className="flex h-[3.25rem] items-end justify-between gap-2">
-            <span className="text-4xl font-extrabold tabular-nums leading-none tracking-tight text-white">
-              {hasData ? client.latestScore : "—"}
-            </span>
-            <span
-              className={cn(
-                "max-w-[5.5rem] shrink-0 text-right text-[11px] font-semibold leading-tight tabular-nums",
-                !hasData && "text-transparent",
-                hasData && deltaTone === "up" && "text-authority-dominant",
-                hasData && deltaTone === "down" && "text-authority-losing",
-                hasData && deltaTone === "neutral" && "text-text-3"
-              )}
-            >
-              {deltaLine}
-            </span>
-          </div>
-        </div>
-
-        <div className="shrink-0 border-t border-white/[0.06] pt-3">
-          <div className="space-y-1.5 text-xs">
-            <p className="text-white/45">
-              Weakest: <span className="font-medium text-white/85">{weakest}</span>
-            </p>
-            <p className="text-white/45">
-              Displaced by: <span className="font-medium text-white/85">{d ?? "—"}</span>
-            </p>
-          </div>
-          <p className="mt-2 h-4 truncate text-[10px] leading-4">
-            {!hasData ? (
-              <span className="text-text-3">Run snapshot to generate data</span>
-            ) : (
-              <span className="invisible select-none" aria-hidden>
-                &nbsp;
-              </span>
-            )}
-          </p>
-        </div>
+      <div className="mb-4 flex items-center gap-2.5">
+        <span
+          className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden bg-white/[0.06]"
+          style={{ borderRadius: 6 }}
+        >
+          {faviconUrl ? (
+            <img src={faviconUrl} alt="" className="h-[18px] w-[18px] object-contain" width={18} height={18} />
+          ) : (
+            <span className="text-[10px] font-medium text-text-3">{client.name.charAt(0)}</span>
+          )}
+        </span>
+        <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-text">{client.name}</span>
+        <CardStatusBadge bucket={bucket} />
+        <svg
+          width={16}
+          height={16}
+          viewBox="0 0 16 16"
+          fill="none"
+          className="shrink-0 text-text-3"
+          aria-hidden
+        >
+          <path
+            d="M6 12L10 8L6 4"
+            stroke="currentColor"
+            strokeWidth={1.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </div>
-    </button>
+
+      {!hasData ? (
+        <>
+          <div className="flex flex-1 flex-col items-start justify-center gap-3 py-2">
+            <span className="text-[13px] text-text-3">No snapshot data</span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/app/clients/${client.id}`);
+              }}
+              className="cursor-pointer rounded-lg border border-white/15 bg-transparent px-3.5 py-1.5 text-[12px] font-medium text-text-2 transition-colors hover:border-white/25 hover:text-text"
+            >
+              Run snapshot
+            </button>
+          </div>
+          <div
+            className="mt-auto border-t border-white/[0.12]"
+            style={{ marginTop: 12, paddingTop: 12, borderTopWidth: 0.5 }}
+            aria-hidden
+          />
+        </>
+      ) : (
+        <>
+          <div className="mb-2 flex items-baseline gap-2.5">
+            <span
+              className="tabular-nums text-text"
+              style={{ fontSize: 48, fontWeight: 500, letterSpacing: "-2px", lineHeight: 1 }}
+            >
+              {client.latestScore}
+            </span>
+            {showDelta ? <CardDeltaBadge delta={delta!} /> : null}
+          </div>
+          <p className="mb-auto flex-1 text-[13px] leading-snug text-text-2" style={{ lineHeight: 1.4 }}>
+            {story}
+          </p>
+          <div
+            className="mt-3 flex flex-wrap items-center gap-4 border-t border-white/[0.12]"
+            style={{ marginTop: 12, paddingTop: 12, borderTopWidth: 0.5 }}
+          >
+            {weakestLabel ? (
+              <span className="text-[12px] text-text-3">
+                Weakest
+                <span className="ml-1.5 font-medium text-text-2">{weakestLabel}</span>
+              </span>
+            ) : null}
+            {showDisplacer ? (
+              <span className="text-[12px] text-text-3">
+                Displaced by
+                <span className="ml-1.5 font-medium text-text-2">{displacer}</span>
+              </span>
+            ) : null}
+          </div>
+        </>
+      )}
+    </div>
   );
 }
 
-/* Client cards — order is pre-sorted by triage (urgency first) */
 function ClientCardsGrid({ clients }: { clients: ClientWithStats[] }) {
   return (
     <section id="clients-overview">
-      <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div
+        className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2 xl:grid-cols-3"
+        style={{ gap: 16 }}
+      >
         {clients.map((client) => (
-          <div key={client.id} className="relative flex h-full min-h-0">
-            <ClientCard client={client} />
-          </div>
+          <ClientCard key={client.id} client={client} />
         ))}
       </div>
     </section>
@@ -834,6 +968,7 @@ export default function AppPage() {
   const [clients, setClients] = useState<ClientWithStats[]>([]);
   const [portfolioStats, setPortfolioStats] = useState<PortfolioStats | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [triageFilter, setTriageFilter] = useState<TriageBucket | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showLogoFailedBanner, setShowLogoFailedBanner] = useState(false);
@@ -1099,6 +1234,11 @@ export default function AppPage() {
     });
   }, [filteredClients]);
 
+  const displayedSortedClients = useMemo(() => {
+    if (triageFilter === null) return triageSortedClients;
+    return triageSortedClients.filter((c) => triageBucket(c) === triageFilter);
+  }, [triageSortedClients, triageFilter]);
+
   const runSnapshotHref = useMemo(() => {
     if (clients.length === 0) return "/app/clients/new";
     const sorted = [...clients].sort((a, b) => {
@@ -1194,8 +1334,16 @@ export default function AppPage() {
             </button>
           </Alert>
         )}
-        <RiskTriageStatusBar clients={clients} />
-        {triageSortedClients.length === 0 && searchQuery ? (
+        {clients.length > 0 ? (
+          <PriorityAlertBar
+            clients={filteredClients}
+            triageFilter={triageFilter}
+            onToggleFilter={(b) => setTriageFilter((f) => (f === b ? null : b))}
+          />
+        ) : null}
+        {clients.length === 0 ? (
+          <EmptyState />
+        ) : triageSortedClients.length === 0 && searchQuery ? (
           <div className="rounded-app-lg border border-white/5 bg-surface/50 py-4 text-center">
             <p className="text-xs text-text-2">No clients match &quot;{searchQuery}&quot;</p>
             <button onClick={() => setSearchQuery("")} className="mt-2 text-sm text-text hover:underline">
@@ -1203,7 +1351,7 @@ export default function AppPage() {
             </button>
           </div>
         ) : (
-          <ClientCardsGrid clients={triageSortedClients} />
+          <ClientCardsGrid clients={displayedSortedClients} />
         )}
       </div>
     </>
