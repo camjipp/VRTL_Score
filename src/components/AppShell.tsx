@@ -229,20 +229,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     sidebarCollapsed ? "h-[45px]" : "h-[59px]"
                   )}
                 >
-                  {/* Right edge of mark sits on sidebar vertical centerline (50% of this row’s width) */}
+                  {/* Mark nudged 3px R, “Score” 3px L → 6px gap between them */}
                   <img
                     src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
                     alt="VRTL"
                     className={cn(
-                      "absolute left-1/2 top-1/2 m-0 block w-auto max-w-none -translate-x-full -translate-y-1/2 p-0 align-middle brightness-0 invert",
-                      sidebarCollapsed ? "h-[45px]" : "h-[59px]"
+                      "absolute left-1/2 top-1/2 m-0 block w-auto max-w-none -translate-y-1/2 p-0 align-middle brightness-0 invert",
+                      sidebarCollapsed ? "h-[45px] -translate-x-full" : "h-[59px] translate-x-[calc(-100%+3px)]"
                     )}
                     width={sidebarCollapsed ? 45 : 59}
                     height={sidebarCollapsed ? 45 : 59}
                   />
                   <span
                     className={cn(
-                      "absolute left-1/2 top-1/2 -translate-y-1/2 text-base font-medium leading-none text-white/80",
+                      "absolute left-1/2 top-1/2 -translate-x-[3px] -translate-y-1/2 text-base font-medium leading-none text-white/80",
                       sidebarCollapsed && "sr-only"
                     )}
                   >
