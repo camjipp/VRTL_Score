@@ -233,15 +233,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
                     alt="VRTL"
                     className={cn(
-                      "m-0 block w-auto p-0 align-middle brightness-0 invert",
-                      sidebarCollapsed ? "h-9" : "h-[47px]"
+                      "m-0 block w-auto shrink-0 p-0 align-middle brightness-0 invert",
+                      sidebarCollapsed ? "h-[45px]" : "h-[59px]"
                     )}
-                    width={sidebarCollapsed ? 36 : 47}
-                    height={sidebarCollapsed ? 36 : 47}
+                    width={sidebarCollapsed ? 45 : 59}
+                    height={sidebarCollapsed ? 45 : 59}
                   />
                   <span
                     className={cn(
-                      "text-base font-medium leading-none text-white/80",
+                      "-ml-1.5 text-base font-medium leading-none text-white/80",
                       sidebarCollapsed && "sr-only"
                     )}
                   >
