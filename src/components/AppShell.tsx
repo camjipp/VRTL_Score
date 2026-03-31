@@ -217,37 +217,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="flex flex-1 flex-col">
               <div
                 className={cn(
-                  "flex shrink-0 items-center border-b border-white/5 py-4",
+                  "flex shrink-0 items-center justify-center border-b border-white/5 py-4",
                   sidebarCollapsed ? "px-2" : "px-4"
                 )}
               >
                 <Link
                   href="/app"
                   title="VRTL Score"
-                  className={cn(
-                    "relative block w-full text-white transition-opacity hover:opacity-90",
-                    sidebarCollapsed ? "h-[45px]" : "h-[59px]"
-                  )}
+                  className="block max-w-full transition-opacity hover:opacity-90"
                 >
-                  {/* “Score” stacked above mark, nudged left so it overlaps the right side of the image */}
                   <img
-                    src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
-                    alt="VRTL"
+                    src="/brand/vrtl-score-lockup.png"
+                    alt="VRTL Score"
                     className={cn(
-                      "absolute left-1/2 top-1/2 z-0 m-0 block w-auto max-w-none -translate-x-full -translate-y-1/2 p-0 align-middle brightness-0 invert",
-                      sidebarCollapsed ? "h-[45px]" : "h-[59px]"
+                      "mx-auto block h-auto w-auto max-w-full object-contain object-center",
+                      sidebarCollapsed ? "max-h-9" : "max-h-[52px]"
                     )}
-                    width={sidebarCollapsed ? 45 : 59}
-                    height={sidebarCollapsed ? 45 : 59}
+                    width={220}
+                    height={60}
+                    decoding="async"
                   />
-                  <span
-                    className={cn(
-                      "absolute left-1/2 top-1/2 z-10 translate-x-[calc(-2.25rem+20px)] -translate-y-1/2 text-xl font-medium leading-none text-white/90 [text-shadow:0_1px_2px_rgba(0,0,0,0.75)]",
-                      sidebarCollapsed && "sr-only"
-                    )}
-                  >
-                    Score
-                  </span>
                 </Link>
               </div>
 
