@@ -218,22 +218,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <div
                 className={cn(
                   "flex shrink-0 items-center border-b border-white/5 py-4",
-                  sidebarCollapsed ? "justify-center px-2" : "px-4"
+                  sidebarCollapsed ? "px-2" : "px-4"
                 )}
               >
                 <Link
                   href="/app"
-                  className={cn(
-                    "flex items-center gap-0 text-white transition-opacity hover:opacity-90",
-                    sidebarCollapsed && "justify-center"
-                  )}
                   title="VRTL Score"
+                  className={cn(
+                    "relative block w-full text-white transition-opacity hover:opacity-90",
+                    sidebarCollapsed ? "h-[45px]" : "h-[59px]"
+                  )}
                 >
+                  {/* Right edge of mark sits on sidebar vertical centerline (50% of this row’s width) */}
                   <img
                     src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
                     alt="VRTL"
                     className={cn(
-                      "m-0 block w-auto shrink-0 p-0 align-middle brightness-0 invert",
+                      "absolute left-1/2 top-1/2 m-0 block w-auto max-w-none -translate-x-full -translate-y-1/2 p-0 align-middle brightness-0 invert",
                       sidebarCollapsed ? "h-[45px]" : "h-[59px]"
                     )}
                     width={sidebarCollapsed ? 45 : 59}
@@ -241,7 +242,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   />
                   <span
                     className={cn(
-                      "-ml-1.5 text-base font-medium leading-none text-white/80",
+                      "absolute left-1/2 top-1/2 -translate-y-1/2 text-base font-medium leading-none text-white/80",
                       sidebarCollapsed && "sr-only"
                     )}
                   >
