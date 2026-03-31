@@ -242,7 +242,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   />
                   <span
                     className={cn(
-                      "absolute left-1/2 top-1/2 z-10 -translate-x-9 -translate-y-1/2 text-base font-medium leading-none text-white/90 [text-shadow:0_1px_2px_rgba(0,0,0,0.75)]",
+                      "absolute left-1/2 top-1/2 z-10 translate-x-[calc(-2.25rem+5px)] -translate-y-1/2 text-base font-medium leading-none text-white/90 [text-shadow:0_1px_2px_rgba(0,0,0,0.75)]",
                       sidebarCollapsed && "sr-only"
                     )}
                   >
