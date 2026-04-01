@@ -231,10 +231,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     alt="VRTL Score"
                     className={cn(
                       "mx-auto block h-auto w-auto max-w-full object-contain object-center",
-                      sidebarCollapsed ? "max-h-9" : "max-h-[52px]"
+                      sidebarCollapsed ? "max-h-[63px]" : "max-h-[91px]"
                     )}
-                    width={220}
-                    height={60}
+                    width={385}
+                    height={105}
                     decoding="async"
                   />
                 </Link>
