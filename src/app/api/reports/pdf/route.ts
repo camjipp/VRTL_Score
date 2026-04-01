@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import type { Extraction } from "@/lib/extraction/schema";
 import { mapSnapshotToReactPdfData } from "@/lib/reports/mapSnapshotToReactPdfData";
 import { generatePDF } from "@/lib/reports/pdf/generatePdf";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -64,6 +65,39 @@ function safePart(value: string) {
     .trim()
     .replace(/[\s_-]+/g, "_")
     .replace(/^_+|_+$/g, "");
+}
+
+function normalizeScoreByProvider(raw: unknown): Record<string, number> | null {
+  let obj: unknown = raw;
+  if (typeof raw === "string") {
+    try {
+      obj = JSON.parse(raw) as unknown;
+    } catch {
+      return null;
+    }
+  }
+  if (!obj || typeof obj !== "object" || Array.isArray(obj)) return null;
+  const out: Record<string, number> = {};
+  for (const [k, v] of Object.entries(obj)) {
+    const n = typeof v === "number" ? v : Number(v);
+    if (Number.isFinite(n)) out[k] = n;
+  }
+  return Object.keys(out).length > 0 ? out : null;
+}
+
+function normalizeParsedJson(pj: unknown): Extraction | null {
+  if (pj == null) return null;
+  if (typeof pj === "string") {
+    try {
+      const o = JSON.parse(pj) as unknown;
+      if (!o || typeof o !== "object" || Array.isArray(o)) return null;
+      return o as Extraction;
+    } catch {
+      return null;
+    }
+  }
+  if (typeof pj === "object" && !Array.isArray(pj)) return pj as Extraction;
+  return null;
 }
 
 export async function GET(req: Request) {
@@ -182,12 +216,25 @@ export async function GET(req: Request) {
       .order("prompt_ordinal", { ascending: true });
     const responses = responsesRes.data ?? [];
 
+    const snap = snapshotRes.data;
     const snapshotInput = {
       agency,
-      client: clientRes.data,
-      snapshot: snapshotRes.data,
-      competitors,
-      responses,
+      client: {
+        ...clientRes.data,
+        name: clientRes.data.name?.trim() || "Client",
+      },
+      snapshot: {
+        ...snap,
+        score_by_provider: normalizeScoreByProvider(snap.score_by_provider),
+      },
+      competitors: competitors.map((c) => ({
+        ...c,
+        name: c.name?.trim() || "Unknown",
+      })),
+      responses: responses.map((r) => ({
+        ...r,
+        parsed_json: normalizeParsedJson(r.parsed_json),
+      })),
     };
 
     const pdfData = mapSnapshotToReactPdfData(snapshotInput, {
@@ -218,7 +265,11 @@ export async function GET(req: Request) {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error("pdf_generation_failed", { snapshotId, message });
+    if (err instanceof Error && err.stack) {
+      console.error("pdf_generation_failed", { snapshotId, message, stack: err.stack });
+    } else {
+      console.error("pdf_generation_failed", { snapshotId, message });
+    }
     return NextResponse.json(
       {
         error: "PDF generation failed",

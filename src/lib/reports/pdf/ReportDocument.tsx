@@ -1,15 +1,12 @@
 import { Document, type DocumentProps } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "./types";
-import { registerPdfFonts } from "./registerFonts";
 import { Page1Overview } from "./pages/Page1Overview";
 import { Page2ModelAnalysis } from "./pages/Page2ModelAnalysis";
 import { Page3Recommendations } from "./pages/Page3Recommendations";
 import { Page4ExecutionPlan } from "./pages/Page4ExecutionPlan";
 import { Page5DataSummary } from "./pages/Page5DataSummary";
 import { Page6Evidence } from "./pages/Page6Evidence";
-
-registerPdfFonts();
 
 export function ReportDocument({ data }: { data: ReportData }): ReactElement<DocumentProps> {
   return (

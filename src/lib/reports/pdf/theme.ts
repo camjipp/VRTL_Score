@@ -22,9 +22,10 @@ export const space = {
   cardPad: 16,
 } as const;
 
+/** PDFKit built-ins only — avoids network font fetch (unpkg) failing on Linux/server and breaking layout. */
 export const fonts = {
-  body: "Inter",
-  display: "Inter",
+  body: "Helvetica",
+  display: "Helvetica",
 } as const;
 
 /** Base styles reused across pages */
