@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import {
   probeMinimalPdf,
   probeReportPagesOneAtATime,
-} from "@/lib/reports/pdf/generatePdf";
+} from "@/lib/reports/pdf/generatePdfServer";
 import { summarizeReportDataShape } from "@/lib/reports/pdf/pdfDiagnostics";
 import { stanleyData } from "@/lib/reports/pdf/stanleyData";
 

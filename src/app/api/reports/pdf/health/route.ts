@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { generatePDF } from "@/lib/reports/pdf/generatePdf";
+import { generatePDF } from "@/lib/reports/pdf/generatePdfServer";
 import { stanleyData } from "@/lib/reports/pdf/stanleyData";
 
 export const runtime = "nodejs";

@@ -3,12 +3,12 @@ export { stanleyData } from "./stanleyData";
 export { ReportDocument } from "./ReportDocument";
 export {
   generatePDF,
-  generatePdfBlob,
   generatePdfMinimalBuffer,
   probeMinimalPdf,
   probeReportPagesOneAtATime,
-} from "./generatePdf";
-export type { GeneratePdfOptions, MinimalProbeResult, PageProbeRow } from "./generatePdf";
+} from "./generatePdfServer";
+export type { GeneratePdfOptions, MinimalProbeResult, PageProbeRow } from "./generatePdfServer";
+export { generatePdfBlob, generatePDFInProcess } from "./generatePdf";
 export {
   getPdfLastTrace,
   isPdfDiagnosticsEnabled,

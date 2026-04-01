@@ -7,8 +7,9 @@
     "node": "22.x"
   },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "pnpm run build:pdf-worker && next dev",
+    "build:pdf-worker": "node scripts/build-pdf-worker.mjs",
+    "build": "next build && pnpm run build:pdf-worker",
     "start": "next start",
     "lint": "next lint",
     "db:check": "node scripts/supabase_healthcheck.mjs"
@@ -40,6 +41,7 @@
     "@types/react-dom": "^18.3.1",
     "autoprefixer": "^10.4.19",
     "dotenv": "^16.4.5",
+    "esbuild": "^0.25.0",
     "eslint": "^9.17.0",
     "eslint-config-next": "^15.1.4",
     "pg": "^8.13.1",

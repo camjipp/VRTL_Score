@@ -7,7 +7,7 @@ import {
   generatePdfMinimalBuffer,
   probeMinimalPdf,
   probeReportPagesOneAtATime,
-} from "@/lib/reports/pdf/generatePdf";
+} from "@/lib/reports/pdf/generatePdfServer";
 import { isPdfDiagnosticsEnabled, summarizeReportDataShape } from "@/lib/reports/pdf/pdfDiagnostics";
 import type { ReportData } from "@/lib/reports/pdf/types";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
