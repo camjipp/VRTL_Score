@@ -7,9 +7,9 @@
     "node": "22.x"
   },
   "scripts": {
-    "dev": "pnpm run build:pdf-worker && next dev",
+    "dev": "next dev",
     "build:pdf-worker": "node scripts/build-pdf-worker.mjs",
-    "build": "pnpm run build:pdf-worker && next build && node scripts/verify-pdf-worker-trace.mjs",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "db:check": "node scripts/supabase_healthcheck.mjs"

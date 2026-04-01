@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 
-import { generatePDF } from "@/lib/reports/pdf/generatePdfServer";
-import { getPdfWorkerStatus } from "@/lib/reports/pdf/pdfWorkerPath";
+import {
+  generatePDF,
+  probeMinimalPdf,
+} from "@/lib/reports/pdf/generatePdfServer";
 import { stanleyData } from "@/lib/reports/pdf/stanleyData";
 
 export const runtime = "nodejs";
@@ -31,36 +33,38 @@ export async function GET(req: Request) {
   }
 
   const startedAt = Date.now();
-  const worker = getPdfWorkerStatus();
-
-  if (!worker.ok) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: "pdf_worker_missing",
-        message: "dist/pdf-worker.cjs not found at runtime",
-        worker: { path: worker.path, cwd: worker.cwd, hint: worker.hint },
-        diagnostics: {
-          nextRuntime,
-          node: process.version,
-          platform: process.platform,
-          arch: process.arch,
-        },
-      },
-      { status: 503 },
-    );
-  }
 
   try {
+    const minimalProbe = await probeMinimalPdf();
+    if (!minimalProbe.ok) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "react_pdf_minimal_probe_failed",
+          message: minimalProbe.message,
+          stack: minimalProbe.stack,
+          path: "in-process renderToBuffer (Document/Page/Text)",
+          diagnostics: {
+            nextRuntime,
+            node: process.version,
+            platform: process.platform,
+            arch: process.arch,
+          },
+        },
+        { status: 503 },
+      );
+    }
+
     const buf = await generatePDF(stanleyData);
     const ok = buf.length > 1000;
 
     return NextResponse.json({
       ok,
       engine: "@react-pdf/renderer",
+      path: "in-process renderToBuffer (ReportDocument)",
+      minimal_probe_bytes: minimalProbe.bytes,
       pdf_bytes: buf.length,
       duration_ms: Date.now() - startedAt,
-      worker: { path: worker.path, cwd: worker.cwd },
       diagnostics: {
         nextRuntime,
         node: process.version,

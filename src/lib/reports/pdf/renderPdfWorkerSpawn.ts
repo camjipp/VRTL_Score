@@ -1,3 +1,7 @@
+/**
+ * Optional subprocess PDF path (not used by `/api/reports/pdf` or health).
+ * Kept for local experiments; production uses in-process `renderToBuffer` in generatePdfServer.
+ */
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { unlinkSync, writeFileSync } from "node:fs";

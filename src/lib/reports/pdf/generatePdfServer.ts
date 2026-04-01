@@ -1,5 +1,10 @@
+import type { DocumentProps } from "@react-pdf/renderer";
+import { Document, Page, Text, renderToBuffer } from "@react-pdf/renderer";
+import type { ReactElement } from "react";
+import React from "react";
+
 import { getPdfLastTrace, resetPdfTrace } from "./pdfDiagnostics";
-import { renderPdfViaWorker, type WorkerPayload } from "./renderPdfWorkerSpawn";
+import { ReportDocument } from "./ReportDocument";
 import type { ReportData } from "./types";
 
 export type GeneratePdfOptions = {
@@ -18,13 +23,21 @@ export type PageProbeRow = {
   lastTrace?: { page: number; section: string };
 };
 
+function minimalPdfElement(): ReactElement<DocumentProps> {
+  return React.createElement(
+    Document,
+    {},
+    React.createElement(Page, { size: "A4" }, React.createElement(Text, {}, "test"))
+  );
+}
+
 export async function generatePdfMinimalBuffer(): Promise<Buffer> {
-  return renderPdfViaWorker({ mode: "minimal" });
+  return renderToBuffer(minimalPdfElement());
 }
 
 export async function probeMinimalPdf(): Promise<MinimalProbeResult> {
   try {
-    const buf = await renderPdfViaWorker({ mode: "minimal" });
+    const buf = await renderToBuffer(minimalPdfElement());
     return { ok: true, bytes: buf.length };
   } catch (err) {
     const e = err instanceof Error ? err : new Error(String(err));
@@ -37,11 +50,12 @@ export async function probeReportPagesOneAtATime(data: ReportData): Promise<Page
   for (let p = 1; p <= 6; p++) {
     resetPdfTrace();
     try {
-      const buf = await renderPdfViaWorker({
-        mode: "full",
-        data,
-        pages: [p],
-      } satisfies WorkerPayload);
+      const buf = await renderToBuffer(
+        React.createElement(ReportDocument, {
+          data,
+          pages: [p],
+        }) as ReactElement<DocumentProps>
+      );
       rows.push({ page: p, ok: true });
       void buf;
     } catch (err) {
@@ -61,11 +75,12 @@ export async function probeReportPagesOneAtATime(data: ReportData): Promise<Page
 export async function generatePDF(data: ReportData, options?: GeneratePdfOptions): Promise<Buffer> {
   resetPdfTrace();
   try {
-    return await renderPdfViaWorker({
-      mode: "full",
-      data,
-      pages: options?.pages,
-    });
+    return await renderToBuffer(
+      React.createElement(ReportDocument, {
+        data,
+        pages: options?.pages,
+      }) as ReactElement<DocumentProps>
+    );
   } catch (err) {
     const e = err instanceof Error ? err : new Error(String(err));
     const wrapped = new Error(e.message) as Error & {

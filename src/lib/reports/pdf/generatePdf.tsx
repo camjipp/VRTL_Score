@@ -1,5 +1,5 @@
 import type { DocumentProps } from "@react-pdf/renderer";
-import { pdf, renderToBuffer } from "@react-pdf/renderer";
+import { pdf } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "./types";
 import { ReportDocument } from "./ReportDocument";
@@ -30,9 +30,5 @@ export async function generatePdfBlob(data: ReportData, options?: { pages?: numb
   }
 }
 
-/** @deprecated Use generatePdfServer — kept for rare in-process tests only. */
-export async function generatePDFInProcess(data: ReportData, options?: { pages?: number[] }): Promise<Buffer> {
-  resetPdfTrace();
-  const el: ReactElement<DocumentProps> = <ReportDocument data={data} pages={options?.pages} />;
-  return renderToBuffer(el);
-}
+/** Alias of `generatePDF` from `./generatePdfServer` (same in-process path as the API). */
+export { generatePDF as generatePDFInProcess } from "./generatePdfServer";
