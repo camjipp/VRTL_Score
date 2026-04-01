@@ -38,10 +38,17 @@ export function DownloadPdfButton({ snapshotId, className, variant = "default", 
         throw new Error(text || `Download failed (${res.status})`);
       }
       const blob = await res.blob();
+      const cd = res.headers.get("Content-Disposition");
+      const fnMatch = cd?.match(/filename\*?=(?:UTF-8'')?["']?([^"';]+)["']?/i);
+      const serverName = fnMatch?.[1]?.trim();
+      const downloadName =
+        serverName && serverName.length > 0
+          ? decodeURIComponent(serverName.replace(/^["']|["']$/g, ""))
+          : `AI_Report_${snapshotId.slice(0, 8)}.pdf`;
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `VRTLScore_${snapshotId}.pdf`;
+      a.download = downloadName;
       document.body.appendChild(a);
       a.click();
       a.remove();

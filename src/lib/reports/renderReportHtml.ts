@@ -1,4 +1,11 @@
 import type { Extraction } from "@/lib/extraction/schema";
+import {
+  evidencePdfChip,
+  PDF_METHODOLOGY_TEXT,
+  PDF_REPORT_TITLE,
+  pdfScoreAccent,
+  resolvePdfAccent,
+} from "@/lib/reports/pdfTheme";
 
 type ProviderScores = Record<string, number>;
 
@@ -342,25 +349,25 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
 
 type EvidenceLabel = "STRENGTH" | "OPPORTUNITY" | "COMPETITIVE" | "VULNERABLE" | "INVISIBLE";
 
-function getEvidenceLabel(pj: Extraction | null): { label: EvidenceLabel; color: string; bgColor: string } {
-  if (!pj) return { label: "INVISIBLE", color: "#64748b", bgColor: "#f1f5f9" };
-  
+function getEvidenceLabel(pj: Extraction | null): { label: EvidenceLabel; chip: ReturnType<typeof evidencePdfChip> } {
+  if (!pj) return { label: "INVISIBLE", chip: evidencePdfChip("INVISIBLE") };
+
   if (pj.client_mentioned && pj.client_position === "top" && pj.recommendation_strength === "strong") {
-    return { label: "STRENGTH", color: "#059669", bgColor: "#d1fae5" };
+    return { label: "STRENGTH", chip: evidencePdfChip("STRENGTH") };
   }
   if (pj.client_mentioned && (pj.client_position === "middle" || pj.recommendation_strength === "medium")) {
-    return { label: "OPPORTUNITY", color: "#2563eb", bgColor: "#dbeafe" };
+    return { label: "OPPORTUNITY", chip: evidencePdfChip("OPPORTUNITY") };
   }
   if (pj.client_mentioned && pj.competitors_mentioned && pj.competitors_mentioned.length > 0) {
-    return { label: "COMPETITIVE", color: "#d97706", bgColor: "#fef3c7" };
+    return { label: "COMPETITIVE", chip: evidencePdfChip("COMPETITIVE") };
   }
   if (!pj.client_mentioned && pj.competitors_mentioned && pj.competitors_mentioned.length > 0) {
-    return { label: "VULNERABLE", color: "#dc2626", bgColor: "#fee2e2" };
+    return { label: "VULNERABLE", chip: evidencePdfChip("VULNERABLE") };
   }
   if (!pj.client_mentioned) {
-    return { label: "INVISIBLE", color: "#64748b", bgColor: "#f1f5f9" };
+    return { label: "INVISIBLE", chip: evidencePdfChip("INVISIBLE") };
   }
-  return { label: "OPPORTUNITY", color: "#2563eb", bgColor: "#dbeafe" };
+  return { label: "OPPORTUNITY", chip: evidencePdfChip("OPPORTUNITY") };
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -405,16 +412,16 @@ function generateBottomLine(data: ReportData, metrics: ReturnType<typeof calcula
 
 function generateTensionStatement(metrics: ReturnType<typeof calculateMetrics>): string {
   if (metrics.isFragileLeadership) {
-    return `⚠ FRAGILE LEADERSHIP: You're #1, but all competitors achieve similar mention coverage. Any content push by a competitor could flip this ranking.`;
+    return `Fragile leadership: you rank first, but competitors show similar mention coverage. A focused content push could change this ranking.`;
   }
   if (metrics.isContestedMarket) {
-    return `⚠ CONTESTED MARKET: No clear AI visibility leader exists. This is a land-grab opportunity — the first to differentiate captures the default position.`;
+    return `Contested landscape: no single leader in AI visibility. The first brand to differentiate is likely to capture the default recommendation.`;
   }
   if (metrics.gapToLeader > 5) {
-    return `⚠ VISIBILITY GAP: ${metrics.leader?.name} has a ${metrics.gapToLeader}-mention lead. Without action, this gap will widen as AI models reinforce existing patterns.`;
+    return `Visibility gap: ${metrics.leader?.name} leads by ${metrics.gapToLeader} mentions. Without intervention, models tend to reinforce existing patterns.`;
   }
   if (metrics.mentionRate < 50) {
-    return `⚠ DISCOVERY RISK: More than half of AI-assisted buyers in your category won't discover you. This compounds daily.`;
+    return `Discovery risk: a majority of category queries may not surface your brand; low presence compounds over time.`;
   }
   return "";
 }
@@ -425,9 +432,10 @@ function generateTensionStatement(metrics: ReturnType<typeof calculateMetrics>):
 
 export function renderReportHtml(data: ReportData): string {
   const { agency, client, snapshot, competitors, responses } = data;
-  
-  const accentColor = agency.brand_accent || "#0f172a";
+
+  const accentColor = resolvePdfAccent(agency.brand_accent);
   const score = snapshot.vrtl_score;
+  const scoreAccent = pdfScoreAccent(score);
   const tier = getScoreTier(score);
   const metrics = calculateMetrics(data);
   const insights = generateInsights(data, metrics);
@@ -452,214 +460,389 @@ export function renderReportHtml(data: ReportData): string {
 <head>
   <meta charset="UTF-8" />
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-    
-    :root { 
-      --accent: ${accentColor}; 
-      --score-color: ${tier.color}; 
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+      --accent: ${accentColor};
+      --score-accent: ${scoreAccent};
+      --pdf-bg: #13161c;
+      --pdf-surface: #1a1e28;
+      --pdf-surface-raised: #222831;
+      --pdf-border: rgba(255, 255, 255, 0.085);
+      --pdf-border-subtle: rgba(255, 255, 255, 0.055);
+      --pdf-text: #e8eaef;
+      --pdf-text-secondary: #98a1b0;
+      --pdf-text-muted: #6d7583;
+      --pdf-success: #5cb89a;
+      --pdf-success-dim: rgba(92, 184, 154, 0.14);
+      --pdf-warning: #d4b06a;
+      --pdf-warning-dim: rgba(212, 176, 106, 0.14);
+      --pdf-danger: #c97070;
+      --pdf-danger-dim: rgba(201, 112, 112, 0.14);
+      --pdf-ring-track: rgba(255, 255, 255, 0.11);
+      --pdf-r: 8px;
+      --pdf-r-sm: 5px;
     }
-    
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    
+
     html, body {
-      font-family: 'Inter', -apple-system, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       font-size: 10px;
-      line-height: 1.4;
-      color: #1e293b;
-      background: #fff;
+      line-height: 1.45;
+      color: var(--pdf-text);
+      background: var(--pdf-bg);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
-    
+
     .page {
       width: 210mm;
       min-height: 297mm;
-      padding: 12mm 14mm;
+      padding: 11mm 13mm;
       page-break-after: always;
       position: relative;
+      background: var(--pdf-bg);
+      color: var(--pdf-text);
     }
     .page:last-child { page-break-after: avoid; }
     .no-break { page-break-inside: avoid; break-inside: avoid; }
-    
-    /* Typography - tighter */
-    .h1 { font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.1; }
-    .h2 { font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
-    .h3 { font-size: 10px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
-    .body { font-size: 9px; color: #475569; line-height: 1.5; }
-    .small { font-size: 8px; color: #64748b; }
-    
-    /* Pills/Badges */
+
+    .h1 { font-size: 17px; font-weight: 700; color: var(--pdf-text); letter-spacing: -0.02em; line-height: 1.15; }
+    .h2 {
+      font-size: 10px; font-weight: 600; color: var(--pdf-text-secondary);
+      text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px; margin-top: 4px;
+    }
+    .h3 { font-size: 9px; font-weight: 600; color: var(--pdf-text); margin-bottom: 6px; letter-spacing: 0.04em; }
+    .body { font-size: 9px; color: var(--pdf-text-secondary); line-height: 1.55; }
+    .small { font-size: 7.5px; color: var(--pdf-text-muted); }
+
     .pill {
       display: inline-block;
-      padding: 2px 5px;
-      border-radius: 3px;
-      font-size: 7px;
+      padding: 3px 6px;
+      border-radius: var(--pdf-r-sm);
+      font-size: 6.5px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.06em;
+      border: 1px solid transparent;
     }
-    .pill-green { background: #d1fae5; color: #065f46; }
-    .pill-yellow { background: #fef3c7; color: #92400e; }
-    .pill-red { background: #fee2e2; color: #991b1b; }
-    .pill-blue { background: #dbeafe; color: #1e40af; }
-    .pill-gray { background: #f1f5f9; color: #475569; }
-    
-    .priority-high { background: #fee2e2; color: #991b1b; }
-    .priority-medium { background: #fef3c7; color: #92400e; }
-    .priority-low { background: #d1fae5; color: #065f46; }
-    
-    /* Page Header/Footer - tighter */
+    .pill-green { background: var(--pdf-success-dim); color: #9fd4c2; border-color: rgba(92, 184, 154, 0.28); }
+    .pill-yellow { background: var(--pdf-warning-dim); color: #e8d49a; border-color: rgba(212, 176, 106, 0.28); }
+    .pill-red { background: var(--pdf-danger-dim); color: #e8b4b4; border-color: rgba(201, 112, 112, 0.28); }
+    .pill-blue { background: rgba(107, 158, 188, 0.14); color: #9ec5e8; border-color: rgba(107, 158, 188, 0.28); }
+    .pill-gray { background: rgba(255, 255, 255, 0.05); color: var(--pdf-text-secondary); border-color: var(--pdf-border); }
+
+    .priority-high { background: var(--pdf-danger-dim); color: #e8b4b4; border: 1px solid rgba(201, 112, 112, 0.3); }
+    .priority-medium { background: var(--pdf-warning-dim); color: #e8d49a; border: 1px solid rgba(212, 176, 106, 0.3); }
+    .priority-low { background: var(--pdf-success-dim); color: #9fd4c2; border: 1px solid rgba(92, 184, 154, 0.3); }
+
     .page-header {
-      display: flex; justify-content: space-between; align-items: center;
-      padding-bottom: 6px; border-bottom: 2px solid #0f172a; margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      padding-bottom: 10px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--pdf-border);
     }
-    .page-title { font-size: 8px; font-weight: 700; color: #0f172a; text-transform: uppercase; letter-spacing: 0.08em; }
-    .page-num { font-size: 7px; color: #94a3b8; }
+    .page-header-left { flex: 1; min-width: 0; }
+    .report-name {
+      font-size: 9px; font-weight: 600; color: var(--pdf-text);
+      letter-spacing: 0.14em; text-transform: uppercase;
+    }
+    .section-slug {
+      font-size: 8px; color: var(--pdf-text-muted); margin-top: 3px;
+      font-weight: 500; letter-spacing: 0.02em; text-transform: none;
+    }
+    .page-header-right { text-align: right; font-size: 8px; color: var(--pdf-text-secondary); line-height: 1.45; }
+    .page-header-right .page-num { margin-top: 4px; font-size: 7px; color: var(--pdf-text-muted); letter-spacing: 0.04em; }
+    .meta-quiet { color: var(--pdf-text-muted); font-size: 7.5px; }
+
     .page-footer {
-      position: absolute; bottom: 8mm; left: 14mm; right: 14mm;
-      display: flex; justify-content: space-between; font-size: 7px; color: #94a3b8;
-      padding-top: 6px; border-top: 1px solid #e2e8f0;
+      position: absolute;
+      bottom: 7mm;
+      left: 13mm;
+      right: 13mm;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 7px;
+      color: var(--pdf-text-muted);
+      padding-top: 8px;
+      border-top: 1px solid var(--pdf-border-subtle);
     }
-    
-    /* Cover Page */
-    .cover { padding-top: 16mm; }
-    .cover-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
-    .cover-logo img { max-height: 24px; }
-    .cover-logo-text { font-size: 11px; font-weight: 700; color: #0f172a; }
-    .cover-type { font-size: 9px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
-    .cover-client { font-size: 24px; font-weight: 800; color: #0f172a; line-height: 1.1; }
-    .cover-url { font-size: 10px; color: #64748b; margin-top: 2px; }
-    
-    /* Score Hero - compact */
-    .score-section { display: flex; gap: 16px; margin: 16px 0; }
+
+    /* Cover */
+    .cover { padding-top: 6mm; }
+    .cover-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--pdf-border);
+    }
+    .cover-header-left { flex: 1; }
+    .cover-header-right { text-align: right; font-size: 8px; color: var(--pdf-text-secondary); line-height: 1.5; }
+    .cover-logo img { max-height: 28px; opacity: 0.95; }
+    .cover-logo-text { font-size: 10px; font-weight: 600; color: var(--pdf-text-secondary); }
+    .cover-agency-line { font-size: 8px; color: var(--pdf-text-muted); margin-top: 4px; }
+
+    .score-section { display: flex; gap: 18px; margin: 18px 0 16px; align-items: flex-start; }
     .score-ring {
-      width: 100px; height: 100px; border-radius: 50%; flex-shrink: 0;
-      background: conic-gradient(var(--score-color) calc(${score ?? 0} * 3.6deg), #e2e8f0 0);
+      width: 104px; height: 104px; border-radius: 50%; flex-shrink: 0;
+      background: conic-gradient(var(--score-accent) calc(${score ?? 0} * 3.6deg), var(--pdf-ring-track) 0);
       display: flex; align-items: center; justify-content: center;
     }
     .score-ring-inner {
-      width: 80px; height: 80px; border-radius: 50%; background: #fff;
+      width: 82px; height: 82px; border-radius: 50%;
+      background: var(--pdf-surface-raised);
+      border: 1px solid var(--pdf-border-subtle);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
-    .score-number { font-size: 32px; font-weight: 800; color: #0f172a; line-height: 1; }
-    .score-max { font-size: 10px; color: #94a3b8; }
-    
-    .score-context { flex: 1; }
-    .score-tier { display: inline-block; padding: 3px 8px; border-radius: 3px; font-size: 9px; font-weight: 700; background: var(--score-color); color: #fff; margin-bottom: 6px; }
-    .score-rank { font-size: 9px; color: #475569; margin-bottom: 8px; }
-    .score-rank strong { color: #0f172a; }
-    
-    .context-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-    .context-item { padding: 6px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 3px; }
-    .context-value { font-size: 12px; font-weight: 700; color: #0f172a; }
-    .context-label { font-size: 7px; color: #64748b; margin-top: 1px; }
-    
-    /* Tension Alert */
+    .score-number { font-size: 30px; font-weight: 700; color: var(--pdf-text); line-height: 1; letter-spacing: -0.03em; }
+    .score-max { font-size: 9px; color: var(--pdf-text-muted); margin-top: 2px; }
+
+    .score-context { flex: 1; padding-top: 2px; }
+    .score-tier {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: var(--pdf-r-sm);
+      font-size: 8.5px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--pdf-text);
+      border: 1px solid var(--pdf-border);
+      border-left: 2px solid var(--score-accent);
+    }
+    .score-rank { font-size: 9px; color: var(--pdf-text-secondary); margin-bottom: 10px; line-height: 1.4; }
+    .score-rank strong { color: var(--pdf-text); font-weight: 600; }
+
+    .context-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .context-item {
+      padding: 8px 10px;
+      background: var(--pdf-surface);
+      border: 1px solid var(--pdf-border);
+      border-radius: var(--pdf-r-sm);
+    }
+    .context-value { font-size: 14px; font-weight: 700; color: var(--pdf-text); letter-spacing: -0.02em; }
+    .context-label { font-size: 7px; color: var(--pdf-text-muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.08em; }
+
     .tension-alert {
-      padding: 10px 12px; background: #fef2f2; border: 1px solid #fecaca; border-left: 3px solid #dc2626;
-      margin: 12px 0; border-radius: 0 4px 4px 0; font-size: 9px; color: #991b1b; line-height: 1.5;
+      padding: 11px 14px;
+      margin: 14px 0;
+      background: var(--pdf-surface);
+      border: 1px solid var(--pdf-border);
+      border-left: 2px solid var(--pdf-warning);
+      border-radius: var(--pdf-r-sm);
+      font-size: 9px;
+      color: var(--pdf-text-secondary);
+      line-height: 1.55;
     }
-    
-    /* Bottom Line Box - compact */
+
     .bottom-line {
-      padding: 10px 12px; background: #f8fafc; border-left: 3px solid var(--accent);
-      margin: 12px 0; border-radius: 0 4px 4px 0;
+      padding: 12px 14px;
+      margin: 14px 0;
+      background: var(--pdf-surface-raised);
+      border: 1px solid var(--pdf-border);
+      border-radius: var(--pdf-r);
     }
-    .bottom-line-title { font-size: 9px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
-    .bottom-line-text { font-size: 9px; color: #334155; line-height: 1.5; }
-    
-    /* Win/Risk/Priority Strip - compact */
-    .verdict-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
-    .verdict-card { padding: 10px; border-radius: 4px; }
-    .verdict-card.win { background: #f0fdf4; border: 1px solid #bbf7d0; }
-    .verdict-card.risk { background: #fef2f2; border: 1px solid #fecaca; }
-    .verdict-card.priority { background: #eff6ff; border: 1px solid #bfdbfe; }
-    .verdict-label { font-size: 7px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 3px; }
-    .verdict-card.win .verdict-label { color: #166534; }
-    .verdict-card.risk .verdict-label { color: #991b1b; }
-    .verdict-card.priority .verdict-label { color: #1e40af; }
-    .verdict-value { font-size: 9px; font-weight: 600; color: #0f172a; }
-    .verdict-detail { font-size: 8px; color: #475569; margin-top: 2px; }
-    
-    /* Competitive Ranking - compact */
-    .ranking-section { margin: 12px 0; }
-    .ranking-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
+    .bottom-line-title {
+      font-size: 8px; font-weight: 600; color: var(--pdf-text-muted);
+      margin-bottom: 6px; letter-spacing: 0.14em; text-transform: uppercase;
+    }
+    .bottom-line-text { font-size: 9.5px; color: var(--pdf-text-secondary); line-height: 1.55; }
+
+    .verdict-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0; }
+    .verdict-card {
+      padding: 11px 12px;
+      border-radius: var(--pdf-r-sm);
+      background: var(--pdf-surface);
+      border: 1px solid var(--pdf-border);
+    }
+    .verdict-card.win { border-left: 2px solid var(--pdf-success); }
+    .verdict-card.risk { border-left: 2px solid var(--pdf-danger); }
+    .verdict-card.priority { border-left: 2px solid var(--accent); }
+    .verdict-label {
+      font-size: 6.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
+      margin-bottom: 5px; color: var(--pdf-text-muted);
+    }
+    .verdict-card.win .verdict-label { color: #9fd4c2; }
+    .verdict-card.risk .verdict-label { color: #e8b4b4; }
+    .verdict-card.priority .verdict-label { color: #9ec5e8; }
+    .verdict-value { font-size: 9px; font-weight: 600; color: var(--pdf-text); line-height: 1.35; }
+    .verdict-detail { font-size: 7.5px; color: var(--pdf-text-muted); margin-top: 4px; line-height: 1.35; }
+
+    .ranking-section { margin: 14px 0 8px; }
+    .ranking-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--pdf-border-subtle);
+    }
     .ranking-row:last-child { border-bottom: none; }
-    .ranking-pos { width: 20px; font-size: 9px; font-weight: 700; color: #64748b; }
-    .ranking-name { width: 90px; font-size: 9px; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .ranking-name.client { font-weight: 700; color: #0f172a; }
-    .ranking-bar { flex: 1; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+    .ranking-pos { width: 22px; font-size: 8.5px; font-weight: 600; color: var(--pdf-text-muted); }
+    .ranking-name { width: 90px; font-size: 9px; color: var(--pdf-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ranking-name.client { font-weight: 600; color: var(--pdf-text); }
+    .ranking-bar { flex: 1; height: 5px; background: rgba(255, 255, 255, 0.08); border-radius: 3px; overflow: hidden; }
     .ranking-fill { height: 100%; border-radius: 3px; }
     .ranking-fill.client { background: var(--accent); }
-    .ranking-fill.other { background: #94a3b8; }
-    .ranking-score { width: 45px; font-size: 9px; color: #64748b; text-align: right; }
-    .ranking-score.client { font-weight: 700; color: #0f172a; }
-    .ranking-delta { width: 40px; font-size: 8px; text-align: right; }
-    .ranking-delta.threat { color: #dc2626; font-weight: 600; }
-    .ranking-delta.safe { color: #16a34a; }
-    
-    /* Model Breakdown - compact with delta */
-    .model-grid { display: grid; grid-template-columns: repeat(${models.length > 2 ? 2 : 1}, 1fr); gap: 8px; margin: 10px 0; }
-    .model-card { padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; border-left: 3px solid; }
-    .model-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .model-name { font-size: 10px; font-weight: 700; color: #0f172a; }
-    .model-score { font-size: 16px; font-weight: 800; color: #0f172a; }
-    .model-bar { height: 4px; background: #e2e8f0; border-radius: 2px; margin: 6px 0; overflow: hidden; }
+    .ranking-fill.other { background: rgba(255, 255, 255, 0.2); }
+    .ranking-score { width: 48px; font-size: 8.5px; color: var(--pdf-text-muted); text-align: right; }
+    .ranking-score.client { font-weight: 600; color: var(--pdf-text); }
+    .ranking-delta { width: 42px; font-size: 7.5px; text-align: right; }
+    .ranking-delta.threat { color: #e8a8a8; font-weight: 600; }
+    .ranking-delta.safe { color: #9fd4c2; }
+
+    .model-grid { display: grid; grid-template-columns: repeat(${models.length > 2 ? 2 : 1}, 1fr); gap: 10px; margin: 12px 0; }
+    .model-card {
+      padding: 12px;
+      background: var(--pdf-surface);
+      border: 1px solid var(--pdf-border);
+      border-radius: var(--pdf-r-sm);
+      border-left: 2px solid var(--model-accent, var(--accent));
+    }
+    .model-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+    .model-name { font-size: 10px; font-weight: 600; color: var(--pdf-text); }
+    .model-score { font-size: 17px; font-weight: 700; color: var(--pdf-text); letter-spacing: -0.03em; }
+    .model-bar { height: 3px; background: rgba(255, 255, 255, 0.08); border-radius: 2px; margin: 8px 0; overflow: hidden; }
     .model-fill { height: 100%; border-radius: 2px; }
-    .model-insight { font-size: 8px; color: #475569; line-height: 1.4; }
-    .model-delta { font-size: 8px; margin-top: 4px; }
-    .model-delta.positive { color: #16a34a; }
-    .model-delta.negative { color: #dc2626; }
-    
-    /* Insight Cards - compact */
-    .insight-card { padding: 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; margin-bottom: 8px; }
-    .insight-header { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
-    .insight-priority { font-size: 7px; font-weight: 700; padding: 2px 5px; border-radius: 2px; }
-    .insight-title { font-size: 10px; font-weight: 700; color: #0f172a; }
-    .insight-grid { display: grid; grid-template-columns: 70px 1fr; gap: 3px; font-size: 8px; }
-    .insight-label { color: #64748b; font-weight: 600; }
-    .insight-value { color: #334155; }
-    .insight-consequence { font-size: 8px; color: #991b1b; margin-top: 6px; padding-top: 6px; border-top: 1px solid #fee2e2; font-style: italic; }
-    
-    /* Evidence Blocks - compact */
-    .evidence-block { padding: 10px; border: 1px solid #e2e8f0; border-radius: 4px; margin-bottom: 8px; border-left: 3px solid; }
-    .evidence-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .evidence-label { font-size: 7px; font-weight: 700; padding: 2px 5px; border-radius: 2px; }
-    .evidence-meta { font-size: 7px; color: #94a3b8; }
-    .evidence-quote { font-size: 9px; color: #334155; line-height: 1.5; margin-bottom: 6px; background: #f8fafc; padding: 6px; border-radius: 3px; }
-    .evidence-stats { display: flex; gap: 10px; font-size: 8px; color: #64748b; }
-    .evidence-stats strong { color: #0f172a; }
-    .evidence-impact { font-size: 8px; color: #475569; margin-top: 6px; padding-top: 6px; border-top: 1px solid #e2e8f0; }
-    
-    /* Tables - compact */
+    .model-insight { font-size: 8px; color: var(--pdf-text-secondary); line-height: 1.45; }
+    .model-delta { font-size: 7.5px; margin-top: 6px; }
+    .model-delta.positive { color: #9fd4c2; }
+    .model-delta.negative { color: #e8a8a8; }
+    .model-aside { font-size: 7.5px; color: var(--pdf-text-muted); font-style: italic; margin-top: 4px; display: block; }
+
+    .insight-card {
+      padding: 12px 14px;
+      background: var(--pdf-surface);
+      border: 1px solid var(--pdf-border);
+      border-radius: var(--pdf-r-sm);
+      margin-bottom: 10px;
+    }
+    .insight-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+    .insight-priority { font-size: 6.5px; font-weight: 700; padding: 3px 6px; border-radius: var(--pdf-r-sm); letter-spacing: 0.06em; }
+    .insight-title { font-size: 10px; font-weight: 600; color: var(--pdf-text); }
+    .insight-grid { display: grid; grid-template-columns: 72px 1fr; gap: 4px 10px; font-size: 8px; line-height: 1.45; }
+    .insight-label { color: var(--pdf-text-muted); font-weight: 600; }
+    .insight-value { color: var(--pdf-text-secondary); }
+    .insight-consequence {
+      font-size: 8px;
+      color: var(--pdf-text-muted);
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--pdf-border-subtle);
+      font-style: italic;
+      line-height: 1.45;
+    }
+
+    .evidence-block {
+      padding: 12px 14px;
+      border: 1px solid var(--pdf-border);
+      border-radius: var(--pdf-r-sm);
+      margin-bottom: 10px;
+      background: var(--pdf-surface);
+      border-left: 2px solid var(--ev-border, var(--accent));
+    }
+    .evidence-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .evidence-chip {
+      font-size: 6.5px; font-weight: 700; padding: 3px 7px; border-radius: var(--pdf-r-sm);
+      letter-spacing: 0.08em; text-transform: uppercase;
+      border: 1px solid;
+    }
+    .evidence-quote {
+      font-size: 9px;
+      color: var(--pdf-text-secondary);
+      line-height: 1.55;
+      margin-bottom: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 10px 12px;
+      border-radius: var(--pdf-r-sm);
+      border: 1px solid var(--pdf-border-subtle);
+    }
+    .evidence-impact { font-size: 8px; color: var(--pdf-text-muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--pdf-border-subtle); line-height: 1.45; }
+
     .data-table { width: 100%; border-collapse: collapse; font-size: 8px; }
-    .data-table th { text-align: left; padding: 6px; background: #f1f5f9; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0; }
-    .data-table td { padding: 6px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-    .data-table tr:nth-child(even) td { background: #fafafa; }
-    
-    /* Methodology - compact */
-    .method-box { padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; margin: 8px 0; }
-    .method-title { font-size: 9px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
-    .method-text { font-size: 8px; color: #475569; line-height: 1.5; }
-    .method-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
-    .method-item { }
-    .method-label { font-size: 7px; color: #94a3b8; }
-    .method-value { font-size: 8px; color: #0f172a; font-weight: 500; }
+    .data-table th {
+      text-align: left;
+      padding: 8px 8px;
+      background: var(--pdf-surface-raised);
+      font-weight: 600;
+      color: var(--pdf-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 6.5px;
+      border-bottom: 1px solid var(--pdf-border);
+    }
+    .data-table td {
+      padding: 8px;
+      border-bottom: 1px solid var(--pdf-border-subtle);
+      vertical-align: middle;
+      color: var(--pdf-text-secondary);
+    }
+    .data-table tbody tr:hover td { background: transparent; }
+    .data-table strong { color: var(--pdf-text); font-weight: 600; }
+    .data-table tr.row-client td { background: rgba(92, 184, 154, 0.06); }
+
+    .method-box {
+      padding: 12px 14px;
+      background: var(--pdf-surface);
+      border: 1px solid var(--pdf-border);
+      border-radius: var(--pdf-r);
+      margin: 10px 0;
+    }
+    .method-box.insight-panel {
+      background: var(--pdf-surface-raised);
+      border-left: 2px solid var(--accent);
+    }
+    .method-title {
+      font-size: 8px; font-weight: 600; color: var(--pdf-text-muted);
+      margin-bottom: 8px; letter-spacing: 0.12em; text-transform: uppercase;
+    }
+    .method-text { font-size: 8.5px; color: var(--pdf-text-secondary); line-height: 1.55; }
+    .method-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+    .method-label { font-size: 7px; color: var(--pdf-text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .method-value { font-size: 8px; color: var(--pdf-text); font-weight: 500; margin-top: 2px; }
+
+    .plan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+    .plan-cell {
+      padding: 10px 12px;
+      background: rgba(0, 0, 0, 0.15);
+      border: 1px solid var(--pdf-border);
+      border-radius: var(--pdf-r-sm);
+    }
+    .plan-phase { font-size: 7px; font-weight: 600; color: var(--pdf-text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 5px; }
+    .plan-copy { font-size: 8px; color: var(--pdf-text-secondary); line-height: 1.45; }
   </style>
 </head>
 <body>
-  <!-- PAGE 1: THE VERDICT -->
+  <!-- PAGE 1 -->
   <div class="page cover">
     <div class="cover-header">
-      ${agency.brand_logo_url 
-        ? `<div class="cover-logo"><img src="${escapeHtml(agency.brand_logo_url)}" alt="" /></div>`
-        : `<div class="cover-logo-text">${escapeHtml(agency.name)}</div>`
-      }
-      <div class="small">${formatDate(snapshot.created_at)}</div>
+      <div class="cover-header-left">
+        <div class="report-name">${PDF_REPORT_TITLE}</div>
+        ${
+          agency.brand_logo_url
+            ? `<div class="cover-logo" style="margin-top:10px"><img src="${escapeHtml(agency.brand_logo_url)}" alt="" /></div>`
+            : ""
+        }
+        ${
+          agency.name
+            ? `<div class="${agency.brand_logo_url ? "cover-agency-line" : "cover-logo-text"}" style="margin-top:${agency.brand_logo_url ? "6px" : "10px"}">${escapeHtml(agency.name)}</div>`
+            : ""
+        }
+      </div>
+      <div class="cover-header-right">
+        <div style="font-weight:600;color:var(--pdf-text)">${escapeHtml(client.name)}</div>
+        ${client.website ? `<div class="meta-quiet">${escapeHtml(client.website)}</div>` : ""}
+        <div class="meta-quiet" style="margin-top:4px">${formatDate(snapshot.created_at)}</div>
+      </div>
     </div>
-    
-    <div class="cover-type">AI Authority Intelligence Briefing</div>
-    <div class="cover-client">${escapeHtml(client.name)}</div>
-    ${client.website ? `<div class="cover-url">${escapeHtml(client.website)}</div>` : ""}
-    
+
     <div class="score-section no-break">
       <div class="score-ring">
         <div class="score-ring-inner">
@@ -739,15 +922,23 @@ export function renderReportHtml(data: ReportData): string {
     
     <div class="page-footer">
       <span>Confidential — ${escapeHtml(client.name)}</span>
-      <span>VRTL Score</span>
+      <span>${agency.name ? escapeHtml(agency.name) : ""}</span>
     </div>
   </div>
-  
-  <!-- PAGE 2: AI MODEL BREAKDOWN (with deltas and insights) -->
+
+  <!-- PAGE 2 -->
   <div class="page">
     <div class="page-header">
-      <span class="page-title">AI Model Analysis</span>
-      <span class="page-num">Page 2</span>
+      <div class="page-header-left">
+        <div class="report-name">${PDF_REPORT_TITLE}</div>
+        <div class="section-slug">Model analysis</div>
+      </div>
+      <div class="page-header-right">
+        <div>${escapeHtml(client.name)}</div>
+        ${client.website ? `<div class="meta-quiet">${escapeHtml(client.website)}</div>` : ""}
+        <div class="meta-quiet">${formatDate(snapshot.created_at)}</div>
+        <div class="page-num">Page 2</div>
+      </div>
     </div>
     
     <div class="h2">Model-by-Model Performance</div>
@@ -755,44 +946,42 @@ export function renderReportHtml(data: ReportData): string {
     
     <div class="model-grid no-break">
       ${models.map(([name, val]) => {
-        const modelTier = getScoreTier(val);
+        const modelAccent = pdfScoreAccent(val);
         const delta = val - avgModelScore;
         const isAboveAvg = delta > 0;
         const isStrong = val >= 70;
         const isWeak = val < 50;
-        
-        // Generate model-specific insight
+
         let modelInsight = "";
         if (isStrong) {
           modelInsight = `Your strongest model. Content strategy resonates here — replicate this approach for weaker models.`;
         } else if (isWeak) {
-          modelInsight = `Critical gap. ${name} users won't find you. Prioritize content that this model indexes well.`;
+          modelInsight = `Critical gap. ${name} users may not surface your brand. Prioritize content this model indexes well.`;
         } else {
-          modelInsight = `Moderate performance. Incremental improvement possible with targeted optimization.`;
+          modelInsight = `Moderate performance. Incremental improvement is possible with targeted optimization.`;
         }
-        
-        // Competitive context for model
-        const modelCompContext = isStrong ? 
-          `This is likely where competitors will focus to catch up.` :
-          isWeak ? 
-          `Competitors may already dominate this model's recommendations.` :
-          `Room to differentiate before competitors claim this space.`;
-        
+
+        const modelCompContext = isStrong
+          ? `Competitors will likely focus here to close the gap.`
+          : isWeak
+            ? `Competitors may already dominate recommendations on this model.`
+            : `Room to differentiate before competitors claim this space.`;
+
         return `
-        <div class="model-card" style="border-left-color: ${modelTier.color};">
+        <div class="model-card" style="--model-accent: ${modelAccent}; border-left-color: ${modelAccent};">
           <div class="model-header">
             <div class="model-name">${escapeHtml(name)}</div>
             <div class="model-score">${Math.round(val)}</div>
           </div>
           <div class="model-bar">
-            <div class="model-fill" style="width: ${val}%; background: ${modelTier.color};"></div>
+            <div class="model-fill" style="width: ${val}%; background: ${modelAccent};"></div>
           </div>
-          <div class="model-delta ${isAboveAvg ? 'positive' : 'negative'}">
-            ${isAboveAvg ? '↑' : '↓'} ${Math.abs(Math.round(delta))} vs your avg (${avgModelScore})
+          <div class="model-delta ${isAboveAvg ? "positive" : "negative"}">
+            ${isAboveAvg ? "↑" : "↓"} ${Math.abs(Math.round(delta))} vs. average (${avgModelScore})
           </div>
           <div class="model-insight" style="margin-top: 6px;">
-            ${modelInsight}<br/>
-            <span style="color: #64748b; font-style: italic;">${modelCompContext}</span>
+            ${modelInsight}
+            <span class="model-aside">${modelCompContext}</span>
           </div>
         </div>
         `;
@@ -806,8 +995,8 @@ export function renderReportHtml(data: ReportData): string {
     ` : ""}
     
     ${models.length > 0 ? `
-    <div class="method-box no-break" style="margin-top: 12px;">
-      <div class="method-title">What This Means for Your Strategy</div>
+    <div class="method-box no-break insight-panel" style="margin-top: 12px;">
+      <div class="method-title">Strategic takeaway</div>
       <div class="method-text">
         ${models[0][1] >= 70 && models[models.length - 1][1] < 50 ? 
           `You have a ${Math.round(models[0][1] - models[models.length - 1][1])}-point spread between your best and worst models. This inconsistency means your content strategy works for some AI systems but not others. Closing this gap is your highest-leverage opportunity.` :
@@ -825,46 +1014,56 @@ export function renderReportHtml(data: ReportData): string {
     <div class="h2" style="margin-top: 16px;">Evidence Preview</div>
     <div class="body" style="margin-bottom: 8px;">A sample of what AI models are actually saying about ${escapeHtml(client.name)}.</div>
     
-    ${strengthExamples.length > 0 ? strengthExamples.slice(0, 1).map(r => {
+    ${strengthExamples.length > 0 ? strengthExamples.slice(0, 1).map((r) => {
       const pj = r.parsed_json;
+      const chip = evidencePdfChip("STRENGTH");
       const snippet = r.raw_text?.slice(0, 150) || pj?.evidence_snippet?.slice(0, 150) || "Response content";
       return `
-      <div class="evidence-block no-break" style="border-left-color: #059669;">
+      <div class="evidence-block no-break" style="--ev-border: ${chip.border}; border-left-color: ${chip.border};">
         <div class="evidence-header">
-          <span class="evidence-label" style="background: #d1fae5; color: #065f46;">STRENGTH</span>
+          <span class="evidence-chip" style="background:${chip.bg};color:${chip.color};border-color:${chip.border}">Strength</span>
         </div>
-        <div class="evidence-quote">"${escapeHtml(snippet)}..."</div>
-        <div class="evidence-impact">✓ This is working. You're positioned as a top recommendation.</div>
+        <div class="evidence-quote">"${escapeHtml(snippet)}…"</div>
+        <div class="evidence-impact">Positioning reads as a primary recommendation — maintain supporting authority signals.</div>
       </div>
       `;
     }).join("") : ""}
-    
-    ${vulnerableExamples.length > 0 ? vulnerableExamples.slice(0, 1).map(r => {
+
+    ${vulnerableExamples.length > 0 ? vulnerableExamples.slice(0, 1).map((r) => {
       const pj = r.parsed_json;
+      const chip = evidencePdfChip("VULNERABLE");
       const snippet = r.raw_text?.slice(0, 150) || "Response where competitors were mentioned but you were not.";
       const competitors = pj?.competitors_mentioned?.slice(0, 2).join(", ") || "competitors";
       return `
-      <div class="evidence-block no-break" style="border-left-color: #dc2626;">
+      <div class="evidence-block no-break" style="--ev-border: ${chip.border}; border-left-color: ${chip.border};">
         <div class="evidence-header">
-          <span class="evidence-label" style="background: #fee2e2; color: #991b1b;">VULNERABLE</span>
+          <span class="evidence-chip" style="background:${chip.bg};color:${chip.color};border-color:${chip.border}">Vulnerable</span>
         </div>
-        <div class="evidence-quote">"${escapeHtml(snippet)}..."</div>
-        <div class="evidence-impact">⚠ ${competitors} mentioned, you were not. This is a discovery gap.</div>
+        <div class="evidence-quote">"${escapeHtml(snippet)}…"</div>
+        <div class="evidence-impact">${escapeHtml(competitors)} surfaced; your brand did not — close the discovery gap with targeted authority building.</div>
       </div>
       `;
     }).join("") : ""}
     
     <div class="page-footer">
-      <span>${escapeHtml(client.name)} — AI Authority Briefing</span>
-      <span>${escapeHtml(agency.name)}</span>
+      <span>Confidential — ${escapeHtml(client.name)}</span>
+      <span>${agency.name ? escapeHtml(agency.name) : ""}</span>
     </div>
   </div>
-  
-  <!-- PAGE 3: STRATEGIC RECOMMENDATIONS (with consequences) -->
+
+  <!-- PAGE 3 -->
   <div class="page">
     <div class="page-header">
-      <span class="page-title">Strategic Recommendations</span>
-      <span class="page-num">Page 3</span>
+      <div class="page-header-left">
+        <div class="report-name">${PDF_REPORT_TITLE}</div>
+        <div class="section-slug">Strategic recommendations</div>
+      </div>
+      <div class="page-header-right">
+        <div>${escapeHtml(client.name)}</div>
+        ${client.website ? `<div class="meta-quiet">${escapeHtml(client.website)}</div>` : ""}
+        <div class="meta-quiet">${formatDate(snapshot.created_at)}</div>
+        <div class="page-num">Page 3</div>
+      </div>
     </div>
     
     <div class="h2">Prioritized Actions</div>
@@ -886,43 +1085,51 @@ export function renderReportHtml(data: ReportData): string {
         <div class="insight-label">Expected:</div>
         <div class="insight-value">${escapeHtml(insight.expectedImpact)}</div>
       </div>
-      <div class="insight-consequence">⚠ If no action: ${escapeHtml(insight.consequence)}</div>
+      <div class="insight-consequence">If no action: ${escapeHtml(insight.consequence)}</div>
     </div>
     `).join("")}
     
-    <div class="method-box no-break" style="margin-top: 12px; border-left: 3px solid var(--accent);">
-      <div class="method-title">30-Day Execution Plan</div>
-      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px;">
-        <div style="padding: 8px; background: #fff; border: 1px solid #e2e8f0; border-radius: 3px;">
-          <div style="font-size: 8px; font-weight: 700; color: var(--accent);">Week 1-2</div>
-          <div style="font-size: 8px; color: #334155; margin-top: 3px;">Audit content for AI extractability. Identify authority gaps. Benchmark competitor content.</div>
+    <div class="method-box no-break insight-panel" style="margin-top: 12px;">
+      <div class="method-title">30-day execution plan</div>
+      <div class="plan-grid">
+        <div class="plan-cell">
+          <div class="plan-phase">Week 1–2</div>
+          <div class="plan-copy">Audit content for AI extractability. Identify authority gaps. Benchmark competitor content.</div>
         </div>
-        <div style="padding: 8px; background: #fff; border: 1px solid #e2e8f0; border-radius: 3px;">
-          <div style="font-size: 8px; font-weight: 700; color: var(--accent);">Week 2-3</div>
-          <div style="font-size: 8px; color: #334155; margin-top: 3px;">Implement priority #1 recommendation. Focus resources on weakest model.</div>
+        <div class="plan-cell">
+          <div class="plan-phase">Week 2–3</div>
+          <div class="plan-copy">Implement priority #1 recommendation. Focus resources on the weakest model.</div>
         </div>
-        <div style="padding: 8px; background: #fff; border: 1px solid #e2e8f0; border-radius: 3px;">
-          <div style="font-size: 8px; font-weight: 700; color: var(--accent);">Week 3-4</div>
-          <div style="font-size: 8px; color: #334155; margin-top: 3px;">Build authority signals. Earn citations from trusted sources. Counter-position vs competitors.</div>
+        <div class="plan-cell">
+          <div class="plan-phase">Week 3–4</div>
+          <div class="plan-copy">Build authority signals. Earn citations from trusted sources. Counter-position versus competitors.</div>
         </div>
-        <div style="padding: 8px; background: #fff; border: 1px solid #e2e8f0; border-radius: 3px;">
-          <div style="font-size: 8px; font-weight: 700; color: var(--accent);">Week 4+</div>
-          <div style="font-size: 8px; color: #334155; margin-top: 3px;">Run follow-up snapshot to measure progress. Iterate on strategy based on results.</div>
+        <div class="plan-cell">
+          <div class="plan-phase">Week 4+</div>
+          <div class="plan-copy">Run follow-up analysis to measure progress. Iterate on strategy based on results.</div>
         </div>
       </div>
     </div>
     
     <div class="page-footer">
-      <span>${escapeHtml(client.name)} — AI Authority Briefing</span>
-      <span>${escapeHtml(agency.name)}</span>
+      <span>Confidential — ${escapeHtml(client.name)}</span>
+      <span>${agency.name ? escapeHtml(agency.name) : ""}</span>
     </div>
   </div>
-  
-  <!-- PAGE 4: EVIDENCE & APPENDIX (combined for density) -->
+
+  <!-- PAGE 4 -->
   <div class="page">
     <div class="page-header">
-      <span class="page-title">Evidence & Methodology</span>
-      <span class="page-num">Page 4</span>
+      <div class="page-header-left">
+        <div class="report-name">${PDF_REPORT_TITLE}</div>
+        <div class="section-slug">Evidence & methodology</div>
+      </div>
+      <div class="page-header-right">
+        <div>${escapeHtml(client.name)}</div>
+        ${client.website ? `<div class="meta-quiet">${escapeHtml(client.website)}</div>` : ""}
+        <div class="meta-quiet">${formatDate(snapshot.created_at)}</div>
+        <div class="page-num">Page 4</div>
+      </div>
     </div>
     
     <div class="h2">Signal Summary</div>
@@ -981,7 +1188,7 @@ export function renderReportHtml(data: ReportData): string {
         </tr>
       </thead>
       <tbody>
-        <tr style="background: #f0fdf4;">
+        <tr class="row-client">
           <td><strong>${escapeHtml(client.name)}</strong></td>
           <td><strong>${metrics.mentioned}</strong></td>
           <td><strong>${metrics.mentionRate}%</strong></td>
@@ -996,7 +1203,7 @@ export function renderReportHtml(data: ReportData): string {
             <td>${escapeHtml(c.name)}</td>
             <td>${c.mentions}</td>
             <td>${c.rate}%</td>
-            <td style="color: ${gap > 0 ? '#dc2626' : gap < 0 ? '#16a34a' : '#64748b'}; font-weight: 600;">${gap > 0 ? '+' : ''}${gap}</td>
+            <td style="color: ${gap > 0 ? "#e8a8a8" : gap < 0 ? "#9fd4c2" : "var(--pdf-text-muted)"}; font-weight: 600;">${gap > 0 ? "+" : ""}${gap}</td>
             <td><span class="pill ${status === 'Ahead' ? 'pill-red' : status === 'Behind' ? 'pill-green' : 'pill-yellow'}">${status}</span></td>
           </tr>
           `;
@@ -1022,10 +1229,11 @@ export function renderReportHtml(data: ReportData): string {
           const pj = r.parsed_json;
           const label = getEvidenceLabel(pj);
           const compCount = pj?.competitors_mentioned?.length ?? 0;
+          const ch = label.chip;
           return `
           <tr>
             <td>${idx + 1}</td>
-            <td><span class="pill" style="background: ${label.bgColor}; color: ${label.color};">${label.label}</span></td>
+            <td><span class="pill" style="background:${ch.bg};color:${ch.color};border:1px solid ${ch.border}">${label.label}</span></td>
             <td>${pj?.client_mentioned ? "✓" : "✗"}</td>
             <td>${pj?.client_position || "—"}</td>
             <td>${pj?.recommendation_strength || "—"}</td>
@@ -1038,9 +1246,7 @@ export function renderReportHtml(data: ReportData): string {
     
     <div class="method-box no-break" style="margin-top: 12px;">
       <div class="method-title">Methodology</div>
-      <div class="method-text">
-        VRTL Score analyzes AI responses across standardized discovery scenarios. The score combines <strong>Presence</strong> (mention consistency), <strong>Positioning</strong> (ranking vs alternatives), and <strong>Authority</strong> (citation signals).
-      </div>
+      <div class="method-text">${PDF_METHODOLOGY_TEXT}</div>
       <div class="method-grid">
         <div class="method-item">
           <div class="method-label">Generated</div>
@@ -1058,8 +1264,8 @@ export function renderReportHtml(data: ReportData): string {
     </div>
     
     <div class="page-footer">
-      <span>${escapeHtml(client.name)} — AI Authority Briefing</span>
-      <span>Powered by VRTL Score</span>
+      <span>Confidential — ${escapeHtml(client.name)}</span>
+      <span>${agency.name ? escapeHtml(agency.name) : ""}</span>
     </div>
   </div>
 </body>
