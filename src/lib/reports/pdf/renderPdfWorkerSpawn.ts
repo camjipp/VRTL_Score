@@ -1,32 +1,26 @@
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { existsSync, unlinkSync, writeFileSync } from "node:fs";
+import { unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+import { getPdfWorkerPath, getPdfWorkerStatus } from "./pdfWorkerPath";
 import type { ReportData } from "./types";
 
 export type WorkerPayload =
   | { mode: "minimal" }
   | { mode: "full"; data: ReportData; pages?: number[] };
 
-const WORKER_REL = join("dist", "pdf-worker.cjs");
-
-function workerPath(): string {
-  return join(process.cwd(), WORKER_REL);
-}
-
 /**
  * Renders PDF in a child Node process so @react-pdf + Yoga load from node_modules
  * (avoids Next/webpack breaking layout; avoids duplicate React vs external pdf).
  */
 export async function renderPdfViaWorker(payload: WorkerPayload): Promise<Buffer> {
-  const bin = workerPath();
-  if (!existsSync(bin)) {
-    throw new Error(
-      "PDF worker not found at dist/pdf-worker.cjs. Run `pnpm build` (includes pdf worker) or `pnpm build:pdf-worker`."
-    );
+  const status = getPdfWorkerStatus();
+  if (!status.ok) {
+    throw new Error(`PDF worker not found at dist/pdf-worker.cjs (${status.hint})`);
   }
+  const bin = getPdfWorkerPath();
   const inPath = join(tmpdir(), `vrtl-pdf-${randomUUID()}.json`);
   writeFileSync(inPath, JSON.stringify(payload), "utf8");
 

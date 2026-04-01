@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { generatePDF } from "@/lib/reports/pdf/generatePdfServer";
+import { getPdfWorkerStatus } from "@/lib/reports/pdf/pdfWorkerPath";
 import { stanleyData } from "@/lib/reports/pdf/stanleyData";
 
 export const runtime = "nodejs";
@@ -30,6 +31,25 @@ export async function GET(req: Request) {
   }
 
   const startedAt = Date.now();
+  const worker = getPdfWorkerStatus();
+
+  if (!worker.ok) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "pdf_worker_missing",
+        message: "dist/pdf-worker.cjs not found at runtime",
+        worker: { path: worker.path, cwd: worker.cwd, hint: worker.hint },
+        diagnostics: {
+          nextRuntime,
+          node: process.version,
+          platform: process.platform,
+          arch: process.arch,
+        },
+      },
+      { status: 503 },
+    );
+  }
 
   try {
     const buf = await generatePDF(stanleyData);
@@ -40,6 +60,7 @@ export async function GET(req: Request) {
       engine: "@react-pdf/renderer",
       pdf_bytes: buf.length,
       duration_ms: Date.now() - startedAt,
+      worker: { path: worker.path, cwd: worker.cwd },
       diagnostics: {
         nextRuntime,
         node: process.version,
