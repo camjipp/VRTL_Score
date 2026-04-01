@@ -1,11 +1,7 @@
-import { Buffer } from "node:buffer";
-
 import { NextResponse } from "next/server";
 
-import chromium from "@sparticuz/chromium";
-import puppeteer from "puppeteer-core";
-
-import { renderReportHtml } from "@/lib/reports/renderReportHtml";
+import { mapSnapshotToReactPdfData } from "@/lib/reports/mapSnapshotToReactPdfData";
+import { generatePDF } from "@/lib/reports/pdf/generatePdf";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
@@ -29,7 +25,7 @@ function parseAgencyForReport(value: unknown): AgencyForReport | null {
   return {
     name: v.name,
     brand_logo_url: brand_logo_url as string | null,
-    brand_accent: brand_accent as string | null
+    brand_accent: brand_accent as string | null,
   };
 }
 
@@ -61,6 +57,15 @@ function bearerToken(req: Request): string | null {
   return match?.[1]?.trim() || null;
 }
 
+function safePart(value: string) {
+  return value
+    .normalize("NFKD")
+    .replace(/[^\w\s-]+/g, "")
+    .trim()
+    .replace(/[\s_-]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
 export async function GET(req: Request) {
   const nextRuntime = process.env.NEXT_RUNTIME ?? null;
   if (nextRuntime === "edge") {
@@ -72,11 +77,6 @@ export async function GET(req: Request) {
 
   const url = new URL(req.url);
   const snapshotId = url.searchParams.get("snapshotId");
-
-  // Track diagnostics even if we fail early.
-  const headlessMode = "shell" as const;
-  let executablePath: string | null = null;
-  let browser: Awaited<ReturnType<typeof puppeteer.launch>> | null = null;
 
   try {
     if (!snapshotId) {
@@ -90,7 +90,6 @@ export async function GET(req: Request) {
 
     const supabase = getSupabaseAdminClient();
 
-    // Auth user
     const userRes = await supabase.auth.getUser(token);
     const user = userRes.data.user;
     if (userRes.error || !user) {
@@ -100,7 +99,6 @@ export async function GET(req: Request) {
       );
     }
 
-    // Snapshot (authoritative agency_id)
     const snapshotRes = await supabase
       .from("snapshots")
       .select(
@@ -113,7 +111,6 @@ export async function GET(req: Request) {
     }
     const snapshotAgencyId = snapshotRes.data.agency_id as string;
 
-    // Resolve agency membership for user (no auto-create here)
     const agencyUser = await supabase
       .from("agency_users")
       .select("agency_id")
@@ -124,7 +121,6 @@ export async function GET(req: Request) {
     }
     const userAgencyId = agencyUser.data.agency_id as string;
 
-    // Enforce snapshot belongs to user's agency
     if (snapshotAgencyId !== userAgencyId) {
       return NextResponse.json(
         { error: "Snapshot not in your agency", snapshotId, snapshotAgencyId, userAgencyId },
@@ -135,7 +131,6 @@ export async function GET(req: Request) {
     const agencyId = snapshotAgencyId;
     const clientId = snapshotRes.data.client_id as string;
 
-    // Agency
     const agencyCols = await getColumnSet(supabase, "agencies");
     const selectCols = ["name"];
     if (agencyCols.has("brand_logo_url")) selectCols.push("brand_logo_url");
@@ -165,7 +160,6 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Agency not found" }, { status: 500 });
     }
 
-    // Client
     const clientRes = await supabase
       .from("clients")
       .select("id,name,website")
@@ -175,14 +169,12 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Client not found" }, { status: 404 });
     }
 
-    // Competitors
     const competitorsRes = await supabase
       .from("competitors")
       .select("name,website")
       .eq("client_id", clientId);
     const competitors = competitorsRes.data ?? [];
 
-    // Responses
     const responsesRes = await supabase
       .from("responses")
       .select("prompt_ordinal,prompt_text,parsed_json,raw_text")
@@ -190,67 +182,43 @@ export async function GET(req: Request) {
       .order("prompt_ordinal", { ascending: true });
     const responses = responsesRes.data ?? [];
 
-    const html = renderReportHtml({
+    const snapshotInput = {
       agency,
       client: clientRes.data,
       snapshot: snapshotRes.data,
       competitors,
-      responses
+      responses,
+    };
+
+    const pdfData = mapSnapshotToReactPdfData(snapshotInput, {
+      name: agency.name,
+      brand_logo_url: agency.brand_logo_url ?? null,
     });
 
-    // Hard: always use Sparticuz-provided executablePath (it extracts to /tmp on Lambda/Vercel).
-    executablePath = await chromium.executablePath();
-    console.log("[pdf] runtime", {
+    console.log("[pdf] react-pdf", {
       nextRuntime,
       node: process.version,
-      platform: process.platform,
-      arch: process.arch,
-      executablePath,
-      argsLength: chromium.args.length
+      snapshotId,
+      client: clientRes.data.name,
     });
 
-    browser = await puppeteer.launch({
-      args: chromium.args,
-      executablePath,
-      headless: headlessMode
-    });
-
-    const page = await browser.newPage();
-    page.setDefaultTimeout(30_000);
-    // Avoid "networkidle0" hanging on external assets (e.g., logos).
-    await page.setContent(html, { waitUntil: "load" });
-
-    const pdfBuffer = await page.pdf({
-      format: "A4",
-      printBackground: true,
-      margin: { top: "20mm", right: "15mm", bottom: "20mm", left: "15mm" }
-    });
-    const safePart = (value: string) =>
-      value
-        .normalize("NFKD")
-        .replace(/[^\w\s-]+/g, "")
-        .trim()
-        .replace(/[\s_-]+/g, "_")
-        .replace(/^_+|_+$/g, "");
+    const buffer = await generatePDF(pdfData);
 
     const clientPart = safePart(clientRes.data.name || "Client").slice(0, 48) || "Client";
     const datePart = new Date(snapshotRes.data.created_at as string).toISOString().slice(0, 10);
     const snapPart = String(snapshotRes.data.id).slice(0, 8);
-
-    // Professional + sortable + still traceable.
-    // Example: AI_Visibility_Report_Nike_2026-02-03_Snap-82ac5704.pdf
     const filename = `AI_Visibility_Report_${clientPart}_${datePart}_Snap-${snapPart}.pdf`;
-    const body = Buffer.from(pdfBuffer);
-    return new NextResponse(body, {
+
+    return new NextResponse(new Uint8Array(buffer), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${filename}"`
-      }
+        "Content-Disposition": `attachment; filename="${filename}"`,
+      },
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error("pdf_generation_failed", { snapshotId, message, executablePath });
+    console.error("pdf_generation_failed", { snapshotId, message });
     return NextResponse.json(
       {
         error: "PDF generation failed",
@@ -258,20 +226,12 @@ export async function GET(req: Request) {
         snapshotId,
         diagnostics: {
           nextRuntime,
-          awsLambdaJsRuntime: process.env.AWS_LAMBDA_JS_RUNTIME ?? null,
           node: process.version,
           platform: process.platform,
           arch: process.arch,
-          executablePath,
-          argsLength: chromium.args.length,
-          headless: headlessMode
-        }
+        },
       },
       { status: 500 }
     );
-  } finally {
-    if (browser) await browser.close();
   }
 }
-
-

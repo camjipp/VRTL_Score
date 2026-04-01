@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-import chromium from "@sparticuz/chromium";
-import puppeteer from "puppeteer-core";
+import { generatePDF } from "@/lib/reports/pdf/generatePdf";
+import { stanleyData } from "@/lib/reports/pdf/stanleyData";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,8 +15,6 @@ function bearerToken(req: Request): string | null {
 }
 
 export async function GET(req: Request) {
-  // Dev-only by default: only enabled when a token is configured.
-  // If you do not set PDF_HEALTH_TOKEN, this endpoint returns 404 everywhere.
   const expected = process.env.PDF_HEALTH_TOKEN;
   const token = bearerToken(req);
   if (!expected || token !== expected) {
@@ -26,62 +24,44 @@ export async function GET(req: Request) {
   const nextRuntime = process.env.NEXT_RUNTIME ?? null;
   if (nextRuntime === "edge") {
     return NextResponse.json(
-      { error: "Chromium healthcheck must run in nodejs runtime", diagnostics: { nextRuntime } },
+      { error: "PDF healthcheck must run in nodejs runtime", diagnostics: { nextRuntime } },
       { status: 500 }
     );
   }
 
-  const headlessMode = "shell" as const;
   const startedAt = Date.now();
-  let executablePath: string | null = null;
-  let browser: Awaited<ReturnType<typeof puppeteer.launch>> | null = null;
 
   try {
-    executablePath = await chromium.executablePath();
-    browser = await puppeteer.launch({
-      args: chromium.args,
-      executablePath,
-      headless: headlessMode
-    });
-    const page = await browser.newPage();
-    await page.setContent("<html><body>ok</body></html>", { waitUntil: "load" });
-    await page.close();
+    const buf = await generatePDF(stanleyData);
+    const ok = buf.length > 1000;
 
     return NextResponse.json({
-      ok: true,
+      ok,
+      engine: "@react-pdf/renderer",
+      pdf_bytes: buf.length,
       duration_ms: Date.now() - startedAt,
       diagnostics: {
         nextRuntime,
         node: process.version,
         platform: process.platform,
         arch: process.arch,
-        executablePath,
-        argsLength: chromium.args.length,
-        headless: headlessMode
-      }
+      },
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json(
       {
         ok: false,
-        error: "Chromium healthcheck failed",
+        error: "React-PDF healthcheck failed",
         message,
         diagnostics: {
           nextRuntime,
           node: process.version,
           platform: process.platform,
           arch: process.arch,
-          executablePath,
-          argsLength: chromium.args.length,
-          headless: headlessMode
-        }
+        },
       },
       { status: 500 }
     );
-  } finally {
-    if (browser) await browser.close();
   }
 }
-
-

@@ -14,9 +14,11 @@
     "db:check": "node scripts/supabase_healthcheck.mjs"
   },
   "dependencies": {
+    "@react-pdf/renderer": "^4.3.2",
     "@sparticuz/chromium": "^141.0.0",
     "@stripe/stripe-js": "^8.6.4",
     "@supabase/supabase-js": "^2.49.1",
+    "clsx": "^2.1.1",
     "next": "^15.1.4",
     "puppeteer-core": "^24.23.1",
     "react": "^19.0.0",

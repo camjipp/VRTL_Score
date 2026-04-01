@@ -427,6 +427,34 @@ function generateTensionStatement(metrics: ReturnType<typeof calculateMetrics>):
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   SHARED DERIVED DATA (HTML + React-PDF)
+═══════════════════════════════════════════════════════════════════════════ */
+
+/** Metrics, narratives, and model breakdown for both PDF pipelines */
+export function buildSnapshotReportDerived(data: ReportData) {
+  const metrics = calculateMetrics(data);
+  const models = data.snapshot.score_by_provider
+    ? Object.entries(data.snapshot.score_by_provider).sort((a, b) => b[1] - a[1])
+    : [];
+  const avgModelScore =
+    models.length > 0 ? Math.round(models.reduce((sum, [, s]) => sum + s, 0) / models.length) : 0;
+  return {
+    metrics,
+    insights: generateInsights(data, metrics),
+    bottomLine: generateBottomLine(data, metrics),
+    tensionNote: generateTensionStatement(metrics) || undefined,
+    tier: getScoreTier(data.snapshot.vrtl_score),
+    models,
+    avgModelScore,
+  };
+}
+
+/** Evidence label for a single response (React-PDF tables / previews) */
+export function getSnapshotEvidenceLabel(pj: Extraction | null) {
+  return getEvidenceLabel(pj).label;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    HTML RENDER
 ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -436,14 +464,10 @@ export function renderReportHtml(data: ReportData): string {
   const accentColor = resolvePdfAccent(agency.brand_accent);
   const score = snapshot.vrtl_score;
   const scoreAccent = pdfScoreAccent(score);
-  const tier = getScoreTier(score);
-  const metrics = calculateMetrics(data);
-  const insights = generateInsights(data, metrics);
-  const bottomLine = generateBottomLine(data, metrics);
-  const tensionStatement = generateTensionStatement(metrics);
-  
-  const models = snapshot.score_by_provider ? Object.entries(snapshot.score_by_provider).sort((a, b) => b[1] - a[1]) : [];
-  const avgModelScore = models.length > 0 ? Math.round(models.reduce((sum, [, s]) => sum + s, 0) / models.length) : 0;
+  const derived = buildSnapshotReportDerived(data);
+  const { metrics, insights, tier, models, avgModelScore } = derived;
+  const bottomLine = derived.bottomLine;
+  const tensionStatement = derived.tensionNote ?? "";
   
   // Get best/worst evidence examples
   const labeledResponses = responses.map((r, idx) => ({
