@@ -3,6 +3,7 @@ import type { ReportData } from "../types";
 import { colors, space, baseStyles } from "../theme";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
+import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
 const styles = StyleSheet.create({
   title: {
@@ -36,13 +37,16 @@ const styles = StyleSheet.create({
 export function Page4ExecutionPlan({ data }: { data: ReportData }) {
   return (
     <Page size="A4" style={baseStyles.page}>
+      <PdfTraceMarker page={4} section="Page4:start" />
       <PdfHeader data={data} variant="inner" sectionSlug="Execution plan" pageNum={4} />
+      <PdfTraceMarker page={4} section="Page4:after_header" />
 
       <Text style={styles.title}>30-day execution roadmap</Text>
       <Text style={styles.intro}>
         A practical sequence for the next month. Adjust dates to your operating cadence.
       </Text>
 
+      <PdfTraceMarker page={4} section="Page4:before_phases" />
       <View style={styles.grid}>
         {data.executionPhases.map((ph, i) => (
           <View key={i} style={styles.cell} wrap={false}>
@@ -51,6 +55,7 @@ export function Page4ExecutionPlan({ data }: { data: ReportData }) {
           </View>
         ))}
       </View>
+      <PdfTraceMarker page={4} section="Page4:before_footer" />
 
       <PdfFooter data={data} />
     </Page>

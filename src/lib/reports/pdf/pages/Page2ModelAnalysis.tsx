@@ -3,6 +3,7 @@ import type { ReportData } from "../types";
 import { colors, space, baseStyles } from "../theme";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
+import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
 const avg = (models: ReportData["modelScores"]) =>
   models.length ? Math.round(models.reduce((s, m) => s + m.score, 0) / models.length) : 0;
@@ -111,7 +112,9 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
 
   return (
     <Page size="A4" style={baseStyles.page}>
+      <PdfTraceMarker page={2} section="Page2:start" />
       <PdfHeader data={data} variant="inner" sectionSlug="Model analysis" pageNum={2} />
+      <PdfTraceMarker page={2} section="Page2:after_header" />
 
       <Text style={styles.headline}>
         Where AI visibility concentrates — and where it breaks by model.
@@ -125,6 +128,7 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
           {pair.length === 1 ? <View style={{ flex: 1 }} /> : null}
         </View>
       ))}
+      <PdfTraceMarker page={2} section="Page2:after_model_grid" />
 
       <Text style={styles.sectionTitle}>Evidence preview</Text>
       {data.evidencePreview.map((ev, i) => (
@@ -134,11 +138,13 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
           {ev.note ? <Text style={styles.evidenceNote}>{ev.note}</Text> : null}
         </View>
       ))}
+      <PdfTraceMarker page={2} section="Page2:after_evidence_preview" />
 
       <View style={styles.takeaway}>
         <Text style={styles.takeawayTitle}>Strategic takeaway</Text>
         <Text style={styles.takeawayBody}>{data.strategicTakeaway}</Text>
       </View>
+      <PdfTraceMarker page={2} section="Page2:before_footer" />
 
       <PdfFooter data={data} />
     </Page>

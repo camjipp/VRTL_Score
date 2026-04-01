@@ -3,6 +3,7 @@ import type { ReportData } from "../types";
 import { colors, space, baseStyles } from "../theme";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
+import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
 const styles = StyleSheet.create({
   heroRow: {
@@ -175,7 +176,9 @@ export function Page1Overview({ data }: { data: ReportData }) {
 
   return (
     <Page size="A4" style={baseStyles.page}>
+      <PdfTraceMarker page={1} section="Page1:start" />
       <PdfHeader data={data} variant="cover" />
+      <PdfTraceMarker page={1} section="Page1:after_header" />
 
       <View style={styles.heroRow}>
         <View style={styles.scoreBlock}>
@@ -191,6 +194,7 @@ export function Page1Overview({ data }: { data: ReportData }) {
           </Text>
         </View>
       </View>
+      <PdfTraceMarker page={1} section="Page1:after_hero" />
 
       <View style={styles.kpiRow}>
         <View style={styles.kpiCard}>
@@ -206,6 +210,7 @@ export function Page1Overview({ data }: { data: ReportData }) {
           <Text style={styles.kpiLabel}>Authority</Text>
         </View>
       </View>
+      <PdfTraceMarker page={1} section="Page1:after_kpi" />
 
       {data.tensionNote ? <Text style={styles.tension}>{data.tensionNote}</Text> : null}
 
@@ -213,6 +218,7 @@ export function Page1Overview({ data }: { data: ReportData }) {
         <Text style={styles.execLabel}>Bottom line</Text>
         <Text style={styles.execBody}>{data.bottomLine}</Text>
       </View>
+      <PdfTraceMarker page={1} section="Page1:after_bottom_line" />
 
       <Text style={styles.rankHeader}>Competitive ranking</Text>
       {data.competitors.map((c) => {
@@ -239,6 +245,7 @@ export function Page1Overview({ data }: { data: ReportData }) {
           </View>
         );
       })}
+      <PdfTraceMarker page={1} section="Page1:after_ranking" />
 
       <View style={styles.alertRow}>
         <View style={[styles.alertCard, styles.alertWin]}>
@@ -257,6 +264,7 @@ export function Page1Overview({ data }: { data: ReportData }) {
           <Text style={styles.alertDetail}>{data.alerts.priority.detail}</Text>
         </View>
       </View>
+      <PdfTraceMarker page={1} section="Page1:before_footer" />
 
       <PdfFooter data={data} />
     </Page>

@@ -3,6 +3,7 @@ import type { ReportData } from "../types";
 import { colors, space, baseStyles } from "../theme";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
+import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
 const styles = StyleSheet.create({
   h: {
@@ -73,22 +74,26 @@ const styles = StyleSheet.create({
   colSt: { width: "26%" },
 });
 
-function signalPillStyle(s: ReportData["signalSummary"][0]["status"]) {
+function signalPillStyle(s: ReportData["signalSummary"][0]["status"] | undefined) {
   if (s === "positive") return styles.pillPos;
   if (s === "improvable") return styles.pillImp;
   if (s === "gap") return styles.pillGap;
-  return styles.pillTrust;
+  if (s === "trust") return styles.pillTrust;
+  return styles.pill;
 }
 
-function statusLabel(s: ReportData["competitiveTable"][0]["status"]) {
+function statusLabel(s: ReportData["competitiveTable"][0]["status"] | undefined) {
   if (s === "You") return "You";
-  return s;
+  if (s === "Ahead" || s === "Behind" || s === "Tied") return s;
+  return "—";
 }
 
 export function Page5DataSummary({ data }: { data: ReportData }) {
   return (
     <Page size="A4" style={baseStyles.page}>
+      <PdfTraceMarker page={5} section="Page5:start" />
       <PdfHeader data={data} variant="inner" sectionSlug="Data summary" pageNum={5} />
+      <PdfTraceMarker page={5} section="Page5:after_header" />
 
       <Text style={styles.hFirst}>Signal summary</Text>
       <View style={styles.table}>
@@ -113,6 +118,7 @@ export function Page5DataSummary({ data }: { data: ReportData }) {
           </View>
         ))}
       </View>
+      <PdfTraceMarker page={5} section="Page5:after_signal_table" />
 
       <Text style={styles.h}>Competitive comparison</Text>
       <View style={styles.table}>
@@ -147,6 +153,7 @@ export function Page5DataSummary({ data }: { data: ReportData }) {
           </View>
         ))}
       </View>
+      <PdfTraceMarker page={5} section="Page5:before_footer" />
 
       <PdfFooter data={data} />
     </Page>

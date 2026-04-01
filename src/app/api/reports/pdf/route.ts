@@ -2,12 +2,27 @@ import { NextResponse } from "next/server";
 
 import type { Extraction } from "@/lib/extraction/schema";
 import { mapSnapshotToReactPdfData } from "@/lib/reports/mapSnapshotToReactPdfData";
-import { generatePDF } from "@/lib/reports/pdf/generatePdf";
+import {
+  generatePDF,
+  generatePdfMinimalBuffer,
+  probeMinimalPdf,
+  probeReportPagesOneAtATime,
+} from "@/lib/reports/pdf/generatePdf";
+import { isPdfDiagnosticsEnabled, summarizeReportDataShape } from "@/lib/reports/pdf/pdfDiagnostics";
+import type { ReportData } from "@/lib/reports/pdf/types";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
+
+/**
+ * Query (diagnostics when NODE_ENV=development or PDF_DIAGNOSTICS=1):
+ * - pdfDebug=minimal — smoke-test React-PDF (Document/Page/Text); same Bearer auth, no snapshot payload.
+ * - pdfDebug=probe — JSON: minimalProbe, pageProbes (pages 1–6 solo), reportDataSummary; needs snapshotId + access.
+ * - pageOnly=3 or pageOnly=1,2 — render only listed 1-based pages (PDF download).
+ * Server logs: PDF_SECTION_LOG=1 prints [pdf-trace] for PdfTraceMarker sections.
+ */
 
 type AgencyForReport = {
   name: string;
@@ -100,6 +115,14 @@ function normalizeParsedJson(pj: unknown): Extraction | null {
   return null;
 }
 
+/** Dev/diagnostics: `pageOnly=3` or `pageOnly=1,2` (1-based). */
+function parsePageOnlyParam(raw: string | null): number[] | undefined {
+  if (!raw?.trim()) return undefined;
+  const parts = raw.split(",").map((s) => parseInt(s.trim(), 10));
+  if (parts.some((n) => !Number.isFinite(n) || n < 1 || n > 6)) return undefined;
+  return parts;
+}
+
 export async function GET(req: Request) {
   const nextRuntime = process.env.NEXT_RUNTIME ?? null;
   if (nextRuntime === "edge") {
@@ -110,7 +133,62 @@ export async function GET(req: Request) {
   }
 
   const url = new URL(req.url);
+  const pdfDebug = url.searchParams.get("pdfDebug");
+  const pageOnlyRaw = url.searchParams.get("pageOnly");
   const snapshotId = url.searchParams.get("snapshotId");
+
+  const supabase = getSupabaseAdminClient();
+
+  if (pdfDebug === "minimal" && isPdfDiagnosticsEnabled()) {
+    try {
+      const token = bearerToken(req);
+      if (!token) {
+        return NextResponse.json({ error: "Missing Authorization: Bearer <token>" }, { status: 401 });
+      }
+      const userRes = await supabase.auth.getUser(token);
+      if (userRes.error || !userRes.data.user) {
+        return NextResponse.json(
+          { error: userRes.error?.message ?? "Unauthorized" },
+          { status: 401 }
+        );
+      }
+      const minimalProbe = await probeMinimalPdf();
+      if (!minimalProbe.ok) {
+        return NextResponse.json(
+          {
+            error: "Minimal PDF probe failed",
+            message: minimalProbe.message,
+            stack: minimalProbe.stack,
+            diagnostics: { nextRuntime, node: process.version, platform: process.platform, arch: process.arch },
+          },
+          { status: 500 }
+        );
+      }
+      const buffer = await generatePdfMinimalBuffer();
+      return new NextResponse(new Uint8Array(buffer), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": 'attachment; filename="pdf_minimal_probe.pdf"',
+        },
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      const stack = err instanceof Error ? err.stack : undefined;
+      console.error("pdf_minimal_probe_failed", { message, stack });
+      return NextResponse.json(
+        {
+          error: "Minimal PDF generation failed",
+          message,
+          stack,
+          diagnostics: { nextRuntime, node: process.version, platform: process.platform, arch: process.arch },
+        },
+        { status: 500 }
+      );
+    }
+  }
+
+  let pdfData: ReportData | null = null;
 
   try {
     if (!snapshotId) {
@@ -121,8 +199,6 @@ export async function GET(req: Request) {
     if (!token) {
       return NextResponse.json({ error: "Missing Authorization: Bearer <token>" }, { status: 401 });
     }
-
-    const supabase = getSupabaseAdminClient();
 
     const userRes = await supabase.auth.getUser(token);
     const user = userRes.data.user;
@@ -237,7 +313,7 @@ export async function GET(req: Request) {
       })),
     };
 
-    const pdfData = mapSnapshotToReactPdfData(snapshotInput, {
+    pdfData = mapSnapshotToReactPdfData(snapshotInput, {
       name: agency.name,
       brand_logo_url: agency.brand_logo_url ?? null,
     });
@@ -249,7 +325,23 @@ export async function GET(req: Request) {
       client: clientRes.data.name,
     });
 
-    const buffer = await generatePDF(pdfData);
+    if (pdfDebug === "probe" && isPdfDiagnosticsEnabled()) {
+      const minimalProbe = await probeMinimalPdf();
+      const pageProbes = await probeReportPagesOneAtATime(pdfData);
+      return NextResponse.json({
+        snapshotId,
+        minimalProbe,
+        pageProbes,
+        reportDataSummary: summarizeReportDataShape(pdfData),
+        hint: "Server: set PDF_SECTION_LOG=1 to log [pdf-trace] section markers to stderr.",
+      });
+    }
+
+    const pageOnlyFilter = isPdfDiagnosticsEnabled() ? parsePageOnlyParam(pageOnlyRaw) : undefined;
+    const buffer = await generatePDF(
+      pdfData,
+      pageOnlyFilter?.length ? { pages: pageOnlyFilter } : undefined
+    );
 
     const clientPart = safePart(clientRes.data.name || "Client").slice(0, 48) || "Client";
     const datePart = new Date(snapshotRes.data.created_at as string).toISOString().slice(0, 10);
@@ -265,16 +357,45 @@ export async function GET(req: Request) {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    if (err instanceof Error && err.stack) {
-      console.error("pdf_generation_failed", { snapshotId, message, stack: err.stack });
+    const stack = err instanceof Error ? err.stack : undefined;
+    const pdfContext =
+      err && typeof err === "object" && "pdfContext" in err
+        ? (err as { pdfContext?: unknown }).pdfContext
+        : undefined;
+
+    if (stack) {
+      console.error("pdf_generation_failed", { snapshotId, message, stack });
     } else {
       console.error("pdf_generation_failed", { snapshotId, message });
     }
+
+    const diagEnabled = isPdfDiagnosticsEnabled();
+    let minimalProbe: Awaited<ReturnType<typeof probeMinimalPdf>> | undefined;
+    let pageProbes: Awaited<ReturnType<typeof probeReportPagesOneAtATime>> | undefined;
+    let reportDataSummary: ReturnType<typeof summarizeReportDataShape> | undefined;
+
+    if (diagEnabled) {
+      minimalProbe = await probeMinimalPdf();
+      if (pdfData) {
+        reportDataSummary = summarizeReportDataShape(pdfData);
+        pageProbes = await probeReportPagesOneAtATime(pdfData);
+      }
+    }
+
     return NextResponse.json(
       {
         error: "PDF generation failed",
         message,
         snapshotId,
+        ...(diagEnabled
+          ? {
+              stack,
+              pdfContext,
+              reportDataSummary,
+              minimalProbe,
+              pageProbes,
+            }
+          : {}),
         diagnostics: {
           nextRuntime,
           node: process.version,

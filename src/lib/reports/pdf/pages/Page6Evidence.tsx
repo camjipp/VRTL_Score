@@ -3,6 +3,7 @@ import type { ReportData } from "../types";
 import { colors, space, baseStyles } from "../theme";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
+import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
 const styles = StyleSheet.create({
   h: {
@@ -73,7 +74,9 @@ const styles = StyleSheet.create({
 export function Page6Evidence({ data }: { data: ReportData }) {
   return (
     <Page size="A4" style={baseStyles.page}>
+      <PdfTraceMarker page={6} section="Page6:start" />
       <PdfHeader data={data} variant="inner" sectionSlug="Evidence & methodology" pageNum={6} />
+      <PdfTraceMarker page={6} section="Page6:after_header" />
 
       <Text style={styles.h}>Evidence log</Text>
       <View style={{ marginBottom: space.section }}>
@@ -96,6 +99,7 @@ export function Page6Evidence({ data }: { data: ReportData }) {
           </View>
         ))}
       </View>
+      <PdfTraceMarker page={6} section="Page6:after_evidence_table" />
 
       <View style={styles.method}>
         <Text style={styles.methodTitle}>Methodology</Text>
@@ -115,6 +119,7 @@ export function Page6Evidence({ data }: { data: ReportData }) {
           </View>
         </View>
       </View>
+      <PdfTraceMarker page={6} section="Page6:before_footer" />
 
       <PdfFooter data={data} />
     </Page>

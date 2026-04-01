@@ -13,6 +13,11 @@ import type {
   ReportData as ReactPdfReportData,
   SignalRow,
 } from "@/lib/reports/pdf/types";
+
+function normalizeRecommendationPriority(p: string | undefined): RecommendationCard["priority"] {
+  if (p === "HIGH" || p === "MEDIUM" || p === "LOW") return p;
+  return "LOW";
+}
 import { PDF_METHODOLOGY_TEXT } from "@/lib/reports/pdfTheme";
 
 function formatLongDate(d: string) {
@@ -145,7 +150,7 @@ export function mapSnapshotToReactPdfData(
   }
 
   const recommendations: RecommendationCard[] = insights.map((ins) => ({
-    priority: ins.priority,
+    priority: normalizeRecommendationPriority(ins.priority),
     title: ins.title,
     insight: ins.insight,
     explanation: ins.whyItMatters,

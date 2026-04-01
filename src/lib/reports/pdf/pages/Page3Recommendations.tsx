@@ -3,9 +3,14 @@ import type { ReportData } from "../types";
 import { colors, space, baseStyles } from "../theme";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
+import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
-const priorityBorder = (p: string) =>
-  p === "HIGH" ? colors.danger : p === "MEDIUM" ? colors.warning : colors.success;
+const priorityBorder = (p: string | undefined) => {
+  if (p === "HIGH") return colors.danger;
+  if (p === "MEDIUM") return colors.warning;
+  if (p === "LOW") return colors.success;
+  return colors.border;
+};
 
 const styles = StyleSheet.create({
   pageTitle: {
@@ -73,7 +78,9 @@ const styles = StyleSheet.create({
 export function Page3Recommendations({ data }: { data: ReportData }) {
   return (
     <Page size="A4" style={baseStyles.page}>
+      <PdfTraceMarker page={3} section="Page3:start" />
       <PdfHeader data={data} variant="inner" sectionSlug="Recommendations" pageNum={3} />
+      <PdfTraceMarker page={3} section="Page3:after_header" />
 
       <Text style={styles.pageTitle}>Prioritized actions</Text>
       <Text style={styles.intro}>
@@ -96,6 +103,7 @@ export function Page3Recommendations({ data }: { data: ReportData }) {
           </View>
         </View>
       ))}
+      <PdfTraceMarker page={3} section="Page3:after_recommendations" />
 
       <PdfFooter data={data} />
     </Page>
