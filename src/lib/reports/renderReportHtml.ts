@@ -467,29 +467,33 @@ export function renderReportHtml(data: ReportData): string {
       --score-accent: ${scoreAccent};
       --pdf-bg: #13161c;
       --pdf-surface: #1a1e28;
-      --pdf-surface-raised: #222831;
-      --pdf-border: rgba(255, 255, 255, 0.085);
-      --pdf-border-subtle: rgba(255, 255, 255, 0.055);
-      --pdf-text: #e8eaef;
-      --pdf-text-secondary: #98a1b0;
-      --pdf-text-muted: #6d7583;
+      --pdf-surface-raised: #232831;
+      --pdf-border: rgba(255, 255, 255, 0.09);
+      --pdf-border-subtle: rgba(255, 255, 255, 0.06);
+      --pdf-text: #eef0f4;
+      --pdf-text-secondary: #aab3c2;
+      --pdf-text-muted: #7d8899;
       --pdf-success: #5cb89a;
       --pdf-success-dim: rgba(92, 184, 154, 0.14);
       --pdf-warning: #d4b06a;
       --pdf-warning-dim: rgba(212, 176, 106, 0.14);
       --pdf-danger: #c97070;
       --pdf-danger-dim: rgba(201, 112, 112, 0.14);
-      --pdf-ring-track: rgba(255, 255, 255, 0.11);
-      --pdf-r: 8px;
-      --pdf-r-sm: 5px;
+      --pdf-ring-track: rgba(255, 255, 255, 0.12);
+      --pdf-r: 9px;
+      --pdf-r-sm: 6px;
+      --pdf-space-lg: 20px;
+      --pdf-space-md: 16px;
+      --pdf-space-sm: 12px;
+      --pdf-leading-body: 1.62;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      font-size: 10px;
-      line-height: 1.45;
+      font-size: 11px;
+      line-height: 1.5;
       color: var(--pdf-text);
       background: var(--pdf-bg);
       -webkit-print-color-adjust: exact;
@@ -499,7 +503,7 @@ export function renderReportHtml(data: ReportData): string {
     .page {
       width: 210mm;
       min-height: 297mm;
-      padding: 11mm 13mm;
+      padding: 10mm 12mm;
       page-break-after: always;
       position: relative;
       background: var(--pdf-bg);
@@ -508,23 +512,25 @@ export function renderReportHtml(data: ReportData): string {
     .page:last-child { page-break-after: avoid; }
     .no-break { page-break-inside: avoid; break-inside: avoid; }
 
-    .h1 { font-size: 17px; font-weight: 700; color: var(--pdf-text); letter-spacing: -0.02em; line-height: 1.15; }
+    .h1 { font-size: 19px; font-weight: 700; color: var(--pdf-text); letter-spacing: -0.02em; line-height: 1.2; }
     .h2 {
-      font-size: 10px; font-weight: 600; color: var(--pdf-text-secondary);
-      text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px; margin-top: 4px;
+      font-size: 12px; font-weight: 600; color: var(--pdf-text);
+      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; margin-top: 6px;
     }
-    .h3 { font-size: 9px; font-weight: 600; color: var(--pdf-text); margin-bottom: 6px; letter-spacing: 0.04em; }
-    .body { font-size: 9px; color: var(--pdf-text-secondary); line-height: 1.55; }
-    .small { font-size: 7.5px; color: var(--pdf-text-muted); }
+    .h3 { font-size: 11px; font-weight: 600; color: var(--pdf-text); margin-bottom: 10px; letter-spacing: 0.03em; }
+    .body { font-size: 10.5px; color: var(--pdf-text-secondary); line-height: var(--pdf-leading-body); }
+    .body-intro { margin-bottom: var(--pdf-space-md); }
+    .section-gap { margin-top: var(--pdf-space-lg); }
+    .small { font-size: 8px; color: var(--pdf-text-muted); }
 
     .pill {
       display: inline-block;
-      padding: 3px 6px;
+      padding: 4px 7px;
       border-radius: var(--pdf-r-sm);
-      font-size: 6.5px;
+      font-size: 7.5px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.05em;
       border: 1px solid transparent;
     }
     .pill-green { background: var(--pdf-success-dim); color: #9fd4c2; border-color: rgba(92, 184, 154, 0.28); }
@@ -541,282 +547,288 @@ export function renderReportHtml(data: ReportData): string {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: 12px;
-      padding-bottom: 10px;
-      margin-bottom: 14px;
+      gap: 14px;
+      padding-bottom: 12px;
+      margin-bottom: var(--pdf-space-md);
       border-bottom: 1px solid var(--pdf-border);
     }
     .page-header-left { flex: 1; min-width: 0; }
     .report-name {
-      font-size: 9px; font-weight: 600; color: var(--pdf-text);
-      letter-spacing: 0.14em; text-transform: uppercase;
+      font-size: 11px; font-weight: 600; color: var(--pdf-text);
+      letter-spacing: 0.11em; text-transform: uppercase; line-height: 1.35;
     }
+    .cover .report-name { font-size: 13px; letter-spacing: 0.1em; }
     .section-slug {
-      font-size: 8px; color: var(--pdf-text-muted); margin-top: 3px;
-      font-weight: 500; letter-spacing: 0.02em; text-transform: none;
+      font-size: 10px; color: var(--pdf-text-secondary); margin-top: 5px;
+      font-weight: 500; letter-spacing: 0.02em; text-transform: none; line-height: 1.4;
     }
-    .page-header-right { text-align: right; font-size: 8px; color: var(--pdf-text-secondary); line-height: 1.45; }
-    .page-header-right .page-num { margin-top: 4px; font-size: 7px; color: var(--pdf-text-muted); letter-spacing: 0.04em; }
-    .meta-quiet { color: var(--pdf-text-muted); font-size: 7.5px; }
+    .page-header-right { text-align: right; font-size: 9px; color: var(--pdf-text-secondary); line-height: 1.55; }
+    .page-header-right .page-num { margin-top: 6px; font-size: 8px; color: var(--pdf-text-muted); letter-spacing: 0.05em; }
+    .meta-quiet { color: var(--pdf-text-muted); font-size: 8px; }
 
     .page-footer {
       position: absolute;
-      bottom: 7mm;
-      left: 13mm;
-      right: 13mm;
+      bottom: 6mm;
+      left: 12mm;
+      right: 12mm;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 7px;
+      font-size: 7.5px;
       color: var(--pdf-text-muted);
-      padding-top: 8px;
+      padding-top: 10px;
       border-top: 1px solid var(--pdf-border-subtle);
     }
 
     /* Cover */
-    .cover { padding-top: 6mm; }
+    .cover { padding-top: 4mm; }
     .cover-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: 16px;
-      margin-bottom: 18px;
-      padding-bottom: 12px;
+      gap: 18px;
+      margin-bottom: var(--pdf-space-lg);
+      padding-bottom: var(--pdf-space-md);
       border-bottom: 1px solid var(--pdf-border);
     }
     .cover-header-left { flex: 1; }
-    .cover-header-right { text-align: right; font-size: 8px; color: var(--pdf-text-secondary); line-height: 1.5; }
-    .cover-logo img { max-height: 28px; opacity: 0.95; }
-    .cover-logo-text { font-size: 10px; font-weight: 600; color: var(--pdf-text-secondary); }
-    .cover-agency-line { font-size: 8px; color: var(--pdf-text-muted); margin-top: 4px; }
+    .cover-header-right { text-align: right; font-size: 9px; color: var(--pdf-text-secondary); line-height: 1.55; }
+    .cover-client-primary { font-size: 14px; font-weight: 600; color: var(--pdf-text); letter-spacing: -0.02em; line-height: 1.25; }
+    .cover-logo img { max-height: 32px; opacity: 0.95; }
+    .cover-logo-text { font-size: 11px; font-weight: 600; color: var(--pdf-text-secondary); }
+    .cover-agency-line { font-size: 9px; color: var(--pdf-text-muted); margin-top: 5px; }
 
-    .score-section { display: flex; gap: 18px; margin: 18px 0 16px; align-items: flex-start; }
+    .score-section { display: flex; gap: 22px; margin: var(--pdf-space-lg) 0 var(--pdf-space-md); align-items: flex-start; }
     .score-ring {
-      width: 104px; height: 104px; border-radius: 50%; flex-shrink: 0;
+      width: 132px; height: 132px; border-radius: 50%; flex-shrink: 0;
       background: conic-gradient(var(--score-accent) calc(${score ?? 0} * 3.6deg), var(--pdf-ring-track) 0);
       display: flex; align-items: center; justify-content: center;
     }
     .score-ring-inner {
-      width: 82px; height: 82px; border-radius: 50%;
+      width: 102px; height: 102px; border-radius: 50%;
       background: var(--pdf-surface-raised);
       border: 1px solid var(--pdf-border-subtle);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
-    .score-number { font-size: 30px; font-weight: 700; color: var(--pdf-text); line-height: 1; letter-spacing: -0.03em; }
-    .score-max { font-size: 9px; color: var(--pdf-text-muted); margin-top: 2px; }
+    .score-number { font-size: 44px; font-weight: 700; color: var(--pdf-text); line-height: 0.95; letter-spacing: -0.04em; }
+    .score-max { font-size: 11px; color: var(--pdf-text-muted); margin-top: 4px; font-weight: 500; }
 
-    .score-context { flex: 1; padding-top: 2px; }
+    .score-context { flex: 1; padding-top: 4px; min-width: 0; }
     .score-tier {
       display: inline-block;
-      padding: 4px 10px;
+      padding: 6px 12px;
       border-radius: var(--pdf-r-sm);
-      font-size: 8.5px;
+      font-size: 10px;
       font-weight: 600;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.07em;
       text-transform: uppercase;
-      margin-bottom: 8px;
-      background: rgba(255, 255, 255, 0.06);
+      margin-bottom: 10px;
+      background: rgba(255, 255, 255, 0.07);
       color: var(--pdf-text);
       border: 1px solid var(--pdf-border);
-      border-left: 2px solid var(--score-accent);
+      border-left: 3px solid var(--score-accent);
     }
-    .score-rank { font-size: 9px; color: var(--pdf-text-secondary); margin-bottom: 10px; line-height: 1.4; }
+    .score-rank { font-size: 11px; color: var(--pdf-text-secondary); margin-bottom: var(--pdf-space-sm); line-height: 1.5; }
     .score-rank strong { color: var(--pdf-text); font-weight: 600; }
 
-    .context-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .context-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
     .context-item {
-      padding: 8px 10px;
+      padding: 12px 14px;
       background: var(--pdf-surface);
       border: 1px solid var(--pdf-border);
       border-radius: var(--pdf-r-sm);
     }
-    .context-value { font-size: 14px; font-weight: 700; color: var(--pdf-text); letter-spacing: -0.02em; }
-    .context-label { font-size: 7px; color: var(--pdf-text-muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .context-value { font-size: 18px; font-weight: 700; color: var(--pdf-text); letter-spacing: -0.02em; }
+    .context-label { font-size: 8px; color: var(--pdf-text-muted); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.07em; }
 
     .tension-alert {
-      padding: 11px 14px;
-      margin: 14px 0;
+      padding: 14px 16px;
+      margin: var(--pdf-space-md) 0;
       background: var(--pdf-surface);
       border: 1px solid var(--pdf-border);
-      border-left: 2px solid var(--pdf-warning);
+      border-left: 3px solid var(--pdf-warning);
       border-radius: var(--pdf-r-sm);
-      font-size: 9px;
+      font-size: 10.5px;
       color: var(--pdf-text-secondary);
-      line-height: 1.55;
+      line-height: var(--pdf-leading-body);
     }
 
     .bottom-line {
-      padding: 12px 14px;
-      margin: 14px 0;
+      padding: 16px 18px;
+      margin: var(--pdf-space-md) 0;
       background: var(--pdf-surface-raised);
       border: 1px solid var(--pdf-border);
       border-radius: var(--pdf-r);
     }
     .bottom-line-title {
-      font-size: 8px; font-weight: 600; color: var(--pdf-text-muted);
-      margin-bottom: 6px; letter-spacing: 0.14em; text-transform: uppercase;
+      font-size: 9.5px; font-weight: 600; color: var(--pdf-text-secondary);
+      margin-bottom: 8px; letter-spacing: 0.12em; text-transform: uppercase;
     }
-    .bottom-line-text { font-size: 9.5px; color: var(--pdf-text-secondary); line-height: 1.55; }
+    .bottom-line-text { font-size: 11.5px; color: var(--pdf-text-secondary); line-height: var(--pdf-leading-body); }
 
-    .verdict-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0; }
+    .verdict-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: var(--pdf-space-md) 0; }
     .verdict-card {
-      padding: 11px 12px;
+      padding: 15px 16px;
+      min-height: 78px;
       border-radius: var(--pdf-r-sm);
       background: var(--pdf-surface);
       border: 1px solid var(--pdf-border);
     }
-    .verdict-card.win { border-left: 2px solid var(--pdf-success); }
-    .verdict-card.risk { border-left: 2px solid var(--pdf-danger); }
-    .verdict-card.priority { border-left: 2px solid var(--accent); }
+    .verdict-card.win { border-left: 3px solid var(--pdf-success); }
+    .verdict-card.risk { border-left: 3px solid var(--pdf-danger); }
+    .verdict-card.priority { border-left: 3px solid var(--accent); }
     .verdict-label {
-      font-size: 6.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
-      margin-bottom: 5px; color: var(--pdf-text-muted);
+      font-size: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.09em;
+      margin-bottom: 7px; color: var(--pdf-text-muted);
     }
     .verdict-card.win .verdict-label { color: #9fd4c2; }
     .verdict-card.risk .verdict-label { color: #e8b4b4; }
     .verdict-card.priority .verdict-label { color: #9ec5e8; }
-    .verdict-value { font-size: 9px; font-weight: 600; color: var(--pdf-text); line-height: 1.35; }
-    .verdict-detail { font-size: 7.5px; color: var(--pdf-text-muted); margin-top: 4px; line-height: 1.35; }
+    .verdict-value { font-size: 10.5px; font-weight: 600; color: var(--pdf-text); line-height: 1.4; }
+    .verdict-detail { font-size: 9px; color: var(--pdf-text-muted); margin-top: 6px; line-height: 1.4; }
 
-    .ranking-section { margin: 14px 0 8px; }
+    .ranking-section { margin: var(--pdf-space-lg) 0 10px; }
     .ranking-row {
-      display: flex; align-items: center; gap: 8px;
-      padding: 7px 0;
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 0;
       border-bottom: 1px solid var(--pdf-border-subtle);
     }
     .ranking-row:last-child { border-bottom: none; }
-    .ranking-pos { width: 22px; font-size: 8.5px; font-weight: 600; color: var(--pdf-text-muted); }
-    .ranking-name { width: 90px; font-size: 9px; color: var(--pdf-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ranking-pos { width: 26px; font-size: 9.5px; font-weight: 600; color: var(--pdf-text-muted); }
+    .ranking-name { width: 100px; font-size: 10.5px; color: var(--pdf-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .ranking-name.client { font-weight: 600; color: var(--pdf-text); }
-    .ranking-bar { flex: 1; height: 5px; background: rgba(255, 255, 255, 0.08); border-radius: 3px; overflow: hidden; }
-    .ranking-fill { height: 100%; border-radius: 3px; }
+    .ranking-bar { flex: 1; height: 7px; background: rgba(255, 255, 255, 0.09); border-radius: 4px; overflow: hidden; }
+    .ranking-fill { height: 100%; border-radius: 4px; }
     .ranking-fill.client { background: var(--accent); }
-    .ranking-fill.other { background: rgba(255, 255, 255, 0.2); }
-    .ranking-score { width: 48px; font-size: 8.5px; color: var(--pdf-text-muted); text-align: right; }
+    .ranking-fill.other { background: rgba(255, 255, 255, 0.22); }
+    .ranking-score { width: 52px; font-size: 9.5px; color: var(--pdf-text-muted); text-align: right; }
     .ranking-score.client { font-weight: 600; color: var(--pdf-text); }
-    .ranking-delta { width: 42px; font-size: 7.5px; text-align: right; }
+    .ranking-delta { width: 44px; font-size: 9px; text-align: right; }
     .ranking-delta.threat { color: #e8a8a8; font-weight: 600; }
     .ranking-delta.safe { color: #9fd4c2; }
 
-    .model-grid { display: grid; grid-template-columns: repeat(${models.length > 2 ? 2 : 1}, 1fr); gap: 10px; margin: 12px 0; }
+    .model-grid { display: grid; grid-template-columns: repeat(${models.length > 2 ? 2 : 1}, 1fr); gap: 14px; margin: var(--pdf-space-md) 0; }
     .model-card {
-      padding: 12px;
+      padding: 17px 18px;
       background: var(--pdf-surface);
       border: 1px solid var(--pdf-border);
       border-radius: var(--pdf-r-sm);
-      border-left: 2px solid var(--model-accent, var(--accent));
+      border-left: 3px solid var(--model-accent, var(--accent));
     }
-    .model-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
-    .model-name { font-size: 10px; font-weight: 600; color: var(--pdf-text); }
-    .model-score { font-size: 17px; font-weight: 700; color: var(--pdf-text); letter-spacing: -0.03em; }
-    .model-bar { height: 3px; background: rgba(255, 255, 255, 0.08); border-radius: 2px; margin: 8px 0; overflow: hidden; }
+    .model-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+    .model-name { font-size: 12.5px; font-weight: 600; color: var(--pdf-text); }
+    .model-score { font-size: 24px; font-weight: 700; color: var(--pdf-text); letter-spacing: -0.03em; }
+    .model-bar { height: 4px; background: rgba(255, 255, 255, 0.09); border-radius: 2px; margin: 10px 0; overflow: hidden; }
     .model-fill { height: 100%; border-radius: 2px; }
-    .model-insight { font-size: 8px; color: var(--pdf-text-secondary); line-height: 1.45; }
-    .model-delta { font-size: 7.5px; margin-top: 6px; }
+    .model-body { margin-top: 4px; }
+    .model-insight { font-size: 10px; color: var(--pdf-text-secondary); line-height: var(--pdf-leading-body); }
+    .model-delta { font-size: 9.5px; margin-top: 8px; font-weight: 500; }
     .model-delta.positive { color: #9fd4c2; }
     .model-delta.negative { color: #e8a8a8; }
-    .model-aside { font-size: 7.5px; color: var(--pdf-text-muted); font-style: italic; margin-top: 4px; display: block; }
+    .model-aside { font-size: 9px; color: var(--pdf-text-muted); font-style: italic; margin-top: 8px; display: block; line-height: 1.5; }
 
     .insight-card {
-      padding: 12px 14px;
+      padding: 17px 18px;
       background: var(--pdf-surface);
       border: 1px solid var(--pdf-border);
       border-radius: var(--pdf-r-sm);
-      margin-bottom: 10px;
+      margin-bottom: 14px;
     }
-    .insight-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
-    .insight-priority { font-size: 6.5px; font-weight: 700; padding: 3px 6px; border-radius: var(--pdf-r-sm); letter-spacing: 0.06em; }
-    .insight-title { font-size: 10px; font-weight: 600; color: var(--pdf-text); }
-    .insight-grid { display: grid; grid-template-columns: 72px 1fr; gap: 4px 10px; font-size: 8px; line-height: 1.45; }
-    .insight-label { color: var(--pdf-text-muted); font-weight: 600; }
+    .insight-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    .insight-priority { font-size: 7.5px; font-weight: 700; padding: 4px 8px; border-radius: var(--pdf-r-sm); letter-spacing: 0.06em; }
+    .insight-title { font-size: 12.5px; font-weight: 600; color: var(--pdf-text); line-height: 1.3; }
+    .insight-grid { display: grid; grid-template-columns: 88px 1fr; gap: 8px 14px; font-size: 10px; line-height: var(--pdf-leading-body); }
+    .insight-label { color: var(--pdf-text-muted); font-weight: 600; font-size: 9.5px; }
     .insight-value { color: var(--pdf-text-secondary); }
     .insight-consequence {
-      font-size: 8px;
+      font-size: 9.5px;
       color: var(--pdf-text-muted);
-      margin-top: 10px;
-      padding-top: 10px;
+      margin-top: 14px;
+      padding-top: 14px;
       border-top: 1px solid var(--pdf-border-subtle);
       font-style: italic;
-      line-height: 1.45;
+      line-height: var(--pdf-leading-body);
     }
 
     .evidence-block {
-      padding: 12px 14px;
+      padding: 16px 18px;
       border: 1px solid var(--pdf-border);
       border-radius: var(--pdf-r-sm);
-      margin-bottom: 10px;
+      margin-bottom: 14px;
       background: var(--pdf-surface);
-      border-left: 2px solid var(--ev-border, var(--accent));
+      border-left: 3px solid var(--ev-border, var(--accent));
     }
-    .evidence-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .evidence-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .evidence-chip {
-      font-size: 6.5px; font-weight: 700; padding: 3px 7px; border-radius: var(--pdf-r-sm);
-      letter-spacing: 0.08em; text-transform: uppercase;
+      font-size: 7.5px; font-weight: 700; padding: 4px 9px; border-radius: var(--pdf-r-sm);
+      letter-spacing: 0.07em; text-transform: uppercase;
       border: 1px solid;
     }
     .evidence-quote {
-      font-size: 9px;
+      font-size: 10.5px;
       color: var(--pdf-text-secondary);
-      line-height: 1.55;
-      margin-bottom: 8px;
-      background: rgba(0, 0, 0, 0.2);
-      padding: 10px 12px;
+      line-height: var(--pdf-leading-body);
+      margin-bottom: 10px;
+      background: rgba(0, 0, 0, 0.22);
+      padding: 13px 15px;
       border-radius: var(--pdf-r-sm);
       border: 1px solid var(--pdf-border-subtle);
     }
-    .evidence-impact { font-size: 8px; color: var(--pdf-text-muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--pdf-border-subtle); line-height: 1.45; }
+    .evidence-impact { font-size: 9.5px; color: var(--pdf-text-muted); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--pdf-border-subtle); line-height: var(--pdf-leading-body); }
 
-    .data-table { width: 100%; border-collapse: collapse; font-size: 8px; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 9px; }
     .data-table th {
       text-align: left;
-      padding: 8px 8px;
+      padding: 11px 10px;
       background: var(--pdf-surface-raised);
       font-weight: 600;
-      color: var(--pdf-text-muted);
+      color: var(--pdf-text-secondary);
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-size: 6.5px;
+      letter-spacing: 0.07em;
+      font-size: 7.5px;
       border-bottom: 1px solid var(--pdf-border);
     }
     .data-table td {
-      padding: 8px;
+      padding: 11px 10px;
       border-bottom: 1px solid var(--pdf-border-subtle);
       vertical-align: middle;
       color: var(--pdf-text-secondary);
+      line-height: 1.45;
     }
+    .data-table td.table-note { font-size: 8.5px; color: var(--pdf-text-muted); }
     .data-table tbody tr:hover td { background: transparent; }
     .data-table strong { color: var(--pdf-text); font-weight: 600; }
-    .data-table tr.row-client td { background: rgba(92, 184, 154, 0.06); }
+    .data-table tr.row-client td { background: rgba(92, 184, 154, 0.07); }
 
     .method-box {
-      padding: 12px 14px;
+      padding: 16px 18px;
       background: var(--pdf-surface);
       border: 1px solid var(--pdf-border);
       border-radius: var(--pdf-r);
-      margin: 10px 0;
+      margin: var(--pdf-space-md) 0;
     }
     .method-box.insight-panel {
       background: var(--pdf-surface-raised);
-      border-left: 2px solid var(--accent);
+      border-left: 3px solid var(--accent);
     }
     .method-title {
-      font-size: 8px; font-weight: 600; color: var(--pdf-text-muted);
-      margin-bottom: 8px; letter-spacing: 0.12em; text-transform: uppercase;
+      font-size: 9.5px; font-weight: 600; color: var(--pdf-text-secondary);
+      margin-bottom: 10px; letter-spacing: 0.11em; text-transform: uppercase;
     }
-    .method-text { font-size: 8.5px; color: var(--pdf-text-secondary); line-height: 1.55; }
-    .method-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
-    .method-label { font-size: 7px; color: var(--pdf-text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
-    .method-value { font-size: 8px; color: var(--pdf-text); font-weight: 500; margin-top: 2px; }
+    .method-text { font-size: 10.5px; color: var(--pdf-text-secondary); line-height: var(--pdf-leading-body); }
+    .method-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
+    .method-label { font-size: 8px; color: var(--pdf-text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .method-value { font-size: 10px; color: var(--pdf-text); font-weight: 500; margin-top: 3px; }
 
-    .plan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+    .plan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 14px; }
     .plan-cell {
-      padding: 10px 12px;
-      background: rgba(0, 0, 0, 0.15);
+      padding: 14px 15px;
+      background: rgba(0, 0, 0, 0.18);
       border: 1px solid var(--pdf-border);
       border-radius: var(--pdf-r-sm);
     }
-    .plan-phase { font-size: 7px; font-weight: 600; color: var(--pdf-text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 5px; }
-    .plan-copy { font-size: 8px; color: var(--pdf-text-secondary); line-height: 1.45; }
+    .plan-phase { font-size: 8.5px; font-weight: 600; color: var(--pdf-text-secondary); letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 7px; }
+    .plan-copy { font-size: 9.5px; color: var(--pdf-text-secondary); line-height: var(--pdf-leading-body); }
   </style>
 </head>
 <body>
@@ -836,8 +848,8 @@ export function renderReportHtml(data: ReportData): string {
             : ""
         }
       </div>
-      <div class="cover-header-right">
-        <div style="font-weight:600;color:var(--pdf-text)">${escapeHtml(client.name)}</div>
+        <div class="cover-header-right">
+        <div class="cover-client-primary">${escapeHtml(client.name)}</div>
         ${client.website ? `<div class="meta-quiet">${escapeHtml(client.website)}</div>` : ""}
         <div class="meta-quiet" style="margin-top:4px">${formatDate(snapshot.created_at)}</div>
       </div>
@@ -941,8 +953,8 @@ export function renderReportHtml(data: ReportData): string {
       </div>
     </div>
     
-    <div class="h2">Model-by-Model Performance</div>
-    <div class="body" style="margin-bottom: 10px;">Each AI model ranks you differently. Understanding where you're strong (and weak) reveals exactly where to focus.</div>
+    <div class="h2">Model-by-model performance</div>
+    <div class="body body-intro">Each AI model ranks you differently. Understanding where you're strong (and weak) reveals exactly where to focus.</div>
     
     <div class="model-grid no-break">
       ${models.map(([name, val]) => {
@@ -976,12 +988,14 @@ export function renderReportHtml(data: ReportData): string {
           <div class="model-bar">
             <div class="model-fill" style="width: ${val}%; background: ${modelAccent};"></div>
           </div>
-          <div class="model-delta ${isAboveAvg ? "positive" : "negative"}">
-            ${isAboveAvg ? "↑" : "↓"} ${Math.abs(Math.round(delta))} vs. average (${avgModelScore})
-          </div>
-          <div class="model-insight" style="margin-top: 6px;">
-            ${modelInsight}
-            <span class="model-aside">${modelCompContext}</span>
+          <div class="model-body">
+            <div class="model-delta ${isAboveAvg ? "positive" : "negative"}">
+              ${isAboveAvg ? "↑" : "↓"} ${Math.abs(Math.round(delta))} vs. average (${avgModelScore})
+            </div>
+            <div class="model-insight">
+              ${modelInsight}
+              <span class="model-aside">${modelCompContext}</span>
+            </div>
           </div>
         </div>
         `;
@@ -995,7 +1009,7 @@ export function renderReportHtml(data: ReportData): string {
     ` : ""}
     
     ${models.length > 0 ? `
-    <div class="method-box no-break insight-panel" style="margin-top: 12px;">
+    <div class="method-box no-break insight-panel section-gap">
       <div class="method-title">Strategic takeaway</div>
       <div class="method-text">
         ${models[0][1] >= 70 && models[models.length - 1][1] < 50 ? 
@@ -1011,8 +1025,8 @@ export function renderReportHtml(data: ReportData): string {
     ` : ""}
     
     <!-- Evidence Preview on Page 2 to fill space -->
-    <div class="h2" style="margin-top: 16px;">Evidence Preview</div>
-    <div class="body" style="margin-bottom: 8px;">A sample of what AI models are actually saying about ${escapeHtml(client.name)}.</div>
+    <div class="h2 section-gap">Evidence preview</div>
+    <div class="body body-intro">A sample of what AI models are actually saying about ${escapeHtml(client.name)}.</div>
     
     ${strengthExamples.length > 0 ? strengthExamples.slice(0, 1).map((r) => {
       const pj = r.parsed_json;
@@ -1066,8 +1080,8 @@ export function renderReportHtml(data: ReportData): string {
       </div>
     </div>
     
-    <div class="h2">Prioritized Actions</div>
-    <div class="body" style="margin-bottom: 10px;">Based on your snapshot, these are the highest-impact improvements — ranked by urgency and potential impact.</div>
+    <div class="h2">Prioritized actions</div>
+    <div class="body body-intro">Based on your snapshot, these are the highest-impact improvements — ranked by urgency and potential impact.</div>
     
     ${insights.map((insight, idx) => `
     <div class="insight-card no-break">
@@ -1089,7 +1103,7 @@ export function renderReportHtml(data: ReportData): string {
     </div>
     `).join("")}
     
-    <div class="method-box no-break insight-panel" style="margin-top: 12px;">
+    <div class="method-box no-break insight-panel section-gap">
       <div class="method-title">30-day execution plan</div>
       <div class="plan-grid">
         <div class="plan-cell">
@@ -1132,7 +1146,7 @@ export function renderReportHtml(data: ReportData): string {
       </div>
     </div>
     
-    <div class="h2">Signal Summary</div>
+    <div class="h2">Signal summary</div>
     <table class="data-table no-break">
       <thead>
         <tr>
@@ -1149,34 +1163,34 @@ export function renderReportHtml(data: ReportData): string {
           <td>${metrics.topPosition}</td>
           <td>${metrics.topPositionRate}%</td>
           <td><span class="pill pill-green">Positive</span></td>
-          <td style="font-size: 7px;">Maintain & defend</td>
+          <td class="table-note">Maintain & defend</td>
         </tr>
         <tr>
           <td><strong>Opportunity</strong> (Mentioned, not top)</td>
           <td>${metrics.mentioned - metrics.topPosition}</td>
           <td>${Math.round(((metrics.mentioned - metrics.topPosition) / metrics.total) * 100)}%</td>
           <td><span class="pill pill-blue">Improvable</span></td>
-          <td style="font-size: 7px;">Strengthen positioning</td>
+          <td class="table-note">Strengthen positioning</td>
         </tr>
         <tr>
           <td><strong>Vulnerable</strong> (Not mentioned)</td>
           <td>${metrics.total - metrics.mentioned}</td>
           <td>${100 - metrics.mentionRate}%</td>
           <td><span class="pill pill-red">Gap</span></td>
-          <td style="font-size: 7px;">Build presence</td>
+          <td class="table-note">Build presence</td>
         </tr>
         <tr>
           <td><strong>Authority</strong> (With citations)</td>
           <td>${metrics.hasCitations}</td>
           <td>${metrics.citationRate}%</td>
           <td><span class="pill ${metrics.citationRate >= 30 ? 'pill-green' : 'pill-yellow'}">Trust signal</span></td>
-          <td style="font-size: 7px;">Earn citations</td>
+          <td class="table-note">Earn citations</td>
         </tr>
       </tbody>
     </table>
     
     ${metrics.competitorStats.length > 0 ? `
-    <div class="h2" style="margin-top: 12px;">Competitive Comparison</div>
+    <div class="h2 section-gap">Competitive comparison</div>
     <table class="data-table no-break">
       <thead>
         <tr>
@@ -1212,7 +1226,7 @@ export function renderReportHtml(data: ReportData): string {
     </table>
     ` : ""}
     
-    <div class="h2" style="margin-top: 12px;">Full Evidence Table</div>
+    <div class="h2 section-gap">Full evidence table</div>
     <table class="data-table">
       <thead>
         <tr>
@@ -1244,7 +1258,7 @@ export function renderReportHtml(data: ReportData): string {
       </tbody>
     </table>
     
-    <div class="method-box no-break" style="margin-top: 12px;">
+    <div class="method-box no-break section-gap">
       <div class="method-title">Methodology</div>
       <div class="method-text">${PDF_METHODOLOGY_TEXT}</div>
       <div class="method-grid">

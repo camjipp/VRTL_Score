@@ -1,6 +1,16 @@
 /**
  * White-label executive PDF design tokens.
  * Used only by renderReportHtml — dark, restrained, agency-deliverable.
+ *
+ * Typography scale (reference — mirrored in renderReportHtml :root + classes):
+ * - Report title: ~12px caps (cover + running header)
+ * - Page section (.h2): ~12px caps
+ * - Component / card titles: ~11–12px
+ * - Hero metric (score): ~40–44px
+ * - Large metrics: ~17–22px
+ * - Body / summaries: ~10–11px, line-height ~1.62
+ * - Secondary body: ~9.5px
+ * - Meta / footer / table dense: ~7.5–8px
  */
 
 export const PDF_REPORT_TITLE = "Competitive AI Presence Report";
