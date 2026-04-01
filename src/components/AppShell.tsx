@@ -217,7 +217,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="flex flex-1 flex-col">
               <div
                 className={cn(
-                  "flex shrink-0 items-center justify-center border-b border-white/5 py-4",
+                  "flex shrink-0 items-center justify-center border-b border-white/5 py-2",
                   sidebarCollapsed ? "px-2" : "px-4"
                 )}
               >
@@ -231,10 +231,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     alt="VRTL Score"
                     className={cn(
                       "mx-auto block h-auto w-auto max-w-full object-contain object-center",
-                      sidebarCollapsed ? "max-h-[63px]" : "max-h-[91px]"
+                      sidebarCollapsed ? "max-h-[69px]" : "max-h-[100px]"
                     )}
-                    width={385}
-                    height={105}
+                    width={424}
+                    height={116}
                     decoding="async"
                   />
                 </Link>
