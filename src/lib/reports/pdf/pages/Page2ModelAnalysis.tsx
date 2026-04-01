@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
     marginBottom: space.section,
     letterSpacing: -0.2,
   },
-  row: { flexDirection: "row", gap: 10, marginBottom: 10 },
+  row: { flexDirection: "row", marginBottom: 10 },
   modelCard: {
     flex: 1,
     backgroundColor: colors.card,
@@ -34,7 +34,9 @@ const styles = StyleSheet.create({
   deltaPos: { color: colors.success },
   deltaNeg: { color: colors.danger },
   barTrack: { height: 4, backgroundColor: colors.barTrack, borderRadius: 2, marginTop: 10 },
+  barInnerRow: { flex: 1, flexDirection: "row", height: 4 },
   barFill: { height: 4, borderRadius: 2, backgroundColor: colors.barFill },
+  barRest: { height: 4 },
   bullet: { fontSize: 9.5, color: colors.textSecondary, lineHeight: 1.55, marginTop: 5, paddingLeft: 2 },
   evidenceCard: {
     backgroundColor: colors.card,
@@ -83,6 +85,8 @@ const styles = StyleSheet.create({
 });
 
 function ModelCard({ m, a }: { m: ReportData["modelScores"][0]; a: number }) {
+  const scorePct = Math.min(100, Math.max(0, Math.round(m.score)));
+  const scoreRest = Math.max(0, 100 - scorePct);
   return (
     <View style={styles.modelCard}>
       <Text style={styles.modelName}>{m.name}</Text>
@@ -91,7 +95,10 @@ function ModelCard({ m, a }: { m: ReportData["modelScores"][0]; a: number }) {
         {m.deltaVsAvg >= 0 ? "↑" : "↓"} {Math.abs(m.deltaVsAvg)} vs. average ({a})
       </Text>
       <View style={styles.barTrack}>
-        <View style={[styles.barFill, { width: `${m.score}%` as `${number}%` }]} />
+        <View style={styles.barInnerRow}>
+          <View style={[{ flex: scorePct <= 0 ? 0 : scorePct }, styles.barFill]} />
+          <View style={[{ flex: scoreRest }, styles.barRest]} />
+        </View>
       </View>
       {m.insights.map((line, i) => (
         <Text key={i} style={styles.bullet}>
@@ -122,8 +129,10 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
 
       {pairs.map((pair, ri) => (
         <View key={ri} style={styles.row}>
-          {pair.map((m) => (
-            <ModelCard key={m.name} m={m} a={a} />
+          {pair.map((m, mi) => (
+            <View key={m.name} style={{ flex: 1, marginLeft: mi > 0 ? 10 : 0 }}>
+              <ModelCard m={m} a={a} />
+            </View>
           ))}
           {pair.length === 1 ? <View style={{ flex: 1 }} /> : null}
         </View>

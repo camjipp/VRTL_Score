@@ -10,7 +10,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     marginBottom: space.section,
-    gap: 20,
   },
   scoreBlock: {
     minWidth: 120,
@@ -57,7 +56,6 @@ const styles = StyleSheet.create({
   },
   kpiRow: {
     flexDirection: "row",
-    gap: 10,
     marginBottom: space.section,
   },
   kpiCard: {
@@ -129,8 +127,10 @@ const styles = StyleSheet.create({
   rankName: { width: 110, fontSize: 10, color: colors.textSecondary },
   rankNameClient: { width: 110, fontSize: 10, color: colors.text, fontWeight: 600 },
   barWrap: { flex: 1, height: 6, backgroundColor: colors.barTrack, borderRadius: 3, marginHorizontal: 8 },
+  barInnerRow: { flex: 1, flexDirection: "row", height: 6 },
   barFill: { height: 6, backgroundColor: colors.barFill, borderRadius: 3 },
   barFillClient: { height: 6, backgroundColor: colors.accent, borderRadius: 3, opacity: 0.9 },
+  barRest: { height: 6 },
   rankCount: { width: 52, fontSize: 9, color: colors.textSecondary, textAlign: "right" },
   pill: {
     width: 40,
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.04)",
   },
   pillText: { fontSize: 7, fontWeight: 600, color: colors.textSecondary },
-  alertRow: { flexDirection: "row", gap: 10, marginTop: 4 },
+  alertRow: { flexDirection: "row", marginTop: 4 },
   alertCard: {
     flex: 1,
     backgroundColor: colors.card,
@@ -188,7 +188,7 @@ export function Page1Overview({ data }: { data: ReportData }) {
             <Text style={styles.statusText}>{data.status}</Text>
           </View>
         </View>
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, marginLeft: 20 }}>
           <Text style={styles.rankText}>
             Rank <Text style={styles.rankStrong}>#{data.rank}</Text> of {data.rankTotal} tracked
           </Text>
@@ -201,11 +201,11 @@ export function Page1Overview({ data }: { data: ReportData }) {
           <Text style={styles.kpiValue}>{data.mentionRate}%</Text>
           <Text style={styles.kpiLabel}>Mention rate</Text>
         </View>
-        <View style={styles.kpiCard}>
+        <View style={[styles.kpiCard, { marginLeft: 10 }]}>
           <Text style={styles.kpiValue}>{data.topPosition}%</Text>
           <Text style={styles.kpiLabel}>Top position</Text>
         </View>
-        <View style={styles.kpiCard}>
+        <View style={[styles.kpiCard, { marginLeft: 10 }]}>
           <Text style={styles.kpiValue}>{data.authorityScore}%</Text>
           <Text style={styles.kpiLabel}>Authority</Text>
         </View>
@@ -222,7 +222,8 @@ export function Page1Overview({ data }: { data: ReportData }) {
 
       <Text style={styles.rankHeader}>Competitive ranking</Text>
       {data.competitors.map((c) => {
-        const widthPct = Math.round((c.mentions / maxM) * 100);
+        const widthPct = Math.min(100, Math.max(0, Math.round((c.mentions / maxM) * 100)));
+        const barRest = Math.max(0, 100 - widthPct);
         const delta = c.isClient ? "" : c.mentions - clientM;
         const deltaStr = delta === "" ? "" : delta > 0 ? `+${delta}` : String(delta);
         return (
@@ -230,7 +231,15 @@ export function Page1Overview({ data }: { data: ReportData }) {
             <Text style={styles.rankIdx}>#{c.rank}</Text>
             <Text style={c.isClient ? styles.rankNameClient : styles.rankName}>{c.name}</Text>
             <View style={styles.barWrap}>
-              <View style={[c.isClient ? styles.barFillClient : styles.barFill, { width: `${widthPct}%` }]} />
+              <View style={styles.barInnerRow}>
+                <View
+                  style={[
+                    { flex: widthPct <= 0 ? 0 : widthPct },
+                    c.isClient ? styles.barFillClient : styles.barFill,
+                  ]}
+                />
+                <View style={[{ flex: barRest }, styles.barRest]} />
+              </View>
             </View>
             <Text style={styles.rankCount}>
               {c.mentions}/{data.meta.responses}
@@ -253,12 +262,12 @@ export function Page1Overview({ data }: { data: ReportData }) {
           <Text style={styles.alertTitle}>{data.alerts.win.title}</Text>
           <Text style={styles.alertDetail}>{data.alerts.win.detail}</Text>
         </View>
-        <View style={[styles.alertCard, styles.alertRisk]}>
+        <View style={[styles.alertCard, styles.alertRisk, { marginLeft: 10 }]}>
           <Text style={styles.alertLabel}>Risk</Text>
           <Text style={styles.alertTitle}>{data.alerts.risk.title}</Text>
           <Text style={styles.alertDetail}>{data.alerts.risk.detail}</Text>
         </View>
-        <View style={[styles.alertCard, styles.alertPri]}>
+        <View style={[styles.alertCard, styles.alertPri, { marginLeft: 10 }]}>
           <Text style={styles.alertLabel}>Priority</Text>
           <Text style={styles.alertTitle}>{data.alerts.priority.title}</Text>
           <Text style={styles.alertDetail}>{data.alerts.priority.detail}</Text>

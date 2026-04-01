@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   methodBody: { fontSize: 10, lineHeight: 1.55, color: colors.textSecondary },
-  metaRow: { flexDirection: "row", marginTop: 14, gap: 24 },
+  metaRow: { flexDirection: "row", marginTop: 14 },
   metaItem: { flex: 1 },
   metaLabel: {
     fontSize: 7,
@@ -109,11 +109,11 @@ export function Page6Evidence({ data }: { data: ReportData }) {
             <Text style={styles.metaLabel}>Responses analyzed</Text>
             <Text style={styles.metaValue}>{data.meta.responses}</Text>
           </View>
-          <View style={styles.metaItem}>
+          <View style={[styles.metaItem, { marginLeft: 24 }]}>
             <Text style={styles.metaLabel}>Confidence</Text>
             <Text style={styles.metaValue}>{data.meta.confidence}</Text>
           </View>
-          <View style={styles.metaItem}>
+          <View style={[styles.metaItem, { marginLeft: 24 }]}>
             <Text style={styles.metaLabel}>Generated</Text>
             <Text style={styles.metaValue}>{data.meta.generated}</Text>
           </View>

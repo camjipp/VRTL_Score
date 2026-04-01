@@ -15,13 +15,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   intro: { fontSize: 10.5, lineHeight: 1.55, color: colors.textSecondary, marginBottom: space.section },
-  grid: { gap: 12 },
   cell: {
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 6,
     padding: space.cardPad,
+    marginBottom: 12,
   },
   phase: {
     fontSize: 9,
@@ -47,7 +47,7 @@ export function Page4ExecutionPlan({ data }: { data: ReportData }) {
       </Text>
 
       <PdfTraceMarker page={4} section="Page4:before_phases" />
-      <View style={styles.grid}>
+      <View>
         {data.executionPhases.map((ph, i) => (
           <View key={i} style={styles.cell} wrap={false}>
             <Text style={styles.phase}>{ph.phase}</Text>
