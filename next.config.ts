@@ -2,8 +2,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  /** Use node_modules on the server so Yoga/layout WASM is not broken by the bundler (Vercel). */
-  serverExternalPackages: [
+  /**
+   * Bundle @react-pdf into the server chunk with the same `react` the route uses.
+   * serverExternalPackages + JSX from the app caused two React copies → reconciler
+   * error #31 (“object with keys $$typeof, type, key, ref, props”).
+   */
+  transpilePackages: [
     "@react-pdf/renderer",
     "@react-pdf/font",
     "@react-pdf/layout",
@@ -17,6 +21,3 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-
-
-
