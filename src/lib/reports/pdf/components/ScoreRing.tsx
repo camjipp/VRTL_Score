@@ -7,9 +7,9 @@ import { colors, fonts } from "../theme";
  * Endpoints at bottom-left / bottom-right; major arc runs over the top (270°).
  * Progress draws along the path from left → right.
  *
- * Geometry: circle center is (CX, CY) = (W/2, H/2). The score block is centered
- * in the H×W arc viewport so its center matches the arc center; OVERALL SCORE sits
- * below that viewport so it does not shift the number vertically.
+ * The primary score digit(s) are anchored at the arc’s optical center (geometry
+ * center + small nudge). “/100” is a separate annotation and does not participate
+ * in that centering. OVERALL SCORE sits just below the arc viewport.
  */
 const W = 172;
 const H = 124;
@@ -17,6 +17,21 @@ const CX = W / 2;
 const CY = 62;
 const R = 54;
 const STROKE = 13;
+
+/** Nudge from math center (CX, CY) for optical balance inside the horseshoe (pt). */
+const OPTICAL_X = 3;
+const OPTICAL_Y = -3;
+
+/** Pull the score glyph so its visual center lands on the anchor (approx. for 42pt 2-digit). */
+const SCORE_PULL_X_TWO = -21;
+const SCORE_PULL_X_ONE = -12;
+const SCORE_PULL_X_THREE = -31;
+const SCORE_PULL_Y = -22;
+const SCORE_PULL_X_DASH = -13;
+
+/** “/100” offset from the same anchor — lower-right of the primary figure (pt). */
+const SUFFIX_X = 10;
+const SUFFIX_Y = 16;
 
 const DEG = Math.PI / 180;
 /** Standard math angle (CCW from +x); y increases downward (SVG). */
@@ -41,9 +56,21 @@ export function ScoreRing({ score }: Props) {
   const filled = pct * ARC_LEN;
   const rest = Math.max(0.001, ARC_LEN - filled);
 
+  const display = score == null ? "—" : String(score);
+  const pullX =
+    display === "—"
+      ? SCORE_PULL_X_DASH
+      : display.length >= 3
+        ? SCORE_PULL_X_THREE
+        : display.length <= 1
+          ? SCORE_PULL_X_ONE
+          : SCORE_PULL_X_TWO;
+
+  const ax = CX + OPTICAL_X;
+  const ay = CY + OPTICAL_Y;
+
   return (
     <View style={{ width: W, alignItems: "center" }}>
-      {/* Fixed arc viewport: Svg + score share the same H; center = arc center (W/2, H/2). */}
       <View style={{ width: W, height: H, position: "relative" }}>
         <View style={{ position: "absolute", top: 0, left: 0, width: W, height: H }}>
           <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
@@ -59,42 +86,46 @@ export function ScoreRing({ score }: Props) {
           </Svg>
         </View>
 
-        <View
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: W,
-            height: H,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <View style={{ alignItems: "center" }}>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Text
-                style={{
-                  fontSize: 42,
-                  fontWeight: 400,
-                  color: colors.ink,
-                  fontFamily: fonts.sansBold,
-                  lineHeight: 1,
-                }}
-              >
-                {score == null ? "—" : String(score)}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 9,
-                  color: colors.ink3,
-                  marginLeft: 3,
-                  fontFamily: fonts.sans,
-                  lineHeight: 1,
-                }}
-              >
-                /{"\u00A0"}100
-              </Text>
-            </View>
+        <View style={{ position: "absolute", top: 0, left: 0, width: W, height: H }}>
+          <View
+            style={{
+              position: "absolute",
+              left: ax,
+              top: ay,
+              marginLeft: pullX,
+              marginTop: SCORE_PULL_Y,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 42,
+                fontWeight: 400,
+                color: colors.ink,
+                fontFamily: fonts.sansBold,
+                lineHeight: 1,
+              }}
+            >
+              {display}
+            </Text>
+          </View>
+
+          <View
+            style={{
+              position: "absolute",
+              left: ax + SUFFIX_X,
+              top: ay + SUFFIX_Y,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 7,
+                color: colors.ink4,
+                fontFamily: fonts.sans,
+                lineHeight: 1,
+              }}
+            >
+              /100
+            </Text>
           </View>
         </View>
       </View>
@@ -104,7 +135,7 @@ export function ScoreRing({ score }: Props) {
           fontSize: 6,
           fontWeight: 400,
           color: colors.ink3,
-          marginTop: 4,
+          marginTop: 2,
           letterSpacing: 0.06,
           fontFamily: fonts.sansBold,
           textTransform: "uppercase",
