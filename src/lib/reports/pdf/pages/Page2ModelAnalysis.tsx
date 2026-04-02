@@ -79,12 +79,12 @@ const styles = StyleSheet.create({
     width: CONTENT_W,
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: rhythm.sm,
+    marginBottom: rhythm.xs,
   },
   evidenceRow: {
     width: CONTENT_W,
     flexDirection: "row",
-    marginBottom: rhythm.xs,
+    marginBottom: rhythm.sm,
     alignItems: "stretch",
   },
   evidenceOuter: {
@@ -94,56 +94,65 @@ const styles = StyleSheet.create({
     borderColor: colors.rule,
     overflow: "hidden",
     width: EVIDENCE_COL_W,
+    minHeight: 128,
   },
   evidenceAccent: { width: 3 },
   evidenceInner: {
     flex: 1,
-    paddingVertical: 6,
-    paddingHorizontal: rhythm.sm,
+    paddingVertical: 9,
+    paddingHorizontal: 10,
     backgroundColor: colors.paper,
+    justifyContent: "flex-start",
   },
   evLabel: {
     fontSize: 6.5,
     fontWeight: 400,
     letterSpacing: 0.12,
-    marginBottom: 4,
+    marginBottom: 5,
     textTransform: "uppercase",
     fontFamily: fonts.sansBold,
     color: colors.ink3,
   },
-  evMono: {
-    fontFamily: fonts.mono,
-    fontSize: 6.5,
-    lineHeight: 1.4,
-    color: colors.ink2,
+  evMonoWrap: {
+    minHeight: 74,
     backgroundColor: colors.surface,
-    paddingVertical: 5,
-    paddingHorizontal: 5,
     borderRadius: 3,
     borderWidth: 1,
     borderColor: colors.rule,
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+    justifyContent: "flex-start",
+  },
+  evMono: {
+    fontFamily: fonts.mono,
+    fontSize: 6.5,
+    lineHeight: 1.42,
+    color: colors.ink2,
   },
   evNote: {
-    fontSize: 7.5,
+    fontSize: 8,
     color: colors.ink,
-    marginTop: 5,
-    lineHeight: 1.45,
+    marginTop: 10,
+    lineHeight: 1.5,
     fontFamily: fonts.sans,
   },
   takeawayOuter: {
     flexDirection: "row",
     borderRadius: 4,
     overflow: "hidden",
-    marginTop: rhythm.xs,
+    marginTop: rhythm.sm,
     borderWidth: 1,
     borderColor: colors.rule,
+    minHeight: 108,
   },
   takeawayBar: { width: 3, backgroundColor: colors.ink },
   takeawayInner: {
     flex: 1,
-    paddingVertical: rhythm.sm,
+    paddingVertical: rhythm.lg,
     paddingHorizontal: rhythm.md,
     backgroundColor: colors.surface2,
+    justifyContent: "center",
+    minHeight: 104,
   },
   takeawayTitle: {
     fontSize: 7,
@@ -151,7 +160,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.1,
     color: colors.ink3,
     textTransform: "uppercase",
-    marginBottom: 4,
+    marginBottom: 6,
     fontFamily: fonts.sansBold,
   },
   takeawayBody: { fontSize: 9, lineHeight: 1.58, color: colors.ink, fontFamily: fonts.sans },
@@ -241,7 +250,9 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
                 <View style={[styles.evidenceAccent, { backgroundColor: colors.ink3 }]} />
                 <View style={styles.evidenceInner}>
                   <Text style={styles.evLabel}>{labelLine}</Text>
-                  <Text style={styles.evMono}>{snippetLine}</Text>
+                  <View style={styles.evMonoWrap}>
+                    <Text style={styles.evMono}>{snippetLine}</Text>
+                  </View>
                   {ev.note ? <Text style={styles.evNote}>{noteLine}</Text> : null}
                 </View>
               </View>
