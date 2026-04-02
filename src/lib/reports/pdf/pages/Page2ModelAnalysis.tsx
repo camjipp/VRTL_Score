@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   bannerLeft: { flex: 1, paddingRight: 8 },
-  bannerSpread: { fontSize: 18, fontWeight: 800, color: colors.ink, fontFamily: fonts.sans },
+  bannerSpread: { fontSize: 18, fontWeight: 400, color: colors.ink, fontFamily: fonts.sansBold },
   bannerSub: {
     fontSize: 9,
     color: colors.ink2,
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 4,
   },
-  bannerPillText: { fontSize: 7, fontWeight: 700, color: colors.paper, fontFamily: fonts.sans },
+  bannerPillText: { fontSize: 7, fontWeight: 400, color: colors.paper, fontFamily: fonts.sansBold },
   row3: {
     width: CONTENT_W,
     flexDirection: "row",
@@ -72,11 +72,11 @@ const styles = StyleSheet.create({
   evidenceInner: { flex: 1, padding: 14, backgroundColor: colors.paper },
   evLabel: {
     fontSize: 8,
-    fontWeight: 700,
+    fontWeight: 400,
     letterSpacing: 0.65,
     marginBottom: 8,
     textTransform: "uppercase",
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
   },
   evMono: {
     fontFamily: fonts.mono,
@@ -106,19 +106,18 @@ const styles = StyleSheet.create({
   takeawayInner: { flex: 1, padding: 14, backgroundColor: colors.violetLight },
   takeawayTitle: {
     fontSize: 8,
-    fontWeight: 600,
+    fontWeight: 400,
     letterSpacing: 0.65,
     color: colors.violet,
     textTransform: "uppercase",
     marginBottom: 8,
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
   },
   takeawayBody: { fontSize: 10, lineHeight: 1.55, color: colors.ink2, fontFamily: fonts.sans },
   sectionTitle: {
     ...baseStyles.sectionLabel,
     marginTop: 6,
     marginBottom: 10,
-    fontFamily: fonts.sans,
   },
 });
 

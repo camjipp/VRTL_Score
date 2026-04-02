@@ -10,10 +10,10 @@ const PHASE_COL = ["#0EA5E9", "#F59E0B", "#7C3AED", "#10B981"] as const;
 const styles = StyleSheet.create({
   title: {
     fontSize: 16,
-    fontWeight: 800,
+    fontWeight: 400,
     color: colors.ink,
     marginBottom: 6,
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
   },
   intro: {
     fontSize: 9,
@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
   },
   timeline: { flexDirection: "row", alignItems: "flex-start", marginBottom: 8, width: 540 },
   nodeCol: { width: 129, alignItems: "center", marginRight: 8 },
-  weekLab: { fontSize: 7, fontWeight: 700, color: colors.ink4, marginBottom: 4, fontFamily: fonts.sans },
+  weekLab: { fontSize: 7, fontWeight: 400, color: colors.ink4, marginBottom: 4, fontFamily: fonts.sansBold },
   circle: {
     width: 14,
     height: 14,
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     width: 129,
     overflow: "hidden",
   },
-  phaseTitle: { fontSize: 8, fontWeight: 700, color: colors.ink, marginBottom: 6, fontFamily: fonts.sans },
+  phaseTitle: { fontSize: 8, fontWeight: 400, color: colors.ink, marginBottom: 6, fontFamily: fonts.sansBold },
   copy: { fontSize: 8.5, lineHeight: 1.5, color: colors.ink2, fontFamily: fonts.sans },
 });
 

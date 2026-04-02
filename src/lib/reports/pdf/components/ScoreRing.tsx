@@ -44,9 +44,9 @@ export function ScoreRing({ score }: Props) {
         <Text
           style={{
             fontSize: 26,
-            fontWeight: 800,
+            fontWeight: 400,
             color: colors.ink,
-            fontFamily: fonts.sans,
+            fontFamily: fonts.sansBold,
           }}
         >
           {score == null ? "—" : String(score)}
@@ -55,11 +55,11 @@ export function ScoreRing({ score }: Props) {
         <Text
           style={{
             fontSize: 7,
-            fontWeight: 600,
+            fontWeight: 400,
             color: colors.ink4,
             marginTop: 6,
             letterSpacing: 0.65,
-            fontFamily: fonts.sans,
+            fontFamily: fonts.sansBold,
           }}
         >
           OVERALL SCORE

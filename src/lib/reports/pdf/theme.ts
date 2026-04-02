@@ -34,9 +34,11 @@ export const space = {
   cardPad: 14,
 } as const;
 
+/** Built-in PDF fonts only — no registration, works in serverless (e.g. /var/task). */
 export const fonts = {
-  sans: "Inter",
-  mono: "DMMono",
+  sans: "Helvetica",
+  sansBold: "Helvetica-Bold",
+  mono: "Courier",
 } as const;
 
 export const baseStyles = StyleSheet.create({
@@ -66,30 +68,30 @@ export const baseStyles = StyleSheet.create({
   },
   brandKicker: {
     fontSize: 9,
-    fontWeight: 800,
+    fontWeight: 400,
     color: colors.cyan,
     letterSpacing: 1,
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
   },
   reportTitleMain: {
     fontSize: 8,
-    fontWeight: 600,
+    fontWeight: 400,
     color: colors.ink4,
     letterSpacing: 2,
     marginTop: 3,
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
   },
   reportTitle: {
     fontSize: 11,
-    fontWeight: 700,
+    fontWeight: 400,
     color: colors.ink,
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
   },
   reportTitleCover: {
     fontSize: 12,
-    fontWeight: 700,
+    fontWeight: 400,
     color: colors.ink,
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
   },
   headerMeta: {
     alignItems: "flex-end",
@@ -97,10 +99,10 @@ export const baseStyles = StyleSheet.create({
   },
   clientName: {
     fontSize: 20,
-    fontWeight: 700,
+    fontWeight: 400,
     color: colors.ink,
     textAlign: "right",
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
   },
   metaLine: {
     fontSize: 9,
@@ -112,19 +114,19 @@ export const baseStyles = StyleSheet.create({
   },
   sectionLabel: {
     fontSize: 8,
-    fontWeight: 600,
+    fontWeight: 400,
     letterSpacing: 0.65,
     textTransform: "uppercase",
     color: colors.ink4,
     marginBottom: space.block,
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
   },
   sectionSlug: {
     fontSize: 10,
-    fontWeight: 600,
+    fontWeight: 400,
     color: colors.ink4,
     marginTop: 4,
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
   },
   body: {
     fontSize: 9,

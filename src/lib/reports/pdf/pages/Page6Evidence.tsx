@@ -19,12 +19,12 @@ const W = {
 const styles = StyleSheet.create({
   h: {
     fontSize: 8,
-    fontWeight: 600,
+    fontWeight: 400,
     letterSpacing: 0.65,
     textTransform: "uppercase",
     color: colors.ink4,
     marginBottom: 8,
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
   },
   th: {
     flexDirection: "row",
@@ -37,10 +37,10 @@ const styles = StyleSheet.create({
   },
   thText: {
     fontSize: 6.5,
-    fontWeight: 700,
+    fontWeight: 400,
     color: colors.ink4,
     textTransform: "uppercase",
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
   },
   tr: {
     flexDirection: "row",
@@ -64,10 +64,10 @@ const styles = StyleSheet.create({
   },
   methodTitle: {
     fontSize: 9,
-    fontWeight: 800,
+    fontWeight: 400,
     color: colors.ink,
     marginBottom: 8,
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
   },
   methodBody: { fontSize: 9, lineHeight: 1.5, color: colors.ink2, fontFamily: fonts.sans },
   chipRow: { flexDirection: "row", marginTop: 14, justifyContent: "space-between", width: 540 },
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     overflow: "hidden",
   },
-  chipNum: { fontSize: 18, fontWeight: 800, color: colors.ink, fontFamily: fonts.sans },
+  chipNum: { fontSize: 18, fontWeight: 400, color: colors.ink, fontFamily: fonts.sansBold },
   chipLab: { fontSize: 7, color: colors.ink4, marginTop: 4, textTransform: "uppercase", fontFamily: fonts.sans },
   ynY: { backgroundColor: colors.greenLight, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 3 },
   ynN: { backgroundColor: colors.redLight, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 3 },
@@ -121,15 +121,17 @@ export function Page6Evidence({ data }: { data: ReportData }) {
                 wrap={false}
               >
                 <Text style={[styles.td, { width: W.idx }]}>{String(row.idx)}</Text>
-                <Text style={[styles.td, { width: W.label, fontWeight: 700 }]}>{row.label}</Text>
+                <Text style={[styles.td, { width: W.label, fontWeight: 400, fontFamily: fonts.sansBold }]}>
+                  {row.label}
+                </Text>
                 <View style={{ width: W.yn }}>
                   <View style={yn ? styles.ynY : styles.ynN}>
                     <Text
                       style={{
                         fontSize: 6.5,
-                        fontWeight: 800,
+                        fontWeight: 400,
                         color: yn ? colors.green : colors.red,
-                        fontFamily: fonts.sans,
+                        fontFamily: fonts.sansBold,
                       }}
                     >
                       {yn ? "YES" : "NO"}
@@ -137,7 +139,7 @@ export function Page6Evidence({ data }: { data: ReportData }) {
                   </View>
                 </View>
                 <Text style={[styles.td, { width: W.pos }]}>{row.position}</Text>
-                <Text style={[styles.td, { width: W.str, color: strC, fontWeight: 700 }]}>
+                <Text style={[styles.td, { width: W.str, color: strC, fontWeight: 400, fontFamily: fonts.sansBold }]}>
                   {row.strength}
                 </Text>
                 <Text style={[styles.td, { width: W.comp }]}>{row.competitors}</Text>

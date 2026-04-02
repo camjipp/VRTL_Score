@@ -30,15 +30,15 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
     borderBottomWidth: 2,
   },
-  kpiVal: { fontSize: 22, fontWeight: 700, fontFamily: fonts.sans },
+  kpiVal: { fontSize: 22, fontWeight: 400, fontFamily: fonts.sansBold },
   kpiLab: {
     fontSize: 7,
-    fontWeight: 600,
+    fontWeight: 400,
     color: colors.ink4,
     marginTop: 6,
     letterSpacing: 0.65,
     textTransform: "uppercase",
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
   },
   pillRow: { flexDirection: "row", flexWrap: "wrap", marginBottom: space.section },
   pillSp: { marginRight: 8, marginBottom: 6 },
@@ -60,18 +60,17 @@ const styles = StyleSheet.create({
   calloutBody: {
     fontSize: 9.5,
     lineHeight: 1.55,
-    color: colors.ink2,
-    fontStyle: "italic",
+    color: colors.ink3,
     fontFamily: fonts.sans,
   },
   rankHeader: {
     fontSize: 8,
-    fontWeight: 600,
+    fontWeight: 400,
     color: colors.ink4,
     letterSpacing: 0.65,
     textTransform: "uppercase",
     marginBottom: 8,
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
   },
   rankOuter: {
     width: 540,
@@ -88,9 +87,9 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingLeft: 6,
   },
-  rankIdx: { width: W.rank, fontSize: 9, color: colors.ink4, fontWeight: 600, fontFamily: fonts.sans },
+  rankIdx: { width: W.rank, fontSize: 9, color: colors.ink4, fontWeight: 400, fontFamily: fonts.sansBold },
   rankName: { width: W.name, fontSize: 9, color: colors.ink2, fontFamily: fonts.sans },
-  rankNameClient: { width: W.name, fontSize: 9, color: colors.ink, fontWeight: 700, fontFamily: fonts.sans },
+  rankNameClient: { width: W.name, fontSize: 9, color: colors.ink, fontWeight: 400, fontFamily: fonts.sansBold },
   barWrap: { width: W.bar, height: 6, backgroundColor: colors.surface2, borderRadius: 3, marginHorizontal: 6 },
   barInner: { flex: 1, flexDirection: "row", height: 6 },
   barFill: { height: 6, backgroundColor: colors.cyan, borderRadius: 3, opacity: 0.85 },
@@ -102,7 +101,7 @@ const styles = StyleSheet.create({
   deltaAhead: { backgroundColor: colors.redLight },
   deltaBehind: { backgroundColor: colors.greenLight },
   deltaTied: { backgroundColor: colors.surface2 },
-  deltaTxt: { fontSize: 7, fontWeight: 700, color: colors.ink2, fontFamily: fonts.sans },
+  deltaTxt: { fontSize: 7, fontWeight: 400, color: colors.ink2, fontFamily: fonts.sansBold },
   alertRow: { flexDirection: "row", marginTop: 6 },
   alertSp: { marginRight: 8 },
   alertCard: {
@@ -124,7 +123,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     marginBottom: 6,
   },
-  alertTitle: { fontSize: 10, fontWeight: 700, color: colors.ink, fontFamily: fonts.sans },
+  alertTitle: { fontSize: 10, fontWeight: 400, color: colors.ink, fontFamily: fonts.sansBold },
   alertDetail: { fontSize: 8, color: colors.ink2, marginTop: 4, lineHeight: 1.45, fontFamily: fonts.sans },
 });
 
@@ -166,13 +165,19 @@ export function Page1Overview({ data }: { data: ReportData }) {
 
         <View style={styles.pillRow}>
           <View style={[styles.pill, styles.pillSp, { backgroundColor: colors.orangeLight }]}>
-            <Text style={[styles.pillTextBase, { color: colors.orange, fontWeight: 600 }]}>{statusUpper}</Text>
+            <Text style={[styles.pillTextBase, { color: colors.orange, fontFamily: fonts.sansBold, fontWeight: 400 }]}>
+              {statusUpper}
+            </Text>
           </View>
           <View style={[styles.pill, styles.pillSp, { backgroundColor: colors.surface2 }]}>
-            <Text style={[styles.pillTextBase, { color: colors.ink2, fontWeight: 700 }]}>{rankLine}</Text>
+            <Text style={[styles.pillTextBase, { color: colors.ink2, fontFamily: fonts.sansBold, fontWeight: 400 }]}>
+              {rankLine}
+            </Text>
           </View>
           <View style={[styles.pill, styles.pillSp, { backgroundColor: colors.greenLight }]}>
-            <Text style={[styles.pillTextBase, { color: colors.green, fontWeight: 600 }]}>{leadingPill}</Text>
+            <Text style={[styles.pillTextBase, { color: colors.green, fontFamily: fonts.sansBold, fontWeight: 400 }]}>
+              {leadingPill}
+            </Text>
           </View>
         </View>
 
@@ -238,21 +243,21 @@ export function Page1Overview({ data }: { data: ReportData }) {
         <View style={styles.alertRow}>
           <View style={[styles.alertCard, styles.alertWin, styles.alertSp]}>
             <View style={[styles.alertPill, { backgroundColor: colors.greenLight }]}>
-              <Text style={{ fontSize: 7, fontWeight: 700, color: colors.green, fontFamily: fonts.sans }}>WIN</Text>
+              <Text style={{ fontSize: 7, fontWeight: 400, color: colors.green, fontFamily: fonts.sansBold }}>WIN</Text>
             </View>
             <Text style={styles.alertTitle}>{data.alerts.win.title}</Text>
             <Text style={styles.alertDetail}>{data.alerts.win.detail}</Text>
           </View>
           <View style={[styles.alertCard, styles.alertRisk, styles.alertSp]}>
             <View style={[styles.alertPill, { backgroundColor: colors.orangeLight }]}>
-              <Text style={{ fontSize: 7, fontWeight: 700, color: colors.orange, fontFamily: fonts.sans }}>RISK</Text>
+              <Text style={{ fontSize: 7, fontWeight: 400, color: colors.orange, fontFamily: fonts.sansBold }}>RISK</Text>
             </View>
             <Text style={styles.alertTitle}>{data.alerts.risk.title}</Text>
             <Text style={styles.alertDetail}>{data.alerts.risk.detail}</Text>
           </View>
           <View style={[styles.alertCard, styles.alertPri]}>
             <View style={[styles.alertPill, { backgroundColor: colors.redLight }]}>
-              <Text style={{ fontSize: 7, fontWeight: 700, color: colors.red, fontFamily: fonts.sans }}>PRIORITY</Text>
+              <Text style={{ fontSize: 7, fontWeight: 400, color: colors.red, fontFamily: fonts.sansBold }}>PRIORITY</Text>
             </View>
             <Text style={styles.alertTitle}>{data.alerts.priority.title}</Text>
             <Text style={styles.alertDetail}>{data.alerts.priority.detail}</Text>

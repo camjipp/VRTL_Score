@@ -35,18 +35,18 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 11,
-    fontWeight: 700,
+    fontWeight: 400,
     color: colors.ink,
     textTransform: "uppercase",
     marginBottom: 4,
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
   },
   score: {
     fontSize: 42,
-    fontWeight: 700,
+    fontWeight: 400,
     lineHeight: 1,
     marginBottom: 8,
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
   },
   deltaPill: {
     alignSelf: "flex-start",
@@ -59,9 +59,9 @@ const styles = StyleSheet.create({
   deltaPillNeg: { backgroundColor: colors.redLight },
   deltaPillText: {
     fontSize: 8,
-    fontWeight: 700,
+    fontWeight: 400,
     color: colors.ink2,
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
   },
   barTrack: {
     width: INNER_W,

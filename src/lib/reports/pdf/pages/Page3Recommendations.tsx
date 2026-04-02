@@ -14,12 +14,12 @@ const PRI_COL: Record<string, string> = {
 const styles = StyleSheet.create({
   pageTitle: {
     fontSize: 10,
-    fontWeight: 700,
+    fontWeight: 400,
     letterSpacing: 0.65,
     textTransform: "uppercase",
     color: colors.ink,
     marginBottom: 8,
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
   },
   intro: { fontSize: 9, lineHeight: 1.55, color: colors.ink2, marginBottom: 12, fontFamily: fonts.sans },
   card: {
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 12,
   },
-  stripeNum: { fontSize: 22, fontWeight: 800, color: colors.paper, fontFamily: fonts.sans },
+  stripeNum: { fontSize: 22, fontWeight: 400, color: colors.paper, fontFamily: fonts.sansBold },
   mid: { flex: 1, padding: 12, paddingRight: 8 },
   priPill: {
     alignSelf: "flex-start",
@@ -48,9 +48,9 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     marginBottom: 6,
   },
-  priPillTxt: { fontSize: 7, fontWeight: 800, color: colors.paper, fontFamily: fonts.sans },
-  title: { fontSize: 11, fontWeight: 700, color: colors.ink, marginBottom: 6, fontFamily: fonts.sans },
-  insight: { fontSize: 9, fontWeight: 700, marginBottom: 6, fontFamily: fonts.sans },
+  priPillTxt: { fontSize: 7, fontWeight: 400, color: colors.paper, fontFamily: fonts.sansBold },
+  title: { fontSize: 11, fontWeight: 400, color: colors.ink, marginBottom: 6, fontFamily: fonts.sansBold },
+  insight: { fontSize: 9, fontWeight: 400, marginBottom: 6, fontFamily: fonts.sansBold },
   body: { fontSize: 8.5, lineHeight: 1.5, color: colors.ink2, fontFamily: fonts.sans },
   sep: { width: 1, backgroundColor: colors.rule },
   right: {
@@ -61,13 +61,13 @@ const styles = StyleSheet.create({
   },
   outLabel: {
     fontSize: 7,
-    fontWeight: 600,
+    fontWeight: 400,
     color: colors.ink4,
     letterSpacing: 0.65,
     marginBottom: 4,
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
   },
-  outText: { fontSize: 8.5, fontWeight: 700, lineHeight: 1.45, fontFamily: fonts.sans },
+  outText: { fontSize: 8.5, fontWeight: 400, lineHeight: 1.45, fontFamily: fonts.sansBold },
 });
 
 export function Page3Recommendations({ data }: { data: ReportData }) {

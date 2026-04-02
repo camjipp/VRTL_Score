@@ -33,7 +33,9 @@ export function PdfHeader({ data, variant = "inner", sectionSlug, pageNum }: Pro
             </View>
           ) : null}
           {data.agencyName && !data.agencyLogoUrl ? (
-            <Text style={{ fontSize: 8, color: colors.ink4, marginTop: 6, fontFamily: fonts.sans }}>{data.agencyName}</Text>
+            <Text style={{ fontSize: 8, color: colors.ink4, marginTop: 6, fontFamily: fonts.sans }}>
+              {data.agencyName}
+            </Text>
           ) : null}
         </View>
         <View style={baseStyles.headerMeta}>

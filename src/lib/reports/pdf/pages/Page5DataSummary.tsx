@@ -27,13 +27,13 @@ const C = {
 const styles = StyleSheet.create({
   h: {
     fontSize: 8,
-    fontWeight: 600,
+    fontWeight: 400,
     letterSpacing: 0.65,
     textTransform: "uppercase",
     color: colors.ink4,
     marginBottom: 8,
     marginTop: 4,
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
   },
   hFirst: { marginTop: 0 },
   th: {
@@ -46,11 +46,11 @@ const styles = StyleSheet.create({
   },
   thText: {
     fontSize: 7,
-    fontWeight: 700,
+    fontWeight: 400,
     color: colors.ink4,
     textTransform: "uppercase",
     letterSpacing: 0.5,
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
   },
   tr: {
     flexDirection: "row",
@@ -64,9 +64,9 @@ const styles = StyleSheet.create({
   trAlt: { backgroundColor: colors.surface },
   trYou: { backgroundColor: colors.cyanLight },
   td: { fontSize: 8.5, color: colors.ink2, fontFamily: fonts.sans },
-  tdStrong: { fontSize: 8.5, color: colors.ink, fontWeight: 700, fontFamily: fonts.sans },
+  tdStrong: { fontSize: 8.5, color: colors.ink, fontWeight: 400, fontFamily: fonts.sansBold },
   pill: { paddingVertical: 2, paddingHorizontal: 6, borderRadius: 4 },
-  pillT: { fontSize: 6.5, fontWeight: 700, fontFamily: fonts.sans },
+  pillT: { fontSize: 6.5, fontWeight: 400, fontFamily: fonts.sansBold },
   barWrap: { height: 5, backgroundColor: colors.surface2, borderRadius: 2, width: C.bar - 8 },
   barIn: { flex: 1, flexDirection: "row", height: 5 },
   barF: { height: 5, backgroundColor: colors.cyan, borderRadius: 2 },
