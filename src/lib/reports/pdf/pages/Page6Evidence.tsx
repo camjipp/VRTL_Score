@@ -1,127 +1,159 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { colors, space, baseStyles } from "../theme";
+import { PAGE, colors, space, baseStyles } from "../theme";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
+/** 30+86+42+48+78+44+212 = 540 */
+const W = {
+  idx: 30,
+  label: 86,
+  yn: 42,
+  pos: 48,
+  str: 78,
+  comp: 44,
+  rest: 212,
+} as const;
+
 const styles = StyleSheet.create({
   h: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: 600,
-    letterSpacing: 0.35,
+    letterSpacing: 0.65,
     textTransform: "uppercase",
-    color: colors.textSecondary,
-    marginBottom: 10,
+    color: colors.muted,
+    marginBottom: 8,
   },
   th: {
     flexDirection: "row",
+    backgroundColor: "#F3F4F6",
+    paddingVertical: 6,
+    paddingHorizontal: 4,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
-    paddingBottom: 8,
-    marginBottom: 2,
+    width: 540,
   },
   thText: {
     fontSize: 6.5,
-    fontWeight: 600,
-    color: colors.textSecondary,
+    fontWeight: 700,
+    color: colors.muted,
     textTransform: "uppercase",
-    letterSpacing: 0.35,
   },
   tr: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 4,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: colors.divider,
+    width: 540,
   },
-  td: { fontSize: 8, color: colors.textSecondary },
-  c1: { width: "6%" },
-  c2: { width: "18%" },
-  c3: { width: "12%" },
-  c4: { width: "14%" },
-  c5: { width: "14%" },
-  c6: { width: "16%" },
+  td: { fontSize: 7.5, color: colors.body },
   method: {
     marginTop: space.section,
+    backgroundColor: "#F9FAFB",
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    padding: 14,
+  },
+  methodTitle: {
+    fontSize: 9,
+    fontWeight: 800,
+    color: colors.text,
+    marginBottom: 8,
+    fontFamily: "Helvetica-Bold",
+  },
+  methodBody: { fontSize: 9, lineHeight: 1.5, color: colors.body },
+  chipRow: { flexDirection: "row", marginTop: 14, justifyContent: "space-between", width: 540 },
+  chip: {
+    width: 168,
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 6,
-    padding: space.cardPad,
+    padding: 10,
+    alignItems: "center",
   },
-  methodTitle: {
-    fontSize: 8,
-    fontWeight: 600,
-    letterSpacing: 0.35,
-    color: colors.textSecondary,
-    textTransform: "uppercase",
-    marginBottom: 8,
-  },
-  methodBody: { fontSize: 10, lineHeight: 1.55, color: colors.textSecondary },
-  metaRow: { flexDirection: "row", marginTop: 14 },
-  metaItem: { flex: 1 },
-  metaLabel: {
-    fontSize: 7,
-    color: colors.textSecondary,
-    textTransform: "uppercase",
-    letterSpacing: 0.35,
-    marginBottom: 4,
-  },
-  metaValue: { fontSize: 10, color: colors.text, fontWeight: 500 },
+  chipNum: { fontSize: 18, fontWeight: 800, color: colors.text, fontFamily: "Helvetica-Bold" },
+  chipLab: { fontSize: 7, color: colors.muted, marginTop: 4, textTransform: "uppercase" },
+  ynY: { backgroundColor: "#D1FAE5", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 3 },
+  ynN: { backgroundColor: "#FEE2E2", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 3 },
 });
 
 export function Page6Evidence({ data }: { data: ReportData }) {
   return (
-    <Page size="A4" style={baseStyles.page}>
-      <PdfTraceMarker page={6} section="Page6:start" />
-      <PdfHeader data={data} variant="inner" sectionSlug="Evidence & methodology" pageNum={6} />
-      <PdfTraceMarker page={6} section="Page6:after_header" />
+    <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
+      <View style={baseStyles.pageBody}>
+        <PdfTraceMarker page={6} section="Page6:start" />
+        <PdfHeader data={data} variant="inner" sectionSlug="Evidence & methodology" pageNum={6} />
+        <PdfTraceMarker page={6} section="Page6:after_header" />
 
-      <Text style={styles.h}>Evidence log</Text>
-      <View style={{ marginBottom: space.section }}>
-        <View style={styles.th}>
-          <Text style={[styles.thText, styles.c1]}>#</Text>
-          <Text style={[styles.thText, styles.c2]}>Label</Text>
-          <Text style={[styles.thText, styles.c3]}>Mentioned</Text>
-          <Text style={[styles.thText, styles.c4]}>Position</Text>
-          <Text style={[styles.thText, styles.c5]}>Strength</Text>
-          <Text style={[styles.thText, styles.c6]}>Competitors</Text>
+        <Text style={styles.h}>Evidence log</Text>
+        <View style={{ marginBottom: 12 }}>
+          <View style={styles.th}>
+            <Text style={[styles.thText, { width: W.idx }]}>#</Text>
+            <Text style={[styles.thText, { width: W.label }]}>Signal</Text>
+            <Text style={[styles.thText, { width: W.yn }]}>Incl.</Text>
+            <Text style={[styles.thText, { width: W.pos }]}>Pos</Text>
+            <Text style={[styles.thText, { width: W.str }]}>Strength</Text>
+            <Text style={[styles.thText, { width: W.comp }]}>#Comp</Text>
+            <Text style={[styles.thText, { width: W.rest }]}>Notes</Text>
+          </View>
+          {data.evidenceLog.map((row) => {
+            const yn = row.mentioned === "Yes";
+            const strC =
+              row.strength === "strong"
+                ? colors.green
+                : row.strength === "medium"
+                  ? colors.orange
+                  : colors.muted;
+            return (
+              <View key={`evl-${row.idx}`} style={styles.tr} wrap={false}>
+                <Text style={[styles.td, { width: W.idx }]}>{String(row.idx)}</Text>
+                <Text style={[styles.td, { width: W.label, fontWeight: 700 }]}>{row.label}</Text>
+                <View style={{ width: W.yn }}>
+                  <View style={yn ? styles.ynY : styles.ynN}>
+                    <Text style={{ fontSize: 6.5, fontWeight: 800, color: yn ? "#065F46" : "#991B1B" }}>
+                      {yn ? "YES" : "NO"}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={[styles.td, { width: W.pos }]}>{row.position}</Text>
+                <Text style={[styles.td, { width: W.str, color: strC, fontWeight: 700 }]}>
+                  {row.strength}
+                </Text>
+                <Text style={[styles.td, { width: W.comp }]}>{row.competitors}</Text>
+                <Text style={[styles.td, { width: W.rest, fontSize: 7 }]}>—</Text>
+              </View>
+            );
+          })}
         </View>
-        {data.evidenceLog.map((row) => (
-          <View key={row.idx} style={styles.tr} wrap={false}>
-            <Text style={[styles.td, styles.c1]}>{row.idx}</Text>
-            <Text style={[styles.td, styles.c2]}>{row.label}</Text>
-            <Text style={[styles.td, styles.c3]}>{row.mentioned}</Text>
-            <Text style={[styles.td, styles.c4]}>{row.position}</Text>
-            <Text style={[styles.td, styles.c5]}>{row.strength}</Text>
-            <Text style={[styles.td, styles.c6]}>{row.competitors}</Text>
-          </View>
-        ))}
-      </View>
-      <PdfTraceMarker page={6} section="Page6:after_evidence_table" />
 
-      <View style={styles.method}>
-        <Text style={styles.methodTitle}>Methodology</Text>
-        <Text style={styles.methodBody}>{data.methodology}</Text>
-        <View style={styles.metaRow}>
-          <View style={styles.metaItem}>
-            <Text style={styles.metaLabel}>Responses analyzed</Text>
-            <Text style={styles.metaValue}>{data.meta.responses}</Text>
+        <View style={styles.method}>
+          <Text style={styles.methodTitle}>METHODOLOGY</Text>
+          <Text style={styles.methodBody}>{data.methodology}</Text>
+        </View>
+
+        <View style={styles.chipRow}>
+          <View style={styles.chip}>
+            <Text style={styles.chipNum}>{String(data.meta.responses)}</Text>
+            <Text style={styles.chipLab}>Responses</Text>
           </View>
-          <View style={[styles.metaItem, { marginLeft: 24 }]}>
-            <Text style={styles.metaLabel}>Confidence</Text>
-            <Text style={styles.metaValue}>{data.meta.confidence}</Text>
+          <View style={styles.chip}>
+            <Text style={[styles.chipNum, { fontSize: 12 }]}>{data.meta.confidence}</Text>
+            <Text style={styles.chipLab}>Confidence</Text>
           </View>
-          <View style={[styles.metaItem, { marginLeft: 24 }]}>
-            <Text style={styles.metaLabel}>Generated</Text>
-            <Text style={styles.metaValue}>{data.meta.generated}</Text>
+          <View style={styles.chip}>
+            <Text style={[styles.chipNum, { fontSize: 11 }]}>{data.meta.generated}</Text>
+            <Text style={styles.chipLab}>Generated</Text>
           </View>
         </View>
-      </View>
-      <PdfTraceMarker page={6} section="Page6:before_footer" />
 
-      <PdfFooter data={data} />
+        <PdfTraceMarker page={6} section="Page6:before_footer" />
+        <PdfFooter data={data} />
+      </View>
     </Page>
   );
 }

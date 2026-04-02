@@ -7,7 +7,7 @@ import { stanleyData } from "@/lib/reports/pdf/stanleyData";
 
 export default function PreviewClient() {
   return (
-    <div className={clsx("min-h-screen w-full bg-[#0F1117]")}>
+    <div className={clsx("min-h-screen w-full bg-[#FAFAFA]")}>
       <PDFViewer width="100%" height="100vh" showToolbar>
         <ReportDocument data={stanleyData} />
       </PDFViewer>

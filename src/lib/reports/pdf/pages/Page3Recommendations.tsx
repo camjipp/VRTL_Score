@@ -1,122 +1,123 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { colors, space, baseStyles } from "../theme";
+import { PAGE, colors, baseStyles } from "../theme";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
-const priorityBorder = (p: string | undefined) => {
-  if (p === "HIGH") return colors.danger;
-  if (p === "MEDIUM") return colors.warning;
-  if (p === "LOW") return colors.success;
-  return colors.border;
+const PRI_COL: Record<string, string> = {
+  HIGH: colors.red,
+  MEDIUM: colors.violet,
+  LOW: colors.green,
 };
 
 const styles = StyleSheet.create({
   pageTitle: {
-    fontSize: 12,
-    fontWeight: 600,
-    letterSpacing: 0.35,
+    fontSize: 10,
+    fontWeight: 700,
+    letterSpacing: 0.65,
     textTransform: "uppercase",
     color: colors.text,
     marginBottom: 8,
   },
-  intro: {
-    fontSize: 10.5,
-    lineHeight: 1.62,
-    color: colors.textSecondary,
-    marginBottom: space.section + 6,
-  },
+  intro: { fontSize: 9, lineHeight: 1.55, color: colors.body, marginBottom: 12 },
   card: {
+    flexDirection: "row",
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 6,
-    padding: 18,
-    marginBottom: 16,
-    borderLeftWidth: 2,
-    borderLeftColor: colors.border,
+    borderRadius: 8,
+    marginBottom: 12,
+    padding: 0,
+    overflow: "hidden",
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+    minHeight: 96,
   },
-  pri: {
+  leftStripe: {
+    width: 36,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+  },
+  stripeNum: { fontSize: 22, fontWeight: 800, color: "#FFFFFF", fontFamily: "Helvetica-Bold" },
+  mid: { flex: 1, padding: 12, paddingRight: 8 },
+  priPill: {
+    alignSelf: "flex-start",
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+    marginBottom: 6,
+  },
+  priPillTxt: { fontSize: 7, fontWeight: 800, color: "#FFFFFF" },
+  title: { fontSize: 11, fontWeight: 700, color: colors.text, marginBottom: 6 },
+  insight: { fontSize: 9, fontWeight: 700, marginBottom: 6 },
+  body: { fontSize: 8.5, lineHeight: 1.5, color: colors.body },
+  right: {
+    width: 148,
+    backgroundColor: "#F9FAFB",
+    padding: 10,
+    justifyContent: "center",
+    borderLeftWidth: 1,
+    borderLeftColor: colors.divider,
+  },
+  outLabel: {
     fontSize: 7,
-    fontWeight: 700,
-    letterSpacing: 0.35,
-    marginBottom: 8,
-    color: colors.textSecondary,
-  },
-  cardTitle: {
-    fontSize: 11.5,
     fontWeight: 600,
-    color: colors.text,
-    lineHeight: 1.4,
-    marginBottom: 10,
+    color: colors.muted,
+    letterSpacing: 0.65,
+    marginBottom: 4,
   },
-  label: {
-    fontSize: 8,
-    fontWeight: 600,
-    color: colors.textSecondary,
-    textTransform: "uppercase",
-    letterSpacing: 0.35,
-    marginTop: 10,
-    marginBottom: 5,
-  },
-  body: { fontSize: 9.5, lineHeight: 1.58, color: colors.textSecondary },
-  outcomeRow: {
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-  outcomeLabel: {
-    fontSize: 8,
-    fontWeight: 600,
-    color: colors.textSecondary,
-    textTransform: "uppercase",
-    width: "30%",
-  },
-  outcomeText: {
-    fontSize: 9.5,
-    lineHeight: 1.5,
-    color: colors.textSecondary,
-    width: "68%",
-    textAlign: "right",
-  },
+  outText: { fontSize: 8.5, fontWeight: 700, lineHeight: 1.45 },
 });
 
 export function Page3Recommendations({ data }: { data: ReportData }) {
   return (
-    <Page size="A4" style={baseStyles.page}>
-      <PdfTraceMarker page={3} section="Page3:start" />
-      <PdfHeader data={data} variant="inner" sectionSlug="Recommendations" pageNum={3} />
-      <PdfTraceMarker page={3} section="Page3:after_header" />
+    <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
+      <View style={baseStyles.pageBody}>
+        <PdfTraceMarker page={3} section="Page3:start" />
+        <PdfHeader data={data} variant="inner" sectionSlug="Recommendations" pageNum={3} />
+        <PdfTraceMarker page={3} section="Page3:after_header" />
 
-      <Text style={styles.pageTitle}>Prioritized actions</Text>
-      <Text style={styles.intro}>
-        Ranked by urgency and leverage. Execute in order where resourcing allows.
-      </Text>
+        <Text style={styles.pageTitle}>Prioritized actions</Text>
+        <Text style={styles.intro}>
+          Ranked by urgency and leverage. Execute in order where resourcing allows.
+        </Text>
 
-      {data.recommendations.map((r, i) => (
-        <View key={i} style={[styles.card, { borderLeftColor: priorityBorder(r.priority) }]}>
-          <Text style={styles.pri}>{r.priority} PRIORITY</Text>
-          <Text style={styles.cardTitle}>{r.title}</Text>
-          <Text style={styles.label}>Insight</Text>
-          <Text style={styles.body}>{r.insight}</Text>
-          <Text style={styles.label}>Why it matters</Text>
-          <Text style={styles.body}>{r.explanation}</Text>
-          <Text style={styles.label}>Recommended action</Text>
-          <Text style={styles.body}>{r.action}</Text>
-          <View style={styles.outcomeRow}>
-            <Text style={styles.outcomeLabel}>Expected outcome</Text>
-            <Text style={styles.outcomeText}>{r.expectedOutcome}</Text>
-          </View>
-        </View>
-      ))}
-      <PdfTraceMarker page={3} section="Page3:after_recommendations" />
+        {data.recommendations.map((r, i) => {
+          const pc = PRI_COL[r.priority] ?? colors.muted;
+          const titleLine = String(r.title);
+          const insightLine = String(r.insight);
+          const expLine = String(r.expectedOutcome);
+          const actLine = String(r.action);
+          const explLine = String(r.explanation);
+          return (
+            <View key={`rec-${r.priority}-${i}`} style={styles.card} wrap={false}>
+              <View style={[styles.leftStripe, { backgroundColor: pc }]}>
+                <Text style={styles.stripeNum}>{String(i + 1)}</Text>
+              </View>
+              <View style={styles.mid}>
+                <View style={[styles.priPill, { backgroundColor: pc }]}>
+                  <Text style={styles.priPillTxt}>{`${r.priority} PRIORITY`}</Text>
+                </View>
+                <Text style={styles.title}>{titleLine}</Text>
+                <Text style={[styles.insight, { color: pc }]}>{insightLine}</Text>
+                <Text style={[styles.body, { marginTop: 4 }]}>{explLine}</Text>
+                <Text style={[styles.body, { marginTop: 6 }]}>{actLine}</Text>
+              </View>
+              <View style={styles.right}>
+                <Text style={styles.outLabel}>EXPECTED OUTCOME</Text>
+                <Text style={[styles.outText, { color: pc }]}>{expLine}</Text>
+              </View>
+            </View>
+          );
+        })}
 
-      <PdfFooter data={data} />
+        <PdfTraceMarker page={3} section="Page3:after_recommendations" />
+        <PdfFooter data={data} />
+      </View>
     </Page>
   );
 }

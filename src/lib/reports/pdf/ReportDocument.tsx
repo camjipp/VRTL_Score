@@ -28,7 +28,7 @@ export function ReportDocument({ data, pages }: ReportDocumentProps): ReactEleme
   const children = PAGE_BUILDERS.filter((p) => !filter || filter.has(p.num)).map((p) => p.render(data));
 
   return (
-    <Document title="AI Authority Report" author={data.agencyName ?? ""} subject={data.clientName}>
+    <Document title="VRTL Score — AI Authority Report" author={data.agencyName ?? ""} subject={data.clientName}>
       {children}
     </Document>
   );
