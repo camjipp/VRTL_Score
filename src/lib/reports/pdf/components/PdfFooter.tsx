@@ -6,11 +6,7 @@ export function PdfFooter({ data }: { data: ReportData }) {
   return (
     <View style={baseStyles.footer} fixed>
       <Text style={baseStyles.footerText}>Confidential — {data.clientName}</Text>
-      {data.agencyName ? (
-        <Text style={baseStyles.footerAgency}>{data.agencyName}</Text>
-      ) : (
-        <Text style={baseStyles.footerText}> </Text>
-      )}
+      <Text style={baseStyles.footerPageNum} render={({ pageNumber }) => `Page ${pageNumber}`} />
     </View>
   );
 }

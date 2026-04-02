@@ -2,6 +2,7 @@ import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
 import { PAGE, colors, fonts, rhythm, baseStyles } from "../theme";
 import { sanitizePdfString } from "../sanitizeReportData";
+import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
@@ -18,15 +19,17 @@ const W = {
 } as const;
 
 const styles = StyleSheet.create({
-  h: {
+  subHead: {
     fontSize: 8,
     fontWeight: 400,
-    letterSpacing: 0.35,
+    letterSpacing: 0.1,
     textTransform: "uppercase",
-    color: colors.ink4,
+    color: colors.ink3,
     marginBottom: rhythm.sm,
+    marginTop: rhythm.md,
     fontFamily: fonts.sansBold,
   },
+  subHeadFirst: { marginTop: rhythm.sm },
   th: {
     flexDirection: "row",
     backgroundColor: colors.surface2,
@@ -40,9 +43,9 @@ const styles = StyleSheet.create({
   thText: {
     fontSize: 6.5,
     fontWeight: 400,
-    color: colors.ink4,
+    color: colors.ink3,
     textTransform: "uppercase",
-    letterSpacing: 0.3,
+    letterSpacing: 0.1,
     fontFamily: fonts.sansBold,
   },
   tr: {
@@ -56,7 +59,7 @@ const styles = StyleSheet.create({
     minHeight: 28,
   },
   trAlt: { backgroundColor: colors.surface },
-  td: { fontSize: 7.5, color: colors.ink2, fontFamily: fonts.sans },
+  td: { fontSize: 7.5, color: colors.ink, fontFamily: fonts.sans },
   sigPill: {
     paddingVertical: 3,
     paddingHorizontal: 6,
@@ -65,23 +68,24 @@ const styles = StyleSheet.create({
   },
   sigPillTxt: { fontSize: 6, fontWeight: 400, fontFamily: fonts.sansBold },
   method: {
-    marginTop: rhythm.xl,
+    marginTop: rhythm.lg,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.rule,
     borderRadius: 4,
-    padding: rhythm.lg,
+    padding: rhythm.md,
     overflow: "hidden",
   },
   methodTitle: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: 400,
-    color: colors.ink,
+    color: colors.ink3,
     marginBottom: rhythm.sm,
     fontFamily: fonts.sansBold,
-    letterSpacing: 0.35,
+    letterSpacing: 0.12,
+    textTransform: "uppercase",
   },
-  methodBody: { fontSize: 9, lineHeight: 1.55, color: colors.ink3, fontFamily: fonts.sans },
+  methodBody: { fontSize: 9, lineHeight: 1.55, color: colors.ink, fontFamily: fonts.sans },
   chipDeck: {
     marginTop: rhythm.lg,
     width: 540,
@@ -90,30 +94,40 @@ const styles = StyleSheet.create({
     borderColor: colors.rule,
     borderRadius: 4,
     paddingVertical: rhythm.md,
-    paddingHorizontal: rhythm.lg,
+    paddingHorizontal: rhythm.md,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "stretch",
   },
   chip: {
-    width: 158,
+    flex: 1,
+    marginHorizontal: 4,
     backgroundColor: colors.paper,
     borderWidth: 1,
     borderColor: colors.rule,
-    borderRadius: 6,
+    borderRadius: 4,
     paddingVertical: rhythm.md,
-    paddingHorizontal: rhythm.sm,
+    paddingHorizontal: rhythm.xs,
     alignItems: "center",
-    overflow: "hidden",
+    justifyContent: "center",
+    minHeight: 56,
   },
-  chipNum: { fontSize: 18, fontWeight: 400, color: colors.ink, fontFamily: fonts.sansBold },
+  chipNum: {
+    fontSize: 14,
+    fontWeight: 400,
+    color: colors.ink,
+    fontFamily: fonts.sansBold,
+    lineHeight: 1,
+    textAlign: "center",
+  },
   chipLab: {
     fontSize: 6.5,
-    color: colors.ink4,
-    marginTop: rhythm.xs,
+    color: colors.ink3,
+    marginTop: 6,
     textTransform: "uppercase",
-    letterSpacing: 0.35,
+    letterSpacing: 0.1,
     fontFamily: fonts.sansBold,
+    textAlign: "center",
   },
   ynY: { backgroundColor: colors.surface2, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 4 },
   ynN: { backgroundColor: colors.surface2, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 4 },
@@ -131,8 +145,11 @@ function formatStrengthLabel(raw: string): string {
 }
 
 function logLabelPill(label: string): { bg: string; fg: string } {
-  void label;
-  return { bg: colors.surface2, fg: colors.ink3 };
+  const u = label.toUpperCase();
+  if (u.includes("STRENGTH")) return { bg: colors.greenLight, fg: colors.ink };
+  if (u.includes("OPPORTUNITY") || u.includes("COMPETITIVE")) return { bg: colors.orangeLight, fg: colors.ink };
+  if (u.includes("INVISIBLE")) return { bg: colors.redLight, fg: colors.ink };
+  return { bg: colors.surface2, fg: colors.ink };
 }
 
 export function Page6Evidence({ data }: { data: ReportData }) {
@@ -140,11 +157,13 @@ export function Page6Evidence({ data }: { data: ReportData }) {
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
       <View style={baseStyles.pageBody}>
         <PdfTraceMarker page={6} section="Page6:start" />
-        <PdfHeader data={data} variant="inner" sectionSlug="Evidence & methodology" pageNum={6} />
+        <PdfHeader data={data} variant="inner" pageNum={6} />
         <PdfTraceMarker page={6} section="Page6:after_header" />
 
-        <Text style={styles.h}>Evidence log</Text>
-        <View style={{ marginBottom: rhythm.md }}>
+        <ChapterTitle title="Evidence & Methodology" />
+
+        <Text style={[styles.subHead, styles.subHeadFirst]}>Evidence log</Text>
+        <View style={{ marginBottom: rhythm.sm }}>
           <View style={styles.th}>
             <Text style={[styles.thText, { width: W.idx }]}>#</Text>
             <Text style={[styles.thText, { width: W.label }]}>Signal</Text>
@@ -157,6 +176,7 @@ export function Page6Evidence({ data }: { data: ReportData }) {
           {data.evidenceLog.map((row, rowIdx) => {
             const yn = row.mentioned === "Yes";
             const lp = logLabelPill(row.label);
+            const strengthDisp = formatStrengthLabel(row.strength);
             return (
               <View
                 key={`evl-${row.idx}`}
@@ -175,7 +195,7 @@ export function Page6Evidence({ data }: { data: ReportData }) {
                       style={{
                         fontSize: 6.5,
                         fontWeight: 400,
-                        color: yn ? colors.ink2 : colors.ink4,
+                        color: yn ? colors.ink2 : colors.ink3,
                         fontFamily: fonts.sansBold,
                       }}
                     >
@@ -184,8 +204,17 @@ export function Page6Evidence({ data }: { data: ReportData }) {
                   </View>
                 </View>
                 <Text style={[styles.td, { width: W.pos }]}>{row.position}</Text>
-                <Text style={[styles.td, { width: W.str, color: colors.ink2, fontFamily: fonts.sansBold }]}>
-                  {formatStrengthLabel(row.strength)}
+                <Text
+                  style={[
+                    styles.td,
+                    {
+                      width: W.str,
+                      fontFamily: fonts.sansBold,
+                      fontSize: 7,
+                    },
+                  ]}
+                >
+                  {strengthDisp}
                 </Text>
                 <Text style={[styles.td, { width: W.comp }]}>{row.competitors}</Text>
                 <Text style={[styles.td, { width: W.rest, fontSize: 7 }]}>—</Text>
@@ -194,22 +223,22 @@ export function Page6Evidence({ data }: { data: ReportData }) {
           })}
         </View>
 
-        <View style={styles.method}>
-          <Text style={styles.methodTitle}>METHODOLOGY</Text>
+        <View style={styles.method} wrap={false}>
+          <Text style={styles.methodTitle}>Methodology</Text>
           <Text style={styles.methodBody}>{data.methodology}</Text>
         </View>
 
-        <View style={styles.chipDeck}>
+        <View style={styles.chipDeck} wrap={false}>
           <View style={styles.chip}>
             <Text style={styles.chipNum}>{String(data.meta.responses)}</Text>
             <Text style={styles.chipLab}>Responses</Text>
           </View>
           <View style={styles.chip}>
-            <Text style={[styles.chipNum, { fontSize: 12 }]}>{data.meta.confidence}</Text>
+            <Text style={styles.chipNum}>{String(data.meta.confidence)}</Text>
             <Text style={styles.chipLab}>Confidence</Text>
           </View>
           <View style={styles.chip}>
-            <Text style={[styles.chipNum, { fontSize: 11 }]}>{data.meta.generated}</Text>
+            <Text style={styles.chipNum}>{String(data.meta.generated)}</Text>
             <Text style={styles.chipLab}>Generated</Text>
           </View>
         </View>

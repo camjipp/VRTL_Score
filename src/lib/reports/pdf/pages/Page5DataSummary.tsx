@@ -1,6 +1,7 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
 import { PAGE, colors, fonts, rhythm, space, baseStyles } from "../theme";
+import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
@@ -28,9 +29,9 @@ const styles = StyleSheet.create({
   h: {
     fontSize: 8,
     fontWeight: 400,
-    letterSpacing: 0.35,
+    letterSpacing: 0.12,
     textTransform: "uppercase",
-    color: colors.ink4,
+    color: colors.ink3,
     marginBottom: rhythm.sm,
     marginTop: rhythm.xs,
     fontFamily: fonts.sansBold,
@@ -49,9 +50,9 @@ const styles = StyleSheet.create({
   thText: {
     fontSize: 6.5,
     fontWeight: 400,
-    color: colors.ink4,
+    color: colors.ink3,
     textTransform: "uppercase",
-    letterSpacing: 0.3,
+    letterSpacing: 0.1,
     fontFamily: fonts.sansBold,
   },
   tr: {
@@ -70,7 +71,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 3,
     borderLeftColor: colors.cyan,
   },
-  td: { fontSize: 8.5, color: colors.ink2, fontFamily: fonts.sans },
+  td: { fontSize: 8.5, color: colors.ink, fontFamily: fonts.sans },
   tdStrong: { fontSize: 8.5, color: colors.ink, fontWeight: 400, fontFamily: fonts.sansBold },
   pill: {
     paddingVertical: 4,
@@ -87,14 +88,18 @@ const styles = StyleSheet.create({
   dot: { width: 6, height: 6, borderRadius: 3, marginRight: 8 },
 });
 
-function sigPillBg(_status: ReportData["signalSummary"][0]["status"]) {
-  void _status;
+function sigPillBg(s: ReportData["signalSummary"][0]["status"]) {
+  if (s === "positive") return colors.greenLight;
+  if (s === "improvable") return colors.orangeLight;
+  if (s === "gap") return colors.redLight;
   return colors.surface2;
 }
 
-function sigPillFg(_status: ReportData["signalSummary"][0]["status"]) {
-  void _status;
-  return colors.ink3;
+function sigPillFg(s: ReportData["signalSummary"][0]["status"]) {
+  if (s === "positive") return colors.ink;
+  if (s === "improvable") return colors.ink;
+  if (s === "gap") return colors.ink;
+  return colors.ink;
 }
 
 function statusLabel(s: ReportData["competitiveTable"][0]["status"] | undefined) {
@@ -103,9 +108,12 @@ function statusLabel(s: ReportData["competitiveTable"][0]["status"] | undefined)
   return "—";
 }
 
-function cmpPillStyle(_status: ReportData["competitiveTable"][0]["status"] | undefined) {
-  void _status;
-  return { bg: colors.surface2, fg: colors.ink3 };
+function cmpPillStyle(s: ReportData["competitiveTable"][0]["status"] | undefined) {
+  if (s === "You") return { bg: colors.cyanLight, fg: colors.ink };
+  if (s === "Tied") return { bg: colors.surface2, fg: colors.ink };
+  if (s === "Behind") return { bg: colors.greenLight, fg: colors.ink };
+  if (s === "Ahead") return { bg: colors.redLight, fg: colors.ink };
+  return { bg: colors.surface2, fg: colors.ink };
 }
 
 export function Page5DataSummary({ data }: { data: ReportData }) {
@@ -115,9 +123,10 @@ export function Page5DataSummary({ data }: { data: ReportData }) {
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
       <View style={baseStyles.pageBody}>
         <PdfTraceMarker page={5} section="Page5:start" />
-        <PdfHeader data={data} variant="inner" sectionSlug="Data summary" pageNum={5} />
+        <PdfHeader data={data} variant="inner" pageNum={5} />
         <PdfTraceMarker page={5} section="Page5:after_header" />
 
+        <ChapterTitle title="Data Summary" />
         <Text style={[styles.h, styles.hFirst]}>Signal summary</Text>
         <View style={{ marginBottom: space.section, width: 540 }}>
           <View style={styles.th}>
@@ -146,7 +155,7 @@ export function Page5DataSummary({ data }: { data: ReportData }) {
                   </Text>
                 </View>
               </View>
-              <Text style={[styles.td, { width: S.note, fontSize: 8, textAlign: "right", color: colors.ink3 }]}>
+              <Text style={[styles.td, { width: S.note, fontSize: 8, textAlign: "right", color: colors.ink2 }]}>
                 {row.actionNote}
               </Text>
             </View>

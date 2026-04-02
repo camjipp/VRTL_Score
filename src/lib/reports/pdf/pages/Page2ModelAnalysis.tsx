@@ -2,6 +2,7 @@ import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
 import { PAGE, colors, fonts, rhythm, baseStyles } from "../theme";
 import { ModelAnalysisCard, MODEL_CARD_WIDTH } from "../components/ModelAnalysisCard";
+import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
@@ -23,13 +24,13 @@ const NEUTRAL_MODEL_VISUAL = {
 const styles = StyleSheet.create({
   bannerOuter: {
     flexDirection: "row",
-    marginBottom: rhythm.xl,
+    marginBottom: rhythm.md,
     borderRadius: 4,
     overflow: "hidden",
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.rule,
-    minHeight: 56,
+    minHeight: 44,
   },
   bannerBar: { width: 3, backgroundColor: colors.ink3 },
   bannerInner: {
@@ -37,51 +38,51 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: rhythm.lg,
-    paddingHorizontal: rhythm.lg,
+    paddingVertical: rhythm.sm,
+    paddingHorizontal: rhythm.md,
   },
   bannerLeft: { flex: 1, paddingRight: rhythm.md, maxWidth: 360 },
   bannerSpread: {
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: 400,
     color: colors.ink,
     fontFamily: fonts.sansBold,
-    letterSpacing: 0.06,
+    letterSpacing: 0.02,
   },
   bannerSub: {
-    fontSize: 8.5,
-    color: colors.ink3,
-    marginTop: rhythm.sm,
-    lineHeight: 1.58,
+    fontSize: 8,
+    color: colors.ink2,
+    marginTop: rhythm.xs,
+    lineHeight: 1.45,
     fontFamily: fonts.sans,
   },
   bannerPill: {
     backgroundColor: colors.paper,
     borderWidth: 1,
-    borderColor: colors.cyan,
-    paddingVertical: 7,
-    paddingHorizontal: 10,
+    borderColor: colors.rule,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
     borderRadius: 4,
-    maxWidth: 172,
+    maxWidth: 160,
   },
   bannerPillText: {
-    fontSize: 6,
+    fontSize: 5.5,
     fontWeight: 400,
-    color: colors.cyan,
+    color: colors.ink2,
     fontFamily: fonts.sansBold,
-    lineHeight: 1.35,
+    lineHeight: 1.3,
     textAlign: "center",
-    letterSpacing: 0.08,
+    letterSpacing: 0.06,
   },
   row3: {
     width: CONTENT_W,
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: rhythm.xl,
+    marginBottom: rhythm.md,
   },
   evidenceOuter: {
     flexDirection: "row",
-    marginBottom: rhythm.md,
+    marginBottom: rhythm.sm,
     borderRadius: 4,
     borderWidth: 1,
     borderColor: colors.rule,
@@ -90,8 +91,8 @@ const styles = StyleSheet.create({
   evidenceAccent: { width: 4 },
   evidenceInner: {
     flex: 1,
-    paddingVertical: rhythm.lg,
-    paddingHorizontal: rhythm.lg,
+    paddingVertical: rhythm.sm,
+    paddingHorizontal: rhythm.md,
     backgroundColor: colors.paper,
   },
   evLabel: {
@@ -104,52 +105,53 @@ const styles = StyleSheet.create({
   },
   evMono: {
     fontFamily: fonts.mono,
-    fontSize: 7.5,
-    lineHeight: 1.52,
-    color: colors.ink3,
+    fontSize: 7,
+    lineHeight: 1.45,
+    color: colors.ink2,
     backgroundColor: colors.surface,
-    paddingVertical: rhythm.md,
-    paddingHorizontal: rhythm.md,
+    paddingVertical: rhythm.sm,
+    paddingHorizontal: rhythm.sm,
     borderRadius: 4,
     borderWidth: 1,
     borderColor: colors.rule,
   },
   evNote: {
-    fontSize: 9,
+    fontSize: 8.5,
     color: colors.ink,
-    marginTop: rhythm.lg,
-    lineHeight: 1.62,
+    marginTop: rhythm.sm,
+    lineHeight: 1.55,
     fontFamily: fonts.sans,
   },
   takeawayOuter: {
     flexDirection: "row",
     borderRadius: 4,
     overflow: "hidden",
-    marginTop: rhythm.md,
+    marginTop: rhythm.sm,
     borderWidth: 1,
     borderColor: colors.rule,
   },
   takeawayBar: { width: 3, backgroundColor: colors.ink },
   takeawayInner: {
     flex: 1,
-    paddingVertical: rhythm.xl,
-    paddingHorizontal: rhythm.lg,
+    paddingVertical: rhythm.md,
+    paddingHorizontal: rhythm.md,
     backgroundColor: colors.surface2,
   },
   takeawayTitle: {
-    fontSize: 8,
+    fontSize: 7.5,
     fontWeight: 400,
-    letterSpacing: 0.12,
-    color: colors.ink4,
+    letterSpacing: 0.1,
+    color: colors.ink3,
     textTransform: "uppercase",
-    marginBottom: rhythm.md,
+    marginBottom: rhythm.sm,
     fontFamily: fonts.sansBold,
   },
-  takeawayBody: { fontSize: 10.5, lineHeight: 1.65, color: colors.ink, fontFamily: fonts.sans },
+  takeawayBody: { fontSize: 9.5, lineHeight: 1.58, color: colors.ink, fontFamily: fonts.sans },
   sectionTitle: {
     ...baseStyles.sectionLabel,
-    marginTop: rhythm.sm,
-    marginBottom: rhythm.md,
+    color: colors.ink3,
+    marginTop: 0,
+    marginBottom: rhythm.sm,
   },
 });
 
@@ -165,8 +167,10 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
       <View style={baseStyles.pageBody}>
         <PdfTraceMarker page={2} section="Page2:start" />
-        <PdfHeader data={data} variant="inner" sectionSlug="Model analysis" pageNum={2} />
+        <PdfHeader data={data} variant="inner" pageNum={2} />
         <PdfTraceMarker page={2} section="Page2:after_header" />
+
+        <ChapterTitle title="Model Analysis" />
 
         <View style={styles.bannerOuter} wrap={false}>
           <View style={styles.bannerBar} />
@@ -181,7 +185,7 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
           </View>
         </View>
 
-        <View style={styles.row3} wrap={false} minPresenceAhead={260}>
+        <View style={styles.row3} wrap={false} minPresenceAhead={220}>
           {data.modelScores.map((m, idx) => {
             const cardId = `model-${m.name}-${idx}`;
             return (
@@ -211,14 +215,14 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
 
         <PdfTraceMarker page={2} section="Page2:after_model_grid" />
 
-        <View wrap={false} minPresenceAhead={200}>
+        <View wrap={false} minPresenceAhead={160}>
           <Text style={styles.sectionTitle}>Evidence preview</Text>
           {data.evidencePreview.map((ev, i) => {
             const labelLine = String(ev.label);
             const snippetLine = String(ev.snippet);
             const noteLine = ev.note ? String(ev.note) : "";
             return (
-            <View key={`ev-${i}`} style={styles.evidenceOuter} wrap={false} minPresenceAhead={130}>
+            <View key={`ev-${i}`} style={styles.evidenceOuter} wrap={false} minPresenceAhead={100}>
               <View style={[styles.evidenceAccent, { backgroundColor: colors.ink3 }]} />
               <View style={styles.evidenceInner}>
                 <Text style={[styles.evLabel, { color: colors.ink4 }]}>{labelLine}</Text>
@@ -232,7 +236,7 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
 
         <PdfTraceMarker page={2} section="Page2:after_evidence_preview" />
 
-        <View style={styles.takeawayOuter} wrap={false} minPresenceAhead={120}>
+        <View style={styles.takeawayOuter} wrap={false} minPresenceAhead={90}>
           <View style={styles.takeawayBar} />
           <View style={styles.takeawayInner}>
             <Text style={styles.takeawayTitle}>Strategic takeaway</Text>

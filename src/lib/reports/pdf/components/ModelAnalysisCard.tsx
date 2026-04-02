@@ -15,9 +15,9 @@ export type ModelAnalysisCardProps = {
 
 /** Three columns + gaps = 540pt content: 172 + 12 + 172 + 12 + 172 */
 export const MODEL_CARD_WIDTH = 172;
-const INNER_W = MODEL_CARD_WIDTH - 28;
+const INNER_W = MODEL_CARD_WIDTH - 20;
 /** Equal-height analysis cards */
-const CARD_MIN_H = 212;
+const CARD_MIN_H = 168;
 
 const styles = StyleSheet.create({
   root: {
@@ -34,25 +34,25 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   inner: {
-    padding: 14,
+    padding: 10,
     flexGrow: 1,
   },
   name: {
-    fontSize: 9.5,
+    fontSize: 8.5,
     fontWeight: 400,
     color: colors.ink,
     textTransform: "uppercase",
-    marginBottom: 10,
+    marginBottom: 6,
     fontFamily: fonts.sansBold,
-    letterSpacing: 0.06,
+    letterSpacing: 0.04,
   },
   scoreRow: {
     flexDirection: "row",
     alignItems: "flex-end",
-    marginBottom: 10,
+    marginBottom: 6,
   },
   score: {
-    fontSize: 44,
+    fontSize: 36,
     fontWeight: 400,
     lineHeight: 1,
     fontFamily: fonts.sansBold,
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
   rule: {
     height: 1,
     backgroundColor: colors.rule,
-    marginBottom: 10,
+    marginBottom: 6,
     width: INNER_W,
   },
   barTrack: {
@@ -108,15 +108,15 @@ const styles = StyleSheet.create({
     backgroundColor: colors.ink4,
   },
   avgLabel: {
-    fontSize: 6,
-    color: colors.ink4,
-    marginBottom: 10,
+    fontSize: 5.5,
+    color: colors.ink3,
+    marginBottom: 6,
     fontFamily: fonts.sans,
   },
   bulletRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginTop: 7,
+    marginTop: 4,
   },
   dot: {
     width: 4,
@@ -127,9 +127,9 @@ const styles = StyleSheet.create({
   },
   bulletText: {
     width: INNER_W - 12,
-    fontSize: 7.5,
-    lineHeight: 1.55,
-    color: colors.ink2,
+    fontSize: 7,
+    lineHeight: 1.45,
+    color: colors.ink,
     fontFamily: fonts.sans,
   },
 });
@@ -163,7 +163,7 @@ export function ModelAnalysisCard({
   const posPill = deltaVsAvg >= 0;
 
   return (
-    <View style={styles.root} wrap={false} minPresenceAhead={220}>
+    <View style={styles.root} wrap={false} minPresenceAhead={180}>
       <View style={[styles.topBand, { backgroundColor: colors.surface2 }]} />
       <View style={styles.inner}>
         <Text style={styles.name}>{nameLine}</Text>

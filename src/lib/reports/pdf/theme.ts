@@ -58,7 +58,7 @@ export const baseStyles = StyleSheet.create({
     padding: 0,
     fontFamily: fonts.sans,
     fontWeight: 400,
-    color: colors.ink2,
+    color: colors.ink,
   },
   pageBody: {
     paddingTop: PAGE.margin,
@@ -70,18 +70,34 @@ export const baseStyles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: rhythm.lg,
-    paddingBottom: rhythm.md,
+    marginBottom: rhythm.md,
+    paddingBottom: rhythm.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.rule,
   },
   /** Primary report label — left rail of every page */
   reportTitleMain: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: 400,
     color: colors.ink,
     letterSpacing: 0,
     fontFamily: fonts.sansBold,
+  },
+  headerAgency: {
+    fontSize: 8.5,
+    fontWeight: 400,
+    color: colors.ink,
+    marginTop: 4,
+    fontFamily: fonts.sansBold,
+  },
+  /** First heading in page body (chapter); not duplicated in header */
+  chapterTitle: {
+    fontSize: 13,
+    fontWeight: 400,
+    color: colors.ink,
+    fontFamily: fonts.sansBold,
+    marginBottom: rhythm.sm,
+    letterSpacing: 0.02,
   },
   reportTitle: {
     fontSize: 11,
@@ -108,7 +124,7 @@ export const baseStyles = StyleSheet.create({
   },
   metaLine: {
     fontSize: 9,
-    color: colors.ink4,
+    color: colors.ink3,
     textAlign: "right",
     marginTop: 4,
     lineHeight: 1.4,
@@ -134,14 +150,14 @@ export const baseStyles = StyleSheet.create({
   body: {
     fontSize: 9,
     lineHeight: 1.62,
-    color: colors.ink2,
+    color: colors.ink,
     fontWeight: 400,
     fontFamily: fonts.sans,
   },
   bodyLarge: {
     fontSize: 9.5,
     lineHeight: 1.58,
-    color: colors.ink2,
+    color: colors.ink,
     fontFamily: fonts.sans,
   },
   footer: {
@@ -161,10 +177,10 @@ export const baseStyles = StyleSheet.create({
     color: colors.ink4,
     fontFamily: fonts.sans,
   },
-  footerAgency: {
+  footerPageNum: {
     fontSize: 7,
     color: colors.ink3,
-    fontFamily: fonts.sansBold,
+    fontFamily: fonts.sans,
   },
   card: {
     backgroundColor: colors.paper,
