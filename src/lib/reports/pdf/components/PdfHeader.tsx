@@ -1,6 +1,6 @@
 import { Image, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { baseStyles } from "../theme";
+import { baseStyles, colors, fonts } from "../theme";
 import { PdfTraceMarker } from "./PdfTraceMarker";
 import { TopStripe } from "./TopStripe";
 
@@ -13,11 +13,10 @@ type Props = {
 
 export function PdfHeader({ data, variant = "inner", sectionSlug, pageNum }: Props) {
   const tracePage = pageNum ?? (variant === "cover" ? 1 : 0);
-  const gradId = `stripe-${variant}-${pageNum ?? "cover"}`;
 
   return (
     <View wrap={false}>
-      <TopStripe gradientId={gradId} />
+      <TopStripe />
       <View style={baseStyles.headerRow}>
         <View style={{ maxWidth: 320 }}>
           <Text style={baseStyles.brandKicker}>VRTL SCORE</Text>
@@ -34,7 +33,7 @@ export function PdfHeader({ data, variant = "inner", sectionSlug, pageNum }: Pro
             </View>
           ) : null}
           {data.agencyName && !data.agencyLogoUrl ? (
-            <Text style={{ fontSize: 8, color: "#9CA3AF", marginTop: 6 }}>{data.agencyName}</Text>
+            <Text style={{ fontSize: 8, color: colors.ink4, marginTop: 6, fontFamily: fonts.sans }}>{data.agencyName}</Text>
           ) : null}
         </View>
         <View style={baseStyles.headerMeta}>
@@ -42,7 +41,7 @@ export function PdfHeader({ data, variant = "inner", sectionSlug, pageNum }: Pro
           <Text style={baseStyles.metaLine}>{data.domain}</Text>
           <Text style={baseStyles.metaLine}>{data.date}</Text>
           {pageNum != null ? (
-            <Text style={{ fontSize: 8, color: "#9CA3AF", marginTop: 6 }}>Page {pageNum}</Text>
+            <Text style={{ fontSize: 8, color: colors.ink4, marginTop: 6, fontFamily: fonts.sans }}>Page {pageNum}</Text>
           ) : null}
         </View>
       </View>

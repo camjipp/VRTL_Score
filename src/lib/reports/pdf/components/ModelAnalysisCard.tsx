@@ -20,15 +20,11 @@ const INNER_W = MODEL_CARD_WIDTH - 24;
 const styles = StyleSheet.create({
   root: {
     width: MODEL_CARD_WIDTH,
-    backgroundColor: colors.card,
+    backgroundColor: colors.paper,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.rule,
     borderRadius: 6,
     overflow: "hidden",
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 1,
-    shadowRadius: 4,
   },
   topBand: {
     height: 6,
@@ -40,17 +36,17 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 11,
     fontWeight: 700,
-    color: colors.text,
+    color: colors.ink,
     textTransform: "uppercase",
     marginBottom: 4,
-    fontFamily: fonts.display,
+    fontFamily: fonts.sans,
   },
   score: {
     fontSize: 42,
     fontWeight: 700,
     lineHeight: 1,
     marginBottom: 8,
-    fontFamily: fonts.display,
+    fontFamily: fonts.sans,
   },
   deltaPill: {
     alignSelf: "flex-start",
@@ -59,17 +55,18 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     marginBottom: 10,
   },
-  deltaPillPos: { backgroundColor: "#D1FAE5" },
-  deltaPillNeg: { backgroundColor: "#FEE2E2" },
+  deltaPillPos: { backgroundColor: colors.greenLight },
+  deltaPillNeg: { backgroundColor: colors.redLight },
   deltaPillText: {
     fontSize: 8,
     fontWeight: 700,
-    color: colors.body,
+    color: colors.ink2,
+    fontFamily: fonts.sans,
   },
   barTrack: {
     width: INNER_W,
     height: 6,
-    backgroundColor: colors.barTrack,
+    backgroundColor: colors.surface2,
     borderRadius: 3,
     marginBottom: 2,
     flexDirection: "row",
@@ -91,12 +88,13 @@ const styles = StyleSheet.create({
     top: -1,
     width: 2,
     height: 9,
-    backgroundColor: colors.muted,
+    backgroundColor: colors.ink4,
   },
   avgLabel: {
     fontSize: 6,
-    color: colors.muted,
+    color: colors.ink4,
     marginBottom: 8,
+    fontFamily: fonts.sans,
   },
   bulletRow: {
     flexDirection: "row",
@@ -114,7 +112,8 @@ const styles = StyleSheet.create({
     width: INNER_W - 11,
     fontSize: 8,
     lineHeight: 1.5,
-    color: colors.body,
+    color: colors.ink2,
+    fontFamily: fonts.sans,
   },
 });
 

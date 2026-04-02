@@ -1,12 +1,12 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { PAGE, colors, space, baseStyles } from "../theme";
+import { PAGE, colors, fonts, space, baseStyles } from "../theme";
 import { ModelAnalysisCard, MODEL_CARD_WIDTH } from "../components/ModelAnalysisCard";
-
-const CONTENT_W = PAGE.width - PAGE.margin * 2;
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
+
+const CONTENT_W = PAGE.width - PAGE.margin * 2;
 
 const avgOf = (models: ReportData["modelScores"]) =>
   models.length ? Math.round(models.reduce((s, m) => s + m.score, 0) / models.length) : 0;
@@ -24,83 +24,102 @@ function visuals(score: number, avg: number) {
 const GAP = 12;
 
 const styles = StyleSheet.create({
-  banner: {
+  bannerOuter: {
     flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.blueTint,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.cyan,
-    padding: 12,
     marginBottom: space.section,
     borderRadius: 4,
+    overflow: "hidden",
+    backgroundColor: colors.cyanLight,
+  },
+  bannerBar: { width: 4, backgroundColor: colors.cyan },
+  bannerInner: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 12,
   },
   bannerLeft: { flex: 1, paddingRight: 8 },
-  bannerSpread: { fontSize: 18, fontWeight: 800, color: colors.text, fontFamily: "Helvetica-Bold" },
-  bannerSub: { fontSize: 9, color: colors.body, marginTop: 4, lineHeight: 1.45 },
+  bannerSpread: { fontSize: 18, fontWeight: 800, color: colors.ink, fontFamily: fonts.sans },
+  bannerSub: {
+    fontSize: 9,
+    color: colors.ink2,
+    marginTop: 4,
+    lineHeight: 1.45,
+    fontFamily: fonts.sans,
+  },
   bannerPill: {
-    backgroundColor: "#E0F2FE",
+    backgroundColor: colors.cyan,
     paddingVertical: 6,
     paddingHorizontal: 10,
     borderRadius: 4,
-    borderWidth: 1,
-    borderColor: colors.cyan,
   },
-  bannerPillText: { fontSize: 7, fontWeight: 700, color: colors.cyan },
+  bannerPillText: { fontSize: 7, fontWeight: 700, color: colors.paper, fontFamily: fonts.sans },
   row3: {
     width: CONTENT_W,
     flexDirection: "row",
     alignItems: "flex-start",
     marginBottom: space.section,
   },
-  evidenceCard: {
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 6,
-    padding: 14,
+  evidenceOuter: {
+    flexDirection: "row",
     marginBottom: 12,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 1,
-    shadowRadius: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    overflow: "hidden",
   },
+  evidenceAccent: { width: 4 },
+  evidenceInner: { flex: 1, padding: 14, backgroundColor: colors.paper },
   evLabel: {
     fontSize: 8,
     fontWeight: 700,
     letterSpacing: 0.65,
     marginBottom: 8,
     textTransform: "uppercase",
+    fontFamily: fonts.sans,
   },
   evMono: {
-    fontFamily: "Courier",
+    fontFamily: fonts.mono,
     fontSize: 8,
     lineHeight: 1.45,
-    color: colors.body,
-    backgroundColor: "#F8FAFC",
+    color: colors.ink3,
+    backgroundColor: colors.surface2,
     padding: 10,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: colors.divider,
+    borderColor: colors.rule,
   },
-  evNote: { fontSize: 8, color: colors.body, marginTop: 8, lineHeight: 1.45 },
-  takeaway: {
-    backgroundColor: colors.strategyTint,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.violet,
-    padding: 14,
+  evNote: {
+    fontSize: 8,
+    color: colors.ink2,
+    marginTop: 8,
+    lineHeight: 1.45,
+    fontFamily: fonts.sans,
+  },
+  takeawayOuter: {
+    flexDirection: "row",
     borderRadius: 4,
+    overflow: "hidden",
     marginTop: 4,
   },
+  takeawayBar: { width: 4, backgroundColor: colors.violet },
+  takeawayInner: { flex: 1, padding: 14, backgroundColor: colors.violetLight },
   takeawayTitle: {
     fontSize: 8,
     fontWeight: 600,
     letterSpacing: 0.65,
-    color: colors.muted,
+    color: colors.violet,
     textTransform: "uppercase",
     marginBottom: 8,
+    fontFamily: fonts.sans,
   },
-  takeawayBody: { fontSize: 10, lineHeight: 1.55, color: colors.body },
-  sectionTitle: { ...baseStyles.sectionLabel, marginTop: 6, marginBottom: 10 },
+  takeawayBody: { fontSize: 10, lineHeight: 1.55, color: colors.ink2, fontFamily: fonts.sans },
+  sectionTitle: {
+    ...baseStyles.sectionLabel,
+    marginTop: 6,
+    marginBottom: 10,
+    fontFamily: fonts.sans,
+  },
 });
 
 export function Page2ModelAnalysis({ data }: { data: ReportData }) {
@@ -118,13 +137,16 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
         <PdfHeader data={data} variant="inner" sectionSlug="Model analysis" pageNum={2} />
         <PdfTraceMarker page={2} section="Page2:after_header" />
 
-        <View style={styles.banner} wrap={false}>
-          <View style={styles.bannerLeft}>
-            <Text style={styles.bannerSpread}>{spreadLine}</Text>
-            <Text style={styles.bannerSub}>{descLine}</Text>
-          </View>
-          <View style={styles.bannerPill}>
-            <Text style={styles.bannerPillText}>HIGHEST-LEVERAGE OPPORTUNITY</Text>
+        <View style={styles.bannerOuter} wrap={false}>
+          <View style={styles.bannerBar} />
+          <View style={styles.bannerInner}>
+            <View style={styles.bannerLeft}>
+              <Text style={styles.bannerSpread}>{spreadLine}</Text>
+              <Text style={styles.bannerSub}>{descLine}</Text>
+            </View>
+            <View style={styles.bannerPill}>
+              <Text style={styles.bannerPillText}>HIGHEST-LEVERAGE OPPORTUNITY</Text>
+            </View>
           </View>
         </View>
 
@@ -166,23 +188,25 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
           const snippetLine = String(ev.snippet);
           const noteLine = ev.note ? String(ev.note) : "";
           return (
-            <View
-              key={`ev-${i}`}
-              style={[styles.evidenceCard, { borderLeftWidth: 3, borderLeftColor: borderC }]}
-              wrap={false}
-            >
-              <Text style={[styles.evLabel, { color: colors.muted }]}>{labelLine}</Text>
-              <Text style={styles.evMono}>{snippetLine}</Text>
-              {ev.note ? <Text style={styles.evNote}>{noteLine}</Text> : null}
+            <View key={`ev-${i}`} style={styles.evidenceOuter} wrap={false}>
+              <View style={[styles.evidenceAccent, { backgroundColor: borderC }]} />
+              <View style={styles.evidenceInner}>
+                <Text style={[styles.evLabel, { color: colors.ink4 }]}>{labelLine}</Text>
+                <Text style={styles.evMono}>{snippetLine}</Text>
+                {ev.note ? <Text style={styles.evNote}>{noteLine}</Text> : null}
+              </View>
             </View>
           );
         })}
 
         <PdfTraceMarker page={2} section="Page2:after_evidence_preview" />
 
-        <View style={styles.takeaway} wrap={false}>
-          <Text style={styles.takeawayTitle}>Strategic takeaway</Text>
-          <Text style={styles.takeawayBody}>{data.strategicTakeaway}</Text>
+        <View style={styles.takeawayOuter} wrap={false}>
+          <View style={styles.takeawayBar} />
+          <View style={styles.takeawayInner}>
+            <Text style={styles.takeawayTitle}>Strategic takeaway</Text>
+            <Text style={styles.takeawayBody}>{data.strategicTakeaway}</Text>
+          </View>
         </View>
 
         <PdfTraceMarker page={2} section="Page2:before_footer" />

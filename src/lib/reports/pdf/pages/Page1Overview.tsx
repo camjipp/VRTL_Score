@@ -1,13 +1,13 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { PAGE, colors, space, baseStyles } from "../theme";
+import { PAGE, colors, fonts, space, baseStyles } from "../theme";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 import { ScoreRing } from "../components/ScoreRing";
 
-/** Row widths sum to CONTENT_W 540 */
-const W = { rank: 32, name: 118, bar: 232, count: 68, pill: 90 } as const;
+/** Inner row columns sum to 537 (540 − 3pt accent rail) */
+const W = { rank: 32, name: 118, bar: 229, count: 68, pill: 90 } as const;
 
 const styles = StyleSheet.create({
   hero: {
@@ -17,15 +17,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.rule,
     padding: 14,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 1,
-    shadowRadius: 4,
+    overflow: "hidden",
   },
   heroLeft: { width: 148, alignItems: "center", justifyContent: "center" },
-  divider: { width: 1, backgroundColor: colors.border, marginHorizontal: 10 },
+  divider: { width: 1, backgroundColor: colors.rule, marginHorizontal: 10 },
   heroRight: { flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "stretch" },
   kpiTile: {
     flex: 1,
@@ -33,14 +30,15 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
     borderBottomWidth: 2,
   },
-  kpiVal: { fontSize: 22, fontWeight: 700, fontFamily: "Helvetica-Bold" },
+  kpiVal: { fontSize: 22, fontWeight: 700, fontFamily: fonts.sans },
   kpiLab: {
     fontSize: 7,
     fontWeight: 600,
-    color: colors.muted,
+    color: colors.ink4,
     marginTop: 6,
     letterSpacing: 0.65,
     textTransform: "uppercase",
+    fontFamily: fonts.sans,
   },
   pillRow: { flexDirection: "row", flexWrap: "wrap", marginBottom: space.section },
   pillSp: { marginRight: 8, marginBottom: 6 },
@@ -49,54 +47,62 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 6,
   },
-  pillText: { fontSize: 8, fontWeight: 700, color: colors.text },
-  callout: {
-    backgroundColor: colors.calloutTint,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.cyan,
-    padding: 14,
+  pillTextBase: { fontSize: 8, fontFamily: fonts.sans },
+  calloutWrap: {
+    flexDirection: "row",
     marginBottom: space.section,
     borderRadius: 4,
+    overflow: "hidden",
+    backgroundColor: colors.cyanLight,
   },
-  calloutBody: { fontSize: 9.5, lineHeight: 1.55, color: colors.body, fontStyle: "italic" },
+  calloutBar: { width: 4, backgroundColor: colors.cyan },
+  calloutInner: { flex: 1, padding: 14 },
+  calloutBody: {
+    fontSize: 9.5,
+    lineHeight: 1.55,
+    color: colors.ink2,
+    fontStyle: "italic",
+    fontFamily: fonts.sans,
+  },
   rankHeader: {
     fontSize: 8,
     fontWeight: 600,
-    color: colors.muted,
+    color: colors.ink4,
     letterSpacing: 0.65,
     textTransform: "uppercase",
     marginBottom: 8,
+    fontFamily: fonts.sans,
   },
-  rankRow: {
+  rankOuter: {
     width: 540,
+    flexDirection: "row",
+    alignItems: "stretch",
+    borderBottomWidth: 1,
+    borderBottomColor: colors.rule,
+  },
+  rankAccent: { width: 3 },
+  rankInner: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
-  },
-  rankRowClient: {
-    backgroundColor: colors.blueTint,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.cyan,
     paddingLeft: 6,
-    marginLeft: -3,
   },
-  rankIdx: { width: W.rank, fontSize: 9, color: colors.muted, fontWeight: 600 },
-  rankName: { width: W.name, fontSize: 9, color: colors.body },
-  rankNameClient: { width: W.name, fontSize: 9, color: colors.text, fontWeight: 700 },
-  barWrap: { width: W.bar, height: 6, backgroundColor: colors.barTrack, borderRadius: 3, marginHorizontal: 6 },
+  rankIdx: { width: W.rank, fontSize: 9, color: colors.ink4, fontWeight: 600, fontFamily: fonts.sans },
+  rankName: { width: W.name, fontSize: 9, color: colors.ink2, fontFamily: fonts.sans },
+  rankNameClient: { width: W.name, fontSize: 9, color: colors.ink, fontWeight: 700, fontFamily: fonts.sans },
+  barWrap: { width: W.bar, height: 6, backgroundColor: colors.surface2, borderRadius: 3, marginHorizontal: 6 },
   barInner: { flex: 1, flexDirection: "row", height: 6 },
   barFill: { height: 6, backgroundColor: colors.cyan, borderRadius: 3, opacity: 0.85 },
-  barFillNeu: { height: 6, backgroundColor: "#94A3B8", borderRadius: 3, opacity: 0.5 },
+  barFillNeu: { height: 6, backgroundColor: colors.ink4, borderRadius: 3, opacity: 0.45 },
   barRest: { height: 6 },
-  rankCount: { width: W.count, fontSize: 9, color: colors.muted, textAlign: "right" },
+  rankCount: { width: W.count, fontSize: 9, color: colors.ink4, textAlign: "right", fontFamily: fonts.sans },
   pillCell: { width: W.pill, alignItems: "flex-end" },
   deltaPill: { paddingVertical: 3, paddingHorizontal: 8, borderRadius: 4 },
-  deltaAhead: { backgroundColor: "#FEE2E2" },
-  deltaBehind: { backgroundColor: "#D1FAE5" },
-  deltaTied: { backgroundColor: "#F3F4F6" },
-  deltaTxt: { fontSize: 7, fontWeight: 700, color: colors.body },
+  deltaAhead: { backgroundColor: colors.redLight },
+  deltaBehind: { backgroundColor: colors.greenLight },
+  deltaTied: { backgroundColor: colors.surface2 },
+  deltaTxt: { fontSize: 7, fontWeight: 700, color: colors.ink2, fontFamily: fonts.sans },
   alertRow: { flexDirection: "row", marginTop: 6 },
   alertSp: { marginRight: 8 },
   alertCard: {
@@ -104,12 +110,13 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     padding: 12,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.rule,
     minHeight: 76,
+    overflow: "hidden",
   },
-  alertWin: { backgroundColor: colors.winBg, borderTopWidth: 3, borderTopColor: colors.green },
-  alertRisk: { backgroundColor: colors.riskBg, borderTopWidth: 3, borderTopColor: colors.orange },
-  alertPri: { backgroundColor: colors.priBg, borderTopWidth: 3, borderTopColor: colors.red },
+  alertWin: { backgroundColor: colors.greenLight, borderTopWidth: 3, borderTopColor: colors.green },
+  alertRisk: { backgroundColor: colors.orangeLight, borderTopWidth: 3, borderTopColor: colors.orange },
+  alertPri: { backgroundColor: colors.redLight, borderTopWidth: 3, borderTopColor: colors.red },
   alertPill: {
     alignSelf: "flex-start",
     paddingVertical: 2,
@@ -117,8 +124,8 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     marginBottom: 6,
   },
-  alertTitle: { fontSize: 10, fontWeight: 700, color: colors.text },
-  alertDetail: { fontSize: 8, color: colors.body, marginTop: 4, lineHeight: 1.45 },
+  alertTitle: { fontSize: 10, fontWeight: 700, color: colors.ink, fontFamily: fonts.sans },
+  alertDetail: { fontSize: 8, color: colors.ink2, marginTop: 4, lineHeight: 1.45, fontFamily: fonts.sans },
 });
 
 export function Page1Overview({ data }: { data: ReportData }) {
@@ -158,19 +165,22 @@ export function Page1Overview({ data }: { data: ReportData }) {
         </View>
 
         <View style={styles.pillRow}>
-          <View style={[styles.pill, styles.pillSp, { backgroundColor: "#FFEDD5" }]}>
-            <Text style={styles.pillText}>{statusUpper}</Text>
+          <View style={[styles.pill, styles.pillSp, { backgroundColor: colors.orangeLight }]}>
+            <Text style={[styles.pillTextBase, { color: colors.orange, fontWeight: 600 }]}>{statusUpper}</Text>
           </View>
-          <View style={[styles.pill, styles.pillSp, { backgroundColor: "#F3F4F6" }]}>
-            <Text style={styles.pillText}>{rankLine}</Text>
+          <View style={[styles.pill, styles.pillSp, { backgroundColor: colors.surface2 }]}>
+            <Text style={[styles.pillTextBase, { color: colors.ink2, fontWeight: 700 }]}>{rankLine}</Text>
           </View>
-          <View style={[styles.pill, styles.pillSp, { backgroundColor: "#D1FAE5" }]}>
-            <Text style={styles.pillText}>{leadingPill}</Text>
+          <View style={[styles.pill, styles.pillSp, { backgroundColor: colors.greenLight }]}>
+            <Text style={[styles.pillTextBase, { color: colors.green, fontWeight: 600 }]}>{leadingPill}</Text>
           </View>
         </View>
 
-        <View style={styles.callout}>
-          <Text style={styles.calloutBody}>{data.bottomLine}</Text>
+        <View style={styles.calloutWrap} wrap={false}>
+          <View style={styles.calloutBar} />
+          <View style={styles.calloutInner}>
+            <Text style={styles.calloutBody}>{data.bottomLine}</Text>
+          </View>
         </View>
 
         <Text style={styles.rankHeader}>Competitive ranking</Text>
@@ -182,40 +192,44 @@ export function Page1Overview({ data }: { data: ReportData }) {
             delta === null ? "" : delta === 0 ? "0" : delta > 0 ? `+${delta}` : String(delta);
           const isClient = !!c.isClient;
           return (
-            <View
-              key={`rank-${c.name}`}
-              style={[styles.rankRow, isClient ? styles.rankRowClient : {}]}
-              wrap={false}
-            >
-              <Text style={styles.rankIdx}>{`#${c.rank}`}</Text>
-              <Text style={isClient ? styles.rankNameClient : styles.rankName}>{c.name}</Text>
-              <View style={styles.barWrap}>
-                <View style={styles.barInner}>
-                  <View
-                    style={[
-                      { flex: widthPct <= 0 ? 0 : widthPct },
-                      isClient ? styles.barFill : styles.barFillNeu,
-                    ]}
-                  />
-                  <View style={[{ flex: barRest }, styles.barRest]} />
-                </View>
-              </View>
-              <Text style={styles.rankCount}>{`${c.mentions}/${data.meta.responses}`}</Text>
-              <View style={styles.pillCell}>
-                {deltaStr !== "" ? (
-                  <View
-                    style={[
-                      styles.deltaPill,
-                      deltaStr === "0"
-                        ? styles.deltaTied
-                        : deltaStr.startsWith("-")
-                          ? styles.deltaBehind
-                          : styles.deltaAhead,
-                    ]}
-                  >
-                    <Text style={styles.deltaTxt}>{deltaStr}</Text>
+            <View key={`rank-${c.name}`} style={styles.rankOuter} wrap={false}>
+              <View style={[styles.rankAccent, { backgroundColor: isClient ? colors.cyan : "transparent" }]} />
+              <View
+                style={[
+                  styles.rankInner,
+                  { backgroundColor: isClient ? colors.cyanLight : "transparent" },
+                ]}
+              >
+                <Text style={styles.rankIdx}>{`#${c.rank}`}</Text>
+                <Text style={isClient ? styles.rankNameClient : styles.rankName}>{c.name}</Text>
+                <View style={styles.barWrap}>
+                  <View style={styles.barInner}>
+                    <View
+                      style={[
+                        { flex: widthPct <= 0 ? 0 : widthPct },
+                        isClient ? styles.barFill : styles.barFillNeu,
+                      ]}
+                    />
+                    <View style={[{ flex: barRest }, styles.barRest]} />
                   </View>
-                ) : null}
+                </View>
+                <Text style={styles.rankCount}>{`${c.mentions}/${data.meta.responses}`}</Text>
+                <View style={styles.pillCell}>
+                  {deltaStr !== "" ? (
+                    <View
+                      style={[
+                        styles.deltaPill,
+                        deltaStr === "0"
+                          ? styles.deltaTied
+                          : deltaStr.startsWith("-")
+                            ? styles.deltaBehind
+                            : styles.deltaAhead,
+                      ]}
+                    >
+                      <Text style={styles.deltaTxt}>{deltaStr}</Text>
+                    </View>
+                  ) : null}
+                </View>
               </View>
             </View>
           );
@@ -223,22 +237,22 @@ export function Page1Overview({ data }: { data: ReportData }) {
 
         <View style={styles.alertRow}>
           <View style={[styles.alertCard, styles.alertWin, styles.alertSp]}>
-            <View style={[styles.alertPill, { backgroundColor: "#A7F3D0" }]}>
-              <Text style={{ fontSize: 7, fontWeight: 700, color: "#065F46" }}>WIN</Text>
+            <View style={[styles.alertPill, { backgroundColor: colors.greenLight }]}>
+              <Text style={{ fontSize: 7, fontWeight: 700, color: colors.green, fontFamily: fonts.sans }}>WIN</Text>
             </View>
             <Text style={styles.alertTitle}>{data.alerts.win.title}</Text>
             <Text style={styles.alertDetail}>{data.alerts.win.detail}</Text>
           </View>
           <View style={[styles.alertCard, styles.alertRisk, styles.alertSp]}>
-            <View style={[styles.alertPill, { backgroundColor: "#FDE68A" }]}>
-              <Text style={{ fontSize: 7, fontWeight: 700, color: "#92400E" }}>RISK</Text>
+            <View style={[styles.alertPill, { backgroundColor: colors.orangeLight }]}>
+              <Text style={{ fontSize: 7, fontWeight: 700, color: colors.orange, fontFamily: fonts.sans }}>RISK</Text>
             </View>
             <Text style={styles.alertTitle}>{data.alerts.risk.title}</Text>
             <Text style={styles.alertDetail}>{data.alerts.risk.detail}</Text>
           </View>
           <View style={[styles.alertCard, styles.alertPri]}>
-            <View style={[styles.alertPill, { backgroundColor: "#FECACA" }]}>
-              <Text style={{ fontSize: 7, fontWeight: 700, color: "#991B1B" }}>PRIORITY</Text>
+            <View style={[styles.alertPill, { backgroundColor: colors.redLight }]}>
+              <Text style={{ fontSize: 7, fontWeight: 700, color: colors.red, fontFamily: fonts.sans }}>PRIORITY</Text>
             </View>
             <Text style={styles.alertTitle}>{data.alerts.priority.title}</Text>
             <Text style={styles.alertDetail}>{data.alerts.priority.detail}</Text>

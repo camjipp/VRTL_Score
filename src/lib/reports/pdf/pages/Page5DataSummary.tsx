@@ -1,6 +1,6 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { PAGE, colors, space, baseStyles } from "../theme";
+import { PAGE, colors, fonts, space, baseStyles } from "../theme";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
@@ -30,25 +30,27 @@ const styles = StyleSheet.create({
     fontWeight: 600,
     letterSpacing: 0.65,
     textTransform: "uppercase",
-    color: colors.muted,
+    color: colors.ink4,
     marginBottom: 8,
     marginTop: 4,
+    fontFamily: fonts.sans,
   },
   hFirst: { marginTop: 0 },
   th: {
     flexDirection: "row",
-    backgroundColor: "#F3F4F6",
+    backgroundColor: colors.surface2,
     paddingVertical: 8,
     paddingHorizontal: 6,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: colors.rule,
   },
   thText: {
     fontSize: 7,
     fontWeight: 700,
-    color: colors.muted,
+    color: colors.ink4,
     textTransform: "uppercase",
     letterSpacing: 0.5,
+    fontFamily: fonts.sans,
   },
   tr: {
     flexDirection: "row",
@@ -56,16 +58,16 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 6,
     borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
+    borderBottomColor: colors.surface2,
     width: 540,
   },
-  trAlt: { backgroundColor: "#FAFAFA" },
-  trYou: { backgroundColor: colors.blueTint },
-  td: { fontSize: 8.5, color: colors.body },
-  tdStrong: { fontSize: 8.5, color: colors.text, fontWeight: 700 },
+  trAlt: { backgroundColor: colors.surface },
+  trYou: { backgroundColor: colors.cyanLight },
+  td: { fontSize: 8.5, color: colors.ink2, fontFamily: fonts.sans },
+  tdStrong: { fontSize: 8.5, color: colors.ink, fontWeight: 700, fontFamily: fonts.sans },
   pill: { paddingVertical: 2, paddingHorizontal: 6, borderRadius: 4 },
-  pillT: { fontSize: 6.5, fontWeight: 700 },
-  barWrap: { height: 5, backgroundColor: colors.barTrack, borderRadius: 2, width: C.bar - 8 },
+  pillT: { fontSize: 6.5, fontWeight: 700, fontFamily: fonts.sans },
+  barWrap: { height: 5, backgroundColor: colors.surface2, borderRadius: 2, width: C.bar - 8 },
   barIn: { flex: 1, flexDirection: "row", height: 5 },
   barF: { height: 5, backgroundColor: colors.cyan, borderRadius: 2 },
   barR: { height: 5 },
@@ -73,17 +75,17 @@ const styles = StyleSheet.create({
 });
 
 function sigPillBg(s: ReportData["signalSummary"][0]["status"]) {
-  if (s === "positive") return "#D1FAE5";
-  if (s === "improvable") return "#FEF3C7";
-  if (s === "gap") return "#FEE2E2";
-  return "#EDE9FE";
+  if (s === "positive") return colors.greenLight;
+  if (s === "improvable") return colors.orangeLight;
+  if (s === "gap") return colors.redLight;
+  return colors.violetLight;
 }
 
 function sigPillFg(s: ReportData["signalSummary"][0]["status"]) {
-  if (s === "positive") return "#065F46";
-  if (s === "improvable") return "#92400E";
-  if (s === "gap") return "#991B1B";
-  return "#5B21B6";
+  if (s === "positive") return colors.green;
+  if (s === "improvable") return colors.orange;
+  if (s === "gap") return colors.red;
+  return colors.violet;
 }
 
 function statusLabel(s: ReportData["competitiveTable"][0]["status"] | undefined) {
@@ -172,8 +174,8 @@ export function Page5DataSummary({ data }: { data: ReportData }) {
                 </Text>
                 <Text style={[styles.td, { width: C.vs, textAlign: "right" }]}>{row.vsYou}</Text>
                 <View style={{ width: C.st, justifyContent: "center" }}>
-                  <View style={[styles.pill, { backgroundColor: "#F3F4F6" }]}>
-                    <Text style={[styles.pillT, { color: colors.body }]}>{statusLabel(row.status)}</Text>
+                  <View style={[styles.pill, { backgroundColor: colors.surface2 }]}>
+                    <Text style={[styles.pillT, { color: colors.ink2 }]}>{statusLabel(row.status)}</Text>
                   </View>
                 </View>
               </View>

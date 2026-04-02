@@ -1,6 +1,6 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { PAGE, colors, baseStyles } from "../theme";
+import { PAGE, colors, fonts, baseStyles } from "../theme";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
@@ -11,36 +11,39 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: 800,
-    color: colors.text,
+    color: colors.ink,
     marginBottom: 6,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: fonts.sans,
   },
-  intro: { fontSize: 9, lineHeight: 1.5, color: colors.body, marginBottom: 16 },
+  intro: {
+    fontSize: 9,
+    lineHeight: 1.5,
+    color: colors.ink2,
+    marginBottom: 16,
+    fontFamily: fonts.sans,
+  },
   timeline: { flexDirection: "row", alignItems: "flex-start", marginBottom: 8, width: 540 },
   nodeCol: { width: 129, alignItems: "center", marginRight: 8 },
-  weekLab: { fontSize: 7, fontWeight: 700, color: colors.muted, marginBottom: 4 },
+  weekLab: { fontSize: 7, fontWeight: 700, color: colors.ink4, marginBottom: 4, fontFamily: fonts.sans },
   circle: {
     width: 14,
     height: 14,
     borderRadius: 7,
     marginBottom: 4,
   },
-  connector: { width: 2, flex: 1, minHeight: 24, backgroundColor: colors.divider },
+  connector: { width: 2, flex: 1, minHeight: 24, backgroundColor: colors.surface2 },
   card: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.paper,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.rule,
     borderRadius: 8,
     padding: 14,
     marginTop: 4,
     width: 129,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 1,
-    shadowRadius: 4,
+    overflow: "hidden",
   },
-  phaseTitle: { fontSize: 8, fontWeight: 700, color: colors.text, marginBottom: 6 },
-  copy: { fontSize: 8.5, lineHeight: 1.5, color: colors.body },
+  phaseTitle: { fontSize: 8, fontWeight: 700, color: colors.ink, marginBottom: 6, fontFamily: fonts.sans },
+  copy: { fontSize: 8.5, lineHeight: 1.5, color: colors.ink2, fontFamily: fonts.sans },
 });
 
 export function Page4ExecutionPlan({ data }: { data: ReportData }) {

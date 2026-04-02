@@ -1,6 +1,6 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { PAGE, colors, space, baseStyles } from "../theme";
+import { PAGE, colors, fonts, space, baseStyles } from "../theme";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
@@ -22,23 +22,25 @@ const styles = StyleSheet.create({
     fontWeight: 600,
     letterSpacing: 0.65,
     textTransform: "uppercase",
-    color: colors.muted,
+    color: colors.ink4,
     marginBottom: 8,
+    fontFamily: fonts.sans,
   },
   th: {
     flexDirection: "row",
-    backgroundColor: "#F3F4F6",
+    backgroundColor: colors.surface2,
     paddingVertical: 6,
     paddingHorizontal: 4,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: colors.rule,
     width: 540,
   },
   thText: {
     fontSize: 6.5,
     fontWeight: 700,
-    color: colors.muted,
+    color: colors.ink4,
     textTransform: "uppercase",
+    fontFamily: fonts.sans,
   },
   tr: {
     flexDirection: "row",
@@ -46,40 +48,43 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 4,
     borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
+    borderBottomColor: colors.surface2,
     width: 540,
   },
-  td: { fontSize: 7.5, color: colors.body },
+  trAlt: { backgroundColor: colors.surface },
+  td: { fontSize: 7.5, color: colors.ink2, fontFamily: fonts.sans },
   method: {
     marginTop: space.section,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.rule,
     borderRadius: 8,
     padding: 14,
+    overflow: "hidden",
   },
   methodTitle: {
     fontSize: 9,
     fontWeight: 800,
-    color: colors.text,
+    color: colors.ink,
     marginBottom: 8,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: fonts.sans,
   },
-  methodBody: { fontSize: 9, lineHeight: 1.5, color: colors.body },
+  methodBody: { fontSize: 9, lineHeight: 1.5, color: colors.ink2, fontFamily: fonts.sans },
   chipRow: { flexDirection: "row", marginTop: 14, justifyContent: "space-between", width: 540 },
   chip: {
     width: 168,
-    backgroundColor: colors.card,
+    backgroundColor: colors.paper,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.rule,
     borderRadius: 6,
     padding: 10,
     alignItems: "center",
+    overflow: "hidden",
   },
-  chipNum: { fontSize: 18, fontWeight: 800, color: colors.text, fontFamily: "Helvetica-Bold" },
-  chipLab: { fontSize: 7, color: colors.muted, marginTop: 4, textTransform: "uppercase" },
-  ynY: { backgroundColor: "#D1FAE5", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 3 },
-  ynN: { backgroundColor: "#FEE2E2", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 3 },
+  chipNum: { fontSize: 18, fontWeight: 800, color: colors.ink, fontFamily: fonts.sans },
+  chipLab: { fontSize: 7, color: colors.ink4, marginTop: 4, textTransform: "uppercase", fontFamily: fonts.sans },
+  ynY: { backgroundColor: colors.greenLight, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 3 },
+  ynN: { backgroundColor: colors.redLight, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 3 },
 });
 
 export function Page6Evidence({ data }: { data: ReportData }) {
@@ -101,21 +106,32 @@ export function Page6Evidence({ data }: { data: ReportData }) {
             <Text style={[styles.thText, { width: W.comp }]}>#Comp</Text>
             <Text style={[styles.thText, { width: W.rest }]}>Notes</Text>
           </View>
-          {data.evidenceLog.map((row) => {
+          {data.evidenceLog.map((row, rowIdx) => {
             const yn = row.mentioned === "Yes";
             const strC =
               row.strength === "strong"
                 ? colors.green
                 : row.strength === "medium"
                   ? colors.orange
-                  : colors.muted;
+                  : colors.ink4;
             return (
-              <View key={`evl-${row.idx}`} style={styles.tr} wrap={false}>
+              <View
+                key={`evl-${row.idx}`}
+                style={[styles.tr, rowIdx % 2 === 1 ? styles.trAlt : {}]}
+                wrap={false}
+              >
                 <Text style={[styles.td, { width: W.idx }]}>{String(row.idx)}</Text>
                 <Text style={[styles.td, { width: W.label, fontWeight: 700 }]}>{row.label}</Text>
                 <View style={{ width: W.yn }}>
                   <View style={yn ? styles.ynY : styles.ynN}>
-                    <Text style={{ fontSize: 6.5, fontWeight: 800, color: yn ? "#065F46" : "#991B1B" }}>
+                    <Text
+                      style={{
+                        fontSize: 6.5,
+                        fontWeight: 800,
+                        color: yn ? colors.green : colors.red,
+                        fontFamily: fonts.sans,
+                      }}
+                    >
                       {yn ? "YES" : "NO"}
                     </Text>
                   </View>

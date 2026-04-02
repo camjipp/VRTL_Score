@@ -1,3 +1,4 @@
+import "./registerPdfFonts";
 import { Document, type DocumentProps } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "./types";

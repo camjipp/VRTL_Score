@@ -1,62 +1,65 @@
-import { Circle, Defs, LinearGradient, Stop, Svg } from "@react-pdf/renderer";
+import { Circle, G, Svg } from "@react-pdf/renderer";
 import { Text, View } from "@react-pdf/renderer";
 import { colors, fonts } from "../theme";
 
-const SIZE = 128;
-const CX = SIZE / 2;
-const CY = SIZE / 2;
-const R = 50;
-const STROKE = 7;
-const C = 2 * Math.PI * R;
+const R = 44;
+const stroke = 9;
+const CX = 55;
+const CY = 55;
 
 type Props = { score: number | null };
 
-/** Arc ring: stroke-dasharray on a circle (SVG, not canvas) */
+/** Arc from top via strokeDasharray + rotate -90° on value stroke only */
 export function ScoreRing({ score }: Props) {
   const pct = score == null ? 0 : Math.min(100, Math.max(0, score)) / 100;
-  const dash = pct * C;
-  const gap = C - dash;
+  const circumference = 2 * Math.PI * R;
+  const filled = pct * circumference;
+  const gap = Math.max(0, circumference - filled);
 
   return (
-    <View style={{ width: SIZE, alignItems: "center" }}>
-      <Svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`}>
-        <Defs>
-          <LinearGradient id="ringGradP1" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor="#0EA5E9" />
-            <Stop offset="1" stopColor="#7C3AED" />
-          </LinearGradient>
-        </Defs>
-        <Circle cx={CX} cy={CY} r={R} fill="none" stroke={colors.barTrack} strokeWidth={STROKE} />
+    <View style={{ width: 110, alignItems: "center" }}>
+      <Svg width={110} height={110} viewBox="0 0 110 110">
         <Circle
           cx={CX}
           cy={CY}
           r={R}
+          stroke={colors.surface2}
+          strokeWidth={stroke}
           fill="none"
-          stroke="url(#ringGradP1)"
-          strokeWidth={STROKE}
-          strokeDasharray={`${dash} ${gap}`}
-          strokeLinecap="round"
         />
+        <G transform={`rotate(-90 ${CX} ${CY})`}>
+          <Circle
+            cx={CX}
+            cy={CY}
+            r={R}
+            stroke={colors.cyan}
+            strokeWidth={stroke}
+            fill="none"
+            strokeDasharray={`${filled} ${gap}`}
+            strokeLinecap="round"
+          />
+        </G>
       </Svg>
       <View style={{ marginTop: -78, alignItems: "center", marginBottom: 8 }}>
         <Text
           style={{
             fontSize: 26,
-            fontWeight: 700,
-            color: colors.text,
-            fontFamily: fonts.display,
+            fontWeight: 800,
+            color: colors.ink,
+            fontFamily: fonts.sans,
           }}
         >
           {score == null ? "—" : String(score)}
         </Text>
-        <Text style={{ fontSize: 9, color: colors.muted, marginTop: 2 }}>/ 100</Text>
+        <Text style={{ fontSize: 9, color: colors.ink4, marginTop: 2, fontFamily: fonts.sans }}>/ 100</Text>
         <Text
           style={{
             fontSize: 7,
             fontWeight: 600,
-            color: colors.muted,
+            color: colors.ink4,
             marginTop: 6,
             letterSpacing: 0.65,
+            fontFamily: fonts.sans,
           }}
         >
           OVERALL SCORE

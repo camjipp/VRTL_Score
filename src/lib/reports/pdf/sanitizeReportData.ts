@@ -1,7 +1,7 @@
 import type { ReportData } from "./types";
 
 /**
- * Invisible / layout control characters that PDFKit + Helvetica mishandle
+ * Invisible / layout control characters that PDFKit + embedded fonts mishandle
  * (e.g. word joiner breaking "distance", ZWSP splitting tokens).
  */
 const INVISIBLE_AND_SOFT_HYPHEN = /[\u200B-\u200D\uFEFF\u2060\u180E\u034F\u00AD\uFFF9-\uFFFB]/g;

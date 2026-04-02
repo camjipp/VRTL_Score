@@ -1,6 +1,6 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { PAGE, colors, baseStyles } from "../theme";
+import { PAGE, colors, fonts, baseStyles } from "../theme";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
@@ -17,23 +17,20 @@ const styles = StyleSheet.create({
     fontWeight: 700,
     letterSpacing: 0.65,
     textTransform: "uppercase",
-    color: colors.text,
+    color: colors.ink,
     marginBottom: 8,
+    fontFamily: fonts.sans,
   },
-  intro: { fontSize: 9, lineHeight: 1.55, color: colors.body, marginBottom: 12 },
+  intro: { fontSize: 9, lineHeight: 1.55, color: colors.ink2, marginBottom: 12, fontFamily: fonts.sans },
   card: {
     flexDirection: "row",
-    backgroundColor: colors.card,
+    backgroundColor: colors.paper,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.rule,
     borderRadius: 8,
     marginBottom: 12,
     padding: 0,
     overflow: "hidden",
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 1,
-    shadowRadius: 4,
     minHeight: 96,
   },
   leftStripe: {
@@ -42,7 +39,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 12,
   },
-  stripeNum: { fontSize: 22, fontWeight: 800, color: "#FFFFFF", fontFamily: "Helvetica-Bold" },
+  stripeNum: { fontSize: 22, fontWeight: 800, color: colors.paper, fontFamily: fonts.sans },
   mid: { flex: 1, padding: 12, paddingRight: 8 },
   priPill: {
     alignSelf: "flex-start",
@@ -51,26 +48,26 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     marginBottom: 6,
   },
-  priPillTxt: { fontSize: 7, fontWeight: 800, color: "#FFFFFF" },
-  title: { fontSize: 11, fontWeight: 700, color: colors.text, marginBottom: 6 },
-  insight: { fontSize: 9, fontWeight: 700, marginBottom: 6 },
-  body: { fontSize: 8.5, lineHeight: 1.5, color: colors.body },
+  priPillTxt: { fontSize: 7, fontWeight: 800, color: colors.paper, fontFamily: fonts.sans },
+  title: { fontSize: 11, fontWeight: 700, color: colors.ink, marginBottom: 6, fontFamily: fonts.sans },
+  insight: { fontSize: 9, fontWeight: 700, marginBottom: 6, fontFamily: fonts.sans },
+  body: { fontSize: 8.5, lineHeight: 1.5, color: colors.ink2, fontFamily: fonts.sans },
+  sep: { width: 1, backgroundColor: colors.rule },
   right: {
     width: 148,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.surface,
     padding: 10,
     justifyContent: "center",
-    borderLeftWidth: 1,
-    borderLeftColor: colors.divider,
   },
   outLabel: {
     fontSize: 7,
     fontWeight: 600,
-    color: colors.muted,
+    color: colors.ink4,
     letterSpacing: 0.65,
     marginBottom: 4,
+    fontFamily: fonts.sans,
   },
-  outText: { fontSize: 8.5, fontWeight: 700, lineHeight: 1.45 },
+  outText: { fontSize: 8.5, fontWeight: 700, lineHeight: 1.45, fontFamily: fonts.sans },
 });
 
 export function Page3Recommendations({ data }: { data: ReportData }) {
@@ -87,7 +84,7 @@ export function Page3Recommendations({ data }: { data: ReportData }) {
         </Text>
 
         {data.recommendations.map((r, i) => {
-          const pc = PRI_COL[r.priority] ?? colors.muted;
+          const pc = PRI_COL[r.priority] ?? colors.ink4;
           const titleLine = String(r.title);
           const insightLine = String(r.insight);
           const expLine = String(r.expectedOutcome);
@@ -98,6 +95,7 @@ export function Page3Recommendations({ data }: { data: ReportData }) {
               <View style={[styles.leftStripe, { backgroundColor: pc }]}>
                 <Text style={styles.stripeNum}>{String(i + 1)}</Text>
               </View>
+              <View style={styles.sep} />
               <View style={styles.mid}>
                 <View style={[styles.priPill, { backgroundColor: pc }]}>
                   <Text style={styles.priPillTxt}>{`${r.priority} PRIORITY`}</Text>

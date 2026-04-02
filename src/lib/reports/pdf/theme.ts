@@ -4,29 +4,27 @@ import { StyleSheet } from "@react-pdf/renderer";
 export const PAGE = { width: 612, height: 792, margin: 36 } as const;
 export const CONTENT_W = PAGE.width - PAGE.margin * 2;
 
+/** PDF-safe palette (plain hex — no CSS variables in @react-pdf) */
 export const colors = {
-  bg: "#FFFFFF",
-  surface: "#FAFAFA",
-  card: "#FFFFFF",
-  border: "#E5E7EB",
-  divider: "#F3F4F6",
-  text: "#111827",
-  body: "#374151",
-  muted: "#9CA3AF",
+  ink: "#0F1117",
+  ink2: "#374151",
+  ink3: "#6B7280",
+  ink4: "#9CA3AF",
+  rule: "#E5E7EB",
+  surface: "#F9FAFB",
+  surface2: "#F3F4F6",
   cyan: "#0EA5E9",
+  cyanLight: "#E0F2FE",
   green: "#10B981",
+  greenLight: "#DCFCE7",
   orange: "#F59E0B",
+  orangeLight: "#FEF3C7",
   red: "#EF4444",
+  redLight: "#FEE2E2",
   violet: "#7C3AED",
-  blueTint: "#EFF6FF",
-  blueTintBorder: "#0EA5E9",
-  calloutTint: "#F0F9FF",
-  winBg: "#F0FDF4",
-  riskBg: "#FFF7ED",
-  priBg: "#FEF2F2",
-  strategyTint: "#F5F3FF",
-  barTrack: "#F3F4F6",
-  shadow: "rgba(0,0,0,0.06)",
+  violetLight: "#EDE9FE",
+  /** Page / card fill */
+  paper: "#FFFFFF",
 } as const;
 
 export const space = {
@@ -36,30 +34,26 @@ export const space = {
   cardPad: 14,
 } as const;
 
-/** Built-in PDF fonts — reliable on Vercel without remote TTF fetch */
 export const fonts = {
-  body: "Helvetica",
-  display: "Helvetica-Bold",
+  sans: "Inter",
+  mono: "DMMono",
 } as const;
 
 export const baseStyles = StyleSheet.create({
   page: {
     width: PAGE.width,
     height: PAGE.height,
-    backgroundColor: colors.bg,
+    backgroundColor: colors.paper,
     padding: 0,
-    fontFamily: fonts.body,
-    color: colors.body,
+    fontFamily: fonts.sans,
+    fontWeight: 400,
+    color: colors.ink2,
   },
   pageBody: {
     paddingTop: PAGE.margin,
     paddingBottom: PAGE.margin,
     paddingHorizontal: PAGE.margin,
     flexGrow: 1,
-  },
-  stripeWrap: {
-    width: PAGE.width,
-    height: 4,
   },
   headerRow: {
     flexDirection: "row",
@@ -68,30 +62,34 @@ export const baseStyles = StyleSheet.create({
     marginBottom: space.section,
     paddingBottom: space.block,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: colors.rule,
   },
   brandKicker: {
     fontSize: 9,
     fontWeight: 800,
     color: colors.cyan,
     letterSpacing: 1,
+    fontFamily: fonts.sans,
   },
   reportTitleMain: {
     fontSize: 8,
     fontWeight: 600,
-    color: colors.muted,
+    color: colors.ink4,
     letterSpacing: 2,
     marginTop: 3,
+    fontFamily: fonts.sans,
   },
   reportTitle: {
     fontSize: 11,
     fontWeight: 700,
-    color: colors.text,
+    color: colors.ink,
+    fontFamily: fonts.sans,
   },
   reportTitleCover: {
     fontSize: 12,
     fontWeight: 700,
-    color: colors.text,
+    color: colors.ink,
+    fontFamily: fonts.sans,
   },
   headerMeta: {
     alignItems: "flex-end",
@@ -100,41 +98,46 @@ export const baseStyles = StyleSheet.create({
   clientName: {
     fontSize: 20,
     fontWeight: 700,
-    color: colors.text,
+    color: colors.ink,
     textAlign: "right",
-    fontFamily: fonts.display,
+    fontFamily: fonts.sans,
   },
   metaLine: {
     fontSize: 9,
-    color: colors.muted,
+    color: colors.ink4,
     textAlign: "right",
     marginTop: 4,
     lineHeight: 1.4,
+    fontFamily: fonts.sans,
   },
   sectionLabel: {
     fontSize: 8,
     fontWeight: 600,
     letterSpacing: 0.65,
     textTransform: "uppercase",
-    color: colors.muted,
+    color: colors.ink4,
     marginBottom: space.block,
+    fontFamily: fonts.sans,
   },
   sectionSlug: {
     fontSize: 10,
     fontWeight: 600,
-    color: colors.muted,
+    color: colors.ink4,
     marginTop: 4,
+    fontFamily: fonts.sans,
   },
   body: {
     fontSize: 9,
     lineHeight: 1.55,
-    color: colors.body,
+    color: colors.ink2,
     fontWeight: 400,
+    fontFamily: fonts.sans,
   },
   bodyLarge: {
     fontSize: 9.5,
     lineHeight: 1.58,
-    color: colors.body,
+    color: colors.ink2,
+    fontFamily: fonts.sans,
   },
   footer: {
     position: "absolute",
@@ -144,22 +147,20 @@ export const baseStyles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     borderTopWidth: 1,
-    borderTopColor: colors.border,
+    borderTopColor: colors.rule,
     paddingTop: 8,
   },
   footerText: {
     fontSize: 7,
-    color: colors.muted,
+    color: colors.ink4,
+    fontFamily: fonts.sans,
   },
   card: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.paper,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.rule,
     borderRadius: 6,
     padding: space.cardPad,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 1,
-    shadowRadius: 4,
+    overflow: "hidden",
   },
 });
