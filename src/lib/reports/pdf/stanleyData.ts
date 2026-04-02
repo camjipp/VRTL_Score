@@ -13,7 +13,7 @@ export const stanleyData: ReportData = {
   topPosition: 60,
   authorityScore: 0,
   bottomLine:
-    "Stanley holds the top rank in this snapshot, but the landscape is tightly contested. Strengthening first-position answers and authority signals will widen the gap versus peers.",
+    "You rank first in this snapshot; the set is still contested. Raise first-position rate and authority to widen the lead.",
   tensionNote: undefined,
   competitors: [
     { name: "Stanley", mentions: 18, rate: 60, rank: 1, isClient: true },
@@ -28,8 +28,8 @@ export const stanleyData: ReportData = {
       score: 90,
       deltaVsAvg: 38,
       insights: [
-        "Your strongest model surface — replicate what works here across weaker models.",
-        "Competitors may target this channel; defend with fresh authority signals.",
+        "Strongest surface. Replicate this pattern on the lagging models.",
+        "Competitors will pressure this channel. Refresh authority signals.",
       ],
     },
     {
@@ -37,8 +37,8 @@ export const stanleyData: ReportData = {
       score: 39,
       deltaVsAvg: -13,
       insights: [
-        "Critical gap: users of Gemini may not reliably see your brand in category answers.",
-        "Prioritize factual, citation-friendly pages this model tends to summarize.",
+        "Gemini visibility is weak. Your brand is frequently absent from category responses.",
+        "Ship factual, citation-heavy pages this model tends to summarize.",
       ],
     },
     {
@@ -46,47 +46,48 @@ export const stanleyData: ReportData = {
       score: 26,
       deltaVsAvg: -26,
       insights: [
-        "Largest gap — prioritize clear, citation-backed claims over promotional language.",
-        "Publish authoritative guides that answer “best in category” style intents.",
+        "Widest gap. Lead with clear, cited claims; cut promo-only copy.",
+        'Publish authoritative guides for "best in category" intents.',
       ],
     },
   ],
   alerts: {
-    win: { title: "OpenAI strength", detail: "Score 90 — replicate patterns across weaker models." },
-    risk: { title: "Contested set", detail: "Owala matches your mention count — differentiation matters." },
-    priority: { title: "Authority depth", detail: "0% authority signals — build trust and citations." },
+    win: { title: "OpenAI strength", detail: "Score 90. Mirror the winning URL pattern on weaker models." },
+    risk: { title: "Contested set", detail: "Owala ties mentions at 18. Differentiate or you split the default answer." },
+    priority: { title: "Authority depth", detail: "Authority reads 0%. Add citations and third-party proof." },
   },
   recommendations: [
     {
       priority: "HIGH",
       title: "Close the model spread",
       insight: "64 points separate your best and worst model scores.",
-      explanation: "Inconsistent AI answers mean buyers get different stories depending on the assistant they use.",
-      action: "Unify structured facts and citations across key URLs; ship one flagship comparison asset.",
-      expectedOutcome: "Lift trailing models by 10+ points within 90 days.",
+      explanation:
+        "Performance is inconsistent across models. Buyers hear different defaults by assistant. You cede control of the narrative.",
+      action: "Unify structured facts and citations on priority URLs. Ship one flagship comparison asset.",
+      expectedOutcome: "Trailing models up 10+ points within 90 days.",
     },
     {
       priority: "HIGH",
       title: "Win first-position answers",
-      insight: "Top position rate is 60% while mention rate is 60%.",
-      explanation: "You appear in the set but are not always the default recommendation.",
+      insight: "Top position and mention rate both sit at 60%.",
+      explanation: "You are in the set but not always the first pick. That caps conversion on high-intent queries.",
       action: "Publish comparison pages with proof points and schema-aligned FAQs.",
-      expectedOutcome: "Increase top-position share on priority intents.",
+      expectedOutcome: "Higher top-position share on priority intents.",
     },
     {
       priority: "MEDIUM",
       title: "Defend parity vs. Owala",
       insight: "Owala matches your mention count at 18.",
-      explanation: "Tied mentions mean assistants may flip the default recommendation on thin margins.",
-      action: "Refresh hero SKUs and earn net-new citations from review and press sources.",
+      explanation: "Parity lets assistants flip the default on thin evidence.",
+      action: "Refresh hero SKUs; earn net-new citations from review and press.",
       expectedOutcome: "Break ties in your favor on head-to-head queries.",
     },
     {
       priority: "LOW",
       title: "Monitor Hydro Flask variants",
-      insight: "Lower-case and upper-case brand variants split signals.",
-      explanation: "Fragmented entity recognition can dilute authority.",
-      action: "Align canonical naming and entity schema across the site.",
+      insight: "Lower-case and upper-case variants split the entity signal.",
+      explanation: "Split entities dilute authority in aggregated answers.",
+      action: "Align canonical naming and entity schema sitewide.",
       expectedOutcome: "Cleaner consolidation in model answers over time.",
     },
   ],
@@ -95,31 +96,31 @@ export const stanleyData: ReportData = {
       label: "STRENGTH",
       snippet:
         "For insulated drinkware, Stanley and Owala are frequently cited for durability and retail availability…",
-      note: "Maintain differentiation on materials and warranty story.",
+      note: "Keep differentiation sharp on materials and warranty.",
     },
     {
       label: "VULNERABLE",
       snippet:
-        "Some assistants aggregate hydro flask variants inconsistently, which can split brand equity across listings…",
+        "Some assistants aggregate hydro flask variants inconsistently, which splits brand equity across listings…",
       note: "Tighten entity consistency and canonical product copy.",
     },
   ],
   executionPhases: [
     {
       phase: "Week 1–2",
-      text: "Audit AI-visible content for extractability, schema coverage, and competitor comparison gaps. Baseline citation inventory and entity consistency.",
+      text: "Audit what models can quote: machine-readable copy, schema, and comparison gaps. Baseline citations and entity consistency.",
     },
     {
       phase: "Week 2–3",
-      text: "Ship priority comparison assets and structured FAQs. Pitch two net-new citation targets in category-relevant publications.",
+      text: "Ship priority comparison assets and structured FAQs. Pitch two net-new citations in category-relevant publications.",
     },
     {
       phase: "Week 3–4",
-      text: "Expand proof: reviews, press, and authoritative backlinks. Align messaging on the weakest model until gains hold.",
+      text: "Add proof: reviews, press, authoritative backlinks. Align messaging on the weakest model until gains hold.",
     },
     {
       phase: "Week 4+",
-      text: "Re-run the visibility snapshot, measure deltas by model and intent cluster, and set the next 30-day plan.",
+      text: "Re-run the visibility snapshot. Measure deltas by model and intent cluster. Lock the next 30-day plan.",
     },
   ],
   signalSummary: [
@@ -168,14 +169,14 @@ export const stanleyData: ReportData = {
     competitors: String((i % 3) + 1),
   })),
   methodology:
-    "This briefing analyzes AI-assisted discovery responses under standardized scenarios. Composite signals reflect presence (mention consistency), positioning (relative rank among alternatives), and authority (citation and source signals). Results are directional and should be paired with your commercial and search data.",
+    "We stress-test AI discovery responses under fixed scenarios. Composite scores blend presence, relative position, and citation-backed authority. Treat results as directional; pair them with your commercial and search data.",
   meta: {
     responses: 30,
     confidence: "High",
     generated: "April 1, 2026",
   },
   strategicTakeaway:
-    "You lead the rank table, but the 64-point spread across AI models is the highest-leverage opportunity: buyers using different assistants may receive materially different recommendations. Standardize facts, citations, and comparison narratives before competitors consolidate the default answer.",
+    "You lead the rank table, but the 64-point model spread is the lever: different assistants recommend different winners. Standardize facts, citations, and comparison narratives before a competitor owns the default answer.",
   agencyName: "Northbridge Digital",
   agencyLogoUrl: null,
 };

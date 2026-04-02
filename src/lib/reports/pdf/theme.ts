@@ -149,14 +149,14 @@ export const baseStyles = StyleSheet.create({
   },
   body: {
     fontSize: 9,
-    lineHeight: 1.62,
+    lineHeight: 1.66,
     color: colors.ink,
     fontWeight: 400,
     fontFamily: fonts.sans,
   },
   bodyLarge: {
     fontSize: 9.5,
-    lineHeight: 1.58,
+    lineHeight: 1.62,
     color: colors.ink,
     fontFamily: fonts.sans,
   },

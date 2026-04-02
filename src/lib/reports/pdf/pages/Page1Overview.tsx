@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
   },
   calloutBody: {
     fontSize: 10.5,
-    lineHeight: 1.65,
+    lineHeight: 1.74,
     color: colors.ink,
     fontFamily: fonts.sans,
   },
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.12,
     textTransform: "uppercase",
     marginBottom: rhythm.md,
-    marginTop: rhythm.xs,
+    marginTop: rhythm.sm,
     fontFamily: fonts.sansBold,
   },
   rankOuter: {
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     fontSize: 8,
     color: colors.ink,
     marginTop: rhythm.sm,
-    lineHeight: 1.58,
+    lineHeight: 1.68,
     fontFamily: fonts.sans,
   },
 });

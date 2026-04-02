@@ -40,12 +40,24 @@ export function sanitizePdfString(raw: string): string {
   s = s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "");
   s = s.replace(/  +/g, " ");
 
+  /* Unicode format characters (Cf) — PDFKit can split words if these slip through. */
+  try {
+    s = s.replace(/\p{Cf}/gu, "");
+  } catch {
+    /* engines without Unicode property escapes */
+  }
+
   /* Collapse stray zero-width / format leftovers in a loop (model output edge cases). */
   let prev = "";
   while (prev !== s) {
     prev = s;
     s = s.replace(INVISIBLE_AND_BREAK_CHARS, "");
     s = s.replace(EXTRA_FORMAT_CHARS, "");
+    try {
+      s = s.replace(/\p{Cf}/gu, "");
+    } catch {
+      /* ignore */
+    }
   }
 
   return s;

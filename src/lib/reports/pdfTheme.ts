@@ -17,7 +17,7 @@ export const PDF_REPORT_TITLE = "Competitive AI Presence Report";
 
 /** Neutral methodology copy (no product branding). */
 export const PDF_METHODOLOGY_TEXT =
-  "This briefing analyzes AI-assisted discovery responses under standardized scenarios. The composite signal reflects presence (mention consistency), positioning (relative rank among alternatives), and authority (citation and source signals).";
+  "We stress-test AI discovery responses under fixed scenarios. Scores blend presence, relative position, and citation-backed authority. Treat as directional; pair with your commercial and search data.";
 
 const ACCENT_FALLBACK = "#6b9ebc";
 

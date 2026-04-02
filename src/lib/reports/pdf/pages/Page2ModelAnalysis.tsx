@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     fontFamily: fonts.sansBold,
   },
-  takeawayBody: { fontSize: 9, lineHeight: 1.52, color: colors.ink, fontFamily: fonts.sans },
+  takeawayBody: { fontSize: 9, lineHeight: 1.58, color: colors.ink, fontFamily: fonts.sans },
   sectionTitle: {
     fontSize: 8,
     fontWeight: 400,
@@ -172,8 +172,7 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
   const scores = data.modelScores.map((m) => m.score);
   const spread = scores.length ? Math.max(...scores) - Math.min(...scores) : 0;
   const spreadLine = `${spread}-POINT SPREAD`;
-  const descLine =
-    "Largest gap between your strongest and weakest model surfaces — prioritize the trailing model first.";
+  const descLine = "Largest delta is best model vs. worst. Fix the trailing model first.";
 
   return (
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>

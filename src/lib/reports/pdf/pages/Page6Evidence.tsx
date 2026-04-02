@@ -109,25 +109,32 @@ const styles = StyleSheet.create({
     paddingVertical: rhythm.md,
     paddingHorizontal: rhythm.xs,
     alignItems: "center",
-    justifyContent: "center",
-    minHeight: 56,
+    justifyContent: "flex-start",
+    minHeight: 58,
+  },
+  chipValWrap: {
+    width: "100%",
+    minHeight: 22,
+    justifyContent: "flex-end",
+    alignItems: "center",
   },
   chipNum: {
     fontSize: 14,
     fontWeight: 400,
     color: colors.ink,
     fontFamily: fonts.sansBold,
-    lineHeight: 1,
+    lineHeight: 1.15,
     textAlign: "center",
   },
   chipLab: {
     fontSize: 6.5,
     color: colors.ink3,
-    marginTop: 6,
+    marginTop: 8,
     textTransform: "uppercase",
     letterSpacing: 0.1,
     fontFamily: fonts.sansBold,
     textAlign: "center",
+    lineHeight: 1.2,
   },
   ynY: { backgroundColor: colors.surface2, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 4 },
   ynN: { backgroundColor: colors.surface2, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 4 },
@@ -230,15 +237,21 @@ export function Page6Evidence({ data }: { data: ReportData }) {
 
         <View style={styles.chipDeck} wrap={false}>
           <View style={styles.chip}>
-            <Text style={styles.chipNum}>{String(data.meta.responses)}</Text>
+            <View style={styles.chipValWrap}>
+              <Text style={styles.chipNum}>{String(data.meta.responses)}</Text>
+            </View>
             <Text style={styles.chipLab}>Responses</Text>
           </View>
           <View style={styles.chip}>
-            <Text style={styles.chipNum}>{String(data.meta.confidence)}</Text>
+            <View style={styles.chipValWrap}>
+              <Text style={styles.chipNum}>{String(data.meta.confidence)}</Text>
+            </View>
             <Text style={styles.chipLab}>Confidence</Text>
           </View>
           <View style={styles.chip}>
-            <Text style={styles.chipNum}>{String(data.meta.generated)}</Text>
+            <View style={styles.chipValWrap}>
+              <Text style={styles.chipNum}>{String(data.meta.generated)}</Text>
+            </View>
             <Text style={styles.chipLab}>Generated</Text>
           </View>
         </View>

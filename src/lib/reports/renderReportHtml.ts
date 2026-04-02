@@ -229,10 +229,10 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       priority: "HIGH",
       title: `${worstModel[0]} Authority Gap`,
       insight: `${worstModel[0]} scores ${worstModel[1]} — ${gap} points below your average.`,
-      whyItMatters: `${worstModel[0]} handles significant AI query volume. Low authority means competitive displacement risk.`,
-      action: "Improve web authority and publish comparison content targeting this model's training data.",
-      expectedImpact: `+10-15 points in ${worstModel[0]} within 60 days.`,
-      consequence: `Every week this gap persists, competitors capture discovery opportunities you're missing.`
+      whyItMatters: `${worstModel[0]} carries real query volume. Weak scores invite displacement.`,
+      action: `Publish comparison and citation-backed pages tuned to ${worstModel[0]}.`,
+      expectedImpact: `Target +10–15 points on ${worstModel[0]} within 60 days.`,
+      consequence: `Lag here hands discovery to whoever looks stronger on this surface.`,
     });
   }
   
@@ -242,10 +242,10 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       priority: "HIGH",
       title: "Competitive Authority Threat",
       insight: `${metrics.topCompetitor.name} is mentioned ${metrics.topCompetitor.mentions} times vs your ${metrics.mentioned}.`,
-      whyItMatters: "AI models are positioning a competitor ahead of you in recommendations.",
-      action: "Audit their content strategy. Counter-position with differentiated messaging.",
-      expectedImpact: "Regain competitive parity within 90 days.",
-      consequence: `Failure to act increases the likelihood ${metrics.topCompetitor.name} becomes the default recommendation.`
+      whyItMatters: "Assistants already rank them ahead of you on key answers.",
+      action: "Audit their proof points. Counter with differentiated claims and citations.",
+      expectedImpact: "Regain parity within 90 days.",
+      consequence: `${metrics.topCompetitor.name} can own the default recommendation if you wait.`,
     });
   }
   
@@ -254,11 +254,11 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
     insights.push({
       priority: "HIGH",
       title: "Fragile Leadership Position",
-      insight: `You're #1, but ${metrics.competitorsWithinRange.length} competitor${metrics.competitorsWithinRange.length > 1 ? 's are' : ' is'} within striking distance.`,
-      whyItMatters: "Leadership with thin margins can flip with a single algorithm update or competitor content push.",
-      action: "Accelerate content velocity to extend your lead before competitors catch up.",
-      expectedImpact: "Create 5+ mention gap to secure defensible leadership.",
-      consequence: `At current parity, any competitor content initiative could overtake you within 30 days.`
+      insight: `You're #1, but ${metrics.competitorsWithinRange.length} competitor${metrics.competitorsWithinRange.length > 1 ? "s are" : " is"} within striking distance.`,
+      whyItMatters: "Thin leads flip fast—one strong content push from a rival changes the table.",
+      action: "Raise velocity: proof, citations, and comparison assets before they close the gap.",
+      expectedImpact: "Build a 5+ mention cushion.",
+      consequence: `At this parity, a single competitor sprint can overtake you in weeks.`,
     });
   }
   
@@ -268,10 +268,10 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       priority: "MEDIUM",
       title: "Contested Market — No Clear Leader",
       insight: `All ${metrics.allEntities.length} tracked entities are within 3 mentions of each other.`,
-      whyItMatters: "This is both risk and opportunity — any player could break away with focused effort.",
-      action: "Aggressive content strategy for 90 days. First to differentiate captures the default position.",
-      expectedImpact: "Become the clear #1 with 10+ point lead.",
-      consequence: `In contested markets, the first mover advantage is decisive. Hesitation means someone else wins.`
+      whyItMatters: "No lock-in: whoever differentiates first takes the default answer.",
+      action: "90-day push on comparison content and citations. Move before a rival does.",
+      expectedImpact: "Aim for a clear #1 with a 10+ mention edge.",
+      consequence: `Contested sets reward speed. Waiting cedes the breakout to someone else.`,
     });
   }
   
@@ -281,10 +281,10 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       priority: "HIGH",
       title: "Low Authority Coverage",
       insight: `Authority signals appear in only ${metrics.mentionRate}% of AI responses.`,
-      whyItMatters: "More than half of AI users asking about your category won't see your brand as an authoritative option.",
-      action: "Improve brand authority through PR, backlinks, and structured data.",
-      expectedImpact: "Target 70%+ authority coverage to enter the AI consideration set.",
-      consequence: `Low visibility compounds — AI models learn from each other, and being absent now means being absent longer.`
+      whyItMatters: "Most category queries never put you in the authoritative set.",
+      action: "PR, backlinks, structured data—raise mention coverage with proof.",
+      expectedImpact: "Push toward 70%+ coverage to enter the consideration set.",
+      consequence: `Absence compounds: models reinforce what they already see.`,
     });
   }
   
@@ -294,10 +294,10 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       priority: "MEDIUM",
       title: "Positioning Weakness",
       insight: `Mentioned but only in top position ${metrics.topPositionRate}% of the time.`,
-      whyItMatters: "You're in the conversation but not the first recommendation.",
-      action: "Strengthen unique value proposition messaging.",
-      expectedImpact: "Move from 'also mentioned' to 'first choice' positioning.",
-      consequence: `Buyers trust first recommendations more. Second place in AI means second place in consideration.`
+      whyItMatters: "You are in the set, rarely first. First pick wins the click.",
+      action: "Sharpen differentiation and proof on priority URLs.",
+      expectedImpact: "Lift top-position share on money intents.",
+      consequence: `Second in the answer set is second in the funnel.`,
     });
   }
   
@@ -307,10 +307,10 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       priority: "MEDIUM",
       title: "Authority Gap",
       insight: `Only ${metrics.citationRate}% of mentions include citations.`,
-      whyItMatters: "AI models don't view your brand as an authoritative source.",
-      action: "Earn citations from industry publications, reviews, and trusted sources.",
-      expectedImpact: "Higher citation rate correlates with +5-10 score points.",
-      consequence: `Without authority signals, AI models will increasingly favor competitors with stronger citation profiles.`
+      whyItMatters: "Low citations read as low authority to the model.",
+      action: "Earn mentions from trade press, reviews, and trusted third parties.",
+      expectedImpact: "Citation lifts typically track +5–10 points.",
+      consequence: `Competitors with stronger citation profiles will keep winning the cite.`,
     });
   }
   
@@ -320,10 +320,10 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       priority: "LOW",
       title: `${strongModels[0][0]} Strength (Replicate)`,
       insight: `${strongModels[0][0]} scores you ${strongModels[0][1]} — your highest.`,
-      whyItMatters: "Shows your content strategy works for this model.",
-      action: "Analyze what content resonates with this model and replicate for others.",
-      expectedImpact: "Lift weaker models by applying successful patterns.",
-      consequence: `This is a proven playbook — not replicating it to other models is leaving points on the table.`
+      whyItMatters: "You already have a winning pattern on this surface.",
+      action: "Clone structure, facts, and citation style onto weaker models.",
+      expectedImpact: "Drag weaker models up using the same playbook.",
+      consequence: `Ignoring the playbook leaves easy points on the table.`,
     });
   }
   
@@ -333,10 +333,10 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       priority: "LOW",
       title: "Strong Position (Maintain)",
       insight: "Your AI authority is competitive — maintain current strategy.",
-      whyItMatters: "Complacency allows competitors to catch up.",
-      action: "Continue content velocity and monitor competitor activity.",
-      expectedImpact: "Sustain top-tier visibility.",
-      consequence: `Even strong positions erode without maintenance. Competitors are always working to overtake you.`
+      whyItMatters: "Complacency is how leaders get passed.",
+      action: "Keep shipping proof; watch competitor moves weekly.",
+      expectedImpact: "Hold top-tier visibility.",
+      consequence: `Strong scores decay without maintenance.`,
     });
   }
   
@@ -397,9 +397,9 @@ function generateBottomLine(data: ReportData, metrics: ReturnType<typeof calcula
   
   // Competitive context with tension
   if (metrics.isFragileLeadership) {
-    parts.push(`Despite ranking #1, competitors are within striking distance — leadership is fragile`);
+    parts.push(`You rank #1, but the lead is thin—easy to lose`);
   } else if (metrics.isContestedMarket) {
-    parts.push(`The market is contested with no clear leader — first to break away wins`);
+    parts.push(`Contested set: no lock-in; first break wins`);
   } else if (metrics.leader && !metrics.leader.isClient && metrics.gapToLeader > 0) {
     parts.push(`${metrics.leader.name} leads by ${metrics.gapToLeader} mentions — the gap is ${metrics.gapToLeader <= 3 ? 'closable' : 'significant'}`);
   } else if (metrics.clientRank === 1 && metrics.allEntities.length > 1) {
@@ -412,16 +412,16 @@ function generateBottomLine(data: ReportData, metrics: ReturnType<typeof calcula
 
 function generateTensionStatement(metrics: ReturnType<typeof calculateMetrics>): string {
   if (metrics.isFragileLeadership) {
-    return `Fragile leadership: you rank first, but competitors show similar mention coverage. A focused content push could change this ranking.`;
+    return `You rank first, but mention coverage is tight. One competitor sprint can flip the table.`;
   }
   if (metrics.isContestedMarket) {
-    return `Contested landscape: no single leader in AI visibility. The first brand to differentiate is likely to capture the default recommendation.`;
+    return `No clear leader in AI visibility. First brand to differentiate likely owns the default answer.`;
   }
   if (metrics.gapToLeader > 5) {
-    return `Visibility gap: ${metrics.leader?.name} leads by ${metrics.gapToLeader} mentions. Without intervention, models tend to reinforce existing patterns.`;
+    return `${metrics.leader?.name} leads by ${metrics.gapToLeader} mentions. Models reinforce what they already see—close the gap or it widens.`;
   }
   if (metrics.mentionRate < 50) {
-    return `Discovery risk: a majority of category queries may not surface your brand; low presence compounds over time.`;
+    return `Majority of category queries may skip you. Low presence compounds.`;
   }
   return "";
 }

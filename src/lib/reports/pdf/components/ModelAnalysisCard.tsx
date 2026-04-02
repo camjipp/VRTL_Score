@@ -42,34 +42,31 @@ const styles = StyleSheet.create({
     fontWeight: 400,
     color: colors.ink,
     textTransform: "uppercase",
-    marginBottom: 4,
+    marginBottom: 6,
     fontFamily: fonts.sansBold,
     letterSpacing: 0.03,
   },
-  scoreRow: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    marginBottom: 4,
-  },
-  score: {
-    fontSize: 32,
+  scoreOnly: {
+    fontSize: 34,
     fontWeight: 400,
     lineHeight: 1,
     fontFamily: fonts.sansBold,
+    marginBottom: 6,
   },
-  deltaWrap: {
-    marginLeft: 8,
-    marginBottom: 5,
+  deltaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 7,
   },
   deltaPill: {
-    paddingVertical: 2,
-    paddingHorizontal: 6,
+    paddingVertical: 3,
+    paddingHorizontal: 7,
     borderRadius: 4,
   },
   deltaPillPos: { backgroundColor: colors.surface2 },
   deltaPillNeg: { backgroundColor: colors.surface2 },
   deltaPillText: {
-    fontSize: 6.5,
+    fontSize: 7,
     fontWeight: 400,
     color: colors.ink2,
     fontFamily: fonts.sansBold,
@@ -77,7 +74,7 @@ const styles = StyleSheet.create({
   rule: {
     height: 1,
     backgroundColor: colors.rule,
-    marginBottom: 4,
+    marginBottom: 5,
     width: INNER_W,
   },
   barTrack: {
@@ -98,7 +95,7 @@ const styles = StyleSheet.create({
   barWrap: {
     position: "relative",
     width: INNER_W,
-    marginBottom: 4,
+    marginBottom: 3,
   },
   avgTick: {
     position: "absolute",
@@ -108,15 +105,15 @@ const styles = StyleSheet.create({
     backgroundColor: colors.ink4,
   },
   avgLabel: {
-    fontSize: 5,
-    color: colors.ink3,
-    marginBottom: 4,
+    fontSize: 6,
+    color: colors.ink4,
+    marginBottom: 8,
     fontFamily: fonts.sans,
   },
   bulletRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginTop: 3,
+    marginTop: 5,
   },
   dot: {
     width: 4,
@@ -128,7 +125,7 @@ const styles = StyleSheet.create({
   bulletText: {
     width: INNER_W - 12,
     fontSize: 6.5,
-    lineHeight: 1.4,
+    lineHeight: 1.48,
     color: colors.ink,
     fontFamily: fonts.sans,
   },
@@ -167,12 +164,10 @@ export function ModelAnalysisCard({
       <View style={[styles.topBand, { backgroundColor: colors.surface2 }]} />
       <View style={styles.inner}>
         <Text style={styles.name}>{nameLine}</Text>
-        <View style={styles.scoreRow}>
-          <Text style={[styles.score, { color: colors.ink }]}>{scoreLine}</Text>
-          <View style={styles.deltaWrap}>
-            <View style={[styles.deltaPill, posPill ? styles.deltaPillPos : styles.deltaPillNeg]}>
-              <Text style={styles.deltaPillText}>{deltaLine}</Text>
-            </View>
+        <Text style={[styles.scoreOnly, { color: colors.ink }]}>{scoreLine}</Text>
+        <View style={styles.deltaRow}>
+          <View style={[styles.deltaPill, posPill ? styles.deltaPillPos : styles.deltaPillNeg]}>
+            <Text style={styles.deltaPillText}>{deltaLine}</Text>
           </View>
         </View>
 

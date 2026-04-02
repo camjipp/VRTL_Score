@@ -13,12 +13,12 @@ import type {
   ReportData as ReactPdfReportData,
   SignalRow,
 } from "@/lib/reports/pdf/types";
+import { PDF_METHODOLOGY_TEXT } from "@/lib/reports/pdfTheme";
 
 function normalizeRecommendationPriority(p: string | undefined): RecommendationCard["priority"] {
   if (p === "HIGH" || p === "MEDIUM" || p === "LOW") return p;
   return "LOW";
 }
-import { PDF_METHODOLOGY_TEXT } from "@/lib/reports/pdfTheme";
 
 function formatLongDate(d: string) {
   const dt = new Date(d);
@@ -29,59 +29,61 @@ function formatLongDate(d: string) {
 const DEFAULT_EXECUTION: ExecutionPhase[] = [
   {
     phase: "Week 1–2",
-    text: "Audit content for AI extractability. Identify authority gaps. Benchmark competitor content.",
+    text: "Audit machine-readable copy, schema, and citation gaps. Benchmark competitor proof and entity consistency.",
   },
   {
     phase: "Week 2–3",
-    text: "Implement priority #1 recommendation. Focus resources on the weakest model.",
+    text: "Ship the top recommendation. Concentrate effort on the weakest model until it moves.",
   },
   {
     phase: "Week 3–4",
-    text: "Build authority signals. Earn citations from trusted sources. Counter-position versus competitors.",
+    text: "Add authority: reviews, press, trusted backlinks. Counter-position where competitors lead the narrative.",
   },
   {
     phase: "Week 4+",
-    text: "Run follow-up analysis to measure progress. Iterate on strategy based on results.",
+    text: "Re-run the snapshot. Read deltas by model and intent. Set the next 30-day plan.",
   },
 ];
 
-function buildModelInsights(name: string, val: number, avg: number): string[] {
+function buildModelInsights(name: string, val: number, _avg: number): string[] {
+  void _avg;
   const isStrong = val >= 70;
   const isWeak = val < 50;
   if (isStrong) {
     return [
-      "Your strongest model surface — replicate what works here across weaker models.",
-      "Competitors may target this channel to close the gap; defend with fresh authority signals.",
+      "Strongest surface. Replicate this pattern on the lagging models.",
+      "Competitors will pressure this channel. Refresh authority signals.",
     ];
   }
   if (isWeak) {
     return [
-      `Critical gap: users of ${name} may not reliably see your brand in category answers.`,
-      "Prioritize factual, citation-friendly pages this model tends to summarize.",
+      `${name} visibility is weak. Your brand is often missing from category responses.`,
+      "Ship factual, citation-heavy pages this model tends to summarize.",
     ];
   }
   return [
-    "Moderate performance — incremental gains available with targeted page updates.",
-    "Differentiate before competitors claim default recommendations on this model.",
+    "Room to run: targeted page updates should move the needle.",
+    "Differentiate before a competitor locks the default recommendation here.",
   ];
 }
 
-function buildStrategicTakeaway(models: [string, number][], avg: number): string {
+function buildStrategicTakeaway(models: [string, number][], _avg: number): string {
+  void _avg;
   if (models.length === 0) {
-    return "No per-model scores yet. Run snapshots that populate provider-level scores to prioritize where to invest.";
+    return "No per-model scores yet. Populate provider scores so you can prioritize spend.";
   }
   const hi = models[0][1];
   const lo = models[models.length - 1][1];
   if (hi >= 70 && lo < 50) {
-    return `You have a ${Math.round(hi - lo)}-point spread between your best and worst models. This inconsistency means your content works for some AI systems but not others. Closing this gap is your highest-leverage opportunity.`;
+    return `Performance is inconsistent across models (${Math.round(hi - lo)} points best vs. worst). That variance creates exposure to displacement. Close the gap before competitors standardize the winning answer.`;
   }
   if (models.every(([, s]) => s >= 70)) {
-    return "Consistent strong performance across models indicates robust content authority. Focus shifts to maintaining position and monitoring competitive threats.";
+    return "Strong across the board. Shift from lift to defense: monitor competitors and refresh proof.";
   }
   if (models.every(([, s]) => s < 50)) {
-    return "Weak performance across all models signals foundational authority issues. Plan for systematic improvement rather than model-only tactics.";
+    return "Weak everywhere. Fix foundations—authority and citations—before tuning model-by-model tactics.";
   }
-  return "Mixed performance suggests targeted optimization: lift your weakest model while preserving strength elsewhere.";
+  return "Mixed board. Lift the weakest model first; do not starve what already works.";
 }
 
 function evidenceSnippet(raw: string | null, parsedSnippet: string | undefined, max = 240): string {
@@ -130,7 +132,7 @@ export function mapSnapshotToReactPdfData(
     evidencePreview.push({
       label: "STRENGTH",
       snippet: evidenceSnippet(strengthExamples[0].raw_text, pj?.evidence_snippet),
-      note: "Primary recommendation positioning — maintain supporting authority.",
+      note: "Top-slot placement—keep proof and citations current.",
     });
   }
   if (vulnerableExamples[0]) {
@@ -139,7 +141,7 @@ export function mapSnapshotToReactPdfData(
     evidencePreview.push({
       label: "VULNERABLE",
       snippet: evidenceSnippet(vulnerableExamples[0].raw_text, pj?.evidence_snippet),
-      note: `${comps} surfaced; your brand did not — close the discovery gap.`,
+      note: `${comps} surfaced without you. Close the discovery gap.`,
     });
   }
   if (evidencePreview.length === 0 && responses[0]) {

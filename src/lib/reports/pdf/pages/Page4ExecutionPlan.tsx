@@ -9,7 +9,7 @@ import { PdfTraceMarker } from "../components/PdfTraceMarker";
 const PHASE_NODE = colors.ink3;
 
 const COL_W = 132;
-const GAP = 8;
+const GAP = 11;
 
 /** Avoid repeating the phase label when the body text starts with the same week string. */
 function stripPhasePrefix(phase: string, text: string): string {
@@ -41,12 +41,13 @@ const styles = StyleSheet.create({
   timeline: { flexDirection: "row", alignItems: "flex-start", width: 540, flexGrow: 1 },
   nodeCol: { width: COL_W, alignItems: "center" },
   stepLab: {
-    fontSize: 8,
+    fontSize: 9.5,
     fontWeight: 400,
-    marginBottom: rhythm.sm,
+    marginBottom: 10,
     fontFamily: fonts.sansBold,
     color: colors.ink,
     textAlign: "center",
+    letterSpacing: 0.02,
   },
   circleWrap: {
     width: 16,
@@ -64,7 +65,7 @@ const styles = StyleSheet.create({
   },
   connector: {
     width: 1,
-    height: 22,
+    height: 26,
     backgroundColor: colors.rule,
     marginBottom: rhythm.xs,
   },
@@ -79,8 +80,8 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   cardAccent: { width: "100%", height: 3 },
-  cardBody: { flex: 1, paddingVertical: rhythm.md, paddingHorizontal: rhythm.sm },
-  copy: { fontSize: 8.5, lineHeight: 1.55, color: colors.ink, fontFamily: fonts.sans },
+  cardBody: { flex: 1, paddingVertical: 14, paddingHorizontal: rhythm.sm },
+  copy: { fontSize: 8.5, lineHeight: 1.6, color: colors.ink, fontFamily: fonts.sans },
   impactLabel: {
     fontSize: 6,
     fontFamily: fonts.sansBold,
@@ -109,8 +110,7 @@ export function Page4ExecutionPlan({ data }: { data: ReportData }) {
 
         <ChapterTitle title="Execution Plan" />
         <Text style={styles.intro}>
-          A practical sequence for the next month. Adjust dates to your operating cadence. Each phase
-          builds on the last — complete discovery before scaling execution.
+          Four-week sequence. Shift dates to match your cadence. Finish discovery before you scale execution.
         </Text>
 
         <PdfTraceMarker page={4} section="Page4:before_phases" />

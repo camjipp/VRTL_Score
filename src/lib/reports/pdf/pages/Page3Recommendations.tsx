@@ -12,9 +12,9 @@ const HIGH_ACCENT = "#DC2626";
 const styles = StyleSheet.create({
   intro: {
     fontSize: 8,
-    lineHeight: 1.45,
+    lineHeight: 1.52,
     color: colors.ink2,
-    marginBottom: rhythm.sm,
+    marginBottom: rhythm.md,
     fontFamily: fonts.sans,
   },
   cardsBlock: {
@@ -41,56 +41,70 @@ const styles = StyleSheet.create({
     paddingVertical: rhythm.sm,
   },
   stripeNum: { fontSize: 20, fontWeight: 400, color: colors.paper, fontFamily: fonts.sansBold },
-  mid: { flex: 1, paddingVertical: 8, paddingHorizontal: 10, paddingRight: 8 },
+  mid: { flex: 1, paddingVertical: 10, paddingHorizontal: 11, paddingRight: 9 },
   priPill: {
     alignSelf: "flex-start",
     paddingVertical: 2,
     paddingHorizontal: 7,
     borderRadius: 3,
-    marginBottom: 6,
+    marginBottom: 7,
     borderWidth: 1,
     borderColor: colors.rule,
     backgroundColor: colors.paper,
   },
   priPillTxt: { fontSize: 5.5, fontWeight: 400, color: colors.ink2, fontFamily: fonts.sansBold, letterSpacing: 0.04 },
-  title: { fontSize: 10, fontWeight: 400, color: colors.ink, marginBottom: 4, fontFamily: fonts.sansBold },
+  title: { fontSize: 10, fontWeight: 400, color: colors.ink, marginBottom: 5, fontFamily: fonts.sansBold },
   insight: {
     fontSize: 8,
     fontWeight: 400,
-    marginBottom: 6,
+    marginBottom: 8,
     fontFamily: fonts.sansBold,
-    lineHeight: 1.35,
+    lineHeight: 1.42,
     color: colors.ink2,
   },
   micro: {
     fontSize: 6,
     fontWeight: 400,
     color: colors.ink3,
-    letterSpacing: 0.08,
-    marginBottom: 3,
-    marginTop: 1,
+    letterSpacing: 0.1,
+    marginBottom: 4,
+    marginTop: 2,
     fontFamily: fonts.sansBold,
     textTransform: "uppercase",
   },
-  body: { fontSize: 7.5, lineHeight: 1.48, color: colors.ink, fontFamily: fonts.sans },
+  microSpaced: {
+    marginTop: 9,
+  },
+  body: { fontSize: 7.5, lineHeight: 1.54, color: colors.ink, fontFamily: fonts.sans },
   sep: { width: 1, backgroundColor: colors.rule },
   right: {
     width: 132,
     backgroundColor: colors.surface2,
-    paddingVertical: 8,
-    paddingHorizontal: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
     justifyContent: "flex-start",
+  },
+  outWrap: {
+    flex: 1,
+    justifyContent: "flex-start",
+  },
+  outHair: {
+    height: 1,
+    width: 56,
+    backgroundColor: colors.rule,
+    marginTop: 6,
+    marginBottom: 7,
   },
   outLabel: {
     fontSize: 5.5,
     fontWeight: 400,
     color: colors.ink3,
-    letterSpacing: 0.08,
-    marginBottom: 6,
+    letterSpacing: 0.1,
+    marginBottom: 0,
     fontFamily: fonts.sansBold,
     textTransform: "uppercase",
   },
-  outText: { fontSize: 8, fontWeight: 400, lineHeight: 1.45, fontFamily: fonts.sansBold, color: colors.ink },
+  outText: { fontSize: 8, fontWeight: 400, lineHeight: 1.5, fontFamily: fonts.sansBold, color: colors.ink },
 });
 
 export function Page3Recommendations({ data }: { data: ReportData }) {
@@ -102,9 +116,7 @@ export function Page3Recommendations({ data }: { data: ReportData }) {
         <PdfTraceMarker page={3} section="Page3:after_header" />
 
         <ChapterTitle title="Recommendations" />
-        <Text style={styles.intro}>
-          Ranked by urgency and leverage. Execute in order where resourcing allows.
-        </Text>
+        <Text style={styles.intro}>Ranked by urgency and leverage. Work top-down when capacity is tight.</Text>
 
         <View style={styles.cardsBlock} wrap={false}>
           {data.recommendations.map((r, i) => {
@@ -132,13 +144,16 @@ export function Page3Recommendations({ data }: { data: ReportData }) {
                   <Text style={styles.insight}>{insightLine}</Text>
                   <Text style={styles.micro}>WHY IT MATTERS</Text>
                   <Text style={styles.body}>{explLine}</Text>
-                  <Text style={[styles.micro, { marginTop: 6 }]}>RECOMMENDED ACTION</Text>
+                  <Text style={[styles.micro, styles.microSpaced]}>RECOMMENDED ACTION</Text>
                   <Text style={styles.body}>{actLine}</Text>
                 </View>
                 <View style={styles.sep} />
                 <View style={styles.right}>
-                  <Text style={styles.outLabel}>EXPECTED OUTCOME</Text>
-                  <Text style={styles.outText}>{expLine}</Text>
+                  <View style={styles.outWrap}>
+                    <Text style={styles.outLabel}>EXPECTED OUTCOME</Text>
+                    <View style={styles.outHair} />
+                    <Text style={styles.outText}>{expLine}</Text>
+                  </View>
                 </View>
               </View>
             );

@@ -30,6 +30,9 @@ const ARC_LEN = (270 / 360) * (2 * Math.PI * R);
 
 const RING_TRACK = "#D1D5DB";
 
+/** Vertical position of score stack in the arc opening (pt, tuned to horseshoe interior). */
+const SCORE_STACK_TOP = 48;
+
 type Props = { score: number | null };
 
 export function ScoreRing({ score }: Props) {
@@ -38,14 +41,7 @@ export function ScoreRing({ score }: Props) {
   const rest = Math.max(0.001, ARC_LEN - filled);
 
   return (
-    <View
-      style={{
-        width: W,
-        height: H,
-        alignItems: "center",
-        justifyContent: "flex-start",
-      }}
-    >
+    <View style={{ width: W, height: H, position: "relative" }}>
       <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
         <Path d={ARC_D} stroke={RING_TRACK} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
         <Path
@@ -59,31 +55,46 @@ export function ScoreRing({ score }: Props) {
       </Svg>
       <View
         style={{
-          marginTop: -56,
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: SCORE_STACK_TOP,
           alignItems: "center",
-          width: W,
         }}
       >
-        <Text
-          style={{
-            fontSize: 42,
-            fontWeight: 400,
-            color: colors.ink,
-            fontFamily: fonts.sansBold,
-            lineHeight: 1,
-          }}
-        >
-          {score == null ? "—" : String(score)}
-        </Text>
-        <Text style={{ fontSize: 8, color: colors.ink3, marginTop: 0, fontFamily: fonts.sans }}>/ 100</Text>
+        <View style={{ flexDirection: "row", alignItems: "baseline" }}>
+          <Text
+            style={{
+              fontSize: 42,
+              fontWeight: 400,
+              color: colors.ink,
+              fontFamily: fonts.sansBold,
+              lineHeight: 1,
+            }}
+          >
+            {score == null ? "—" : String(score)}
+          </Text>
+          <Text
+            style={{
+              fontSize: 9,
+              color: colors.ink3,
+              marginLeft: 3,
+              fontFamily: fonts.sans,
+              lineHeight: 1,
+            }}
+          >
+            /{"\u00A0"}100
+          </Text>
+        </View>
         <Text
           style={{
             fontSize: 6,
             fontWeight: 400,
             color: colors.ink3,
-            marginTop: 2,
-            letterSpacing: 0.05,
+            marginTop: 3,
+            letterSpacing: 0.06,
             fontFamily: fonts.sansBold,
+            textTransform: "uppercase",
           }}
         >
           OVERALL SCORE
