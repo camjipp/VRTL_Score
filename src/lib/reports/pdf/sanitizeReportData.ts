@@ -5,11 +5,11 @@ import type { ReportData } from "./types";
  * Includes ZWSP/ZWJ/ZWNJ, soft hyphen, variation selectors, word joiners, bidi marks, BOM.
  */
 const INVISIBLE_AND_BREAK_CHARS =
-  /[\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFE00-\uFE0F\uFE20-\uFE2F\uFEFF\uFFF9-\uFFFB\u00AD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180E\uFFFC\uFFFD]/g;
+  /[\u2000-\u200F\u202A-\u202E\u2060-\u206F\uFE00-\uFE0F\uFE20-\uFE2F\uFEFF\uFFF9-\uFFFB\u00AD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180E\uFFFC\uFFFD]/g;
 
 /** Second pass after NFC (combining sequences can reintroduce problematic chars). */
 const EXTRA_FORMAT_CHARS =
-  /\u200B|\u200C|\u200D|\u200E|\u200F|\u2060|\u2061|\u2062|\u2063|\u2064|\uFEFF|\u00AD|\u034F|\u061C|\uFFF9|\uFFFA|\uFFFB/g;
+  /\u2000|\u2001|\u2002|\u2003|\u2004|\u2005|\u2006|\u2007|\u2008|\u2009|\u200A|\u200B|\u200C|\u200D|\u200E|\u200F|\u2060|\u2061|\u2062|\u2063|\u2064|\uFEFF|\u00AD|\u034F|\u061C|\uFFF9|\uFFFA|\uFFFB|\uFFFC/g;
 
 /**
  * Normalize user- and model-generated strings for reliable PDF rendering.
@@ -20,6 +20,11 @@ export function sanitizePdfString(raw: string): string {
   s = s.replace(EXTRA_FORMAT_CHARS, "");
   try {
     s = s.normalize("NFC");
+  } catch {
+    /* ignore */
+  }
+  try {
+    s = s.normalize("NFKC");
   } catch {
     /* ignore */
   }
@@ -34,6 +39,14 @@ export function sanitizePdfString(raw: string): string {
   s = s.replace(/[\u2028\u2029]/g, "\n");
   s = s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "");
   s = s.replace(/  +/g, " ");
+
+  /* Collapse stray zero-width / format leftovers in a loop (model output edge cases). */
+  let prev = "";
+  while (prev !== s) {
+    prev = s;
+    s = s.replace(INVISIBLE_AND_BREAK_CHARS, "");
+    s = s.replace(EXTRA_FORMAT_CHARS, "");
+  }
 
   return s;
 }

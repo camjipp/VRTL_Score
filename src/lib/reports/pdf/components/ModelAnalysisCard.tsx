@@ -15,9 +15,9 @@ export type ModelAnalysisCardProps = {
 
 /** Three columns + gaps = 540pt content: 172 + 12 + 172 + 12 + 172 */
 export const MODEL_CARD_WIDTH = 172;
-const INNER_W = MODEL_CARD_WIDTH - 20;
+const INNER_W = MODEL_CARD_WIDTH - 14;
 /** Equal-height analysis cards */
-const CARD_MIN_H = 168;
+const CARD_MIN_H = 136;
 
 const styles = StyleSheet.create({
   root: {
@@ -38,21 +38,21 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   name: {
-    fontSize: 8.5,
+    fontSize: 8,
     fontWeight: 400,
     color: colors.ink,
     textTransform: "uppercase",
-    marginBottom: 6,
+    marginBottom: 4,
     fontFamily: fonts.sansBold,
-    letterSpacing: 0.04,
+    letterSpacing: 0.03,
   },
   scoreRow: {
     flexDirection: "row",
     alignItems: "flex-end",
-    marginBottom: 6,
+    marginBottom: 4,
   },
   score: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: 400,
     lineHeight: 1,
     fontFamily: fonts.sansBold,
@@ -62,14 +62,14 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   deltaPill: {
-    paddingVertical: 4,
-    paddingHorizontal: 8,
+    paddingVertical: 2,
+    paddingHorizontal: 6,
     borderRadius: 4,
   },
   deltaPillPos: { backgroundColor: colors.surface2 },
   deltaPillNeg: { backgroundColor: colors.surface2 },
   deltaPillText: {
-    fontSize: 7,
+    fontSize: 6.5,
     fontWeight: 400,
     color: colors.ink2,
     fontFamily: fonts.sansBold,
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
   rule: {
     height: 1,
     backgroundColor: colors.rule,
-    marginBottom: 6,
+    marginBottom: 4,
     width: INNER_W,
   },
   barTrack: {
@@ -108,15 +108,15 @@ const styles = StyleSheet.create({
     backgroundColor: colors.ink4,
   },
   avgLabel: {
-    fontSize: 5.5,
+    fontSize: 5,
     color: colors.ink3,
-    marginBottom: 6,
+    marginBottom: 4,
     fontFamily: fonts.sans,
   },
   bulletRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginTop: 4,
+    marginTop: 3,
   },
   dot: {
     width: 4,
@@ -127,8 +127,8 @@ const styles = StyleSheet.create({
   },
   bulletText: {
     width: INNER_W - 12,
-    fontSize: 7,
-    lineHeight: 1.45,
+    fontSize: 6.5,
+    lineHeight: 1.4,
     color: colors.ink,
     fontFamily: fonts.sans,
   },
@@ -163,7 +163,7 @@ export function ModelAnalysisCard({
   const posPill = deltaVsAvg >= 0;
 
   return (
-    <View style={styles.root} wrap={false} minPresenceAhead={180}>
+    <View style={styles.root} wrap={false}>
       <View style={[styles.topBand, { backgroundColor: colors.surface2 }]} />
       <View style={styles.inner}>
         <Text style={styles.name}>{nameLine}</Text>

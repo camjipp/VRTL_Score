@@ -92,11 +92,11 @@ export const baseStyles = StyleSheet.create({
   },
   /** First heading in page body (chapter); not duplicated in header */
   chapterTitle: {
-    fontSize: 13,
+    fontSize: 13.5,
     fontWeight: 400,
     color: colors.ink,
     fontFamily: fonts.sansBold,
-    marginBottom: rhythm.sm,
+    marginBottom: rhythm.xs,
     letterSpacing: 0.02,
   },
   reportTitle: {

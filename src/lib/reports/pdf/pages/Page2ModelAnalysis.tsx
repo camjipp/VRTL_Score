@@ -8,13 +8,14 @@ import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
 const CONTENT_W = PAGE.width - PAGE.margin * 2;
+const EVIDENCE_GAP = 10;
+const EVIDENCE_COL_W = (CONTENT_W - EVIDENCE_GAP) / 2;
 
 const avgOf = (models: ReportData["modelScores"]) =>
   models.length ? Math.round(models.reduce((s, m) => s + m.score, 0) / models.length) : 0;
 
-const GAP = 12;
+const GAP = 10;
 
-/** Props unused for palette (cards use neutral + single cyan bar); kept for API stability. */
 const NEUTRAL_MODEL_VISUAL = {
   band: colors.surface2,
   scoreAccent: colors.cyan,
@@ -24,13 +25,13 @@ const NEUTRAL_MODEL_VISUAL = {
 const styles = StyleSheet.create({
   bannerOuter: {
     flexDirection: "row",
-    marginBottom: rhythm.md,
+    marginBottom: rhythm.sm,
     borderRadius: 4,
     overflow: "hidden",
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.rule,
-    minHeight: 44,
+    minHeight: 36,
   },
   bannerBar: { width: 3, backgroundColor: colors.ink3 },
   bannerInner: {
@@ -38,120 +39,131 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: rhythm.sm,
-    paddingHorizontal: rhythm.md,
+    paddingVertical: 4,
+    paddingHorizontal: rhythm.sm,
   },
-  bannerLeft: { flex: 1, paddingRight: rhythm.md, maxWidth: 360 },
+  bannerLeft: { flex: 1, paddingRight: rhythm.sm, maxWidth: 380 },
   bannerSpread: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: 400,
     color: colors.ink,
     fontFamily: fonts.sansBold,
     letterSpacing: 0.02,
   },
   bannerSub: {
-    fontSize: 8,
+    fontSize: 7.5,
     color: colors.ink2,
-    marginTop: rhythm.xs,
-    lineHeight: 1.45,
+    marginTop: 2,
+    lineHeight: 1.4,
     fontFamily: fonts.sans,
   },
   bannerPill: {
     backgroundColor: colors.paper,
     borderWidth: 1,
     borderColor: colors.rule,
-    paddingVertical: 5,
-    paddingHorizontal: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 6,
     borderRadius: 4,
-    maxWidth: 160,
+    maxWidth: 148,
   },
   bannerPillText: {
-    fontSize: 5.5,
+    fontSize: 5,
     fontWeight: 400,
     color: colors.ink2,
     fontFamily: fonts.sansBold,
-    lineHeight: 1.3,
+    lineHeight: 1.25,
     textAlign: "center",
-    letterSpacing: 0.06,
+    letterSpacing: 0.05,
   },
   row3: {
     width: CONTENT_W,
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: rhythm.md,
+    marginBottom: rhythm.sm,
+  },
+  evidenceRow: {
+    width: CONTENT_W,
+    flexDirection: "row",
+    marginBottom: rhythm.xs,
+    alignItems: "stretch",
   },
   evidenceOuter: {
     flexDirection: "row",
-    marginBottom: rhythm.sm,
     borderRadius: 4,
     borderWidth: 1,
     borderColor: colors.rule,
     overflow: "hidden",
+    width: EVIDENCE_COL_W,
   },
-  evidenceAccent: { width: 4 },
+  evidenceAccent: { width: 3 },
   evidenceInner: {
     flex: 1,
-    paddingVertical: rhythm.sm,
-    paddingHorizontal: rhythm.md,
+    paddingVertical: 6,
+    paddingHorizontal: rhythm.sm,
     backgroundColor: colors.paper,
   },
   evLabel: {
-    fontSize: 7.5,
+    fontSize: 6.5,
     fontWeight: 400,
-    letterSpacing: 0.3,
-    marginBottom: rhythm.sm,
+    letterSpacing: 0.12,
+    marginBottom: 4,
     textTransform: "uppercase",
     fontFamily: fonts.sansBold,
+    color: colors.ink3,
   },
   evMono: {
     fontFamily: fonts.mono,
-    fontSize: 7,
-    lineHeight: 1.45,
+    fontSize: 6.5,
+    lineHeight: 1.4,
     color: colors.ink2,
     backgroundColor: colors.surface,
-    paddingVertical: rhythm.sm,
-    paddingHorizontal: rhythm.sm,
-    borderRadius: 4,
+    paddingVertical: 5,
+    paddingHorizontal: 5,
+    borderRadius: 3,
     borderWidth: 1,
     borderColor: colors.rule,
   },
   evNote: {
-    fontSize: 8.5,
+    fontSize: 7.5,
     color: colors.ink,
-    marginTop: rhythm.sm,
-    lineHeight: 1.55,
+    marginTop: 5,
+    lineHeight: 1.45,
     fontFamily: fonts.sans,
   },
   takeawayOuter: {
     flexDirection: "row",
     borderRadius: 4,
     overflow: "hidden",
-    marginTop: rhythm.sm,
+    marginTop: rhythm.xs,
     borderWidth: 1,
     borderColor: colors.rule,
   },
   takeawayBar: { width: 3, backgroundColor: colors.ink },
   takeawayInner: {
     flex: 1,
-    paddingVertical: rhythm.md,
+    paddingVertical: rhythm.sm,
     paddingHorizontal: rhythm.md,
     backgroundColor: colors.surface2,
   },
   takeawayTitle: {
-    fontSize: 7.5,
+    fontSize: 7,
     fontWeight: 400,
     letterSpacing: 0.1,
     color: colors.ink3,
     textTransform: "uppercase",
-    marginBottom: rhythm.sm,
+    marginBottom: 4,
     fontFamily: fonts.sansBold,
   },
-  takeawayBody: { fontSize: 9.5, lineHeight: 1.58, color: colors.ink, fontFamily: fonts.sans },
+  takeawayBody: { fontSize: 9, lineHeight: 1.52, color: colors.ink, fontFamily: fonts.sans },
   sectionTitle: {
-    ...baseStyles.sectionLabel,
+    fontSize: 8,
+    fontWeight: 400,
+    letterSpacing: 0.12,
+    textTransform: "uppercase",
     color: colors.ink3,
     marginTop: 0,
-    marginBottom: rhythm.sm,
+    marginBottom: 4,
+    fontFamily: fonts.sansBold,
   },
 });
 
@@ -185,7 +197,7 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
           </View>
         </View>
 
-        <View style={styles.row3} wrap={false} minPresenceAhead={220}>
+        <View style={styles.row3} wrap={false}>
           {data.modelScores.map((m, idx) => {
             const cardId = `model-${m.name}-${idx}`;
             return (
@@ -215,28 +227,32 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
 
         <PdfTraceMarker page={2} section="Page2:after_model_grid" />
 
-        <View wrap={false} minPresenceAhead={160}>
-          <Text style={styles.sectionTitle}>Evidence preview</Text>
+        <Text style={styles.sectionTitle}>Evidence preview</Text>
+        <View style={styles.evidenceRow} wrap={false}>
           {data.evidencePreview.map((ev, i) => {
             const labelLine = String(ev.label);
             const snippetLine = String(ev.snippet);
             const noteLine = ev.note ? String(ev.note) : "";
             return (
-            <View key={`ev-${i}`} style={styles.evidenceOuter} wrap={false} minPresenceAhead={100}>
-              <View style={[styles.evidenceAccent, { backgroundColor: colors.ink3 }]} />
-              <View style={styles.evidenceInner}>
-                <Text style={[styles.evLabel, { color: colors.ink4 }]}>{labelLine}</Text>
-                <Text style={styles.evMono}>{snippetLine}</Text>
-                {ev.note ? <Text style={styles.evNote}>{noteLine}</Text> : null}
+              <View
+                key={`ev-${i}`}
+                style={[styles.evidenceOuter, i === 0 ? { marginRight: EVIDENCE_GAP } : {}]}
+                wrap={false}
+              >
+                <View style={[styles.evidenceAccent, { backgroundColor: colors.ink3 }]} />
+                <View style={styles.evidenceInner}>
+                  <Text style={styles.evLabel}>{labelLine}</Text>
+                  <Text style={styles.evMono}>{snippetLine}</Text>
+                  {ev.note ? <Text style={styles.evNote}>{noteLine}</Text> : null}
+                </View>
               </View>
-            </View>
             );
           })}
         </View>
 
         <PdfTraceMarker page={2} section="Page2:after_evidence_preview" />
 
-        <View style={styles.takeawayOuter} wrap={false} minPresenceAhead={90}>
+        <View style={styles.takeawayOuter} wrap={false}>
           <View style={styles.takeawayBar} />
           <View style={styles.takeawayInner}>
             <Text style={styles.takeawayTitle}>Strategic takeaway</Text>

@@ -22,14 +22,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: rhythm.lg,
     overflow: "hidden",
   },
-  heroLeft: { width: 210, alignItems: "center", justifyContent: "center" },
+  heroLeft: { width: 180, alignItems: "center", justifyContent: "center" },
   divider: { width: 1, alignSelf: "stretch", backgroundColor: colors.rule, marginHorizontal: rhythm.md },
   heroRight: {
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    minHeight: 144,
+    minHeight: 124,
   },
   kpiTile: {
     flex: 1,
@@ -44,13 +44,14 @@ const styles = StyleSheet.create({
   },
   kpiVal: { fontSize: 24, fontWeight: 400, fontFamily: fonts.sansBold, lineHeight: 1.05, color: colors.ink },
   kpiLab: {
-    fontSize: 6.5,
+    fontSize: 6,
     fontWeight: 400,
     color: colors.ink3,
     marginTop: rhythm.sm,
-    letterSpacing: 0.12,
+    letterSpacing: 0.06,
     textTransform: "uppercase",
     fontFamily: fonts.sansBold,
+    maxWidth: 92,
   },
   statusStrip: {
     flexDirection: "row",
@@ -197,11 +198,15 @@ export function Page1Overview({ data }: { data: ReportData }) {
           <View style={styles.heroRight}>
             <View style={styles.kpiTile}>
               <Text style={styles.kpiVal}>{data.mentionRate}%</Text>
-              <Text style={styles.kpiLab}>Mention rate</Text>
+              <Text style={styles.kpiLab}>
+                Mention{"\u00A0"}rate
+              </Text>
             </View>
             <View style={styles.kpiTile}>
               <Text style={styles.kpiVal}>{data.topPosition}%</Text>
-              <Text style={styles.kpiLab}>Top position</Text>
+              <Text style={styles.kpiLab}>
+                Top{"\u00A0"}position
+              </Text>
             </View>
             <View style={[styles.kpiTile, authEmpty ? { opacity: 0.88 } : {}]}>
               <Text style={[styles.kpiVal, authEmpty ? { color: colors.ink4 } : {}]}>{data.authorityScore}%</Text>
