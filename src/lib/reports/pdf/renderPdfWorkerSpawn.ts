@@ -25,7 +25,7 @@ export async function renderPdfViaWorker(payload: WorkerPayload): Promise<Buffer
     throw new Error(`PDF worker not found at dist/pdf-worker.cjs (${status.hint})`);
   }
   const bin = getPdfWorkerPath();
-  const inPath = join(tmpdir(), `vrtl-pdf-${randomUUID()}.json`);
+  const inPath = join(tmpdir(), `report-pdf-${randomUUID()}.json`);
   writeFileSync(inPath, JSON.stringify(payload), "utf8");
 
   return new Promise((resolve, reject) => {

@@ -1,6 +1,7 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
 import { PAGE, colors, fonts, rhythm, baseStyles } from "../theme";
+import { sanitizePdfString } from "../sanitizeReportData";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
@@ -29,7 +30,7 @@ const styles = StyleSheet.create({
   th: {
     flexDirection: "row",
     backgroundColor: colors.surface2,
-    paddingVertical: 8,
+    paddingVertical: 9,
     paddingHorizontal: rhythm.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.rule,
@@ -47,12 +48,12 @@ const styles = StyleSheet.create({
   tr: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 7,
+    paddingVertical: 8,
     paddingHorizontal: rhythm.sm,
     borderBottomWidth: 1,
-    borderBottomColor: colors.surface2,
+    borderBottomColor: colors.rule,
     width: 540,
-    minHeight: 26,
+    minHeight: 28,
   },
   trAlt: { backgroundColor: colors.surface },
   td: { fontSize: 7.5, color: colors.ink2, fontFamily: fonts.sans },
@@ -68,8 +69,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.rule,
-    borderRadius: 8,
-    padding: rhythm.md,
+    borderRadius: 4,
+    padding: rhythm.lg,
     overflow: "hidden",
   },
   methodTitle: {
@@ -87,8 +88,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.rule,
-    borderRadius: 8,
-    padding: rhythm.md,
+    borderRadius: 4,
+    paddingVertical: rhythm.md,
+    paddingHorizontal: rhythm.lg,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "stretch",
@@ -113,16 +115,23 @@ const styles = StyleSheet.create({
     letterSpacing: 0.35,
     fontFamily: fonts.sansBold,
   },
-  ynY: { backgroundColor: colors.greenLight, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 4 },
-  ynN: { backgroundColor: colors.redLight, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 4 },
+  ynY: { backgroundColor: colors.surface2, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 4 },
+  ynN: { backgroundColor: colors.surface2, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 4 },
 });
 
+/** Human-readable strength for table cells (underscores → words). */
+function formatStrengthLabel(raw: string): string {
+  const s = sanitizePdfString(String(raw).trim());
+  if (!s.includes("_")) return s;
+  return s
+    .split("_")
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
 function logLabelPill(label: string): { bg: string; fg: string } {
-  const u = label.toUpperCase();
-  if (u.includes("STRENGTH")) return { bg: colors.greenLight, fg: colors.green };
-  if (u.includes("OPPORTUNITY")) return { bg: colors.orangeLight, fg: colors.orange };
-  if (u.includes("COMPETITIVE")) return { bg: colors.orangeLight, fg: colors.orange };
-  if (u.includes("INVISIBLE")) return { bg: colors.redLight, fg: colors.red };
+  void label;
   return { bg: colors.surface2, fg: colors.ink3 };
 }
 
@@ -147,12 +156,6 @@ export function Page6Evidence({ data }: { data: ReportData }) {
           </View>
           {data.evidenceLog.map((row, rowIdx) => {
             const yn = row.mentioned === "Yes";
-            const strC =
-              row.strength === "strong"
-                ? colors.green
-                : row.strength === "medium"
-                  ? colors.orange
-                  : colors.ink4;
             const lp = logLabelPill(row.label);
             return (
               <View
@@ -172,7 +175,7 @@ export function Page6Evidence({ data }: { data: ReportData }) {
                       style={{
                         fontSize: 6.5,
                         fontWeight: 400,
-                        color: yn ? colors.green : colors.red,
+                        color: yn ? colors.ink2 : colors.ink4,
                         fontFamily: fonts.sansBold,
                       }}
                     >
@@ -181,8 +184,8 @@ export function Page6Evidence({ data }: { data: ReportData }) {
                   </View>
                 </View>
                 <Text style={[styles.td, { width: W.pos }]}>{row.position}</Text>
-                <Text style={[styles.td, { width: W.str, color: strC, fontFamily: fonts.sansBold }]}>
-                  {row.strength}
+                <Text style={[styles.td, { width: W.str, color: colors.ink2, fontFamily: fonts.sansBold }]}>
+                  {formatStrengthLabel(row.strength)}
                 </Text>
                 <Text style={[styles.td, { width: W.comp }]}>{row.competitors}</Text>
                 <Text style={[styles.td, { width: W.rest, fontSize: 7 }]}>—</Text>

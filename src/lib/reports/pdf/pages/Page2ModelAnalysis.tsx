@@ -11,84 +11,89 @@ const CONTENT_W = PAGE.width - PAGE.margin * 2;
 const avgOf = (models: ReportData["modelScores"]) =>
   models.length ? Math.round(models.reduce((s, m) => s + m.score, 0) / models.length) : 0;
 
-function visuals(score: number, avg: number) {
-  if (score >= avg + 15) {
-    return { band: colors.green, scoreAccent: colors.green, dot: colors.green };
-  }
-  if (score < avg - 5) {
-    return { band: colors.red, scoreAccent: colors.red, dot: colors.red };
-  }
-  return { band: colors.orange, scoreAccent: colors.orange, dot: colors.orange };
-}
-
 const GAP = 12;
+
+/** Props unused for palette (cards use neutral + single cyan bar); kept for API stability. */
+const NEUTRAL_MODEL_VISUAL = {
+  band: colors.surface2,
+  scoreAccent: colors.cyan,
+  dot: colors.ink4,
+} as const;
 
 const styles = StyleSheet.create({
   bannerOuter: {
     flexDirection: "row",
-    marginBottom: rhythm.lg,
-    borderRadius: 8,
+    marginBottom: rhythm.xl,
+    borderRadius: 4,
     overflow: "hidden",
-    backgroundColor: colors.cyanLight,
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.rule,
-    minHeight: 52,
+    minHeight: 56,
   },
-  bannerBar: { width: 4, backgroundColor: colors.cyan },
+  bannerBar: { width: 3, backgroundColor: colors.ink3 },
   bannerInner: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: rhythm.md,
-    paddingHorizontal: rhythm.md,
+    paddingVertical: rhythm.lg,
+    paddingHorizontal: rhythm.lg,
   },
   bannerLeft: { flex: 1, paddingRight: rhythm.md, maxWidth: 360 },
   bannerSpread: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 400,
     color: colors.ink,
     fontFamily: fonts.sansBold,
-    letterSpacing: 0.25,
+    letterSpacing: 0.06,
   },
   bannerSub: {
     fontSize: 8.5,
     color: colors.ink3,
-    marginTop: rhythm.xs,
-    lineHeight: 1.5,
+    marginTop: rhythm.sm,
+    lineHeight: 1.58,
     fontFamily: fonts.sans,
   },
   bannerPill: {
-    backgroundColor: colors.cyan,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    maxWidth: 168,
+    backgroundColor: colors.paper,
+    borderWidth: 1,
+    borderColor: colors.cyan,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    borderRadius: 4,
+    maxWidth: 172,
   },
   bannerPillText: {
-    fontSize: 6.5,
+    fontSize: 6,
     fontWeight: 400,
-    color: colors.paper,
+    color: colors.cyan,
     fontFamily: fonts.sansBold,
     lineHeight: 1.35,
     textAlign: "center",
+    letterSpacing: 0.08,
   },
   row3: {
     width: CONTENT_W,
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: rhythm.lg,
+    marginBottom: rhythm.xl,
   },
   evidenceOuter: {
     flexDirection: "row",
     marginBottom: rhythm.md,
-    borderRadius: 8,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: colors.rule,
     overflow: "hidden",
   },
   evidenceAccent: { width: 4 },
-  evidenceInner: { flex: 1, paddingVertical: rhythm.md, paddingHorizontal: rhythm.md, backgroundColor: colors.paper },
+  evidenceInner: {
+    flex: 1,
+    paddingVertical: rhythm.lg,
+    paddingHorizontal: rhythm.lg,
+    backgroundColor: colors.paper,
+  },
   evLabel: {
     fontSize: 7.5,
     fontWeight: 400,
@@ -100,42 +105,47 @@ const styles = StyleSheet.create({
   evMono: {
     fontFamily: fonts.mono,
     fontSize: 7.5,
-    lineHeight: 1.5,
+    lineHeight: 1.52,
     color: colors.ink3,
-    backgroundColor: colors.surface2,
+    backgroundColor: colors.surface,
     paddingVertical: rhythm.md,
     paddingHorizontal: rhythm.md,
-    borderRadius: 6,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: colors.rule,
   },
   evNote: {
-    fontSize: 8.5,
-    color: colors.ink2,
-    marginTop: rhythm.md,
-    lineHeight: 1.55,
+    fontSize: 9,
+    color: colors.ink,
+    marginTop: rhythm.lg,
+    lineHeight: 1.62,
     fontFamily: fonts.sans,
   },
   takeawayOuter: {
     flexDirection: "row",
-    borderRadius: 8,
+    borderRadius: 4,
     overflow: "hidden",
-    marginTop: rhythm.sm,
+    marginTop: rhythm.md,
     borderWidth: 1,
     borderColor: colors.rule,
   },
-  takeawayBar: { width: 5, backgroundColor: colors.violet },
-  takeawayInner: { flex: 1, paddingVertical: rhythm.lg, paddingHorizontal: rhythm.lg, backgroundColor: colors.violetLight },
+  takeawayBar: { width: 3, backgroundColor: colors.ink },
+  takeawayInner: {
+    flex: 1,
+    paddingVertical: rhythm.xl,
+    paddingHorizontal: rhythm.lg,
+    backgroundColor: colors.surface2,
+  },
   takeawayTitle: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: 400,
-    letterSpacing: 0.35,
-    color: colors.violet,
+    letterSpacing: 0.12,
+    color: colors.ink4,
     textTransform: "uppercase",
-    marginBottom: rhythm.sm,
+    marginBottom: rhythm.md,
     fontFamily: fonts.sansBold,
   },
-  takeawayBody: { fontSize: 10, lineHeight: 1.62, color: colors.ink2, fontFamily: fonts.sans },
+  takeawayBody: { fontSize: 10.5, lineHeight: 1.65, color: colors.ink, fontFamily: fonts.sans },
   sectionTitle: {
     ...baseStyles.sectionLabel,
     marginTop: rhythm.sm,
@@ -171,9 +181,8 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
           </View>
         </View>
 
-        <View style={styles.row3}>
+        <View style={styles.row3} wrap={false} minPresenceAhead={260}>
           {data.modelScores.map((m, idx) => {
-            const v = visuals(m.score, a);
             const cardId = `model-${m.name}-${idx}`;
             return (
               <View
@@ -191,9 +200,9 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
                   deltaVsAvg={m.deltaVsAvg}
                   avg={a}
                   insights={m.insights}
-                  bandColor={v.band}
-                  scoreAccent={v.scoreAccent}
-                  bulletDotColor={v.dot}
+                  bandColor={NEUTRAL_MODEL_VISUAL.band}
+                  scoreAccent={NEUTRAL_MODEL_VISUAL.scoreAccent}
+                  bulletDotColor={NEUTRAL_MODEL_VISUAL.dot}
                 />
               </View>
             );
@@ -202,27 +211,28 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
 
         <PdfTraceMarker page={2} section="Page2:after_model_grid" />
 
-        <Text style={styles.sectionTitle}>Evidence preview</Text>
-        {data.evidencePreview.map((ev, i) => {
-          const borderC = ev.label.includes("STRENGTH") || ev.label.includes("STR") ? colors.green : colors.red;
-          const labelLine = String(ev.label);
-          const snippetLine = String(ev.snippet);
-          const noteLine = ev.note ? String(ev.note) : "";
-          return (
-            <View key={`ev-${i}`} style={styles.evidenceOuter} wrap={false}>
-              <View style={[styles.evidenceAccent, { backgroundColor: borderC }]} />
+        <View wrap={false} minPresenceAhead={200}>
+          <Text style={styles.sectionTitle}>Evidence preview</Text>
+          {data.evidencePreview.map((ev, i) => {
+            const labelLine = String(ev.label);
+            const snippetLine = String(ev.snippet);
+            const noteLine = ev.note ? String(ev.note) : "";
+            return (
+            <View key={`ev-${i}`} style={styles.evidenceOuter} wrap={false} minPresenceAhead={130}>
+              <View style={[styles.evidenceAccent, { backgroundColor: colors.ink3 }]} />
               <View style={styles.evidenceInner}>
                 <Text style={[styles.evLabel, { color: colors.ink4 }]}>{labelLine}</Text>
                 <Text style={styles.evMono}>{snippetLine}</Text>
                 {ev.note ? <Text style={styles.evNote}>{noteLine}</Text> : null}
               </View>
             </View>
-          );
-        })}
+            );
+          })}
+        </View>
 
         <PdfTraceMarker page={2} section="Page2:after_evidence_preview" />
 
-        <View style={styles.takeawayOuter} wrap={false}>
+        <View style={styles.takeawayOuter} wrap={false} minPresenceAhead={120}>
           <View style={styles.takeawayBar} />
           <View style={styles.takeawayInner}>
             <Text style={styles.takeawayTitle}>Strategic takeaway</Text>

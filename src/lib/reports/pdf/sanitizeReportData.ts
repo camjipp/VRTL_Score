@@ -1,10 +1,15 @@
 import type { ReportData } from "./types";
 
 /**
- * Invisible / bidi / soft-break characters that PDFKit mishandles (split words, odd glyphs).
+ * Invisible / bidi / soft-break / format characters that PDFKit mishandles (split words, odd glyphs).
+ * Includes ZWSP/ZWJ/ZWNJ, soft hyphen, variation selectors, word joiners, bidi marks, BOM.
  */
 const INVISIBLE_AND_BREAK_CHARS =
-  /[\u200B-\u200F\u202A-\u202E\u2060-\u2064\u2066-\u2069\uFEFF\uFFF9-\uFFFB\u00AD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180E\uFFFC\uFFFD]/g;
+  /[\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFE00-\uFE0F\uFE20-\uFE2F\uFEFF\uFFF9-\uFFFB\u00AD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180E\uFFFC\uFFFD]/g;
+
+/** Second pass after NFC (combining sequences can reintroduce problematic chars). */
+const EXTRA_FORMAT_CHARS =
+  /\u200B|\u200C|\u200D|\u200E|\u200F|\u2060|\u2061|\u2062|\u2063|\u2064|\uFEFF|\u00AD|\u034F|\u061C|\uFFF9|\uFFFA|\uFFFB/g;
 
 /**
  * Normalize user- and model-generated strings for reliable PDF rendering.
@@ -12,11 +17,14 @@ const INVISIBLE_AND_BREAK_CHARS =
 export function sanitizePdfString(raw: string): string {
   if (raw === "") return raw;
   let s = raw.replace(INVISIBLE_AND_BREAK_CHARS, "");
+  s = s.replace(EXTRA_FORMAT_CHARS, "");
   try {
     s = s.normalize("NFC");
   } catch {
     /* ignore */
   }
+  s = s.replace(EXTRA_FORMAT_CHARS, "");
+  s = s.replace(INVISIBLE_AND_BREAK_CHARS, "");
 
   s = s.replace(/[\u2018\u2019\u201A\u02BC\u02B9\u2032\u2035\u00B4]/g, "'");
   s = s.replace(/[\u201C\u201D\u201E\u2033\u2036\u00AB\u00BB]/g, '"');

@@ -12,81 +12,101 @@ const W = { rank: 30, name: 116, bar: 231, count: 66, pill: 91 } as const;
 const styles = StyleSheet.create({
   hero: {
     flexDirection: "row",
-    alignItems: "stretch",
-    marginBottom: rhythm.lg,
+    alignItems: "center",
+    marginBottom: rhythm.xl,
     backgroundColor: colors.surface,
-    borderRadius: 8,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: colors.rule,
-    padding: rhythm.lg,
+    paddingVertical: rhythm.xl,
+    paddingHorizontal: rhythm.lg,
     overflow: "hidden",
   },
-  heroLeft: { width: 172, alignItems: "center", justifyContent: "center" },
-  divider: { width: 1, backgroundColor: colors.rule, marginHorizontal: rhythm.md },
-  heroRight: { flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "stretch" },
+  heroLeft: { width: 196, alignItems: "center", justifyContent: "center" },
+  divider: { width: 1, alignSelf: "stretch", backgroundColor: colors.rule, marginHorizontal: rhythm.md },
+  heroRight: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    minHeight: 144,
+  },
   kpiTile: {
     flex: 1,
-    marginHorizontal: 5,
-    paddingTop: rhythm.sm,
-    paddingHorizontal: rhythm.sm,
+    marginHorizontal: 6,
+    paddingTop: rhythm.md,
+    paddingHorizontal: rhythm.md,
     paddingBottom: rhythm.md,
-    borderBottomWidth: 3,
-    borderRadius: 6,
+    borderRadius: 4,
     backgroundColor: colors.paper,
     borderWidth: 1,
     borderColor: colors.rule,
-    borderBottomColor: colors.rule,
   },
-  kpiVal: { fontSize: 24, fontWeight: 400, fontFamily: fonts.sansBold },
+  kpiVal: { fontSize: 24, fontWeight: 400, fontFamily: fonts.sansBold, lineHeight: 1.05, color: colors.ink },
   kpiLab: {
-    fontSize: 7,
+    fontSize: 6.5,
     fontWeight: 400,
-    color: colors.ink3,
+    color: colors.ink4,
     marginTop: rhythm.sm,
-    letterSpacing: 0.3,
+    letterSpacing: 0.12,
     textTransform: "uppercase",
     fontFamily: fonts.sansBold,
   },
-  pillRow: { flexDirection: "row", flexWrap: "wrap", marginBottom: rhythm.lg, alignItems: "center" },
-  pillSp: { marginRight: 10, marginBottom: rhythm.sm },
-  pill: {
-    paddingVertical: 7,
-    paddingHorizontal: 14,
-    borderRadius: 6,
+  statusStrip: {
+    flexDirection: "row",
+    alignItems: "stretch",
+    marginBottom: rhythm.xl,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    borderRadius: 4,
+    backgroundColor: colors.paper,
+    overflow: "hidden",
   },
-  pillTextBase: { fontSize: 8, fontFamily: fonts.sans },
+  statusCell: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: rhythm.sm,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRightWidth: 1,
+    borderRightColor: colors.rule,
+  },
+  statusCellLast: { borderRightWidth: 0 },
+  statusText: { fontSize: 7.5, fontFamily: fonts.sansBold, textAlign: "center" },
   calloutWrap: {
     flexDirection: "row",
-    marginBottom: rhythm.lg,
-    borderRadius: 6,
+    marginBottom: rhythm.xl,
+    borderRadius: 4,
     overflow: "hidden",
-    backgroundColor: colors.cyanLight,
+    backgroundColor: colors.surface2,
     borderWidth: 1,
     borderColor: colors.rule,
   },
-  calloutBar: { width: 4, backgroundColor: colors.cyan },
-  calloutInner: { flex: 1, paddingVertical: rhythm.md, paddingHorizontal: rhythm.lg },
+  calloutBar: { width: 3, backgroundColor: colors.ink3 },
+  calloutInner: { flex: 1, paddingVertical: rhythm.lg, paddingHorizontal: rhythm.lg },
   calloutKicker: {
     fontSize: 6,
     fontWeight: 400,
-    color: colors.cyan,
+    color: colors.ink4,
     fontFamily: fonts.sansBold,
-    letterSpacing: 0.35,
-    marginBottom: rhythm.xs,
+    letterSpacing: 0.15,
+    marginBottom: rhythm.sm,
+    textTransform: "uppercase",
   },
   calloutBody: {
-    fontSize: 9.5,
-    lineHeight: 1.65,
-    color: colors.ink2,
+    fontSize: 10,
+    lineHeight: 1.68,
+    color: colors.ink,
     fontFamily: fonts.sans,
   },
   rankHeader: {
     fontSize: 8,
     fontWeight: 400,
     color: colors.ink4,
-    letterSpacing: 0.35,
+    letterSpacing: 0.12,
     textTransform: "uppercase",
-    marginBottom: rhythm.sm,
+    marginBottom: rhythm.md,
+    marginTop: rhythm.xs,
     fontFamily: fonts.sansBold,
   },
   rankOuter: {
@@ -105,48 +125,50 @@ const styles = StyleSheet.create({
     paddingLeft: rhythm.sm,
   },
   rankIdx: { width: W.rank, fontSize: 8.5, color: colors.ink4, fontWeight: 400, fontFamily: fonts.sansBold },
-  rankName: { width: W.name, fontSize: 9, color: colors.ink2, fontFamily: fonts.sans },
+  rankName: { width: W.name, fontSize: 8.5, color: colors.ink4, fontFamily: fonts.sans },
   rankNameClient: { width: W.name, fontSize: 9, color: colors.ink, fontWeight: 400, fontFamily: fonts.sansBold },
   barWrap: { width: W.bar, height: 7, backgroundColor: colors.surface2, borderRadius: 4, marginHorizontal: 6 },
   barInner: { flex: 1, flexDirection: "row", height: 7 },
   barFill: { height: 7, backgroundColor: colors.cyan, borderRadius: 4 },
   barFillNeu: { height: 7, backgroundColor: colors.ink4, borderRadius: 4, opacity: 0.35 },
   barRest: { height: 7 },
-  rankCount: { width: W.count, fontSize: 8.5, color: colors.ink3, textAlign: "right", fontFamily: fonts.sansBold },
+  rankCount: { width: W.count, fontSize: 8, color: colors.ink4, textAlign: "right", fontFamily: fonts.sans },
   pillCell: { width: W.pill, alignItems: "flex-end" },
   deltaPill: { paddingVertical: 2, paddingHorizontal: 7, borderRadius: 4 },
-  deltaAhead: { backgroundColor: colors.redLight },
-  deltaBehind: { backgroundColor: colors.greenLight },
+  deltaAhead: { backgroundColor: colors.surface2 },
+  deltaBehind: { backgroundColor: colors.surface2 },
   deltaTied: { backgroundColor: colors.surface2 },
   deltaTxt: { fontSize: 6.5, fontWeight: 400, color: colors.ink3, fontFamily: fonts.sansBold },
-  alertRow: { flexDirection: "row", marginTop: rhythm.sm, alignItems: "stretch" },
-  alertSp: { marginRight: 10 },
+  alertRow: { flexDirection: "row", marginTop: rhythm.lg, alignItems: "stretch" },
+  alertSp: { marginRight: rhythm.sm },
   alertCard: {
     flex: 1,
-    borderRadius: 8,
-    paddingVertical: rhythm.md,
+    borderRadius: 4,
+    paddingVertical: rhythm.lg,
     paddingHorizontal: rhythm.md,
     borderWidth: 1,
     borderColor: colors.rule,
-    minHeight: 92,
+    minHeight: 96,
     overflow: "hidden",
   },
-  alertWin: { backgroundColor: colors.greenLight, borderTopWidth: 3, borderTopColor: colors.green },
-  alertRisk: { backgroundColor: colors.orangeLight, borderTopWidth: 3, borderTopColor: colors.orange },
-  alertPri: { backgroundColor: colors.redLight, borderTopWidth: 3, borderTopColor: colors.red },
+  alertWin: { backgroundColor: colors.greenLight, borderTopWidth: 2, borderTopColor: colors.green },
+  alertRisk: { backgroundColor: colors.orangeLight, borderTopWidth: 2, borderTopColor: colors.orange },
+  alertPri: { backgroundColor: colors.redLight, borderTopWidth: 2, borderTopColor: colors.red },
   alertPill: {
     alignSelf: "flex-start",
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: 4,
+    paddingVertical: 2,
+    paddingHorizontal: 7,
+    borderRadius: 3,
     marginBottom: rhythm.sm,
+    borderWidth: 1,
+    borderColor: colors.rule,
   },
-  alertTitle: { fontSize: 10, fontWeight: 400, color: colors.ink, fontFamily: fonts.sansBold },
+  alertTitle: { fontSize: 9.5, fontWeight: 400, color: colors.ink, fontFamily: fonts.sansBold, lineHeight: 1.25 },
   alertDetail: {
     fontSize: 8,
     color: colors.ink2,
-    marginTop: rhythm.xs,
-    lineHeight: 1.55,
+    marginTop: rhythm.sm,
+    lineHeight: 1.58,
     fontFamily: fonts.sans,
   },
 });
@@ -167,57 +189,36 @@ export function Page1Overview({ data }: { data: ReportData }) {
         <PdfHeader data={data} variant="cover" />
         <PdfTraceMarker page={1} section="Page1:after_header" />
 
-        <View style={styles.hero}>
+        <View style={styles.hero} wrap={false} minPresenceAhead={180}>
           <View style={styles.heroLeft}>
             <ScoreRing score={data.overallScore} />
           </View>
           <View style={styles.divider} />
           <View style={styles.heroRight}>
-            <View style={[styles.kpiTile, { borderBottomColor: colors.cyan }]}>
-              <Text style={[styles.kpiVal, { color: colors.cyan }]}>{data.mentionRate}%</Text>
+            <View style={styles.kpiTile}>
+              <Text style={styles.kpiVal}>{data.mentionRate}%</Text>
               <Text style={styles.kpiLab}>Mention rate</Text>
             </View>
-            <View style={[styles.kpiTile, { borderBottomColor: colors.violet }]}>
-              <Text style={[styles.kpiVal, { color: colors.violet }]}>{data.topPosition}%</Text>
+            <View style={styles.kpiTile}>
+              <Text style={styles.kpiVal}>{data.topPosition}%</Text>
               <Text style={styles.kpiLab}>Top position</Text>
             </View>
-            <View
-              style={[
-                styles.kpiTile,
-                {
-                  borderBottomColor: authEmpty ? colors.rule : colors.green,
-                  opacity: authEmpty ? 0.92 : 1,
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.kpiVal,
-                  { color: authEmpty ? colors.ink4 : colors.green },
-                ]}
-              >
-                {data.authorityScore}%
-              </Text>
+            <View style={[styles.kpiTile, authEmpty ? { opacity: 0.88 } : {}]}>
+              <Text style={[styles.kpiVal, authEmpty ? { color: colors.ink4 } : {}]}>{data.authorityScore}%</Text>
               <Text style={[styles.kpiLab, authEmpty ? { color: colors.ink4 } : {}]}>Authority</Text>
             </View>
           </View>
         </View>
 
-        <View style={styles.pillRow}>
-          <View style={[styles.pill, styles.pillSp, { backgroundColor: colors.orangeLight }]}>
-            <Text style={[styles.pillTextBase, { color: colors.orange, fontFamily: fonts.sansBold, fontWeight: 400 }]}>
-              {statusUpper}
-            </Text>
+        <View style={styles.statusStrip} wrap={false}>
+          <View style={styles.statusCell}>
+            <Text style={[styles.statusText, { color: colors.ink2 }]}>{statusUpper}</Text>
           </View>
-          <View style={[styles.pill, styles.pillSp, { backgroundColor: colors.surface2 }]}>
-            <Text style={[styles.pillTextBase, { color: colors.ink2, fontFamily: fonts.sansBold, fontWeight: 400 }]}>
-              {rankLine}
-            </Text>
+          <View style={styles.statusCell}>
+            <Text style={[styles.statusText, { color: colors.ink2 }]}>{rankLine}</Text>
           </View>
-          <View style={[styles.pill, styles.pillSp, { backgroundColor: colors.greenLight }]}>
-            <Text style={[styles.pillTextBase, { color: colors.green, fontFamily: fonts.sansBold, fontWeight: 400 }]}>
-              {leadingPill}
-            </Text>
+          <View style={[styles.statusCell, styles.statusCellLast]}>
+            <Text style={[styles.statusText, { color: colors.ink2 }]}>{leadingPill}</Text>
           </View>
         </View>
 
@@ -243,7 +244,12 @@ export function Page1Overview({ data }: { data: ReportData }) {
               <View
                 style={[styles.rankInner, { backgroundColor: isClient ? colors.cyanLight : "transparent" }]}
               >
-                <Text style={styles.rankIdx}>{`#${c.rank}`}</Text>
+                <Text
+                  style={[
+                    styles.rankIdx,
+                    isClient ? {} : { color: colors.ink4, fontFamily: fonts.sans },
+                  ]}
+                >{`#${c.rank}`}</Text>
                 <Text style={isClient ? styles.rankNameClient : styles.rankName}>{c.name}</Text>
                 <View style={styles.barWrap}>
                   <View style={styles.barInner}>
@@ -278,24 +284,24 @@ export function Page1Overview({ data }: { data: ReportData }) {
           );
         })}
 
-        <View style={styles.alertRow}>
+        <View style={styles.alertRow} wrap={false} minPresenceAhead={140}>
           <View style={[styles.alertCard, styles.alertWin, styles.alertSp]}>
-            <View style={[styles.alertPill, { backgroundColor: colors.paper }]}>
-              <Text style={{ fontSize: 7, fontWeight: 400, color: colors.green, fontFamily: fonts.sansBold }}>WIN</Text>
+            <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.green }]}>
+              <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.green, fontFamily: fonts.sansBold }}>WIN</Text>
             </View>
             <Text style={styles.alertTitle}>{data.alerts.win.title}</Text>
             <Text style={styles.alertDetail}>{data.alerts.win.detail}</Text>
           </View>
           <View style={[styles.alertCard, styles.alertRisk, styles.alertSp]}>
-            <View style={[styles.alertPill, { backgroundColor: colors.paper }]}>
-              <Text style={{ fontSize: 7, fontWeight: 400, color: colors.orange, fontFamily: fonts.sansBold }}>RISK</Text>
+            <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.orange }]}>
+              <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.orange, fontFamily: fonts.sansBold }}>RISK</Text>
             </View>
             <Text style={styles.alertTitle}>{data.alerts.risk.title}</Text>
             <Text style={styles.alertDetail}>{data.alerts.risk.detail}</Text>
           </View>
           <View style={[styles.alertCard, styles.alertPri]}>
-            <View style={[styles.alertPill, { backgroundColor: colors.paper }]}>
-              <Text style={{ fontSize: 7, fontWeight: 400, color: colors.red, fontFamily: fonts.sansBold }}>PRIORITY</Text>
+            <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.red }]}>
+              <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.red, fontFamily: fonts.sansBold }}>PRIORITY</Text>
             </View>
             <Text style={styles.alertTitle}>{data.alerts.priority.title}</Text>
             <Text style={styles.alertDetail}>{data.alerts.priority.detail}</Text>

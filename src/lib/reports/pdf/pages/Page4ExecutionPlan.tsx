@@ -5,34 +5,47 @@ import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
-const PHASE_COL = ["#0EA5E9", "#F59E0B", "#7C3AED", "#10B981"] as const;
+const PHASE_NODE = colors.ink3;
 
 const COL_W = 129;
 const GAP = 8;
 
+/** Avoid repeating the phase label when the body text starts with the same week string. */
+function stripPhasePrefix(phase: string, text: string): string {
+  const p = phase.trim();
+  const t = text.trim();
+  if (!p || !t) return t;
+  if (!t.toLowerCase().startsWith(p.toLowerCase())) return t;
+  let rest = t.slice(p.length).trim();
+  rest = rest.replace(/^[\s:–—\-]+/, "").trim();
+  return rest.length > 0 ? rest : t;
+}
+
 const styles = StyleSheet.create({
   title: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 400,
     color: colors.ink,
-    marginBottom: rhythm.xs,
+    marginBottom: rhythm.sm,
     fontFamily: fonts.sansBold,
-    letterSpacing: 0.2,
+    letterSpacing: 0.06,
   },
   intro: {
     fontSize: 9,
-    lineHeight: 1.55,
+    lineHeight: 1.62,
     color: colors.ink3,
-    marginBottom: rhythm.lg,
+    marginBottom: rhythm.xl,
     fontFamily: fonts.sans,
   },
   timeline: { flexDirection: "row", alignItems: "flex-start", width: 540 },
   nodeCol: { width: COL_W, alignItems: "center" },
   weekLab: {
-    fontSize: 7,
+    fontSize: 7.5,
     fontWeight: 400,
-    marginBottom: rhythm.xs,
+    marginBottom: rhythm.sm,
     fontFamily: fonts.sansBold,
+    color: colors.ink2,
+    textAlign: "center",
   },
   circleWrap: {
     width: 16,
@@ -59,14 +72,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.paper,
     borderWidth: 1,
     borderColor: colors.rule,
-    borderRadius: 8,
-    minHeight: 118,
+    borderRadius: 4,
+    minHeight: 128,
     width: COL_W,
     overflow: "hidden",
   },
   cardAccent: { width: 3 },
   cardBody: { flex: 1, paddingVertical: rhythm.md, paddingHorizontal: rhythm.sm },
-  copy: { fontSize: 8.5, lineHeight: 1.58, color: colors.ink2, fontFamily: fonts.sans },
+  copy: { fontSize: 8.5, lineHeight: 1.62, color: colors.ink2, fontFamily: fonts.sans },
 });
 
 export function Page4ExecutionPlan({ data }: { data: ReportData }) {
@@ -84,15 +97,15 @@ export function Page4ExecutionPlan({ data }: { data: ReportData }) {
         </Text>
 
         <PdfTraceMarker page={4} section="Page4:before_phases" />
-        <View style={styles.timeline}>
+        <View style={styles.timeline} wrap={false} minPresenceAhead={200}>
           {data.executionPhases.map((ph, i) => {
-            const col = PHASE_COL[i % PHASE_COL.length];
+            const col = PHASE_NODE;
             const phaseLine = String(ph.phase);
-            const textLine = String(ph.text);
+            const textLine = stripPhasePrefix(phaseLine, String(ph.text));
             const last = i === data.executionPhases.length - 1;
             return (
               <View key={`phase-${i}`} style={[styles.nodeCol, !last ? { marginRight: GAP } : {}]} wrap={false}>
-                <Text style={[styles.weekLab, { color: col }]}>{phaseLine}</Text>
+                <Text style={styles.weekLab}>{phaseLine}</Text>
                 <View style={[styles.circleWrap, { backgroundColor: col }]}>
                   <View style={styles.circleInner} />
                 </View>

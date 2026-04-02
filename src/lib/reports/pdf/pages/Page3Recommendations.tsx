@@ -5,17 +5,13 @@ import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
-const PRI_COL: Record<string, string> = {
-  HIGH: colors.red,
-  MEDIUM: colors.violet,
-  LOW: colors.green,
-};
+const STRIPE_BG = colors.ink2;
 
 const styles = StyleSheet.create({
   pageTitle: {
     fontSize: 10,
     fontWeight: 400,
-    letterSpacing: 0.35,
+    letterSpacing: 0.12,
     textTransform: "uppercase",
     color: colors.ink,
     marginBottom: rhythm.sm,
@@ -23,9 +19,9 @@ const styles = StyleSheet.create({
   },
   intro: {
     fontSize: 9,
-    lineHeight: 1.55,
+    lineHeight: 1.62,
     color: colors.ink3,
-    marginBottom: rhythm.md,
+    marginBottom: rhythm.lg,
     fontFamily: fonts.sans,
   },
   card: {
@@ -33,11 +29,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.paper,
     borderWidth: 1,
     borderColor: colors.rule,
-    borderRadius: 8,
-    marginBottom: rhythm.lg,
+    borderRadius: 4,
+    marginBottom: rhythm.xl,
     padding: 0,
     overflow: "hidden",
-    minHeight: 108,
+    minHeight: 112,
   },
   leftStripe: {
     width: 46,
@@ -46,31 +42,36 @@ const styles = StyleSheet.create({
     paddingVertical: rhythm.md,
   },
   stripeNum: { fontSize: 24, fontWeight: 400, color: colors.paper, fontFamily: fonts.sansBold },
-  mid: { flex: 1, paddingVertical: rhythm.md, paddingHorizontal: rhythm.md, paddingRight: rhythm.sm },
+  mid: { flex: 1, paddingVertical: rhythm.lg, paddingHorizontal: rhythm.lg, paddingRight: rhythm.md },
   priPill: {
     alignSelf: "flex-start",
     paddingVertical: 4,
     paddingHorizontal: 9,
-    borderRadius: 4,
-    marginBottom: rhythm.sm,
+    borderRadius: 3,
+    marginBottom: rhythm.md,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    backgroundColor: colors.paper,
   },
-  priPillTxt: { fontSize: 6.5, fontWeight: 400, color: colors.paper, fontFamily: fonts.sansBold },
+  priPillTxt: { fontSize: 6, fontWeight: 400, color: colors.ink2, fontFamily: fonts.sansBold, letterSpacing: 0.06 },
   title: { fontSize: 11, fontWeight: 400, color: colors.ink, marginBottom: rhythm.sm, fontFamily: fonts.sansBold },
-  insight: { fontSize: 9, fontWeight: 400, marginBottom: rhythm.md, fontFamily: fonts.sansBold },
+  insight: { fontSize: 9, fontWeight: 400, marginBottom: rhythm.lg, fontFamily: fonts.sansBold, lineHeight: 1.4, color: colors.ink2 },
   micro: {
-    fontSize: 6,
+    fontSize: 6.5,
     fontWeight: 400,
-    color: colors.ink4,
-    letterSpacing: 0.35,
-    marginBottom: 4,
+    color: colors.ink3,
+    letterSpacing: 0.12,
+    marginBottom: 6,
+    marginTop: 2,
     fontFamily: fonts.sansBold,
+    textTransform: "uppercase",
   },
-  body: { fontSize: 8.5, lineHeight: 1.55, color: colors.ink2, fontFamily: fonts.sans },
+  body: { fontSize: 8.5, lineHeight: 1.65, color: colors.ink2, fontFamily: fonts.sans },
   sep: { width: 1, backgroundColor: colors.rule },
   right: {
-    width: 154,
-    backgroundColor: colors.surface,
-    paddingVertical: rhythm.md,
+    width: 156,
+    backgroundColor: colors.surface2,
+    paddingVertical: rhythm.lg,
     paddingHorizontal: rhythm.md,
     justifyContent: "center",
   },
@@ -78,11 +79,12 @@ const styles = StyleSheet.create({
     fontSize: 6,
     fontWeight: 400,
     color: colors.ink4,
-    letterSpacing: 0.4,
-    marginBottom: rhythm.sm,
+    letterSpacing: 0.12,
+    marginBottom: rhythm.md,
     fontFamily: fonts.sansBold,
+    textTransform: "uppercase",
   },
-  outText: { fontSize: 9, fontWeight: 400, lineHeight: 1.45, fontFamily: fonts.sansBold },
+  outText: { fontSize: 9, fontWeight: 400, lineHeight: 1.55, fontFamily: fonts.sansBold, color: colors.ink },
 });
 
 export function Page3Recommendations({ data }: { data: ReportData }) {
@@ -99,33 +101,32 @@ export function Page3Recommendations({ data }: { data: ReportData }) {
         </Text>
 
         {data.recommendations.map((r, i) => {
-          const pc = PRI_COL[r.priority] ?? colors.ink4;
           const titleLine = String(r.title);
           const insightLine = String(r.insight);
           const expLine = String(r.expectedOutcome);
           const actLine = String(r.action);
           const explLine = String(r.explanation);
           return (
-            <View key={`rec-${r.priority}-${i}`} style={styles.card} wrap={false}>
-              <View style={[styles.leftStripe, { backgroundColor: pc }]}>
+            <View key={`rec-${r.priority}-${i}`} style={styles.card} wrap={false} minPresenceAhead={320}>
+              <View style={[styles.leftStripe, { backgroundColor: STRIPE_BG }]}>
                 <Text style={styles.stripeNum}>{String(i + 1)}</Text>
               </View>
               <View style={styles.sep} />
               <View style={styles.mid}>
-                <View style={[styles.priPill, { backgroundColor: pc }]}>
+                <View style={styles.priPill}>
                   <Text style={styles.priPillTxt}>{`${r.priority} PRIORITY`}</Text>
                 </View>
                 <Text style={styles.title}>{titleLine}</Text>
-                <Text style={[styles.insight, { color: pc }]}>{insightLine}</Text>
-                <Text style={styles.micro}>WHY IT MATTERS</Text>
+                <Text style={styles.insight}>{insightLine}</Text>
+                <Text style={[styles.micro, { marginTop: rhythm.sm }]}>WHY IT MATTERS</Text>
                 <Text style={styles.body}>{explLine}</Text>
-                <Text style={[styles.micro, { marginTop: rhythm.md }]}>RECOMMENDED ACTION</Text>
+                <Text style={[styles.micro, { marginTop: rhythm.lg }]}>RECOMMENDED ACTION</Text>
                 <Text style={styles.body}>{actLine}</Text>
               </View>
               <View style={styles.sep} />
               <View style={styles.right}>
                 <Text style={styles.outLabel}>EXPECTED OUTCOME</Text>
-                <Text style={[styles.outText, { color: pc }]}>{expLine}</Text>
+                <Text style={styles.outText}>{expLine}</Text>
               </View>
             </View>
           );

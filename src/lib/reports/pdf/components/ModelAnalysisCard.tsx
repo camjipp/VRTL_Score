@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   topBand: {
-    height: 5,
+    height: 3,
     width: "100%",
   },
   inner: {
@@ -38,13 +38,13 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   name: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: 400,
     color: colors.ink,
     textTransform: "uppercase",
-    marginBottom: 8,
+    marginBottom: 10,
     fontFamily: fonts.sansBold,
-    letterSpacing: 0.2,
+    letterSpacing: 0.06,
   },
   scoreRow: {
     flexDirection: "row",
@@ -66,8 +66,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: 4,
   },
-  deltaPillPos: { backgroundColor: colors.greenLight },
-  deltaPillNeg: { backgroundColor: colors.redLight },
+  deltaPillPos: { backgroundColor: colors.surface2 },
+  deltaPillNeg: { backgroundColor: colors.surface2 },
   deltaPillText: {
     fontSize: 7,
     fontWeight: 400,
@@ -141,10 +141,13 @@ export function ModelAnalysisCard({
   deltaVsAvg,
   avg,
   insights,
-  bandColor,
-  scoreAccent,
-  bulletDotColor,
+  bandColor: _bandColor,
+  scoreAccent: _scoreAccent,
+  bulletDotColor: _bulletDotColor,
 }: ModelAnalysisCardProps) {
+  void _bandColor;
+  void _scoreAccent;
+  void _bulletDotColor;
   const scorePct = Math.min(100, Math.max(0, Math.round(score)));
   const rest = Math.max(0, 100 - scorePct);
   const avgPos = Math.min(100, Math.max(0, Math.round(avg)));
@@ -160,12 +163,12 @@ export function ModelAnalysisCard({
   const posPill = deltaVsAvg >= 0;
 
   return (
-    <View style={styles.root} wrap={false} minPresenceAhead={80}>
-      <View style={[styles.topBand, { backgroundColor: bandColor }]} />
+    <View style={styles.root} wrap={false} minPresenceAhead={220}>
+      <View style={[styles.topBand, { backgroundColor: colors.surface2 }]} />
       <View style={styles.inner}>
         <Text style={styles.name}>{nameLine}</Text>
         <View style={styles.scoreRow}>
-          <Text style={[styles.score, { color: scoreAccent }]}>{scoreLine}</Text>
+          <Text style={[styles.score, { color: colors.ink }]}>{scoreLine}</Text>
           <View style={styles.deltaWrap}>
             <View style={[styles.deltaPill, posPill ? styles.deltaPillPos : styles.deltaPillNeg]}>
               <Text style={styles.deltaPillText}>{deltaLine}</Text>
@@ -177,7 +180,7 @@ export function ModelAnalysisCard({
 
         <View style={styles.barWrap}>
           <View style={styles.barTrack}>
-            <View style={[{ flex: scorePct <= 0 ? 0 : scorePct, backgroundColor: scoreAccent }, styles.barFill]} />
+            <View style={[{ flex: scorePct <= 0 ? 0 : scorePct, backgroundColor: colors.cyan }, styles.barFill]} />
             <View style={[{ flex: rest }, styles.barRest]} />
           </View>
           <View style={[styles.avgTick, { left: tickLeft }]} />
@@ -188,7 +191,7 @@ export function ModelAnalysisCard({
           const lineText = String(line);
           return (
             <View key={`${modelId}-row-${idx}`} style={styles.bulletRow} wrap={false}>
-              <View style={[styles.dot, { backgroundColor: bulletDotColor }]} />
+              <View style={[styles.dot, { backgroundColor: colors.ink4 }]} />
               <Text style={styles.bulletText}>{lineText}</Text>
             </View>
           );

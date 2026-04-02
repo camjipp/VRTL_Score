@@ -44,6 +44,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.rule,
     alignItems: "center",
+    width: 540,
   },
   thText: {
     fontSize: 6.5,
@@ -56,15 +57,19 @@ const styles = StyleSheet.create({
   tr: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 10,
+    paddingVertical: 11,
     paddingHorizontal: rhythm.sm,
     borderBottomWidth: 1,
-    borderBottomColor: colors.surface2,
+    borderBottomColor: colors.rule,
     width: 540,
-    minHeight: 34,
+    minHeight: 36,
   },
   trAlt: { backgroundColor: colors.surface },
-  trYou: { backgroundColor: colors.cyanLight },
+  trYou: {
+    backgroundColor: colors.surface,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.cyan,
+  },
   td: { fontSize: 8.5, color: colors.ink2, fontFamily: fonts.sans },
   tdStrong: { fontSize: 8.5, color: colors.ink, fontWeight: 400, fontFamily: fonts.sansBold },
   pill: {
@@ -77,22 +82,19 @@ const styles = StyleSheet.create({
   barWrap: { height: 6, backgroundColor: colors.surface2, borderRadius: 3, width: C.bar - 8 },
   barIn: { flex: 1, flexDirection: "row", height: 6 },
   barF: { height: 6, backgroundColor: colors.cyan, borderRadius: 3 },
+  barFGray: { height: 6, backgroundColor: colors.ink4, borderRadius: 3, opacity: 0.4 },
   barR: { height: 6 },
   dot: { width: 6, height: 6, borderRadius: 3, marginRight: 8 },
 });
 
-function sigPillBg(s: ReportData["signalSummary"][0]["status"]) {
-  if (s === "positive") return colors.greenLight;
-  if (s === "improvable") return colors.orangeLight;
-  if (s === "gap") return colors.redLight;
-  return colors.violetLight;
+function sigPillBg(_status: ReportData["signalSummary"][0]["status"]) {
+  void _status;
+  return colors.surface2;
 }
 
-function sigPillFg(s: ReportData["signalSummary"][0]["status"]) {
-  if (s === "positive") return colors.green;
-  if (s === "improvable") return colors.orange;
-  if (s === "gap") return colors.red;
-  return colors.violet;
+function sigPillFg(_status: ReportData["signalSummary"][0]["status"]) {
+  void _status;
+  return colors.ink3;
 }
 
 function statusLabel(s: ReportData["competitiveTable"][0]["status"] | undefined) {
@@ -101,12 +103,9 @@ function statusLabel(s: ReportData["competitiveTable"][0]["status"] | undefined)
   return "—";
 }
 
-function cmpPillStyle(s: ReportData["competitiveTable"][0]["status"] | undefined) {
-  if (s === "You") return { bg: colors.cyanLight, fg: colors.cyan };
-  if (s === "Tied") return { bg: colors.surface2, fg: colors.ink3 };
-  if (s === "Behind") return { bg: colors.greenLight, fg: colors.green };
-  if (s === "Ahead") return { bg: colors.redLight, fg: colors.red };
-  return { bg: colors.surface2, fg: colors.ink2 };
+function cmpPillStyle(_status: ReportData["competitiveTable"][0]["status"] | undefined) {
+  void _status;
+  return { bg: colors.surface2, fg: colors.ink3 };
 }
 
 export function Page5DataSummary({ data }: { data: ReportData }) {
@@ -179,7 +178,12 @@ export function Page5DataSummary({ data }: { data: ReportData }) {
                 <View style={{ width: C.bar, flexDirection: "row", alignItems: "center" }}>
                   <View style={styles.barWrap}>
                     <View style={styles.barIn}>
-                      <View style={[{ flex: wPct <= 0 ? 0 : wPct }, styles.barF]} />
+                      <View
+                        style={[
+                          { flex: wPct <= 0 ? 0 : wPct },
+                          isYou ? styles.barF : styles.barFGray,
+                        ]}
+                      />
                       <View style={[{ flex: rest }, styles.barR]} />
                     </View>
                   </View>
@@ -196,12 +200,7 @@ export function Page5DataSummary({ data }: { data: ReportData }) {
                     {
                       width: C.vs,
                       textAlign: "right",
-                      color:
-                        row.vsYou === "0" || row.vsYou === "—"
-                          ? colors.ink4
-                          : row.vsYou.startsWith("-")
-                            ? colors.green
-                            : colors.ink2,
+                      color: colors.ink2,
                       fontFamily: fonts.sansBold,
                     },
                   ]}

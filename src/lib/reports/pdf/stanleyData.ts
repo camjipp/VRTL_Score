@@ -1,6 +1,6 @@
 import type { ReportData } from "./types";
 
-/** Fixture aligned with VRTL Score editorial template (preview / health checks) */
+/** Fixture for PDF preview and health checks (sample client data). */
 export const stanleyData: ReportData = {
   clientName: "STANLEY",
   domain: "stanley1913.com",
