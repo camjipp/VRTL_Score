@@ -1,91 +1,130 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { PAGE, colors, fonts, space, baseStyles } from "../theme";
+import { PAGE, colors, fonts, rhythm, baseStyles } from "../theme";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
-/** 30+86+42+48+78+44+212 = 540 */
+/** 28+102+40+44+72+40+214 = 540 */
 const W = {
-  idx: 30,
-  label: 86,
-  yn: 42,
-  pos: 48,
-  str: 78,
-  comp: 44,
-  rest: 212,
+  idx: 28,
+  label: 102,
+  yn: 40,
+  pos: 44,
+  str: 72,
+  comp: 40,
+  rest: 214,
 } as const;
 
 const styles = StyleSheet.create({
   h: {
     fontSize: 8,
     fontWeight: 400,
-    letterSpacing: 0.65,
+    letterSpacing: 0.35,
     textTransform: "uppercase",
     color: colors.ink4,
-    marginBottom: 8,
+    marginBottom: rhythm.sm,
     fontFamily: fonts.sansBold,
   },
   th: {
     flexDirection: "row",
     backgroundColor: colors.surface2,
-    paddingVertical: 6,
-    paddingHorizontal: 4,
+    paddingVertical: 8,
+    paddingHorizontal: rhythm.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.rule,
     width: 540,
+    alignItems: "center",
   },
   thText: {
     fontSize: 6.5,
     fontWeight: 400,
     color: colors.ink4,
     textTransform: "uppercase",
+    letterSpacing: 0.3,
     fontFamily: fonts.sansBold,
   },
   tr: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 6,
-    paddingHorizontal: 4,
+    paddingVertical: 7,
+    paddingHorizontal: rhythm.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.surface2,
     width: 540,
+    minHeight: 26,
   },
   trAlt: { backgroundColor: colors.surface },
   td: { fontSize: 7.5, color: colors.ink2, fontFamily: fonts.sans },
+  sigPill: {
+    paddingVertical: 3,
+    paddingHorizontal: 6,
+    borderRadius: 4,
+    alignSelf: "flex-start",
+  },
+  sigPillTxt: { fontSize: 6, fontWeight: 400, fontFamily: fonts.sansBold },
   method: {
-    marginTop: space.section,
+    marginTop: rhythm.xl,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.rule,
     borderRadius: 8,
-    padding: 14,
+    padding: rhythm.md,
     overflow: "hidden",
   },
   methodTitle: {
     fontSize: 9,
     fontWeight: 400,
     color: colors.ink,
-    marginBottom: 8,
+    marginBottom: rhythm.sm,
     fontFamily: fonts.sansBold,
+    letterSpacing: 0.35,
   },
-  methodBody: { fontSize: 9, lineHeight: 1.5, color: colors.ink2, fontFamily: fonts.sans },
-  chipRow: { flexDirection: "row", marginTop: 14, justifyContent: "space-between", width: 540 },
+  methodBody: { fontSize: 9, lineHeight: 1.55, color: colors.ink3, fontFamily: fonts.sans },
+  chipDeck: {
+    marginTop: rhythm.lg,
+    width: 540,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    borderRadius: 8,
+    padding: rhythm.md,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "stretch",
+  },
   chip: {
-    width: 168,
+    width: 158,
     backgroundColor: colors.paper,
     borderWidth: 1,
     borderColor: colors.rule,
     borderRadius: 6,
-    padding: 10,
+    paddingVertical: rhythm.md,
+    paddingHorizontal: rhythm.sm,
     alignItems: "center",
     overflow: "hidden",
   },
   chipNum: { fontSize: 18, fontWeight: 400, color: colors.ink, fontFamily: fonts.sansBold },
-  chipLab: { fontSize: 7, color: colors.ink4, marginTop: 4, textTransform: "uppercase", fontFamily: fonts.sans },
-  ynY: { backgroundColor: colors.greenLight, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 3 },
-  ynN: { backgroundColor: colors.redLight, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 3 },
+  chipLab: {
+    fontSize: 6.5,
+    color: colors.ink4,
+    marginTop: rhythm.xs,
+    textTransform: "uppercase",
+    letterSpacing: 0.35,
+    fontFamily: fonts.sansBold,
+  },
+  ynY: { backgroundColor: colors.greenLight, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 4 },
+  ynN: { backgroundColor: colors.redLight, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 4 },
 });
+
+function logLabelPill(label: string): { bg: string; fg: string } {
+  const u = label.toUpperCase();
+  if (u.includes("STRENGTH")) return { bg: colors.greenLight, fg: colors.green };
+  if (u.includes("OPPORTUNITY")) return { bg: colors.orangeLight, fg: colors.orange };
+  if (u.includes("COMPETITIVE")) return { bg: colors.orangeLight, fg: colors.orange };
+  if (u.includes("INVISIBLE")) return { bg: colors.redLight, fg: colors.red };
+  return { bg: colors.surface2, fg: colors.ink3 };
+}
 
 export function Page6Evidence({ data }: { data: ReportData }) {
   return (
@@ -96,7 +135,7 @@ export function Page6Evidence({ data }: { data: ReportData }) {
         <PdfTraceMarker page={6} section="Page6:after_header" />
 
         <Text style={styles.h}>Evidence log</Text>
-        <View style={{ marginBottom: 12 }}>
+        <View style={{ marginBottom: rhythm.md }}>
           <View style={styles.th}>
             <Text style={[styles.thText, { width: W.idx }]}>#</Text>
             <Text style={[styles.thText, { width: W.label }]}>Signal</Text>
@@ -114,6 +153,7 @@ export function Page6Evidence({ data }: { data: ReportData }) {
                 : row.strength === "medium"
                   ? colors.orange
                   : colors.ink4;
+            const lp = logLabelPill(row.label);
             return (
               <View
                 key={`evl-${row.idx}`}
@@ -121,10 +161,12 @@ export function Page6Evidence({ data }: { data: ReportData }) {
                 wrap={false}
               >
                 <Text style={[styles.td, { width: W.idx }]}>{String(row.idx)}</Text>
-                <Text style={[styles.td, { width: W.label, fontWeight: 400, fontFamily: fonts.sansBold }]}>
-                  {row.label}
-                </Text>
-                <View style={{ width: W.yn }}>
+                <View style={{ width: W.label, justifyContent: "center" }}>
+                  <View style={[styles.sigPill, { backgroundColor: lp.bg }]}>
+                    <Text style={[styles.sigPillTxt, { color: lp.fg }]}>{row.label}</Text>
+                  </View>
+                </View>
+                <View style={{ width: W.yn, alignItems: "flex-start" }}>
                   <View style={yn ? styles.ynY : styles.ynN}>
                     <Text
                       style={{
@@ -139,7 +181,7 @@ export function Page6Evidence({ data }: { data: ReportData }) {
                   </View>
                 </View>
                 <Text style={[styles.td, { width: W.pos }]}>{row.position}</Text>
-                <Text style={[styles.td, { width: W.str, color: strC, fontWeight: 400, fontFamily: fonts.sansBold }]}>
+                <Text style={[styles.td, { width: W.str, color: strC, fontFamily: fonts.sansBold }]}>
                   {row.strength}
                 </Text>
                 <Text style={[styles.td, { width: W.comp }]}>{row.competitors}</Text>
@@ -154,7 +196,7 @@ export function Page6Evidence({ data }: { data: ReportData }) {
           <Text style={styles.methodBody}>{data.methodology}</Text>
         </View>
 
-        <View style={styles.chipRow}>
+        <View style={styles.chipDeck}>
           <View style={styles.chip}>
             <Text style={styles.chipNum}>{String(data.meta.responses)}</Text>
             <Text style={styles.chipLab}>Responses</Text>

@@ -1,18 +1,17 @@
 import type { ReportData } from "./types";
 
 /**
- * Invisible / layout control characters that PDFKit + embedded fonts mishandle
- * (e.g. word joiner breaking "distance", ZWSP splitting tokens).
+ * Invisible / bidi / soft-break characters that PDFKit mishandles (split words, odd glyphs).
  */
-const INVISIBLE_AND_SOFT_HYPHEN = /[\u200B-\u200D\uFEFF\u2060\u180E\u034F\u00AD\uFFF9-\uFFFB]/g;
+const INVISIBLE_AND_BREAK_CHARS =
+  /[\u200B-\u200F\u202A-\u202E\u2060-\u2064\u2066-\u2069\uFEFF\uFFF9-\uFFFB\u00AD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180E\uFFFC\uFFFD]/g;
 
 /**
  * Normalize user- and model-generated strings for reliable PDF rendering.
- * Smart quotes, primes, and exotic spaces → ASCII-safe equivalents.
  */
 export function sanitizePdfString(raw: string): string {
   if (raw === "") return raw;
-  let s = raw.replace(INVISIBLE_AND_SOFT_HYPHEN, "");
+  let s = raw.replace(INVISIBLE_AND_BREAK_CHARS, "");
   try {
     s = s.normalize("NFC");
   } catch {
@@ -21,10 +20,12 @@ export function sanitizePdfString(raw: string): string {
 
   s = s.replace(/[\u2018\u2019\u201A\u02BC\u02B9\u2032\u2035\u00B4]/g, "'");
   s = s.replace(/[\u201C\u201D\u201E\u2033\u2036\u00AB\u00BB]/g, '"');
-  s = s.replace(/[\u2013\u2014\u2015\u2212]/g, " - ");
+  s = s.replace(/[\u2010\u2011\u2012\u2013\u2014\u2015\u2212]/g, "-");
   s = s.replace(/\u2026/g, "...");
   s = s.replace(/\u00A0|\u202F|\u2007|\uFEFF/g, " ");
   s = s.replace(/[\u2028\u2029]/g, "\n");
+  s = s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "");
+  s = s.replace(/  +/g, " ");
 
   return s;
 }

@@ -2,10 +2,11 @@ import { Circle, G, Svg } from "@react-pdf/renderer";
 import { Text, View } from "@react-pdf/renderer";
 import { colors, fonts } from "../theme";
 
-const R = 44;
+const SIZE = 120;
+const R = 48;
 const stroke = 9;
-const CX = 55;
-const CY = 55;
+const CX = 60;
+const CY = 60;
 
 type Props = { score: number | null };
 
@@ -17,8 +18,8 @@ export function ScoreRing({ score }: Props) {
   const gap = Math.max(0, circumference - filled);
 
   return (
-    <View style={{ width: 110, alignItems: "center" }}>
-      <Svg width={110} height={110} viewBox="0 0 110 110">
+    <View style={{ width: SIZE, alignItems: "center" }}>
+      <Svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`}>
         <Circle
           cx={CX}
           cy={CY}
@@ -40,10 +41,10 @@ export function ScoreRing({ score }: Props) {
           />
         </G>
       </Svg>
-      <View style={{ marginTop: -78, alignItems: "center", marginBottom: 8 }}>
+      <View style={{ marginTop: -86, alignItems: "center", marginBottom: 6 }}>
         <Text
           style={{
-            fontSize: 26,
+            fontSize: 28,
             fontWeight: 400,
             color: colors.ink,
             fontFamily: fonts.sansBold,
@@ -57,8 +58,8 @@ export function ScoreRing({ score }: Props) {
             fontSize: 7,
             fontWeight: 400,
             color: colors.ink4,
-            marginTop: 6,
-            letterSpacing: 0.65,
+            marginTop: 5,
+            letterSpacing: 0.25,
             fontFamily: fonts.sansBold,
           }}
         >

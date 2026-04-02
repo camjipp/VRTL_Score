@@ -1,49 +1,72 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { PAGE, colors, fonts, baseStyles } from "../theme";
+import { PAGE, colors, fonts, rhythm, baseStyles } from "../theme";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
 const PHASE_COL = ["#0EA5E9", "#F59E0B", "#7C3AED", "#10B981"] as const;
 
+const COL_W = 129;
+const GAP = 8;
+
 const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: 400,
     color: colors.ink,
-    marginBottom: 6,
+    marginBottom: rhythm.xs,
     fontFamily: fonts.sansBold,
+    letterSpacing: 0.2,
   },
   intro: {
     fontSize: 9,
-    lineHeight: 1.5,
-    color: colors.ink2,
-    marginBottom: 16,
+    lineHeight: 1.55,
+    color: colors.ink3,
+    marginBottom: rhythm.lg,
     fontFamily: fonts.sans,
   },
-  timeline: { flexDirection: "row", alignItems: "flex-start", marginBottom: 8, width: 540 },
-  nodeCol: { width: 129, alignItems: "center", marginRight: 8 },
-  weekLab: { fontSize: 7, fontWeight: 400, color: colors.ink4, marginBottom: 4, fontFamily: fonts.sansBold },
-  circle: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    marginBottom: 4,
+  timeline: { flexDirection: "row", alignItems: "flex-start", width: 540 },
+  nodeCol: { width: COL_W, alignItems: "center" },
+  weekLab: {
+    fontSize: 7,
+    fontWeight: 400,
+    marginBottom: rhythm.xs,
+    fontFamily: fonts.sansBold,
   },
-  connector: { width: 2, flex: 1, minHeight: 24, backgroundColor: colors.surface2 },
+  circleWrap: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    marginBottom: rhythm.xs,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  circleInner: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: colors.paper,
+  },
+  connector: {
+    width: 1,
+    height: 20,
+    backgroundColor: colors.rule,
+    marginBottom: rhythm.xs,
+  },
   card: {
+    flexDirection: "row",
     backgroundColor: colors.paper,
     borderWidth: 1,
     borderColor: colors.rule,
     borderRadius: 8,
-    padding: 14,
-    marginTop: 4,
-    width: 129,
+    minHeight: 118,
+    width: COL_W,
     overflow: "hidden",
   },
-  phaseTitle: { fontSize: 8, fontWeight: 400, color: colors.ink, marginBottom: 6, fontFamily: fonts.sansBold },
-  copy: { fontSize: 8.5, lineHeight: 1.5, color: colors.ink2, fontFamily: fonts.sans },
+  cardAccent: { width: 3 },
+  cardBody: { flex: 1, paddingVertical: rhythm.md, paddingHorizontal: rhythm.sm },
+  copy: { fontSize: 8.5, lineHeight: 1.58, color: colors.ink2, fontFamily: fonts.sans },
 });
 
 export function Page4ExecutionPlan({ data }: { data: ReportData }) {
@@ -66,14 +89,19 @@ export function Page4ExecutionPlan({ data }: { data: ReportData }) {
             const col = PHASE_COL[i % PHASE_COL.length];
             const phaseLine = String(ph.phase);
             const textLine = String(ph.text);
+            const last = i === data.executionPhases.length - 1;
             return (
-              <View key={`phase-${i}`} style={styles.nodeCol} wrap={false}>
-                <Text style={styles.weekLab}>{phaseLine}</Text>
-                <View style={[styles.circle, { backgroundColor: col }]} />
-                <View style={[styles.connector, { backgroundColor: col, opacity: 0.35, maxHeight: 20 }]} />
+              <View key={`phase-${i}`} style={[styles.nodeCol, !last ? { marginRight: GAP } : {}]} wrap={false}>
+                <Text style={[styles.weekLab, { color: col }]}>{phaseLine}</Text>
+                <View style={[styles.circleWrap, { backgroundColor: col }]}>
+                  <View style={styles.circleInner} />
+                </View>
+                <View style={styles.connector} />
                 <View style={styles.card}>
-                  <Text style={styles.phaseTitle}>{phaseLine}</Text>
-                  <Text style={styles.copy}>{textLine}</Text>
+                  <View style={[styles.cardAccent, { backgroundColor: col }]} />
+                  <View style={styles.cardBody}>
+                    <Text style={styles.copy}>{textLine}</Text>
+                  </View>
                 </View>
               </View>
             );

@@ -1,75 +1,92 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { PAGE, colors, fonts, space, baseStyles } from "../theme";
+import { PAGE, colors, fonts, rhythm, baseStyles } from "../theme";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 import { ScoreRing } from "../components/ScoreRing";
 
 /** Inner row columns sum to 537 (540 − 3pt accent rail) */
-const W = { rank: 32, name: 118, bar: 229, count: 68, pill: 90 } as const;
+const W = { rank: 30, name: 116, bar: 231, count: 66, pill: 91 } as const;
 
 const styles = StyleSheet.create({
   hero: {
     flexDirection: "row",
     alignItems: "stretch",
-    marginBottom: space.section,
+    marginBottom: rhythm.lg,
     backgroundColor: colors.surface,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.rule,
-    padding: 14,
+    padding: rhythm.lg,
     overflow: "hidden",
   },
-  heroLeft: { width: 148, alignItems: "center", justifyContent: "center" },
-  divider: { width: 1, backgroundColor: colors.rule, marginHorizontal: 10 },
+  heroLeft: { width: 172, alignItems: "center", justifyContent: "center" },
+  divider: { width: 1, backgroundColor: colors.rule, marginHorizontal: rhythm.md },
   heroRight: { flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "stretch" },
   kpiTile: {
     flex: 1,
-    marginHorizontal: 4,
-    paddingBottom: 8,
-    borderBottomWidth: 2,
+    marginHorizontal: 5,
+    paddingTop: rhythm.sm,
+    paddingHorizontal: rhythm.sm,
+    paddingBottom: rhythm.md,
+    borderBottomWidth: 3,
+    borderRadius: 6,
+    backgroundColor: colors.paper,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    borderBottomColor: colors.rule,
   },
-  kpiVal: { fontSize: 22, fontWeight: 400, fontFamily: fonts.sansBold },
+  kpiVal: { fontSize: 24, fontWeight: 400, fontFamily: fonts.sansBold },
   kpiLab: {
     fontSize: 7,
     fontWeight: 400,
-    color: colors.ink4,
-    marginTop: 6,
-    letterSpacing: 0.65,
+    color: colors.ink3,
+    marginTop: rhythm.sm,
+    letterSpacing: 0.3,
     textTransform: "uppercase",
     fontFamily: fonts.sansBold,
   },
-  pillRow: { flexDirection: "row", flexWrap: "wrap", marginBottom: space.section },
-  pillSp: { marginRight: 8, marginBottom: 6 },
+  pillRow: { flexDirection: "row", flexWrap: "wrap", marginBottom: rhythm.lg, alignItems: "center" },
+  pillSp: { marginRight: 10, marginBottom: rhythm.sm },
   pill: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingVertical: 7,
+    paddingHorizontal: 14,
     borderRadius: 6,
   },
   pillTextBase: { fontSize: 8, fontFamily: fonts.sans },
   calloutWrap: {
     flexDirection: "row",
-    marginBottom: space.section,
-    borderRadius: 4,
+    marginBottom: rhythm.lg,
+    borderRadius: 6,
     overflow: "hidden",
     backgroundColor: colors.cyanLight,
+    borderWidth: 1,
+    borderColor: colors.rule,
   },
   calloutBar: { width: 4, backgroundColor: colors.cyan },
-  calloutInner: { flex: 1, padding: 14 },
+  calloutInner: { flex: 1, paddingVertical: rhythm.md, paddingHorizontal: rhythm.lg },
+  calloutKicker: {
+    fontSize: 6,
+    fontWeight: 400,
+    color: colors.cyan,
+    fontFamily: fonts.sansBold,
+    letterSpacing: 0.35,
+    marginBottom: rhythm.xs,
+  },
   calloutBody: {
     fontSize: 9.5,
-    lineHeight: 1.55,
-    color: colors.ink3,
+    lineHeight: 1.65,
+    color: colors.ink2,
     fontFamily: fonts.sans,
   },
   rankHeader: {
     fontSize: 8,
     fontWeight: 400,
     color: colors.ink4,
-    letterSpacing: 0.65,
+    letterSpacing: 0.35,
     textTransform: "uppercase",
-    marginBottom: 8,
+    marginBottom: rhythm.sm,
     fontFamily: fonts.sansBold,
   },
   rankOuter: {
@@ -84,33 +101,34 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 8,
-    paddingLeft: 6,
+    paddingVertical: 7,
+    paddingLeft: rhythm.sm,
   },
-  rankIdx: { width: W.rank, fontSize: 9, color: colors.ink4, fontWeight: 400, fontFamily: fonts.sansBold },
+  rankIdx: { width: W.rank, fontSize: 8.5, color: colors.ink4, fontWeight: 400, fontFamily: fonts.sansBold },
   rankName: { width: W.name, fontSize: 9, color: colors.ink2, fontFamily: fonts.sans },
   rankNameClient: { width: W.name, fontSize: 9, color: colors.ink, fontWeight: 400, fontFamily: fonts.sansBold },
-  barWrap: { width: W.bar, height: 6, backgroundColor: colors.surface2, borderRadius: 3, marginHorizontal: 6 },
-  barInner: { flex: 1, flexDirection: "row", height: 6 },
-  barFill: { height: 6, backgroundColor: colors.cyan, borderRadius: 3, opacity: 0.85 },
-  barFillNeu: { height: 6, backgroundColor: colors.ink4, borderRadius: 3, opacity: 0.45 },
-  barRest: { height: 6 },
-  rankCount: { width: W.count, fontSize: 9, color: colors.ink4, textAlign: "right", fontFamily: fonts.sans },
+  barWrap: { width: W.bar, height: 7, backgroundColor: colors.surface2, borderRadius: 4, marginHorizontal: 6 },
+  barInner: { flex: 1, flexDirection: "row", height: 7 },
+  barFill: { height: 7, backgroundColor: colors.cyan, borderRadius: 4 },
+  barFillNeu: { height: 7, backgroundColor: colors.ink4, borderRadius: 4, opacity: 0.35 },
+  barRest: { height: 7 },
+  rankCount: { width: W.count, fontSize: 8.5, color: colors.ink3, textAlign: "right", fontFamily: fonts.sansBold },
   pillCell: { width: W.pill, alignItems: "flex-end" },
-  deltaPill: { paddingVertical: 3, paddingHorizontal: 8, borderRadius: 4 },
+  deltaPill: { paddingVertical: 2, paddingHorizontal: 7, borderRadius: 4 },
   deltaAhead: { backgroundColor: colors.redLight },
   deltaBehind: { backgroundColor: colors.greenLight },
   deltaTied: { backgroundColor: colors.surface2 },
-  deltaTxt: { fontSize: 7, fontWeight: 400, color: colors.ink2, fontFamily: fonts.sansBold },
-  alertRow: { flexDirection: "row", marginTop: 6 },
-  alertSp: { marginRight: 8 },
+  deltaTxt: { fontSize: 6.5, fontWeight: 400, color: colors.ink3, fontFamily: fonts.sansBold },
+  alertRow: { flexDirection: "row", marginTop: rhythm.sm, alignItems: "stretch" },
+  alertSp: { marginRight: 10 },
   alertCard: {
     flex: 1,
-    borderRadius: 6,
-    padding: 12,
+    borderRadius: 8,
+    paddingVertical: rhythm.md,
+    paddingHorizontal: rhythm.md,
     borderWidth: 1,
     borderColor: colors.rule,
-    minHeight: 76,
+    minHeight: 92,
     overflow: "hidden",
   },
   alertWin: { backgroundColor: colors.greenLight, borderTopWidth: 3, borderTopColor: colors.green },
@@ -118,13 +136,19 @@ const styles = StyleSheet.create({
   alertPri: { backgroundColor: colors.redLight, borderTopWidth: 3, borderTopColor: colors.red },
   alertPill: {
     alignSelf: "flex-start",
-    paddingVertical: 2,
+    paddingVertical: 3,
     paddingHorizontal: 8,
     borderRadius: 4,
-    marginBottom: 6,
+    marginBottom: rhythm.sm,
   },
   alertTitle: { fontSize: 10, fontWeight: 400, color: colors.ink, fontFamily: fonts.sansBold },
-  alertDetail: { fontSize: 8, color: colors.ink2, marginTop: 4, lineHeight: 1.45, fontFamily: fonts.sans },
+  alertDetail: {
+    fontSize: 8,
+    color: colors.ink2,
+    marginTop: rhythm.xs,
+    lineHeight: 1.55,
+    fontFamily: fonts.sans,
+  },
 });
 
 export function Page1Overview({ data }: { data: ReportData }) {
@@ -134,6 +158,7 @@ export function Page1Overview({ data }: { data: ReportData }) {
   const rankLine = `RANK #${data.rank} OF ${data.rankTotal}`;
   const statusUpper = String(data.status).toUpperCase();
   const leadingPill = data.rank === 1 ? "LEADING" : "CHALLENGER";
+  const authEmpty = data.authorityScore === 0;
 
   return (
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
@@ -156,9 +181,24 @@ export function Page1Overview({ data }: { data: ReportData }) {
               <Text style={[styles.kpiVal, { color: colors.violet }]}>{data.topPosition}%</Text>
               <Text style={styles.kpiLab}>Top position</Text>
             </View>
-            <View style={[styles.kpiTile, { borderBottomColor: colors.green }]}>
-              <Text style={[styles.kpiVal, { color: colors.green }]}>{data.authorityScore}%</Text>
-              <Text style={styles.kpiLab}>Authority</Text>
+            <View
+              style={[
+                styles.kpiTile,
+                {
+                  borderBottomColor: authEmpty ? colors.rule : colors.green,
+                  opacity: authEmpty ? 0.92 : 1,
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.kpiVal,
+                  { color: authEmpty ? colors.ink4 : colors.green },
+                ]}
+              >
+                {data.authorityScore}%
+              </Text>
+              <Text style={[styles.kpiLab, authEmpty ? { color: colors.ink4 } : {}]}>Authority</Text>
             </View>
           </View>
         </View>
@@ -184,6 +224,7 @@ export function Page1Overview({ data }: { data: ReportData }) {
         <View style={styles.calloutWrap} wrap={false}>
           <View style={styles.calloutBar} />
           <View style={styles.calloutInner}>
+            <Text style={styles.calloutKicker}>BOTTOM LINE</Text>
             <Text style={styles.calloutBody}>{data.bottomLine}</Text>
           </View>
         </View>
@@ -200,10 +241,7 @@ export function Page1Overview({ data }: { data: ReportData }) {
             <View key={`rank-${c.name}`} style={styles.rankOuter} wrap={false}>
               <View style={[styles.rankAccent, { backgroundColor: isClient ? colors.cyan : "transparent" }]} />
               <View
-                style={[
-                  styles.rankInner,
-                  { backgroundColor: isClient ? colors.cyanLight : "transparent" },
-                ]}
+                style={[styles.rankInner, { backgroundColor: isClient ? colors.cyanLight : "transparent" }]}
               >
                 <Text style={styles.rankIdx}>{`#${c.rank}`}</Text>
                 <Text style={isClient ? styles.rankNameClient : styles.rankName}>{c.name}</Text>
@@ -242,21 +280,21 @@ export function Page1Overview({ data }: { data: ReportData }) {
 
         <View style={styles.alertRow}>
           <View style={[styles.alertCard, styles.alertWin, styles.alertSp]}>
-            <View style={[styles.alertPill, { backgroundColor: colors.greenLight }]}>
+            <View style={[styles.alertPill, { backgroundColor: colors.paper }]}>
               <Text style={{ fontSize: 7, fontWeight: 400, color: colors.green, fontFamily: fonts.sansBold }}>WIN</Text>
             </View>
             <Text style={styles.alertTitle}>{data.alerts.win.title}</Text>
             <Text style={styles.alertDetail}>{data.alerts.win.detail}</Text>
           </View>
           <View style={[styles.alertCard, styles.alertRisk, styles.alertSp]}>
-            <View style={[styles.alertPill, { backgroundColor: colors.orangeLight }]}>
+            <View style={[styles.alertPill, { backgroundColor: colors.paper }]}>
               <Text style={{ fontSize: 7, fontWeight: 400, color: colors.orange, fontFamily: fonts.sansBold }}>RISK</Text>
             </View>
             <Text style={styles.alertTitle}>{data.alerts.risk.title}</Text>
             <Text style={styles.alertDetail}>{data.alerts.risk.detail}</Text>
           </View>
           <View style={[styles.alertCard, styles.alertPri]}>
-            <View style={[styles.alertPill, { backgroundColor: colors.redLight }]}>
+            <View style={[styles.alertPill, { backgroundColor: colors.paper }]}>
               <Text style={{ fontSize: 7, fontWeight: 400, color: colors.red, fontFamily: fonts.sansBold }}>PRIORITY</Text>
             </View>
             <Text style={styles.alertTitle}>{data.alerts.priority.title}</Text>

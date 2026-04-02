@@ -16,5 +16,5 @@ export {
   resetPdfTrace,
   summarizeReportDataShape,
 } from "./pdfDiagnostics";
-export { colors, space, baseStyles, fonts } from "./theme";
+export { colors, rhythm, space, baseStyles, fonts } from "./theme";
 export { mapSnapshotToReactPdfData } from "../mapSnapshotToReactPdfData";

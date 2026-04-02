@@ -15,65 +15,82 @@ export type ModelAnalysisCardProps = {
 
 /** Three columns + gaps = 540pt content: 172 + 12 + 172 + 12 + 172 */
 export const MODEL_CARD_WIDTH = 172;
-const INNER_W = MODEL_CARD_WIDTH - 24;
+const INNER_W = MODEL_CARD_WIDTH - 28;
+/** Equal-height analysis cards */
+const CARD_MIN_H = 212;
 
 const styles = StyleSheet.create({
   root: {
     width: MODEL_CARD_WIDTH,
+    minHeight: CARD_MIN_H,
     backgroundColor: colors.paper,
     borderWidth: 1,
     borderColor: colors.rule,
-    borderRadius: 6,
+    borderRadius: 8,
     overflow: "hidden",
   },
   topBand: {
-    height: 6,
+    height: 5,
     width: "100%",
   },
   inner: {
-    padding: 12,
+    padding: 14,
+    flexGrow: 1,
   },
   name: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: 400,
     color: colors.ink,
     textTransform: "uppercase",
-    marginBottom: 4,
-    fontFamily: fonts.sansBold,
-  },
-  score: {
-    fontSize: 42,
-    fontWeight: 400,
-    lineHeight: 1,
     marginBottom: 8,
     fontFamily: fonts.sansBold,
+    letterSpacing: 0.2,
+  },
+  scoreRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    marginBottom: 10,
+  },
+  score: {
+    fontSize: 44,
+    fontWeight: 400,
+    lineHeight: 1,
+    fontFamily: fonts.sansBold,
+  },
+  deltaWrap: {
+    marginLeft: 8,
+    marginBottom: 5,
   },
   deltaPill: {
-    alignSelf: "flex-start",
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 4,
-    marginBottom: 10,
   },
   deltaPillPos: { backgroundColor: colors.greenLight },
   deltaPillNeg: { backgroundColor: colors.redLight },
   deltaPillText: {
-    fontSize: 8,
+    fontSize: 7,
     fontWeight: 400,
     color: colors.ink2,
     fontFamily: fonts.sansBold,
+  },
+  rule: {
+    height: 1,
+    backgroundColor: colors.rule,
+    marginBottom: 10,
+    width: INNER_W,
   },
   barTrack: {
     width: INNER_W,
     height: 6,
     backgroundColor: colors.surface2,
-    borderRadius: 3,
+    borderRadius: 4,
     marginBottom: 2,
     flexDirection: "row",
   },
   barFill: {
     height: 6,
-    borderRadius: 3,
+    borderRadius: 4,
   },
   barRest: {
     height: 6,
@@ -81,7 +98,7 @@ const styles = StyleSheet.create({
   barWrap: {
     position: "relative",
     width: INNER_W,
-    marginBottom: 2,
+    marginBottom: 4,
   },
   avgTick: {
     position: "absolute",
@@ -93,25 +110,25 @@ const styles = StyleSheet.create({
   avgLabel: {
     fontSize: 6,
     color: colors.ink4,
-    marginBottom: 8,
+    marginBottom: 10,
     fontFamily: fonts.sans,
   },
   bulletRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginTop: 6,
+    marginTop: 7,
   },
   dot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    marginTop: 2,
-    marginRight: 6,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    marginTop: 3,
+    marginRight: 7,
   },
   bulletText: {
-    width: INNER_W - 11,
-    fontSize: 8,
-    lineHeight: 1.5,
+    width: INNER_W - 12,
+    fontSize: 7.5,
+    lineHeight: 1.55,
     color: colors.ink2,
     fontFamily: fonts.sans,
   },
@@ -137,7 +154,7 @@ export function ModelAnalysisCard({
   const scoreLine = String(score);
   const deltaSign = deltaVsAvg >= 0 ? "+" : "-";
   const deltaAbs = String(Math.abs(deltaVsAvg));
-  const deltaLine = `${deltaSign}${deltaAbs} vs. avg`;
+  const deltaLine = `${deltaSign}${deltaAbs} vs avg`;
   const avgLabelLine = `avg ${avg}`;
 
   const posPill = deltaVsAvg >= 0;
@@ -147,10 +164,16 @@ export function ModelAnalysisCard({
       <View style={[styles.topBand, { backgroundColor: bandColor }]} />
       <View style={styles.inner}>
         <Text style={styles.name}>{nameLine}</Text>
-        <Text style={[styles.score, { color: scoreAccent }]}>{scoreLine}</Text>
-        <View style={[styles.deltaPill, posPill ? styles.deltaPillPos : styles.deltaPillNeg]}>
-          <Text style={styles.deltaPillText}>{deltaLine}</Text>
+        <View style={styles.scoreRow}>
+          <Text style={[styles.score, { color: scoreAccent }]}>{scoreLine}</Text>
+          <View style={styles.deltaWrap}>
+            <View style={[styles.deltaPill, posPill ? styles.deltaPillPos : styles.deltaPillNeg]}>
+              <Text style={styles.deltaPillText}>{deltaLine}</Text>
+            </View>
+          </View>
         </View>
+
+        <View style={styles.rule} />
 
         <View style={styles.barWrap}>
           <View style={styles.barTrack}>

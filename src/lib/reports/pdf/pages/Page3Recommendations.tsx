@@ -1,6 +1,6 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { PAGE, colors, fonts, baseStyles } from "../theme";
+import { PAGE, colors, fonts, rhythm, baseStyles } from "../theme";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
@@ -15,59 +15,74 @@ const styles = StyleSheet.create({
   pageTitle: {
     fontSize: 10,
     fontWeight: 400,
-    letterSpacing: 0.65,
+    letterSpacing: 0.35,
     textTransform: "uppercase",
     color: colors.ink,
-    marginBottom: 8,
+    marginBottom: rhythm.sm,
     fontFamily: fonts.sansBold,
   },
-  intro: { fontSize: 9, lineHeight: 1.55, color: colors.ink2, marginBottom: 12, fontFamily: fonts.sans },
+  intro: {
+    fontSize: 9,
+    lineHeight: 1.55,
+    color: colors.ink3,
+    marginBottom: rhythm.md,
+    fontFamily: fonts.sans,
+  },
   card: {
     flexDirection: "row",
     backgroundColor: colors.paper,
     borderWidth: 1,
     borderColor: colors.rule,
     borderRadius: 8,
-    marginBottom: 12,
+    marginBottom: rhythm.lg,
     padding: 0,
     overflow: "hidden",
-    minHeight: 96,
+    minHeight: 108,
   },
   leftStripe: {
-    width: 36,
+    width: 46,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 12,
+    paddingVertical: rhythm.md,
   },
-  stripeNum: { fontSize: 22, fontWeight: 400, color: colors.paper, fontFamily: fonts.sansBold },
-  mid: { flex: 1, padding: 12, paddingRight: 8 },
+  stripeNum: { fontSize: 24, fontWeight: 400, color: colors.paper, fontFamily: fonts.sansBold },
+  mid: { flex: 1, paddingVertical: rhythm.md, paddingHorizontal: rhythm.md, paddingRight: rhythm.sm },
   priPill: {
     alignSelf: "flex-start",
-    paddingVertical: 3,
-    paddingHorizontal: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 9,
     borderRadius: 4,
-    marginBottom: 6,
+    marginBottom: rhythm.sm,
   },
-  priPillTxt: { fontSize: 7, fontWeight: 400, color: colors.paper, fontFamily: fonts.sansBold },
-  title: { fontSize: 11, fontWeight: 400, color: colors.ink, marginBottom: 6, fontFamily: fonts.sansBold },
-  insight: { fontSize: 9, fontWeight: 400, marginBottom: 6, fontFamily: fonts.sansBold },
-  body: { fontSize: 8.5, lineHeight: 1.5, color: colors.ink2, fontFamily: fonts.sans },
-  sep: { width: 1, backgroundColor: colors.rule },
-  right: {
-    width: 148,
-    backgroundColor: colors.surface,
-    padding: 10,
-    justifyContent: "center",
-  },
-  outLabel: {
-    fontSize: 7,
+  priPillTxt: { fontSize: 6.5, fontWeight: 400, color: colors.paper, fontFamily: fonts.sansBold },
+  title: { fontSize: 11, fontWeight: 400, color: colors.ink, marginBottom: rhythm.sm, fontFamily: fonts.sansBold },
+  insight: { fontSize: 9, fontWeight: 400, marginBottom: rhythm.md, fontFamily: fonts.sansBold },
+  micro: {
+    fontSize: 6,
     fontWeight: 400,
     color: colors.ink4,
-    letterSpacing: 0.65,
+    letterSpacing: 0.35,
     marginBottom: 4,
     fontFamily: fonts.sansBold,
   },
-  outText: { fontSize: 8.5, fontWeight: 400, lineHeight: 1.45, fontFamily: fonts.sansBold },
+  body: { fontSize: 8.5, lineHeight: 1.55, color: colors.ink2, fontFamily: fonts.sans },
+  sep: { width: 1, backgroundColor: colors.rule },
+  right: {
+    width: 154,
+    backgroundColor: colors.surface,
+    paddingVertical: rhythm.md,
+    paddingHorizontal: rhythm.md,
+    justifyContent: "center",
+  },
+  outLabel: {
+    fontSize: 6,
+    fontWeight: 400,
+    color: colors.ink4,
+    letterSpacing: 0.4,
+    marginBottom: rhythm.sm,
+    fontFamily: fonts.sansBold,
+  },
+  outText: { fontSize: 9, fontWeight: 400, lineHeight: 1.45, fontFamily: fonts.sansBold },
 });
 
 export function Page3Recommendations({ data }: { data: ReportData }) {
@@ -102,9 +117,12 @@ export function Page3Recommendations({ data }: { data: ReportData }) {
                 </View>
                 <Text style={styles.title}>{titleLine}</Text>
                 <Text style={[styles.insight, { color: pc }]}>{insightLine}</Text>
-                <Text style={[styles.body, { marginTop: 4 }]}>{explLine}</Text>
-                <Text style={[styles.body, { marginTop: 6 }]}>{actLine}</Text>
+                <Text style={styles.micro}>WHY IT MATTERS</Text>
+                <Text style={styles.body}>{explLine}</Text>
+                <Text style={[styles.micro, { marginTop: rhythm.md }]}>RECOMMENDED ACTION</Text>
+                <Text style={styles.body}>{actLine}</Text>
               </View>
+              <View style={styles.sep} />
               <View style={styles.right}>
                 <Text style={styles.outLabel}>EXPECTED OUTCOME</Text>
                 <Text style={[styles.outText, { color: pc }]}>{expLine}</Text>

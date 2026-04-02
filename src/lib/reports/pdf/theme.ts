@@ -27,6 +27,15 @@ export const colors = {
   paper: "#FFFFFF",
 } as const;
 
+/** Vertical / horizontal rhythm (pt) — use across pages for consistent cadence */
+export const rhythm = {
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+} as const;
+
 export const space = {
   pagePad: PAGE.margin,
   section: 16,
@@ -70,15 +79,16 @@ export const baseStyles = StyleSheet.create({
     fontSize: 9,
     fontWeight: 400,
     color: colors.cyan,
-    letterSpacing: 1,
+    letterSpacing: 0.15,
     fontFamily: fonts.sansBold,
   },
+  /** Subtitle under kicker — keep tight; large letterSpacing renders as per-letter gaps in PDF */
   reportTitleMain: {
     fontSize: 8,
     fontWeight: 400,
     color: colors.ink4,
-    letterSpacing: 2,
-    marginTop: 3,
+    letterSpacing: 0.2,
+    marginTop: 2,
     fontFamily: fonts.sansBold,
   },
   reportTitle: {
@@ -115,17 +125,18 @@ export const baseStyles = StyleSheet.create({
   sectionLabel: {
     fontSize: 8,
     fontWeight: 400,
-    letterSpacing: 0.65,
+    letterSpacing: 0.35,
     textTransform: "uppercase",
     color: colors.ink4,
     marginBottom: space.block,
     fontFamily: fonts.sansBold,
   },
   sectionSlug: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: 400,
-    color: colors.ink4,
-    marginTop: 4,
+    color: colors.ink3,
+    marginTop: 3,
+    letterSpacing: 0.2,
     fontFamily: fonts.sansBold,
   },
   body: {
