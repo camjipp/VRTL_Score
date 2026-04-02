@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
     fontSize: 56,
     fontWeight: 700,
     color: colors.text,
-    letterSpacing: -1.5,
+    letterSpacing: -0.5,
     lineHeight: 1,
   },
   scoreSuffix: {
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 9,
     fontWeight: 600,
-    letterSpacing: 1,
+    letterSpacing: 0.35,
     color: colors.text,
     textTransform: "uppercase",
   },
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     marginTop: 6,
     textTransform: "uppercase",
-    letterSpacing: 0.8,
+    letterSpacing: 0.35,
   },
   execBlock: {
     backgroundColor: colors.card,
@@ -87,9 +87,9 @@ const styles = StyleSheet.create({
     marginBottom: space.section,
   },
   execLabel: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: 600,
-    letterSpacing: 1.2,
+    letterSpacing: 0.35,
     color: colors.textSecondary,
     textTransform: "uppercase",
     marginBottom: 10,
@@ -109,11 +109,11 @@ const styles = StyleSheet.create({
     borderLeftColor: colors.warning,
   },
   rankHeader: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: 600,
     color: colors.textSecondary,
     textTransform: "uppercase",
-    letterSpacing: 1,
+    letterSpacing: 0.35,
     marginBottom: 10,
   },
   rankRow: {
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   alertLabel: {
     fontSize: 7,
     fontWeight: 600,
-    letterSpacing: 1,
+    letterSpacing: 0.35,
     color: colors.textSecondary,
     textTransform: "uppercase",
     marginBottom: 6,

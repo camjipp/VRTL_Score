@@ -5,6 +5,7 @@ import React from "react";
 
 import { getPdfLastTrace, resetPdfTrace } from "./pdfDiagnostics";
 import { ReportDocument } from "./ReportDocument";
+import { sanitizeReportDataForPdf } from "./sanitizeReportData";
 import type { ReportData } from "./types";
 
 export type GeneratePdfOptions = {
@@ -46,13 +47,14 @@ export async function probeMinimalPdf(): Promise<MinimalProbeResult> {
 }
 
 export async function probeReportPagesOneAtATime(data: ReportData): Promise<PageProbeRow[]> {
+  const safe = sanitizeReportDataForPdf(data);
   const rows: PageProbeRow[] = [];
   for (let p = 1; p <= 6; p++) {
     resetPdfTrace();
     try {
       const buf = await renderToBuffer(
         React.createElement(ReportDocument, {
-          data,
+          data: safe,
           pages: [p],
         }) as ReactElement<DocumentProps>
       );
@@ -74,10 +76,11 @@ export async function probeReportPagesOneAtATime(data: ReportData): Promise<Page
 
 export async function generatePDF(data: ReportData, options?: GeneratePdfOptions): Promise<Buffer> {
   resetPdfTrace();
+  const safe = sanitizeReportDataForPdf(data);
   try {
     return await renderToBuffer(
       React.createElement(ReportDocument, {
-        data,
+        data: safe,
         pages: options?.pages,
       }) as ReactElement<DocumentProps>
     );

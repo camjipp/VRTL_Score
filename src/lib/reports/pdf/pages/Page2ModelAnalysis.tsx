@@ -13,55 +13,55 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 700,
     color: colors.text,
-    lineHeight: 1.35,
-    marginBottom: space.section,
-    letterSpacing: -0.2,
+    lineHeight: 1.4,
+    marginBottom: space.section + 4,
+    letterSpacing: 0,
   },
-  row: { flexDirection: "row", marginBottom: 10 },
+  row: { flexDirection: "row", marginBottom: 16 },
   modelCard: {
     flex: 1,
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 6,
-    padding: space.cardPad,
+    padding: 18,
     borderLeftWidth: 2,
     borderLeftColor: colors.accent,
   },
-  modelName: { fontSize: 12, fontWeight: 600, color: colors.text },
-  modelScore: { fontSize: 22, fontWeight: 700, color: colors.text, marginTop: 4 },
-  modelDelta: { fontSize: 9, marginTop: 6, fontWeight: 500 },
+  modelName: { fontSize: 12, fontWeight: 600, color: colors.text, marginBottom: 2 },
+  modelScore: { fontSize: 22, fontWeight: 700, color: colors.text, marginTop: 2 },
+  modelDelta: { fontSize: 9, marginTop: 8, marginBottom: 4, fontWeight: 500 },
   deltaPos: { color: colors.success },
   deltaNeg: { color: colors.danger },
-  barTrack: { height: 4, backgroundColor: colors.barTrack, borderRadius: 2, marginTop: 10 },
+  barTrack: { height: 4, backgroundColor: colors.barTrack, borderRadius: 2, marginTop: 12 },
   barInnerRow: { flex: 1, flexDirection: "row", height: 4 },
   barFill: { height: 4, borderRadius: 2, backgroundColor: colors.barFill },
   barRest: { height: 4 },
-  bullet: { fontSize: 9.5, color: colors.textSecondary, lineHeight: 1.55, marginTop: 5, paddingLeft: 2 },
+  bullet: { fontSize: 9.5, color: colors.textSecondary, lineHeight: 1.6, marginTop: 7, paddingLeft: 2 },
   evidenceCard: {
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 6,
-    padding: space.cardPad,
-    marginBottom: 10,
+    padding: 18,
+    marginBottom: 14,
     borderLeftWidth: 2,
     borderLeftColor: colors.border,
   },
   evidenceLabel: {
     fontSize: 7,
     fontWeight: 700,
-    letterSpacing: 1,
+    letterSpacing: 0.35,
     color: colors.textSecondary,
     textTransform: "uppercase",
-    marginBottom: 8,
+    marginBottom: 10,
   },
   evidenceQuote: {
     fontSize: 10,
-    lineHeight: 1.58,
+    lineHeight: 1.62,
     color: colors.textSecondary,
   },
-  evidenceNote: { fontSize: 9, color: colors.textSecondary, marginTop: 8, lineHeight: 1.45 },
+  evidenceNote: { fontSize: 9, color: colors.textSecondary, marginTop: 10, lineHeight: 1.5 },
   takeaway: {
     backgroundColor: colors.card,
     borderWidth: 1,
@@ -69,19 +69,19 @@ const styles = StyleSheet.create({
     borderLeftWidth: 2,
     borderLeftColor: colors.accent,
     borderRadius: 6,
-    padding: 18,
-    marginTop: 4,
+    padding: 20,
+    marginTop: 8,
   },
   takeawayTitle: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: 600,
-    letterSpacing: 1.1,
+    letterSpacing: 0.35,
     color: colors.textSecondary,
     textTransform: "uppercase",
-    marginBottom: 10,
+    marginBottom: 12,
   },
-  takeawayBody: { fontSize: 11, lineHeight: 1.58, color: colors.textSecondary },
-  sectionTitle: { ...baseStyles.sectionLabel, marginTop: 4, marginBottom: 10 },
+  takeawayBody: { fontSize: 11, lineHeight: 1.62, color: colors.textSecondary },
+  sectionTitle: { ...baseStyles.sectionLabel, marginTop: 10, marginBottom: 12 },
 });
 
 function ModelCard({ m, a }: { m: ReportData["modelScores"][0]; a: number }) {
@@ -92,7 +92,8 @@ function ModelCard({ m, a }: { m: ReportData["modelScores"][0]; a: number }) {
       <Text style={styles.modelName}>{m.name}</Text>
       <Text style={styles.modelScore}>{m.score}</Text>
       <Text style={[styles.modelDelta, m.deltaVsAvg >= 0 ? styles.deltaPos : styles.deltaNeg]}>
-        {m.deltaVsAvg >= 0 ? "↑" : "↓"} {Math.abs(m.deltaVsAvg)} vs. average ({a})
+        {m.deltaVsAvg >= 0 ? "+" : "-"}
+        {Math.abs(m.deltaVsAvg)} vs. average ({a})
       </Text>
       <View style={styles.barTrack}>
         <View style={styles.barInnerRow}>
@@ -143,7 +144,11 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
       {data.evidencePreview.map((ev, i) => (
         <View key={i} style={styles.evidenceCard}>
           <Text style={styles.evidenceLabel}>{ev.label}</Text>
-          <Text style={styles.evidenceQuote}>&ldquo;{ev.snippet}&rdquo;</Text>
+          <Text style={styles.evidenceQuote}>
+            {'"'}
+            {ev.snippet}
+            {'"'}
+          </Text>
           {ev.note ? <Text style={styles.evidenceNote}>{ev.note}</Text> : null}
         </View>
       ))}

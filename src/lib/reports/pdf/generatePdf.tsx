@@ -4,14 +4,16 @@ import type { ReactElement } from "react";
 import type { ReportData } from "./types";
 import { ReportDocument } from "./ReportDocument";
 import { getPdfLastTrace, resetPdfTrace } from "./pdfDiagnostics";
+import { sanitizeReportDataForPdf } from "./sanitizeReportData";
 
 export type { GeneratePdfOptions } from "./generatePdfServer";
 
 /** Browser: downloadable Blob (client preview / download). */
 export async function generatePdfBlob(data: ReportData, options?: { pages?: number[] }): Promise<Blob> {
   resetPdfTrace();
+  const safe = sanitizeReportDataForPdf(data);
   const doc = (pages?: number[]): ReactElement<DocumentProps> => (
-    <ReportDocument data={data} pages={pages} />
+    <ReportDocument data={safe} pages={pages} />
   );
   try {
     const instance = pdf(doc(options?.pages));

@@ -9,7 +9,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 12,
     fontWeight: 600,
-    letterSpacing: 1.2,
+    letterSpacing: 0.35,
     textTransform: "uppercase",
     color: colors.text,
     marginBottom: 8,
@@ -24,9 +24,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   phase: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: 600,
-    letterSpacing: 1,
+    letterSpacing: 0.35,
     color: colors.textSecondary,
     textTransform: "uppercase",
     marginBottom: 8,

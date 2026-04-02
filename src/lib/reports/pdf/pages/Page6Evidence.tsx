@@ -7,9 +7,9 @@ import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
 const styles = StyleSheet.create({
   h: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: 600,
-    letterSpacing: 1,
+    letterSpacing: 0.35,
     textTransform: "uppercase",
     color: colors.textSecondary,
     marginBottom: 10,
@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     fontWeight: 600,
     color: colors.textSecondary,
     textTransform: "uppercase",
-    letterSpacing: 0.4,
+    letterSpacing: 0.35,
   },
   tr: {
     flexDirection: "row",
@@ -51,9 +51,9 @@ const styles = StyleSheet.create({
     padding: space.cardPad,
   },
   methodTitle: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: 600,
-    letterSpacing: 1,
+    letterSpacing: 0.35,
     color: colors.textSecondary,
     textTransform: "uppercase",
     marginBottom: 8,
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     fontSize: 7,
     color: colors.textSecondary,
     textTransform: "uppercase",
-    letterSpacing: 0.5,
+    letterSpacing: 0.35,
     marginBottom: 4,
   },
   metaValue: { fontSize: 10, color: colors.text, fontWeight: 500 },

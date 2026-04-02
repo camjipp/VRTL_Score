@@ -47,19 +47,18 @@ export const baseStyles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
+  /** Product title — no wide tracking (PDFKit + Helvetica exaggerated letterSpacing + uppercase). */
   reportTitle: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: 600,
-    letterSpacing: 1.6,
-    textTransform: "uppercase",
+    letterSpacing: 0,
     color: colors.text,
     maxWidth: 320,
   },
   reportTitleCover: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: 600,
-    letterSpacing: 1.4,
-    textTransform: "uppercase",
+    letterSpacing: 0,
     color: colors.text,
   },
   headerMeta: {
@@ -79,10 +78,11 @@ export const baseStyles = StyleSheet.create({
     marginTop: 3,
     lineHeight: 1.4,
   },
+  /** Small section / eyebrow labels — subtle tracking only */
   sectionLabel: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: 600,
-    letterSpacing: 1.2,
+    letterSpacing: 0.35,
     textTransform: "uppercase",
     color: colors.textSecondary,
     marginBottom: space.block,
@@ -92,6 +92,7 @@ export const baseStyles = StyleSheet.create({
     fontWeight: 500,
     color: colors.textSecondary,
     marginTop: 4,
+    letterSpacing: 0,
   },
   body: {
     fontSize: 10,
