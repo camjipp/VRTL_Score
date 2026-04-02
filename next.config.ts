@@ -3,12 +3,18 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   /**
-   * Bundle @react-pdf into the server chunk with the same `react` the route uses.
-   * serverExternalPackages + JSX from the app caused two React copies → reconciler
-   * error #31 (“object with keys $$typeof, type, key, ref, props”).
+   * Keep @react-pdf out of the webpack server bundle so pdfkit internals
+   * (which rely on PDF-spec property names like 'S') aren't mangled by
+   * minification. At runtime they load from node_modules via require().
+   *
+   * React element interop works because:
+   *  - types (Document, Page, …) come from the external package
+   *  - $$typeof uses Symbol.for('react.element') (globally shared)
+   *  - pnpm overrides pin a single react@18.3.1 across all packages
    */
-  transpilePackages: [
+  serverExternalPackages: [
     "@react-pdf/renderer",
+    "@react-pdf/reconciler",
     "@react-pdf/font",
     "@react-pdf/layout",
     "@react-pdf/pdfkit",
@@ -17,6 +23,10 @@ const nextConfig: NextConfig = {
     "@react-pdf/fns",
     "@react-pdf/image",
     "@react-pdf/png-js",
+    "@react-pdf/stylesheet",
+    "@react-pdf/textkit",
+    "@react-pdf/types",
+    "yoga-layout",
   ],
 };
 
