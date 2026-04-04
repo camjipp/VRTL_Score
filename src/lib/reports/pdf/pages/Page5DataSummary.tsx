@@ -80,6 +80,14 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   pillT: { fontSize: 6.5, fontWeight: 400, fontFamily: fonts.sansBold },
+  /** Competitive table: tighter pill so it clears the vs. column */
+  pillCmp: {
+    paddingVertical: 2,
+    paddingHorizontal: 5,
+    borderRadius: 3,
+    alignSelf: "flex-start",
+  },
+  pillCmpText: { fontSize: 6, fontWeight: 400, fontFamily: fonts.sansBold, letterSpacing: 0.03 },
   barWrap: { height: 6, backgroundColor: colors.surface2, borderRadius: 3, width: C.bar - 8 },
   barIn: { flex: 1, flexDirection: "row", height: 6 },
   barF: { height: 6, backgroundColor: colors.cyan, borderRadius: 3 },
@@ -211,14 +219,15 @@ export function Page5DataSummary({ data }: { data: ReportData }) {
                       textAlign: "right",
                       color: colors.ink2,
                       fontFamily: fonts.sansBold,
+                      paddingRight: 4,
                     },
                   ]}
                 >
                   {row.vsYou}
                 </Text>
-                <View style={{ width: C.st, justifyContent: "center" }}>
-                  <View style={[styles.pill, { backgroundColor: cp.bg }]}>
-                    <Text style={[styles.pillT, { color: cp.fg }]}>{statusLabel(row.status)}</Text>
+                <View style={{ width: C.st, justifyContent: "center", paddingLeft: 2 }}>
+                  <View style={[styles.pillCmp, { backgroundColor: cp.bg }]}>
+                    <Text style={[styles.pillCmpText, { color: cp.fg }]}>{statusLabel(row.status)}</Text>
                   </View>
                 </View>
               </View>
