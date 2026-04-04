@@ -57,7 +57,7 @@ export function LoginForm({ nextPath, siteOrigin = "" }: { nextPath: string; sit
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       if (msg === "Failed to fetch" || msg.includes("load failed") || msg.includes("NetworkError")) {
-        setError("Connection failed. The server may be starting up — please try again in a moment.");
+        setError("Connection failed. The server may be starting up. Please try again in a moment.");
       } else {
         setError(msg);
       }

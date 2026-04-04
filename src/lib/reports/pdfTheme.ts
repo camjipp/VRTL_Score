@@ -17,7 +17,7 @@ export const PDF_REPORT_TITLE = "Competitive AI Presence Report";
 
 /** Neutral methodology copy (no product branding). */
 export const PDF_METHODOLOGY_TEXT =
-  "We test AI discovery responses under controlled scenarios. Scores combine presence, relative position, and citation-backed authority. Directional only—pair with your commercial and search data.";
+  "We test AI discovery responses under controlled scenarios. Scores combine presence, relative position, and citation-backed authority. Directional only. Pair with your commercial and search data.";
 
 const ACCENT_FALLBACK = "#6b9ebc";
 

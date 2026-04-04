@@ -251,12 +251,12 @@ function clientStoryLine(c: ClientWithStats): string {
   const wm = c.worstModel ? displayModelName(c.worstModel) : null;
   if (state === "Dominant") return "Leading across all tracked models";
   if (state === "Losing Ground") {
-    return wm ? `Authority failure on ${wm} — act now` : "Critical authority gap — act now";
+    return wm ? `Authority failure on ${wm}. Act now.` : "Critical authority gap. Act now.";
   }
   if (state === "Watchlist") {
-    return wm ? `Losing ground on ${wm} — needs attention` : "Flagged for monitoring — run snapshot to diagnose";
+    return wm ? `Losing ground on ${wm}. Needs attention.` : "Flagged for monitoring. Run a snapshot to diagnose.";
   }
-  return "Stable authority signal — monitor weak channels";
+  return "Stable authority signal. Monitor weak channels.";
 }
 
 const CARD_STATUS_STYLES: Record<
@@ -552,7 +552,7 @@ function ClientsRequiringAttention({ clients }: { clients: ClientWithStats[] }) 
   if (attention.length === 0) {
     return (
       <section className="rounded-app-lg border border-white/5 bg-surface">
-        <div className="px-3 py-2 text-xs text-text-2">Portfolio stable — no widening gaps detected.</div>
+        <div className="px-3 py-2 text-xs text-text-2">Portfolio stable. No widening gaps detected.</div>
       </section>
     );
   }

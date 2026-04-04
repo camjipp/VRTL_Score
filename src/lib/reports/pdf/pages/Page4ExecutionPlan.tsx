@@ -22,12 +22,20 @@ function stripPhasePrefix(phase: string, text: string): string {
   return rest.length > 0 ? rest : t;
 }
 
-/** Presentation-only: optional “Expected impact” from em dash split (same underlying copy). */
+/** Presentation-only: optional “Expected impact” from first sentence break or legacy em-dash split. */
 function splitImpact(text: string): { main: string; impact: string | null } {
   const t = text.trim();
   const m = t.split(/\s+[—–]\s+/);
-  if (m.length < 2) return { main: t, impact: null };
-  return { main: m[0]!.trim(), impact: m.slice(1).join(" — ").trim() || null };
+  if (m.length >= 2) {
+    return { main: m[0]!.trim(), impact: m.slice(1).join(" ").trim() || null };
+  }
+  const dot = t.indexOf(". ");
+  if (dot > 0 && dot < t.length - 2) {
+    const first = t.slice(0, dot + 1).trim();
+    const second = t.slice(dot + 2).trim();
+    if (second.length > 0) return { main: first, impact: second };
+  }
+  return { main: t, impact: null };
 }
 
 const styles = StyleSheet.create({

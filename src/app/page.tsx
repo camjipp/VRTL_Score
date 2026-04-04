@@ -85,7 +85,7 @@ export default function HomePage() {
           </h1>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-white/60 sm:text-lg">
             Answer engines are shaping brand perception in real time.
-            VRTL Score measures where your clients appear — and where they&apos;re invisible.
+            VRTL Score measures where your clients appear, and where they&apos;re invisible.
           </p>
         </div>
 
@@ -334,7 +334,7 @@ export default function HomePage() {
               <p className="text-xs font-semibold uppercase tracking-wider text-white/40">Competitive replacement</p>
               <h3 className="mt-2 text-lg font-semibold text-white">See who AI chooses instead.</h3>
               <p className="mt-2 text-sm leading-relaxed text-white/70">
-                When your client isn&apos;t recommended, know exactly who is — and why.
+                When your client isn&apos;t recommended, know exactly who is, and why.
               </p>
               <div className="mt-5 flex flex-1 items-center justify-center gap-2">
                 <div className="rounded border border-white/15 bg-white/5 px-2.5 py-1.5 text-xs text-white/70">Client</div>
@@ -388,7 +388,7 @@ export default function HomePage() {
               <FAQItem
                 dark
                 question="What is AI visibility?"
-                answer="AI visibility is how often—and how prominently—a brand appears when someone asks ChatGPT, Claude, Gemini, or other AI answer engines for a recommendation. It's the new version of 'do we rank on page one?'"
+                answer="AI visibility is how often and how prominently a brand appears when someone asks ChatGPT, Claude, Gemini, or other AI answer engines for a recommendation. It's the new version of 'do we rank on page one?'"
               />
               <FAQItem
                 dark
@@ -398,7 +398,7 @@ export default function HomePage() {
               <FAQItem
                 dark
                 question="What AI models do you track?"
-                answer="Currently ChatGPT (OpenAI), Claude (Anthropic), and Gemini (Google)—with Perplexity and others being added. We expand coverage as new AI answer engines gain user share."
+                answer="Currently ChatGPT (OpenAI), Claude (Anthropic), and Gemini (Google), with Perplexity and others being added. We expand coverage as new AI answer engines gain user share."
               />
               <FAQItem
                 dark
@@ -408,12 +408,12 @@ export default function HomePage() {
               <FAQItem
                 dark
                 question="Can I white-label the reports?"
-                answer="Yes. PDF reports include your agency logo and branding. They're designed to be handed directly to clients as a professional deliverable—supporting renewals, upsells, and new business pitches."
+                answer="Yes. PDF reports include your agency logo and branding. They're designed to be handed directly to clients as a professional deliverable, supporting renewals, upsells, and new business pitches."
               />
               <FAQItem
                 dark
                 question="Is there a free trial?"
-                answer="Yes. Start with a 7-day free trial—run snapshots on real clients and see the platform in action before committing."
+                answer="Yes. Start with a 7-day free trial. Run snapshots on real clients and see the platform in action before committing."
               />
             </div>
           </div>

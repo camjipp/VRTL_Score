@@ -150,7 +150,7 @@ export function AppEntitlementGate({ children }: Props) {
         // If not entitled and not from checkout, redirect (unless it was a network error)
         if (!isCheckoutSuccess) {
           if (lastNetworkError.current) {
-            if (!cancelled) setStatusText("Connection failed — refresh the page to try again.");
+            if (!cancelled) setStatusText("Connection failed. Refresh the page to try again.");
             return;
           }
           router.replace(`/app/plans`);

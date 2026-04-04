@@ -9,7 +9,7 @@ import { AppShell } from "@/components/AppShell";
 import { ToastContextProvider } from "@/contexts/ToastContext";
 
 export const metadata: Metadata = {
-  title: "VRTL Score — App"
+  title: "VRTL Score: App"
 };
 
 function LoadingScreen() {

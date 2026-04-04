@@ -90,10 +90,10 @@ function errorMessage(e: unknown): string {
 
 function getScoreLabel(score: number | null): { label: string; description: string } {
   if (score === null) return { label: "Watchlist", description: "Run a snapshot to diagnose your AI authority architecture" };
-  if (score >= 80) return { label: "Dominant", description: "High authority signal density — consistently surfaced and cited across AI models" };
+  if (score >= 80) return { label: "Dominant", description: "High authority signal density. Consistently surfaced and cited across AI models." };
   if (score >= 60) return { label: "Stable", description: "Present across models, but not yet the default authority" };
   if (score >= 40) return { label: "Watchlist", description: "Authority is inconsistent and vulnerable to competitor displacement" };
-  return { label: "Losing Ground", description: "Critical authority weakness — rarely surfaced or cited in AI-generated responses" };
+  return { label: "Losing Ground", description: "Critical authority weakness. Rarely surfaced or cited in AI-generated responses." };
 }
 
 function getAuthorityStatusTone(score: number | null): string {
@@ -170,7 +170,7 @@ function SnapshotSelector({
       >
         {snapshots.map((s, idx) => (
           <option key={s.id} value={s.id}>
-            {idx === 0 ? "Latest" : new Date(s.created_at).toLocaleDateString()} — {s.vrtl_score ?? "—"}
+            {idx === 0 ? "Latest" : new Date(s.created_at).toLocaleDateString()} · {s.vrtl_score ?? "—"}
           </option>
         ))}
       </select>
@@ -437,13 +437,13 @@ function KeyInsightsCards({
 
   let topWeakness = "Run snapshot";
   if (mentionRate !== null && mentionRate < 50) {
-    topWeakness = `Low visibility — ${mentionRate}% of responses`;
+    topWeakness = `Low visibility in ${mentionRate}% of responses`;
   } else if (citationRate !== null && citationRate < 20) {
-    topWeakness = `Citations: ${citationRate}% — authority gap`;
+    topWeakness = `Citations: ${citationRate}%. Authority gap.`;
   } else if (modelGap > 40 && weakModel) {
-    topWeakness = `${weakModel[0]}: ${weakModel[1]} — ${modelGap}pt behind best`;
+    topWeakness = `${weakModel[0]}: ${weakModel[1]}, ${modelGap}pt behind best`;
   } else if (score !== null && score >= 70) {
-    topWeakness = "Strong — maintain";
+    topWeakness = "Strong. Maintain.";
   }
 
   const hasCompetitiveData = totalEntities > 1;
@@ -721,10 +721,10 @@ function generateStrategicInsights(
     insights.push({
       priority: "HIGH",
       title: `Fix ${wName} retrieval`,
-      insight: `${wName} at ${worstModel[1]} — ${gap} pts below your average.`,
+      insight: `${wName} at ${worstModel[1]}, ${gap} pts below your average.`,
       whyItMatters: `${wName} is where you're bleeding authority in model answers.`,
       action: `Add structured schema for key entities. Align content to retrieval-heavy queries for ${wName}.`,
-      expectedImpact: `+8–14 pts on ${wName} signal within 60 days.`,
+      expectedImpact: `+8 to 14 pts on ${wName} signal within 60 days.`,
       consequence: `Competitors keep winning that channel until this is fixed.`,
     });
   }
@@ -740,7 +740,7 @@ function generateStrategicInsights(
         insight: `${topCompetitor.count} vs your ${clientMentions} in this snapshot.`,
         whyItMatters: "Models surface them first in your category.",
         action: "Publish comparison content vs that brand. Strengthen entity + citation signals they own.",
-        expectedImpact: "+4–10 pts mention share when executed.",
+        expectedImpact: "+4 to 10 pts mention share when executed.",
         consequence: "They compound default recommendations until you counter.",
       });
     }
@@ -767,7 +767,7 @@ function generateStrategicInsights(
       insight: "You're in answers but not first.",
       whyItMatters: "First recommendation wins most clicks.",
       action: "Publish comparison pages and proof (reviews, specs) that models can cite first.",
-      expectedImpact: "+4–8 pts top-position share.",
+      expectedImpact: "+4 to 8 pts top-position share.",
       consequence: "Second place is invisible to many buyers.",
     });
   }
@@ -780,7 +780,7 @@ function generateStrategicInsights(
       insight: "Below trust threshold for models.",
       whyItMatters: "Uncited brands get deprioritized in retrieval.",
       action: "Place quotable facts on trusted domains. Add schema and source-friendly copy.",
-      expectedImpact: "+4–8 pts as citation density rises.",
+      expectedImpact: "+4 to 8 pts as citation density rises.",
       consequence: "Competitors with denser citations win retrieval.",
     });
   }
@@ -804,11 +804,11 @@ function generateStrategicInsights(
     const bestName = getProviderDisplayName(bestModel[0]);
     insights.push({
       priority: "LOW",
-      title: `${bestName} is healthy — mirror it`,
-      insight: `${bestName} at ${bestModel[1]} — your best channel.`,
+      title: `${bestName} is healthy. Mirror it`,
+      insight: `${bestName} at ${bestModel[1]}, your best channel.`,
       whyItMatters: "Same entity patterns can lift weak models.",
       action: "Copy structure, entities, and citation style from winning pages into weak channels.",
-      expectedImpact: "+2–5 pts by pattern transfer.",
+      expectedImpact: "+2 to 5 pts by pattern transfer.",
       consequence: "Leaving the playbook unused wastes lift.",
     });
   }
@@ -918,7 +918,7 @@ function SnapshotProgress({ startedAt }: { startedAt: string | null }) {
         <div className="h-2 w-2 shrink-0 animate-spin rounded-full border-2 border-white/10 border-t-authority-watchlist" />
         <div className="flex-1">
           <div className="text-sm font-medium text-text">Analyzing AI responses</div>
-          <div className="text-xs text-text-2">{minutes}:{seconds.toString().padStart(2, "0")} elapsed · typically 2–3 min</div>
+          <div className="text-xs text-text-2">{minutes}:{seconds.toString().padStart(2, "0")} elapsed · typically 2 to 3 min</div>
         </div>
       </div>
       <div className="mt-3 h-0.5 rounded-full bg-white/10 overflow-hidden">
@@ -1635,24 +1635,24 @@ function BigTrendChart({
     }
     const delta = scores[scores.length - 1]! - scores[0]!;
     if (filter === "all") {
-      if (delta < -3) return "No recovery — weakest channel still dragging performance.";
-      if (delta > 3) return "Closing the gap — keep pressure on weak-channel fixes.";
-      return "Flat trajectory — no recovery yet in weakest model channel.";
+      if (delta < -3) return "No recovery. Weakest channel still dragging performance.";
+      if (delta > 3) return "Closing the gap. Keep pressure on weak-channel fixes.";
+      return "Flat trajectory. No recovery yet in weakest model channel.";
     }
     if (filter === "openai") {
       return delta < 0
-        ? "OpenAI downtrend — entity clarity and citation quality still underperforming."
-        : "OpenAI stabilizing — maintain retrieval-focused execution.";
+        ? "OpenAI downtrend. Entity clarity and citation quality still underperforming."
+        : "OpenAI stabilizing. Maintain retrieval-focused execution.";
     }
     if (filter === "gemini") {
       return delta < 0
-        ? "Gemini downtrend — structured proof gaps remain unresolved."
-        : "Gemini trend improving — reinforce winning content patterns.";
+        ? "Gemini downtrend. Structured proof gaps remain unresolved."
+        : "Gemini trend improving. Reinforce winning content patterns.";
     }
     if (filter === "anthropic") {
       return delta < 0
         ? "Downtrend driven by Anthropic weakness."
-        : "Anthropic pressure easing — continue execution to sustain lift.";
+        : "Anthropic pressure easing. Continue execution to sustain lift.";
     }
     return "";
   }, [scores, filter]);
@@ -2033,8 +2033,8 @@ function AIAnswerMarketShareChart({
     clientRow && topCompetitor ? Math.max(0, topCompetitor.share - clientRow.share) : null;
   const gapLine = proofZone
     ? shareGap != null
-      ? `Losing ground — ${shareGap}% gap to leader`
-      : "Share gap — run another snapshot"
+      ? `Losing ground. ${shareGap}% gap to leader`
+      : "Share gap. Run another snapshot"
     : gapTrendDelta != null
       ? gapTrendDelta > 0
         ? `Closing gap: -${Math.abs(gapTrendDelta)}% vs leader`
@@ -2238,21 +2238,21 @@ function modelTerminalBorderHex(s: ModelTerminalStatus): string {
 }
 
 function getModelDiagnosisOneLine(key: (typeof VULN_MODELS)[number], terminal: ModelTerminalStatus): string {
-  if (terminal === "strong") return "Strong entity coverage — mirror this structure elsewhere";
+  if (terminal === "strong") return "Strong entity coverage. Mirror this structure elsewhere.";
   if (terminal === "degrading") {
     return key === "gemini"
-      ? "Retrieval gap detected — content needs model-specific audit"
-      : "Retrieval softening — tighten entities and citations";
+      ? "Retrieval gap detected. Content needs a model-specific audit."
+      : "Retrieval softening. Tighten entities and citations.";
   }
   return key === "anthropic"
-    ? "Authority failure — not being cited in structured answers"
-    : "Critical retrieval gap — rebuild structured signals";
+    ? "Authority failure. Not cited in structured answers."
+    : "Critical retrieval gap. Rebuild structured signals.";
 }
 
 function primaryActionUpside(priority: StrategicInsight["priority"]): string {
-  if (priority === "HIGH") return "+8–14 pts";
-  if (priority === "MEDIUM") return "+4–8 pts";
-  return "+2–5 pts";
+  if (priority === "HIGH") return "+8 to 14 pts";
+  if (priority === "MEDIUM") return "+4 to 8 pts";
+  return "+2 to 5 pts";
 }
 
 type PlaybookGridRow = { label: string; value: string };
@@ -2271,9 +2271,9 @@ function buildModelPlaybook(key: (typeof VULN_MODELS)[number]): ModelPlaybookSpe
     case "openai":
       return {
         diagnosisRows: [
-          { label: "Coverage", value: "Strong — appears in product + comparison queries" },
+          { label: "Coverage", value: "Strong: appears in product + comparison queries" },
           { label: "Retrieval signal", value: "Page structure matches OpenAI training patterns" },
-          { label: "Risk", value: "Defensive — protect what is working" },
+          { label: "Risk", value: "Defensive: protect what is working" },
         ],
         whyLead: "OpenAI (ChatGPT) handles the highest volume of branded product queries of any AI model.",
         whyRows: [
@@ -2282,13 +2282,13 @@ function buildModelPlaybook(key: (typeof VULN_MODELS)[number]): ModelPlaybookSpe
           { label: "Risk if lost", value: "Highest single-model impact to VrtlScore" },
         ],
         steps: [
-          "Audit which pages are driving retrieval — protect their structure",
+          "Audit which pages are driving retrieval. Protect their structure.",
           "Mirror successful entity patterns into your weaker product pages",
-          "Monitor for position drift — strong scores erode slowly before they drop",
+          "Monitor for position drift. Strong scores erode slowly before they drop.",
         ],
         expectedImpactLines: [
-          "Maintain 88–92 range.",
-          "Defensive priority — do not change what is working.",
+          "Maintain 88 to 92 range.",
+          "Defensive priority. Do not change what is working.",
         ],
       };
     case "gemini":
@@ -2300,17 +2300,17 @@ function buildModelPlaybook(key: (typeof VULN_MODELS)[number]): ModelPlaybookSpe
         ],
         whyLead: "Gemini is embedded in Google products including Search, Workspace, and Android.",
         whyRows: [
-          { label: "Ecosystem", value: "Google stack — early purchase journey touchpoints" },
+          { label: "Ecosystem", value: "Google stack, early purchase journey touchpoints" },
           { label: "Query type", value: "Product discovery inside Google's ecosystem" },
           { label: "Risk", value: "Miss early-funnel AI consideration where intent forms" },
         ],
         steps: [
-          "Audit your top 10 pages for entity markup — Gemini relies heavily on structured data",
+          "Audit your top 10 pages for entity markup. Gemini relies heavily on structured data.",
           "Add FAQ schema targeting comparison and recommendation query patterns",
           "Increase third-party brand mentions on domains Google already trusts",
-          "Review content for direct-answer formatting — Gemini favors concise factual passages",
+          "Review content for direct-answer formatting. Gemini favors concise factual passages.",
         ],
-        expectedImpactLines: ["+12–18 pts over 3–4 snapshot cycles with consistent implementation."],
+        expectedImpactLines: ["+12 to 18 pts over 3 to 4 snapshot cycles with consistent implementation."],
       };
     case "anthropic":
       return {
@@ -2321,18 +2321,18 @@ function buildModelPlaybook(key: (typeof VULN_MODELS)[number]): ModelPlaybookSpe
         ],
         whyLead: "Claude handles high-intent branded research at point of purchase decision.",
         whyRows: [
-          { label: "Volume rank", value: "Growing — embedded in Notion, Cursor, enterprise tools" },
+          { label: "Volume rank", value: "Growing. Embedded in Notion, Cursor, enterprise tools." },
           { label: "Query type", value: "High-intent research + branded recommendations" },
           { label: "Risk if lost", value: "Invisible when purchase intent is highest" },
         ],
         steps: [
           "Publish JSON-LD schema for brand, product lines, and key entities",
-          "Reformat key product pages to direct-answer structure (question → answer)",
+          "Reformat key product pages to direct-answer structure (question to answer)",
           "Place brand authority facts on high-trust third-party domains",
           "Add FAQ blocks targeting the specific query patterns Claude handles",
         ],
         expectedImpactLines: [
-          "+8–14 pts on Anthropic signal within 60 days.",
+          "+8 to 14 pts on Anthropic signal within 60 days.",
           "This is the highest-leverage single action available in this snapshot.",
         ],
       };
@@ -2389,7 +2389,7 @@ function DecisionSurface({
   const causeLine =
     primary?.whyItMatters?.trim() ||
     (weakestName
-      ? `Not being retrieved in ${weakestName} answers — displacement is accelerating.`
+      ? `Not being retrieved in ${weakestName} answers. Displacement is accelerating.`
       : "Run a snapshot to isolate retrieval failure.");
 
   const topBullets = primary ? tacticalActionBullets(primary.action) : [];

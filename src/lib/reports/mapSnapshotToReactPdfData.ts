@@ -29,11 +29,11 @@ function formatLongDate(d: string) {
 
 const DEFAULT_EXECUTION: ExecutionPhase[] = [
   {
-    phase: "Week 1–2",
+    phase: "Week 1 to 2",
     text: "Audit structured content, schema, and citation gaps. Benchmark competitor proof and entity consistency.",
   },
   {
-    phase: "Week 2–3",
+    phase: "Week 2 to 3",
     text: "Execute the top recommendation. Focus the weakest model until the score moves.",
   },
   {
@@ -52,7 +52,7 @@ function buildModelInsights(name: string, val: number, _avg: number): string[] {
   const isWeak = val < 50;
   if (isStrong) {
     return [
-      "Strongest surface — copy what works here onto the weak models.",
+      "Strongest surface. Copy what works here onto the weak models.",
       "Rivals will push here; refresh proof and citations before they do.",
     ];
   }
@@ -63,7 +63,7 @@ function buildModelInsights(name: string, val: number, _avg: number): string[] {
     ];
   }
   return [
-    "Room to move — targeted page updates should shift the score.",
+    "Room to move. Targeted page updates should shift the score.",
     "Differentiate before a competitor locks the default answer here.",
   ];
 }
@@ -76,7 +76,7 @@ function buildStrategicTakeaway(models: [string, number][], _avg: number): strin
   const hi = models[0][1];
   const lo = models[models.length - 1][1];
   if (hi >= 70 && lo < 50) {
-    return `${Math.round(hi - lo)} points separate your best and worst model — assistants recommend different winners. Close the gap before a competitor owns the default answer.`;
+    return `${Math.round(hi - lo)} points separate your best and worst model. Assistants recommend different winners. Close the gap before a competitor owns the default answer.`;
   }
   if (models.every(([, s]) => s >= 70)) {
     return "Strong across the board. Shift to defense: watch competitors and refresh proof.";
@@ -145,7 +145,7 @@ export function mapSnapshotToReactPdfData(
     evidencePreview.push({
       label: "VULNERABLE",
       snippet: evidenceSnippet(vulnerableExamples[0].raw_text, pj?.evidence_snippet),
-      note: `${comps} surfaced without you — close the gap.`,
+      note: `${comps} surfaced without you. Close the gap.`,
     });
   }
   if (evidencePreview.length === 0 && responses[0]) {

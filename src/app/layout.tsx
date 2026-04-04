@@ -8,7 +8,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "VRTL Score — AI Visibility for Agencies",
+    default: "VRTL Score: AI Visibility for Agencies",
     template: "%s | VRTL Score",
   },
   description: "Measure how your clients rank across ChatGPT, Gemini, and Claude. Generate branded reports that prove your SEO value.",
@@ -21,20 +21,20 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://vrtlscore.com",
     siteName: "VRTL Score",
-    title: "VRTL Score — AI Visibility for Agencies",
+    title: "VRTL Score: AI Visibility for Agencies",
     description: "Measure how your clients rank across ChatGPT, Gemini, and Claude. Generate branded reports that prove your SEO value.",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "VRTL Score — AI Visibility for Agencies",
+        alt: "VRTL Score: AI Visibility for Agencies",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "VRTL Score — AI Visibility for Agencies",
+    title: "VRTL Score: AI Visibility for Agencies",
     description: "Measure how your clients rank across ChatGPT, Gemini, and Claude. Generate branded reports that prove your SEO value.",
     images: ["/og-image.png"],
   },

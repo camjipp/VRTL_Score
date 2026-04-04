@@ -23,7 +23,7 @@ const NAV_LINKS = [
   {
     href: "/app",
     label: "Dashboard",
-    hint: "Portfolio triage — who needs attention",
+    hint: "Portfolio triage: who needs attention",
     icon: "dashboard" as const,
   },
   {
@@ -274,7 +274,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                           key={item.label}
                           className="flex cursor-not-allowed items-center gap-3 rounded-lg border-l-2 border-transparent py-2.5 pl-3 pr-2 text-sm font-medium text-text-3/70"
                           aria-disabled="true"
-                          title={`${item.label} — coming soon`}
+                          title={`${item.label}: coming soon`}
                         >
                           <NavGlyph name={item.icon} className="text-text-3/80" />
                           <span className="min-w-0 flex-1 truncate">{item.label}</span>

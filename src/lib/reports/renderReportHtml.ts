@@ -65,7 +65,7 @@ function getScoreTier(score: number | null): ScoreTier {
     label: "90-100", 
     color: "#059669",
     description: "You're the default recommendation in AI responses",
-    implication: "Defend your position — competitors will target you",
+    implication: "Defend your position. Competitors will target you.",
     consequence: "Complacency here means competitors will study and replicate your strategy."
   };
   if (score >= 80) return { 
@@ -73,7 +73,7 @@ function getScoreTier(score: number | null): ScoreTier {
     label: "80-89", 
     color: "#10b981",
     description: "Consistently mentioned first or second",
-    implication: "Maintain momentum — the gap to #1 is closable",
+    implication: "Maintain momentum. The gap to #1 is closable.",
     consequence: "At this level, a 10-point drop moves you from 'recommended' to 'also mentioned.'"
   };
   if (score >= 70) return { 
@@ -81,7 +81,7 @@ function getScoreTier(score: number | null): ScoreTier {
     label: "70-79", 
     color: "#f59e0b",
     description: "Mentioned but not prominently positioned",
-    implication: "Close the gap — you're in consideration but not first choice",
+    implication: "Close the gap. You are in consideration but not first choice.",
     consequence: "Buyers using AI for research will see competitors first. Every day this continues, you lose discovery opportunities."
   };
   if (score >= 50) return { 
@@ -89,7 +89,7 @@ function getScoreTier(score: number | null): ScoreTier {
     label: "50-69", 
     color: "#f97316",
     description: "Sometimes mentioned, often behind competitors",
-    implication: "Differentiation needed — multiple players competing",
+    implication: "Differentiation needed. Multiple players are competing.",
     consequence: "In a contested market, the first to break away captures the default position. Inaction means falling further behind."
   };
   return { 
@@ -97,7 +97,7 @@ function getScoreTier(score: number | null): ScoreTier {
     label: "<50", 
     color: "#ef4444",
     description: "Rarely surfaced in AI responses",
-    implication: "Foundational work required — significant gap to leaders",
+    implication: "Foundational work required. There is a significant gap to leaders.",
     consequence: "AI-assisted buying is growing 40%+ annually. Invisibility now means compounding losses in discovery."
   };
 }
@@ -230,10 +230,10 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
     insights.push({
       priority: "HIGH",
       title: `${wName} Authority Gap`,
-      insight: `${wName} scores ${worstModel[1]} — ${gap} points below your average.`,
+      insight: `${wName} scores ${worstModel[1]}, ${gap} points below your average.`,
       whyItMatters: `${wName} carries real query volume. Weak scores invite displacement.`,
       action: `Publish comparison and citation-backed pages tuned to ${wName}.`,
-      expectedImpact: `Lift ${wName} score by 10–15 points within 60 days.`,
+      expectedImpact: `Lift ${wName} score by 10 to 15 points within 60 days.`,
       consequence: `Lag here hands discovery to whoever looks stronger on this surface.`,
     });
   }
@@ -257,7 +257,7 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       priority: "HIGH",
       title: "Fragile Leadership Position",
       insight: `You're #1, but ${metrics.competitorsWithinRange.length} competitor${metrics.competitorsWithinRange.length > 1 ? "s are" : " is"} within striking distance.`,
-      whyItMatters: "Thin leads flip fast—one strong content push from a rival changes the table.",
+      whyItMatters: "Thin leads flip fast. One strong content push from a rival changes the table.",
       action: "Raise velocity: proof, citations, and comparison assets before they close the gap.",
       expectedImpact: "Open a 5+ mention cushion.",
       consequence: `At this parity, a single competitor sprint can overtake you in weeks.`,
@@ -268,7 +268,7 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
   if (metrics.isContestedMarket && !metrics.isFragileLeadership) {
     insights.push({
       priority: "MEDIUM",
-      title: "Contested Market — No Clear Leader",
+      title: "Contested Market, No Clear Leader",
       insight: `All ${metrics.allEntities.length} tracked entities are within 3 mentions of each other.`,
       whyItMatters: "No lock-in: whoever differentiates first takes the default answer.",
       action: "90-day push on comparison content and citations. Move before a rival does.",
@@ -284,7 +284,7 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       title: "Low Authority Coverage",
       insight: `Authority signals appear in only ${metrics.mentionRate}% of AI responses.`,
       whyItMatters: "Most category queries never put you in the authoritative set.",
-      action: "PR, backlinks, structured data—raise mention coverage with proof.",
+      action: "PR, backlinks, structured data. Raise mention coverage with proof.",
       expectedImpact: "Reach 70%+ coverage to enter the consideration set.",
       consequence: `Absence compounds: models reinforce what they already see.`,
     });
@@ -311,7 +311,7 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       insight: `Only ${metrics.citationRate}% of mentions include citations.`,
       whyItMatters: "Low citations read as low authority to the model.",
       action: "Earn mentions from trade press, reviews, and trusted third parties.",
-      expectedImpact: "Citations typically add 5–10 points.",
+      expectedImpact: "Citations typically add 5 to 10 points.",
       consequence: `Competitors with stronger citation profiles will keep winning the cite.`,
     });
   }
@@ -322,7 +322,7 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
     insights.push({
       priority: "LOW",
       title: `${sName} Strength (Replicate)`,
-      insight: `${sName} scores you ${strongModels[0][1]} — your highest.`,
+      insight: `${sName} scores you ${strongModels[0][1]}, your highest.`,
       whyItMatters: "You already have a winning pattern on this surface.",
       action: "Clone structure, facts, and citation style onto weaker models.",
       expectedImpact: "Pull weaker models up with the same playbook.",
@@ -335,7 +335,7 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
     insights.push({
       priority: "LOW",
       title: "Strong Position (Maintain)",
-      insight: "Your AI authority is competitive — maintain current strategy.",
+      insight: "Your AI authority is competitive. Maintain current strategy.",
       whyItMatters: "Complacency is how leaders get passed.",
       action: "Keep shipping proof; watch competitor moves weekly.",
       expectedImpact: "Hold tier-one visibility.",
@@ -403,15 +403,15 @@ function generateBottomLine(data: ReportData, metrics: ReturnType<typeof calcula
   if (metrics.isFragileLeadership) {
     rest.push(`You rank #1, but the lead is thin`);
   } else if (metrics.isContestedMarket) {
-    rest.push(`No lock-in — first brand to break wins`);
+    rest.push(`No lock-in. First brand to break wins`);
   } else if (metrics.leader && !metrics.leader.isClient && metrics.gapToLeader > 0) {
     rest.push(
-      `${metrics.leader.name} leads by ${metrics.gapToLeader} mentions — ${metrics.gapToLeader <= 3 ? "narrow" : "material"}`,
+      `${metrics.leader.name} leads by ${metrics.gapToLeader} mentions (${metrics.gapToLeader <= 3 ? "narrow" : "material"} gap).`,
     );
   } else if (metrics.clientRank === 1 && metrics.allEntities.length > 1) {
     const lead = metrics.mentioned - (metrics.allEntities[1]?.mentions ?? 0);
     rest.push(
-      `You lead by ${lead} mention${lead !== 1 ? "s" : ""} — ${lead <= 2 ? "thin margin" : "defensible"}`,
+      `You lead by ${lead} mention${lead !== 1 ? "s" : ""} (${lead <= 2 ? "thin margin" : "defensible"}).`,
     );
   }
 
@@ -420,13 +420,13 @@ function generateBottomLine(data: ReportData, metrics: ReturnType<typeof calcula
 
 function generateTensionStatement(metrics: ReturnType<typeof calculateMetrics>): string {
   if (metrics.isFragileLeadership) {
-    return `You rank first, but coverage is tight — one sprint can flip it.`;
+    return `You rank first, but coverage is tight. One sprint can flip it.`;
   }
   if (metrics.isContestedMarket) {
     return `No clear leader. First brand to differentiate owns the default answer.`;
   }
   if (metrics.gapToLeader > 5) {
-    return `${metrics.leader?.name} leads by ${metrics.gapToLeader} mentions. Models reinforce what they already see — close the gap or lose ground.`;
+    return `${metrics.leader?.name} leads by ${metrics.gapToLeader} mentions. Models reinforce what they already see. Close the gap or lose ground.`;
   }
   if (metrics.mentionRate < 50) {
     return `Most category queries skip you. Absence compounds.`;
@@ -965,7 +965,7 @@ export function renderReportHtml(data: ReportData): string {
     </div>
     
     <div class="page-footer">
-      <span>Confidential — ${escapeHtml(client.name)}</span>
+      <span>Confidential: ${escapeHtml(client.name)}</span>
       <span>${agency.name ? escapeHtml(agency.name) : ""}</span>
     </div>
   </div>
@@ -998,7 +998,7 @@ export function renderReportHtml(data: ReportData): string {
 
         let modelInsight = "";
         if (isStrong) {
-          modelInsight = `Your strongest model. Content strategy resonates here — replicate this approach for weaker models.`;
+          modelInsight = `Your strongest model. Content strategy resonates here. Replicate this approach for weaker models.`;
         } else if (isWeak) {
           modelInsight = `Critical gap. ${name} users may not surface your brand. Prioritize content this model indexes well.`;
         } else {
@@ -1045,7 +1045,7 @@ export function renderReportHtml(data: ReportData): string {
       <div class="method-title">Strategic takeaway</div>
       <div class="method-text">
         ${models[0][1] >= 70 && models[models.length - 1][1] < 50
-          ? `${Math.round(models[0][1] - models[models.length - 1][1])} points separate your best and worst model — assistants recommend different winners. Close the gap before a competitor owns the default answer.`
+          ? `${Math.round(models[0][1] - models[models.length - 1][1])} points separate your best and worst model. Assistants recommend different winners. Close the gap before a competitor owns the default answer.`
           : models.every(([, s]) => s >= 70)
             ? `Strong across the board. Shift to defense: watch competitors and refresh proof.`
             : models.every(([, s]) => s < 50)
@@ -1069,7 +1069,7 @@ export function renderReportHtml(data: ReportData): string {
           <span class="evidence-chip" style="background:${chip.bg};color:${chip.color};border-color:${chip.border}">Strength</span>
         </div>
         <div class="evidence-quote">"${escapeHtml(snippet)}…"</div>
-        <div class="evidence-impact">Positioning reads as a primary recommendation — maintain supporting authority signals.</div>
+        <div class="evidence-impact">Positioning reads as a primary recommendation. Maintain supporting authority signals.</div>
       </div>
       `;
     }).join("") : ""}
@@ -1085,13 +1085,13 @@ export function renderReportHtml(data: ReportData): string {
           <span class="evidence-chip" style="background:${chip.bg};color:${chip.color};border-color:${chip.border}">Vulnerable</span>
         </div>
         <div class="evidence-quote">"${escapeHtml(snippet)}…"</div>
-        <div class="evidence-impact">${escapeHtml(competitors)} surfaced; your brand did not — close the discovery gap with targeted authority building.</div>
+        <div class="evidence-impact">${escapeHtml(competitors)} surfaced; your brand did not. Close the discovery gap with targeted authority building.</div>
       </div>
       `;
     }).join("") : ""}
     
     <div class="page-footer">
-      <span>Confidential — ${escapeHtml(client.name)}</span>
+      <span>Confidential: ${escapeHtml(client.name)}</span>
       <span>${agency.name ? escapeHtml(agency.name) : ""}</span>
     </div>
   </div>
@@ -1112,7 +1112,7 @@ export function renderReportHtml(data: ReportData): string {
     </div>
     
     <div class="h2">Prioritized actions</div>
-    <div class="body body-intro">Based on your snapshot, these are the highest-impact improvements — ranked by urgency and potential impact.</div>
+    <div class="body body-intro">Based on your snapshot, these are the highest-impact improvements, ranked by urgency and potential impact.</div>
     
     ${insights.map((insight, idx) => `
     <div class="insight-card no-break">
@@ -1138,15 +1138,15 @@ export function renderReportHtml(data: ReportData): string {
       <div class="method-title">30-day execution plan</div>
       <div class="plan-grid">
         <div class="plan-cell">
-          <div class="plan-phase">Week 1–2</div>
+          <div class="plan-phase">Week 1 to 2</div>
           <div class="plan-copy">Audit content for AI extractability. Identify authority gaps. Benchmark competitor content.</div>
         </div>
         <div class="plan-cell">
-          <div class="plan-phase">Week 2–3</div>
+          <div class="plan-phase">Week 2 to 3</div>
           <div class="plan-copy">Implement priority #1 recommendation. Focus resources on the weakest model.</div>
         </div>
         <div class="plan-cell">
-          <div class="plan-phase">Week 3–4</div>
+          <div class="plan-phase">Week 3 to 4</div>
           <div class="plan-copy">Build authority signals. Earn citations from trusted sources. Counter-position versus competitors.</div>
         </div>
         <div class="plan-cell">
@@ -1157,7 +1157,7 @@ export function renderReportHtml(data: ReportData): string {
     </div>
     
     <div class="page-footer">
-      <span>Confidential — ${escapeHtml(client.name)}</span>
+      <span>Confidential: ${escapeHtml(client.name)}</span>
       <span>${agency.name ? escapeHtml(agency.name) : ""}</span>
     </div>
   </div>
@@ -1309,7 +1309,7 @@ export function renderReportHtml(data: ReportData): string {
     </div>
     
     <div class="page-footer">
-      <span>Confidential — ${escapeHtml(client.name)}</span>
+      <span>Confidential: ${escapeHtml(client.name)}</span>
       <span>${agency.name ? escapeHtml(agency.name) : ""}</span>
     </div>
   </div>
