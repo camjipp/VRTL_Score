@@ -1,4 +1,5 @@
 import type { Extraction } from "@/lib/extraction/schema";
+import { formatProviderDisplayName } from "@/lib/reports/formatProviderDisplayName";
 import {
   evidencePdfChip,
   PDF_METHODOLOGY_TEXT,
@@ -224,14 +225,15 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
   
   if (weakModels.length > 0) {
     const worstModel = weakModels[weakModels.length - 1];
+    const wName = formatProviderDisplayName(worstModel[0]);
     const gap = avgScore - worstModel[1];
     insights.push({
       priority: "HIGH",
-      title: `${worstModel[0]} Authority Gap`,
-      insight: `${worstModel[0]} scores ${worstModel[1]} — ${gap} points below your average.`,
-      whyItMatters: `${worstModel[0]} carries real query volume. Weak scores invite displacement.`,
-      action: `Publish comparison and citation-backed pages tuned to ${worstModel[0]}.`,
-      expectedImpact: `Lift ${worstModel[0]} score by 10–15 points within 60 days.`,
+      title: `${wName} Authority Gap`,
+      insight: `${wName} scores ${worstModel[1]} — ${gap} points below your average.`,
+      whyItMatters: `${wName} carries real query volume. Weak scores invite displacement.`,
+      action: `Publish comparison and citation-backed pages tuned to ${wName}.`,
+      expectedImpact: `Lift ${wName} score by 10–15 points within 60 days.`,
       consequence: `Lag here hands discovery to whoever looks stronger on this surface.`,
     });
   }
@@ -241,10 +243,10 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
     insights.push({
       priority: "HIGH",
       title: "Competitive Authority Threat",
-      insight: `${metrics.topCompetitor.name} is mentioned ${metrics.topCompetitor.mentions} times vs your ${metrics.mentioned}.`,
+      insight: `${metrics.topCompetitor.name} is mentioned ${metrics.topCompetitor.mentions} times vs. your ${metrics.mentioned}.`,
       whyItMatters: "Assistants already rank them ahead of you on key answers.",
       action: "Audit their proof points. Counter with differentiated claims and citations.",
-      expectedImpact: "Close to parity within 90 days.",
+      expectedImpact: "Reach parity within 90 days.",
       consequence: `${metrics.topCompetitor.name} can own the default recommendation if you wait.`,
     });
   }
@@ -309,17 +311,18 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       insight: `Only ${metrics.citationRate}% of mentions include citations.`,
       whyItMatters: "Low citations read as low authority to the model.",
       action: "Earn mentions from trade press, reviews, and trusted third parties.",
-      expectedImpact: "Citation gains typically add 5–10 points.",
+      expectedImpact: "Citations typically add 5–10 points.",
       consequence: `Competitors with stronger citation profiles will keep winning the cite.`,
     });
   }
   
   // Strong model to replicate
   if (strongModels.length > 0 && strongModels.length < models.length) {
+    const sName = formatProviderDisplayName(strongModels[0][0]);
     insights.push({
       priority: "LOW",
-      title: `${strongModels[0][0]} Strength (Replicate)`,
-      insight: `${strongModels[0][0]} scores you ${strongModels[0][1]} — your highest.`,
+      title: `${sName} Strength (Replicate)`,
+      insight: `${sName} scores you ${strongModels[0][1]} — your highest.`,
       whyItMatters: "You already have a winning pattern on this surface.",
       action: "Clone structure, facts, and citation style onto weaker models.",
       expectedImpact: "Pull weaker models up with the same playbook.",
@@ -376,39 +379,43 @@ function getEvidenceLabel(pj: Extraction | null): { label: EvidenceLabel; chip: 
 
 function generateBottomLine(data: ReportData, metrics: ReturnType<typeof calculateMetrics>): string {
   const { client } = data;
+  const name = client.name;
+  const mention = metrics.mentionRate;
+  const top = metrics.topPositionRate;
 
-  const parts: string[] = [];
-
-  if (metrics.mentionRate >= 70) {
-    parts.push(`${client.name} lands in ${metrics.mentionRate}% of AI answers`);
-  } else if (metrics.mentionRate >= 40) {
-    parts.push(`${client.name} shows in ${metrics.mentionRate}% of AI answers`);
+  let leadSentence = "";
+  if (mention >= 70) {
+    leadSentence = `${name} appears in ${mention}% of AI answers`;
+  } else if (mention >= 40) {
+    leadSentence = `${name} appears in ${mention}% of AI answers`;
   } else {
-    parts.push(`${client.name} shows in only ${metrics.mentionRate}% of AI answers`);
+    leadSentence = `${name} appears in only ${mention}% of AI answers`;
   }
 
-  if (metrics.topPositionRate >= 50) {
-    parts.push(`first or second on most of those`);
-  } else if (metrics.topPositionRate > 0) {
-    parts.push(`rarely first in the answer`);
+  if (top >= 50) {
+    leadSentence += `, ranking first or second in most`;
+  } else if (top > 0) {
+    leadSentence += `, rarely first in the answer`;
   }
+
+  const rest: string[] = [];
 
   if (metrics.isFragileLeadership) {
-    parts.push(`You rank #1, but the lead is thin`);
+    rest.push(`You rank #1, but the lead is thin`);
   } else if (metrics.isContestedMarket) {
-    parts.push(`No lock-in — first brand to break wins`);
+    rest.push(`No lock-in — first brand to break wins`);
   } else if (metrics.leader && !metrics.leader.isClient && metrics.gapToLeader > 0) {
-    parts.push(
+    rest.push(
       `${metrics.leader.name} leads by ${metrics.gapToLeader} mentions — ${metrics.gapToLeader <= 3 ? "narrow" : "material"}`,
     );
   } else if (metrics.clientRank === 1 && metrics.allEntities.length > 1) {
     const lead = metrics.mentioned - (metrics.allEntities[1]?.mentions ?? 0);
-    parts.push(
+    rest.push(
       `You lead by ${lead} mention${lead !== 1 ? "s" : ""} — ${lead <= 2 ? "thin margin" : "defensible"}`,
     );
   }
 
-  return parts.join(". ") + ".";
+  return [leadSentence, ...rest].filter(Boolean).join(". ") + ".";
 }
 
 function generateTensionStatement(metrics: ReturnType<typeof calculateMetrics>): string {
@@ -921,12 +928,12 @@ export function renderReportHtml(data: ReportData): string {
     <div class="verdict-strip no-break">
       <div class="verdict-card win">
         <div class="verdict-label">Win</div>
-        <div class="verdict-value">${models.length > 0 ? `Strong in ${models[0][0]}` : "Baseline established"}</div>
+        <div class="verdict-value">${models.length > 0 ? `Strong in ${escapeHtml(formatProviderDisplayName(models[0][0]))}` : "Baseline established"}</div>
         <div class="verdict-detail">${models.length > 0 ? `Score: ${Math.round(models[0][1])}` : "First snapshot"}</div>
       </div>
       <div class="verdict-card risk">
         <div class="verdict-label">Risk</div>
-        <div class="verdict-value">${metrics.isFragileLeadership ? "Fragile lead" : models.length > 1 && models[models.length - 1][1] < 60 ? `Weak in ${models[models.length - 1][0]}` : metrics.topCompetitor ? `${metrics.topCompetitor.name} closing` : "Monitor changes"}</div>
+        <div class="verdict-value">${metrics.isFragileLeadership ? "Fragile lead" : models.length > 1 && models[models.length - 1][1] < 60 ? `Weak in ${escapeHtml(formatProviderDisplayName(models[models.length - 1][0]))}` : metrics.topCompetitor ? `${escapeHtml(metrics.topCompetitor.name)} closing` : "Monitor changes"}</div>
         <div class="verdict-detail">${metrics.isFragileLeadership ? "Competitors tied" : models.length > 1 && models[models.length - 1][1] < 60 ? `Score: ${Math.round(models[models.length - 1][1])}` : metrics.topCompetitor ? `${metrics.topCompetitor.mentions} mentions` : "Track weekly"}</div>
       </div>
       <div class="verdict-card priority">
@@ -1037,14 +1044,13 @@ export function renderReportHtml(data: ReportData): string {
     <div class="method-box no-break insight-panel section-gap">
       <div class="method-title">Strategic takeaway</div>
       <div class="method-text">
-        ${models[0][1] >= 70 && models[models.length - 1][1] < 50 ? 
-          `You have a ${Math.round(models[0][1] - models[models.length - 1][1])}-point spread between your best and worst models. This inconsistency means your content strategy works for some AI systems but not others. Closing this gap is your highest-leverage opportunity.` :
-          models.every(([, s]) => s >= 70) ?
-          `Consistent strong performance across models indicates robust content authority. Focus shifts to maintaining this position and monitoring for competitive threats.` :
-          models.every(([, s]) => s < 50) ?
-          `Weak performance across all models signals foundational content authority issues. This requires systematic improvement, not model-specific tactics.` :
-          `Mixed performance suggests opportunity for targeted optimization. Focus on lifting your weakest model while maintaining strength in others.`
-        }
+        ${models[0][1] >= 70 && models[models.length - 1][1] < 50
+          ? `${Math.round(models[0][1] - models[models.length - 1][1])} points separate your best and worst model — assistants recommend different winners. Close the gap before a competitor owns the default answer.`
+          : models.every(([, s]) => s >= 70)
+            ? `Strong across the board. Shift to defense: watch competitors and refresh proof.`
+            : models.every(([, s]) => s < 50)
+              ? `Weak everywhere. Fix authority and citations before model-by-model tactics.`
+              : `Mixed board. Lift the weakest model first; protect what already works.`}
       </div>
     </div>
     ` : ""}

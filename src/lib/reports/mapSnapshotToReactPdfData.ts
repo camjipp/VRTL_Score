@@ -13,6 +13,7 @@ import type {
   ReportData as ReactPdfReportData,
   SignalRow,
 } from "@/lib/reports/pdf/types";
+import { formatProviderDisplayName } from "@/lib/reports/formatProviderDisplayName";
 import { PDF_METHODOLOGY_TEXT } from "@/lib/reports/pdfTheme";
 
 function normalizeRecommendationPriority(p: string | undefined): RecommendationCard["priority"] {
@@ -112,12 +113,15 @@ export function mapSnapshotToReactPdfData(
     isClient: e.isClient,
   }));
 
-  const modelScores: ModelScoreRow[] = models.map(([name, val]) => ({
-    name,
-    score: Math.round(val),
-    deltaVsAvg: Math.round(val) - avgModelScore,
-    insights: buildModelInsights(name, val, avgModelScore),
-  }));
+  const modelScores: ModelScoreRow[] = models.map(([name, val]) => {
+    const displayName = formatProviderDisplayName(name);
+    return {
+      name: displayName,
+      score: Math.round(val),
+      deltaVsAvg: Math.round(val) - avgModelScore,
+      insights: buildModelInsights(displayName, val, avgModelScore),
+    };
+  });
 
   const labeled = responses.map((r) => ({
     ...r,
@@ -232,14 +236,15 @@ export function mapSnapshotToReactPdfData(
     };
   });
 
-  const winTitle = models.length > 0 ? `Strong in ${models[0][0]}` : "Establish baseline";
+  const winTitle =
+    models.length > 0 ? `Strong in ${formatProviderDisplayName(models[0][0])}` : "Establish baseline";
   const winDetail =
     models.length > 0 ? `Score ${Math.round(models[0][1])}` : "Run snapshots to compare models";
 
   const riskTitle = metrics.isFragileLeadership
     ? "Fragile lead"
     : models.length > 1 && models[models.length - 1][1] < 60
-      ? `Weak in ${models[models.length - 1][0]}`
+      ? `Weak in ${formatProviderDisplayName(models[models.length - 1][0])}`
       : metrics.topCompetitor
         ? `${metrics.topCompetitor.name} pressure`
         : "Monitor changes";

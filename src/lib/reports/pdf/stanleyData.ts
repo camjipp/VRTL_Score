@@ -13,7 +13,7 @@ export const stanleyData: ReportData = {
   topPosition: 60,
   authorityScore: 0,
   bottomLine:
-    "Stanley shows in 60% of AI answers and sits #1 in this snapshot — but the field is still open. Nail first-position answers and authority, or the lead stays negotiable.",
+    "Stanley appears in 60% of AI answers, ranking first or second in most. The field is contested—own first-position answers and authority or the lead stays negotiable.",
   tensionNote: undefined,
   competitors: [
     { name: "Stanley", mentions: 18, rate: 60, rank: 1, isClient: true },
@@ -169,14 +169,14 @@ export const stanleyData: ReportData = {
     competitors: String((i % 3) + 1),
   })),
   methodology:
-    "We test AI discovery responses under controlled scenarios. Scores combine presence, relative position, and citation-backed authority. Directional only — pair with your commercial and search data.",
+    "We test AI discovery responses under controlled scenarios. Scores combine presence, relative position, and citation-backed authority. Directional only—pair with your commercial and search data.",
   meta: {
     responses: 30,
     confidence: "High",
     generated: "April 1, 2026",
   },
   strategicTakeaway:
-    "You lead the rank table, but a 64-point spread across models is the real risk: assistants recommend different winners. Standardize facts, citations, and comparison narratives before a competitor locks the default answer.",
+    "You lead the rank table, but a 64-point model spread is the risk: assistants recommend different winners. Standardize facts, citations, and comparison narratives before a competitor locks the default answer.",
   agencyName: "Northbridge Digital",
   agencyLogoUrl: null,
 };

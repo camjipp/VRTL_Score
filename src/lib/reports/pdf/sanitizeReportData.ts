@@ -36,7 +36,7 @@ export function sanitizePdfString(raw: string): string {
   s = s.replace(/[\u2010\u2011\u2012\u2013\u2014\u2015\u2212]/g, "-");
   s = s.replace(/\u2026/g, "...");
   s = s.replace(/\u00A0|\u202F|\u2007|\uFEFF/g, " ");
-  s = s.replace(/[\u2028\u2029]/g, "\n");
+  s = s.replace(/[\u2028\u2029]/g, " ");
   s = s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "");
   s = s.replace(/  +/g, " ");
 
