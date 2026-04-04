@@ -29,19 +29,19 @@ function formatLongDate(d: string) {
 const DEFAULT_EXECUTION: ExecutionPhase[] = [
   {
     phase: "Week 1–2",
-    text: "Audit machine-readable copy, schema, and citation gaps. Benchmark competitor proof and entity consistency.",
+    text: "Audit structured content, schema, and citation gaps. Benchmark competitor proof and entity consistency.",
   },
   {
     phase: "Week 2–3",
-    text: "Ship the top recommendation. Concentrate effort on the weakest model until it moves.",
+    text: "Execute the top recommendation. Focus the weakest model until the score moves.",
   },
   {
     phase: "Week 3–4",
-    text: "Add authority: reviews, press, trusted backlinks. Counter-position where competitors lead the narrative.",
+    text: "Add authority: reviews, press, authoritative backlinks. Counter competitors where they lead the narrative.",
   },
   {
     phase: "Week 4+",
-    text: "Re-run the snapshot. Read deltas by model and intent. Set the next 30-day plan.",
+    text: "Re-run the snapshot. Read deltas by model and intent cluster. Lock the next 30-day plan.",
   },
 ];
 
@@ -51,39 +51,39 @@ function buildModelInsights(name: string, val: number, _avg: number): string[] {
   const isWeak = val < 50;
   if (isStrong) {
     return [
-      "Strongest surface. Replicate this pattern on the lagging models.",
-      "Competitors will pressure this channel. Refresh authority signals.",
+      "Strongest surface — copy what works here onto the weak models.",
+      "Rivals will push here; refresh proof and citations before they do.",
     ];
   }
   if (isWeak) {
     return [
-      `${name} visibility is weak. Your brand is often missing from category responses.`,
-      "Ship factual, citation-heavy pages this model tends to summarize.",
+      `${name} visibility is low. Your brand is frequently absent from category answers.`,
+      "Prioritize factual, citation-dense pages this model pulls from.",
     ];
   }
   return [
-    "Room to run: targeted page updates should move the needle.",
-    "Differentiate before a competitor locks the default recommendation here.",
+    "Room to move — targeted page updates should shift the score.",
+    "Differentiate before a competitor locks the default answer here.",
   ];
 }
 
 function buildStrategicTakeaway(models: [string, number][], _avg: number): string {
   void _avg;
   if (models.length === 0) {
-    return "No per-model scores yet. Populate provider scores so you can prioritize spend.";
+    return "No per-model scores yet. Populate provider scores to prioritize spend.";
   }
   const hi = models[0][1];
   const lo = models[models.length - 1][1];
   if (hi >= 70 && lo < 50) {
-    return `Performance is inconsistent across models (${Math.round(hi - lo)} points best vs. worst). That variance creates exposure to displacement. Close the gap before competitors standardize the winning answer.`;
+    return `${Math.round(hi - lo)} points separate your best and worst model — assistants recommend different winners. Close the gap before a competitor owns the default answer.`;
   }
   if (models.every(([, s]) => s >= 70)) {
-    return "Strong across the board. Shift from lift to defense: monitor competitors and refresh proof.";
+    return "Strong across the board. Shift to defense: watch competitors and refresh proof.";
   }
   if (models.every(([, s]) => s < 50)) {
-    return "Weak everywhere. Fix foundations—authority and citations—before tuning model-by-model tactics.";
+    return "Weak everywhere. Fix authority and citations before model-by-model tactics.";
   }
-  return "Mixed board. Lift the weakest model first; do not starve what already works.";
+  return "Mixed board. Lift the weakest model first; protect what already works.";
 }
 
 function evidenceSnippet(raw: string | null, parsedSnippet: string | undefined, max = 240): string {
@@ -132,7 +132,7 @@ export function mapSnapshotToReactPdfData(
     evidencePreview.push({
       label: "STRENGTH",
       snippet: evidenceSnippet(strengthExamples[0].raw_text, pj?.evidence_snippet),
-      note: "Top-slot placement—keep proof and citations current.",
+      note: "Maintain top position with consistent proof and updated citations.",
     });
   }
   if (vulnerableExamples[0]) {
@@ -141,7 +141,7 @@ export function mapSnapshotToReactPdfData(
     evidencePreview.push({
       label: "VULNERABLE",
       snippet: evidenceSnippet(vulnerableExamples[0].raw_text, pj?.evidence_snippet),
-      note: `${comps} surfaced without you. Close the discovery gap.`,
+      note: `${comps} surfaced without you — close the gap.`,
     });
   }
   if (evidencePreview.length === 0 && responses[0]) {
@@ -168,18 +168,18 @@ export function mapSnapshotToReactPdfData(
 
   const signalSummary: SignalRow[] = [
     {
-      signal: "Strength (top position, strong rec.)",
+      signal: "Strength (top + strong rec.)",
       count: metrics.topPosition,
       rate: `${metrics.topPositionRate}%`,
       status: "positive",
-      actionNote: "Maintain & defend",
+      actionNote: "Hold position",
     },
     {
       signal: "Opportunity (mentioned, not top)",
       count: oppCount,
       rate: `${oppRate}%`,
       status: "improvable",
-      actionNote: "Strengthen positioning",
+      actionNote: "Win top slot",
     },
     {
       signal: "Vulnerable (not mentioned)",
@@ -232,9 +232,9 @@ export function mapSnapshotToReactPdfData(
     };
   });
 
-  const winTitle = models.length > 0 ? `Strong in ${models[0][0]}` : "Baseline established";
+  const winTitle = models.length > 0 ? `Strong in ${models[0][0]}` : "Establish baseline";
   const winDetail =
-    models.length > 0 ? `Score ${Math.round(models[0][1])}` : "Complete snapshots to compare models";
+    models.length > 0 ? `Score ${Math.round(models[0][1])}` : "Run snapshots to compare models";
 
   const riskTitle = metrics.isFragileLeadership
     ? "Fragile lead"
@@ -244,12 +244,12 @@ export function mapSnapshotToReactPdfData(
         ? `${metrics.topCompetitor.name} pressure`
         : "Monitor changes";
   const riskDetail = metrics.isFragileLeadership
-    ? "Competitors within striking distance"
+    ? "Competitors inside striking distance"
     : models.length > 1 && models[models.length - 1][1] < 60
       ? `Score ${Math.round(models[models.length - 1][1])}`
       : metrics.topCompetitor
         ? `${metrics.topCompetitor.mentions} mentions`
-        : "Track weekly";
+        : "Watch weekly";
 
   return {
     clientName: client.name,

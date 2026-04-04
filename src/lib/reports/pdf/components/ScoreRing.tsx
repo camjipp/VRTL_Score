@@ -7,8 +7,8 @@ import { colors, fonts } from "../theme";
  * Endpoints at bottom-left / bottom-right; major arc runs over the top (270°).
  *
  * Layout: the arc viewport (W×H) is centered in `COLUMN_W` to match Page 1 heroLeft.
- * Score + “/100” are flex-centered in the upper area; “OVERALL SCORE” sits in the
- * bottom opening of the horseshoe (inside the same viewport).
+ * Score + “/100” stay vertically centered in the full arc viewport (unchanged).
+ * “OVERALL SCORE” is layered in the lower opening only — it does not shift the numbers.
  */
 const W = 172;
 const H = 124;
@@ -20,11 +20,12 @@ const STROKE = 13;
 /** Must match `heroLeft` width on Page 1 so the ring is centered in the column. */
 export const SCORE_RING_COLUMN_W = 180;
 
-/** Fine-tune optical center of the digit stack (pt). `paddingBottom` reserves the label band. */
+/** Fine-tune optical center of the digit stack inside the arc (pt). */
 const STACK_NUDGE_X = 0;
 const STACK_NUDGE_Y = -6;
-/** Room for OVERALL SCORE in the lower opening so the number stack clears it. */
-const LABEL_BAND_PT = 18;
+
+/** Distance from viewport bottom to “OVERALL SCORE” — higher value = label further up in the opening. */
+const OVERALL_LABEL_BOTTOM = 22;
 
 const DEG = Math.PI / 180;
 function pt(angleDeg: number): { x: number; y: number } {
@@ -65,7 +66,7 @@ export function ScoreRing({ score }: Props) {
           </Svg>
         </View>
 
-        <View style={{ position: "absolute", bottom: 8, left: 0, width: W, alignItems: "center" }}>
+        <View style={{ position: "absolute", bottom: OVERALL_LABEL_BOTTOM, left: 0, width: W, alignItems: "center" }}>
           <Text
             style={{
               fontSize: 6,
@@ -90,7 +91,6 @@ export function ScoreRing({ score }: Props) {
             height: H,
             alignItems: "center",
             justifyContent: "center",
-            paddingBottom: LABEL_BAND_PT,
           }}
         >
           <View

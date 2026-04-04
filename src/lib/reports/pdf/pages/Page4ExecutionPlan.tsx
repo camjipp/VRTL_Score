@@ -110,7 +110,7 @@ export function Page4ExecutionPlan({ data }: { data: ReportData }) {
 
         <ChapterTitle title="Execution Plan" />
         <Text style={styles.intro}>
-          Four-week sequence. Shift dates to match your cadence. Finish discovery before you scale execution.
+          Four weeks, sequenced. Adjust dates to your cadence. Lock discovery before you scale execution.
         </Text>
 
         <PdfTraceMarker page={4} section="Page4:before_phases" />
@@ -134,7 +134,7 @@ export function Page4ExecutionPlan({ data }: { data: ReportData }) {
                     <Text style={styles.copy}>{main}</Text>
                     {impact ? (
                       <>
-                        <Text style={styles.impactLabel}>Expected impact</Text>
+                        <Text style={styles.impactLabel}>Impact</Text>
                         <Text style={styles.impactText}>{impact}</Text>
                       </>
                     ) : null}

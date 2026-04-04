@@ -127,7 +127,7 @@ export function Page5DataSummary({ data }: { data: ReportData }) {
         <PdfTraceMarker page={5} section="Page5:after_header" />
 
         <ChapterTitle title="Data Summary" />
-        <Text style={[styles.h, styles.hFirst]}>Signal summary</Text>
+        <Text style={[styles.h, styles.hFirst]}>Signals</Text>
         <View style={{ marginBottom: space.section, width: 540 }}>
           <View style={styles.th}>
             <Text style={[styles.thText, { width: S.sig }]}>Signal</Text>
@@ -162,7 +162,7 @@ export function Page5DataSummary({ data }: { data: ReportData }) {
           ))}
         </View>
 
-        <Text style={styles.h}>Competitive comparison</Text>
+        <Text style={styles.h}>Competitive set</Text>
         <View style={{ width: 540 }}>
           <View style={styles.th}>
             <Text style={[styles.thText, { width: C.brand }]}>Brand</Text>

@@ -181,7 +181,10 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
   const scores = data.modelScores.map((m) => m.score);
   const spread = scores.length ? Math.max(...scores) - Math.min(...scores) : 0;
   const spreadLine = `${spread}-POINT SPREAD`;
-  const descLine = "Largest delta is best model vs. worst. Fix the trailing model first.";
+  const descLine =
+    spread === 0
+      ? "No spread across models — scores align."
+      : `${spread} points separate best and worst model — assistant answers diverge hard.`;
 
   return (
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>

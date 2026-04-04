@@ -116,7 +116,7 @@ export function Page3Recommendations({ data }: { data: ReportData }) {
         <PdfTraceMarker page={3} section="Page3:after_header" />
 
         <ChapterTitle title="Recommendations" />
-        <Text style={styles.intro}>Ranked by urgency and leverage. Work top-down when capacity is tight.</Text>
+        <Text style={styles.intro}>Urgent first. Work the list in order when bandwidth is thin.</Text>
 
         <View style={styles.cardsBlock} wrap={false}>
           {data.recommendations.map((r, i) => {

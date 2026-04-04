@@ -231,7 +231,7 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       insight: `${worstModel[0]} scores ${worstModel[1]} — ${gap} points below your average.`,
       whyItMatters: `${worstModel[0]} carries real query volume. Weak scores invite displacement.`,
       action: `Publish comparison and citation-backed pages tuned to ${worstModel[0]}.`,
-      expectedImpact: `Target +10–15 points on ${worstModel[0]} within 60 days.`,
+      expectedImpact: `Lift ${worstModel[0]} score by 10–15 points within 60 days.`,
       consequence: `Lag here hands discovery to whoever looks stronger on this surface.`,
     });
   }
@@ -244,7 +244,7 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       insight: `${metrics.topCompetitor.name} is mentioned ${metrics.topCompetitor.mentions} times vs your ${metrics.mentioned}.`,
       whyItMatters: "Assistants already rank them ahead of you on key answers.",
       action: "Audit their proof points. Counter with differentiated claims and citations.",
-      expectedImpact: "Regain parity within 90 days.",
+      expectedImpact: "Close to parity within 90 days.",
       consequence: `${metrics.topCompetitor.name} can own the default recommendation if you wait.`,
     });
   }
@@ -257,7 +257,7 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       insight: `You're #1, but ${metrics.competitorsWithinRange.length} competitor${metrics.competitorsWithinRange.length > 1 ? "s are" : " is"} within striking distance.`,
       whyItMatters: "Thin leads flip fast—one strong content push from a rival changes the table.",
       action: "Raise velocity: proof, citations, and comparison assets before they close the gap.",
-      expectedImpact: "Build a 5+ mention cushion.",
+      expectedImpact: "Open a 5+ mention cushion.",
       consequence: `At this parity, a single competitor sprint can overtake you in weeks.`,
     });
   }
@@ -270,7 +270,7 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       insight: `All ${metrics.allEntities.length} tracked entities are within 3 mentions of each other.`,
       whyItMatters: "No lock-in: whoever differentiates first takes the default answer.",
       action: "90-day push on comparison content and citations. Move before a rival does.",
-      expectedImpact: "Aim for a clear #1 with a 10+ mention edge.",
+      expectedImpact: "Clear #1 with a 10+ mention edge.",
       consequence: `Contested sets reward speed. Waiting cedes the breakout to someone else.`,
     });
   }
@@ -283,7 +283,7 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       insight: `Authority signals appear in only ${metrics.mentionRate}% of AI responses.`,
       whyItMatters: "Most category queries never put you in the authoritative set.",
       action: "PR, backlinks, structured data—raise mention coverage with proof.",
-      expectedImpact: "Push toward 70%+ coverage to enter the consideration set.",
+      expectedImpact: "Reach 70%+ coverage to enter the consideration set.",
       consequence: `Absence compounds: models reinforce what they already see.`,
     });
   }
@@ -296,7 +296,7 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       insight: `Mentioned but only in top position ${metrics.topPositionRate}% of the time.`,
       whyItMatters: "You are in the set, rarely first. First pick wins the click.",
       action: "Sharpen differentiation and proof on priority URLs.",
-      expectedImpact: "Lift top-position share on money intents.",
+      expectedImpact: "Raise top-position share on priority intents.",
       consequence: `Second in the answer set is second in the funnel.`,
     });
   }
@@ -309,7 +309,7 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       insight: `Only ${metrics.citationRate}% of mentions include citations.`,
       whyItMatters: "Low citations read as low authority to the model.",
       action: "Earn mentions from trade press, reviews, and trusted third parties.",
-      expectedImpact: "Citation lifts typically track +5–10 points.",
+      expectedImpact: "Citation gains typically add 5–10 points.",
       consequence: `Competitors with stronger citation profiles will keep winning the cite.`,
     });
   }
@@ -322,7 +322,7 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       insight: `${strongModels[0][0]} scores you ${strongModels[0][1]} — your highest.`,
       whyItMatters: "You already have a winning pattern on this surface.",
       action: "Clone structure, facts, and citation style onto weaker models.",
-      expectedImpact: "Drag weaker models up using the same playbook.",
+      expectedImpact: "Pull weaker models up with the same playbook.",
       consequence: `Ignoring the playbook leaves easy points on the table.`,
     });
   }
@@ -335,7 +335,7 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       insight: "Your AI authority is competitive — maintain current strategy.",
       whyItMatters: "Complacency is how leaders get passed.",
       action: "Keep shipping proof; watch competitor moves weekly.",
-      expectedImpact: "Hold top-tier visibility.",
+      expectedImpact: "Hold tier-one visibility.",
       consequence: `Strong scores decay without maintenance.`,
     });
   }
@@ -376,52 +376,53 @@ function getEvidenceLabel(pj: Extraction | null): { label: EvidenceLabel; chip: 
 
 function generateBottomLine(data: ReportData, metrics: ReturnType<typeof calculateMetrics>): string {
   const { client } = data;
-  
+
   const parts: string[] = [];
-  
-  // Mention rate statement
+
   if (metrics.mentionRate >= 70) {
-    parts.push(`${client.name} is mentioned in ${metrics.mentionRate}% of AI responses`);
+    parts.push(`${client.name} lands in ${metrics.mentionRate}% of AI answers`);
   } else if (metrics.mentionRate >= 40) {
-    parts.push(`${client.name} appears in ${metrics.mentionRate}% of AI responses`);
+    parts.push(`${client.name} shows in ${metrics.mentionRate}% of AI answers`);
   } else {
-    parts.push(`${client.name} is only mentioned in ${metrics.mentionRate}% of AI responses`);
+    parts.push(`${client.name} shows in only ${metrics.mentionRate}% of AI answers`);
   }
-  
-  // Positioning statement
+
   if (metrics.topPositionRate >= 50) {
-    parts.push(`with strong first-position placement`);
+    parts.push(`first or second on most of those`);
   } else if (metrics.topPositionRate > 0) {
-    parts.push(`but rarely as the first recommendation`);
+    parts.push(`rarely first in the answer`);
   }
-  
-  // Competitive context with tension
+
   if (metrics.isFragileLeadership) {
-    parts.push(`You rank #1, but the lead is thin—easy to lose`);
+    parts.push(`You rank #1, but the lead is thin`);
   } else if (metrics.isContestedMarket) {
-    parts.push(`Contested set: no lock-in; first break wins`);
+    parts.push(`No lock-in — first brand to break wins`);
   } else if (metrics.leader && !metrics.leader.isClient && metrics.gapToLeader > 0) {
-    parts.push(`${metrics.leader.name} leads by ${metrics.gapToLeader} mentions — the gap is ${metrics.gapToLeader <= 3 ? 'closable' : 'significant'}`);
+    parts.push(
+      `${metrics.leader.name} leads by ${metrics.gapToLeader} mentions — ${metrics.gapToLeader <= 3 ? "narrow" : "material"}`,
+    );
   } else if (metrics.clientRank === 1 && metrics.allEntities.length > 1) {
     const lead = metrics.mentioned - (metrics.allEntities[1]?.mentions ?? 0);
-    parts.push(`You lead by ${lead} mention${lead !== 1 ? 's' : ''} — ${lead <= 2 ? 'a thin margin to defend' : 'a defensible position'}`);
+    parts.push(
+      `You lead by ${lead} mention${lead !== 1 ? "s" : ""} — ${lead <= 2 ? "thin margin" : "defensible"}`,
+    );
   }
-  
+
   return parts.join(". ") + ".";
 }
 
 function generateTensionStatement(metrics: ReturnType<typeof calculateMetrics>): string {
   if (metrics.isFragileLeadership) {
-    return `You rank first, but mention coverage is tight. One competitor sprint can flip the table.`;
+    return `You rank first, but coverage is tight — one sprint can flip it.`;
   }
   if (metrics.isContestedMarket) {
-    return `No clear leader in AI visibility. First brand to differentiate likely owns the default answer.`;
+    return `No clear leader. First brand to differentiate owns the default answer.`;
   }
   if (metrics.gapToLeader > 5) {
-    return `${metrics.leader?.name} leads by ${metrics.gapToLeader} mentions. Models reinforce what they already see—close the gap or it widens.`;
+    return `${metrics.leader?.name} leads by ${metrics.gapToLeader} mentions. Models reinforce what they already see — close the gap or lose ground.`;
   }
   if (metrics.mentionRate < 50) {
-    return `Majority of category queries may skip you. Low presence compounds.`;
+    return `Most category queries skip you. Absence compounds.`;
   }
   return "";
 }
