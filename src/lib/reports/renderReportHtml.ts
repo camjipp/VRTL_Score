@@ -1,5 +1,6 @@
 import type { Extraction } from "@/lib/extraction/schema";
 import { formatProviderDisplayName } from "@/lib/reports/formatProviderDisplayName";
+import { formatEvidenceFieldDisplay } from "@/lib/reports/formatEvidenceFieldDisplay";
 import {
   evidencePdfChip,
   PDF_METHODOLOGY_TEXT,
@@ -233,7 +234,7 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
       insight: `${wName} scores ${worstModel[1]}, ${gap} points below your average.`,
       whyItMatters: `${wName} carries real query volume. Weak scores invite displacement.`,
       action: `Publish comparison and citation-backed pages tuned to ${wName}.`,
-      expectedImpact: `Lift ${wName} score by 10 to 15 points within 60 days.`,
+      expectedImpact: `Lift ${wName} score by 10–15 points within 60 days.`,
       consequence: `Lag here hands discovery to whoever looks stronger on this surface.`,
     });
   }
@@ -1101,7 +1102,7 @@ export function renderReportHtml(data: ReportData): string {
     <div class="page-header">
       <div class="page-header-left">
         <div class="report-name">${PDF_REPORT_TITLE}</div>
-        <div class="section-slug">Strategic recommendations</div>
+        <div class="section-slug">Strategic\u00a0recommendations</div>
       </div>
       <div class="page-header-right">
         <div>${escapeHtml(client.name)}</div>
@@ -1280,8 +1281,8 @@ export function renderReportHtml(data: ReportData): string {
             <td>${idx + 1}</td>
             <td><span class="pill" style="background:${ch.bg};color:${ch.color};border:1px solid ${ch.border}">${label.label}</span></td>
             <td>${pj?.client_mentioned ? "✓" : "✗"}</td>
-            <td>${pj?.client_position || "—"}</td>
-            <td>${pj?.recommendation_strength || "—"}</td>
+            <td>${escapeHtml(formatEvidenceFieldDisplay(pj?.client_position ?? null))}</td>
+            <td>${escapeHtml(formatEvidenceFieldDisplay(pj?.recommendation_strength ?? null))}</td>
             <td>${compCount > 0 ? compCount : "—"}</td>
           </tr>
           `;

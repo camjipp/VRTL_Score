@@ -1,6 +1,7 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
 import { PAGE, colors, fonts, rhythm, baseStyles } from "../theme";
+import { formatEvidenceFieldDisplay } from "@/lib/reports/formatEvidenceFieldDisplay";
 import { sanitizePdfString } from "../sanitizeReportData";
 import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfFooter } from "../components/PdfFooter";
@@ -140,17 +141,6 @@ const styles = StyleSheet.create({
   ynN: { backgroundColor: colors.surface2, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 4 },
 });
 
-/** Human-readable strength for table cells (underscores → words). */
-function formatStrengthLabel(raw: string): string {
-  const s = sanitizePdfString(String(raw).trim());
-  if (!s.includes("_")) return s;
-  return s
-    .split("_")
-    .filter(Boolean)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-    .join(" ");
-}
-
 function logLabelPill(label: string): { bg: string; fg: string } {
   const u = label.toUpperCase();
   if (u.includes("STRENGTH")) return { bg: colors.greenLight, fg: colors.ink };
@@ -183,7 +173,8 @@ export function Page6Evidence({ data }: { data: ReportData }) {
           {data.evidenceLog.map((row, rowIdx) => {
             const yn = row.mentioned === "Yes";
             const lp = logLabelPill(row.label);
-            const strengthDisp = formatStrengthLabel(row.strength);
+            const strengthDisp = formatEvidenceFieldDisplay(sanitizePdfString(String(row.strength ?? "")));
+            const positionDisp = formatEvidenceFieldDisplay(sanitizePdfString(String(row.position ?? "")));
             return (
               <View
                 key={`evl-${row.idx}`}
@@ -210,7 +201,7 @@ export function Page6Evidence({ data }: { data: ReportData }) {
                     </Text>
                   </View>
                 </View>
-                <Text style={[styles.td, { width: W.pos }]}>{row.position}</Text>
+                <Text style={[styles.td, { width: W.pos }]}>{positionDisp}</Text>
                 <Text
                   style={[
                     styles.td,

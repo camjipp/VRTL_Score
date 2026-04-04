@@ -184,7 +184,7 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
   const descLine =
     spread === 0
       ? "No spread across models. Scores align."
-      : `${spread} points separate best and worst model. Assistant answers diverge hard.`;
+      : `${spread} points separate best and worst model. Assistant answers diverge sharply.`;
 
   return (
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>

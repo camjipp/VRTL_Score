@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import type { BadgeVariant } from "@/components/ui/Badge";
 import { cn } from "@/lib/cn";
+import { formatEvidenceFieldDisplay } from "@/lib/reports/formatEvidenceFieldDisplay";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    TYPES
@@ -2977,8 +2978,12 @@ function EvidenceSection({ detail }: { detail: SnapshotDetailResponse }) {
                     </div>
                   )}
                   <div className="flex flex-wrap gap-2 text-xs">
-                    <span className="rounded bg-surface-2 px-2 py-1 text-text-2">Position: {position || "N/A"}</span>
-                    <span className="rounded bg-surface-2 px-2 py-1 text-text-2">Strength: {strength || "N/A"}</span>
+                    <span className="rounded bg-surface-2 px-2 py-1 text-text-2">
+                      Position: {position ? formatEvidenceFieldDisplay(position) : "N/A"}
+                    </span>
+                    <span className="rounded bg-surface-2 px-2 py-1 text-text-2">
+                      Strength: {strength ? formatEvidenceFieldDisplay(strength) : "N/A"}
+                    </span>
                     {r.competitors_mentioned.length > 0 && (
                       <span className="rounded bg-surface-2 px-2 py-1 text-text-2">Competitors: {r.competitors_mentioned.join(", ")}</span>
                     )}
@@ -3237,10 +3242,10 @@ function EvidenceTab({
                   )}
                   <div className="flex flex-wrap gap-2 text-xs">
                     <span className="rounded bg-surface-2 px-2 py-1 text-text-2">
-                      Position: {position || "N/A"}
+                      Position: {position ? formatEvidenceFieldDisplay(position) : "N/A"}
                     </span>
                     <span className="rounded bg-surface-2 px-2 py-1 text-text-2">
-                      Strength: {strength || "N/A"}
+                      Strength: {strength ? formatEvidenceFieldDisplay(strength) : "N/A"}
                     </span>
                     {r.competitors_mentioned.length > 0 && (
                       <span className="rounded bg-surface-2 px-2 py-1 text-text-2">
