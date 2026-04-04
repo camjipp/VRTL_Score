@@ -4,7 +4,7 @@ import { PAGE, colors, fonts, rhythm, baseStyles } from "../theme";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
-import { ScoreRing } from "../components/ScoreRing";
+import { ScoreRing, SCORE_RING_COLUMN_W } from "../components/ScoreRing";
 
 /** Inner row columns sum to 537 (540 − 3pt accent rail) */
 const W = { rank: 30, name: 116, bar: 231, count: 66, pill: 91 } as const;
@@ -22,7 +22,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: rhythm.lg,
     overflow: "hidden",
   },
-  heroLeft: { width: 180, alignItems: "center", justifyContent: "center" },
+  heroLeft: {
+    width: SCORE_RING_COLUMN_W,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "column",
+  },
   divider: { width: 1, alignSelf: "stretch", backgroundColor: colors.rule, marginHorizontal: rhythm.md },
   heroRight: {
     flex: 1,
