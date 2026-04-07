@@ -376,35 +376,36 @@ export default function HomePage() {
         </section>
 
         <section className={`scroll-mt-24 ${sectionRule} ${sectionAlt}`} id="agencies">
-          <div className={`${container} flex flex-col gap-10 py-24`}>
-            <h2 className={heading}>Turn AI visibility into a new revenue stream.</h2>
-            <p className={subtext}>
-              Package AI visibility into a deliverable you price, repeat, and renew on—not another internal dashboard only your team sees.
-            </p>
-            <div className="grid gap-6 md:grid-cols-3 md:gap-8">
-              {[
-                {
-                  t: "Add a new line item",
-                  b: "Give clients a clear AI visibility report they understand and expect.",
-                },
-                {
-                  t: "Increase retainers",
-                  b: "Expand scope with measurable AI performance and reporting.",
-                },
-                {
-                  t: "Defend client relationships",
-                  b: "Answer the question clients are already asking: “Why is AI recommending someone else?”",
-                },
-              ].map((c) => (
-                <div key={c.t} className={cardShell}>
-                  <h3 className="font-display text-lg font-semibold tracking-tight text-white">{c.t}</h3>
-                  <p className="mt-4 text-base leading-relaxed text-white/55">{c.b}</p>
+          <div className={`${container} flex flex-col gap-14 py-24`}>
+            <div className="flex flex-col gap-12 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)] lg:items-start lg:gap-16">
+              <div className="flex max-w-xl flex-col gap-8">
+                <h2 className={heading}>Turn AI visibility into a new revenue stream.</h2>
+                <p className={subtext}>
+                  Package AI visibility into a deliverable you price, repeat, and renew on—not another internal dashboard only your team sees.
+                </p>
+                <div className="flex flex-col gap-2">
+                  <p className="font-display text-2xl font-semibold tracking-tight text-white md:text-3xl">$2K–$10K/mo service layer</p>
+                  <p className="text-sm leading-relaxed text-white/45">Agencies are already packaging this into retainers.</p>
                 </div>
-              ))}
+                <figure className="mt-4 flex flex-col gap-6 border-t border-white/[0.06] pt-10">
+                  <blockquote className="text-xl font-medium leading-snug text-white/90 md:text-2xl md:leading-snug">
+                    We ran this for a client and immediately saw where they were losing visibility in AI answers.
+                  </blockquote>
+                  <figcaption className="text-sm text-white/45">Principal, search-focused agency</figcaption>
+                </figure>
+              </div>
+              <div className="flex flex-col">
+                <div className="border-b border-white/[0.06] py-8 first:pt-0">
+                  <h3 className="font-display text-2xl font-semibold tracking-tight text-white md:text-[1.65rem]">Add a new line item</h3>
+                </div>
+                <div className="border-b border-white/[0.06] py-7">
+                  <h3 className="font-display text-lg font-semibold tracking-tight text-white">Increase retainers</h3>
+                </div>
+                <div className="py-7">
+                  <h3 className="font-display text-lg font-semibold tracking-tight text-white">Defend client relationships</h3>
+                </div>
+              </div>
             </div>
-            <blockquote className={`${cardShell} border-l-2 border-l-emerald-500/50 text-base leading-relaxed text-white/55`}>
-              We ran this for a client and immediately saw where they were losing visibility in AI answers.
-            </blockquote>
           </div>
         </section>
 
