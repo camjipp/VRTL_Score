@@ -215,7 +215,9 @@ export function Page1Overview({ data }: { data: ReportData }) {
             </View>
             <View style={[styles.kpiTile, authEmpty ? { opacity: 0.88 } : {}]}>
               <Text style={[styles.kpiVal, authEmpty ? { color: colors.ink4 } : {}]}>{data.authorityScore}%</Text>
-              <Text style={[styles.kpiLab, authEmpty ? { color: colors.ink4 } : {}]}>Authority</Text>
+              <Text style={[styles.kpiLab, authEmpty ? { color: colors.ink4 } : {}]}>
+                Authority{"\u00A0"}(citations)
+              </Text>
             </View>
           </View>
         </View>

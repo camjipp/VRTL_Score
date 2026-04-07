@@ -57,10 +57,11 @@ function buildModelInsights(name: string, val: number, _avg: number): string[] {
     ];
   }
   if (isWeak) {
-    return [
-      `${name} visibility is low. Your brand is frequently absent from category answers.`,
-      "Prioritize factual, citation-dense pages this model pulls from.",
-    ];
+    const first =
+      name === "Anthropic"
+        ? "Anthropic visibility is weak. Your brand is frequently absent from category answers."
+        : `${name} visibility is low. Your brand is frequently absent from category answers.`;
+    return [first, "Prioritize factual, citation-dense pages this model pulls from."];
   }
   return [
     "Room to move. Targeted page updates should shift the score.",
@@ -179,7 +180,7 @@ export function mapSnapshotToReactPdfData(
       actionNote: "Hold position",
     },
     {
-      signal: "Opportunity (mentioned, not top)",
+      signal: "Mentioned (not top)",
       count: oppCount,
       rate: `${oppRate}%`,
       status: "improvable",
@@ -193,7 +194,7 @@ export function mapSnapshotToReactPdfData(
       actionNote: "Build presence",
     },
     {
-      signal: "Authority (with citations)",
+      signal: "Authority (citations)",
       count: metrics.hasCitations,
       rate: `${metrics.citationRate}%`,
       status: authorityStatus,

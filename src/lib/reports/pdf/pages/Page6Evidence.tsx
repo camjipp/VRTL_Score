@@ -1,7 +1,7 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
 import { PAGE, colors, fonts, rhythm, baseStyles } from "../theme";
-import { formatEvidenceFieldDisplay } from "@/lib/reports/formatEvidenceFieldDisplay";
+import { formatEvidenceFieldDisplay, formatEvidenceLogPillLabel } from "@/lib/reports/formatEvidenceFieldDisplay";
 import { sanitizePdfString } from "../sanitizeReportData";
 import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfFooter } from "../components/PdfFooter";
@@ -139,13 +139,21 @@ const styles = StyleSheet.create({
   },
   ynY: { backgroundColor: colors.surface2, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 4 },
   ynN: { backgroundColor: colors.surface2, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 4 },
+  sampleCaption: {
+    fontSize: 8,
+    fontWeight: 400,
+    color: colors.ink3,
+    marginBottom: rhythm.sm,
+    marginTop: 2,
+    fontFamily: fonts.sans,
+  },
 });
 
 function logLabelPill(label: string): { bg: string; fg: string } {
   const u = label.toUpperCase();
   if (u.includes("STRENGTH")) return { bg: colors.greenLight, fg: colors.ink };
-  if (u.includes("OPPORTUNITY") || u.includes("COMPETITIVE")) return { bg: colors.orangeLight, fg: colors.ink };
-  if (u.includes("INVISIBLE")) return { bg: colors.redLight, fg: colors.ink };
+  if (u.includes("OPPORTUNITY") || u.includes("MENTIONED") || u.includes("COMPETITIVE")) return { bg: colors.orangeLight, fg: colors.ink };
+  if (u.includes("VULNERABLE") || u.includes("INVISIBLE")) return { bg: colors.redLight, fg: colors.ink };
   return { bg: colors.surface2, fg: colors.ink };
 }
 
@@ -160,6 +168,7 @@ export function Page6Evidence({ data }: { data: ReportData }) {
         <ChapterTitle title="Evidence & Methodology" />
 
         <Text style={[styles.subHead, styles.subHeadFirst]}>Evidence log</Text>
+        <Text style={styles.sampleCaption}>Sample of responses</Text>
         <View style={{ marginBottom: rhythm.sm }}>
           <View style={styles.th}>
             <Text style={[styles.thText, { width: W.idx }]}>#</Text>
@@ -184,7 +193,9 @@ export function Page6Evidence({ data }: { data: ReportData }) {
                 <Text style={[styles.td, { width: W.idx }]}>{String(row.idx)}</Text>
                 <View style={{ width: W.label, justifyContent: "center" }}>
                   <View style={[styles.sigPill, { backgroundColor: lp.bg }]}>
-                    <Text style={[styles.sigPillTxt, { color: lp.fg }]}>{row.label}</Text>
+                    <Text style={[styles.sigPillTxt, { color: lp.fg }]}>
+                      {formatEvidenceLogPillLabel(sanitizePdfString(row.label))}
+                    </Text>
                   </View>
                 </View>
                 <View style={{ width: W.yn, alignItems: "flex-start" }}>

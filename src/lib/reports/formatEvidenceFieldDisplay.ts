@@ -15,3 +15,11 @@ export function formatEvidenceFieldDisplay(raw: string | null | undefined): stri
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
     .join(" ");
 }
+
+/** Evidence log / preview pill text (aligns with Data Summary: mentioned-not-top vs opportunity). */
+export function formatEvidenceLogPillLabel(raw: string | null | undefined): string {
+  if (raw == null || raw === "") return "";
+  const s = String(raw).trim().replace(/\u00ad/g, "");
+  if (s === "OPPORTUNITY") return "MENTIONED (NOT TOP)";
+  return s;
+}

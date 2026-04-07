@@ -46,7 +46,7 @@ export const stanleyData: ReportData = {
       score: 26,
       deltaVsAvg: -26,
       insights: [
-        "Largest gap. Lead with cited facts, not promo copy.",
+        "Anthropic visibility is weak. Your brand is frequently absent from category answers.",
         'Own authoritative "best in category" answers with sources.',
       ],
     },
@@ -132,7 +132,7 @@ export const stanleyData: ReportData = {
       actionNote: "Hold position",
     },
     {
-      signal: "Opportunity (mentioned, not top)",
+      signal: "Mentioned (not top)",
       count: 0,
       rate: "0%",
       status: "improvable",
@@ -146,7 +146,7 @@ export const stanleyData: ReportData = {
       actionNote: "Build presence",
     },
     {
-      signal: "Authority (with citations)",
+      signal: "Authority (citations)",
       count: 0,
       rate: "0%",
       status: "trust",

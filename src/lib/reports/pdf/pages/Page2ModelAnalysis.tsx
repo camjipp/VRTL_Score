@@ -1,6 +1,7 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
 import { PAGE, colors, fonts, rhythm, baseStyles } from "../theme";
+import { formatEvidenceLogPillLabel } from "@/lib/reports/formatEvidenceFieldDisplay";
 import { ModelAnalysisCard, MODEL_CARD_WIDTH } from "../components/ModelAnalysisCard";
 import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfFooter } from "../components/PdfFooter";
@@ -241,7 +242,7 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
         <Text style={styles.sectionTitle}>Evidence preview</Text>
         <View style={styles.evidenceRow} wrap={false}>
           {data.evidencePreview.map((ev, i) => {
-            const labelLine = String(ev.label);
+            const labelLine = formatEvidenceLogPillLabel(String(ev.label));
             const snippetLine = String(ev.snippet);
             const noteLine = ev.note ? String(ev.note) : "";
             return (

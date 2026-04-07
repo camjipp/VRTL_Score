@@ -1,6 +1,6 @@
 import type { Extraction } from "@/lib/extraction/schema";
 import { formatProviderDisplayName } from "@/lib/reports/formatProviderDisplayName";
-import { formatEvidenceFieldDisplay } from "@/lib/reports/formatEvidenceFieldDisplay";
+import { formatEvidenceFieldDisplay, formatEvidenceLogPillLabel } from "@/lib/reports/formatEvidenceFieldDisplay";
 import {
   evidencePdfChip,
   PDF_METHODOLOGY_TEXT,
@@ -554,6 +554,8 @@ export function renderReportHtml(data: ReportData): string {
     .body { font-size: 10.5px; color: var(--pdf-text-secondary); line-height: var(--pdf-leading-body); }
     .body-intro { margin-bottom: var(--pdf-space-md); }
     .section-gap { margin-top: var(--pdf-space-lg); }
+    .section-gap-tight { margin-top: 4px; }
+    .body-small { font-size: 8.5px; color: var(--pdf-text-muted); margin-bottom: 8px; line-height: 1.45; }
     .small { font-size: 8px; color: var(--pdf-text-muted); }
 
     .pill {
@@ -1198,7 +1200,7 @@ export function renderReportHtml(data: ReportData): string {
           <td class="table-note">Maintain & defend</td>
         </tr>
         <tr>
-          <td><strong>Opportunity</strong> (Mentioned, not top)</td>
+          <td><strong>Mentioned (not top)</strong></td>
           <td>${metrics.mentioned - metrics.topPosition}</td>
           <td>${Math.round(((metrics.mentioned - metrics.topPosition) / metrics.total) * 100)}%</td>
           <td><span class="pill pill-blue">Improvable</span></td>
@@ -1212,7 +1214,7 @@ export function renderReportHtml(data: ReportData): string {
           <td class="table-note">Build presence</td>
         </tr>
         <tr>
-          <td><strong>Authority</strong> (With citations)</td>
+          <td><strong>Authority (citations)</strong></td>
           <td>${metrics.hasCitations}</td>
           <td>${metrics.citationRate}%</td>
           <td><span class="pill ${metrics.citationRate >= 30 ? 'pill-green' : 'pill-yellow'}">Trust signal</span></td>
@@ -1259,6 +1261,7 @@ export function renderReportHtml(data: ReportData): string {
     ` : ""}
     
     <div class="h2 section-gap">Full evidence table</div>
+    <p class="body-small section-gap-tight">Sample of responses</p>
     <table class="data-table">
       <thead>
         <tr>
@@ -1279,7 +1282,7 @@ export function renderReportHtml(data: ReportData): string {
           return `
           <tr>
             <td>${idx + 1}</td>
-            <td><span class="pill" style="background:${ch.bg};color:${ch.color};border:1px solid ${ch.border}">${label.label}</span></td>
+            <td><span class="pill" style="background:${ch.bg};color:${ch.color};border:1px solid ${ch.border}">${escapeHtml(formatEvidenceLogPillLabel(label.label))}</span></td>
             <td>${pj?.client_mentioned ? "✓" : "✗"}</td>
             <td>${escapeHtml(formatEvidenceFieldDisplay(pj?.client_position ?? null))}</td>
             <td>${escapeHtml(formatEvidenceFieldDisplay(pj?.recommendation_strength ?? null))}</td>
@@ -1325,7 +1328,8 @@ function formatDate(d: string) {
 }
 
 function escapeHtml(str: string) {
-  return str.replace(/[&<>"']/g, (ch) => {
+  const cleaned = str.replace(/\u00ad/g, "");
+  return cleaned.replace(/[&<>"']/g, (ch) => {
     switch (ch) {
       case "&": return "&amp;";
       case "<": return "&lt;";

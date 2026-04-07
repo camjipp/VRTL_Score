@@ -1,15 +1,20 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { PAGE, colors, fonts, rhythm, baseStyles } from "../theme";
+import { PAGE, colors, fonts, rhythm, baseStyles, CONTENT_W } from "../theme";
 import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
-const PHASE_NODE = colors.ink3;
+/** Fixed step titles (one per execution phase; content still driven by data). */
+const STEP_HEADERS = [
+  "STEP 1 — AUDIT FOUNDATION",
+  "STEP 2 — FIX WEAKEST MODEL",
+  "STEP 3 — BUILD AUTHORITY",
+  "STEP 4 — RE-MEASURE & ITERATE",
+] as const;
 
-const COL_W = 132;
-const GAP = 11;
+const LEFT_ACCENT_W = 3;
 
 /** Avoid repeating the phase label when the body text starts with the same week string. */
 function stripPhasePrefix(phase: string, text: string): string {
@@ -43,75 +48,89 @@ const styles = StyleSheet.create({
     fontSize: 8.5,
     lineHeight: 1.5,
     color: colors.ink2,
-    marginBottom: rhythm.lg,
+    marginBottom: rhythm.md,
     fontFamily: fonts.sans,
   },
-  timeline: { flexDirection: "row", alignItems: "flex-start", width: 540, flexGrow: 1 },
-  nodeCol: { width: COL_W, alignItems: "center" },
-  stepLab: {
-    fontSize: 9.5,
-    fontWeight: 400,
-    marginBottom: 10,
-    fontFamily: fonts.sansBold,
-    color: colors.ink,
-    textAlign: "center",
-    letterSpacing: 0.02,
-  },
-  circleWrap: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    marginBottom: rhythm.xs,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  circleInner: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: colors.paper,
-  },
-  connector: {
-    width: 1,
-    height: 26,
-    backgroundColor: colors.rule,
-    marginBottom: rhythm.xs,
-  },
-  card: {
+  stepsColumn: {
+    width: CONTENT_W,
+    flex: 1,
     flexDirection: "column",
-    backgroundColor: colors.paper,
+    minHeight: 0,
+  },
+  stepSection: {
+    width: CONTENT_W,
+    flex: 1,
+    flexDirection: "row",
+    marginBottom: rhythm.md,
+    minHeight: 108,
+  },
+  stepSectionLast: {
+    marginBottom: 0,
+  },
+  accentBar: {
+    width: LEFT_ACCENT_W,
+    backgroundColor: colors.ink,
+    borderRadius: 1,
+  },
+  stepCard: {
+    flex: 1,
+    flexDirection: "column",
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.rule,
-    borderRadius: 4,
-    minHeight: 152,
-    width: COL_W,
-    overflow: "hidden",
+    borderLeftWidth: 0,
+    borderTopRightRadius: 4,
+    borderBottomRightRadius: 4,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    justifyContent: "flex-start",
   },
-  cardAccent: { width: "100%", height: 3 },
-  cardBody: { flex: 1, paddingVertical: 14, paddingHorizontal: rhythm.sm },
-  copy: { fontSize: 8.5, lineHeight: 1.6, color: colors.ink, fontFamily: fonts.sans },
+  stepHeader: {
+    fontSize: 10,
+    fontWeight: 400,
+    fontFamily: fonts.sansBold,
+    color: colors.ink,
+    letterSpacing: 0.04,
+    marginBottom: 10,
+  },
+  blockLabel: {
+    fontSize: 6,
+    fontFamily: fonts.sansBold,
+    color: colors.ink3,
+    textTransform: "uppercase",
+    letterSpacing: 0.1,
+    marginBottom: 5,
+  },
+  copy: {
+    fontSize: 9,
+    lineHeight: 1.58,
+    color: colors.ink,
+    fontFamily: fonts.sans,
+  },
+  impactBlock: {
+    marginTop: 10,
+  },
   impactLabel: {
     fontSize: 6,
     fontFamily: fonts.sansBold,
     color: colors.ink3,
-    marginTop: rhythm.sm,
     textTransform: "uppercase",
-    letterSpacing: 0.08,
+    letterSpacing: 0.1,
+    marginBottom: 4,
   },
   impactText: {
-    fontSize: 7.5,
-    lineHeight: 1.45,
+    fontSize: 8,
+    lineHeight: 1.52,
     color: colors.ink2,
-    marginTop: 3,
     fontFamily: fonts.sans,
   },
-  spacer: { flexGrow: 1, minHeight: 24 },
 });
 
 export function Page4ExecutionPlan({ data }: { data: ReportData }) {
+  const phases = data.executionPhases;
   return (
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
-      <View style={[baseStyles.pageBody, { flexGrow: 1 }]}>
+      <View style={[baseStyles.pageBody, { flexGrow: 1, flexDirection: "column" }]}>
         <PdfTraceMarker page={4} section="Page4:start" />
         <PdfHeader data={data} variant="inner" pageNum={4} />
         <PdfTraceMarker page={4} section="Page4:after_header" />
@@ -122,38 +141,35 @@ export function Page4ExecutionPlan({ data }: { data: ReportData }) {
         </Text>
 
         <PdfTraceMarker page={4} section="Page4:before_phases" />
-        <View style={styles.timeline} wrap={false} minPresenceAhead={200}>
-          {data.executionPhases.map((ph, i) => {
-            const col = PHASE_NODE;
+        <View style={styles.stepsColumn}>
+          {phases.map((ph, i) => {
             const phaseLine = String(ph.phase);
             const textLine = stripPhasePrefix(phaseLine, String(ph.text));
             const { main, impact } = splitImpact(textLine);
-            const last = i === data.executionPhases.length - 1;
+            const header = STEP_HEADERS[i] ?? `STEP ${i + 1}`;
+            const last = i === phases.length - 1;
             return (
-              <View key={`phase-${i}`} style={[styles.nodeCol, !last ? { marginRight: GAP } : {}]} wrap={false}>
-                <Text style={styles.stepLab}>{`Step ${i + 1}`}</Text>
-                <View style={[styles.circleWrap, { backgroundColor: col }]}>
-                  <View style={styles.circleInner} />
-                </View>
-                <View style={styles.connector} />
-                <View style={styles.card}>
-                  <View style={[styles.cardAccent, { backgroundColor: col }]} />
-                  <View style={styles.cardBody}>
-                    <Text style={styles.copy}>{main}</Text>
-                    {impact ? (
-                      <>
-                        <Text style={styles.impactLabel}>Impact</Text>
-                        <Text style={styles.impactText}>{impact}</Text>
-                      </>
-                    ) : null}
-                  </View>
+              <View
+                key={`phase-${i}`}
+                style={[styles.stepSection, last ? styles.stepSectionLast : {}]}
+                wrap={false}
+              >
+                <View style={styles.accentBar} />
+                <View style={styles.stepCard}>
+                  <Text style={styles.stepHeader}>{header}</Text>
+                  <Text style={styles.blockLabel}>What to do</Text>
+                  <Text style={styles.copy}>{main}</Text>
+                  {impact ? (
+                    <View style={styles.impactBlock}>
+                      <Text style={styles.impactLabel}>Expected Impact</Text>
+                      <Text style={styles.impactText}>{impact}</Text>
+                    </View>
+                  ) : null}
                 </View>
               </View>
             );
           })}
         </View>
-
-        <View style={styles.spacer} />
 
         <PdfTraceMarker page={4} section="Page4:before_footer" />
         <PdfFooter data={data} />
