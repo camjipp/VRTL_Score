@@ -9,33 +9,36 @@ import { Footer } from "@/components/Footer";
 const SAMPLE_REPORT_HREF = "/preview";
 const SIGNUP_HREF = "/signup";
 
-/** Unified homepage layout — max-w-6xl, horizontal padding only (vertical is py-24 on section). */
+/** Minimal DS: near-black page, #111 surfaces, soft border, emerald only for meaning + CTAs */
+const pageBg = "bg-[#080808]";
+const sectionAlt = "bg-[#0a0a0a]";
+
 const container = "mx-auto w-full max-w-6xl px-6";
 
 const heading = "font-display text-4xl font-semibold tracking-tight text-white md:text-5xl";
 
-const subtext = "text-lg text-white/60 max-w-xl";
+const subtext = "text-lg text-white/55 max-w-xl";
 
-const label = "text-xs uppercase tracking-wide text-white/40";
+const label = "text-[11px] font-medium tracking-wide text-white/45";
 
-/** Single card system — no variants. */
-const card = "rounded-2xl border border-white/5 bg-[#0F1117] p-6";
+/** Outer shell for proof + content cards */
+const cardShell = "rounded-xl border border-white/[0.08] bg-[#111111] p-5";
 
-const sectionBorder = "border-t border-white/5";
+const sectionRule = "border-t border-white/[0.06]";
 
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="border-b border-white/5">
+    <div className="border-b border-white/[0.06]">
       <button
-        className="flex w-full items-center justify-between py-5 text-left transition-colors duration-150 hover:bg-white/[0.03]"
+        className="flex w-full items-center justify-between py-5 text-left transition-colors duration-150 hover:bg-white/[0.02]"
         onClick={() => setIsOpen(!isOpen)}
         type="button"
       >
         <span className="text-lg font-semibold tracking-tight text-white">{question}</span>
         <svg
-          className={`h-5 w-5 shrink-0 text-white/50 transition-transform ${isOpen ? "rotate-180" : ""}`}
+          className={`h-5 w-5 shrink-0 text-white/40 transition-transform ${isOpen ? "rotate-180" : ""}`}
           fill="none"
           stroke="currentColor"
           strokeWidth={2}
@@ -46,7 +49,7 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
       </button>
       <div className={`grid transition-all duration-200 ease-in-out ${isOpen ? "grid-rows-[1fr] pb-5" : "grid-rows-[0fr]"}`}>
         <div className="overflow-hidden">
-          <p className="text-base leading-relaxed text-white/60">{answer}</p>
+          <p className="text-base leading-relaxed text-white/55">{answer}</p>
         </div>
       </div>
     </div>
@@ -55,13 +58,13 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 
 function ModelRow() {
   return (
-    <div className={`flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-white/5 pt-8 ${label} font-semibold tracking-[0.2em]`}>
+    <div className={`flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/[0.06] pt-8 ${label}`}>
       <span>ChatGPT</span>
-      <span className="text-white/25" aria-hidden>
+      <span className="text-white/20" aria-hidden>
         ·
       </span>
       <span>Gemini</span>
-      <span className="text-white/25" aria-hidden>
+      <span className="text-white/20" aria-hidden>
         ·
       </span>
       <span>Claude</span>
@@ -69,83 +72,85 @@ function ModelRow() {
   );
 }
 
+/** Hero: client-facing PDF preview — white page, no decorative glows */
 function HeroReportMockup() {
   return (
-    <div className="relative mx-auto w-full max-w-md lg:mx-0 lg:max-w-none">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -inset-8 rounded-[2rem] bg-gradient-to-b from-emerald-500/[0.12] via-emerald-500/[0.04] to-transparent blur-3xl md:-inset-14"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[min(420px,85%)] w-[min(520px,120%)] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.14)_0%,transparent_58%)]"
-      />
-      <div className="relative">
-        <div className="absolute left-6 right-6 top-6 hidden h-[min(380px,52vw)] rounded-md border border-zinc-300/80 bg-zinc-100 shadow-lg md:block md:translate-y-3 md:rotate-[-2deg]" />
-        <div className="absolute left-3 right-3 top-3 hidden h-[min(400px,54vw)] rounded-md border border-zinc-200 bg-white shadow-xl md:block md:translate-y-1 md:rotate-[1.2deg]" />
-
-        <div className="relative rounded-lg border border-zinc-200/90 bg-white p-5 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.5)] sm:p-6">
-          <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-4">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">VRTL Score</p>
-              <p className="mt-1 text-sm font-semibold text-zinc-900">Executive snapshot</p>
-            </div>
-            <div className="rounded-md bg-zinc-900 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white">PDF</div>
+    <div className="relative mx-auto w-full max-w-sm lg:mx-0 lg:max-w-md">
+      <div className="relative hidden md:block" aria-hidden>
+        <div className="absolute inset-0 translate-x-2 translate-y-3 scale-[0.98] rounded-2xl border border-zinc-300/60 bg-zinc-100" />
+      </div>
+      <div className="relative rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-xl sm:p-6">
+        <div className="flex items-start justify-between gap-3 border-b border-zinc-200 pb-4">
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">VRTL Score</p>
+            <p className="mt-1 text-sm font-semibold text-zinc-900">Executive snapshot</p>
           </div>
-          <div className="mt-5 flex flex-wrap items-end gap-6">
-            <div>
-              <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">Overall</p>
-              <p className="mt-0.5 font-display text-4xl font-semibold tabular-nums tracking-tight text-zinc-900 sm:text-5xl">78</p>
-            </div>
-            <div className="flex flex-1 flex-wrap gap-3 text-[11px] text-zinc-600">
-              <span className="rounded border border-zinc-200 bg-zinc-50 px-2 py-1 font-medium text-zinc-800">Win · 3 models</span>
-              <span className="rounded border border-amber-200/80 bg-amber-50 px-2 py-1 font-medium text-amber-900">At risk · 2</span>
-            </div>
+          <span className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-700">
+            PDF
+          </span>
+        </div>
+        <div className="mt-5 flex flex-wrap items-end gap-5">
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">Overall</p>
+            <p className="mt-0.5 font-display text-4xl font-semibold tabular-nums tracking-tight text-zinc-900 sm:text-5xl">78</p>
           </div>
-          <div className="mt-6 grid grid-cols-3 gap-2 border-t border-zinc-100 pt-5">
-            {[
-              { l: "Presence", v: "Strong" },
-              { l: "Position", v: "Mixed" },
-              { l: "Authority", v: "Low" },
-            ].map((k) => (
-              <div key={k.l} className="rounded border border-zinc-100 bg-zinc-50/80 px-2 py-2">
-                <p className="text-[9px] font-medium uppercase tracking-wide text-zinc-500">{k.l}</p>
-                <p className="mt-0.5 text-xs font-semibold text-zinc-900">{k.v}</p>
-              </div>
-            ))}
+          <div className="flex flex-wrap gap-2 text-[11px]">
+            <span className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 font-medium text-zinc-800">Win · 3 models</span>
+            <span className="rounded-md border border-amber-200/90 bg-amber-50 px-2 py-1 font-medium text-amber-900">At risk · 2</span>
           </div>
+        </div>
+        <div className="mt-5 grid grid-cols-3 gap-2 border-t border-zinc-100 pt-4">
+          {[
+            { l: "Presence", v: "Strong" },
+            { l: "Position", v: "Mixed" },
+            { l: "Authority", v: "Low" },
+          ].map((k) => (
+            <div key={k.l} className="rounded-md border border-zinc-100 bg-zinc-50 px-2 py-2">
+              <p className="text-[9px] font-medium uppercase tracking-wide text-zinc-500">{k.l}</p>
+              <p className="mt-0.5 text-xs font-semibold text-zinc-900">{k.v}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>
   );
 }
 
-/** Problem row: inclusion — AI answer surface with highlighted mention + badge. */
+/** CARD 1 — AI answer: assistant message, highlighted brand, Mentioned */
 function ProofCardInclusion() {
   return (
-    <div className={`${card} flex flex-col`}>
-      <div className="flex flex-1 flex-col rounded-xl border border-white/10 bg-[#161920] p-4">
-        <div className="mb-3 flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          <span className="text-[10px] font-medium uppercase tracking-wide text-white/40">Answer</span>
+    <div className={`${cardShell} flex flex-col`}>
+      <div className="flex flex-1 flex-col rounded-lg border border-white/[0.06] bg-[#0c0c0c] p-4">
+        <div className="mb-3 flex items-center gap-2 border-b border-white/[0.06] pb-3">
+          <span className="flex h-7 w-7 items-center justify-center rounded-md bg-white/10 text-[11px] font-semibold text-white/80">
+            AI
+          </span>
+          <div>
+            <p className="text-[12px] font-medium text-white/90">Assistant</p>
+            <p className="text-[10px] text-white/40">Answer</p>
+          </div>
         </div>
-        <p className="text-[13px] leading-relaxed text-white/75">
-          For mid-market payroll, teams compare{" "}
-          <span className="rounded bg-emerald-500/20 px-1 py-0.5 font-medium text-emerald-200">Acme Payroll</span>
-          {" "}with Gusto and Rippling for compliance.
-        </p>
-        <div className="mt-4">
-          <span className="inline-flex items-center rounded-full border border-emerald-500/35 bg-emerald-500/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-300">
+        <div className="rounded-xl border border-white/[0.06] bg-[#141414] px-3 py-3">
+          <p className="text-[13px] leading-relaxed text-white/80">
+            For payroll at 50–500 employees, teams often compare{" "}
+            <mark className="rounded bg-emerald-500/25 px-1 py-0.5 font-medium text-emerald-200 [text-decoration:none]">
+              Acme Payroll
+            </mark>{" "}
+            with Gusto and Rippling.
+          </p>
+        </div>
+        <div className="mt-3">
+          <span className="inline-flex rounded-md border border-emerald-500/35 bg-emerald-500/10 px-2 py-1 text-[10px] font-semibold text-emerald-400">
             Mentioned
           </span>
         </div>
       </div>
-      <p className={`${label} mt-4`}>AEO · inclusion</p>
+      <p className={`${label} mt-4`}>Inclusion in the answer</p>
     </div>
   );
 }
 
-/** Problem row: recommendation order — ranked list with winner + pill. */
+/** CARD 2 — Ranked recommendations */
 function ProofCardRecommendation() {
   const rows: Array<{
     rank: number;
@@ -160,84 +165,92 @@ function ProofCardRecommendation() {
   ];
 
   return (
-    <div className={`${card} flex flex-col`}>
-      <div className="flex flex-1 flex-col gap-2 rounded-xl border border-white/10 bg-[#161920] p-4">
-        {rows.map((row) => (
-          <div
-            key={row.rank}
-            className={
-              row.highlight
-                ? "flex items-center justify-between gap-2 rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-3 py-2.5"
-                : row.dim === true
-                  ? "flex items-center justify-between gap-2 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2 opacity-70"
-                  : "flex items-center justify-between gap-2 rounded-lg border border-white/8 bg-white/[0.04] px-3 py-2.5"
-            }
-          >
-            <div className="flex min-w-0 items-center gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white/10 text-[11px] font-bold tabular-nums text-white/90">
-                {row.rank}
-              </span>
-              <span className={`truncate text-[13px] font-medium ${row.dim === true ? "text-white/50" : "text-white/90"}`}>{row.name}</span>
+    <div className={`${cardShell} flex flex-col`}>
+      <div className="flex flex-1 flex-col rounded-lg border border-white/[0.06] bg-[#0c0c0c] p-3">
+        <p className="mb-2 px-1 text-[10px] font-medium uppercase tracking-wide text-white/35">Model ranking</p>
+        <div className="flex flex-col gap-1.5">
+          {rows.map((row) => (
+            <div
+              key={row.rank}
+              className={
+                row.highlight
+                  ? "flex items-center justify-between gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/[0.12] px-3 py-2.5"
+                  : row.dim === true
+                    ? "flex items-center justify-between gap-2 rounded-lg border border-white/[0.05] bg-white/[0.02] px-3 py-2 opacity-65"
+                    : "flex items-center justify-between gap-2 rounded-lg border border-white/[0.06] bg-white/[0.04] px-3 py-2"
+              }
+            >
+              <div className="flex min-w-0 items-center gap-2.5">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-black/40 text-[12px] font-bold tabular-nums text-white/90">
+                  {row.rank}
+                </span>
+                <span className={`truncate text-[13px] font-medium ${row.dim === true ? "text-white/45" : "text-white/90"}`}>
+                  {row.name}
+                </span>
+              </div>
+              {row.pill ? (
+                <span className="shrink-0 rounded-md bg-emerald-500 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-black">
+                  {row.pill}
+                </span>
+              ) : null}
             </div>
-            {row.pill ? (
-              <span className="shrink-0 rounded-full bg-emerald-500/90 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-black">
-                {row.pill}
-              </span>
-            ) : null}
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-      <p className={`${label} mt-4`}>GEO · recommendation</p>
+      <p className={`${label} mt-4`}>Who gets recommended</p>
     </div>
   );
 }
 
-/** Problem row: score + trend + metric chips — reporting snapshot. */
-function ProofCardMeasurement() {
+/** CARD 3 — PDF-style report snapshot (matches deliverable, not a dark dashboard) */
+function ProofCardReporting() {
   return (
-    <div className={`${card} flex flex-col`}>
-      <div className="flex flex-1 flex-col rounded-xl border border-white/10 bg-[#161920] p-4">
-        <div className="flex items-end justify-between gap-4">
+    <div className={`${cardShell} flex flex-col`}>
+      <div className="overflow-hidden rounded-lg border border-zinc-200/80 bg-white p-4 text-zinc-900 shadow-sm">
+        <div className="flex items-start justify-between gap-2 border-b border-zinc-200 pb-3">
           <div>
-            <p className="text-[10px] font-medium uppercase tracking-wide text-white/40">Visibility score</p>
-            <p className="mt-1 font-display text-3xl font-semibold tabular-nums tracking-tight text-white">72</p>
+            <p className="text-[9px] font-medium uppercase tracking-wide text-zinc-500">VRTL Score</p>
+            <p className="text-[11px] font-semibold text-zinc-900">Snapshot</p>
           </div>
-          <div className="shrink-0 pb-1">
-            <svg className="h-11 w-[4.5rem]" viewBox="0 0 72 44" fill="none" aria-hidden>
-              <path
-                d="M4 36 L16 28 L28 32 L40 18 L52 22 L64 10"
-                stroke="rgb(16 185 129 / 0.55)"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-              />
-              <path
-                d="M4 36 L16 28 L28 32 L40 18 L52 22 L64 10 V40 H4 Z"
-                fill="url(#trendFill)"
-                opacity="0.15"
-              />
-              <defs>
-                <linearGradient id="trendFill" x1="36" x2="36" y1="10" y2="40" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="rgb(16 185 129)" />
-                  <stop offset="1" stopColor="rgb(16 185 129)" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
+          <span className="rounded border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 text-[8px] font-bold uppercase text-zinc-600">PDF</span>
         </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <span className="rounded-md border border-white/10 bg-white/[0.06] px-2 py-1 text-[10px] font-medium text-white/65">
-            Mention rate · 68%
-          </span>
-          <span className="rounded-md border border-white/10 bg-white/[0.06] px-2 py-1 text-[10px] font-medium text-white/65">
-            Top-3 rate · 41%
-          </span>
-          <span className="rounded-md border border-white/10 bg-white/[0.06] px-2 py-1 text-[10px] font-medium text-white/65">
-            Models · 3
-          </span>
+        <div className="mt-3 flex items-end justify-between gap-3">
+          <div>
+            <p className="text-[9px] font-medium uppercase tracking-wide text-zinc-500">Score</p>
+            <p className="font-display text-2xl font-semibold tabular-nums text-zinc-900">72</p>
+          </div>
+          <svg className="h-10 w-24 shrink-0" viewBox="0 0 96 40" fill="none" aria-hidden>
+            <path d="M4 32 L20 24 L36 28 L52 14 L68 18 L84 8" stroke="rgb(16 185 129)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M4 32 L20 24 L36 28 L52 14 L68 18 L84 8 V36 H4 Z"
+              fill="url(#proofTrend)"
+              opacity="0.12"
+            />
+            <defs>
+              <linearGradient id="proofTrend" x1="48" x2="48" y1="8" y2="36" gradientUnits="userSpaceOnUse">
+                <stop stopColor="rgb(16 185 129)" />
+                <stop offset="1" stopColor="rgb(16 185 129)" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div className="mt-3 h-1.5 w-full rounded-full bg-zinc-100">
+          <div className="h-full w-[72%] rounded-full bg-zinc-800" />
+        </div>
+        <div className="mt-3 grid grid-cols-3 gap-1.5">
+          {[
+            { k: "Mention", v: "68%" },
+            { k: "Top 3", v: "41%" },
+            { k: "Models", v: "3" },
+          ].map((m) => (
+            <div key={m.k} className="rounded border border-zinc-100 bg-zinc-50 px-1.5 py-1.5 text-center">
+              <p className="text-[8px] font-medium uppercase tracking-wide text-zinc-500">{m.k}</p>
+              <p className="text-[11px] font-semibold tabular-nums text-zinc-900">{m.v}</p>
+            </div>
+          ))}
         </div>
       </div>
-      <p className={`${label} mt-4`}>Measurement · reporting</p>
+      <p className={`${label} mt-4`}>What you send clients</p>
     </div>
   );
 }
@@ -253,9 +266,9 @@ function ReportPageCard({
 }) {
   return (
     <div className="flex flex-col gap-3">
-      <div className={card}>
+      <div className={cardShell}>
         <p className={label}>{title}</p>
-        <div className="mt-4 rounded-lg border border-zinc-200/80 bg-white p-4 text-zinc-900 shadow-inner">{children}</div>
+        <div className="mt-3 rounded-lg border border-zinc-200/80 bg-white p-4 text-zinc-900">{children}</div>
       </div>
       <p className={`text-center ${label}`}>{caption}</p>
     </div>
@@ -264,29 +277,28 @@ function ReportPageCard({
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-black text-zinc-100 selection:bg-emerald-500/25 selection:text-emerald-50">
+    <div className={`min-h-screen ${pageBg} text-zinc-100 selection:bg-emerald-500/20 selection:text-emerald-50`}>
       <main>
-        <section className="relative overflow-hidden border-b border-white/5 bg-black">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(16,185,129,0.12),transparent)]" />
-          <div className={`${container} relative py-24`}>
-            <div className="flex flex-col gap-8 lg:grid lg:grid-cols-2 lg:items-center lg:gap-8">
+        <section className={`border-b border-white/[0.06] ${pageBg}`}>
+          <div className={`${container} py-24`}>
+            <div className="flex flex-col gap-10 lg:grid lg:grid-cols-2 lg:items-center lg:gap-12">
               <div className="flex flex-col gap-8">
                 <h1 className={heading}>
                   Your clients are already being ranked by AI.
-                  <span className="mt-2 block text-white/60">You&apos;re not reporting on it.</span>
+                  <span className="mt-2 block text-white/55">You&apos;re not reporting on it.</span>
                 </h1>
                 <p className={subtext}>
                   VRTL Score shows how ChatGPT, Gemini, and Claude rank, mention, and recommend your clients — and gives you a report you can actually send.
                 </p>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                   <Link
-                    className="inline-flex h-12 items-center justify-center rounded-full bg-emerald-500 px-8 text-sm font-semibold text-black transition duration-200 hover:bg-emerald-400 hover:shadow-[0_12px_40px_-8px_rgba(16,185,129,0.45)]"
+                    className="inline-flex h-12 items-center justify-center rounded-full bg-emerald-500 px-8 text-sm font-semibold text-black transition hover:bg-emerald-400"
                     href={SIGNUP_HREF}
                   >
                     Run a free snapshot
                   </Link>
                   <Link
-                    className="inline-flex h-12 items-center justify-center rounded-full border border-white/10 px-8 text-sm font-medium text-white/90 transition duration-200 hover:border-white/20 hover:bg-white/[0.04]"
+                    className="inline-flex h-12 items-center justify-center rounded-full border border-white/[0.12] px-8 text-sm font-medium text-white/90 transition hover:border-white/20 hover:bg-white/[0.04]"
                     href={SAMPLE_REPORT_HREF}
                   >
                     View sample report
@@ -299,8 +311,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className={`${sectionBorder} bg-[#0B0D12]`}>
-          <div className={`${container} flex flex-col gap-8 py-24`}>
+        <section className={`${sectionRule} ${sectionAlt}`}>
+          <div className={`${container} flex flex-col gap-10 py-24`}>
             <h2 className={heading}>Your clients are already losing visibility inside AI answers.</h2>
             <div className={`${subtext} flex max-w-xl flex-col gap-4`}>
               <p>Clients are starting to ask why ChatGPT recommends a competitor.</p>
@@ -311,68 +323,65 @@ export default function HomePage() {
                 AI now chooses answers.
               </p>
             </div>
-            <div className="grid gap-8 md:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-3 md:gap-8">
               <ProofCardInclusion />
               <ProofCardRecommendation />
-              <ProofCardMeasurement />
+              <ProofCardReporting />
             </div>
           </div>
         </section>
 
-        <section className={`scroll-mt-24 ${sectionBorder} bg-black`} id="product">
-          <div className={`${container} flex flex-col gap-8 py-24`}>
+        <section className={`scroll-mt-24 ${sectionRule} ${pageBg}`} id="product">
+          <div className={`${container} flex flex-col gap-10 py-24`}>
             <h2 className={heading}>Show clients where they are winning, losing, and getting displaced.</h2>
             <p className={subtext}>
               VRTL Score turns AI visibility into a client-ready report with model breakdowns, competitor pressure, and prioritized actions.
             </p>
-            <div className="grid gap-8 md:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-3 md:gap-8">
               <ReportPageCard title="Page 1" caption="Send this to clients">
-                <div className="flex items-end gap-4">
-                  <span className="font-display text-3xl font-semibold tabular-nums text-zinc-900">72</span>
-                  <span className="text-xs text-zinc-500">score · snapshot</span>
+                <div className="flex items-end gap-3">
+                  <span className="font-display text-3xl font-semibold tabular-nums">72</span>
+                  <span className="text-xs text-zinc-500">Score</span>
                 </div>
-                <div className="mt-4 h-2 w-full rounded-full bg-zinc-100">
+                <div className="mt-3 h-2 w-full rounded-full bg-zinc-100">
                   <div className="h-full w-[72%] rounded-full bg-zinc-800" />
                 </div>
-                <p className="mt-3 text-xs leading-relaxed text-zinc-600">One screen your client can grasp in a meeting.</p>
               </ReportPageCard>
               <ReportPageCard title="Analysis" caption="Show where they&apos;re losing">
                 <div className="space-y-2">
                   {["ChatGPT", "Gemini", "Claude"].map((m, i) => (
                     <div key={m} className="flex items-center justify-between gap-2 text-xs">
-                      <span className="font-medium text-zinc-800">{m}</span>
-                      <div className="h-1.5 max-w-[120px] flex-1 rounded-full bg-zinc-100">
+                      <span className="font-medium">{m}</span>
+                      <div className="h-1.5 max-w-[100px] flex-1 rounded-full bg-zinc-100">
                         <div className="h-full rounded-full bg-zinc-700" style={{ width: `${[88, 62, 45][i]}%` }} />
                       </div>
                     </div>
                   ))}
                 </div>
-                <p className="mt-3 text-xs leading-relaxed text-zinc-600">Where each model puts them — and who it prefers instead.</p>
               </ReportPageCard>
               <ReportPageCard title="Next steps" caption="Prove where competitors are winning">
                 <ul className="space-y-2 text-xs text-zinc-700">
                   <li className="flex gap-2">
-                    <span className="shrink-0 font-semibold text-emerald-700">HIGH</span>
-                    <span>Close the citation gap on X.</span>
+                    <span className="shrink-0 font-semibold text-emerald-600">High</span>
+                    <span>Close the citation gap.</span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="shrink-0 font-semibold text-amber-700">MED</span>
-                    <span>Align on-page proof with what models quote.</span>
+                    <span className="shrink-0 font-semibold text-zinc-600">Med</span>
+                    <span>Align proof with what models quote.</span>
                   </li>
                 </ul>
-                <p className="mt-3 text-xs leading-relaxed text-zinc-600">Prioritized so your team can execute, not debate.</p>
               </ReportPageCard>
             </div>
           </div>
         </section>
 
-        <section className={`scroll-mt-24 ${sectionBorder} bg-[#0B0D12]`} id="agencies">
-          <div className={`${container} flex flex-col gap-8 py-24`}>
+        <section className={`scroll-mt-24 ${sectionRule} ${sectionAlt}`} id="agencies">
+          <div className={`${container} flex flex-col gap-10 py-24`}>
             <h2 className={heading}>Turn AI visibility into a new revenue stream.</h2>
             <p className={subtext}>
               Package AI visibility into a deliverable you price, repeat, and renew on—not another internal dashboard only your team sees.
             </p>
-            <div className="grid gap-8 md:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-3 md:gap-8">
               {[
                 {
                   t: "Add a new line item",
@@ -387,51 +396,48 @@ export default function HomePage() {
                   b: "Answer the question clients are already asking: “Why is AI recommending someone else?”",
                 },
               ].map((c) => (
-                <div key={c.t} className={card}>
+                <div key={c.t} className={cardShell}>
                   <h3 className="font-display text-lg font-semibold tracking-tight text-white">{c.t}</h3>
-                  <p className="mt-4 text-lg leading-relaxed text-white/60">{c.b}</p>
+                  <p className="mt-4 text-base leading-relaxed text-white/55">{c.b}</p>
                 </div>
               ))}
             </div>
-            <blockquote className={`${card} text-lg leading-relaxed text-white/60`}>
+            <blockquote className={`${cardShell} border-l-2 border-l-emerald-500/50 text-base leading-relaxed text-white/55`}>
               We ran this for a client and immediately saw where they were losing visibility in AI answers.
             </blockquote>
           </div>
         </section>
 
-        <section className={`scroll-mt-24 ${sectionBorder} bg-black`} id="category">
-          <div className={`${container} flex flex-col gap-8 py-24`}>
+        <section className={`scroll-mt-24 ${sectionRule} ${pageBg}`} id="category">
+          <div className={`${container} flex flex-col gap-10 py-24`}>
             <h2 className={heading}>Search ranked pages. AI ranks answers.</h2>
             <p className={subtext}>
               Answer-engine visibility (sometimes called AEO or GEO) is simply: do models mention you, where, and as a source?
             </p>
-            <div className="grid gap-8 md:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-3 md:gap-8">
               {[
                 { t: "Presence", b: "Are you mentioned at all?" },
                 { t: "Position", b: "Are you near the top or missing from the answer?" },
                 { t: "Authority", b: "Are you being cited as a trusted source?" },
               ].map((c) => (
-                <div key={c.t} className={card}>
-                  <h3 className={`${label} font-semibold`}>{c.t}</h3>
-                  <p className="mt-4 text-lg leading-relaxed text-white/60">{c.b}</p>
+                <div key={c.t} className={cardShell}>
+                  <h3 className={label}>{c.t}</h3>
+                  <p className="mt-4 text-base leading-relaxed text-white/55">{c.b}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className={`relative overflow-hidden ${sectionBorder} bg-[#0B0D12]`}>
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_55%_45%_at_50%_45%,rgba(255,255,255,0.06),transparent_70%)]" />
-          <div className={`${container} relative z-[1] flex flex-col items-center gap-8 py-24 text-center`}>
-            <p className="max-w-xl font-display text-4xl font-semibold tracking-tight text-white md:text-5xl">
-              <span className="bg-gradient-to-b from-white via-white to-zinc-400 bg-clip-text text-transparent">
-                If you can&apos;t measure AI visibility, you can&apos;t sell it.
-              </span>
-              <span className="mt-4 block text-lg text-white/60">If you can&apos;t sell it, you lose the client.</span>
+        <section className={`${sectionRule} ${sectionAlt}`}>
+          <div className={`${container} flex flex-col items-center gap-8 py-24 text-center`}>
+            <p className="max-w-2xl font-display text-4xl font-semibold tracking-tight text-white md:text-5xl">
+              If you can&apos;t measure AI visibility, you can&apos;t sell it.
+              <span className="mt-4 block text-lg font-normal text-white/45">If you can&apos;t sell it, you lose the client.</span>
             </p>
-            <div className="flex w-full max-w-xl flex-col items-center gap-3">
+            <div className="flex w-full max-w-md flex-col items-center gap-3">
               <Link
-                className="inline-flex h-12 w-full items-center justify-center rounded-full bg-emerald-500 px-8 text-sm font-semibold text-black transition duration-200 hover:bg-emerald-400 hover:shadow-[0_12px_40px_-8px_rgba(16,185,129,0.45)] sm:w-auto"
+                className="inline-flex h-12 w-full items-center justify-center rounded-full bg-emerald-500 px-8 text-sm font-semibold text-black transition hover:bg-emerald-400 sm:w-auto"
                 href={SIGNUP_HREF}
               >
                 Run a free snapshot
@@ -441,22 +447,13 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className={`scroll-mt-24 ${sectionBorder} bg-black`} id="faq">
-          <div className={`${container} flex flex-col gap-8 py-24`}>
-            <div className="flex flex-col items-center gap-8 text-center">
+        <section className={`scroll-mt-24 ${sectionRule} ${pageBg}`} id="faq">
+          <div className={`${container} flex flex-col gap-10 py-24`}>
+            <div className="flex flex-col items-center gap-6 text-center">
               <h2 className={heading}>Questions agencies ask before they run a snapshot</h2>
               <p className={subtext}>
                 Straight answers on what VRTL Score measures, how reports work, and what you can charge for.
               </p>
-            </div>
-            <div className="overflow-hidden py-2">
-              <div className="flex animate-marquee whitespace-nowrap">
-                {Array.from({ length: 24 }).map((_, i) => (
-                  <span key={i} className="mx-8 text-5xl font-black text-white/10 md:text-6xl lg:text-7xl">
-                    FAQ
-                  </span>
-                ))}
-              </div>
             </div>
             <div className="mx-auto w-full max-w-2xl">
               <FAQItem
@@ -487,21 +484,19 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className={`${sectionBorder} bg-[#0B0D12]`}>
+        <section className={`${sectionRule} ${sectionAlt}`}>
           <div className={`${container} flex flex-col items-center gap-8 py-24 text-center`}>
             <h2 className={`max-w-xl ${heading}`}>Start with one client. See what AI is already saying.</h2>
-            <p className={subtext}>
-              Run a free snapshot and generate a report your team can actually use.
-            </p>
+            <p className={subtext}>Run a free snapshot and generate a report your team can actually use.</p>
             <div className="flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
               <Link
-                className="inline-flex h-12 items-center justify-center rounded-full bg-emerald-500 px-8 text-sm font-semibold text-black transition duration-200 hover:bg-emerald-400 hover:shadow-[0_12px_40px_-8px_rgba(16,185,129,0.45)]"
+                className="inline-flex h-12 items-center justify-center rounded-full bg-emerald-500 px-8 text-sm font-semibold text-black transition hover:bg-emerald-400"
                 href={SIGNUP_HREF}
               >
                 Run a free snapshot
               </Link>
               <Link
-                className="inline-flex h-12 items-center justify-center rounded-full border border-white/10 px-8 text-sm font-medium text-white/90 transition duration-200 hover:border-white/20 hover:bg-white/[0.04]"
+                className="inline-flex h-12 items-center justify-center rounded-full border border-white/[0.12] px-8 text-sm font-medium text-white/90 transition hover:border-white/20 hover:bg-white/[0.04]"
                 href={SAMPLE_REPORT_HREF}
               >
                 View sample report
