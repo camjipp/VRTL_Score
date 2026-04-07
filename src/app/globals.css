@@ -406,3 +406,63 @@ html {
   color: #3b6d11;
 }
 
+/* ═══ Marketing landing — editorial tokens (visibl-inspired) ═══ */
+:root {
+  --bg-base: #070707;
+  --bg-surface: #0f0f0f;
+  --bg-elevated: #161616;
+  --bg-inset: #1a1a1a;
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-mid: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --text-primary: #efefef;
+  --text-secondary: #777777;
+  --text-muted: #444444;
+  --accent-marketing: #00e87a;
+  --accent-bg: rgba(0, 232, 122, 0.07);
+  --accent-border: rgba(0, 232, 122, 0.2);
+  --marketing-red: #ff4040;
+  --marketing-amber: #f5a623;
+}
+
+html {
+  --font-display: var(--font-instrument-serif), Georgia, serif;
+  --font-body: var(--font-dm-sans), system-ui, sans-serif;
+  --font-mono: var(--font-dm-mono), ui-monospace, monospace;
+}
+
+.page-marketing {
+  font-family: var(--font-body, system-ui, sans-serif);
+  color: var(--text-primary);
+  background-color: var(--bg-base);
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+  min-height: 100%;
+}
+
+.font-marketing-display {
+  font-family: var(--font-display, Georgia, serif);
+}
+
+.font-marketing-body {
+  font-family: var(--font-body, system-ui, sans-serif);
+}
+
+.font-marketing-mono {
+  font-family: var(--font-mono, ui-monospace, monospace);
+}
+
+@keyframes pulse-green {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 232, 122, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(0, 232, 122, 0);
+  }
+}
+
+.nav-cta-pulse {
+  animation: pulse-green 2.5s ease 1.5s 3;
+}
+
