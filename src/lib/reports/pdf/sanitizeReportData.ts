@@ -1,66 +1,18 @@
+import { normalizeDisplayText } from "@/lib/text/normalizeDisplayText";
 import type { ReportData } from "./types";
 
 /**
- * Invisible / bidi / soft-break / format characters that PDFKit mishandles (split words, odd glyphs).
- * Includes ZWSP/ZWJ/ZWNJ, soft hyphen, variation selectors, word joiners, bidi marks, BOM.
- */
-const INVISIBLE_AND_BREAK_CHARS =
-  /[\u2000-\u200F\u202A-\u202E\u2060-\u206F\uFE00-\uFE0F\uFE20-\uFE2F\uFEFF\uFFF9-\uFFFB\u00AD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180E\uFFFC\uFFFD]/g;
-
-/** Second pass after NFC (combining sequences can reintroduce problematic chars). */
-const EXTRA_FORMAT_CHARS =
-  /\u2000|\u2001|\u2002|\u2003|\u2004|\u2005|\u2006|\u2007|\u2008|\u2009|\u200A|\u200B|\u200C|\u200D|\u200E|\u200F|\u2060|\u2061|\u2062|\u2063|\u2064|\uFEFF|\u00AD|\u034F|\u061C|\uFFF9|\uFFFA|\uFFFB|\uFFFC/g;
-
-/**
  * Normalize user- and model-generated strings for reliable PDF rendering.
+ * Strips invisible unicode via normalizeDisplayText, then PDF-safe typography.
  */
 export function sanitizePdfString(raw: string): string {
   if (raw === "") return raw;
-  let s = raw.replace(INVISIBLE_AND_BREAK_CHARS, "");
-  s = s.replace(EXTRA_FORMAT_CHARS, "");
-  try {
-    s = s.normalize("NFC");
-  } catch {
-    /* ignore */
-  }
-  try {
-    s = s.normalize("NFKC");
-  } catch {
-    /* ignore */
-  }
-  s = s.replace(EXTRA_FORMAT_CHARS, "");
-  s = s.replace(INVISIBLE_AND_BREAK_CHARS, "");
-
+  let s = normalizeDisplayText(raw);
   s = s.replace(/[\u2018\u2019\u201A\u02BC\u02B9\u2032\u2035\u00B4]/g, "'");
   s = s.replace(/[\u201C\u201D\u201E\u2033\u2036\u00AB\u00BB]/g, '"');
   s = s.replace(/[\u2010\u2011\u2012\u2013\u2014\u2015\u2212]/g, "-");
   s = s.replace(/\u2026/g, "...");
-  s = s.replace(/\u00A0|\u202F|\u2007|\uFEFF/g, " ");
-  s = s.replace(/[\u2028\u2029]/g, " ");
-  s = s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "");
-  s = s.replace(/  +/g, " ");
-
-  /* Unicode format characters (Cf) — PDFKit can split words if these slip through. */
-  try {
-    s = s.replace(/\p{Cf}/gu, "");
-  } catch {
-    /* engines without Unicode property escapes */
-  }
-
-  /* Collapse stray zero-width / format leftovers in a loop (model output edge cases). */
-  let prev = "";
-  while (prev !== s) {
-    prev = s;
-    s = s.replace(INVISIBLE_AND_BREAK_CHARS, "");
-    s = s.replace(EXTRA_FORMAT_CHARS, "");
-    try {
-      s = s.replace(/\p{Cf}/gu, "");
-    } catch {
-      /* ignore */
-    }
-  }
-
-  return s;
+  return normalizeDisplayText(s);
 }
 
 /** Deep-copy ReportData with every string field sanitized for PDF output. */

@@ -7,10 +7,10 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
 
 const navLinks = [
-  { href: "/#features", label: "Features" },
+  { href: "/#product", label: "Product" },
+  { href: "/preview", label: "Reports" },
+  { href: "/#faq", label: "FAQ" },
   { href: "/pricing", label: "Pricing" },
-  { href: "/#faq", label: "Questions" },
-  { href: "/blog", label: "Blog" },
 ];
 
 export function SiteNav() {
@@ -37,7 +37,7 @@ export function SiteNav() {
 
   // Treat null/undefined as home to avoid white flash before pathname hydrates
   const isHome = pathname === "/" || pathname === null || pathname === undefined;
-  const isDarkPage = isHome || pathname === "/pricing";
+  const isDarkPage = isHome || pathname === "/pricing" || pathname === "/preview";
 
   // On dark pages: dark at top; darker when scrolled
   const darkPageBg = scrolled
@@ -104,12 +104,12 @@ export function SiteNav() {
             </Link>
             <Link
               className={cn(
-                "rounded-full px-5 py-2 text-sm font-medium transition-colors",
-                isDarkPage ? "bg-white text-black hover:bg-white/90" : "text-text-3 hover:text-text"
+                "rounded-full px-5 py-2 text-sm font-semibold transition-colors",
+                isDarkPage ? "bg-emerald-500 text-black hover:bg-emerald-400" : "bg-accent text-white hover:bg-accent-2"
               )}
               href="/signup"
             >
-              Sign up
+              Run a free snapshot
             </Link>
           </div>
 
@@ -138,7 +138,7 @@ export function SiteNav() {
         {/* Mobile menu */}
         {mobileOpen && (
           <div
-            className={            cn(
+            className={cn(
               "absolute left-4 right-4 top-full mt-2 rounded-2xl shadow-xl md:hidden",
               isDarkPage ? "border border-white/20 bg-black/95 backdrop-blur-xl" : "border border-border bg-surface"
             )}
@@ -175,13 +175,13 @@ export function SiteNav() {
                 </Link>
                 <Link
                   className={cn(
-                    "rounded-xl px-4 py-3.5 text-center text-base font-medium transition-all",
-                    isDarkPage ? "bg-white text-black hover:bg-white/90" : "text-text-3 hover:text-text"
+                    "rounded-xl px-4 py-3.5 text-center text-base font-semibold transition-all",
+                    isDarkPage ? "bg-emerald-500 text-black hover:bg-emerald-400" : "bg-accent text-white hover:bg-accent-2"
                   )}
                   href="/signup"
                   onClick={() => setMobileOpen(false)}
                 >
-                  Sign up
+                  Run a free snapshot
                 </Link>
               </div>
             </div>

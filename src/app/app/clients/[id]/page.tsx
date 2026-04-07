@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/Badge";
 import type { BadgeVariant } from "@/components/ui/Badge";
 import { cn } from "@/lib/cn";
 import { formatEvidenceFieldDisplay } from "@/lib/reports/formatEvidenceFieldDisplay";
+import { normalizeDisplayText } from "@/lib/text/normalizeDisplayText";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    TYPES
@@ -1317,11 +1318,12 @@ function getModelDisplayName(key: string): string {
 }
 
 function getProviderDisplayName(provider: string): string {
-  const p = provider.toLowerCase();
+  const normalized = normalizeDisplayText(provider.trim());
+  const p = normalized.toLowerCase();
   if (p.includes("openai") || p.includes("chatgpt")) return MODEL_DISPLAY_NAMES.openai;
   if (p.includes("gemini") || p.includes("google")) return MODEL_DISPLAY_NAMES.gemini;
   if (p.includes("anthropic") || p.includes("claude")) return MODEL_DISPLAY_NAMES.anthropic;
-  return provider;
+  return normalized;
 }
 
 function estimateCompetitorScores(clientScore: number, gap: number): { leader: number; challenger: number } {

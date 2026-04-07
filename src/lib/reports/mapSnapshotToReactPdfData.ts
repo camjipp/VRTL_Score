@@ -14,6 +14,7 @@ import type {
   SignalRow,
 } from "@/lib/reports/pdf/types";
 import { formatProviderDisplayName } from "@/lib/reports/formatProviderDisplayName";
+import { normalizeDisplayText } from "@/lib/text/normalizeDisplayText";
 import { PDF_METHODOLOGY_TEXT } from "@/lib/reports/pdfTheme";
 
 function normalizeRecommendationPriority(p: string | undefined): RecommendationCard["priority"] {
@@ -89,7 +90,7 @@ function buildStrategicTakeaway(models: [string, number][], _avg: number): strin
 }
 
 function evidenceSnippet(raw: string | null, parsedSnippet: string | undefined, max = 240): string {
-  const src = raw?.trim() || parsedSnippet?.trim() || "";
+  const src = normalizeDisplayText(raw?.trim() || parsedSnippet?.trim() || "");
   if (!src) return "—";
   const t = src.slice(0, max);
   return src.length > max ? `${t}…` : t;

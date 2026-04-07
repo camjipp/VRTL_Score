@@ -1,6 +1,7 @@
 import type { Extraction } from "@/lib/extraction/schema";
 import { formatProviderDisplayName } from "@/lib/reports/formatProviderDisplayName";
 import { formatEvidenceFieldDisplay, formatEvidenceLogPillLabel } from "@/lib/reports/formatEvidenceFieldDisplay";
+import { normalizeDisplayText } from "@/lib/text/normalizeDisplayText";
 import {
   evidencePdfChip,
   PDF_METHODOLOGY_TEXT,
@@ -356,20 +357,23 @@ type EvidenceLabel = "STRENGTH" | "OPPORTUNITY" | "COMPETITIVE" | "VULNERABLE" |
 function getEvidenceLabel(pj: Extraction | null): { label: EvidenceLabel; chip: ReturnType<typeof evidencePdfChip> } {
   if (!pj) return { label: "INVISIBLE", chip: evidencePdfChip("INVISIBLE") };
 
-  if (pj.client_mentioned && pj.client_position === "top" && pj.recommendation_strength === "strong") {
+  if (!pj.client_mentioned) {
+    if (pj.competitors_mentioned && pj.competitors_mentioned.length > 0) {
+      return { label: "VULNERABLE", chip: evidencePdfChip("VULNERABLE") };
+    }
+    return { label: "INVISIBLE", chip: evidencePdfChip("INVISIBLE") };
+  }
+
+  /* Top position implies strength signal; never OPPORTUNITY / "mentioned not top". */
+  if (pj.client_position === "top") {
     return { label: "STRENGTH", chip: evidencePdfChip("STRENGTH") };
   }
-  if (pj.client_mentioned && (pj.client_position === "middle" || pj.recommendation_strength === "medium")) {
+
+  if (pj.client_position === "middle" || pj.recommendation_strength === "medium") {
     return { label: "OPPORTUNITY", chip: evidencePdfChip("OPPORTUNITY") };
   }
-  if (pj.client_mentioned && pj.competitors_mentioned && pj.competitors_mentioned.length > 0) {
+  if (pj.competitors_mentioned && pj.competitors_mentioned.length > 0) {
     return { label: "COMPETITIVE", chip: evidencePdfChip("COMPETITIVE") };
-  }
-  if (!pj.client_mentioned && pj.competitors_mentioned && pj.competitors_mentioned.length > 0) {
-    return { label: "VULNERABLE", chip: evidencePdfChip("VULNERABLE") };
-  }
-  if (!pj.client_mentioned) {
-    return { label: "INVISIBLE", chip: evidencePdfChip("INVISIBLE") };
   }
   return { label: "OPPORTUNITY", chip: evidencePdfChip("OPPORTUNITY") };
 }
@@ -1328,7 +1332,7 @@ function formatDate(d: string) {
 }
 
 function escapeHtml(str: string) {
-  const cleaned = str.replace(/\u00ad/g, "");
+  const cleaned = normalizeDisplayText(str);
   return cleaned.replace(/[&<>"']/g, (ch) => {
     switch (ch) {
       case "&": return "&amp;";
