@@ -203,7 +203,7 @@ export default function HomePage() {
               </p>
             </div>
             <div className="mt-14 grid gap-10 md:grid-cols-3 md:gap-8">
-              <ReportPageCard title="Page 1" caption="Executive snapshot">
+              <ReportPageCard title="Page 1" caption="Send this to clients">
                 <div className="flex items-end gap-4">
                   <span className="font-display text-3xl font-semibold tabular-nums text-zinc-900">72</span>
                   <span className="text-xs text-zinc-500">score · snapshot</span>
@@ -213,7 +213,7 @@ export default function HomePage() {
                 </div>
                 <p className="mt-3 text-xs leading-relaxed text-zinc-600">One screen your client can grasp in a meeting.</p>
               </ReportPageCard>
-              <ReportPageCard title="Analysis" caption="Model-by-model breakdown">
+              <ReportPageCard title="Analysis" caption="Show where they&apos;re losing">
                 <div className="space-y-2">
                   {["ChatGPT", "Gemini", "Claude"].map((m, i) => (
                     <div key={m} className="flex items-center justify-between gap-2 text-xs">
@@ -226,7 +226,7 @@ export default function HomePage() {
                 </div>
                 <p className="mt-3 text-xs leading-relaxed text-zinc-600">Where each model puts them — and who it prefers instead.</p>
               </ReportPageCard>
-              <ReportPageCard title="Next steps" caption="Recommended actions">
+              <ReportPageCard title="Next steps" caption="Prove where competitors are winning">
                 <ul className="space-y-2 text-xs text-zinc-700">
                   <li className="flex gap-2">
                     <span className="shrink-0 font-semibold text-emerald-700">HIGH</span>
@@ -247,25 +247,25 @@ export default function HomePage() {
           <div className="container-xl">
             <div className="max-w-2xl">
               <h2 className="font-display text-2xl font-semibold tracking-tight text-white md:text-3xl">
-                Turn AI visibility into a billable service.
+                Turn AI visibility into a new revenue stream.
               </h2>
               <p className="mt-5 text-base leading-relaxed text-zinc-400 md:text-lg">
-                VRTL Score gives agencies a way to measure AI answer visibility, package the findings, and turn them into a new client-facing deliverable.
+                Package AI visibility into a deliverable you price, repeat, and renew on—not another internal dashboard only your team sees.
               </p>
             </div>
             <div className="mt-14 grid gap-4 md:grid-cols-3 md:gap-6">
               {[
                 {
-                  t: "Sell a new reporting layer",
-                  b: "Give clients a clear view of how AI models rank and recommend them.",
+                  t: "Add a new line item",
+                  b: "Give clients a clear AI visibility report they understand and expect.",
                 },
                 {
-                  t: "Defend retainers",
-                  b: "Answer the question clients are starting to ask: why is AI recommending someone else?",
+                  t: "Increase retainers",
+                  b: "Expand scope with measurable AI performance and reporting.",
                 },
                 {
-                  t: "Create action plans",
-                  b: "Turn AI visibility gaps into concrete strategic recommendations.",
+                  t: "Defend client relationships",
+                  b: "Answer the question clients are already asking: “Why is AI recommending someone else?”",
                 },
               ].map((c) => (
                 <div key={c.t} className="border border-white/[0.08] bg-white/[0.02] px-6 py-8">
@@ -274,6 +274,9 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
+            <blockquote className="mx-auto mt-12 max-w-2xl border-l-2 border-emerald-500/50 pl-5 text-sm leading-relaxed text-zinc-300 md:text-base">
+              We ran this for a client and immediately saw where they were losing visibility in AI answers.
+            </blockquote>
           </div>
         </section>
 
@@ -304,6 +307,15 @@ export default function HomePage() {
               If you can&apos;t measure AI visibility, you can&apos;t sell it.
               <span className="mt-3 block text-zinc-300">If you can&apos;t sell it, you lose the client.</span>
             </p>
+            <div className="mx-auto mt-10 flex max-w-xl flex-col items-center gap-3 text-center">
+              <Link
+                className="inline-flex h-12 w-full items-center justify-center rounded-full bg-emerald-500 px-8 text-sm font-semibold text-black transition hover:bg-emerald-400 sm:w-auto"
+                href={SIGNUP_HREF}
+              >
+                Run a free snapshot
+              </Link>
+              <p className="text-sm text-zinc-400">Generate a client-ready report in minutes.</p>
+            </div>
           </div>
         </section>
 
