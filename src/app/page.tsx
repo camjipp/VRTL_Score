@@ -9,17 +9,21 @@ import { Footer } from "@/components/Footer";
 const SAMPLE_REPORT_HREF = "/preview";
 const SIGNUP_HREF = "/signup";
 
+/** Dark elevated surface — depth + hover lift (homepage only). */
+const surfaceCard =
+  "rounded-xl border border-white/5 bg-[#0F1117] shadow-[0_24px_56px_-16px_rgba(0,0,0,0.65)] transition duration-200 ease-out will-change-transform hover:-translate-y-1 hover:shadow-[0_32px_72px_-14px_rgba(0,0,0,0.72)]";
+
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="border-b border-white/10">
+    <div className="border-b border-white/5">
       <button
-        className="flex w-full items-center justify-between py-5 text-left"
+        className="flex w-full items-center justify-between rounded-lg py-5 text-left transition-colors duration-150 hover:bg-white/[0.03]"
         onClick={() => setIsOpen(!isOpen)}
         type="button"
       >
-        <span className="text-lg font-semibold text-white">{question}</span>
+        <span className="text-lg font-semibold tracking-tight text-white">{question}</span>
         <svg
           className={`h-5 w-5 shrink-0 text-white/50 transition-transform ${isOpen ? "rotate-180" : ""}`}
           fill="none"
@@ -32,7 +36,7 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
       </button>
       <div className={`grid transition-all duration-200 ease-in-out ${isOpen ? "grid-rows-[1fr] pb-5" : "grid-rows-[0fr]"}`}>
         <div className="overflow-hidden">
-          <p className="leading-relaxed text-white/70">{answer}</p>
+          <p className="leading-relaxed text-white/60">{answer}</p>
         </div>
       </div>
     </div>
@@ -41,13 +45,13 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 
 function ModelRow() {
   return (
-    <div className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-white/[0.07] pt-8 text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500">
+    <div className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-white/5 pt-8 text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
       <span>ChatGPT</span>
-      <span className="text-zinc-700" aria-hidden>
+      <span className="text-white/25" aria-hidden>
         ·
       </span>
       <span>Gemini</span>
-      <span className="text-zinc-700" aria-hidden>
+      <span className="text-white/25" aria-hidden>
         ·
       </span>
       <span>Claude</span>
@@ -57,16 +61,20 @@ function ModelRow() {
 
 function HeroReportMockup() {
   return (
-    <div className="relative mx-auto w-full max-w-[440px] lg:max-w-none">
+    <div className="group/report relative mx-auto w-full max-w-[440px] transition-transform duration-300 ease-out will-change-transform lg:max-w-none lg:hover:scale-[1.02]">
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-6 rounded-[2rem] bg-gradient-to-b from-emerald-500/[0.07] to-transparent blur-2xl md:-inset-10"
+        className="pointer-events-none absolute -inset-8 rounded-[2rem] bg-gradient-to-b from-emerald-500/[0.12] via-emerald-500/[0.04] to-transparent blur-3xl md:-inset-14"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[min(420px,85%)] w-[min(520px,120%)] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.14)_0%,transparent_58%)]"
       />
       <div className="relative">
-        <div className="absolute left-6 right-6 top-6 hidden h-[min(380px,52vw)] rounded-md border border-zinc-300/80 bg-zinc-100 shadow-lg md:block md:translate-y-3 md:rotate-[-2deg]" />
-        <div className="absolute left-3 right-3 top-3 hidden h-[min(400px,54vw)] rounded-md border border-zinc-200 bg-white shadow-xl md:block md:translate-y-1 md:rotate-[1.2deg]" />
+        <div className="absolute left-6 right-6 top-6 hidden h-[min(380px,52vw)] rounded-md border border-zinc-300/80 bg-zinc-100 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.35)] transition duration-300 group-hover/report:translate-y-2 md:block md:translate-y-3 md:rotate-[-2deg]" />
+        <div className="absolute left-3 right-3 top-3 hidden h-[min(400px,54vw)] rounded-md border border-zinc-200 bg-white shadow-[0_24px_56px_-14px_rgba(0,0,0,0.3)] transition duration-300 group-hover/report:translate-y-1 md:block md:rotate-[1.2deg]" />
 
-        <div className="relative rounded-lg border border-zinc-200/90 bg-white p-5 shadow-[0_32px_80px_rgba(0,0,0,0.45)] sm:p-6 md:p-7">
+        <div className="relative rounded-lg border border-zinc-200/90 bg-white p-5 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.5)] sm:p-6 md:p-7">
           <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-4">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">VRTL Score</p>
@@ -112,12 +120,12 @@ function ReportPageCard({
   children: ReactNode;
 }) {
   return (
-    <div className="flex flex-col">
-      <div className="flex-1 rounded-lg border border-zinc-200 bg-white p-4 shadow-[0_20px_50px_rgba(0,0,0,0.35)] sm:p-5">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">{title}</p>
-        <div className="mt-3">{children}</div>
+    <div className="group/preview flex flex-col transition-transform duration-200 ease-out will-change-transform hover:scale-[1.02]">
+      <div className="flex-1 rounded-xl border border-zinc-200/90 bg-white p-5 shadow-[0_24px_64px_-18px_rgba(0,0,0,0.38)] sm:p-6">
+        <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">{title}</p>
+        <div className="mt-5">{children}</div>
       </div>
-      <p className="mt-4 text-center text-xs font-medium text-zinc-500">{caption}</p>
+      <p className="mt-5 text-center text-xs font-medium tracking-tight text-white/50">{caption}</p>
     </div>
   );
 }
@@ -126,27 +134,27 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#03040a] text-zinc-100 selection:bg-emerald-500/25 selection:text-emerald-50">
       <main>
-        <section className="relative overflow-hidden border-b border-white/[0.06]">
+        <section className="relative overflow-hidden border-b border-white/5 bg-[#03040a]">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(16,185,129,0.12),transparent)]" />
           <div className="container-xl relative py-16 md:py-24 lg:py-28">
             <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-16">
               <div>
-                <h1 className="font-display text-[2rem] font-semibold leading-[1.08] tracking-[-0.03em] text-white sm:text-4xl md:text-[2.75rem] lg:text-5xl">
+                <h1 className="font-display text-[2.125rem] font-bold leading-[1.06] tracking-[-0.045em] text-white sm:text-[2.5rem] md:text-5xl lg:text-[3.25rem]">
                   Your clients are already being ranked by AI.
                   <span className="mt-2 block text-zinc-400">You&apos;re not reporting on it.</span>
                 </h1>
-                <p className="mt-6 max-w-xl text-base leading-relaxed text-zinc-400 md:text-lg">
+                <p className="mt-6 max-w-xl text-base leading-relaxed text-white/60 md:text-lg">
                   VRTL Score shows how ChatGPT, Gemini, and Claude rank, mention, and recommend your clients — and gives you a report you can actually send.
                 </p>
                 <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
                   <Link
-                    className="inline-flex h-12 items-center justify-center rounded-full bg-emerald-500 px-8 text-sm font-semibold text-black transition hover:bg-emerald-400"
+                    className="inline-flex h-12 items-center justify-center rounded-full bg-emerald-500 px-8 text-sm font-semibold text-black transition duration-200 hover:bg-emerald-400 hover:shadow-[0_12px_40px_-8px_rgba(16,185,129,0.45)]"
                     href={SIGNUP_HREF}
                   >
                     Run a free snapshot
                   </Link>
                   <Link
-                    className="inline-flex h-12 items-center justify-center rounded-full border border-white/15 px-8 text-sm font-medium text-white/90 transition hover:border-white/25 hover:bg-white/[0.04]"
+                    className="inline-flex h-12 items-center justify-center rounded-full border border-white/10 px-8 text-sm font-medium text-white/90 transition duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.04]"
                     href={SAMPLE_REPORT_HREF}
                   >
                     View sample report
@@ -159,16 +167,16 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="border-b border-white/[0.06] bg-black/25 py-20 md:py-28">
+        <section className="border-t border-white/5 border-b border-white/5 bg-black py-20 md:py-28">
           <div className="container-xl">
-            <div className="max-w-2xl">
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-white md:text-3xl">
+            <div className="max-w-xl">
+              <h2 className="font-display text-3xl font-bold tracking-[-0.04em] text-white md:text-4xl lg:text-[2.5rem]">
                 Your clients are already losing visibility inside AI answers.
               </h2>
-              <div className="mt-6 space-y-4 text-base leading-relaxed text-zinc-400 md:text-lg">
+              <div className="mt-6 max-w-xl space-y-4 text-base leading-relaxed text-white/60 md:text-lg">
                 <p>Clients are starting to ask why ChatGPT recommends a competitor.</p>
                 <p>Most agencies do not have a metric, a report, or a defensible answer.</p>
-                <p className="text-zinc-300">
+                <p className="text-white/75">
                   Search used to rank pages.
                   <br />
                   AI now chooses answers.
@@ -183,7 +191,7 @@ export default function HomePage() {
               ].map((t) => (
                 <div
                   key={t}
-                  className="border border-white/[0.08] bg-white/[0.02] px-5 py-6 text-sm font-medium leading-snug text-zinc-300 md:px-6 md:py-7 md:text-[15px]"
+                  className={`${surfaceCard} px-7 py-8 text-sm font-medium leading-snug text-white/70 md:py-9 md:text-[15px]`}
                 >
                   {t}
                 </div>
@@ -192,13 +200,13 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="scroll-mt-24 border-b border-white/[0.06] py-20 md:py-28" id="product">
+        <section className="scroll-mt-24 border-t border-white/5 border-b border-white/5 bg-[#0B0D12] py-20 md:py-28" id="product">
           <div className="container-xl">
-            <div className="max-w-2xl">
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-white md:text-3xl">
+            <div className="max-w-xl">
+              <h2 className="font-display text-3xl font-bold tracking-[-0.04em] text-white md:text-4xl lg:text-[2.5rem]">
                 Show clients where they are winning, losing, and getting displaced.
               </h2>
-              <p className="mt-5 text-base leading-relaxed text-zinc-400 md:text-lg">
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-white/60 md:text-lg">
                 VRTL Score turns AI visibility into a client-ready report with model breakdowns, competitor pressure, and prioritized actions.
               </p>
             </div>
@@ -243,13 +251,13 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="scroll-mt-24 border-b border-white/[0.06] py-20 md:py-28" id="agencies">
+        <section className="scroll-mt-24 border-t border-white/5 border-b border-white/5 bg-black py-20 md:py-28" id="agencies">
           <div className="container-xl">
-            <div className="max-w-2xl">
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-white md:text-3xl">
+            <div className="max-w-xl">
+              <h2 className="font-display text-3xl font-bold tracking-[-0.04em] text-white md:text-4xl lg:text-[2.5rem]">
                 Turn AI visibility into a new revenue stream.
               </h2>
-              <p className="mt-5 text-base leading-relaxed text-zinc-400 md:text-lg">
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-white/60 md:text-lg">
                 Package AI visibility into a deliverable you price, repeat, and renew on—not another internal dashboard only your team sees.
               </p>
             </div>
@@ -268,22 +276,25 @@ export default function HomePage() {
                   b: "Answer the question clients are already asking: “Why is AI recommending someone else?”",
                 },
               ].map((c) => (
-                <div key={c.t} className="border border-white/[0.08] bg-white/[0.02] px-6 py-8">
-                  <h3 className="font-display text-lg font-semibold text-white">{c.t}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-zinc-400">{c.b}</p>
+                <div key={c.t} className={`${surfaceCard} px-7 py-9`}>
+                  <div className="mb-4 h-px w-10 bg-gradient-to-r from-emerald-500/45 to-transparent" aria-hidden />
+                  <h3 className="font-display text-lg font-semibold tracking-tight text-white">{c.t}</h3>
+                  <p className="mt-5 text-sm leading-relaxed text-white/60">{c.b}</p>
                 </div>
               ))}
             </div>
-            <blockquote className="mx-auto mt-12 max-w-2xl border-l-2 border-emerald-500/50 pl-5 text-sm leading-relaxed text-zinc-300 md:text-base">
+            <blockquote className="mx-auto mt-12 max-w-2xl rounded-xl border border-white/5 border-l-2 border-l-emerald-500/50 bg-[#0F1117] py-7 pl-7 pr-8 text-sm leading-relaxed text-white/70 shadow-[0_24px_56px_-16px_rgba(0,0,0,0.65)] md:text-base">
               We ran this for a client and immediately saw where they were losing visibility in AI answers.
             </blockquote>
           </div>
         </section>
 
-        <section className="scroll-mt-24 border-b border-white/[0.06] py-20 md:py-28" id="category">
+        <section className="scroll-mt-24 border-t border-white/5 border-b border-white/5 bg-[#0B0D12] py-20 md:py-28" id="category">
           <div className="container-xl">
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-white md:text-3xl">Search ranked pages. AI ranks answers.</h2>
-            <p className="mt-4 max-w-xl text-sm text-zinc-500">
+            <h2 className="font-display text-3xl font-bold tracking-[-0.04em] text-white md:text-4xl lg:text-[2.5rem]">
+              Search ranked pages. AI ranks answers.
+            </h2>
+            <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/60">
               Answer-engine visibility (sometimes called AEO or GEO) is simply: do models mention you, where, and as a source?
             </p>
             <div className="mt-12 grid gap-4 md:grid-cols-3 md:gap-6">
@@ -292,40 +303,43 @@ export default function HomePage() {
                 { t: "Position", b: "Are you near the top or missing from the answer?" },
                 { t: "Authority", b: "Are you being cited as a trusted source?" },
               ].map((c) => (
-                <div key={c.t} className="border border-white/[0.08] bg-white/[0.02] px-6 py-7">
-                  <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-zinc-500">{c.t}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-zinc-300">{c.b}</p>
+                <div key={c.t} className={`${surfaceCard} px-7 py-8`}>
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-white/40">{c.t}</h3>
+                  <p className="mt-5 text-sm leading-relaxed text-white/70">{c.b}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="border-b border-white/[0.08] bg-white/[0.04] py-16 md:py-24">
-          <div className="container-xl">
-            <p className="mx-auto max-w-4xl text-center font-display text-2xl font-semibold leading-snug tracking-[-0.02em] text-white md:text-3xl lg:text-[2.125rem]">
-              If you can&apos;t measure AI visibility, you can&apos;t sell it.
-              <span className="mt-3 block text-zinc-300">If you can&apos;t sell it, you lose the client.</span>
+        <section className="relative overflow-hidden border-t border-white/5 border-b border-white/5 bg-black py-20 md:py-28">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_55%_45%_at_50%_45%,rgba(255,255,255,0.06),transparent_70%)]" />
+          <div className="container-xl relative z-[1]">
+            <p className="mx-auto max-w-[34rem] text-center font-display text-3xl font-bold leading-[1.15] tracking-[-0.04em] md:text-4xl lg:text-[2.75rem]">
+              <span className="bg-gradient-to-b from-white via-white to-zinc-400 bg-clip-text text-transparent">
+                If you can&apos;t measure AI visibility, you can&apos;t sell it.
+              </span>
+              <span className="mt-4 block text-white/60">If you can&apos;t sell it, you lose the client.</span>
             </p>
-            <div className="mx-auto mt-10 flex max-w-xl flex-col items-center gap-3 text-center">
+            <div className="mx-auto mt-12 flex max-w-xl flex-col items-center gap-3 text-center">
               <Link
-                className="inline-flex h-12 w-full items-center justify-center rounded-full bg-emerald-500 px-8 text-sm font-semibold text-black transition hover:bg-emerald-400 sm:w-auto"
+                className="inline-flex h-12 w-full items-center justify-center rounded-full bg-emerald-500 px-8 text-sm font-semibold text-black transition duration-200 hover:bg-emerald-400 hover:shadow-[0_12px_40px_-8px_rgba(16,185,129,0.45)] sm:w-auto"
                 href={SIGNUP_HREF}
               >
                 Run a free snapshot
               </Link>
-              <p className="text-sm text-zinc-400">Generate a client-ready report in minutes.</p>
+              <p className="text-sm text-white/60">Generate a client-ready report in minutes.</p>
             </div>
           </div>
         </section>
 
-        <section className="scroll-mt-24 py-16 md:py-20" id="faq">
+        <section className="scroll-mt-24 border-t border-white/5 bg-[#0B0D12] py-16 md:py-20" id="faq">
           <div className="container-xl">
             <div className="mx-auto max-w-3xl text-center">
-              <h2 className="font-display text-3xl font-semibold tracking-tight text-white md:text-4xl">
+              <h2 className="font-display text-3xl font-bold tracking-[-0.04em] text-white md:text-4xl lg:text-[2.5rem]">
                 Questions agencies ask before they run a snapshot
               </h2>
-              <p className="mt-4 text-base text-zinc-400">
+              <p className="mx-auto mt-4 max-w-xl text-base text-white/60">
                 Straight answers on what VRTL Score measures, how reports work, and what you can charge for.
               </p>
             </div>
@@ -369,24 +383,24 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="border-t border-white/[0.06] py-20 md:py-28">
+        <section className="border-t border-white/5 bg-black py-20 md:py-28">
           <div className="container-xl">
             <div className="mx-auto max-w-2xl text-center">
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-white md:text-3xl lg:text-4xl">
+              <h2 className="font-display text-3xl font-bold tracking-[-0.04em] text-white md:text-4xl lg:text-[2.5rem]">
                 Start with one client. See what AI is already saying.
               </h2>
-              <p className="mt-5 text-base text-zinc-400 md:text-lg">
+              <p className="mx-auto mt-5 max-w-xl text-base text-white/60 md:text-lg">
                 Run a free snapshot and generate a report your team can actually use.
               </p>
               <div className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:justify-center">
                 <Link
-                  className="inline-flex h-12 items-center justify-center rounded-full bg-emerald-500 px-8 text-sm font-semibold text-black transition hover:bg-emerald-400"
+                  className="inline-flex h-12 items-center justify-center rounded-full bg-emerald-500 px-8 text-sm font-semibold text-black transition duration-200 hover:bg-emerald-400 hover:shadow-[0_12px_40px_-8px_rgba(16,185,129,0.45)]"
                   href={SIGNUP_HREF}
                 >
                   Run a free snapshot
                 </Link>
                 <Link
-                  className="inline-flex h-12 items-center justify-center rounded-full border border-white/15 px-8 text-sm font-medium text-white/90 transition hover:border-white/25 hover:bg-white/[0.04]"
+                  className="inline-flex h-12 items-center justify-center rounded-full border border-white/10 px-8 text-sm font-medium text-white/90 transition duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.04]"
                   href={SAMPLE_REPORT_HREF}
                 >
                   View sample report
