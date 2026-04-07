@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { cn } from "@/lib/cn";
 
@@ -13,19 +13,12 @@ const navLinks = [
   { href: "/pricing", label: "Pricing" },
 ];
 
+const navContainer = "mx-auto w-full max-w-6xl px-6";
+
 export function SiteNav() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(typeof window !== "undefined" && window.scrollY > 80);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  // Hide marketing nav inside the app, during onboarding, and on auth pages (login/callback show minimal UI).
   if (
     pathname.startsWith("/app") ||
     pathname.startsWith("/onboarding") ||
@@ -35,53 +28,35 @@ export function SiteNav() {
   )
     return null;
 
-  // Treat null/undefined as home to avoid white flash before pathname hydrates
   const isHome = pathname === "/" || pathname === null || pathname === undefined;
   const isDarkPage = isHome || pathname === "/pricing" || pathname === "/preview";
 
-  // On dark pages: dark at top; darker when scrolled
-  const darkPageBg = scrolled
-    ? "border-white/10 bg-black/80 backdrop-blur-md"
-    : "border-white/[0.06] bg-black";
-
   return (
-    <header className={cn("sticky top-0 z-50", isDarkPage && "bg-black")}>
-      {/* Background — dark on home/pricing; light on other pages */}
-      <div
-        className={cn(
-          "absolute inset-0 border-b transition-colors duration-200",
-          isDarkPage ? darkPageBg : "border-border/40 bg-white/80 backdrop-blur-xl"
-        )}
-      />
-
-      <div className="container-xl relative">
-        <nav className="flex h-16 items-center justify-between md:h-18">
-          {/* Logo — white on homepage */}
-          <Link className="flex shrink-0 items-center transition-transform hover:scale-[1.02]" href="/">
+    <header
+      className={cn(
+        "sticky top-0 z-50",
+        isDarkPage ? "border-b border-white/[0.08] bg-[#080808]/85 backdrop-blur-[16px]" : "border-b border-border/40 bg-white/85 backdrop-blur-xl"
+      )}
+    >
+      <div className={navContainer}>
+        <nav className="flex h-14 items-center justify-between md:h-[3.75rem]">
+          <Link className="flex shrink-0 items-center opacity-90 transition-opacity hover:opacity-100" href="/">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               alt="VRTL Score"
-              className={cn("h-11 w-auto md:h-[52px]", isDarkPage && "brightness-0 invert")}
+              className={cn("h-9 w-auto md:h-10", isDarkPage && "brightness-0 invert")}
               src="/brand/ChatGPT%20Image%20Jan%2020,%202026,%2001_19_44%20PM.png"
             />
           </Link>
 
-          {/* Desktop nav — no pill on homepage (Linear-style) */}
           <div className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:block">
-          <div
-            className={cn(
-              "flex items-center",
-              isDarkPage ? "gap-6" : "gap-1 rounded-full border border-border/60 bg-surface-2/60 px-1.5 py-1"
-            )}
-          >
+            <div className="flex items-center gap-8">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   className={cn(
-                    "text-sm font-medium transition-all",
-                    isDarkPage
-                      ? "rounded-full px-4 py-1.5 text-white/80 hover:text-white"
-                      : "rounded-full px-4 py-1.5 text-text-2 hover:bg-white hover:text-text hover:shadow-sm"
+                    "text-sm font-medium transition-colors",
+                    isDarkPage ? "text-white/55 hover:text-white" : "text-text-2 hover:text-text"
                   )}
                   href={link.href}
                 >
@@ -91,12 +66,11 @@ export function SiteNav() {
             </div>
           </div>
 
-          {/* Desktop CTA */}
-          <div className="hidden shrink-0 items-center gap-3 md:flex">
+          <div className="hidden shrink-0 items-center gap-5 md:flex">
             <Link
               className={cn(
-                "rounded-full px-5 py-2 text-sm font-medium transition-colors",
-                isDarkPage ? "text-white/80 hover:text-white" : "border border-border bg-surface-2 text-text hover:bg-bg-2 hover:border-border/80"
+                "text-sm font-medium transition-colors",
+                isDarkPage ? "text-white/55 hover:text-white" : "text-text-2 hover:text-text"
               )}
               href="/login"
             >
@@ -113,77 +87,66 @@ export function SiteNav() {
             </Link>
           </div>
 
-          {/* Mobile menu button */}
           <button
             className={cn(
-              "flex h-10 w-10 items-center justify-center rounded-full transition-all md:hidden",
-              isDarkPage ? "text-white/80 hover:text-white" : "border border-border bg-white text-text hover:bg-surface-2"
+              "flex h-9 w-9 items-center justify-center rounded-md transition-colors md:hidden",
+              isDarkPage ? "text-white/70 hover:bg-white/[0.06] hover:text-white" : "border border-border text-text hover:bg-surface-2"
             )}
             onClick={() => setMobileOpen(!mobileOpen)}
             type="button"
             aria-label="Toggle menu"
           >
             {mobileOpen ? (
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             ) : (
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             )}
           </button>
         </nav>
 
-        {/* Mobile menu */}
         {mobileOpen && (
           <div
             className={cn(
-              "absolute left-4 right-4 top-full mt-2 rounded-2xl shadow-xl md:hidden",
-              isDarkPage ? "border border-white/20 bg-black/95 backdrop-blur-xl" : "border border-border bg-surface"
+              "absolute left-4 right-4 top-full z-50 mt-1 rounded-lg border py-3 shadow-lg md:hidden",
+              isDarkPage ? "border-white/[0.08] bg-[#0a0a0a]" : "border-border bg-surface"
             )}
           >
-            <div className="p-4">
-              <div className="flex flex-col gap-1">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    className={cn(
-                      "rounded-xl px-4 py-3.5 text-base font-medium transition-all",
-                      isDarkPage
-                        ? "text-white/80 hover:bg-white/10 hover:text-white"
-                        : "text-text-2 hover:bg-surface-2 hover:text-text"
-                    )}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
-              <hr className={cn("my-3", isDarkPage ? "border-white/15" : "border-border")} />
-              <div className="flex flex-col gap-2">
+            <div className="flex flex-col px-2">
+              {navLinks.map((link) => (
                 <Link
+                  key={link.href}
                   className={cn(
-                    "rounded-xl px-4 py-3.5 text-center text-base font-medium transition-all",
-                    isDarkPage ? "text-white/80 hover:text-white" : "border border-border bg-surface-2 text-text hover:bg-bg-2"
+                    "rounded-md px-3 py-2.5 text-sm font-medium",
+                    isDarkPage ? "text-white/70 hover:bg-white/[0.05] hover:text-white" : "text-text-2 hover:bg-surface-2"
                   )}
-                  href="/login"
+                  href={link.href}
                   onClick={() => setMobileOpen(false)}
                 >
-                  Log in
+                  {link.label}
                 </Link>
-                <Link
-                  className={cn(
-                    "rounded-xl px-4 py-3.5 text-center text-base font-semibold transition-all",
-                    isDarkPage ? "bg-emerald-500 text-black hover:bg-emerald-400" : "bg-accent text-white hover:bg-accent-2"
-                  )}
-                  href="/signup"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  Run a free snapshot
-                </Link>
-              </div>
+              ))}
+              <hr className={cn("my-2 border-t", isDarkPage ? "border-white/[0.08]" : "border-border")} />
+              <Link
+                className={cn(
+                  "rounded-md px-3 py-2.5 text-sm font-medium",
+                  isDarkPage ? "text-white/70 hover:bg-white/[0.05]" : "text-text-2 hover:bg-surface-2"
+                )}
+                href="/login"
+                onClick={() => setMobileOpen(false)}
+              >
+                Log in
+              </Link>
+              <Link
+                className="mt-1 rounded-full bg-emerald-500 py-2.5 text-center text-sm font-semibold text-black hover:bg-emerald-400"
+                href="/signup"
+                onClick={() => setMobileOpen(false)}
+              >
+                Run a free snapshot
+              </Link>
             </div>
           </div>
         )}
@@ -191,4 +154,3 @@ export function SiteNav() {
     </header>
   );
 }
-

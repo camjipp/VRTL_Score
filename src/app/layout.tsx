@@ -55,7 +55,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-black text-text antialiased">
+      <body className="min-h-screen bg-[#080808] text-text antialiased">
         <SiteNav />
         {children}
       </body>
