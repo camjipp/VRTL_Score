@@ -120,6 +120,128 @@ function HeroReportMockup() {
   );
 }
 
+/** Problem row: inclusion — AI answer surface with highlighted mention + badge. */
+function ProofCardInclusion() {
+  return (
+    <div className={`${card} flex flex-col`}>
+      <div className="flex flex-1 flex-col rounded-xl border border-white/10 bg-[#161920] p-4">
+        <div className="mb-3 flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          <span className="text-[10px] font-medium uppercase tracking-wide text-white/40">Answer</span>
+        </div>
+        <p className="text-[13px] leading-relaxed text-white/75">
+          For mid-market payroll, teams compare{" "}
+          <span className="rounded bg-emerald-500/20 px-1 py-0.5 font-medium text-emerald-200">Acme Payroll</span>
+          {" "}with Gusto and Rippling for compliance.
+        </p>
+        <div className="mt-4">
+          <span className="inline-flex items-center rounded-full border border-emerald-500/35 bg-emerald-500/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-300">
+            Mentioned
+          </span>
+        </div>
+      </div>
+      <p className={`${label} mt-4`}>AEO · inclusion</p>
+    </div>
+  );
+}
+
+/** Problem row: recommendation order — ranked list with winner + pill. */
+function ProofCardRecommendation() {
+  const rows: Array<{
+    rank: number;
+    name: string;
+    highlight: boolean;
+    dim?: boolean;
+    pill?: string;
+  }> = [
+    { rank: 1, name: "Sterling Health", highlight: true, pill: "Recommended" },
+    { rank: 2, name: "Vantage Care", highlight: false, dim: false },
+    { rank: 3, name: "Your client", highlight: false, dim: true },
+  ];
+
+  return (
+    <div className={`${card} flex flex-col`}>
+      <div className="flex flex-1 flex-col gap-2 rounded-xl border border-white/10 bg-[#161920] p-4">
+        {rows.map((row) => (
+          <div
+            key={row.rank}
+            className={
+              row.highlight
+                ? "flex items-center justify-between gap-2 rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-3 py-2.5"
+                : row.dim === true
+                  ? "flex items-center justify-between gap-2 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2 opacity-70"
+                  : "flex items-center justify-between gap-2 rounded-lg border border-white/8 bg-white/[0.04] px-3 py-2.5"
+            }
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white/10 text-[11px] font-bold tabular-nums text-white/90">
+                {row.rank}
+              </span>
+              <span className={`truncate text-[13px] font-medium ${row.dim === true ? "text-white/50" : "text-white/90"}`}>{row.name}</span>
+            </div>
+            {row.pill ? (
+              <span className="shrink-0 rounded-full bg-emerald-500/90 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-black">
+                {row.pill}
+              </span>
+            ) : null}
+          </div>
+        ))}
+      </div>
+      <p className={`${label} mt-4`}>GEO · recommendation</p>
+    </div>
+  );
+}
+
+/** Problem row: score + trend + metric chips — reporting snapshot. */
+function ProofCardMeasurement() {
+  return (
+    <div className={`${card} flex flex-col`}>
+      <div className="flex flex-1 flex-col rounded-xl border border-white/10 bg-[#161920] p-4">
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-wide text-white/40">Visibility score</p>
+            <p className="mt-1 font-display text-3xl font-semibold tabular-nums tracking-tight text-white">72</p>
+          </div>
+          <div className="shrink-0 pb-1">
+            <svg className="h-11 w-[4.5rem]" viewBox="0 0 72 44" fill="none" aria-hidden>
+              <path
+                d="M4 36 L16 28 L28 32 L40 18 L52 22 L64 10"
+                stroke="rgb(16 185 129 / 0.55)"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+              />
+              <path
+                d="M4 36 L16 28 L28 32 L40 18 L52 22 L64 10 V40 H4 Z"
+                fill="url(#trendFill)"
+                opacity="0.15"
+              />
+              <defs>
+                <linearGradient id="trendFill" x1="36" x2="36" y1="10" y2="40" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="rgb(16 185 129)" />
+                  <stop offset="1" stopColor="rgb(16 185 129)" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <span className="rounded-md border border-white/10 bg-white/[0.06] px-2 py-1 text-[10px] font-medium text-white/65">
+            Mention rate · 68%
+          </span>
+          <span className="rounded-md border border-white/10 bg-white/[0.06] px-2 py-1 text-[10px] font-medium text-white/65">
+            Top-3 rate · 41%
+          </span>
+          <span className="rounded-md border border-white/10 bg-white/[0.06] px-2 py-1 text-[10px] font-medium text-white/65">
+            Models · 3
+          </span>
+        </div>
+      </div>
+      <p className={`${label} mt-4`}>Measurement · reporting</p>
+    </div>
+  );
+}
+
 function ReportPageCard({
   title,
   caption,
@@ -190,15 +312,9 @@ export default function HomePage() {
               </p>
             </div>
             <div className="grid gap-8 md:grid-cols-3">
-              {[
-                "No clear AI visibility metric",
-                "No report clients can understand",
-                "No way to sell AI visibility as a service",
-              ].map((t) => (
-                <div key={t} className={`${card} text-sm font-medium leading-snug text-white/70`}>
-                  {t}
-                </div>
-              ))}
+              <ProofCardInclusion />
+              <ProofCardRecommendation />
+              <ProofCardMeasurement />
             </div>
           </div>
         </section>
