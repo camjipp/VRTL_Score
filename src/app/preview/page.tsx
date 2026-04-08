@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
 import Link from "next/link";
 
 import { stanleyData } from "@/lib/reports/pdf/stanleyData";
@@ -17,6 +16,8 @@ const accentGreen = "#00e87a";
 
 const docShell =
   "border border-[#e5e7eb] bg-[#fafafa] text-[#0f1117] shadow-[0_22px_48px_rgba(0,0,0,0.38),0_2px_10px_rgba(0,0,0,0.06)] rounded-[2px]";
+
+const SIGNUP_HREF = "/signup";
 
 /** Public preview only: numeric structure from fixture, no real client / competitor brands. */
 function buildPublicPreviewData(base: ReportData): ReportData {
@@ -98,10 +99,6 @@ function buildPublicPreviewData(base: ReportData): ReportData {
   };
 }
 
-function avgOf(models: ReportData["modelScores"]) {
-  return models.length ? Math.round(models.reduce((s, m) => s + m.score, 0) / models.length) : 0;
-}
-
 /** Semi-circular score arc — same geometry as PDF `ScoreRing`, scaled for web */
 function PreviewScoreRing({ score }: { score: number | null }) {
   const W = 140;
@@ -172,33 +169,78 @@ function DocHeader({ data }: { data: ReportData }) {
 
 function DocFooter({ data, pageNum }: { data: ReportData; pageNum: number }) {
   return (
-    <footer className="mt-10 flex flex-col gap-1 border-t border-[#e5e7eb] pt-2 sm:flex-row sm:items-center sm:justify-between">
+    <footer className="mt-6 flex flex-col gap-1 border-t border-[#e5e7eb] pt-2 sm:flex-row sm:items-center sm:justify-between">
       <span className={`${mono} text-[7px] text-[#9ca3af]`}>Sample · {data.clientName}</span>
       <span className={`${mono} text-[7px] text-[#6b7280]`}>Page {pageNum}</span>
     </footer>
   );
 }
 
-function ChapterHeading({ title }: { title: string }) {
+/** Blurred sheet stack behind page 1 (same spine, stepped offsets, progressive blur + fade). */
+function BlurredStackSheets({ clientName }: { clientName: string }) {
+  const sheet =
+    "absolute left-0 top-0 w-full origin-top rounded-[2px] border border-[#d1d5db] bg-[#fafafa] p-4 shadow-sm";
   return (
-    <h2 className="mb-3 font-marketing-body text-[15px] font-bold tracking-[0.02em] text-[#0f1117]">{title}</h2>
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 top-0 overflow-hidden" aria-hidden>
+      <div
+        className={sheet}
+        style={{
+          transform: "translate(10px, 20px) scale(0.91)",
+          filter: "blur(7px)",
+          opacity: 0.42,
+        }}
+      >
+        <p className={`${mono} text-[7px] font-semibold uppercase tracking-[0.12em] text-[#9ca3af]`}>AI Authority Report</p>
+        <p className="mt-1 text-[10px] font-bold text-[#0f1117]">Data Summary</p>
+        <p className={`${mono} mt-2 text-[7px] text-[#6b7280]`}>{clientName}</p>
+        <div className="mt-3 space-y-1">
+          <div className="h-1.5 rounded bg-[#e5e7eb]" />
+          <div className="h-1.5 w-[85%] rounded bg-[#e5e7eb]" />
+        </div>
+      </div>
+      <div
+        className={sheet}
+        style={{
+          transform: "translate(7px, 13px) scale(0.935)",
+          filter: "blur(4px)",
+          opacity: 0.48,
+        }}
+      >
+        <p className={`${mono} text-[7px] font-semibold uppercase tracking-[0.12em] text-[#9ca3af]`}>AI Authority Report</p>
+        <p className="mt-1 text-[10px] font-bold text-[#0f1117]">Recommendations</p>
+        <p className={`${mono} mt-2 text-[7px] text-[#6b7280]`}>{clientName}</p>
+        <div className="mt-3 h-8 rounded bg-[#f3f4f6]" />
+      </div>
+      <div
+        className={sheet}
+        style={{
+          transform: "translate(4px, 7px) scale(0.96)",
+          filter: "blur(2px)",
+          opacity: 0.55,
+        }}
+      >
+        <p className={`${mono} text-[7px] font-semibold uppercase tracking-[0.12em] text-[#9ca3af]`}>AI Authority Report</p>
+        <p className="mt-1 text-[10px] font-bold text-[#0f1117]">Model Analysis</p>
+        <p className={`${mono} mt-2 text-[7px] text-[#6b7280]`}>{clientName}</p>
+        <div className="mt-3 flex gap-1.5">
+          <div className="h-9 flex-1 rounded border border-[#e5e7eb] bg-white" />
+          <div className="h-9 flex-1 rounded border border-[#e5e7eb] bg-white" />
+          <div className="h-9 flex-1 rounded border border-[#e5e7eb] bg-white" />
+        </div>
+      </div>
+    </div>
   );
 }
 
-/** Fade + light blur at bottom of truncated “pages” */
-function PreviewObscurity({ children }: { children: ReactNode }) {
+function LockIcon({ className }: { className?: string }) {
   return (
-    <div className="relative">
-      {children}
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 top-[28%] bg-gradient-to-b from-transparent via-[#fafafa]/75 to-[#fafafa]"
-        aria-hidden
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
       />
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[42%] backdrop-blur-[2px] [mask-image:linear-gradient(to_top,black,transparent)]"
-        aria-hidden
-      />
-    </div>
+    </svg>
   );
 }
 
@@ -206,20 +248,11 @@ export default function PreviewPage() {
   const data = buildPublicPreviewData(stanleyData);
   const maxM = Math.max(...data.competitors.map((x) => x.mentions), 1);
   const clientM = data.competitors.find((x) => x.isClient)?.mentions ?? 0;
-  const avg = avgOf(data.modelScores);
-  const scores = data.modelScores.map((m) => m.score);
-  const spread = scores.length ? Math.max(...scores) - Math.min(...scores) : 0;
-  const spreadLine = `${spread}-POINT SPREAD`;
-  const descLine =
-    spread === 0
-      ? "No spread across models. Scores align."
-      : `${spread} points separate best and worst model. Assistant answers diverge sharply.`;
   const statusUpper = String(data.status).toUpperCase();
   const rankLine = `RANK #${data.rank} OF ${data.rankTotal}`;
   const leadingPill = data.rank === 1 ? "LEADING" : "CHALLENGER";
   const authEmpty = data.authorityScore === 0;
-
-  const firstModel = data.modelScores[0]!;
+  const previewCompetitors = data.competitors.filter((r) => r.rank <= 3);
 
   return (
     <div className="min-h-screen bg-[#070707] font-marketing-body text-[#efefef]">
@@ -235,7 +268,7 @@ export default function PreviewPage() {
           This is a sample AI visibility briefing agencies can brand and send.
         </p>
 
-        {/* Report stack: one spine (left:0, full width), stepped +3px / +6px per layer back, scale −2.2% / opacity +0.06 toward front */}
+        {/* Single preview object: sharp page 1 + locked blurred stack (same CTA as signup) */}
         <div className="relative mx-auto mb-16 w-full max-w-[600px] pb-6 md:pb-8">
           <div
             aria-hidden
@@ -244,61 +277,11 @@ export default function PreviewPage() {
             <div className="mx-auto h-14 bg-[radial-gradient(ellipse_72%_90%_at_50%_100%,rgba(15,23,42,0.2),rgba(15,23,42,0.05)_48%,transparent_72%)] blur-[12px] md:h-16" />
           </div>
 
-          <div className="relative w-full">
-            {/* Page 4 — lowest emphasis (data summary hint) */}
-            <div
-              className={`${docShell} pointer-events-none absolute left-0 top-0 z-0 hidden w-full origin-top p-5 md:block`}
-              style={{ transform: "translate(9px, 18px) scale(0.922)", opacity: 0.76 }}
-              aria-hidden
-            >
-              <p className={`${mono} text-[7px] font-semibold uppercase tracking-[0.14em] text-[#9ca3af]`}>AI Authority Report</p>
-              <p className="mt-1 text-[11px] font-bold text-[#0f1117]">Data Summary</p>
-              <p className={`${mono} mt-3 text-[8px] text-[#6b7280]`}>{data.clientName}</p>
-              <div className="mt-4 space-y-1.5">
-                <div className="h-1.5 rounded bg-[#f3f4f6]" />
-                <div className="h-1.5 w-[88%] rounded bg-[#f3f4f6]" />
-                <div className="h-1.5 w-[72%] rounded bg-[#f3f4f6]" />
-              </div>
-            </div>
-
-            {/* Page 3 — tertiary */}
-            <div
-              className={`${docShell} pointer-events-none absolute left-0 top-0 z-[1] hidden w-full origin-top p-5 md:block`}
-              style={{ transform: "translate(6px, 12px) scale(0.944)", opacity: 0.82 }}
-              aria-hidden
-            >
-              <p className={`${mono} text-[7px] font-semibold uppercase tracking-[0.14em] text-[#9ca3af]`}>AI Authority Report</p>
-              <p className="mt-1 text-[11px] font-bold text-[#0f1117]">Recommendations</p>
-              <p className={`${mono} mt-3 text-[8px] text-[#6b7280]`}>{data.clientName}</p>
-              <div className="mt-4 space-y-2">
-                <div className="h-2 rounded bg-[#f3f4f6]" />
-                <div className="h-2 w-4/5 rounded bg-[#f3f4f6]" />
-              </div>
-            </div>
-
-            {/* Page 2 — secondary */}
-            <div
-              className={`${docShell} pointer-events-none absolute left-0 top-0 z-[2] hidden w-full origin-top p-5 md:block`}
-              style={{ transform: "translate(3px, 6px) scale(0.966)", opacity: 0.88 }}
-              aria-hidden
-            >
-              <p className={`${mono} text-[7px] font-semibold uppercase tracking-[0.14em] text-[#9ca3af]`}>AI Authority Report</p>
-              <p className="mt-1 text-[11px] font-bold text-[#0f1117]">Model Analysis</p>
-              <p className={`${mono} mt-3 text-[8px] text-[#6b7280]`}>{data.clientName}</p>
-              <div className="mt-4 flex gap-2">
-                <div className="h-12 flex-1 rounded border border-[#e5e7eb] bg-white" />
-                <div className="h-12 flex-1 rounded border border-[#e5e7eb] bg-white" />
-                <div className="h-12 flex-1 rounded border border-[#e5e7eb] bg-white" />
-              </div>
-            </div>
-
-            {/* Page 1 — primary (straight; single object with stack) */}
-            <article
-              className={`${docShell} relative z-[3] w-full px-7 py-8 transition-transform duration-300 ease-out md:px-9 md:py-9 hover:-translate-y-0.5`}
-            >
+          <article className={`${docShell} relative z-[1] w-full overflow-hidden`}>
+            <div className="relative z-10 bg-[#fafafa] px-7 pb-5 pt-7 md:px-9 md:pb-6 md:pt-8">
             <DocHeader data={data} />
 
-            <div className="mb-3 flex flex-col items-stretch gap-0 overflow-hidden rounded-md border border-[#e5e7eb] bg-[#f9fafb] p-4 sm:flex-row sm:items-center">
+            <div className="mb-2.5 flex flex-col items-stretch gap-0 overflow-hidden rounded-md border border-[#e5e7eb] bg-[#f9fafb] p-3.5 sm:flex-row sm:items-center">
               <PreviewScoreRing score={data.overallScore} />
               <div className="mx-0 my-3 hidden w-px shrink-0 self-stretch bg-[#e5e7eb] sm:mx-3 sm:my-0 sm:block" aria-hidden />
               <div className="grid min-h-[100px] min-w-0 flex-1 grid-cols-3 gap-2">
@@ -343,13 +326,13 @@ export default function PreviewPage() {
               </div>
             </div>
 
-            <div className="mb-4 flex overflow-hidden rounded border border-[#e5e7eb] bg-[#f9fafb]">
+            <div className="mb-3 flex overflow-hidden rounded border border-[#e5e7eb] bg-[#f9fafb]">
               <div className="w-[3px] shrink-0 bg-[#9ca3af]" aria-hidden />
-              <div className="min-w-0 px-4 py-3">
-                <p className={`${mono} mb-1.5 text-[6px] font-semibold uppercase tracking-[0.15em] text-[#9ca3af]`}>
+              <div className="min-w-0 px-3 py-2.5">
+                <p className={`${mono} mb-1 text-[6px] font-semibold uppercase tracking-[0.15em] text-[#9ca3af]`}>
                   Bottom line
                 </p>
-                <p className="text-[11px] font-normal leading-[1.74] text-[#0f1117]">{data.bottomLine}</p>
+                <p className="line-clamp-4 text-[10.5px] font-normal leading-[1.68] text-[#0f1117]">{data.bottomLine}</p>
               </div>
             </div>
 
@@ -358,7 +341,7 @@ export default function PreviewPage() {
             </p>
             <div className="overflow-x-auto overflow-y-hidden rounded border border-[#e5e7eb] bg-white">
               <div className="min-w-[320px]">
-                {data.competitors.map((row) => {
+                {previewCompetitors.map((row) => {
                   const widthPct = Math.min(100, Math.max(0, Math.round((row.mentions / maxM) * 100)));
                   const delta = row.isClient ? null : row.mentions - clientM;
                   const deltaStr =
@@ -405,7 +388,7 @@ export default function PreviewPage() {
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
               <InsightCard
                 variant="win"
                 label="WIN"
@@ -427,115 +410,30 @@ export default function PreviewPage() {
             </div>
 
             <DocFooter data={data} pageNum={1} />
-          </article>
-          </div>
-        </div>
-
-        <p className={`${mono} mb-3 text-center text-[10px] uppercase tracking-[0.12em] text-[#6b7280]`}>
-          Following pages · preview only
-        </p>
-
-        {/* Page 2 — partial Model Analysis */}
-        <div className="relative mx-auto mb-10 max-w-[600px]">
-          <div className="max-h-[min(380px,52vh)] overflow-hidden rounded-[2px] shadow-[0_22px_48px_rgba(0,0,0,0.38),0_2px_10px_rgba(0,0,0,0.06)]">
-            <PreviewObscurity>
-              <article className={`${docShell} border-0 shadow-none mb-0 px-7 py-8 md:px-9 md:py-9`}>
-                <DocHeader data={data} />
-                <ChapterHeading title="Model Analysis" />
-                <div className="mb-3 flex overflow-hidden rounded border border-[#e5e7eb] bg-[#f9fafb]">
-                  <div className="w-[3px] shrink-0 bg-[#6b7280]" aria-hidden />
-                  <div className="flex min-w-0 flex-1 flex-col gap-1 px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-                    <div>
-                      <p className="text-[12px] font-bold tracking-wide text-[#0f1117]">{spreadLine}</p>
-                      <p className="mt-0.5 text-[8px] leading-snug text-[#374151]">{descLine}</p>
-                    </div>
-                    <div className="shrink-0 rounded border border-[#e5e7eb] bg-white px-2 py-1.5">
-                      <p
-                        className={`${mono} max-w-[148px] text-center text-[5px] font-bold uppercase leading-tight tracking-[0.05em] text-[#374151]`}
-                      >
-                        Highest-leverage opportunity
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 gap-2.5 md:grid-cols-3">
-                  <ModelCard model={firstModel} avg={avg} />
-                  {data.modelScores.slice(1).map((m, idx) => (
-                    <ModelCard key={`${m.name}-${idx}`} model={m} avg={avg} />
-                  ))}
-                </div>
-              </article>
-            </PreviewObscurity>
-          </div>
-          <p className={`${mono} mt-3 text-center text-[9px] text-[#9ca3af]`}>
-            Model breakdown, evidence, and takeaway continue in the export.
-          </p>
-        </div>
-
-        {/* Page 3 — partial Recommendations */}
-        <div className="relative mx-auto mb-10 max-w-[600px]">
-          <div className="max-h-[min(260px,38vh)] overflow-hidden rounded-[2px] shadow-[0_22px_48px_rgba(0,0,0,0.38),0_2px_10px_rgba(0,0,0,0.06)]">
-            <PreviewObscurity>
-              <article className={`${docShell} border-0 shadow-none mb-0 px-7 py-8 md:px-9 md:py-9`}>
-                <DocHeader data={data} />
-                <ChapterHeading title="Recommendations" />
-                <p className="mb-4 text-[8px] leading-relaxed text-[#374151]">
-                  Urgent first. Work the list in order when bandwidth is thin.
-                </p>
-                <div className="flex flex-col gap-1.5">
-                  {(() => {
-                    const r = data.recommendations[0]!;
-                    const isHigh = r.priority === "HIGH";
-                    return (
-                      <div
-                        className={`flex flex-col overflow-hidden rounded border border-[#e5e7eb] bg-white lg:flex-row ${isHigh ? "border-l-[3px] border-l-[#DC2626]" : ""}`}
-                      >
-                        <div className="flex w-full shrink-0 items-center justify-center bg-[#374151] py-3 text-[20px] font-bold text-white lg:w-10 lg:py-0">
-                          1
-                        </div>
-                        <div className="hidden w-px shrink-0 bg-[#e5e7eb] lg:block" aria-hidden />
-                        <div className="min-w-0 flex-1 px-3 py-2.5">
-                          <span
-                            className={`inline-block rounded border border-[#e5e7eb] bg-white px-1.5 py-0.5 ${mono} text-[5.5px] font-bold uppercase tracking-wide text-[#374151]`}
-                          >
-                            {r.priority} priority
-                          </span>
-                          <p className="mt-2 text-[10px] font-bold text-[#0f1117]">{r.title}</p>
-                          <p className="mt-1 text-[8px] font-bold leading-snug text-[#374151]">{r.insight}</p>
-                          <p className={`${mono} mt-2 text-[6px] font-semibold uppercase tracking-[0.1em] text-[#6b7280]`}>
-                            Why it matters
-                          </p>
-                          <p className="mt-1 text-[7.5px] leading-snug text-[#0f1117]">{r.explanation}</p>
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </div>
-              </article>
-            </PreviewObscurity>
-          </div>
-          <p className={`${mono} mt-3 text-center text-[9px] text-[#9ca3af]`}>
-            Prioritized actions and expected outcomes continue in the export.
-          </p>
-        </div>
-
-        {/* Data summary — structure only, not readable */}
-        <div className="relative mx-auto mb-12 max-w-[600px]">
-          <article
-            className={`${docShell} relative overflow-hidden px-7 py-8 md:px-9 md:py-9 transition-transform duration-300 ease-out hover:-translate-y-0.5`}
-          >
-            <DocHeader data={data} />
-            <ChapterHeading title="Data Summary" />
-            <div className="relative mt-2 space-y-3 opacity-50 blur-[3px] select-none" aria-hidden>
-              <div className="h-8 rounded bg-[#f3f4f6]" />
-              <div className="h-20 rounded border border-[#e5e7eb] bg-white" />
-              <div className="h-20 rounded border border-[#e5e7eb] bg-[#f9fafb]" />
-              <div className="h-20 rounded border border-[#e5e7eb] bg-white" />
             </div>
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 top-[32%] bg-gradient-to-b from-transparent to-[#fafafa]" />
-            <p className={`${mono} relative z-[1] mt-6 text-center text-[8px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]`}>
-              Full signal tables & competitive set in PDF
-            </p>
+
+            <div className="group/lock relative min-h-[158px] w-full overflow-hidden border-t border-[#e5e7eb] bg-[#e4e5e8]">
+              <div
+                className="absolute inset-0 origin-bottom transition duration-500 ease-out will-change-transform [transform:translateZ(0)] group-hover/lock:scale-[1.015] group-hover/lock:shadow-[0_0_36px_rgba(0,232,122,0.14)]"
+                aria-hidden
+              >
+                <BlurredStackSheets clientName={data.clientName} />
+                <div className="absolute inset-0 z-[6] bg-black/[0.26]" />
+              </div>
+              <Link
+                href={SIGNUP_HREF}
+                className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-1.5 px-5 text-center outline-none ring-0 transition-colors duration-300 hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-[#00e87a] focus-visible:ring-offset-0"
+                aria-label="Unlock full report — run a free snapshot"
+              >
+                <LockIcon className="h-7 w-7 text-white/95 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]" />
+                <p className="max-w-[300px] text-[11px] font-normal leading-snug text-white/95 [text-shadow:0_1px_10px_rgba(0,0,0,0.75)]">
+                  Full report includes model breakdown, competitor displacement, and prioritized actions.
+                </p>
+                <p className={`${mono} text-[9.5px] font-semibold uppercase tracking-[0.12em] text-[#00e87a] [text-shadow:0_1px_12px_rgba(0,0,0,0.85)]`}>
+                  Unlock with snapshot
+                </p>
+              </Link>
+            </div>
           </article>
         </div>
 
@@ -544,7 +442,7 @@ export default function PreviewPage() {
           <p className="mt-2 text-sm text-[#9ca3af]">Generate a report like this for one of your clients.</p>
           <Link
             className="mt-6 inline-flex items-center justify-center rounded-full bg-[#00e87a] px-6 py-3 text-sm font-medium text-black transition hover:brightness-110"
-            href="/signup"
+            href={SIGNUP_HREF}
           >
             Run a free snapshot →
           </Link>
@@ -575,61 +473,14 @@ function InsightCard({
     variant === "win" ? "text-[#0f1117]" : variant === "risk" ? "text-[#0f1117]" : "text-[#0f1117]";
 
   return (
-    <div className={`min-h-[96px] rounded border border-[#e5e7eb] border-t-2 ${top} ${bg} px-3 py-3`}>
+    <div className={`min-h-[84px] rounded border border-[#e5e7eb] border-t-2 ${top} ${bg} px-2.5 py-2.5`}>
       <span
-        className={`mb-2 inline-block rounded border bg-white px-1.5 py-0.5 ${mono} text-[6.5px] font-bold uppercase tracking-wide ${pillBorder} ${pillText}`}
+        className={`mb-1.5 inline-block rounded border bg-white px-1.5 py-0.5 ${mono} text-[6px] font-bold uppercase tracking-wide ${pillBorder} ${pillText}`}
       >
         {label}
       </span>
-      <p className="text-[9.5px] font-bold leading-snug text-[#0f1117]">{title}</p>
-      <p className="mt-2 text-[8px] leading-relaxed text-[#0f1117]">{detail}</p>
-    </div>
-  );
-}
-
-function ModelCard({ model, avg }: { model: ReportData["modelScores"][0]; avg: number }) {
-  const scorePct = Math.min(100, Math.max(0, Math.round(model.score)));
-  const avgPos = Math.min(100, Math.max(0, Math.round(avg)));
-  const innerW = 100;
-  const tickLeft = Math.min(Math.max(0, (innerW * avgPos) / 100 - 1), innerW - 2);
-  const deltaSign = model.deltaVsAvg >= 0 ? "+" : "−";
-  const deltaAbs = Math.abs(model.deltaVsAvg);
-
-  return (
-    <div className="min-h-[136px] overflow-hidden rounded-lg border border-[#e5e7eb] bg-white">
-      <div className="h-[3px] w-full bg-[#f3f4f6]" />
-      <div className="p-2.5">
-        <p className={`${mono} mb-1.5 text-[8px] font-bold uppercase tracking-wide text-[#0f1117]`}>
-          {model.name}
-        </p>
-        <p className="text-[28px] font-bold leading-none tracking-tight text-[#0f1117]">{model.score}</p>
-        <div className="mt-1.5">
-          <span className={`inline-block rounded bg-[#f3f4f6] px-1.5 py-1 ${mono} text-[7px] font-bold text-[#374151]`}>
-            {deltaSign}
-            {deltaAbs} vs avg
-          </span>
-        </div>
-        <div className="mb-1 mt-1.5 h-px w-full max-w-[100px] bg-[#e5e7eb]" />
-        <div className="relative mb-0.5 w-full max-w-[100px]">
-          <div className="h-1.5 w-full overflow-hidden rounded bg-[#f3f4f6]">
-            <div className="h-full rounded-l bg-[#00e87a]" style={{ width: `${scorePct}%` }} />
-          </div>
-          <div
-            className="absolute top-[-2px] h-[9px] w-0.5 bg-[#9ca3af]"
-            style={{ left: `${tickLeft}px` }}
-            aria-hidden
-          />
-        </div>
-        <p className={`${mono} mb-2 text-[6px] text-[#9ca3af]`}>avg {avg}</p>
-        <ul className="space-y-1">
-          {model.insights.slice(0, 1).map((line, idx) => (
-            <li key={idx} className="flex gap-1.5 text-[6.5px] leading-snug text-[#0f1117]">
-              <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-[#9ca3af]" />
-              <span>{line}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <p className="text-[9px] font-bold leading-snug text-[#0f1117]">{title}</p>
+      <p className="mt-1 line-clamp-3 text-[7.5px] leading-relaxed text-[#0f1117]">{detail}</p>
     </div>
   );
 }
