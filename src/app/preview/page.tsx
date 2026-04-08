@@ -235,51 +235,67 @@ export default function PreviewPage() {
           This is a sample AI visibility briefing agencies can brand and send.
         </p>
 
-        {/* Report stack: document pages on dark canvas */}
-        <div className="relative mx-auto mb-16 max-w-[640px]">
+        {/* Report stack: one spine (left:0, full width), stepped +3px / +6px per layer back, scale −2.2% / opacity +0.06 toward front */}
+        <div className="relative mx-auto mb-16 w-full max-w-[600px] pb-6 md:pb-8">
           <div
             aria-hidden
-            className="pointer-events-none absolute -bottom-6 left-1/2 z-0 w-[92%] -translate-x-1/2"
+            className="pointer-events-none absolute -bottom-4 left-1/2 z-0 w-[94%] max-w-[560px] -translate-x-1/2"
           >
-            <div className="mx-auto h-16 bg-[radial-gradient(ellipse_70%_90%_at_50%_100%,rgba(15,23,42,0.2),rgba(15,23,42,0.06)_45%,transparent_70%)] blur-[14px]" />
+            <div className="mx-auto h-14 bg-[radial-gradient(ellipse_72%_90%_at_50%_100%,rgba(15,23,42,0.2),rgba(15,23,42,0.05)_48%,transparent_72%)] blur-[12px] md:h-16" />
           </div>
 
-          {/* Rear — Recommendations (peek) */}
-          <div
-            className={`${docShell} pointer-events-none absolute left-[3%] top-0 z-0 hidden w-[94%] p-5 opacity-[0.92] md:block`}
-            style={{ transform: "translate(-4%, 10%) rotate(-2deg) scale(0.94)" }}
-            aria-hidden
-          >
-            <p className={`${mono} text-[7px] font-semibold uppercase tracking-[0.14em] text-[#9ca3af]`}>AI Authority Report</p>
-            <p className="mt-1 text-[11px] font-bold text-[#0f1117]">Recommendations</p>
-            <p className={`${mono} mt-3 text-[8px] text-[#6b7280]`}>{data.clientName}</p>
-            <div className="mt-4 space-y-2">
-              <div className="h-2 rounded bg-[#f3f4f6]" />
-              <div className="h-2 w-4/5 rounded bg-[#f3f4f6]" />
+          <div className="relative w-full">
+            {/* Page 4 — lowest emphasis (data summary hint) */}
+            <div
+              className={`${docShell} pointer-events-none absolute left-0 top-0 z-0 hidden w-full origin-top p-5 md:block`}
+              style={{ transform: "translate(9px, 18px) scale(0.922)", opacity: 0.76 }}
+              aria-hidden
+            >
+              <p className={`${mono} text-[7px] font-semibold uppercase tracking-[0.14em] text-[#9ca3af]`}>AI Authority Report</p>
+              <p className="mt-1 text-[11px] font-bold text-[#0f1117]">Data Summary</p>
+              <p className={`${mono} mt-3 text-[8px] text-[#6b7280]`}>{data.clientName}</p>
+              <div className="mt-4 space-y-1.5">
+                <div className="h-1.5 rounded bg-[#f3f4f6]" />
+                <div className="h-1.5 w-[88%] rounded bg-[#f3f4f6]" />
+                <div className="h-1.5 w-[72%] rounded bg-[#f3f4f6]" />
+              </div>
             </div>
-          </div>
 
-          {/* Middle — Model Analysis (peek) */}
-          <div
-            className={`${docShell} pointer-events-none absolute left-[2%] top-0 z-[1] hidden w-[96%] p-5 md:block`}
-            style={{ transform: "translate(-2%, 5%) rotate(-1deg) scale(0.97)" }}
-            aria-hidden
-          >
-            <p className={`${mono} text-[7px] font-semibold uppercase tracking-[0.14em] text-[#9ca3af]`}>AI Authority Report</p>
-            <p className="mt-1 text-[11px] font-bold text-[#0f1117]">Model Analysis</p>
-            <p className={`${mono} mt-3 text-[8px] text-[#6b7280]`}>{data.clientName}</p>
-            <div className="mt-4 flex gap-2">
-              <div className="h-12 flex-1 rounded border border-[#e5e7eb] bg-white" />
-              <div className="h-12 flex-1 rounded border border-[#e5e7eb] bg-white" />
-              <div className="h-12 flex-1 rounded border border-[#e5e7eb] bg-white" />
+            {/* Page 3 — tertiary */}
+            <div
+              className={`${docShell} pointer-events-none absolute left-0 top-0 z-[1] hidden w-full origin-top p-5 md:block`}
+              style={{ transform: "translate(6px, 12px) scale(0.944)", opacity: 0.82 }}
+              aria-hidden
+            >
+              <p className={`${mono} text-[7px] font-semibold uppercase tracking-[0.14em] text-[#9ca3af]`}>AI Authority Report</p>
+              <p className="mt-1 text-[11px] font-bold text-[#0f1117]">Recommendations</p>
+              <p className={`${mono} mt-3 text-[8px] text-[#6b7280]`}>{data.clientName}</p>
+              <div className="mt-4 space-y-2">
+                <div className="h-2 rounded bg-[#f3f4f6]" />
+                <div className="h-2 w-4/5 rounded bg-[#f3f4f6]" />
+              </div>
             </div>
-          </div>
 
-          {/* Page 1 — Executive summary (full) */}
-          <article
-            className={`${docShell} relative z-[3] mx-auto w-full max-w-[600px] px-7 py-8 transition-transform duration-300 ease-out md:px-9 md:py-9 hover:-translate-y-0.5`}
-            style={{ transform: "translate(1.5%, 0) rotate(0.6deg)" }}
-          >
+            {/* Page 2 — secondary */}
+            <div
+              className={`${docShell} pointer-events-none absolute left-0 top-0 z-[2] hidden w-full origin-top p-5 md:block`}
+              style={{ transform: "translate(3px, 6px) scale(0.966)", opacity: 0.88 }}
+              aria-hidden
+            >
+              <p className={`${mono} text-[7px] font-semibold uppercase tracking-[0.14em] text-[#9ca3af]`}>AI Authority Report</p>
+              <p className="mt-1 text-[11px] font-bold text-[#0f1117]">Model Analysis</p>
+              <p className={`${mono} mt-3 text-[8px] text-[#6b7280]`}>{data.clientName}</p>
+              <div className="mt-4 flex gap-2">
+                <div className="h-12 flex-1 rounded border border-[#e5e7eb] bg-white" />
+                <div className="h-12 flex-1 rounded border border-[#e5e7eb] bg-white" />
+                <div className="h-12 flex-1 rounded border border-[#e5e7eb] bg-white" />
+              </div>
+            </div>
+
+            {/* Page 1 — primary (straight; single object with stack) */}
+            <article
+              className={`${docShell} relative z-[3] w-full px-7 py-8 transition-transform duration-300 ease-out md:px-9 md:py-9 hover:-translate-y-0.5`}
+            >
             <DocHeader data={data} />
 
             <div className="mb-3 flex flex-col items-stretch gap-0 overflow-hidden rounded-md border border-[#e5e7eb] bg-[#f9fafb] p-4 sm:flex-row sm:items-center">
@@ -412,6 +428,7 @@ export default function PreviewPage() {
 
             <DocFooter data={data} pageNum={1} />
           </article>
+          </div>
         </div>
 
         <p className={`${mono} mb-3 text-center text-[10px] uppercase tracking-[0.12em] text-[#6b7280]`}>
