@@ -176,65 +176,56 @@ function DocFooter({ data, pageNum }: { data: ReportData; pageNum: number }) {
   );
 }
 
-/** Blurred sheet stack behind page 1 (same spine, stepped offsets, progressive blur + fade). */
-function BlurredStackSheets({ clientName }: { clientName: string }) {
+/** Pages 2+ as a deck behind page 1: stepped offset, scale, progressive blur/opacity, per-layer shadow. */
+function ReportDeckBehind({ clientName }: { clientName: string }) {
   const sheet =
-    "absolute left-0 top-0 w-full origin-top rounded-[2px] border border-[#d1d5db] bg-[#fafafa] p-4 shadow-sm";
+    "absolute inset-0 origin-top rounded-[2px] border border-[#e5e7eb] bg-[#fafafa] p-5 shadow-[0_12px_32px_rgba(0,0,0,0.14)]";
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 top-0 overflow-hidden" aria-hidden>
+    <>
       <div
-        className={sheet}
-        style={{
-          transform: "translate(10px, 20px) scale(0.91)",
-          filter: "blur(7px)",
-          opacity: 0.42,
-        }}
+        className={`${sheet} z-0 blur-md opacity-[0.72]`}
+        style={{ transform: "translate(12px, 14px) scale(0.94)" }}
+        aria-hidden
       >
         <p className={`${mono} text-[7px] font-semibold uppercase tracking-[0.12em] text-[#9ca3af]`}>AI Authority Report</p>
         <p className="mt-1 text-[10px] font-bold text-[#0f1117]">Data Summary</p>
         <p className={`${mono} mt-2 text-[7px] text-[#6b7280]`}>{clientName}</p>
-        <div className="mt-3 space-y-1">
+        <div className="mt-3 space-y-1.5">
           <div className="h-1.5 rounded bg-[#e5e7eb]" />
-          <div className="h-1.5 w-[85%] rounded bg-[#e5e7eb]" />
+          <div className="h-1.5 w-[82%] rounded bg-[#e5e7eb]" />
         </div>
       </div>
       <div
-        className={sheet}
-        style={{
-          transform: "translate(7px, 13px) scale(0.935)",
-          filter: "blur(4px)",
-          opacity: 0.48,
-        }}
+        className={`${sheet} z-[1] blur-md opacity-[0.78]`}
+        style={{ transform: "translate(8px, 9px) scale(0.96)" }}
+        aria-hidden
       >
         <p className={`${mono} text-[7px] font-semibold uppercase tracking-[0.12em] text-[#9ca3af]`}>AI Authority Report</p>
         <p className="mt-1 text-[10px] font-bold text-[#0f1117]">Recommendations</p>
         <p className={`${mono} mt-2 text-[7px] text-[#6b7280]`}>{clientName}</p>
-        <div className="mt-3 h-8 rounded bg-[#f3f4f6]" />
+        <div className="mt-3 h-9 rounded bg-[#f3f4f6]" />
       </div>
       <div
-        className={sheet}
-        style={{
-          transform: "translate(4px, 7px) scale(0.96)",
-          filter: "blur(2px)",
-          opacity: 0.55,
-        }}
+        className={`${sheet} z-[2] blur-sm opacity-90`}
+        style={{ transform: "translate(4px, 5px) scale(0.98)" }}
+        aria-hidden
       >
         <p className={`${mono} text-[7px] font-semibold uppercase tracking-[0.12em] text-[#9ca3af]`}>AI Authority Report</p>
         <p className="mt-1 text-[10px] font-bold text-[#0f1117]">Model Analysis</p>
         <p className={`${mono} mt-2 text-[7px] text-[#6b7280]`}>{clientName}</p>
         <div className="mt-3 flex gap-1.5">
-          <div className="h-9 flex-1 rounded border border-[#e5e7eb] bg-white" />
-          <div className="h-9 flex-1 rounded border border-[#e5e7eb] bg-white" />
-          <div className="h-9 flex-1 rounded border border-[#e5e7eb] bg-white" />
+          <div className="h-10 flex-1 rounded border border-[#e5e7eb] bg-white" />
+          <div className="h-10 flex-1 rounded border border-[#e5e7eb] bg-white" />
+          <div className="h-10 flex-1 rounded border border-[#e5e7eb] bg-white" />
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
-function LockIcon({ className }: { className?: string }) {
+function LockIcon({ className, strokeWidth = 1.5 }: { className?: string; strokeWidth?: number }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} aria-hidden>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -268,17 +259,27 @@ export default function PreviewPage() {
           This is a sample AI visibility briefing agencies can brand and send.
         </p>
 
-        {/* Single preview object: sharp page 1 + locked blurred stack (same CTA as signup) */}
-        <div className="relative mx-auto mb-16 w-full max-w-[600px] pb-6 md:pb-8">
+        {/* Gated preview: sharp page 1 + deck behind + centered lock card (whole stack → signup) */}
+        <div className="relative mx-auto mb-16 w-full max-w-[600px] overflow-visible pb-6 pr-2 pt-1 md:pb-8 md:pr-3">
           <div
             aria-hidden
-            className="pointer-events-none absolute -bottom-4 left-1/2 z-0 w-[94%] max-w-[560px] -translate-x-1/2"
+            className="pointer-events-none absolute -bottom-2 left-1/2 z-0 w-[92%] max-w-[540px] -translate-x-1/2"
           >
-            <div className="mx-auto h-14 bg-[radial-gradient(ellipse_72%_90%_at_50%_100%,rgba(15,23,42,0.2),rgba(15,23,42,0.05)_48%,transparent_72%)] blur-[12px] md:h-16" />
+            <div className="mx-auto h-12 bg-[radial-gradient(ellipse_72%_90%_at_50%_100%,rgba(15,23,42,0.22),rgba(15,23,42,0.05)_48%,transparent_72%)] blur-[12px] md:h-14" />
           </div>
 
-          <article className={`${docShell} relative z-[1] w-full overflow-hidden`}>
-            <div className="relative z-10 bg-[#fafafa] px-7 pb-5 pt-7 md:px-9 md:pb-6 md:pt-8">
+          <Link
+            href={SIGNUP_HREF}
+            className="group/stack block w-full rounded-[2px] outline-none focus-visible:ring-2 focus-visible:ring-[#00e87a] focus-visible:ring-offset-2 focus-visible:ring-offset-[#070707]"
+            aria-label="Unlock the full AI visibility report — run a free snapshot"
+          >
+            <div className="relative w-full overflow-visible transition duration-500 ease-out will-change-transform [transform:translateZ(0)] group-hover/stack:scale-[1.018] group-hover/stack:brightness-[1.05]">
+              <div className="pointer-events-none absolute inset-0 z-0 overflow-visible" aria-hidden>
+                <ReportDeckBehind clientName={data.clientName} />
+              </div>
+
+              <article className={`${docShell} relative z-[2] w-full overflow-hidden`}>
+            <div className="relative bg-[#fafafa] px-7 pb-5 pt-7 md:px-9 md:pb-6 md:pt-8">
             <DocHeader data={data} />
 
             <div className="mb-2.5 flex flex-col items-stretch gap-0 overflow-hidden rounded-md border border-[#e5e7eb] bg-[#f9fafb] p-3.5 sm:flex-row sm:items-center">
@@ -411,30 +412,35 @@ export default function PreviewPage() {
 
             <DocFooter data={data} pageNum={1} />
             </div>
+              </article>
 
-            <div className="group/lock relative min-h-[158px] w-full overflow-hidden border-t border-[#e5e7eb] bg-[#e4e5e8]">
-              <div
-                className="absolute inset-0 origin-bottom transition duration-500 ease-out will-change-transform [transform:translateZ(0)] group-hover/lock:scale-[1.015] group-hover/lock:shadow-[0_0_36px_rgba(0,232,122,0.14)]"
-                aria-hidden
-              >
-                <BlurredStackSheets clientName={data.clientName} />
-                <div className="absolute inset-0 z-[6] bg-black/[0.26]" />
+              <div className="pointer-events-none absolute inset-0 z-[3] flex items-center justify-center p-4 sm:p-8">
+                <div className="w-full max-w-[360px] rounded-xl border border-white/10 bg-black/40 px-6 py-7 text-center text-white shadow-2xl shadow-black/40 backdrop-blur-md transition-all duration-500 ease-out opacity-[0.92] group-hover/stack:opacity-100 group-hover/stack:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.55)] sm:px-8 sm:py-8">
+                  <LockIcon className="mx-auto h-10 w-10 text-white" strokeWidth={1.75} />
+                  <h2 className="mt-4 text-lg font-semibold leading-snug tracking-tight text-white sm:text-xl">
+                    Unlock the full briefing
+                  </h2>
+                  <ul className="mt-5 space-y-2.5 text-left text-[13px] font-normal leading-snug text-white/90">
+                    <li className="flex gap-2.5">
+                      <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[#00e87a]" aria-hidden />
+                      <span>Per-model scores, evidence excerpts, and strategic takeaway</span>
+                    </li>
+                    <li className="flex gap-2.5">
+                      <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[#00e87a]" aria-hidden />
+                      <span>Competitor displacement signals and full ranking context</span>
+                    </li>
+                    <li className="flex gap-2.5">
+                      <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[#00e87a]" aria-hidden />
+                      <span>Prioritized actions and client-ready PDF export</span>
+                    </li>
+                  </ul>
+                  <span className="mt-7 inline-flex w-full max-w-[280px] items-center justify-center rounded-full bg-[#00e87a] px-5 py-2.5 text-sm font-medium text-black transition group-hover/stack:brightness-110">
+                    Run a free snapshot →
+                  </span>
+                </div>
               </div>
-              <Link
-                href={SIGNUP_HREF}
-                className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-1.5 px-5 text-center outline-none ring-0 transition-colors duration-300 hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-[#00e87a] focus-visible:ring-offset-0"
-                aria-label="Unlock full report — run a free snapshot"
-              >
-                <LockIcon className="h-7 w-7 text-white/95 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]" />
-                <p className="max-w-[300px] text-[11px] font-normal leading-snug text-white/95 [text-shadow:0_1px_10px_rgba(0,0,0,0.75)]">
-                  Full report includes model breakdown, competitor displacement, and prioritized actions.
-                </p>
-                <p className={`${mono} text-[9.5px] font-semibold uppercase tracking-[0.12em] text-[#00e87a] [text-shadow:0_1px_12px_rgba(0,0,0,0.85)]`}>
-                  Unlock with snapshot
-                </p>
-              </Link>
             </div>
-          </article>
+          </Link>
         </div>
 
         <footer className="border-t border-white/10 pt-10 text-center">
