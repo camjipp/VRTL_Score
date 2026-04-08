@@ -1,38 +1,102 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
 
-import { formatEvidenceLogPillLabel } from "@/lib/reports/formatEvidenceFieldDisplay";
 import { stanleyData } from "@/lib/reports/pdf/stanleyData";
 import type { ReportData } from "@/lib/reports/pdf/types";
 
 export const metadata: Metadata = {
   title: "Sample Report — VRTL Score",
   description:
-    "See what a VRTL Score AI visibility report looks like. Real data, real competitive analysis, client-ready PDF format.",
+    "Preview a client-ready AI visibility briefing: structure and tone of the VRTL Score PDF, without exposing full report content.",
 };
 
 const mono = "font-marketing-mono";
 
-/** Mirrors `src/lib/reports/pdf/theme.ts` for product-truth alignment */
-const c = {
-  ink: "#0F1117",
-  ink2: "#374151",
-  ink3: "#6B7280",
-  ink4: "#9CA3AF",
-  rule: "#E5E7EB",
-  surface: "#F9FAFB",
-  surface2: "#F3F4F6",
-  cyan: "#00e87a",
-  cyanLight: "#E8FAF0",
-  greenLight: "#E8FAF0",
-  orange: "#F59E0B",
-  orangeLight: "#FEF3C7",
-  red: "#EF4444",
-  redLight: "#FEE2E2",
-} as const;
+const accentGreen = "#00e87a";
 
 const docShell =
   "border border-[#e5e7eb] bg-[#fafafa] text-[#0f1117] shadow-[0_22px_48px_rgba(0,0,0,0.38),0_2px_10px_rgba(0,0,0,0.06)] rounded-[2px]";
+
+/** Public preview only: numeric structure from fixture, no real client / competitor brands. */
+function buildPublicPreviewData(base: ReportData): ReportData {
+  const clientLabel = "Client Name";
+
+  const brandForTable = (row: ReportData["competitiveTable"][0], idx: number) =>
+    row.status === "You" ? clientLabel : `Competitor ${String.fromCharCode(64 + idx)}`;
+
+  return {
+    ...base,
+    clientName: clientLabel,
+    domain: "clientdomain.com",
+    date: "Sample snapshot",
+    agencyName: "Your Agency",
+    meta: { ...base.meta, generated: "Sample snapshot" },
+    bottomLine:
+      "Your brand appears in a majority of AI answers for this category, often first or second. The field is still contested. Without consistent top-position answers and third-party authority, the lead stays negotiable.",
+    competitors: base.competitors.map((row) => ({
+      ...row,
+      name: row.isClient ? clientLabel : `Competitor ${String.fromCharCode(64 + (row.rank - 1))}`,
+    })),
+    competitiveTable: base.competitiveTable.map((row, idx) => ({
+      ...row,
+      brand: brandForTable(row, idx),
+    })),
+    alerts: {
+      win: {
+        title: "Strongest model surface",
+        detail: "One engine scores well ahead of the rest. Mirror what works there onto weaker surfaces.",
+      },
+      risk: {
+        title: "Contested set",
+        detail: "A competitor matches your mention count. Differentiate with proof or risk splitting the default answer.",
+      },
+      priority: {
+        title: "Authority depth",
+        detail: "Citation-backed mentions are thin. Add third-party proof so assistants have something concrete to cite.",
+      },
+    },
+    evidencePreview: [
+      {
+        label: "STRENGTH",
+        snippet:
+          "Representative answers in this snapshot cite your category and compare named players when recommending options…",
+        note: "Maintain proof density where you already win.",
+      },
+      {
+        label: "VULNERABLE",
+        snippet:
+          "Some responses resolve competitor names inconsistently, which can split how models aggregate entity signals…",
+        note: "Tighten canonical naming and structured product context.",
+      },
+    ],
+    strategicTakeaway:
+      "You lead the rank table, but a wide spread across models is the risk: assistants can recommend different winners. Standardize facts, citations, and comparison narratives before a competitor locks the default answer.",
+    recommendations: base.recommendations.map((r, i) => ({
+      ...r,
+      title:
+        i === 0
+          ? "Close the model spread"
+          : i === 1
+            ? "Win first-position answers"
+            : i === 2
+              ? "Defend parity at the top"
+              : `Follow-on initiative ${i + 1}`,
+      insight:
+        i === 0
+          ? "A large gap separates your strongest and weakest model scores."
+          : i === 1
+            ? "Mention rate and top-position share both have room to move."
+            : i === 2
+              ? "A peer matches your visibility on head-to-head queries."
+              : "Patterns in this snapshot point to a focused next step.",
+      explanation:
+        "The full PDF walks through rationale, evidence, and sequencing—omitted here to keep this preview high-level.",
+      action: "See the complete export for step-by-step guidance tailored to this snapshot.",
+      expectedOutcome: "Detailed outcomes and checkpoints are included in the full briefing.",
+    })),
+  };
+}
 
 function avgOf(models: ReportData["modelScores"]) {
   return models.length ? Math.round(models.reduce((s, m) => s + m.score, 0) / models.length) : 0;
@@ -68,7 +132,7 @@ function PreviewScoreRing({ score }: { score: number | null }) {
           <path
             d={d}
             fill="none"
-            stroke={c.cyan}
+            stroke={accentGreen}
             strokeDasharray={`${filled} ${rest + arcLen}`}
             strokeLinecap="butt"
             strokeWidth={sw}
@@ -109,7 +173,7 @@ function DocHeader({ data }: { data: ReportData }) {
 function DocFooter({ data, pageNum }: { data: ReportData; pageNum: number }) {
   return (
     <footer className="mt-10 flex flex-col gap-1 border-t border-[#e5e7eb] pt-2 sm:flex-row sm:items-center sm:justify-between">
-      <span className={`${mono} text-[7px] text-[#9ca3af]`}>Confidential: {data.clientName}</span>
+      <span className={`${mono} text-[7px] text-[#9ca3af]`}>Sample · {data.clientName}</span>
       <span className={`${mono} text-[7px] text-[#6b7280]`}>Page {pageNum}</span>
     </footer>
   );
@@ -121,27 +185,25 @@ function ChapterHeading({ title }: { title: string }) {
   );
 }
 
-function SignalPill({ status }: { status: ReportData["signalSummary"][0]["status"] }) {
-  const bg =
-    status === "positive"
-      ? "bg-[#E8FAF0]"
-      : status === "improvable"
-        ? "bg-[#FEF3C7]"
-        : status === "gap"
-          ? "bg-[#FEE2E2]"
-          : "bg-[#F3F4F6]";
-  const label = status.toUpperCase();
+/** Fade + light blur at bottom of truncated “pages” */
+function PreviewObscurity({ children }: { children: ReactNode }) {
   return (
-    <span
-      className={`inline-flex rounded px-2 py-1 ${mono} text-[6.5px] font-bold uppercase tracking-wide text-[#0f1117] ${bg}`}
-    >
-      {label}
-    </span>
+    <div className="relative">
+      {children}
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 top-[28%] bg-gradient-to-b from-transparent via-[#fafafa]/75 to-[#fafafa]"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[42%] backdrop-blur-[2px] [mask-image:linear-gradient(to_top,black,transparent)]"
+        aria-hidden
+      />
+    </div>
   );
 }
 
 export default function PreviewPage() {
-  const data = stanleyData;
+  const data = buildPublicPreviewData(stanleyData);
   const maxM = Math.max(...data.competitors.map((x) => x.mentions), 1);
   const clientM = data.competitors.find((x) => x.isClient)?.mentions ?? 0;
   const avg = avgOf(data.modelScores);
@@ -157,15 +219,21 @@ export default function PreviewPage() {
   const leadingPill = data.rank === 1 ? "LEADING" : "CHALLENGER";
   const authEmpty = data.authorityScore === 0;
 
+  const firstModel = data.modelScores[0]!;
+
   return (
     <div className="min-h-screen bg-[#070707] font-marketing-body text-[#efefef]">
       <div className="mx-auto max-w-[720px] px-5 py-16 md:px-8 md:py-20">
         <Link
-          className={`${mono} mb-12 inline-block text-[12px] text-[#6b7280] transition-colors hover:text-[#e5e7eb]`}
+          className={`${mono} mb-8 inline-block text-[12px] text-[#6b7280] transition-colors hover:text-[#e5e7eb]`}
           href="/"
         >
           ← Back to home
         </Link>
+
+        <p className="mb-10 max-w-[520px] text-[15px] font-light leading-relaxed text-[#a8b0bc]">
+          This is a sample AI visibility briefing agencies can brand and send.
+        </p>
 
         {/* Report stack: document pages on dark canvas */}
         <div className="relative mx-auto mb-16 max-w-[640px]">
@@ -207,14 +275,13 @@ export default function PreviewPage() {
             </div>
           </div>
 
-          {/* Page 1 — Executive summary (matches PDF Page1Overview) */}
+          {/* Page 1 — Executive summary (full) */}
           <article
             className={`${docShell} relative z-[3] mx-auto w-full max-w-[600px] px-7 py-8 transition-transform duration-300 ease-out md:px-9 md:py-9 hover:-translate-y-0.5`}
             style={{ transform: "translate(1.5%, 0) rotate(0.6deg)" }}
           >
             <DocHeader data={data} />
 
-            {/* Score + KPI hero */}
             <div className="mb-3 flex flex-col items-stretch gap-0 overflow-hidden rounded-md border border-[#e5e7eb] bg-[#f9fafb] p-4 sm:flex-row sm:items-center">
               <PreviewScoreRing score={data.overallScore} />
               <div className="mx-0 my-3 hidden w-px shrink-0 self-stretch bg-[#e5e7eb] sm:mx-3 sm:my-0 sm:block" aria-hidden />
@@ -248,7 +315,6 @@ export default function PreviewPage() {
               </div>
             </div>
 
-            {/* Status strip */}
             <div className="mb-3 flex overflow-hidden rounded border border-[#e5e7eb] bg-white">
               <div className="flex flex-1 items-center justify-center border-r border-[#e5e7eb] px-2 py-2.5">
                 <p className={`${mono} text-center text-[7.5px] font-bold text-[#374151]`}>{statusUpper}</p>
@@ -261,7 +327,6 @@ export default function PreviewPage() {
               </div>
             </div>
 
-            {/* Bottom line callout */}
             <div className="mb-4 flex overflow-hidden rounded border border-[#e5e7eb] bg-[#f9fafb]">
               <div className="w-[3px] shrink-0 bg-[#9ca3af]" aria-hidden />
               <div className="min-w-0 px-4 py-3">
@@ -272,60 +337,58 @@ export default function PreviewPage() {
               </div>
             </div>
 
-            {/* Competitive ranking */}
             <p className={`${mono} mb-2 text-[8px] font-semibold uppercase tracking-[0.12em] text-[#6b7280]`}>
               Competitive ranking
             </p>
             <div className="overflow-x-auto overflow-y-hidden rounded border border-[#e5e7eb] bg-white">
               <div className="min-w-[320px]">
-              {data.competitors.map((row) => {
-                const widthPct = Math.min(100, Math.max(0, Math.round((row.mentions / maxM) * 100)));
-                const delta = row.isClient ? null : row.mentions - clientM;
-                const deltaStr =
-                  delta === null ? "" : delta === 0 ? "0" : delta > 0 ? `+${delta}` : String(delta);
-                const isClient = !!row.isClient;
-                return (
-                  <div key={row.rank} className="flex border-b border-[#f3f4f6] last:border-b-0">
-                    <div className={`w-[3px] shrink-0 ${isClient ? "bg-[#00e87a]" : "bg-transparent"}`} aria-hidden />
-                    <div
-                      className={`grid min-w-0 flex-1 grid-cols-[28px_minmax(0,1fr)_minmax(100px,1fr)_3.25rem_3rem] items-center gap-x-2 py-2 pl-2 pr-2 text-[#0f1117] sm:gap-x-3 ${isClient ? "bg-[#E8FAF0]/90" : ""}`}
-                    >
-                      <span
-                        className={`${mono} text-[8.5px] tabular-nums ${isClient ? "font-bold text-[#0f1117]" : "font-medium text-[#9ca3af]"}`}
+                {data.competitors.map((row) => {
+                  const widthPct = Math.min(100, Math.max(0, Math.round((row.mentions / maxM) * 100)));
+                  const delta = row.isClient ? null : row.mentions - clientM;
+                  const deltaStr =
+                    delta === null ? "" : delta === 0 ? "0" : delta > 0 ? `+${delta}` : String(delta);
+                  const isClient = !!row.isClient;
+                  return (
+                    <div key={row.rank} className="flex border-b border-[#f3f4f6] last:border-b-0">
+                      <div className={`w-[3px] shrink-0 ${isClient ? "bg-[#00e87a]" : "bg-transparent"}`} aria-hidden />
+                      <div
+                        className={`grid min-w-0 flex-1 grid-cols-[28px_minmax(0,1fr)_minmax(100px,1fr)_3.25rem_3rem] items-center gap-x-2 py-2 pl-2 pr-2 text-[#0f1117] sm:gap-x-3 ${isClient ? "bg-[#E8FAF0]/90" : ""}`}
                       >
-                        #{row.rank}
-                      </span>
-                      <span
-                        className={`min-w-0 truncate text-[9px] ${isClient ? "font-bold" : "font-normal text-[#374151]"}`}
-                      >
-                        {row.name}
-                      </span>
-                      <div className="h-[7px] min-w-0 rounded bg-[#f3f4f6]">
-                        <div
-                          className={`h-full rounded ${isClient ? "bg-[#00e87a]" : "bg-[#9ca3af]"}`}
-                          style={{ width: `${widthPct}%`, opacity: isClient ? 1 : 0.35 }}
-                        />
-                      </div>
-                      <span className={`${mono} text-right text-[8px] tabular-nums text-[#9ca3af]`}>
-                        {row.mentions}/{data.meta.responses}
-                      </span>
-                      <div className="flex justify-end">
-                        {deltaStr !== "" ? (
-                          <span
-                            className={`rounded px-1.5 py-0.5 ${mono} text-[6.5px] font-bold text-[#6b7280] bg-[#f3f4f6]`}
-                          >
-                            {deltaStr}
-                          </span>
-                        ) : null}
+                        <span
+                          className={`${mono} text-[8.5px] tabular-nums ${isClient ? "font-bold text-[#0f1117]" : "font-medium text-[#9ca3af]"}`}
+                        >
+                          #{row.rank}
+                        </span>
+                        <span
+                          className={`min-w-0 truncate text-[9px] ${isClient ? "font-bold" : "font-normal text-[#374151]"}`}
+                        >
+                          {row.name}
+                        </span>
+                        <div className="h-[7px] min-w-0 rounded bg-[#f3f4f6]">
+                          <div
+                            className={`h-full rounded ${isClient ? "bg-[#00e87a]" : "bg-[#9ca3af]"}`}
+                            style={{ width: `${widthPct}%`, opacity: isClient ? 1 : 0.35 }}
+                          />
+                        </div>
+                        <span className={`${mono} text-right text-[8px] tabular-nums text-[#9ca3af]`}>
+                          {row.mentions}/{data.meta.responses}
+                        </span>
+                        <div className="flex justify-end">
+                          {deltaStr !== "" ? (
+                            <span
+                              className={`rounded px-1.5 py-0.5 ${mono} text-[6.5px] font-bold text-[#6b7280] bg-[#f3f4f6]`}
+                            >
+                              {deltaStr}
+                            </span>
+                          ) : null}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
               </div>
             </div>
 
-            {/* Win / Risk / Priority */}
             <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
               <InsightCard
                 variant="win"
@@ -351,245 +414,117 @@ export default function PreviewPage() {
           </article>
         </div>
 
-        {/* Page 2 — Model Analysis */}
-        <article
-          className={`${docShell} mx-auto mb-10 w-full max-w-[600px] px-7 py-8 transition-transform duration-300 ease-out md:px-9 md:py-9 hover:-translate-y-0.5`}
-        >
-          <DocHeader data={data} />
-          <ChapterHeading title="Model Analysis" />
+        <p className={`${mono} mb-3 text-center text-[10px] uppercase tracking-[0.12em] text-[#6b7280]`}>
+          Following pages · preview only
+        </p>
 
-          <div className="mb-3 flex overflow-hidden rounded border border-[#e5e7eb] bg-[#f9fafb]">
-            <div className="w-[3px] shrink-0 bg-[#6b7280]" aria-hidden />
-            <div className="flex min-w-0 flex-1 flex-col gap-1 px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-              <div>
-                <p className="text-[12px] font-bold tracking-wide text-[#0f1117]">{spreadLine}</p>
-                <p className="mt-0.5 text-[8px] leading-snug text-[#374151]">{descLine}</p>
-              </div>
-              <div className="shrink-0 rounded border border-[#e5e7eb] bg-white px-2 py-1.5">
-                <p className={`${mono} max-w-[148px] text-center text-[5px] font-bold uppercase leading-tight tracking-[0.05em] text-[#374151]`}>
-                  Highest-leverage opportunity
+        {/* Page 2 — partial Model Analysis */}
+        <div className="relative mx-auto mb-10 max-w-[600px]">
+          <div className="max-h-[min(380px,52vh)] overflow-hidden rounded-[2px] shadow-[0_22px_48px_rgba(0,0,0,0.38),0_2px_10px_rgba(0,0,0,0.06)]">
+            <PreviewObscurity>
+              <article className={`${docShell} border-0 shadow-none mb-0 px-7 py-8 md:px-9 md:py-9`}>
+                <DocHeader data={data} />
+                <ChapterHeading title="Model Analysis" />
+                <div className="mb-3 flex overflow-hidden rounded border border-[#e5e7eb] bg-[#f9fafb]">
+                  <div className="w-[3px] shrink-0 bg-[#6b7280]" aria-hidden />
+                  <div className="flex min-w-0 flex-1 flex-col gap-1 px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                    <div>
+                      <p className="text-[12px] font-bold tracking-wide text-[#0f1117]">{spreadLine}</p>
+                      <p className="mt-0.5 text-[8px] leading-snug text-[#374151]">{descLine}</p>
+                    </div>
+                    <div className="shrink-0 rounded border border-[#e5e7eb] bg-white px-2 py-1.5">
+                      <p
+                        className={`${mono} max-w-[148px] text-center text-[5px] font-bold uppercase leading-tight tracking-[0.05em] text-[#374151]`}
+                      >
+                        Highest-leverage opportunity
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 gap-2.5 md:grid-cols-3">
+                  <ModelCard model={firstModel} avg={avg} />
+                  {data.modelScores.slice(1).map((m, idx) => (
+                    <ModelCard key={`${m.name}-${idx}`} model={m} avg={avg} />
+                  ))}
+                </div>
+              </article>
+            </PreviewObscurity>
+          </div>
+          <p className={`${mono} mt-3 text-center text-[9px] text-[#9ca3af]`}>
+            Model breakdown, evidence, and takeaway continue in the export.
+          </p>
+        </div>
+
+        {/* Page 3 — partial Recommendations */}
+        <div className="relative mx-auto mb-10 max-w-[600px]">
+          <div className="max-h-[min(260px,38vh)] overflow-hidden rounded-[2px] shadow-[0_22px_48px_rgba(0,0,0,0.38),0_2px_10px_rgba(0,0,0,0.06)]">
+            <PreviewObscurity>
+              <article className={`${docShell} border-0 shadow-none mb-0 px-7 py-8 md:px-9 md:py-9`}>
+                <DocHeader data={data} />
+                <ChapterHeading title="Recommendations" />
+                <p className="mb-4 text-[8px] leading-relaxed text-[#374151]">
+                  Urgent first. Work the list in order when bandwidth is thin.
                 </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-2.5 md:grid-cols-3">
-            {data.modelScores.map((m, idx) => (
-              <ModelCard key={`${m.name}-${idx}`} model={m} avg={avg} />
-            ))}
-          </div>
-
-          <p className={`${mono} mb-2 mt-6 text-[8px] font-semibold uppercase tracking-[0.12em] text-[#6b7280]`}>
-            Evidence preview
-          </p>
-          <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
-            {data.evidencePreview.map((ev, i) => (
-              <div
-                key={i}
-                className="flex min-h-[128px] overflow-hidden rounded border border-[#e5e7eb] bg-white"
-              >
-                <div className="w-[3px] shrink-0 bg-[#6b7280]" aria-hidden />
-                <div className="min-w-0 flex-1 px-2.5 py-2.5">
-                  <p className={`${mono} mb-1 text-[6.5px] font-semibold uppercase tracking-[0.12em] text-[#6b7280]`}>
-                    {formatEvidenceLogPillLabel(ev.label)}
-                  </p>
-                  <div className="min-h-[74px] rounded border border-[#e5e7eb] bg-[#f9fafb] px-1.5 py-2">
-                    <p className={`${mono} text-[6.5px] leading-snug text-[#374151]`}>{ev.snippet}</p>
-                  </div>
-                  {ev.note ? <p className="mt-2.5 text-[8px] leading-snug text-[#0f1117]">{ev.note}</p> : null}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-3 flex overflow-hidden rounded border border-[#e5e7eb] bg-[#f3f4f6]">
-            <div className="w-[3px] shrink-0 bg-[#0f1117]" aria-hidden />
-            <div className="min-w-0 px-3 py-4">
-              <p className={`${mono} mb-1.5 text-[7px] font-semibold uppercase tracking-[0.1em] text-[#6b7280]`}>
-                Strategic takeaway
-              </p>
-              <p className="text-[9px] leading-relaxed text-[#0f1117]">{data.strategicTakeaway}</p>
-            </div>
-          </div>
-
-          <DocFooter data={data} pageNum={2} />
-        </article>
-
-        {/* Page 3 — Recommendations */}
-        <article
-          className={`${docShell} mx-auto mb-10 w-full max-w-[600px] px-7 py-8 transition-transform duration-300 ease-out md:px-9 md:py-9 hover:-translate-y-0.5`}
-        >
-          <DocHeader data={data} />
-          <ChapterHeading title="Recommendations" />
-          <p className="mb-4 text-[8px] leading-relaxed text-[#374151]">
-            Urgent first. Work the list in order when bandwidth is thin.
-          </p>
-
-          <div className="flex flex-col gap-1.5">
-            {data.recommendations.map((r, i) => {
-              const isHigh = r.priority === "HIGH";
-              return (
-                <div
-                  key={`${r.title}-${i}`}
-                  className={`flex flex-col overflow-hidden rounded border border-[#e5e7eb] bg-white lg:flex-row ${isHigh ? "border-l-[3px] border-l-[#DC2626]" : ""}`}
-                >
-                  <div className="flex w-full shrink-0 items-center justify-center bg-[#374151] py-3 text-[20px] font-bold text-white lg:w-10 lg:py-0">
-                    {i + 1}
-                  </div>
-                  <div className="hidden w-px shrink-0 bg-[#e5e7eb] lg:block" aria-hidden />
-                  <div className="min-w-0 flex-1 px-3 py-2.5">
-                    <span
-                      className={`inline-block rounded border border-[#e5e7eb] bg-white px-1.5 py-0.5 ${mono} text-[5.5px] font-bold uppercase tracking-wide text-[#374151]`}
-                    >
-                      {r.priority} priority
-                    </span>
-                    <p className="mt-2 text-[10px] font-bold text-[#0f1117]">{r.title}</p>
-                    <p className="mt-1 text-[8px] font-bold leading-snug text-[#374151]">{r.insight}</p>
-                    <p className={`${mono} mt-2 text-[6px] font-semibold uppercase tracking-[0.1em] text-[#6b7280]`}>
-                      Why it matters
-                    </p>
-                    <p className="mt-1 text-[7.5px] leading-snug text-[#0f1117]">{r.explanation}</p>
-                    <p className={`${mono} mt-2 text-[6px] font-semibold uppercase tracking-[0.1em] text-[#6b7280]`}>
-                      Recommended action
-                    </p>
-                    <p className="mt-1 text-[7.5px] leading-snug text-[#0f1117]">{r.action}</p>
-                  </div>
-                  <div className="hidden w-px shrink-0 bg-[#e5e7eb] lg:block" aria-hidden />
-                  <div className="hidden w-full shrink-0 bg-[#f3f4f6] px-2.5 py-2.5 lg:block lg:w-[132px]">
-                    <p className={`${mono} text-[5.5px] font-semibold uppercase tracking-[0.1em] text-[#6b7280]`}>
-                      Expected outcome
-                    </p>
-                    <div className="mb-1.5 mt-1.5 h-px w-14 bg-[#e5e7eb]" />
-                    <p className="text-[8px] font-bold leading-snug text-[#0f1117]">{r.expectedOutcome}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <DocFooter data={data} pageNum={3} />
-        </article>
-
-        {/* Page 5 — Data summary (tables match PDF Page5) */}
-        <article
-          className={`${docShell} mx-auto mb-12 w-full max-w-[600px] px-7 py-8 transition-transform duration-300 ease-out md:px-9 md:py-9 hover:-translate-y-0.5`}
-        >
-          <DocHeader data={data} />
-          <ChapterHeading title="Data Summary" />
-
-          <p className={`${mono} mb-2 text-[8px] font-semibold uppercase tracking-[0.12em] text-[#6b7280]`}>Signals</p>
-          <div className="mb-6 overflow-x-auto rounded border border-[#e5e7eb]">
-            <div className="min-w-[540px]">
-              <div className="grid grid-cols-[184px_44px_44px_100px_168px] bg-[#f3f4f6] px-2 py-2.5 text-[#6b7280]">
-                <span className={`${mono} text-[6.5px] font-semibold uppercase tracking-wide`}>Signal</span>
-                <span className={`${mono} text-center text-[6.5px] font-semibold uppercase tracking-wide`}>Count</span>
-                <span className={`${mono} text-center text-[6.5px] font-semibold uppercase tracking-wide`}>Rate</span>
-                <span className={`${mono} text-[6.5px] font-semibold uppercase tracking-wide`}>Status</span>
-                <span className={`${mono} text-right text-[6.5px] font-semibold uppercase tracking-wide`}>Action</span>
-              </div>
-              {data.signalSummary.map((row, i) => (
-                <div
-                  key={row.signal}
-                  className={`grid grid-cols-[184px_44px_44px_100px_168px] items-center border-t border-[#e5e7eb] px-2 py-3 text-[8.5px] text-[#0f1117] ${i % 2 === 1 ? "bg-[#f9fafb]" : "bg-white"}`}
-                >
-                  <span className="flex items-center gap-2 pr-2 font-bold">
-                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#00e87a]" aria-hidden />
-                    {row.signal}
-                  </span>
-                  <span className={`${mono} text-center tabular-nums`}>{row.count}</span>
-                  <span className={`${mono} text-center`}>{row.rate}</span>
-                  <div>
-                    <SignalPill status={row.status} />
-                  </div>
-                  <span className={`text-right text-[8px] text-[#374151]`}>{row.actionNote}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <p className={`${mono} mb-2 text-[8px] font-semibold uppercase tracking-[0.12em] text-[#6b7280]`}>
-            Competitive set
-          </p>
-          <div className="overflow-x-auto rounded border border-[#e5e7eb]">
-            <div className="min-w-[540px]">
-              <div className="grid grid-cols-[108px_176px_48px_48px_52px_108px] bg-[#f3f4f6] px-2 py-2.5">
-                <span className={`${mono} text-[6.5px] font-semibold uppercase tracking-wide text-[#6b7280]`}>Brand</span>
-                <span className={`${mono} text-[6.5px] font-semibold uppercase tracking-wide text-[#6b7280]`}>
-                  Mentions
-                </span>
-                <span className={`${mono} text-right text-[6.5px] font-semibold uppercase tracking-wide text-[#6b7280]`}>
-                  #
-                </span>
-                <span className={`${mono} text-right text-[6.5px] font-semibold uppercase tracking-wide text-[#6b7280]`}>
-                  Rate
-                </span>
-                <span className={`${mono} text-right text-[6.5px] font-semibold uppercase tracking-wide text-[#6b7280]`}>
-                  vs.
-                </span>
-                <span className={`${mono} text-[6.5px] font-semibold uppercase tracking-wide text-[#6b7280]`}>Status</span>
-              </div>
-              {(() => {
-                const maxCmp = Math.max(...data.competitiveTable.map((r) => r.mentions), 1);
-                return data.competitiveTable.map((row, i) => {
-                  const wPct = Math.min(100, Math.max(0, Math.round((row.mentions / maxCmp) * 100)));
-                  const isYou = row.status === "You";
-                  const pill =
-                    row.status === "You"
-                      ? { bg: c.cyanLight, fg: c.ink }
-                      : row.status === "Tied"
-                        ? { bg: c.surface2, fg: c.ink }
-                        : row.status === "Behind"
-                          ? { bg: c.greenLight, fg: c.ink }
-                          : row.status === "Ahead"
-                            ? { bg: c.redLight, fg: c.ink }
-                            : { bg: c.surface2, fg: c.ink };
-                  const statusTxt =
-                    row.status === "You"
-                      ? "YOU"
-                      : row.status === "Tied" || row.status === "Ahead" || row.status === "Behind"
-                        ? row.status.toUpperCase()
-                        : "—";
-                  return (
-                    <div
-                      key={row.brand}
-                      className={`grid grid-cols-[108px_176px_48px_48px_52px_108px] items-center border-t border-[#e5e7eb] px-2 py-3 text-[8.5px] ${isYou ? "border-l-[3px] border-l-[#00e87a] bg-[#f9fafb]" : i % 2 === 1 ? "bg-[#f9fafb]" : "bg-white"}`}
-                    >
-                      <span className={isYou ? "font-bold text-[#0f1117]" : "text-[#0f1117]"}>{row.brand}</span>
-                      <div className="pr-2">
-                        <div className="h-[6px] w-full overflow-hidden rounded bg-[#f3f4f6]">
-                          <div
-                            className={`h-full rounded ${isYou ? "bg-[#00e87a]" : "bg-[#9ca3af]"}`}
-                            style={{ width: `${wPct}%`, opacity: isYou ? 1 : 0.4 }}
-                          />
+                <div className="flex flex-col gap-1.5">
+                  {(() => {
+                    const r = data.recommendations[0]!;
+                    const isHigh = r.priority === "HIGH";
+                    return (
+                      <div
+                        className={`flex flex-col overflow-hidden rounded border border-[#e5e7eb] bg-white lg:flex-row ${isHigh ? "border-l-[3px] border-l-[#DC2626]" : ""}`}
+                      >
+                        <div className="flex w-full shrink-0 items-center justify-center bg-[#374151] py-3 text-[20px] font-bold text-white lg:w-10 lg:py-0">
+                          1
+                        </div>
+                        <div className="hidden w-px shrink-0 bg-[#e5e7eb] lg:block" aria-hidden />
+                        <div className="min-w-0 flex-1 px-3 py-2.5">
+                          <span
+                            className={`inline-block rounded border border-[#e5e7eb] bg-white px-1.5 py-0.5 ${mono} text-[5.5px] font-bold uppercase tracking-wide text-[#374151]`}
+                          >
+                            {r.priority} priority
+                          </span>
+                          <p className="mt-2 text-[10px] font-bold text-[#0f1117]">{r.title}</p>
+                          <p className="mt-1 text-[8px] font-bold leading-snug text-[#374151]">{r.insight}</p>
+                          <p className={`${mono} mt-2 text-[6px] font-semibold uppercase tracking-[0.1em] text-[#6b7280]`}>
+                            Why it matters
+                          </p>
+                          <p className="mt-1 text-[7.5px] leading-snug text-[#0f1117]">{r.explanation}</p>
                         </div>
                       </div>
-                      <span className={`${mono} text-right tabular-nums ${isYou ? "font-bold" : ""}`}>
-                        {row.mentions}
-                      </span>
-                      <span className={`${mono} text-right ${isYou ? "font-bold" : ""}`}>{row.rate}</span>
-                      <span className={`${mono} text-right font-bold text-[#374151]`}>{row.vsYou}</span>
-                      <div>
-                        <span
-                          className={`inline-block rounded px-1.5 py-0.5 ${mono} text-[6px] font-bold tracking-wide`}
-                          style={{ backgroundColor: pill.bg, color: pill.fg }}
-                        >
-                          {statusTxt}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                });
-              })()}
-            </div>
+                    );
+                  })()}
+                </div>
+              </article>
+            </PreviewObscurity>
           </div>
+          <p className={`${mono} mt-3 text-center text-[9px] text-[#9ca3af]`}>
+            Prioritized actions and expected outcomes continue in the export.
+          </p>
+        </div>
 
-          <DocFooter data={data} pageNum={5} />
-        </article>
+        {/* Data summary — structure only, not readable */}
+        <div className="relative mx-auto mb-12 max-w-[600px]">
+          <article
+            className={`${docShell} relative overflow-hidden px-7 py-8 md:px-9 md:py-9 transition-transform duration-300 ease-out hover:-translate-y-0.5`}
+          >
+            <DocHeader data={data} />
+            <ChapterHeading title="Data Summary" />
+            <div className="relative mt-2 space-y-3 opacity-50 blur-[3px] select-none" aria-hidden>
+              <div className="h-8 rounded bg-[#f3f4f6]" />
+              <div className="h-20 rounded border border-[#e5e7eb] bg-white" />
+              <div className="h-20 rounded border border-[#e5e7eb] bg-[#f9fafb]" />
+              <div className="h-20 rounded border border-[#e5e7eb] bg-white" />
+            </div>
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 top-[32%] bg-gradient-to-b from-transparent to-[#fafafa]" />
+            <p className={`${mono} relative z-[1] mt-6 text-center text-[8px] font-semibold uppercase tracking-[0.14em] text-[#6b7280]`}>
+              Full signal tables & competitive set in PDF
+            </p>
+          </article>
+        </div>
 
-        {/* CTA — outside report (marketing chrome on dark canvas) */}
         <footer className="border-t border-white/10 pt-10 text-center">
-          <p className="text-lg font-light text-[#e5e7eb]">Want a report like this for your client?</p>
-          <p className="mt-2 text-sm text-[#9ca3af]">Run a free snapshot in minutes.</p>
+          <p className="text-lg font-light text-[#e5e7eb]">Run a free snapshot</p>
+          <p className="mt-2 text-sm text-[#9ca3af]">Generate a report like this for one of your clients.</p>
           <Link
             className="mt-6 inline-flex items-center justify-center rounded-full bg-[#00e87a] px-6 py-3 text-sm font-medium text-black transition hover:brightness-110"
             href="/signup"
@@ -640,7 +575,6 @@ function ModelCard({ model, avg }: { model: ReportData["modelScores"][0]; avg: n
   const avgPos = Math.min(100, Math.max(0, Math.round(avg)));
   const innerW = 100;
   const tickLeft = Math.min(Math.max(0, (innerW * avgPos) / 100 - 1), innerW - 2);
-  const posPill = model.deltaVsAvg >= 0;
   const deltaSign = model.deltaVsAvg >= 0 ? "+" : "−";
   const deltaAbs = Math.abs(model.deltaVsAvg);
 
@@ -653,9 +587,7 @@ function ModelCard({ model, avg }: { model: ReportData["modelScores"][0]; avg: n
         </p>
         <p className="text-[28px] font-bold leading-none tracking-tight text-[#0f1117]">{model.score}</p>
         <div className="mt-1.5">
-          <span
-            className={`inline-block rounded px-1.5 py-1 ${mono} text-[7px] font-bold text-[#374151] ${posPill ? "bg-[#f3f4f6]" : "bg-[#f3f4f6]"}`}
-          >
+          <span className={`inline-block rounded bg-[#f3f4f6] px-1.5 py-1 ${mono} text-[7px] font-bold text-[#374151]`}>
             {deltaSign}
             {deltaAbs} vs avg
           </span>
@@ -673,7 +605,7 @@ function ModelCard({ model, avg }: { model: ReportData["modelScores"][0]; avg: n
         </div>
         <p className={`${mono} mb-2 text-[6px] text-[#9ca3af]`}>avg {avg}</p>
         <ul className="space-y-1">
-          {model.insights.map((line, idx) => (
+          {model.insights.slice(0, 1).map((line, idx) => (
             <li key={idx} className="flex gap-1.5 text-[6.5px] leading-snug text-[#0f1117]">
               <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-[#9ca3af]" />
               <span>{line}</span>
