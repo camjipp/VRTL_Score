@@ -14,25 +14,16 @@ const SIGNUP_HREF = "/signup";
 const shell = "mx-auto w-full max-w-[1200px] px-6 md:px-12";
 
 const MODEL_PILLS: Array<{ name: string; iconSrc: string }> = [
-  {
-    name: "ChatGPT",
-    iconSrc: "https://cdn.brandfetch.io/idR3duQxYl/w/400/h/400/theme/dark/icon.png",
-  },
-  {
-    name: "Gemini",
-    iconSrc: "https://cdn.brandfetch.io/id9IRGFoS-/theme/dark/icon.png",
-  },
-  {
-    name: "Claude",
-    iconSrc: "https://cdn.brandfetch.io/anthropic.com/w/400/h/400/theme/dark/icon.png",
-  },
-  { name: "Perplexity", iconSrc: "/ai/perplexity.svg" },
+  { name: "ChatGPT", iconSrc: "/ai/icons8-chatgpt.svg" },
+  { name: "Gemini", iconSrc: "/ai/gemini.png" },
+  { name: "Claude", iconSrc: "/ai/icons8-claude.svg" },
+  { name: "Perplexity", iconSrc: "/ai/perplexity.png" },
 ];
 
 function ModelPill({ name, iconSrc }: { name: string; iconSrc: string }) {
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-1">
-      {/* eslint-disable-next-line @next/next/no-img-element -- Brandfetch / SVG favicons; avoids optimizer referer issues */}
+      {/* eslint-disable-next-line @next/next/no-img-element -- local /ai icons (png + svg) */}
       <img alt="" className="h-4 w-4 shrink-0 object-contain" height={16} src={iconSrc} width={16} />
       <span className="font-marketing-mono text-[11px] uppercase tracking-[0.08em] text-[var(--text-muted)]">{name}</span>
     </span>
