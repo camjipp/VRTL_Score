@@ -23,26 +23,22 @@ const MODEL_PILLS: Array<{ name: string; iconSrc: string }> = [
 function ModelPill({ name, iconSrc }: { name: string; iconSrc: string }) {
   return (
     <span
-      className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] p-2 transition-all duration-200 ease-out hover:bg-[rgba(255,255,255,0.07)]"
+      className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] p-2 transition-all duration-200 ease-out hover:border-[rgba(255,255,255,0.14)] hover:shadow-[0_0_24px_rgba(0,232,122,0.12)]"
       title={name}
     >
       {/* eslint-disable-next-line @next/next/no-img-element -- local /ai icons (png + svg); monochrome for system-badge read */}
       <img
         alt={name}
-        className="h-[22px] w-[22px] shrink-0 object-contain brightness-0 invert opacity-[0.88]"
-        height={22}
+        className="h-[25px] w-[25px] shrink-0 object-contain brightness-0 invert opacity-[0.85]"
+        height={25}
         src={iconSrc}
-        width={22}
+        width={25}
       />
     </span>
   );
 }
 
-const paper =
-  "border border-[#d4d4d4] bg-[#fafafa] text-[#111] shadow-[0_24px_56px_rgba(0,0,0,0.42),0_4px_14px_rgba(0,0,0,0.1)] rounded-[2px]";
-
-const paperBack =
-  "border border-[#d4d4d4] bg-[#fafafa] text-[#111] shadow-[0_14px_36px_rgba(0,0,0,0.2),0_3px_10px_rgba(0,0,0,0.06)] rounded-[2px]";
+const paperHero = "border border-[#d4d4d4] bg-[#fafafa] text-[#111] rounded-[2px] shadow-[0_40px_120px_rgba(0,0,0,0.6)]";
 
 /** Semi-circular score arc (same geometry as PDF ScoreRing, scaled for hero). */
 function HeroScoreArc({ score }: { score: number }) {
@@ -98,114 +94,16 @@ function HeroReportStack() {
   ];
 
   return (
-    <div className="group/stack relative z-10 flex w-full flex-col items-center lg:items-end lg:justify-center lg:overflow-visible lg:pr-0">
-      <div className="relative flex w-full max-w-[min(100%,472px)] flex-col items-center justify-center lg:ml-auto lg:mr-[-20px] lg:items-end lg:-translate-y-10 xl:-translate-y-14">
-        <div className="animate-hero-report-float relative w-[min(100%,316px)] origin-center scale-[0.96] pb-6 pt-0 sm:w-[min(100%,360px)] sm:scale-[0.98] lg:w-[472px] lg:origin-center lg:scale-[1.24]">
-          {/* Grounding: dark base + soft shadow so the stack reads seated in the layout */}
+    <div className="relative z-10 flex w-full flex-col items-center lg:items-end lg:justify-center lg:overflow-visible lg:pr-0">
+      <div className="relative flex w-full max-w-[min(100%,420px)] flex-col items-center justify-center lg:ml-auto lg:mr-[-12px] lg:items-end lg:-translate-y-[5.5rem] xl:-translate-y-[6rem]">
+        <div className="relative w-[min(100%,316px)] pb-4 pt-0 sm:w-[min(100%,360px)] lg:w-[400px]">
           <div
             aria-hidden
-            className="pointer-events-none absolute -bottom-1 left-1/2 z-0 w-[min(108%,440px)] -translate-x-1/2 translate-y-0 sm:w-[min(105%,480px)] lg:w-[92%] lg:max-w-[480px]"
-          >
-            <div className="mx-auto h-12 w-full bg-[radial-gradient(ellipse_78%_100%_at_50%_100%,rgba(0,0,0,0.38),rgba(0,0,0,0.14)_38%,transparent_70%)] blur-[14px] sm:h-14 lg:h-16" />
-          </div>
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -bottom-2 left-1/2 z-0 h-3 w-[min(96%,400px)] -translate-x-1/2 rounded-[100%] bg-black/20 blur-md sm:h-3.5 lg:bottom-[-6px] lg:w-[88%]"
+            className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[118%] w-[118%] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle_at_center,rgba(34,197,94,0.12),transparent_70%)]"
           />
-        {/* Brand glow: behind stacked pages */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute left-[2%] top-[6%] z-0 hidden h-[88%] w-[94%] max-w-[384px] rounded-sm bg-[radial-gradient(ellipse_72%_60%_at_50%_42%,rgba(0,232,122,0.09),transparent_68%)] blur-[36px] lg:block lg:max-w-none"
-        />
-        {/* Page 3: Recommendations (desktop only) */}
-        <div
-          className={`${paperBack} absolute left-[2%] top-0 hidden min-h-[392px] w-[96%] max-w-[384px] p-2.5 opacity-[0.68] lg:block lg:max-w-none`}
-          style={{ transform: "translate(-5.25%, 5.5%) rotate(-2.4deg) scale(0.922)", zIndex: 0 }}
-          aria-hidden
-        >
-          <div className="border-b border-[#e5e5e5] pb-2">
-            <p className="font-marketing-mono text-[6.5px] font-semibold uppercase tracking-[0.18em] text-[#94a3b8]">VRTL Score</p>
-            <p className="mt-0.5 font-marketing-mono text-[9px] font-bold uppercase tracking-[0.12em] text-[#1e293b]">
-              Recommendations
-            </p>
-          </div>
-          <p className="mt-2 font-marketing-mono text-[7px] font-medium text-[#64748b]">Your Client · continued</p>
-          <ul className="mt-2 space-y-1.5 border-t border-[#e5e5e5] pt-2">
-            <li className="flex gap-1.5 text-[8px] leading-snug text-[#334155]">
-              <span className="mt-0.5 h-1 w-1 shrink-0 rounded-full bg-[#ef4444]" />
-              <span>
-                <span className="font-marketing-mono font-bold text-[#b91c1c]">HIGH</span> Close authority gap: citations at 0%.
-              </span>
-            </li>
-            <li className="flex gap-1.5 text-[8px] leading-snug text-[#374151]">
-              <span className="mt-0.5 h-1 w-1 shrink-0 rounded-full bg-[#ef4444]" />
-              <span>
-                <span className="font-marketing-mono font-bold text-[#b91c1c]">HIGH</span> Counter competitor mentions on head terms.
-              </span>
-            </li>
-            <li className="flex gap-1.5 text-[8px] leading-snug text-[#374151]">
-              <span className="mt-0.5 h-1 w-1 shrink-0 rounded-full bg-[#d97706]" />
-              <span>
-                <span className="font-marketing-mono font-bold text-[#b45309]">MED</span> Increase third party citations.
-              </span>
-            </li>
-          </ul>
-          <div className="mt-3 h-1 w-full bg-[#f3f4f6]" />
-          <p className="mt-1 font-marketing-mono text-[6px] text-[#d1d5db]">Confidential · sample</p>
-          <p className="absolute bottom-2.5 right-2.5 font-marketing-mono text-[7px] text-[#d1d5db]">3</p>
-        </div>
-
-        {/* Page 2: Model Analysis (desktop only, middle of stack) */}
-        <div
-          className={`${paperBack} absolute left-[2%] top-0 hidden min-h-[392px] w-[96%] max-w-[384px] p-2.5 opacity-[0.76] lg:block lg:max-w-none`}
-          style={{ transform: "translate(-2.75%, 3%) rotate(-1.2deg) scale(0.952)", zIndex: 1 }}
-          aria-hidden
-        >
-          <div className="border-b border-[#e5e5e5] pb-2">
-            <p className="font-marketing-mono text-[6.5px] font-semibold uppercase tracking-[0.18em] text-[#94a3b8]">VRTL Score</p>
-            <p className="mt-0.5 font-marketing-mono text-[9px] font-bold uppercase tracking-[0.12em] text-[#1e293b]">
-              Model Analysis
-            </p>
-          </div>
-          <p className="mt-2 font-marketing-mono text-[7px] font-medium text-[#64748b]">Your Client · by engine</p>
-          <div className="mt-2 space-y-2 border-t border-[#e5e5e5] pt-2">
-            {[
-              { label: "OPENAI", pct: 90, vs: "+38 vs avg" },
-              { label: "GEMINI", pct: 39, vs: "-13 vs avg" },
-              { label: "ANTHROPIC", pct: 26, vs: "-26 vs avg" },
-            ].map((row) => (
-              <div key={row.label}>
-                <div className="flex items-center justify-between gap-1">
-                  <span className="font-marketing-mono text-[7px] font-bold uppercase tracking-[0.1em] text-[#4b5563]">
-                    {row.label}
-                  </span>
-                  <span className="font-marketing-mono text-[7px] font-medium text-[#64748b]">{row.vs}</span>
-                </div>
-                <div className="mt-1 h-[4px] w-full rounded-sm bg-[#f3f4f6]">
-                  <div className="h-full rounded-sm bg-[#111827]" style={{ width: `${row.pct}%`, opacity: row.label === "OPENAI" ? 1 : 0.45 }} />
-                </div>
-              </div>
-            ))}
-          </div>
-          <ul className="mt-2.5 space-y-1 border-t border-[#eee] pt-2">
-            <li className="flex items-start gap-1.5 text-[7px] text-[#4b5563]">
-              <span className="text-[#00e87a]">●</span>
-              <span>64 pts between best and worst model.</span>
-            </li>
-            <li className="flex items-start gap-1.5 text-[7px] text-[#4b5563]">
-              <span className="text-[#9ca3af]">●</span>
-              <span>Prioritize Anthropic surface.</span>
-            </li>
-          </ul>
-          <p className="absolute bottom-2.5 right-2.5 font-marketing-mono text-[7px] text-[#d1d5db]">2</p>
-        </div>
-
-        {/* Page 1: Executive summary (front) */}
-        <div
-          className={`${paper} relative z-[2] mx-auto flex w-full max-w-[316px] flex-col p-2.5 transition-shadow duration-500 ease-out sm:max-w-[360px] group-hover/stack:shadow-[0_22px_56px_rgba(0,0,0,0.34),0_8px_20px_rgba(0,0,0,0.08)] lg:mx-0 lg:ml-auto lg:max-w-none`}
-          style={{ transform: "translate(2.75%, 0) rotate(1deg)" }}
-        >
-          <div className="flex items-start justify-between gap-2 border-b border-[#e5e7eb] pb-2">
+          <div className="group/pdf relative z-[1] origin-center rotate-[-2deg] scale-[1.05] transition-transform duration-300 ease-out group-hover/pdf:-translate-y-[6px] group-hover/pdf:scale-[1.08]">
+            <div className={`${paperHero} relative mx-auto flex w-full max-w-[316px] flex-col p-2.5 sm:max-w-[360px] lg:mx-0 lg:ml-auto lg:max-w-none`}>
+              <div className="flex items-start justify-between gap-2 border-b border-[#e5e7eb] pb-2">
             <div className="min-w-0">
               <p className="font-marketing-mono text-[6.5px] font-semibold uppercase tracking-[0.16em] text-[#94a3b8]">
                 AI Authority Report
@@ -215,14 +113,14 @@ function HeroReportStack() {
             <span className="shrink-0 border border-[#d1d5db] bg-white px-1.5 py-0.5 font-marketing-mono text-[6.5px] font-bold uppercase tracking-wider text-[#64748b]">
               PDF
             </span>
-          </div>
+              </div>
 
-          <div className="pt-2">
+              <div className="pt-2">
             <p className="text-[10px] font-bold text-[#334155]">Your Client</p>
             <p className="mt-0.5 font-marketing-mono text-[7px] font-medium text-[#94a3b8]">April 1, 2026</p>
-          </div>
+              </div>
 
-          <div className="mt-2 flex gap-2 border-t border-[#e5e7eb] pt-2">
+              <div className="mt-2 flex gap-2 border-t border-[#e5e7eb] pt-2">
             <HeroScoreArc score={68} />
             <div className="w-px shrink-0 self-stretch bg-[#e5e7eb]" aria-hidden />
             <div className="grid min-h-[42px] min-w-0 flex-1 grid-cols-3 gap-0.5">
@@ -245,10 +143,10 @@ function HeroReportStack() {
                   </p>
                 </div>
               ))}
-            </div>
-          </div>
+              </div>
+              </div>
 
-          <div className="mt-2 border-t border-[#e5e7eb] pt-2">
+              <div className="mt-2 border-t border-[#e5e7eb] pt-2">
             <p className="font-marketing-mono text-[6.5px] font-semibold uppercase tracking-[0.12em] text-[#64748b]">
               Competitive ranking
             </p>
@@ -285,9 +183,9 @@ function HeroReportStack() {
                 );
               })}
             </div>
-          </div>
+              </div>
 
-          <div className="mt-2 border-t border-[#e5e7eb] pt-2">
+              <div className="mt-2 border-t border-[#e5e7eb] pt-2">
             <div className="rounded-sm border border-amber-200/55 border-t-2 border-t-amber-500/85 bg-amber-50/50 px-1.5 py-1">
               <span className="inline-block rounded border border-amber-300/80 bg-white/90 px-1 py-px font-marketing-mono text-[6px] font-bold uppercase tracking-wide text-amber-800">
                 RISK
@@ -295,12 +193,13 @@ function HeroReportStack() {
               <p className="mt-0.5 text-[8px] font-bold leading-tight text-[#0f1117]">Fragile lead</p>
               <p className="mt-0.5 text-[7px] leading-snug text-[#64748b]">Competitors within range</p>
             </div>
-          </div>
+              </div>
 
-          <p className="absolute bottom-2.5 right-2.5 font-marketing-mono text-[7px] font-medium text-[#cbd5e1]">
-            1<span className="hidden lg:inline"> / 3</span>
-          </p>
-        </div>
+              <p className="absolute bottom-2.5 right-2.5 font-marketing-mono text-[7px] font-medium text-[#cbd5e1]">
+                Sample
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -498,9 +397,9 @@ export default function HomePage() {
                   </div>
                 </AnimateIn>
                 <AnimateIn delay={400}>
-                  <div className="mt-12 flex flex-wrap items-center gap-2.5 sm:gap-3">
-                    <span className="font-marketing-mono text-[11px] uppercase tracking-[0.12em] text-[var(--text-muted)]">
-                      Tracks
+                  <div className="mt-12 flex max-w-[240px] flex-wrap items-center gap-2 sm:gap-2.5">
+                    <span className="shrink-0 font-marketing-mono text-[11px] uppercase tracking-[0.12em] text-[var(--text-muted)]">
+                      Tracks across
                     </span>
                     {MODEL_PILLS.map((m) => (
                       <ModelPill key={m.name} iconSrc={m.iconSrc} name={m.name} />
