@@ -23,16 +23,16 @@ const MODEL_PILLS: Array<{ name: string; iconSrc: string }> = [
 function ModelPill({ name, iconSrc }: { name: string; iconSrc: string }) {
   return (
     <span
-      className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] p-1.5 transition-all duration-200 ease-out hover:bg-white/[0.06]"
+      className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] p-2 transition-all duration-200 ease-out hover:bg-[rgba(255,255,255,0.07)]"
       title={name}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element -- local /ai icons (png + svg) */}
+      {/* eslint-disable-next-line @next/next/no-img-element -- local /ai icons (png + svg); monochrome for system-badge read */}
       <img
         alt={name}
-        className="h-5 w-5 shrink-0 object-contain opacity-70"
-        height={20}
+        className="h-[22px] w-[22px] shrink-0 object-contain brightness-0 invert opacity-[0.88]"
+        height={22}
         src={iconSrc}
-        width={20}
+        width={22}
       />
     </span>
   );
@@ -40,6 +40,9 @@ function ModelPill({ name, iconSrc }: { name: string; iconSrc: string }) {
 
 const paper =
   "border border-[#d4d4d4] bg-[#fafafa] text-[#111] shadow-[0_24px_56px_rgba(0,0,0,0.42),0_4px_14px_rgba(0,0,0,0.1)] rounded-[2px]";
+
+const paperBack =
+  "border border-[#d4d4d4] bg-[#fafafa] text-[#111] shadow-[0_14px_36px_rgba(0,0,0,0.2),0_3px_10px_rgba(0,0,0,0.06)] rounded-[2px]";
 
 /** Semi-circular score arc (same geometry as PDF ScoreRing, scaled for hero). */
 function HeroScoreArc({ score }: { score: number }) {
@@ -95,24 +98,29 @@ function HeroReportStack() {
   ];
 
   return (
-    <div className="group/stack relative z-10 flex w-full flex-col items-center lg:items-end lg:justify-end lg:overflow-visible lg:pr-0">
-      <div className="relative flex w-full max-w-[min(100%,472px)] flex-col items-center justify-end lg:ml-auto lg:mr-[-20px] lg:items-end">
-        <div className="animate-hero-report-float relative w-[min(100%,316px)] origin-center scale-[0.91] pb-6 pt-0 sm:w-[min(100%,360px)] sm:scale-[0.95] lg:w-[472px] lg:origin-bottom-right lg:scale-[1.18]">
+    <div className="group/stack relative z-10 flex w-full flex-col items-center lg:items-end lg:justify-center lg:overflow-visible lg:pr-0">
+      <div className="relative flex w-full max-w-[min(100%,472px)] flex-col items-center justify-center lg:ml-auto lg:mr-[-20px] lg:items-end lg:-translate-y-10 xl:-translate-y-14">
+        <div className="animate-hero-report-float relative w-[min(100%,316px)] origin-center scale-[0.96] pb-6 pt-0 sm:w-[min(100%,360px)] sm:scale-[0.98] lg:w-[472px] lg:origin-center lg:scale-[1.24]">
           {/* Grounding: dark base + soft shadow so the stack reads seated in the layout */}
           <div
             aria-hidden
             className="pointer-events-none absolute -bottom-1 left-1/2 z-0 w-[min(108%,440px)] -translate-x-1/2 translate-y-0 sm:w-[min(105%,480px)] lg:w-[92%] lg:max-w-[480px]"
           >
-            <div className="mx-auto h-12 w-full bg-[radial-gradient(ellipse_78%_100%_at_50%_100%,rgba(0,0,0,0.45),rgba(0,0,0,0.18)_38%,transparent_70%)] blur-[14px] sm:h-14 lg:h-16" />
+            <div className="mx-auto h-12 w-full bg-[radial-gradient(ellipse_78%_100%_at_50%_100%,rgba(0,0,0,0.38),rgba(0,0,0,0.14)_38%,transparent_70%)] blur-[14px] sm:h-14 lg:h-16" />
           </div>
           <div
             aria-hidden
-            className="pointer-events-none absolute -bottom-2 left-1/2 z-0 h-3 w-[min(96%,400px)] -translate-x-1/2 rounded-[100%] bg-black/25 blur-md sm:h-3.5 lg:bottom-[-6px] lg:w-[88%]"
+            className="pointer-events-none absolute -bottom-2 left-1/2 z-0 h-3 w-[min(96%,400px)] -translate-x-1/2 rounded-[100%] bg-black/20 blur-md sm:h-3.5 lg:bottom-[-6px] lg:w-[88%]"
           />
+        {/* Brand glow — behind stacked pages */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-[2%] top-[6%] z-0 hidden h-[88%] w-[94%] max-w-[384px] rounded-sm bg-[radial-gradient(ellipse_72%_60%_at_50%_42%,rgba(0,232,122,0.09),transparent_68%)] blur-[36px] lg:block lg:max-w-none"
+        />
         {/* Page 3 — Recommendations — desktop only */}
         <div
-          className={`${paper} absolute left-[2%] top-0 hidden min-h-[392px] w-[96%] max-w-[384px] p-2.5 opacity-[0.88] lg:block lg:max-w-none`}
-          style={{ transform: "translate(-5.75%, 9.25%) rotate(-2.75deg) scale(0.928)", zIndex: 0 }}
+          className={`${paperBack} absolute left-[2%] top-0 hidden min-h-[392px] w-[96%] max-w-[384px] p-2.5 opacity-[0.68] lg:block lg:max-w-none`}
+          style={{ transform: "translate(-5.25%, 5.5%) rotate(-2.4deg) scale(0.922)", zIndex: 0 }}
           aria-hidden
         >
           <div className="border-b border-[#e5e5e5] pb-2">
@@ -149,8 +157,8 @@ function HeroReportStack() {
 
         {/* Page 2 — Model Analysis — desktop only (middle of stack) */}
         <div
-          className={`${paper} absolute left-[2%] top-0 hidden min-h-[392px] w-[96%] max-w-[384px] p-2.5 lg:block lg:max-w-none`}
-          style={{ transform: "translate(-3%, 4.75%) rotate(-1.5deg) scale(0.961)", zIndex: 1 }}
+          className={`${paperBack} absolute left-[2%] top-0 hidden min-h-[392px] w-[96%] max-w-[384px] p-2.5 opacity-[0.76] lg:block lg:max-w-none`}
+          style={{ transform: "translate(-2.75%, 3%) rotate(-1.2deg) scale(0.952)", zIndex: 1 }}
           aria-hidden
         >
           <div className="border-b border-[#e5e5e5] pb-2">
@@ -194,7 +202,7 @@ function HeroReportStack() {
 
         {/* Page 1 — Executive summary (front) */}
         <div
-          className={`${paper} relative z-[2] mx-auto flex w-full max-w-[316px] flex-col p-2.5 transition-shadow duration-500 ease-out sm:max-w-[360px] group-hover/stack:shadow-[0_32px_80px_rgba(0,0,0,0.5),0_10px_28px_rgba(0,0,0,0.12)] lg:mx-0 lg:ml-auto lg:max-w-none`}
+          className={`${paper} relative z-[2] mx-auto flex w-full max-w-[316px] flex-col p-2.5 transition-shadow duration-500 ease-out sm:max-w-[360px] group-hover/stack:shadow-[0_22px_56px_rgba(0,0,0,0.34),0_8px_20px_rgba(0,0,0,0.08)] lg:mx-0 lg:ml-auto lg:max-w-none`}
           style={{ transform: "translate(2.75%, 0) rotate(1deg)" }}
         >
           <div className="flex items-start justify-between gap-2 border-b border-[#e5e7eb] pb-2">
@@ -354,14 +362,20 @@ function ProductPreviewCard({
   children: ReactNode;
 }) {
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full min-h-0 flex-col">
       <AnimateIn className="flex min-h-0 flex-1 flex-col" delay={delay}>
-        <div className="flex h-full min-h-[260px] flex-1 flex-col overflow-hidden rounded-xl border border-[color:var(--border-subtle)] bg-[var(--bg-surface)] p-6 transition duration-200 hover:-translate-y-0.5 hover:border-[color:var(--border-mid)]">
-          <p className="font-marketing-mono text-[10px] uppercase tracking-[0.14em] text-[var(--text-muted)]">{label}</p>
-          <div className="mt-0 flex min-h-0 flex-1 flex-col">{children}</div>
+        <div className="flex h-full min-h-[300px] flex-1 flex-col overflow-hidden rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.06] to-[var(--bg-elevated)] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-all duration-200 ease-out hover:border-white/[0.14] md:min-h-[320px] md:p-6">
+          <header className="shrink-0 border-b border-white/[0.08] pb-3">
+            <p className="font-marketing-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
+              {label}
+            </p>
+          </header>
+          <div className="mt-4 flex min-h-0 flex-1 flex-col">{children}</div>
         </div>
       </AnimateIn>
-      <p className="mt-3 text-center text-xs text-[var(--text-muted)]">{caption}</p>
+      <p className="mt-2 max-w-[18rem] self-center text-center font-marketing-mono text-[10px] uppercase leading-snug tracking-[0.1em] text-[var(--text-muted)]">
+        {caption}
+      </p>
     </div>
   );
 }
@@ -443,7 +457,7 @@ export default function HomePage() {
         {/* 1 — Hero */}
         <section className="min-h-screen overflow-visible border-b border-[color:var(--border-subtle)] pt-[120px]">
           <div className={`${shell} overflow-visible pb-24`}>
-            <div className="grid items-start gap-16 overflow-visible lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-end lg:gap-10">
+            <div className="grid items-start gap-16 overflow-visible lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center lg:gap-10">
               <div className="self-start">
                 <AnimateIn delay={0}>
                   <SectionLabel>{`// AI VISIBILITY FOR AGENCIES`}</SectionLabel>
@@ -494,7 +508,7 @@ export default function HomePage() {
                   </div>
                 </AnimateIn>
               </div>
-              <AnimateIn delay={150} className="self-end">
+              <AnimateIn delay={150} className="self-center">
                 <HeroReportStack />
               </AnimateIn>
             </div>
@@ -562,58 +576,107 @@ export default function HomePage() {
                 prioritized actions.
               </p>
             </AnimateIn>
-            <div className="mt-14 grid gap-4 md:grid-cols-3 md:items-stretch md:gap-4">
-              <ProductPreviewCard caption="Executive summary — one screen they understand" delay={0} label="PAGE 1">
-                <div className="mt-4 flex items-end gap-2">
-                  <span className="font-marketing-mono text-5xl font-light tabular-nums text-[var(--text-primary)]">72</span>
-                  <span className="text-[13px] text-[var(--text-muted)]">Visibility score</span>
-                </div>
-                <div className="mt-auto pt-4">
-                  <div className="h-[3px] w-full rounded-full bg-[var(--bg-inset)]">
-                    <div className="h-full w-[72%] rounded-full bg-[var(--accent-marketing)]" />
+            <div className="mt-12 grid gap-6 md:grid-cols-3 md:items-stretch md:gap-6">
+              <ProductPreviewCard caption="Executive summary — one screen they understand" delay={0} label="Executive summary">
+                <div className="flex flex-1 flex-col">
+                  <div className="flex flex-wrap items-end gap-x-3 gap-y-1">
+                    <span className="font-marketing-mono text-[52px] font-light leading-[0.95] tracking-tight text-[var(--text-primary)] tabular-nums md:text-[56px]">
+                      72
+                    </span>
+                    <span className="pb-1.5 text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--text-muted)]">
+                      Visibility score
+                    </span>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span className="rounded border border-white/10 bg-white/[0.04] px-2 py-1 font-marketing-mono text-[9px] font-medium uppercase tracking-wide text-[var(--text-secondary)]">
+                      Mention rate 62%
+                    </span>
+                    <span className="rounded border border-white/10 bg-white/[0.04] px-2 py-1 font-marketing-mono text-[9px] font-medium uppercase tracking-wide text-[var(--text-secondary)]">
+                      vs. prior +4 pts
+                    </span>
+                  </div>
+                  <p className="mt-auto pt-5 text-[12px] font-light leading-relaxed text-[var(--text-secondary)]">
+                    One composite number across engines — built to trend on every client call.
+                  </p>
+                  <div className="mt-4 shrink-0">
+                    <div className="flex justify-between font-marketing-mono text-[8px] uppercase tracking-wider text-[var(--text-muted)]">
+                      <span>0</span>
+                      <span>100</span>
+                    </div>
+                    <div className="mt-1.5 h-1 w-full rounded-full bg-[var(--bg-inset)]">
+                      <div className="h-full w-[72%] rounded-full bg-[var(--accent-marketing)]" />
+                    </div>
                   </div>
                 </div>
               </ProductPreviewCard>
-              <ProductPreviewCard caption="Model breakdown — where each engine puts them" delay={100} label="ANALYSIS">
-                <div className="mt-5 flex min-h-0 flex-1 flex-col">
-                  <div className="mt-auto space-y-3.5">
+              <ProductPreviewCard caption="Model breakdown — where each engine puts them" delay={100} label="Model analysis">
+                <div className="flex min-h-0 flex-1 flex-col">
+                  <div>
+                    <p className="text-[12px] font-medium text-[var(--text-primary)]">Per-engine visibility</p>
+                    <p className="mt-0.5 text-[10px] font-light text-[var(--text-muted)]">Same prompts · normalized scores</p>
+                  </div>
+                  <div className="mt-5 flex flex-1 flex-col justify-center space-y-2.5">
                     {[
                       { n: "ChatGPT", w: 85, c: "var(--accent-marketing)" },
-                      { n: "Gemini", w: 60, c: "rgba(0,232,122,0.4)" },
-                      { n: "Claude", w: 45, c: "rgba(0,232,122,0.2)" },
+                      { n: "Gemini", w: 60, c: "rgba(0,232,122,0.45)" },
+                      { n: "Claude", w: 45, c: "rgba(0,232,122,0.22)" },
                     ].map((row) => (
-                      <div key={row.n} className="flex items-center gap-3">
-                        <span className="w-[72px] shrink-0 text-[13px] text-[var(--text-secondary)]">{row.n}</span>
-                        <div className="h-[3px] flex-1 rounded-full bg-[var(--bg-inset)]">
+                      <div key={row.n} className="flex items-center gap-2.5">
+                        <span className="w-[4.5rem] shrink-0 font-marketing-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-secondary)]">
+                          {row.n}
+                        </span>
+                        <div className="h-1 flex-1 rounded-full bg-[var(--bg-inset)]">
                           <div className="h-full rounded-full" style={{ width: `${row.w}%`, background: row.c }} />
                         </div>
+                        <span className="w-7 shrink-0 text-right font-marketing-mono text-[10px] tabular-nums text-[var(--text-muted)]">
+                          {row.w}
+                        </span>
                       </div>
                     ))}
                   </div>
+                  <p className="mt-auto border-t border-white/[0.08] pt-3 text-[11px] font-light leading-snug text-[var(--text-secondary)]">
+                    40-point spread — lead the recap with the weakest surface first.
+                  </p>
                 </div>
               </ProductPreviewCard>
-              <ProductPreviewCard caption="Recommended actions — prioritized next steps" delay={200} label="NEXT STEPS">
-                <div className="mt-5 flex flex-1 flex-col space-y-3">
-                  <div className="flex items-start gap-2">
-                    <span
-                      className={`${actionPillClass} bg-[rgba(255,64,64,0.12)] text-[var(--marketing-red)]`}
-                    >
-                      HIGH
-                    </span>
-                    <span className="text-[13px] font-light leading-snug text-[var(--text-secondary)]">
-                      Close the citation gap on key topics.
-                    </span>
+              <ProductPreviewCard caption="Recommended actions — prioritized next steps" delay={200} label="Recommended actions">
+                <div className="flex min-h-0 flex-1 flex-col">
+                  <div className="shrink-0">
+                    <p className="text-[12px] font-semibold text-[var(--text-primary)]">Next steps</p>
+                    <p className="mt-0.5 text-[10px] font-light text-[var(--text-muted)]">Prioritized for this client</p>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <span
-                      className={`${actionPillClass} bg-[rgba(245,166,35,0.12)] text-[var(--marketing-amber)]`}
-                    >
-                      MED
-                    </span>
-                    <span className="text-[13px] font-light leading-snug text-[var(--text-secondary)]">
-                      Align on-page proof with what models quote.
-                    </span>
-                  </div>
+                  <ul className="mt-4 flex flex-1 flex-col justify-center space-y-3">
+                    <li className="flex gap-2.5">
+                      <span
+                        className={`${actionPillClass} mt-0.5 bg-[rgba(255,64,64,0.14)] text-[var(--marketing-red)]`}
+                      >
+                        HIGH
+                      </span>
+                      <span className="min-w-0 text-[12px] font-light leading-snug text-[var(--text-secondary)]">
+                        Close the citation gap on head-term prompts your client should own.
+                      </span>
+                    </li>
+                    <li className="flex gap-2.5">
+                      <span
+                        className={`${actionPillClass} mt-0.5 bg-[rgba(245,166,35,0.14)] text-[var(--marketing-amber)]`}
+                      >
+                        MED
+                      </span>
+                      <span className="min-w-0 text-[12px] font-light leading-snug text-[var(--text-secondary)]">
+                        Align on-page proof with passages models are already quoting.
+                      </span>
+                    </li>
+                    <li className="flex gap-2.5">
+                      <span
+                        className={`${actionPillClass} mt-0.5 bg-[rgba(255,64,64,0.14)] text-[var(--marketing-red)]`}
+                      >
+                        HIGH
+                      </span>
+                      <span className="min-w-0 text-[12px] font-light leading-snug text-[var(--text-secondary)]">
+                        Counter competitor mentions before they harden into default answers.
+                      </span>
+                    </li>
+                  </ul>
                 </div>
               </ProductPreviewCard>
             </div>
