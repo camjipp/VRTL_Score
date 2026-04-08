@@ -9,7 +9,12 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 function Check({ className }: { className?: string }) {
   return (
-    <span className={cn("inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400", className)}>
+    <span
+      className={cn(
+        "inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-zinc-200",
+        className,
+      )}
+    >
       <svg aria-hidden="true" fill="none" height="12" viewBox="0 0 24 24" width="12">
         <path
           d="M20 6L9 17l-5-5"
@@ -26,99 +31,138 @@ function Check({ className }: { className?: string }) {
 const plans = [
   {
     id: "starter" as const,
-    name: "Starter",
-    description: "For small agencies getting started with AI visibility.",
+    name: "Foundation",
+    description: "For agencies validating AI visibility with a tight client list before you productize reporting.",
     monthlyPrice: 149,
     yearlyPrice: 1490,
     clients: 5,
-    features: [
-      "Up to 5 active clients",
-      "Unlimited snapshots",
-      "PDF report export",
-      "All leading AI providers included",
-      "Basic branding",
-      "Email support",
+    highlights: [
+      "Up to 5 clients",
+      "Basic report branding",
+      "30-day snapshot history",
+      "4 competitors tracked per client",
     ],
   },
   {
     id: "growth" as const,
-    name: "Growth",
-    description: "For real agencies running weekly reporting.",
+    name: "Agency",
+    description: "For agencies running client reporting and closing retainers with AI visibility.",
     monthlyPrice: 399,
     yearlyPrice: 3990,
     clients: 20,
-    features: [
-      "Up to 20 active clients",
-      "Unlimited snapshots",
+    highlights: [
+      "Up to 20 clients",
       "Full PDF branding (logo, colors, footer)",
-      "Priority snapshot processing",
-      "Complete snapshot history",
-      "Competitor tracking (up to 8 per client)",
-      "Priority support",
+      "Unlimited history + priority snapshot runs",
+      "8 competitors per client",
     ],
     recommended: true,
   },
   {
     id: "pro" as const,
-    name: "Pro",
-    description: "For larger agencies and power users.",
+    name: "Scale",
+    description: "For firms managing a large book and packaging AI visibility as a core, billable line of business.",
     monthlyPrice: 799,
     yearlyPrice: 7990,
     clients: 50,
-    features: [
-      "50+ active clients",
-      "Unlimited snapshots",
-      "Everything in Growth",
-      "Faster snapshot runs",
-      "White-label domain (coming soon)",
-      "API access (coming soon)",
-      "Team seats (coming soon)",
-      "Dedicated account manager",
+    highlights: [
+      "50+ clients",
+      "Everything in Agency",
+      "Fastest runs + dedicated account manager",
+      "8 competitors per client",
     ],
   },
 ];
 
 const comparisonFeatures = [
   { name: "Active clients", starter: "5", growth: "20", pro: "50+" },
-  { name: "Snapshots per month", starter: "Unlimited", growth: "Unlimited", pro: "Unlimited" },
-  { name: "AI providers", starter: true, growth: true, pro: true },
-  { name: "PDF exports", starter: true, growth: true, pro: true },
-  { name: "Full branding (logo + colors)", starter: false, growth: true, pro: true },
-  { name: "Priority processing", starter: false, growth: true, pro: true },
-  { name: "Snapshot history", starter: "30 days", growth: "Unlimited", pro: "Unlimited" },
-  { name: "Competitor tracking", starter: "4 per client", growth: "8 per client", pro: "8 per client" },
-  { name: "White-label domain", starter: false, growth: false, pro: "Coming soon" },
-  { name: "API access", starter: false, growth: false, pro: "Coming soon" },
-  { name: "Team seats", starter: "1", growth: "3", pro: "Unlimited" },
+  { name: "Branding", starter: "Basic", growth: "Full (logo, colors, footer)", pro: "Full" },
+  { name: "Reporting & history", starter: "30-day history", growth: "Unlimited + priority runs", pro: "Unlimited + fastest runs" },
+  { name: "Competitors per client", starter: "4", growth: "8", pro: "8" },
   { name: "Support", starter: "Email", growth: "Priority", pro: "Dedicated" },
 ];
 
 const faqs = [
   {
-    question: "What's included in the free trial?",
-    answer: "All plans include a 7-day free trial with full access to features. You'll enter your card at signup, but won't be charged until the trial ends. Cancel anytime.",
+    question: "How do I get started?",
+    answer:
+      "Run a free snapshot during onboarding to see the product on real data. When you’re ready to cover more clients and history, pick a plan that matches your book.",
   },
   {
     question: "Can I change plans later?",
-    answer: "Absolutely. Upgrade or downgrade anytime. We'll prorate your billing automatically.",
+    answer: "Yes. Upgrade or downgrade anytime. We’ll prorate your billing automatically.",
   },
   {
     question: "What AI providers are included?",
-    answer: "All plans include access to the leading AI models for comprehensive visibility analysis. We continuously add new providers as they emerge.",
+    answer:
+      "All plans include the leading models we track for visibility analysis. We add providers as the landscape shifts.",
   },
   {
     question: "Do you offer refunds?",
-    answer: "Yes. If you're not satisfied within the first 30 days, we'll refund your payment in full.",
+    answer: "Yes. If you’re not satisfied within the first 30 days, we’ll refund your payment in full.",
   },
   {
-    question: "What happens if I exceed my client limit?",
-    answer: "You can add extra clients for $25-50/client/month, or upgrade to a higher tier for better value.",
+    question: "What if I exceed my client limit?",
+    answer: "You can add extra clients for $25–50/client/month, or move up a tier for better unit economics.",
   },
   {
-    question: "Is there a contract or commitment?",
-    answer: "No long-term contracts. Monthly plans can be cancelled anytime. Annual plans are billed upfront with 2 months free.",
+    question: "Is there a long-term contract?",
+    answer: "No. Monthly plans cancel anytime. Annual is billed upfront with two months included free.",
   },
 ];
+
+const heroBullets = [
+  "Catch client risk before churn",
+  "Prove value in client calls",
+  "Turn AI visibility into a billable service",
+];
+
+const howAgenciesBullets = [
+  "Identify which clients are losing AI visibility",
+  "Show exactly which competitors are replacing them",
+  "Deliver a report clients actually understand",
+];
+
+function RunSnapshotButton({
+  loading,
+  onClick,
+  className,
+}: {
+  loading?: boolean;
+  onClick: () => void;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={loading}
+      className={cn(
+        "inline-flex items-center justify-center gap-1 rounded-xl px-6 py-3 text-sm font-semibold transition-all disabled:opacity-50",
+        className,
+      )}
+    >
+      {loading ? (
+        <span className="flex items-center gap-2">
+          <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
+          </svg>
+          Processing…
+        </span>
+      ) : (
+        <>
+          Run a snapshot
+          <span aria-hidden="true">→</span>
+        </>
+      )}
+    </button>
+  );
+}
 
 function PricingContent() {
   const router = useRouter();
@@ -128,11 +172,9 @@ function PricingContent() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
 
-  // Check if this is a paywall context (user came from onboarding)
   const nextParam = searchParams.get("next");
   const isPaywall = !!nextParam && isLoggedIn;
 
-  // Check if user is logged in
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
     supabase.auth.getSession().then(({ data }) => {
@@ -171,7 +213,6 @@ function PricingContent() {
 
       if (!res.ok) {
         const error = await res.json();
-        // If no agency, redirect to complete onboarding
         if (error.code === "NO_AGENCY") {
           router.push("/onboarding");
           return;
@@ -192,33 +233,29 @@ function PricingContent() {
     }
   }
 
-  // Paywall mode - clean, focused plan selection
+  const cardBase =
+    "relative flex flex-col rounded-2xl border border-white/[0.08] bg-[#060606] p-8 transition-colors";
+  const cardRecommended = "border-white/[0.14] bg-[#0a0a0a] shadow-[0_0_0_1px_rgba(255,255,255,0.06)]";
+
   if (isPaywall) {
     return (
-      <main className="min-h-screen bg-black">
+      <main className="min-h-screen bg-[#030303]">
         <div className="mx-auto max-w-4xl px-6 py-12 md:py-20">
-          {/* Header */}
           <div className="mb-10 text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/20 text-2xl">
-              🎉
-            </div>
-            <h1 className="text-2xl font-bold text-white sm:text-3xl">
-              Choose your plan
-            </h1>
-            <p className="mt-2 text-white/60">
-              Start your 7-day free trial. Cancel anytime.
+            <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Choose your plan</h1>
+            <p className="mt-3 text-sm text-zinc-500">
+              Generate your first report on onboarding, then scale when you&apos;re ready.
             </p>
           </div>
 
-          {/* Billing toggle */}
           <div className="mb-8 flex items-center justify-center gap-3">
-            <div className="relative inline-flex items-center rounded-full border border-white/10 bg-white/5 p-1">
+            <div className="relative inline-flex items-center rounded-full border border-white/[0.08] bg-[#0a0a0a] p-1">
               <button
                 type="button"
                 onClick={() => setIsAnnual(false)}
                 className={cn(
                   "relative rounded-full px-4 py-1.5 text-sm font-medium transition-all",
-                  !isAnnual ? "bg-white text-black" : "text-white/50 hover:text-white/80"
+                  !isAnnual ? "bg-white text-black" : "text-zinc-500 hover:text-zinc-300",
                 )}
               >
                 Monthly
@@ -228,145 +265,121 @@ function PricingContent() {
                 onClick={() => setIsAnnual(true)}
                 className={cn(
                   "relative rounded-full px-4 py-1.5 text-sm font-medium transition-all",
-                  isAnnual ? "bg-white text-black" : "text-white/50 hover:text-white/80"
+                  isAnnual ? "bg-white text-black" : "text-zinc-500 hover:text-zinc-300",
                 )}
               >
                 Annual
               </button>
             </div>
             {isAnnual && (
-              <span className="rounded-full border border-emerald-500/50 bg-emerald-500/20 px-2.5 py-1 text-xs font-medium text-emerald-400">
-                Save 2 months
+              <span className="rounded-full border border-white/[0.1] bg-white/[0.04] px-2.5 py-1 text-xs font-medium text-zinc-400">
+                2 months free on annual
               </span>
             )}
           </div>
 
-          {/* Plan cards - compact */}
           <div className="grid gap-4 md:grid-cols-3">
             {plans.map((plan) => {
               const monthlyEquivalent = isAnnual ? Math.round(plan.yearlyPrice / 12) : plan.monthlyPrice;
               const isSelected = selectedPlan === plan.id;
               const isRecommended = plan.recommended && !selectedPlan;
 
-  return (
+              return (
                 <button
                   key={plan.id}
                   type="button"
                   onClick={() => setSelectedPlan(plan.id)}
                   className={cn(
-                    "relative flex flex-col rounded-2xl border-2 p-5 text-left transition-all",
+                    "relative flex flex-col rounded-2xl border p-5 text-left transition-all",
                     isSelected
-                      ? "border-emerald-500 bg-white/5 ring-2 ring-emerald-500/20"
+                      ? "border-white/20 bg-[#0c0c0c]"
                       : isRecommended
-                        ? "border-emerald-500/50 bg-white/[0.02]"
-                        : "border-white/10 bg-white/[0.02] hover:border-white/20"
+                        ? cn("border-white/[0.14] bg-[#0a0a0a] shadow-[0_0_0_1px_rgba(255,255,255,0.06)]")
+                        : "border-white/[0.08] bg-[#060606] hover:border-white/[0.12]",
                   )}
                 >
-                  {/* Badge */}
                   {(isSelected || isRecommended) && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className={cn(
-                        "inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold text-white",
-                        isSelected ? "bg-emerald-500" : "bg-emerald-500/80"
-                      )}>
-                        {isSelected ? (
-                          <>
-                            <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                            Selected
-                          </>
-                        ) : "Recommended"}
+                      <span
+                        className={cn(
+                          "inline-flex items-center gap-1 rounded-full border border-white/10 px-3 py-1 text-xs font-medium text-zinc-300",
+                          isSelected ? "bg-white/10" : "bg-white/[0.06]",
+                        )}
+                      >
+                        {isSelected ? "Selected" : "Best fit for most"}
                       </span>
                     </div>
                   )}
 
                   <div className="mb-3">
                     <h3 className="font-semibold text-white">{plan.name}</h3>
-                    <p className="mt-1 text-xs text-white/40">{plan.clients === 50 ? "50+" : plan.clients} clients</p>
+                    <p className="mt-1 text-xs text-zinc-500">{plan.clients === 50 ? "50+" : plan.clients} clients</p>
                   </div>
 
-                  <div className="mb-4">
-                    <span className="text-3xl font-bold text-white">${monthlyEquivalent}</span>
-                    <span className="text-sm text-white/40">/mo</span>
+                  <div className="mb-2">
+                    <span className="text-3xl font-bold tracking-tight text-white">${monthlyEquivalent}</span>
+                    <span className="text-sm text-zinc-500">/mo</span>
                   </div>
+                  <p className="mb-4 text-xs text-zinc-400">Typical ROI: 1 retained client pays for this 10–30x</p>
 
-                  <ul className="flex-1 space-y-2">
-                    {plan.features.slice(0, 4).map((feature) => (
-                      <li key={feature} className="flex items-start gap-2 text-xs text-white/70">
+                  <ul className="flex-1 space-y-2 text-left">
+                    {plan.highlights.map((line) => (
+                      <li key={line} className="flex items-start gap-2 text-xs text-zinc-400">
                         <Check className="mt-0.5 h-4 w-4 shrink-0" />
-                        <span>{feature}</span>
+                        <span>{line}</span>
                       </li>
                     ))}
-                    {plan.features.length > 4 && (
-                      <li className="text-xs text-white/40">
-                        +{plan.features.length - 4} more features
-                      </li>
-                    )}
                   </ul>
                 </button>
               );
             })}
           </div>
 
-          {/* CTA */}
-          <div className="mt-8 text-center">
-            <button
-              type="button"
+          <div className="mt-10 flex flex-col items-center gap-4">
+            <RunSnapshotButton
+              loading={!!loadingPlan}
               onClick={() => handleCheckout((selectedPlan || "growth") as "starter" | "growth" | "pro")}
-              disabled={!!loadingPlan}
-              className="inline-flex h-12 items-center justify-center rounded-xl bg-emerald-500 px-8 text-base font-semibold text-white transition-all hover:bg-emerald-600 disabled:opacity-50"
-            >
-              {loadingPlan ? (
-                <span className="flex items-center gap-2">
-                  <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-      </svg>
-                  Processing...
-    </span>
-              ) : (
-                `Start free trial with ${plans.find(p => p.id === (selectedPlan || "growth"))?.name}`
-              )}
-            </button>
-            <p className="mt-4 text-sm text-white/40">
-              7-day free trial · Cancel anytime · No charge until trial ends
-            </p>
+              className="w-full max-w-md bg-white text-black hover:bg-zinc-200 sm:w-auto"
+            />
+            <Link href="/preview" className="text-sm font-medium text-zinc-500 hover:text-zinc-300">
+              See example report
+            </Link>
           </div>
         </div>
       </main>
     );
   }
 
-  // Regular pricing page
   return (
-    <main className="min-h-screen bg-black">
-      {/* Hero */}
-      <section className="border-b border-white/10">
+    <main className="min-h-screen bg-[#030303]">
+      <section className="border-b border-white/[0.06]">
         <div className="mx-auto max-w-6xl px-6 py-20 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/50 bg-emerald-500/20 px-4 py-1.5 text-sm font-medium text-emerald-400">
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            7-day free trial on all plans
-          </div>
-          
-          <h1 className="mt-6 text-4xl font-bold tracking-tight text-white sm:text-5xl">
-            Pricing built for agencies
+          <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">Pricing</p>
+          <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white sm:text-5xl sm:leading-[1.1]">
+            Pricing built for agencies that want to win AI search
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-white/60">
-            Become the go-to expert for AI visibility. Track, report, and improve how your clients rank across the leading AI models.
+          <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-zinc-400">
+            Most agencies lose clients without even knowing why. VRTL Score shows you where you&apos;re being replaced —
+            and how to fix it.
           </p>
 
-          {/* Billing toggle */}
-          <div className="mt-10 flex items-center justify-center gap-4">
-            <div className="relative inline-flex items-center rounded-full border border-white/10 bg-white/5 p-1">
+          <ul className="mx-auto mt-10 max-w-xl space-y-3 text-left text-sm text-zinc-300">
+            {heroBullets.map((item) => (
+              <li key={item} className="flex gap-3">
+                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-zinc-500" aria-hidden />
+                {item}
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-12 flex items-center justify-center gap-4">
+            <div className="relative inline-flex items-center rounded-full border border-white/[0.08] bg-[#0a0a0a] p-1">
               <button
                 type="button"
                 onClick={() => setIsAnnual(false)}
                 className={cn(
                   "relative rounded-full px-5 py-2 text-sm font-medium transition-all",
-                  !isAnnual ? "bg-white text-black" : "text-white/50 hover:text-white/80"
+                  !isAnnual ? "bg-white text-black" : "text-zinc-500 hover:text-zinc-300",
                 )}
               >
                 Monthly
@@ -376,25 +389,24 @@ function PricingContent() {
                 onClick={() => setIsAnnual(true)}
                 className={cn(
                   "relative rounded-full px-5 py-2 text-sm font-medium transition-all",
-                  isAnnual ? "bg-white text-black" : "text-white/50 hover:text-white/80"
+                  isAnnual ? "bg-white text-black" : "text-zinc-500 hover:text-zinc-300",
                 )}
               >
                 Annual
               </button>
             </div>
             {isAnnual && (
-              <span className="rounded-full border border-emerald-500/50 bg-emerald-500/20 px-3 py-1 text-sm font-medium text-emerald-400">
-                Save 2 months
+              <span className="rounded-full border border-white/[0.1] bg-white/[0.04] px-3 py-1 text-sm font-medium text-zinc-400">
+                2 months free on annual
               </span>
             )}
           </div>
         </div>
       </section>
 
-      {/* Pricing cards */}
       <section className="relative">
         <div className="mx-auto max-w-6xl px-6 py-16">
-          <div className="grid gap-8 lg:grid-cols-3">
+          <div className="grid gap-6 lg:grid-cols-3 lg:gap-5">
             {plans.map((plan) => {
               const price = isAnnual ? plan.yearlyPrice : plan.monthlyPrice;
               const monthlyEquivalent = isAnnual ? Math.round(plan.yearlyPrice / 12) : plan.monthlyPrice;
@@ -403,204 +415,177 @@ function PricingContent() {
               return (
                 <div
                   key={plan.name}
-                  className={cn(
-                    "relative flex flex-col rounded-3xl border p-8 transition-all",
-                    plan.recommended
-                      ? "border-emerald-500/50 bg-white/[0.02] ring-2 ring-emerald-500/20 scale-[1.02]"
-                      : "border-white/10 bg-white/[0.02] hover:border-white/20"
-                  )}
+                  className={cn(cardBase, plan.recommended && cn("lg:-mt-1 lg:mb-1", cardRecommended))}
                 >
                   {plan.recommended && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-4 py-1.5 text-sm font-semibold text-white">
-                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                        </svg>
-                        Most Popular
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <span className="inline-flex rounded-full border border-white/10 bg-white/[0.08] px-3 py-1 text-xs font-medium text-zinc-200">
+                        Where most agencies land
                       </span>
                     </div>
                   )}
 
                   <div className="mb-6">
-                    <h3 className="text-xl font-bold text-white">{plan.name}</h3>
-                    <p className="mt-2 text-sm text-white/60">{plan.description}</p>
-              </div>
+                    <h3 className="text-xl font-semibold text-white">{plan.name}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-zinc-500">{plan.description}</p>
+                  </div>
 
-                  <div className="mb-6">
+                  <div className="mb-4">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-5xl font-bold tracking-tight text-white">
-                        ${monthlyEquivalent}
-                      </span>
-                      <span className="text-white/40">/month</span>
-              </div>
-                    {isAnnual && (
-                      <p className="mt-2 text-sm text-white/40">
-                        ${price.toLocaleString()} billed annually
-                      </p>
-                    )}
+                      <span className="text-5xl font-semibold tracking-tight text-white">${monthlyEquivalent}</span>
+                      <span className="text-zinc-500">/month</span>
+                    </div>
+                    <p className="mt-2 text-xs text-zinc-400">Typical ROI: 1 retained client pays for this 10–30x</p>
+                    {isAnnual && <p className="mt-2 text-sm text-zinc-500">${price.toLocaleString()} billed annually</p>}
                     {!isAnnual && (
-                      <p className="mt-2 text-sm text-emerald-400">
-                        Save ${(plan.monthlyPrice * 12 - plan.yearlyPrice).toLocaleString()}/year with annual
+                      <p className="mt-2 text-sm text-zinc-500">
+                        Save ${(plan.monthlyPrice * 12 - plan.yearlyPrice).toLocaleString()}/year on annual
                       </p>
                     )}
-              </div>
+                  </div>
 
-                  <button
-                    type="button"
+                  <RunSnapshotButton
+                    loading={isLoading}
                     onClick={() => handleCheckout(plan.id)}
-                    disabled={isLoading}
                     className={cn(
-                      "flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold transition-all disabled:opacity-50",
+                      "w-full",
                       plan.recommended
-                        ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                        : "border border-white/20 bg-white/5 text-white hover:bg-white/10"
+                        ? "bg-white text-black hover:bg-zinc-200"
+                        : "border border-white/[0.12] bg-transparent text-white hover:bg-white/[0.06]",
                     )}
-                  >
-                    {isLoading ? (
-                      <span className="flex items-center gap-2">
-                        <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                        </svg>
-                        Loading...
-                      </span>
-                    ) : (
-                      "Start free trial"
-                    )}
-                  </button>
+                  />
 
-                  <div className="my-6 h-px bg-white/10" />
+                  <Link
+                    href="/preview"
+                    className="mt-3 block text-center text-xs font-medium text-zinc-500 hover:text-zinc-400"
+                  >
+                    See example report
+                  </Link>
+
+                  <div className="my-6 h-px bg-white/[0.06]" />
 
                   <div className="mb-4 flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-white/80">
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-                      </svg>
-                    </div>
-                    <span className="text-sm font-semibold text-white">
+                    <span className="text-sm font-medium text-zinc-300">
                       Up to {plan.clients === 50 ? "50+" : plan.clients} clients
                     </span>
-              </div>
+                  </div>
 
                   <ul className="flex-1 space-y-3">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-3 text-sm text-white/70">
+                    {plan.highlights.map((line) => (
+                      <li key={line} className="flex items-start gap-3 text-sm text-zinc-400">
                         <Check className="mt-0.5 shrink-0" />
-                        <span>{feature}</span>
-                </li>
+                        <span>{line}</span>
+                      </li>
                     ))}
-              </ul>
+                  </ul>
                 </div>
               );
             })}
           </div>
 
-          {/* Enterprise callout */}
-          <div className="mt-12 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02] p-8 lg:p-12">
-            <div className="flex flex-col items-center justify-between gap-6 lg:flex-row">
+          <div className="mt-12 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#060606] p-8 lg:p-10">
+            <div className="flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
               <div>
-                <h3 className="text-2xl font-bold text-white">Need more than 50 clients?</h3>
-                <p className="mt-2 text-white/60">
-                  Get custom pricing, dedicated support, and enterprise features tailored to your agency.
+                <h3 className="text-xl font-semibold text-white">More than 50 clients?</h3>
+                <p className="mt-2 max-w-xl text-sm text-zinc-500">
+                  Custom pricing, rollout support, and terms that match how your agency sells.
                 </p>
               </div>
               <a
                 href="mailto:hello@vrtlscore.com"
-                className="shrink-0 rounded-xl border border-white/20 bg-white/10 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-white/20"
+                className="shrink-0 rounded-xl border border-white/[0.12] bg-white/[0.04] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/[0.08]"
               >
                 Contact sales →
               </a>
             </div>
           </div>
-            </div>
+        </div>
       </section>
 
-      {/* Comparison table */}
-      <section className="border-t border-white/10">
+      <section className="border-t border-white/[0.06] bg-[#050505]">
         <div className="mx-auto max-w-6xl px-6 py-16">
-          <h2 className="text-center text-2xl font-bold text-white">Compare plans</h2>
-          <p className="mt-2 text-center text-white/60">See what&apos;s included in each plan</p>
+          <h2 className="text-center text-xl font-semibold text-white sm:text-2xl">How agencies use VRTL Score</h2>
+          <ul className="mx-auto mt-8 grid max-w-3xl gap-4 sm:grid-cols-1 md:grid-cols-3 md:gap-8">
+            {howAgenciesBullets.map((item) => (
+              <li
+                key={item}
+                className="rounded-xl border border-white/[0.06] bg-[#080808] px-5 py-4 text-sm leading-relaxed text-zinc-400"
+              >
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
 
-          <div className="mt-10 overflow-hidden rounded-2xl border border-white/10">
+      <section className="border-t border-white/[0.06]">
+        <div className="mx-auto max-w-6xl px-6 py-16">
+          <h2 className="text-center text-xl font-semibold text-white sm:text-2xl">At a glance</h2>
+          <p className="mt-2 text-center text-sm text-zinc-500">What actually moves the needle for your book</p>
+
+          <div className="mt-10 overflow-hidden rounded-2xl border border-white/[0.08]">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-white/10 bg-white/[0.02]">
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-white">Feature</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-white">Starter</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-emerald-400">Growth</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-white">Pro</th>
+                  <tr className="border-b border-white/[0.08] bg-[#0a0a0a]">
+                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                      &nbsp;
+                    </th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-zinc-300">Foundation</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-white bg-white/[0.04]">Agency</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-zinc-300">Scale</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/10">
+                <tbody className="divide-y divide-white/[0.06] bg-[#060606]">
                   {comparisonFeatures.map((feature) => (
                     <tr key={feature.name} className="hover:bg-white/[0.02]">
-                      <td className="px-6 py-4 text-sm text-white/70">{feature.name}</td>
-                      <td className="px-6 py-4 text-center">
-                        {typeof feature.starter === "boolean" ? (
-                          feature.starter ? <Check className="mx-auto" /> : <span className="text-white/30">—</span>
-                        ) : (
-                          <span className="text-sm text-white">{feature.starter}</span>
-                        )}
+                      <td className="px-6 py-4 text-sm text-zinc-400">{feature.name}</td>
+                      <td className="px-6 py-4 text-center text-sm text-zinc-300">{feature.starter}</td>
+                      <td className="px-6 py-4 text-center text-sm font-medium text-white bg-white/[0.03]">
+                        {feature.growth}
                       </td>
-                      <td className="px-6 py-4 text-center bg-emerald-500/10">
-                        {typeof feature.growth === "boolean" ? (
-                          feature.growth ? <Check className="mx-auto" /> : <span className="text-white/30">—</span>
-                        ) : (
-                          <span className="text-sm font-medium text-white">{feature.growth}</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        {typeof feature.pro === "boolean" ? (
-                          feature.pro ? <Check className="mx-auto" /> : <span className="text-white/30">—</span>
-                        ) : (
-                          <span className="text-sm text-white">{feature.pro}</span>
-                        )}
-                      </td>
+                      <td className="px-6 py-4 text-center text-sm text-zinc-300">{feature.pro}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-                </div>
-                </div>
+          </div>
+        </div>
       </section>
 
-      {/* FAQ */}
-      <section className="border-t border-white/10">
+      <section className="border-t border-white/[0.06]">
         <div className="mx-auto max-w-4xl px-6 py-16">
-          <h2 className="text-center text-2xl font-bold text-white">Frequently asked questions</h2>
-          <p className="mt-2 text-center text-white/60">Everything you need to know about pricing</p>
+          <h2 className="text-center text-xl font-semibold text-white sm:text-2xl">Questions</h2>
+          <p className="mt-2 text-center text-sm text-zinc-500">Straight answers on plans and billing</p>
 
-          <div className="mt-10 grid gap-6 sm:grid-cols-2">
+          <div className="mt-10 grid gap-4 sm:grid-cols-2">
             {faqs.map((faq) => (
-              <div key={faq.question} className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
-                <h3 className="font-semibold text-white">{faq.question}</h3>
-                <p className="mt-2 text-sm text-white/60">{faq.answer}</p>
-                </div>
+              <div key={faq.question} className="rounded-xl border border-white/[0.08] bg-[#060606] p-6">
+                <h3 className="text-sm font-semibold text-white">{faq.question}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-zinc-500">{faq.answer}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="border-t border-white/10">
+      <section className="border-t border-white/[0.06]">
         <div className="mx-auto max-w-4xl px-6 py-16 text-center">
-          <h2 className="text-2xl font-bold text-white">Ready to dominate AI search?</h2>
-          <p className="mt-2 text-white/60">Start your 7-day free trial. Cancel anytime before it ends.</p>
+          <h2 className="text-2xl font-semibold text-white">See where you&apos;re being replaced</h2>
+          <p className="mt-3 text-sm text-zinc-500">
+            Run a snapshot, walk into the next QBR with proof—not guesswork.
+          </p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <button
-              type="button"
+            <RunSnapshotButton
+              loading={loadingPlan === "growth"}
               onClick={() => handleCheckout("growth")}
-              disabled={loadingPlan === "growth"}
-              className="rounded-xl bg-emerald-500 px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-emerald-600 disabled:opacity-50"
-            >
-              {loadingPlan === "growth" ? "Loading..." : "Start free trial"}
-            </button>
-            <Link
-              href="/"
-              className="text-sm font-medium text-white/60 hover:text-white/90"
-            >
+              className="bg-white text-black hover:bg-zinc-200"
+            />
+            <Link href="/preview" className="text-sm font-medium text-zinc-500 hover:text-zinc-300">
+              See example report
+            </Link>
+            <Link href="/" className="text-sm font-medium text-zinc-600 hover:text-zinc-400 sm:ml-2">
               ← Back to home
             </Link>
           </div>
@@ -612,11 +597,13 @@ function PricingContent() {
 
 export default function PricingPage() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-black">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[#030303]">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-zinc-400" />
+        </div>
+      }
+    >
       <PricingContent />
     </Suspense>
   );
