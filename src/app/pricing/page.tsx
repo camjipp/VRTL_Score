@@ -4,14 +4,25 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
+import { SectionLabel } from "@/components/SectionLabel";
 import { cn } from "@/lib/cn";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+
+/** Same horizontal grid as landing (`src/app/page.tsx`). */
+const shell = "mx-auto w-full max-w-[1200px] px-6 md:px-12";
+
+const sectionY = "py-16 md:py-24";
+
+const cardBase =
+  "flex h-full min-h-0 flex-col gap-5 rounded-xl border border-zinc-800 bg-zinc-900 p-6 md:p-8";
+const cardFeatured =
+  "relative z-10 scale-[1.02] border-emerald-500/40 bg-zinc-900/80";
 
 function Check({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-zinc-200",
+        "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300",
         className,
       )}
     >
@@ -118,27 +129,42 @@ const heroBullets = [
 ];
 
 const howAgenciesBullets = [
-  "Identify which clients are losing AI visibility",
-  "Show exactly which competitors are replacing them",
-  "Deliver a report clients actually understand",
+  "Spot which clients are losing AI visibility",
+  "See which competitors are replacing them",
+  "Ship a report clients actually understand",
 ];
 
 function RunSnapshotButton({
   loading,
   onClick,
   className,
+  variant = "primary",
+  size = "default",
 }: {
   loading?: boolean;
   onClick: () => void;
   className?: string;
+  variant?: "primary" | "outline";
+  size?: "default" | "large";
 }) {
+  const sizeCls = size === "large" ? "px-8 py-3.5 text-base" : "px-6 py-3 text-sm";
+  const base =
+    "inline-flex w-full items-center justify-center gap-1 font-medium transition duration-150 disabled:opacity-50";
+  const shape = "rounded-full";
+
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={loading}
       className={cn(
-        "inline-flex items-center justify-center gap-1 rounded-xl px-6 py-3 text-sm font-semibold transition-all disabled:opacity-50",
+        base,
+        shape,
+        sizeCls,
+        variant === "primary" &&
+          "bg-[var(--accent-marketing)] text-black hover:scale-[1.02] hover:brightness-110",
+        variant === "outline" &&
+          "border border-[color:var(--border-mid)] bg-transparent font-normal text-[var(--text-secondary)] hover:border-[color:var(--border-strong)] hover:text-[var(--text-primary)]",
         className,
       )}
     >
@@ -161,6 +187,50 @@ function RunSnapshotButton({
         </>
       )}
     </button>
+  );
+}
+
+function BillingToggle({
+  isAnnual,
+  setIsAnnual,
+  compact,
+}: {
+  isAnnual: boolean;
+  setIsAnnual: (v: boolean) => void;
+  compact?: boolean;
+}) {
+  return (
+    <div className={cn("flex flex-wrap items-center justify-center gap-3", compact ? "gap-2" : "gap-4")}>
+      <div className="relative inline-flex items-center rounded-full border border-[color:var(--border-subtle)] bg-[var(--bg-elevated)] p-1">
+        <button
+          type="button"
+          onClick={() => setIsAnnual(false)}
+          className={cn(
+            "relative rounded-full font-medium transition-all",
+            compact ? "px-4 py-1.5 text-sm" : "px-5 py-2 text-sm",
+            !isAnnual ? "bg-[var(--text-primary)] text-black" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]",
+          )}
+        >
+          Monthly
+        </button>
+        <button
+          type="button"
+          onClick={() => setIsAnnual(true)}
+          className={cn(
+            "relative rounded-full font-medium transition-all",
+            compact ? "px-4 py-1.5 text-sm" : "px-5 py-2 text-sm",
+            isAnnual ? "bg-[var(--text-primary)] text-black" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]",
+          )}
+        >
+          Annual
+        </button>
+      </div>
+      {isAnnual && (
+        <span className="rounded-full border border-[color:var(--border-mid)] bg-[var(--bg-inset)] px-3 py-1 text-xs font-medium text-[var(--text-secondary)] md:text-sm">
+          2 months free on annual
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -233,365 +303,342 @@ function PricingContent() {
     }
   }
 
-  const cardBase =
-    "relative flex flex-col rounded-2xl border border-white/[0.08] bg-[#060606] p-8 transition-colors";
-  const cardRecommended = "border-white/[0.14] bg-[#0a0a0a] shadow-[0_0_0_1px_rgba(255,255,255,0.06)]";
-
   if (isPaywall) {
     return (
-      <main className="min-h-screen bg-[#030303]">
-        <div className="mx-auto max-w-4xl px-6 py-12 md:py-20">
-          <div className="mb-10 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Choose your plan</h1>
-            <p className="mt-3 text-sm text-zinc-500">
-              Generate your first report on onboarding, then scale when you&apos;re ready.
-            </p>
-          </div>
+      <div className="page-marketing selection:bg-[var(--accent-bg)] selection:text-[var(--text-primary)]">
+        <main className="min-h-screen">
+          <section className={cn("border-b border-[color:var(--border-subtle)]", sectionY)}>
+            <div className={shell}>
+              <div className="text-center">
+                <SectionLabel noMargin>{`// CHOOSE PLAN`}</SectionLabel>
+                <h1 className="mt-6 text-4xl font-semibold tracking-tight text-[var(--text-primary)] md:text-5xl">
+                  Choose your plan
+                </h1>
+                <p className="mx-auto mt-4 max-w-2xl text-base font-light text-[var(--text-secondary)]">
+                  Generate your first report on onboarding, then scale when you&apos;re ready.
+                </p>
+              </div>
 
-          <div className="mb-8 flex items-center justify-center gap-3">
-            <div className="relative inline-flex items-center rounded-full border border-white/[0.08] bg-[#0a0a0a] p-1">
-              <button
-                type="button"
-                onClick={() => setIsAnnual(false)}
-                className={cn(
-                  "relative rounded-full px-4 py-1.5 text-sm font-medium transition-all",
-                  !isAnnual ? "bg-white text-black" : "text-zinc-500 hover:text-zinc-300",
-                )}
-              >
-                Monthly
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsAnnual(true)}
-                className={cn(
-                  "relative rounded-full px-4 py-1.5 text-sm font-medium transition-all",
-                  isAnnual ? "bg-white text-black" : "text-zinc-500 hover:text-zinc-300",
-                )}
-              >
-                Annual
-              </button>
-            </div>
-            {isAnnual && (
-              <span className="rounded-full border border-white/[0.1] bg-white/[0.04] px-2.5 py-1 text-xs font-medium text-zinc-400">
-                2 months free on annual
-              </span>
-            )}
-          </div>
+              <div className="mt-10">
+                <BillingToggle compact isAnnual={isAnnual} setIsAnnual={setIsAnnual} />
+              </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
-            {plans.map((plan) => {
-              const monthlyEquivalent = isAnnual ? Math.round(plan.yearlyPrice / 12) : plan.monthlyPrice;
-              const isSelected = selectedPlan === plan.id;
-              const isRecommended = plan.recommended && !selectedPlan;
+              <div className="mt-10 grid gap-6 md:grid-cols-3 md:gap-8 md:items-stretch">
+                {plans.map((plan) => {
+                  const monthlyEquivalent = isAnnual ? Math.round(plan.yearlyPrice / 12) : plan.monthlyPrice;
+                  const isSelected = selectedPlan === plan.id;
+                  const isRecommended = plan.recommended && !selectedPlan;
 
-              return (
-                <button
-                  key={plan.id}
-                  type="button"
-                  onClick={() => setSelectedPlan(plan.id)}
-                  className={cn(
-                    "relative flex flex-col rounded-2xl border p-5 text-left transition-all",
-                    isSelected
-                      ? "border-white/20 bg-[#0c0c0c]"
-                      : isRecommended
-                        ? cn("border-white/[0.14] bg-[#0a0a0a] shadow-[0_0_0_1px_rgba(255,255,255,0.06)]")
-                        : "border-white/[0.08] bg-[#060606] hover:border-white/[0.12]",
-                  )}
+                  return (
+                    <button
+                      key={plan.id}
+                      type="button"
+                      onClick={() => setSelectedPlan(plan.id)}
+                      className={cn(
+                        "flex h-full flex-col gap-5 rounded-xl border p-6 text-left transition-colors",
+                        "border-zinc-800 bg-zinc-900",
+                        isSelected && "border-emerald-500/40 bg-zinc-900/80",
+                        !isSelected && isRecommended && cardFeatured,
+                        !isSelected && !isRecommended && "hover:border-zinc-700",
+                      )}
+                    >
+                      <div className="min-h-[2.25rem]">
+                        {plan.recommended ? (
+                          <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-500">
+                            Most agencies choose this
+                          </p>
+                        ) : null}
+                      </div>
+
+                      <div>
+                        <h3 className="text-lg font-medium text-[var(--text-primary)]">{plan.name}</h3>
+                        <p className="mt-1 text-sm text-[var(--text-muted)]">
+                          {plan.clients === 50 ? "50+" : plan.clients} clients
+                        </p>
+                      </div>
+
+                      <div className="flex min-h-[5.5rem] flex-col gap-2">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-4xl font-semibold tracking-tight text-[var(--text-primary)] md:text-5xl">
+                            ${monthlyEquivalent}
+                          </span>
+                          <span className="text-sm text-[var(--text-secondary)]">/mo</span>
+                        </div>
+                        <p className="text-sm text-zinc-400">Typical ROI: 1 retained client pays for this 10–30x</p>
+                      </div>
+
+                      <ul className="flex flex-1 flex-col gap-3 text-left">
+                        {plan.highlights.map((line) => (
+                          <li key={line} className="flex items-start gap-3 text-sm text-zinc-400">
+                            <Check className="mt-0.5" />
+                            <span>{line}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-10 flex flex-col items-center gap-6">
+                <RunSnapshotButton
+                  loading={!!loadingPlan}
+                  onClick={() => handleCheckout((selectedPlan || "growth") as "starter" | "growth" | "pro")}
+                  className="w-full max-w-md sm:w-auto"
+                />
+                <Link
+                  href="/preview"
+                  className="text-sm font-normal text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
                 >
-                  {(isSelected || isRecommended) && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span
-                        className={cn(
-                          "inline-flex items-center gap-1 rounded-full border border-white/10 px-3 py-1 text-xs font-medium text-zinc-300",
-                          isSelected ? "bg-white/10" : "bg-white/[0.06]",
-                        )}
-                      >
-                        {isSelected ? "Selected" : "Best fit for most"}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="mb-3">
-                    <h3 className="font-semibold text-white">{plan.name}</h3>
-                    <p className="mt-1 text-xs text-zinc-500">{plan.clients === 50 ? "50+" : plan.clients} clients</p>
-                  </div>
-
-                  <div className="mb-2">
-                    <span className="text-3xl font-bold tracking-tight text-white">${monthlyEquivalent}</span>
-                    <span className="text-sm text-zinc-500">/mo</span>
-                  </div>
-                  <p className="mb-4 text-xs text-zinc-400">Typical ROI: 1 retained client pays for this 10–30x</p>
-
-                  <ul className="flex-1 space-y-2 text-left">
-                    {plan.highlights.map((line) => (
-                      <li key={line} className="flex items-start gap-2 text-xs text-zinc-400">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0" />
-                        <span>{line}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="mt-10 flex flex-col items-center gap-4">
-            <RunSnapshotButton
-              loading={!!loadingPlan}
-              onClick={() => handleCheckout((selectedPlan || "growth") as "starter" | "growth" | "pro")}
-              className="w-full max-w-md bg-white text-black hover:bg-zinc-200 sm:w-auto"
-            />
-            <Link href="/preview" className="text-sm font-medium text-zinc-500 hover:text-zinc-300">
-              See example report
-            </Link>
-          </div>
-        </div>
-      </main>
+                  See example report
+                </Link>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#030303]">
-      <section className="border-b border-white/[0.06]">
-        <div className="mx-auto max-w-6xl px-6 py-20 text-center">
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">Pricing</p>
-          <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white sm:text-5xl sm:leading-[1.1]">
-            Pricing built for agencies that want to win AI search
-          </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-zinc-400">
-            Most agencies lose clients without even knowing why. VRTL Score shows you where you&apos;re being replaced —
-            and how to fix it.
-          </p>
+    <div className="page-marketing selection:bg-[var(--accent-bg)] selection:text-[var(--text-primary)]">
+      <main>
+        <section className={cn("border-b border-[color:var(--border-subtle)]", sectionY)}>
+          <div className={shell}>
+            <div className="text-center">
+              <SectionLabel noMargin>{`// PRICING`}</SectionLabel>
+              <h1 className="mt-6 text-4xl font-semibold tracking-tight text-[var(--text-primary)] md:text-5xl md:leading-[1.1]">
+                Pricing built for agencies that want to win AI search
+              </h1>
+              <p className="mx-auto mt-5 max-w-2xl text-lg font-light leading-relaxed text-zinc-400">
+                Most agencies lose clients without even knowing why. VRTL Score shows you where you&apos;re being replaced —
+                and how to fix it.
+              </p>
 
-          <ul className="mx-auto mt-10 max-w-xl space-y-3 text-left text-sm text-zinc-300">
-            {heroBullets.map((item) => (
-              <li key={item} className="flex gap-3">
-                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-zinc-500" aria-hidden />
-                {item}
-              </li>
-            ))}
-          </ul>
+              <ul className="mx-auto mt-10 max-w-xl space-y-3 text-left text-base font-light text-[var(--text-secondary)]">
+                {heroBullets.map((item) => (
+                  <li key={item} className="flex gap-3">
+                    <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[var(--text-muted)]" aria-hidden />
+                    {item}
+                  </li>
+                ))}
+              </ul>
 
-          <div className="mt-12 flex items-center justify-center gap-4">
-            <div className="relative inline-flex items-center rounded-full border border-white/[0.08] bg-[#0a0a0a] p-1">
-              <button
-                type="button"
-                onClick={() => setIsAnnual(false)}
-                className={cn(
-                  "relative rounded-full px-5 py-2 text-sm font-medium transition-all",
-                  !isAnnual ? "bg-white text-black" : "text-zinc-500 hover:text-zinc-300",
-                )}
-              >
-                Monthly
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsAnnual(true)}
-                className={cn(
-                  "relative rounded-full px-5 py-2 text-sm font-medium transition-all",
-                  isAnnual ? "bg-white text-black" : "text-zinc-500 hover:text-zinc-300",
-                )}
-              >
-                Annual
-              </button>
+              <div className="mt-10">
+                <BillingToggle isAnnual={isAnnual} setIsAnnual={setIsAnnual} />
+              </div>
             </div>
-            {isAnnual && (
-              <span className="rounded-full border border-white/[0.1] bg-white/[0.04] px-3 py-1 text-sm font-medium text-zinc-400">
-                2 months free on annual
-              </span>
-            )}
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="relative">
-        <div className="mx-auto max-w-6xl px-6 py-16">
-          <div className="grid gap-6 lg:grid-cols-3 lg:gap-5">
-            {plans.map((plan) => {
-              const price = isAnnual ? plan.yearlyPrice : plan.monthlyPrice;
-              const monthlyEquivalent = isAnnual ? Math.round(plan.yearlyPrice / 12) : plan.monthlyPrice;
-              const isLoading = loadingPlan === plan.id;
+        <section className={cn("border-b border-[color:var(--border-subtle)]", sectionY)}>
+          <div className={shell}>
+            <div className="grid gap-6 overflow-visible py-1 lg:grid-cols-3 lg:items-stretch lg:gap-8 lg:py-2">
+              {plans.map((plan) => {
+                const price = isAnnual ? plan.yearlyPrice : plan.monthlyPrice;
+                const monthlyEquivalent = isAnnual ? Math.round(plan.yearlyPrice / 12) : plan.monthlyPrice;
+                const isLoading = loadingPlan === plan.id;
 
-              return (
-                <div
-                  key={plan.name}
-                  className={cn(cardBase, plan.recommended && cn("lg:-mt-1 lg:mb-1", cardRecommended))}
-                >
-                  {plan.recommended && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className="inline-flex rounded-full border border-white/10 bg-white/[0.08] px-3 py-1 text-xs font-medium text-zinc-200">
-                        Where most agencies land
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="mb-6">
-                    <h3 className="text-xl font-semibold text-white">{plan.name}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-zinc-500">{plan.description}</p>
-                  </div>
-
-                  <div className="mb-4">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-5xl font-semibold tracking-tight text-white">${monthlyEquivalent}</span>
-                      <span className="text-zinc-500">/month</span>
-                    </div>
-                    <p className="mt-2 text-xs text-zinc-400">Typical ROI: 1 retained client pays for this 10–30x</p>
-                    {isAnnual && <p className="mt-2 text-sm text-zinc-500">${price.toLocaleString()} billed annually</p>}
-                    {!isAnnual && (
-                      <p className="mt-2 text-sm text-zinc-500">
-                        Save ${(plan.monthlyPrice * 12 - plan.yearlyPrice).toLocaleString()}/year on annual
-                      </p>
-                    )}
-                  </div>
-
-                  <RunSnapshotButton
-                    loading={isLoading}
-                    onClick={() => handleCheckout(plan.id)}
-                    className={cn(
-                      "w-full",
-                      plan.recommended
-                        ? "bg-white text-black hover:bg-zinc-200"
-                        : "border border-white/[0.12] bg-transparent text-white hover:bg-white/[0.06]",
-                    )}
-                  />
-
-                  <Link
-                    href="/preview"
-                    className="mt-3 block text-center text-xs font-medium text-zinc-500 hover:text-zinc-400"
+                return (
+                  <div
+                    key={plan.name}
+                    className={cn(cardBase, plan.recommended && cardFeatured)}
                   >
-                    See example report
-                  </Link>
+                    <div className="min-h-[2.25rem] shrink-0">
+                      {plan.recommended ? (
+                        <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-500">
+                          Most agencies choose this
+                        </p>
+                      ) : null}
+                    </div>
 
-                  <div className="my-6 h-px bg-white/[0.06]" />
+                    <div className="shrink-0">
+                      <h3 className="text-lg font-medium text-[var(--text-primary)]">{plan.name}</h3>
+                      <p className="mt-2 min-h-[4.5rem] text-sm font-light leading-relaxed text-[var(--text-secondary)]">
+                        {plan.description}
+                      </p>
+                    </div>
 
-                  <div className="mb-4 flex items-center gap-2">
-                    <span className="text-sm font-medium text-zinc-300">
-                      Up to {plan.clients === 50 ? "50+" : plan.clients} clients
-                    </span>
+                    <div className="flex min-h-[7.5rem] shrink-0 flex-col gap-2">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-semibold tracking-tight text-[var(--text-primary)] md:text-5xl">
+                          ${monthlyEquivalent}
+                        </span>
+                        <span className="text-sm text-[var(--text-secondary)]">/month</span>
+                      </div>
+                      <p className="text-sm text-zinc-400">Typical ROI: 1 retained client pays for this 10–30x</p>
+                      {isAnnual && (
+                        <p className="text-sm text-[var(--text-secondary)]">${price.toLocaleString()} billed annually</p>
+                      )}
+                      {!isAnnual && (
+                        <p className="text-sm text-[var(--text-secondary)]">
+                          Save ${(plan.monthlyPrice * 12 - plan.yearlyPrice).toLocaleString()}/year on annual
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex min-h-[5.25rem] shrink-0 flex-col gap-2">
+                      <RunSnapshotButton
+                        loading={isLoading}
+                        onClick={() => handleCheckout(plan.id)}
+                        variant={plan.recommended ? "primary" : "outline"}
+                        className={cn(!plan.recommended && "font-normal")}
+                      />
+                      <Link
+                        href="/preview"
+                        className="text-center text-sm font-normal text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+                      >
+                        See example report
+                      </Link>
+                    </div>
+
+                    <ul className="flex flex-1 flex-col gap-3">
+                      {plan.highlights.map((line) => (
+                        <li key={line} className="flex items-start gap-3 text-sm text-zinc-400">
+                          <Check className="mt-0.5" />
+                          <span>{line}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
+                );
+              })}
+            </div>
 
-                  <ul className="flex-1 space-y-3">
-                    {plan.highlights.map((line) => (
-                      <li key={line} className="flex items-start gap-3 text-sm text-zinc-400">
-                        <Check className="mt-0.5 shrink-0" />
-                        <span>{line}</span>
-                      </li>
-                    ))}
-                  </ul>
+            <div className="mt-10 rounded-xl border border-zinc-800 bg-zinc-900 p-6 md:mt-12 md:p-8">
+              <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+                <div>
+                  <h3 className="text-lg font-medium text-[var(--text-primary)]">More than 50 clients?</h3>
+                  <p className="mt-2 max-w-xl text-sm font-light text-[var(--text-secondary)]">
+                    Custom pricing, rollout support, and terms that match how your agency sells.
+                  </p>
                 </div>
-              );
-            })}
-          </div>
-
-          <div className="mt-12 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#060606] p-8 lg:p-10">
-            <div className="flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
-              <div>
-                <h3 className="text-xl font-semibold text-white">More than 50 clients?</h3>
-                <p className="mt-2 max-w-xl text-sm text-zinc-500">
-                  Custom pricing, rollout support, and terms that match how your agency sells.
-                </p>
+                <a
+                  href="mailto:hello@vrtlscore.com"
+                  className="shrink-0 rounded-full border border-[color:var(--border-mid)] px-6 py-3 text-sm font-medium text-[var(--text-primary)] transition-colors hover:border-[color:var(--border-strong)]"
+                >
+                  Contact sales →
+                </a>
               </div>
-              <a
-                href="mailto:hello@vrtlscore.com"
-                className="shrink-0 rounded-xl border border-white/[0.12] bg-white/[0.04] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/[0.08]"
-              >
-                Contact sales →
-              </a>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="border-t border-white/[0.06] bg-[#050505]">
-        <div className="mx-auto max-w-6xl px-6 py-16">
-          <h2 className="text-center text-xl font-semibold text-white sm:text-2xl">How agencies use VRTL Score</h2>
-          <ul className="mx-auto mt-8 grid max-w-3xl gap-4 sm:grid-cols-1 md:grid-cols-3 md:gap-8">
-            {howAgenciesBullets.map((item) => (
-              <li
-                key={item}
-                className="rounded-xl border border-white/[0.06] bg-[#080808] px-5 py-4 text-sm leading-relaxed text-zinc-400"
-              >
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
+        <section className={cn("border-b border-[color:var(--border-subtle)] bg-[var(--bg-surface)]", sectionY)}>
+          <div className={shell}>
+            <h2 className="text-center text-4xl font-semibold tracking-tight text-[var(--text-primary)] md:text-5xl">
+              How agencies use VRTL Score
+            </h2>
+            <ul className="mt-10 grid gap-6 md:grid-cols-3">
+              {howAgenciesBullets.map((item) => (
+                <li
+                  key={item}
+                  className="flex h-full min-h-[8rem] flex-col rounded-xl border border-zinc-800 bg-zinc-900 p-6 text-sm font-light leading-relaxed text-zinc-400"
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
 
-      <section className="border-t border-white/[0.06]">
-        <div className="mx-auto max-w-6xl px-6 py-16">
-          <h2 className="text-center text-xl font-semibold text-white sm:text-2xl">At a glance</h2>
-          <p className="mt-2 text-center text-sm text-zinc-500">What actually moves the needle for your book</p>
+        <section className={cn("border-b border-[color:var(--border-subtle)]", sectionY)}>
+          <div className={shell}>
+            <h2 className="text-center text-4xl font-semibold tracking-tight text-[var(--text-primary)] md:text-5xl">
+              At a glance
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-center text-base font-light text-zinc-400">
+              What actually moves the needle for your book
+            </p>
 
-          <div className="mt-10 overflow-hidden rounded-2xl border border-white/[0.08]">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-white/[0.08] bg-[#0a0a0a]">
-                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                      &nbsp;
-                    </th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-zinc-300">Foundation</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-white bg-white/[0.04]">Agency</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-zinc-300">Scale</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/[0.06] bg-[#060606]">
-                  {comparisonFeatures.map((feature) => (
-                    <tr key={feature.name} className="hover:bg-white/[0.02]">
-                      <td className="px-6 py-4 text-sm text-zinc-400">{feature.name}</td>
-                      <td className="px-6 py-4 text-center text-sm text-zinc-300">{feature.starter}</td>
-                      <td className="px-6 py-4 text-center text-sm font-medium text-white bg-white/[0.03]">
-                        {feature.growth}
-                      </td>
-                      <td className="px-6 py-4 text-center text-sm text-zinc-300">{feature.pro}</td>
+            <div className="mt-10 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-zinc-800 bg-zinc-950">
+                      <th className="px-6 py-5 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">
+                        &nbsp;
+                      </th>
+                      <th className="px-6 py-5 text-center text-sm font-medium text-zinc-300">Foundation</th>
+                      <th className="px-6 py-5 text-center text-sm font-medium text-[var(--text-primary)] bg-emerald-500/5">
+                        Agency
+                      </th>
+                      <th className="px-6 py-5 text-center text-sm font-medium text-zinc-300">Scale</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800">
+                    {comparisonFeatures.map((feature) => (
+                      <tr key={feature.name} className="bg-zinc-900">
+                        <td className="px-6 py-5 text-sm text-zinc-400">{feature.name}</td>
+                        <td className="px-6 py-5 text-center text-sm text-zinc-300">{feature.starter}</td>
+                        <td className="px-6 py-5 text-center text-sm font-medium text-[var(--text-primary)] bg-emerald-500/5">
+                          {feature.growth}
+                        </td>
+                        <td className="px-6 py-5 text-center text-sm text-zinc-300">{feature.pro}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="border-t border-white/[0.06]">
-        <div className="mx-auto max-w-4xl px-6 py-16">
-          <h2 className="text-center text-xl font-semibold text-white sm:text-2xl">Questions</h2>
-          <p className="mt-2 text-center text-sm text-zinc-500">Straight answers on plans and billing</p>
+        <section className={cn("border-b border-[color:var(--border-subtle)]", sectionY)}>
+          <div className={shell}>
+            <h2 className="text-center text-4xl font-semibold tracking-tight text-[var(--text-primary)] md:text-5xl">
+              Questions
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-center text-base font-light text-zinc-400">
+              Straight answers on plans and billing
+            </p>
 
-          <div className="mt-10 grid gap-4 sm:grid-cols-2">
-            {faqs.map((faq) => (
-              <div key={faq.question} className="rounded-xl border border-white/[0.08] bg-[#060606] p-6">
-                <h3 className="text-sm font-semibold text-white">{faq.question}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-zinc-500">{faq.answer}</p>
-              </div>
-            ))}
+            <div className="mt-10 grid gap-6 sm:grid-cols-2">
+              {faqs.map((faq) => (
+                <div
+                  key={faq.question}
+                  className="flex h-full flex-col rounded-xl border border-zinc-800 bg-zinc-900 p-6"
+                >
+                  <h3 className="text-base font-medium text-[var(--text-primary)]">{faq.question}</h3>
+                  <p className="mt-3 flex-1 text-sm font-light leading-relaxed text-zinc-400">{faq.answer}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="border-t border-white/[0.06]">
-        <div className="mx-auto max-w-4xl px-6 py-16 text-center">
-          <h2 className="text-2xl font-semibold text-white">See where you&apos;re being replaced</h2>
-          <p className="mt-3 text-sm text-zinc-500">
-            Run a snapshot, walk into the next QBR with proof—not guesswork.
-          </p>
-          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <RunSnapshotButton
-              loading={loadingPlan === "growth"}
-              onClick={() => handleCheckout("growth")}
-              className="bg-white text-black hover:bg-zinc-200"
-            />
-            <Link href="/preview" className="text-sm font-medium text-zinc-500 hover:text-zinc-300">
-              See example report
-            </Link>
-            <Link href="/" className="text-sm font-medium text-zinc-600 hover:text-zinc-400 sm:ml-2">
-              ← Back to home
-            </Link>
+        <section className={sectionY}>
+          <div className={cn(shell, "text-center")}>
+            <h2 className="text-4xl font-semibold tracking-tight text-[var(--text-primary)] md:text-5xl">
+              See where you&apos;re being replaced
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-base font-light text-zinc-400">
+              Run a snapshot, walk into your next client call with proof.
+            </p>
+            <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-6">
+              <RunSnapshotButton
+                loading={loadingPlan === "growth"}
+                onClick={() => handleCheckout("growth")}
+                size="large"
+                className="w-full sm:w-auto"
+              />
+              <Link
+                href="/preview"
+                className="inline-flex items-center justify-center rounded-full border border-[color:var(--border-mid)] px-6 py-3.5 text-base font-normal text-[var(--text-secondary)] transition duration-150 hover:border-[color:var(--border-strong)] hover:text-[var(--text-primary)]"
+              >
+                See example report
+              </Link>
+              <Link
+                href="/"
+                className="text-sm font-normal text-[var(--text-muted)] transition-colors hover:text-[var(--text-secondary)]"
+              >
+                ← Back to home
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
-    </main>
+        </section>
+      </main>
+    </div>
   );
 }
 
@@ -599,8 +646,8 @@ export default function PricingPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-[#030303]">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-zinc-400" />
+        <div className="page-marketing flex min-h-screen items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[color:var(--border-subtle)] border-t-[var(--accent-marketing)]" />
         </div>
       }
     >
