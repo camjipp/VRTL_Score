@@ -23,11 +23,17 @@ const MODEL_PILLS: Array<{ name: string; iconSrc: string }> = [
 function ModelPill({ name, iconSrc }: { name: string; iconSrc: string }) {
   return (
     <span
-      className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--accent-marketing)] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] ring-1 ring-black/10"
+      className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] p-1.5 transition-all duration-200 ease-out hover:bg-white/[0.06]"
       title={name}
     >
       {/* eslint-disable-next-line @next/next/no-img-element -- local /ai icons (png + svg) */}
-      <img alt={name} className="h-7 w-7 shrink-0 object-contain" height={28} src={iconSrc} width={28} />
+      <img
+        alt={name}
+        className="h-5 w-5 shrink-0 object-contain opacity-70"
+        height={20}
+        src={iconSrc}
+        width={20}
+      />
     </span>
   );
 }
@@ -89,15 +95,20 @@ function HeroReportStack() {
   ];
 
   return (
-    <div className="group/stack relative z-10 flex w-full flex-col items-center lg:items-end lg:overflow-visible lg:pr-0">
-      <div className="animate-hero-report-float relative w-[min(100%,316px)] origin-center scale-[0.91] pb-[4.25rem] pt-0 sm:w-[min(100%,360px)] sm:scale-[0.95] lg:ml-auto lg:mr-[-20px] lg:w-[472px] lg:origin-top-right lg:scale-[1.18]">
-        {/* Grounding: subtle weight under stack (no heavy glow) */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute bottom-0 left-1/2 z-0 w-[min(104%,420px)] -translate-x-1/2 translate-y-1 sm:w-[min(102%,460px)] lg:w-[90%] lg:max-w-[460px] lg:translate-y-2"
-        >
-          <div className="mx-auto h-14 w-full bg-[radial-gradient(ellipse_72%_90%_at_50%_100%,rgba(15,23,42,0.11),rgba(15,23,42,0.04)_42%,transparent_68%)] blur-[12px] sm:h-16 lg:h-[4.25rem]" />
-        </div>
+    <div className="group/stack relative z-10 flex w-full flex-col items-center lg:items-end lg:justify-end lg:overflow-visible lg:pr-0">
+      <div className="relative flex w-full max-w-[min(100%,472px)] flex-col items-center justify-end lg:ml-auto lg:mr-[-20px] lg:items-end">
+        <div className="animate-hero-report-float relative w-[min(100%,316px)] origin-center scale-[0.91] pb-6 pt-0 sm:w-[min(100%,360px)] sm:scale-[0.95] lg:w-[472px] lg:origin-bottom-right lg:scale-[1.18]">
+          {/* Grounding: dark base + soft shadow so the stack reads seated in the layout */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-1 left-1/2 z-0 w-[min(108%,440px)] -translate-x-1/2 translate-y-0 sm:w-[min(105%,480px)] lg:w-[92%] lg:max-w-[480px]"
+          >
+            <div className="mx-auto h-12 w-full bg-[radial-gradient(ellipse_78%_100%_at_50%_100%,rgba(0,0,0,0.45),rgba(0,0,0,0.18)_38%,transparent_70%)] blur-[14px] sm:h-14 lg:h-16" />
+          </div>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-2 left-1/2 z-0 h-3 w-[min(96%,400px)] -translate-x-1/2 rounded-[100%] bg-black/25 blur-md sm:h-3.5 lg:bottom-[-6px] lg:w-[88%]"
+          />
         {/* Page 3 — Recommendations — desktop only */}
         <div
           className={`${paper} absolute left-[2%] top-0 hidden min-h-[392px] w-[96%] max-w-[384px] p-2.5 opacity-[0.88] lg:block lg:max-w-none`}
@@ -282,6 +293,7 @@ function HeroReportStack() {
             1<span className="hidden lg:inline"> / 3</span>
           </p>
         </div>
+        </div>
       </div>
     </div>
   );
@@ -431,8 +443,8 @@ export default function HomePage() {
         {/* 1 — Hero */}
         <section className="min-h-screen overflow-visible border-b border-[color:var(--border-subtle)] pt-[120px]">
           <div className={`${shell} overflow-visible pb-24`}>
-            <div className="grid items-start gap-16 overflow-visible lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center lg:gap-10">
-              <div>
+            <div className="grid items-start gap-16 overflow-visible lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-end lg:gap-10">
+              <div className="self-start">
                 <AnimateIn delay={0}>
                   <SectionLabel>{`// AI VISIBILITY FOR AGENCIES`}</SectionLabel>
                 </AnimateIn>
@@ -450,9 +462,9 @@ export default function HomePage() {
                   </AnimateIn>
                 </h1>
                 <AnimateIn delay={200}>
-                  <p className="mt-6 max-w-[440px] text-lg font-light leading-relaxed text-[var(--text-secondary)]">
-                    VRTL Score shows how ChatGPT, Gemini, and Claude rank, mention, and recommend your clients — and gives you
-                    a report you can actually send.
+                  <p className="mt-6 max-w-[560px] text-lg font-light leading-relaxed text-[var(--text-secondary)]">
+                    VRTL Score shows how your clients are ranked, mentioned, and recommended across top AI models so you can
+                    deliver reports that actually prove value.
                   </p>
                 </AnimateIn>
                 <AnimateIn delay={300}>
@@ -472,15 +484,17 @@ export default function HomePage() {
                   </div>
                 </AnimateIn>
                 <AnimateIn delay={400}>
-                  <div className="mt-12 flex flex-wrap items-center gap-3">
-                    <span className="text-sm text-[var(--text-muted)]">Tracks:</span>
+                  <div className="mt-12 flex flex-wrap items-center gap-2.5 sm:gap-3">
+                    <span className="font-marketing-mono text-[11px] uppercase tracking-[0.12em] text-[var(--text-muted)]">
+                      Tracks
+                    </span>
                     {MODEL_PILLS.map((m) => (
                       <ModelPill key={m.name} iconSrc={m.iconSrc} name={m.name} />
                     ))}
                   </div>
                 </AnimateIn>
               </div>
-              <AnimateIn delay={150}>
+              <AnimateIn delay={150} className="self-end">
                 <HeroReportStack />
               </AnimateIn>
             </div>
