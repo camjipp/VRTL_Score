@@ -22,10 +22,12 @@ const MODEL_PILLS: Array<{ name: string; iconSrc: string }> = [
 
 function ModelPill({ name, iconSrc }: { name: string; iconSrc: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-1">
+    <span
+      className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--accent-marketing)] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] ring-1 ring-black/10"
+      title={name}
+    >
       {/* eslint-disable-next-line @next/next/no-img-element -- local /ai icons (png + svg) */}
-      <img alt="" className="h-4 w-4 shrink-0 object-contain" height={16} src={iconSrc} width={16} />
-      <span className="font-marketing-mono text-[11px] uppercase tracking-[0.08em] text-[var(--text-muted)]">{name}</span>
+      <img alt={name} className="h-7 w-7 shrink-0 object-contain" height={28} src={iconSrc} width={28} />
     </span>
   );
 }
@@ -470,7 +472,7 @@ export default function HomePage() {
                   </div>
                 </AnimateIn>
                 <AnimateIn delay={400}>
-                  <div className="mt-12 flex flex-wrap items-center gap-2">
+                  <div className="mt-12 flex flex-wrap items-center gap-3">
                     <span className="text-sm text-[var(--text-muted)]">Tracks:</span>
                     {MODEL_PILLS.map((m) => (
                       <ModelPill key={m.name} iconSrc={m.iconSrc} name={m.name} />
