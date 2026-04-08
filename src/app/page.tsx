@@ -43,15 +43,15 @@ function HeroTracksAcross() {
           <div
             key={logo.alt}
             style={{
-              width: "28px",
-              height: "28px",
+              width: "36px",
+              height: "36px",
               borderRadius: "50%",
-              background: "#1a1a1a",
+              background: "#2a2a2a",
               border: "2px solid #070707",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              marginLeft: i === 0 ? "0" : "-8px",
+              marginLeft: i === 0 ? "0" : "-10px",
               zIndex: 4 - i,
               position: "relative",
             }}
@@ -61,11 +61,11 @@ function HeroTracksAcross() {
               alt={logo.alt}
               src={logo.src}
               style={{
-                width: "14px",
-                height: "14px",
+                width: "16px",
+                height: "16px",
                 objectFit: "contain",
                 filter: "brightness(0) invert(1)",
-                opacity: 0.8,
+                opacity: 1,
               }}
             />
           </div>
@@ -82,26 +82,26 @@ function HeroPdfPreviewCard() {
         aria-hidden
         style={{
           position: "absolute",
-          top: "12px",
-          left: "6px",
-          right: "-6px",
-          bottom: "-12px",
-          background: "#e8e8e8",
+          top: "14px",
+          left: "8px",
+          right: "-14px",
+          bottom: "-14px",
+          background: "#e2e2e2",
           borderRadius: "2px",
-          transform: "rotate(2.5deg)",
+          transform: "rotate(3.5deg)",
         }}
       />
       <div
         aria-hidden
         style={{
           position: "absolute",
-          top: "6px",
-          left: "3px",
-          right: "-3px",
-          bottom: "-6px",
-          background: "#f2f2f2",
+          top: "7px",
+          left: "4px",
+          right: "-7px",
+          bottom: "-7px",
+          background: "#eeeeee",
           borderRadius: "2px",
-          transform: "rotate(1.2deg)",
+          transform: "rotate(1.8deg)",
         }}
       />
       <div
@@ -529,8 +529,8 @@ export default function HomePage() {
     <div className="page-marketing selection:bg-[var(--accent-bg)] selection:text-[var(--text-primary)]">
       <main>
         {/* 1: Hero */}
-        <section className="min-h-screen overflow-visible border-b border-[color:var(--border-subtle)] pt-[120px]">
-          <div className={`${shell} overflow-visible pb-24`}>
+        <section className="overflow-visible border-b border-[color:var(--border-subtle)] pt-[120px] pb-20">
+          <div className={`${shell} overflow-visible pb-0`}>
             <div className="grid items-start gap-16 overflow-visible lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center lg:gap-10">
               <div className="self-start">
                 <AnimateIn delay={0}>
@@ -575,7 +575,7 @@ export default function HomePage() {
                   <HeroTracksAcross />
                 </AnimateIn>
               </div>
-              <AnimateIn delay={150} className="self-center">
+              <AnimateIn delay={150} className="self-center pt-10">
                 <HeroReportStack />
               </AnimateIn>
             </div>
