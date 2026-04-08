@@ -77,10 +77,10 @@ function HeroScoreArc({ score }: { score: number }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center pb-3 pt-0">
-        <span className="font-marketing-body text-[26px] font-bold leading-none tracking-tight text-[#0f1117]">{score}</span>
-        <span className="font-marketing-mono text-[7px] font-medium text-[#64748b]">/100</span>
+        <span className="font-marketing-body text-[26px] font-extrabold leading-none tracking-tight text-[#0f1117]">{score}</span>
+        <span className="font-marketing-mono text-[7px] font-medium text-[#94a3b8]">/100</span>
       </div>
-      <p className="absolute bottom-0 left-0 right-0 text-center font-marketing-mono text-[6px] font-semibold uppercase tracking-[0.14em] text-[#525252]">
+      <p className="absolute bottom-0 left-0 right-0 text-center font-marketing-mono text-[6px] font-semibold uppercase tracking-[0.14em] text-[#94a3b8]">
         AI Authority Score
       </p>
     </div>
@@ -98,19 +98,26 @@ function HeroReportStack() {
   return (
     <div className="group/stack relative z-10 flex w-full flex-col items-center lg:items-end lg:overflow-visible lg:pr-0">
       <div className="animate-hero-report-float relative w-[min(100%,316px)] origin-center scale-[0.91] pb-[4.25rem] pt-0 sm:w-[min(100%,360px)] sm:scale-[0.95] lg:ml-auto lg:mr-[-20px] lg:w-[472px] lg:origin-top-right lg:scale-[1.18]">
+        {/* Grounding: subtle weight under stack (no heavy glow) */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute bottom-0 left-1/2 z-0 w-[min(104%,420px)] -translate-x-1/2 translate-y-1 sm:w-[min(102%,460px)] lg:w-[90%] lg:max-w-[460px] lg:translate-y-2"
+        >
+          <div className="mx-auto h-14 w-full bg-[radial-gradient(ellipse_72%_90%_at_50%_100%,rgba(15,23,42,0.11),rgba(15,23,42,0.04)_42%,transparent_68%)] blur-[12px] sm:h-16 lg:h-[4.25rem]" />
+        </div>
         {/* Page 3 — Recommendations — desktop only */}
         <div
-          className={`${paper} absolute left-[2%] top-0 hidden min-h-[392px] w-[96%] max-w-[384px] p-2.5 opacity-[0.99] lg:block lg:max-w-none`}
-          style={{ transform: "translate(-4.5%, 7.5%) rotate(-2.5deg) scale(0.935)", zIndex: 0 }}
+          className={`${paper} absolute left-[2%] top-0 hidden min-h-[392px] w-[96%] max-w-[384px] p-2.5 opacity-[0.88] lg:block lg:max-w-none`}
+          style={{ transform: "translate(-5.75%, 9.25%) rotate(-2.75deg) scale(0.928)", zIndex: 0 }}
           aria-hidden
         >
           <div className="border-b border-[#e5e5e5] pb-2">
-            <p className="font-marketing-mono text-[6.5px] font-semibold uppercase tracking-[0.18em] text-[#64748b]">VRTL Score</p>
+            <p className="font-marketing-mono text-[6.5px] font-semibold uppercase tracking-[0.18em] text-[#94a3b8]">VRTL Score</p>
             <p className="mt-0.5 font-marketing-mono text-[9px] font-bold uppercase tracking-[0.12em] text-[#1e293b]">
               Recommendations
             </p>
           </div>
-          <p className="mt-2 font-marketing-mono text-[7px] font-medium text-[#64748b]">Acme Corp · continued</p>
+          <p className="mt-2 font-marketing-mono text-[7px] font-medium text-[#64748b]">Your Client · continued</p>
           <ul className="mt-2 space-y-1.5 border-t border-[#e5e5e5] pt-2">
             <li className="flex gap-1.5 text-[8px] leading-snug text-[#334155]">
               <span className="mt-0.5 h-1 w-1 shrink-0 rounded-full bg-[#ef4444]" />
@@ -139,16 +146,16 @@ function HeroReportStack() {
         {/* Page 2 — Model Analysis — desktop only (middle of stack) */}
         <div
           className={`${paper} absolute left-[2%] top-0 hidden min-h-[392px] w-[96%] max-w-[384px] p-2.5 lg:block lg:max-w-none`}
-          style={{ transform: "translate(-2.25%, 3.75%) rotate(-1.25deg) scale(0.968)", zIndex: 1 }}
+          style={{ transform: "translate(-3%, 4.75%) rotate(-1.5deg) scale(0.961)", zIndex: 1 }}
           aria-hidden
         >
           <div className="border-b border-[#e5e5e5] pb-2">
-            <p className="font-marketing-mono text-[6.5px] font-semibold uppercase tracking-[0.18em] text-[#64748b]">VRTL Score</p>
+            <p className="font-marketing-mono text-[6.5px] font-semibold uppercase tracking-[0.18em] text-[#94a3b8]">VRTL Score</p>
             <p className="mt-0.5 font-marketing-mono text-[9px] font-bold uppercase tracking-[0.12em] text-[#1e293b]">
               Model Analysis
             </p>
           </div>
-          <p className="mt-2 font-marketing-mono text-[7px] font-medium text-[#64748b]">Acme Corp · by engine</p>
+          <p className="mt-2 font-marketing-mono text-[7px] font-medium text-[#64748b]">Your Client · by engine</p>
           <div className="mt-2 space-y-2 border-t border-[#e5e5e5] pt-2">
             {[
               { label: "OPENAI", pct: 90, vs: "+38 vs avg" },
@@ -183,30 +190,30 @@ function HeroReportStack() {
 
         {/* Page 1 — Executive summary (front) */}
         <div
-          className={`${paper} relative z-[2] mx-auto flex w-full max-w-[316px] flex-col p-3 transition-shadow duration-500 ease-out sm:max-w-[360px] group-hover/stack:shadow-[0_32px_80px_rgba(0,0,0,0.5),0_10px_28px_rgba(0,0,0,0.12)] lg:mx-0 lg:ml-auto lg:max-w-none`}
+          className={`${paper} relative z-[2] mx-auto flex w-full max-w-[316px] flex-col p-2.5 transition-shadow duration-500 ease-out sm:max-w-[360px] group-hover/stack:shadow-[0_32px_80px_rgba(0,0,0,0.5),0_10px_28px_rgba(0,0,0,0.12)] lg:mx-0 lg:ml-auto lg:max-w-none`}
           style={{ transform: "translate(2.75%, 0) rotate(1deg)" }}
         >
           <div className="flex items-start justify-between gap-2 border-b border-[#e5e7eb] pb-2">
             <div className="min-w-0">
-              <p className="font-marketing-mono text-[6.5px] font-semibold uppercase tracking-[0.16em] text-[#64748b]">
+              <p className="font-marketing-mono text-[6.5px] font-semibold uppercase tracking-[0.16em] text-[#94a3b8]">
                 AI Authority Report
               </p>
               <p className="mt-1 text-[11px] font-bold leading-tight text-[#0f1117]">Executive summary</p>
             </div>
-            <span className="shrink-0 border border-[#d1d5db] bg-white px-1.5 py-0.5 font-marketing-mono text-[6.5px] font-bold uppercase tracking-wider text-[#525252]">
+            <span className="shrink-0 border border-[#d1d5db] bg-white px-1.5 py-0.5 font-marketing-mono text-[6.5px] font-bold uppercase tracking-wider text-[#64748b]">
               PDF
             </span>
           </div>
 
-          <div className="pt-2.5">
-            <p className="text-[10px] font-bold text-[#334155]">Acme Corp</p>
-            <p className="mt-0.5 font-marketing-mono text-[7px] font-medium text-[#64748b]">April 1, 2026</p>
+          <div className="pt-2">
+            <p className="text-[10px] font-bold text-[#334155]">Your Client</p>
+            <p className="mt-0.5 font-marketing-mono text-[7px] font-medium text-[#94a3b8]">April 1, 2026</p>
           </div>
 
-          <div className="mt-2.5 flex gap-2 border-t border-[#e5e7eb] pt-2.5">
+          <div className="mt-2 flex gap-2 border-t border-[#e5e7eb] pt-2">
             <HeroScoreArc score={68} />
             <div className="w-px shrink-0 self-stretch bg-[#e5e7eb]" aria-hidden />
-            <div className="grid min-w-0 flex-1 grid-cols-3 gap-1">
+            <div className="grid min-h-[42px] min-w-0 flex-1 grid-cols-3 gap-0.5">
               {[
                 { val: "62%", lab: "Mention rate" },
                 { val: "60%", lab: "Top position" },
@@ -214,14 +221,14 @@ function HeroReportStack() {
               ].map((k) => (
                 <div
                   key={k.lab}
-                  className="flex flex-col items-center justify-center rounded border border-[#e5e7eb] bg-white px-1 py-[5px] text-center"
+                  className="flex min-h-[42px] min-w-0 flex-col items-center justify-center rounded border border-[#e5e7eb] bg-white px-1 py-1 text-center"
                 >
                   <p
-                    className={`font-marketing-body text-[11px] font-bold tabular-nums leading-none ${k.warn ? "text-[#dc2626]" : "text-[#0f1117]"}`}
+                    className={`font-marketing-body text-[11px] font-extrabold tabular-nums leading-none ${k.warn ? "text-[#dc2626]" : "text-[#0f1117]"}`}
                   >
                     {k.val}
                   </p>
-                  <p className="mt-1 font-marketing-mono text-[6px] font-semibold uppercase leading-tight tracking-[0.08em] text-[#64748b]">
+                  <p className="mt-0.5 font-marketing-mono text-[6px] font-semibold uppercase leading-tight tracking-[0.08em] text-[#94a3b8]">
                     {k.lab}
                   </p>
                 </div>
@@ -229,7 +236,7 @@ function HeroReportStack() {
             </div>
           </div>
 
-          <div className="mt-2.5 border-t border-[#e5e7eb] pt-2.5">
+          <div className="mt-2 border-t border-[#e5e7eb] pt-2">
             <p className="font-marketing-mono text-[6.5px] font-semibold uppercase tracking-[0.12em] text-[#64748b]">
               Competitive ranking
             </p>
@@ -240,25 +247,25 @@ function HeroReportStack() {
                   <div key={row.rank} className="flex border-b border-[#f1f5f9] last:border-b-0">
                     <div className={`w-[3px] shrink-0 self-stretch ${row.client ? "bg-[#00e87a]" : "bg-transparent"}`} aria-hidden />
                     <div
-                      className={`flex min-h-[22px] min-w-0 flex-1 items-center gap-1.5 py-1 pl-1.5 pr-1.5 ${row.client ? "bg-[#ecfdf5]/90" : "bg-white"}`}
+                      className={`grid min-h-[20px] min-w-0 flex-1 grid-cols-[22px_minmax(0,1fr)_52px_2.75rem] items-center gap-x-1 py-0.5 pl-1.5 pr-1.5 ${row.client ? "bg-[#ecfdf5]/90" : "bg-white"}`}
                     >
                       <span
-                        className={`w-[22px] shrink-0 text-left font-marketing-mono text-[7.5px] tabular-nums ${row.client ? "font-bold text-[#0f172a]" : "font-medium text-[#94a3b8]"}`}
+                        className={`text-left font-marketing-mono text-[7.5px] tabular-nums ${row.client ? "font-bold text-[#0f172a]" : "font-medium text-[#94a3b8]"}`}
                       >
                         #{row.rank}
                       </span>
                       <span
-                        className={`min-w-0 flex-1 truncate text-[8px] leading-none ${row.client ? "font-bold text-[#0f1117]" : "font-medium text-[#475569]"}`}
+                        className={`min-w-0 truncate text-[8px] leading-none ${row.client ? "font-bold text-[#0f1117]" : "font-medium text-[#475569]"}`}
                       >
                         {row.name}
                       </span>
-                      <div className="h-[3px] min-w-[40px] max-w-[56px] flex-1 rounded-sm bg-[#f1f5f9]">
+                      <div className="h-[3px] w-[52px] shrink-0 justify-self-start rounded-sm bg-[#f1f5f9]">
                         <div
                           className={`h-full rounded-sm ${row.client ? "bg-[#00e87a]" : "bg-[#94a3b8]"}`}
                           style={{ width: `${barPct}%`, opacity: row.client ? 1 : 0.38 }}
                         />
                       </div>
-                      <span className="w-[30px] shrink-0 text-right font-marketing-mono text-[7.5px] font-medium tabular-nums text-[#64748b]">
+                      <span className="text-right font-marketing-mono text-[7.5px] font-semibold tabular-nums text-[#475569]">
                         {row.mentions}/30
                       </span>
                     </div>
@@ -268,13 +275,13 @@ function HeroReportStack() {
             </div>
           </div>
 
-          <div className="mt-2.5 border-t border-[#e5e7eb] pt-2.5">
-            <div className="rounded-sm border border-amber-200/90 border-t-2 border-t-amber-500 bg-amber-50 px-2 py-1.5">
-              <span className="inline-block rounded border border-amber-300 bg-white px-1 py-0.5 font-marketing-mono text-[6px] font-bold uppercase tracking-wide text-amber-800">
+          <div className="mt-2 border-t border-[#e5e7eb] pt-2">
+            <div className="rounded-sm border border-amber-200/55 border-t-2 border-t-amber-500/85 bg-amber-50/50 px-1.5 py-1">
+              <span className="inline-block rounded border border-amber-300/80 bg-white/90 px-1 py-px font-marketing-mono text-[6px] font-bold uppercase tracking-wide text-amber-800">
                 RISK
               </span>
-              <p className="mt-1 text-[8px] font-bold leading-tight text-[#0f1117]">Fragile lead</p>
-              <p className="mt-0.5 text-[7.5px] leading-snug text-[#475569]">Competitors within range</p>
+              <p className="mt-0.5 text-[8px] font-bold leading-tight text-[#0f1117]">Fragile lead</p>
+              <p className="mt-0.5 text-[7px] leading-snug text-[#64748b]">Competitors within range</p>
             </div>
           </div>
 
