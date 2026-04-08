@@ -35,19 +35,19 @@ export function SiteNav() {
       className={cn(
         "sticky top-0 z-50 h-[60px] border-b px-6 md:px-12",
         isDarkPage
-          ? "border-[color:var(--border-subtle)] bg-[rgba(7,7,7,0.8)] backdrop-blur-xl"
+          ? "border-b border-[rgba(255,255,255,0.06)] bg-[rgba(7,7,7,0.92)] backdrop-blur-[16px]"
           : "border-border/40 bg-white/90 backdrop-blur-xl"
       )}
     >
       <div className="mx-auto flex h-full max-w-[1200px] items-center justify-between">
-        <Link className="relative flex h-8 shrink-0 items-center" href="/">
+        <Link className="relative flex min-h-8 shrink-0 items-center md:min-h-9" href="/">
           <Image
             alt="VRTL Score"
-            className="h-7 w-auto object-contain object-left md:h-8"
-            height={32}
+            className="h-8 min-h-[32px] w-auto object-contain object-left md:h-9 md:min-h-[36px]"
+            height={36}
             priority
             src={isDarkPage ? "/brand/White_VRTL.png" : "/brand/VRTL_Solo.png"}
-            width={160}
+            width={180}
           />
         </Link>
 

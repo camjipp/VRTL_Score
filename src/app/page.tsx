@@ -6,58 +6,99 @@ import { useState } from "react";
 
 import { AnimateIn } from "@/components/AnimateIn";
 import { Footer } from "@/components/Footer";
+import { SectionLabel } from "@/components/SectionLabel";
 
 const SAMPLE_REPORT_HREF = "/preview";
 const SIGNUP_HREF = "/signup";
 
 const shell = "mx-auto w-full max-w-[1200px] px-6 md:px-12";
 
-function Eyebrow({ children, accent }: { children: ReactNode; accent?: boolean }) {
+const MODEL_PILLS: Array<{ name: string; iconSrc: string }> = [
+  {
+    name: "ChatGPT",
+    iconSrc: "https://cdn.brandfetch.io/idR3duQxYl/w/400/h/400/theme/dark/icon.png",
+  },
+  {
+    name: "Gemini",
+    iconSrc: "https://cdn.brandfetch.io/id9IRGFoS-/theme/dark/icon.png",
+  },
+  {
+    name: "Claude",
+    iconSrc: "https://cdn.brandfetch.io/anthropic.com/w/400/h/400/theme/dark/icon.png",
+  },
+  { name: "Perplexity", iconSrc: "/ai/perplexity.svg" },
+];
+
+function ModelPill({ name, iconSrc }: { name: string; iconSrc: string }) {
   return (
-    <p
-      className={`font-marketing-mono text-[11px] uppercase tracking-[0.12em] ${
-        accent ? "text-[var(--accent-marketing)]" : "text-[var(--text-muted)]"
-      }`}
-    >
-      {children}
-    </p>
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-1">
+      {/* eslint-disable-next-line @next/next/no-img-element -- Brandfetch / SVG favicons; avoids optimizer referer issues */}
+      <img alt="" className="h-4 w-4 shrink-0 object-contain" height={16} src={iconSrc} width={16} />
+      <span className="font-marketing-mono text-[11px] uppercase tracking-[0.08em] text-[var(--text-muted)]">{name}</span>
+    </span>
   );
 }
 
 function HeroReportStack() {
   return (
-    <div className="relative mx-auto h-[420px] w-full max-w-[440px] lg:mx-0">
+    <div className="relative mx-auto w-full max-w-[440px] lg:mx-0">
       <div
-        className="absolute right-[-10px] top-5 h-[380px] w-full rounded-2xl border border-[color:var(--border-subtle)] bg-[var(--bg-elevated)] opacity-50"
+        className="absolute right-[-10px] top-5 hidden h-[min(380px,70vh)] w-full rounded-2xl border border-[color:var(--border-subtle)] bg-[var(--bg-elevated)] opacity-50 lg:block"
         style={{ transform: "rotate(2deg)" }}
         aria-hidden
       />
-      <div className="absolute right-0 top-0 w-[96%] rounded-2xl bg-white p-7 text-[#111] shadow-[0_0_0_1px_rgba(0,0,0,0.06)]">
-        <div className="flex items-start justify-between gap-3">
+      <div className="relative z-10 w-full rounded-2xl bg-white p-7 text-[#111] shadow-[0_0_0_1px_rgba(0,0,0,0.06)] lg:w-[96%] lg:ml-auto">
+        <div className="flex items-center justify-between gap-3">
           <p className="font-marketing-mono text-[10px] uppercase tracking-[0.14em] text-[#999]">VRTL SCORE</p>
-          <span className="rounded bg-[#f4f4f4] px-2 py-0.5 font-marketing-mono text-[10px] text-[#666]">PDF</span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#e8faf0] px-2.5 py-0.5 font-marketing-mono text-[10px] font-medium text-[#1a7a45]">
+            <span className="h-2 w-2 shrink-0 rounded-full bg-[#00e87a] animate-live-dot" aria-hidden />
+            LIVE
+          </span>
         </div>
-        <p className="mt-1 text-base font-medium text-[#111]">Executive snapshot</p>
+        <p className="mt-1 text-[15px] font-medium text-[#111]">Acme Corp · Q2 snapshot</p>
         <div className="my-4 h-px bg-[#eee]" />
-        <p className="font-marketing-mono text-[10px] uppercase tracking-[0.12em] text-[#aaa]">OVERALL</p>
-        <p className="mt-1 font-marketing-display text-[52px] font-light leading-none text-[#111]">78</p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <span className="rounded-full bg-[#e8faf0] px-3 py-1 font-marketing-mono text-xs text-[#1a7a45]">Win · 3 models</span>
-          <span className="rounded-full bg-[#fff8e8] px-3 py-1 font-marketing-mono text-xs text-[#92600a]">At risk · 2</span>
+        <div className="flex flex-wrap items-end gap-4">
+          <p className="font-marketing-display text-[52px] font-light leading-none text-[#111]">74</p>
+          <div className="flex flex-col gap-0.5 pb-1">
+            <span className="text-xs font-medium text-[#1a7a45]">↑ 6 pts</span>
+            <span className="text-[11px] text-[#aaa]">vs last snapshot</span>
+          </div>
         </div>
-        <div className="mt-6 grid grid-cols-3 gap-3 border-t border-[#eee] pt-4">
+        <div className="mt-4 flex flex-col gap-2">
           {[
-            { l: "PRESENCE", v: "Strong" },
-            { l: "POSITION", v: "Mixed" },
-            { l: "AUTHORITY", v: "Low" },
+            { n: "ChatGPT", pct: 88, fill: "#1a7a45" },
+            { n: "Gemini", pct: 61, fill: "#4a90d9" },
+            { n: "Claude", pct: 43, fill: "#c084fc" },
           ].map((row) => (
-            <div key={row.l}>
-              <p className="font-marketing-mono text-[10px] uppercase tracking-[0.12em] text-[#aaa]">{row.l}</p>
-              <p className="mt-1 text-sm font-medium text-[#111]">{row.v}</p>
+            <div key={row.n} className="flex items-center gap-2">
+              <span className="w-20 shrink-0 text-xs text-[#666]">{row.n}</span>
+              <div className="h-1.5 flex-1 rounded-full bg-gray-100">
+                <div className="h-full rounded-full" style={{ width: `${row.pct}%`, background: row.fill }} />
+              </div>
             </div>
           ))}
         </div>
-        <p className="mt-4 text-center text-[11px] text-[#bbb]">Client-facing report · ready to send</p>
+        <div className="mt-4 flex justify-between border-t border-gray-100 pt-3 font-marketing-mono text-[11px]">
+          <span className="text-[#aaa]">3 models tracked</span>
+          <span className="text-[#e53e3e]">2 competitors ahead</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PresenceDotRow({ green, label }: { label: string; green: number }) {
+  const total = 5;
+  return (
+    <div className="flex items-center gap-2">
+      <span className="w-14 shrink-0 text-[10px] text-[#555]">{label}</span>
+      <div className="flex gap-[3px]">
+        {Array.from({ length: total }, (_, i) => (
+          <span
+            key={i}
+            className={`h-1.5 w-1.5 shrink-0 rounded-full ${i < green ? "bg-[#00e87a]" : "bg-[#333]"}`}
+          />
+        ))}
       </div>
     </div>
   );
@@ -86,6 +127,9 @@ function ProblemCard({
   );
 }
 
+const actionPillClass =
+  "inline-flex h-5 shrink-0 items-center whitespace-nowrap rounded-full px-2 font-marketing-mono text-[10px] leading-none";
+
 function ProductPreviewCard({
   label,
   caption,
@@ -98,11 +142,11 @@ function ProductPreviewCard({
   children: ReactNode;
 }) {
   return (
-    <div className="flex flex-col">
-      <AnimateIn delay={delay}>
-        <div className="overflow-hidden rounded-xl border border-[color:var(--border-subtle)] bg-[var(--bg-surface)] p-6 transition duration-200 hover:-translate-y-0.5 hover:border-[color:var(--border-mid)]">
+    <div className="flex h-full flex-col">
+      <AnimateIn className="flex min-h-0 flex-1 flex-col" delay={delay}>
+        <div className="flex h-full min-h-[260px] flex-1 flex-col overflow-hidden rounded-xl border border-[color:var(--border-subtle)] bg-[var(--bg-surface)] p-6 transition duration-200 hover:-translate-y-0.5 hover:border-[color:var(--border-mid)]">
           <p className="font-marketing-mono text-[10px] uppercase tracking-[0.14em] text-[var(--text-muted)]">{label}</p>
-          {children}
+          <div className="mt-0 flex min-h-0 flex-1 flex-col">{children}</div>
         </div>
       </AnimateIn>
       <p className="mt-3 text-center text-xs text-[var(--text-muted)]">{caption}</p>
@@ -140,8 +184,8 @@ const faqItems: Array<{ q: string; a: string }> = [
     a: "Yes. PDF reports include your agency logo and branding. They're designed to be handed directly to clients as a professional deliverable, supporting renewals, upsells, and new business pitches.",
   },
   {
-    q: "Is there a free trial?",
-    a: "Yes. Start with a 7-day free trial. Run snapshots on real clients and see the platform in action before committing.",
+    q: "How do I get started?",
+    a: "Run your first snapshot directly from the dashboard. Enter a client name and category, select the AI models to test, and your report is ready in minutes. No setup, no dev work, no credit card required to start.",
   },
 ];
 
@@ -190,7 +234,7 @@ export default function HomePage() {
             <div className="grid items-center gap-16 lg:grid-cols-[55%_45%] lg:gap-12">
               <div>
                 <AnimateIn delay={0}>
-                  <Eyebrow>{`// AI VISIBILITY FOR AGENCIES`}</Eyebrow>
+                  <SectionLabel>{`// AI VISIBILITY FOR AGENCIES`}</SectionLabel>
                 </AnimateIn>
                 <h1 className="mt-6 font-marketing-display font-normal leading-none tracking-[-0.03em] text-[var(--text-primary)]">
                   <AnimateIn delay={0}>
@@ -230,13 +274,8 @@ export default function HomePage() {
                 <AnimateIn delay={400}>
                   <div className="mt-12 flex flex-wrap items-center gap-2">
                     <span className="text-sm text-[var(--text-muted)]">Tracks:</span>
-                    {["ChatGPT", "Gemini", "Claude", "Perplexity"].map((m) => (
-                      <span
-                        key={m}
-                        className="rounded-full border border-[color:var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-1 font-marketing-mono text-[11px] uppercase tracking-[0.08em] text-[var(--text-muted)]"
-                      >
-                        {m}
-                      </span>
+                    {MODEL_PILLS.map((m) => (
+                      <ModelPill key={m.name} iconSrc={m.iconSrc} name={m.name} />
                     ))}
                   </div>
                 </AnimateIn>
@@ -252,7 +291,7 @@ export default function HomePage() {
         <section className="border-b border-[color:var(--border-subtle)] bg-[var(--bg-surface)] py-[120px]">
           <div className={shell}>
             <AnimateIn delay={0}>
-              <Eyebrow accent>{`// THE PROBLEM`}</Eyebrow>
+              <SectionLabel>{`// THE PROBLEM`}</SectionLabel>
             </AnimateIn>
             <AnimateIn delay={100}>
               <h2 className="mt-6 max-w-[680px] font-marketing-display text-[52px] font-normal italic leading-[1.1] text-[var(--text-primary)]">
@@ -309,45 +348,55 @@ export default function HomePage() {
                 prioritized actions.
               </p>
             </AnimateIn>
-            <div className="mt-14 grid gap-4 md:grid-cols-3 md:gap-4">
+            <div className="mt-14 grid gap-4 md:grid-cols-3 md:items-stretch md:gap-4">
               <ProductPreviewCard caption="Executive summary — one screen they understand" delay={0} label="PAGE 1">
                 <div className="mt-4 flex items-end gap-2">
-                  <span className="font-marketing-display text-5xl text-[var(--text-primary)]">72</span>
+                  <span className="font-marketing-mono text-5xl font-light tabular-nums text-[var(--text-primary)]">72</span>
                   <span className="text-[13px] text-[var(--text-muted)]">Visibility score</span>
                 </div>
-                <div className="mt-4 h-[3px] w-full rounded-full bg-[var(--bg-inset)]">
-                  <div className="h-full w-[72%] rounded-full bg-[var(--accent-marketing)]" />
+                <div className="mt-auto pt-4">
+                  <div className="h-[3px] w-full rounded-full bg-[var(--bg-inset)]">
+                    <div className="h-full w-[72%] rounded-full bg-[var(--accent-marketing)]" />
+                  </div>
                 </div>
               </ProductPreviewCard>
               <ProductPreviewCard caption="Model breakdown — where each engine puts them" delay={100} label="ANALYSIS">
-                <div className="mt-5 space-y-3.5">
-                  {[
-                    { n: "ChatGPT", w: 85, c: "var(--accent-marketing)" },
-                    { n: "Gemini", w: 60, c: "rgba(0,232,122,0.4)" },
-                    { n: "Claude", w: 45, c: "rgba(0,232,122,0.2)" },
-                  ].map((row) => (
-                    <div key={row.n} className="flex items-center gap-3">
-                      <span className="w-[72px] shrink-0 text-[13px] text-[var(--text-secondary)]">{row.n}</span>
-                      <div className="h-[3px] flex-1 rounded-full bg-[var(--bg-inset)]">
-                        <div className="h-full rounded-full" style={{ width: `${row.w}%`, background: row.c }} />
+                <div className="mt-5 flex min-h-0 flex-1 flex-col">
+                  <div className="mt-auto space-y-3.5">
+                    {[
+                      { n: "ChatGPT", w: 85, c: "var(--accent-marketing)" },
+                      { n: "Gemini", w: 60, c: "rgba(0,232,122,0.4)" },
+                      { n: "Claude", w: 45, c: "rgba(0,232,122,0.2)" },
+                    ].map((row) => (
+                      <div key={row.n} className="flex items-center gap-3">
+                        <span className="w-[72px] shrink-0 text-[13px] text-[var(--text-secondary)]">{row.n}</span>
+                        <div className="h-[3px] flex-1 rounded-full bg-[var(--bg-inset)]">
+                          <div className="h-full rounded-full" style={{ width: `${row.w}%`, background: row.c }} />
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </ProductPreviewCard>
               <ProductPreviewCard caption="Recommended actions — prioritized next steps" delay={200} label="NEXT STEPS">
-                <div className="mt-5 space-y-3">
-                  <div className="flex gap-2">
-                    <span className="shrink-0 rounded bg-[rgba(255,64,64,0.12)] px-2 py-0.5 font-marketing-mono text-[10px] text-[var(--marketing-red)]">
+                <div className="mt-5 flex flex-1 flex-col space-y-3">
+                  <div className="flex items-start gap-2">
+                    <span
+                      className={`${actionPillClass} bg-[rgba(255,64,64,0.12)] text-[var(--marketing-red)]`}
+                    >
                       HIGH
                     </span>
-                    <span className="text-[13px] font-light text-[var(--text-secondary)]">Close the citation gap on key topics.</span>
+                    <span className="text-[13px] font-light leading-snug text-[var(--text-secondary)]">
+                      Close the citation gap on key topics.
+                    </span>
                   </div>
-                  <div className="flex gap-2">
-                    <span className="shrink-0 rounded bg-[rgba(245,166,35,0.12)] px-2 py-0.5 font-marketing-mono text-[10px] text-[var(--marketing-amber)]">
+                  <div className="flex items-start gap-2">
+                    <span
+                      className={`${actionPillClass} bg-[rgba(245,166,35,0.12)] text-[var(--marketing-amber)]`}
+                    >
                       MED
                     </span>
-                    <span className="text-[13px] font-light text-[var(--text-secondary)]">
+                    <span className="text-[13px] font-light leading-snug text-[var(--text-secondary)]">
                       Align on-page proof with what models quote.
                     </span>
                   </div>
@@ -369,9 +418,9 @@ export default function HomePage() {
         <section className="border-b border-[color:var(--border-subtle)] bg-[var(--bg-surface)] py-[120px]">
           <div className={shell}>
             <AnimateIn delay={0}>
-              <Eyebrow>{`// FOR AGENCIES`}</Eyebrow>
+              <SectionLabel>{`// FOR AGENCIES`}</SectionLabel>
             </AnimateIn>
-            <div className="mt-8 grid gap-16 lg:grid-cols-[45%_55%] lg:gap-16">
+            <div className="mt-8 grid gap-16 lg:grid-cols-[45%_55%] lg:items-start lg:gap-16">
               <div>
                 <AnimateIn delay={50}>
                   <h2 className="font-marketing-display text-5xl font-normal leading-[1.1] text-[var(--text-primary)]">
@@ -386,7 +435,10 @@ export default function HomePage() {
                 </AnimateIn>
                 <AnimateIn delay={150}>
                   <div className="mt-8 rounded-xl border border-[color:var(--border-subtle)] bg-[var(--bg-elevated)] px-6 py-5">
-                    <p className="text-xl font-medium text-[var(--text-primary)]">$2K–$10K/mo service layer</p>
+                    <p className="text-xl font-medium">
+                      <span style={{ color: "#00e87a" }}>$2K–$10K</span>
+                      <span className="text-[var(--text-primary)]"> /mo service layer</span>
+                    </p>
                     <p className="mt-1 text-[13px] font-light text-[var(--text-secondary)]">
                       Agencies are already packaging this into retainers.
                     </p>
@@ -403,7 +455,7 @@ export default function HomePage() {
                   </figure>
                 </AnimateIn>
               </div>
-              <div className="flex flex-col gap-px overflow-hidden rounded-xl border border-[color:var(--border-subtle)] bg-[color:var(--border-subtle)]">
+              <div className="flex h-fit w-full flex-col gap-px self-start overflow-hidden rounded-xl border border-[color:var(--border-subtle)] bg-[color:var(--border-subtle)]">
                 {[
                   {
                     t: "Add a new line item",
@@ -441,12 +493,10 @@ export default function HomePage() {
         <section className="border-b border-[color:var(--border-subtle)] py-20 md:py-[80px]">
           <div className={shell}>
             <AnimateIn delay={0}>
-              <p className="text-center font-marketing-mono text-[11px] uppercase tracking-[0.12em] text-[var(--text-muted)]">
-                {`// HOW IT'S MEASURED`}
-              </p>
+              <SectionLabel className="mb-3 text-center" noMargin>{`// HOW IT'S MEASURED`}</SectionLabel>
             </AnimateIn>
             <AnimateIn delay={100}>
-              <h2 className="mx-auto mt-4 max-w-[600px] text-center font-marketing-display text-[44px] font-normal leading-[1.1] text-[var(--text-primary)]">
+              <h2 className="mx-auto max-w-[600px] text-center font-marketing-display text-[44px] font-normal leading-[1.1] text-[var(--text-primary)]">
                 Search ranked pages. AI ranks answers.
               </h2>
             </AnimateIn>
@@ -455,20 +505,45 @@ export default function HomePage() {
                 Answer-engine visibility is simply: do models mention you, where, and as a source?
               </p>
             </AnimateIn>
-            <div className="mt-12 grid gap-4 md:grid-cols-3">
-              {[
-                { l: "PRESENCE", q: "Are you mentioned at all?" },
-                { l: "POSITION", q: "Are you near the top or missing from the answer?" },
-                { l: "AUTHORITY", q: "Are you being cited as a trusted source?" },
-              ].map((c, i) => (
-                <AnimateIn key={c.l} delay={i * 100}>
-                  <article className="rounded-xl border border-[color:var(--border-subtle)] bg-[var(--bg-surface)] p-8">
-                    <p className="font-marketing-mono text-[11px] uppercase tracking-[0.14em] text-[var(--text-muted)]">{c.l}</p>
-                    <p className="mt-2 text-[17px] font-normal leading-snug text-[var(--text-primary)]">{c.q}</p>
-                    <div className="mt-5 h-1.5 w-1.5 rounded-full bg-[var(--accent-marketing)]" />
-                  </article>
-                </AnimateIn>
-              ))}
+            <div className="mt-12 grid gap-4 md:grid-cols-3 md:items-stretch">
+              <AnimateIn delay={0}>
+                <article className="flex h-full min-h-[200px] flex-col rounded-xl border border-[color:var(--border-subtle)] bg-[var(--bg-surface)] p-8">
+                  <p className="font-marketing-mono text-[11px] uppercase tracking-[0.14em] text-[#555]">PRESENCE</p>
+                  <p className="mt-2 text-[17px] font-normal leading-[1.4] text-[#efefef]">Are you mentioned at all?</p>
+                  <div className="mt-auto flex flex-col gap-2 pt-4">
+                    <PresenceDotRow green={4} label="ChatGPT" />
+                    <PresenceDotRow green={3} label="Gemini" />
+                    <PresenceDotRow green={2} label="Claude" />
+                  </div>
+                </article>
+              </AnimateIn>
+              <AnimateIn delay={100}>
+                <article className="flex h-full min-h-[200px] flex-col rounded-xl border border-[color:var(--border-subtle)] bg-[var(--bg-surface)] p-8">
+                  <p className="font-marketing-mono text-[11px] uppercase tracking-[0.14em] text-[#555]">POSITION</p>
+                  <p className="mt-2 text-[17px] font-normal leading-[1.4] text-[#efefef]">
+                    Are you near the top or missing from the answer?
+                  </p>
+                  <div className="mt-auto space-y-1 pt-4 text-[10px] leading-relaxed">
+                    <p className="text-[#00e87a]">#1 Your client</p>
+                    <p className="text-[#555]">#2 Competitor A</p>
+                    <p className="text-[#444]">#3 Competitor B</p>
+                  </div>
+                </article>
+              </AnimateIn>
+              <AnimateIn delay={200}>
+                <article className="flex h-full min-h-[200px] flex-col rounded-xl border border-[color:var(--border-subtle)] bg-[var(--bg-surface)] p-8">
+                  <p className="font-marketing-mono text-[11px] uppercase tracking-[0.14em] text-[#555]">AUTHORITY</p>
+                  <p className="mt-2 text-[17px] font-normal leading-[1.4] text-[#efefef]">Are you being cited as a trusted source?</p>
+                  <div className="mt-auto pt-4">
+                    <p className="text-[10px] text-[#555]">Citations: 0%</p>
+                    <div className="mt-1 h-[3px] w-full rounded-full bg-[#1a1a1a]">
+                      <div className="h-full w-0 rounded-full bg-[#00e87a]" />
+                    </div>
+                    <p className="mt-1 text-[10px] text-[#555]">Target: 15%+</p>
+                    <p className="mt-1 text-[10px] text-[#444]">Improve with press + backlinks</p>
+                  </div>
+                </article>
+              </AnimateIn>
             </div>
           </div>
         </section>
@@ -501,8 +576,10 @@ export default function HomePage() {
         {/* 7 — FAQ */}
         <section className="scroll-mt-24 border-b border-[color:var(--border-subtle)] bg-[var(--bg-surface)] py-[120px]" id="faq">
           <div className="mx-auto max-w-[720px] px-6 md:px-12">
-            <p className="text-center font-marketing-mono text-[11px] uppercase tracking-[0.14em] text-[var(--text-muted)]">FAQ</p>
-            <h2 className="mt-3 text-center font-marketing-display text-[44px] font-normal leading-[1.1] text-[var(--text-primary)]">
+            <SectionLabel className="mb-3 text-center" noMargin>
+              FAQ
+            </SectionLabel>
+            <h2 className="text-center font-marketing-display text-[44px] font-normal leading-[1.1] text-[var(--text-primary)]">
               Questions agencies ask before they run a snapshot
             </h2>
             <p className="mx-auto mt-3 max-w-[520px] text-center text-base font-light text-[var(--text-secondary)]">

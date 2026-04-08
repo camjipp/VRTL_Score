@@ -466,3 +466,19 @@ html {
   animation: pulse-green 2.5s ease 1.5s 3;
 }
 
+@keyframes live-dot-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.88);
+  }
+}
+
+.animate-live-dot {
+  animation: live-dot-pulse 2s ease infinite;
+}
+
