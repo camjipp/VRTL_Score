@@ -39,48 +39,101 @@ function ModelPill({ name, iconSrc }: { name: string; iconSrc: string }) {
   );
 }
 
+const paper =
+  "border border-[#dadada] bg-[#fafafa] text-[#111] shadow-[0_28px_70px_rgba(0,0,0,0.45),0_8px_24px_rgba(0,0,0,0.12)] rounded-[3px]";
+
 function HeroReportStack() {
   return (
-    <div className="relative mx-auto w-full max-w-[440px] lg:mx-0">
-      <div
-        className="absolute right-[-10px] top-5 hidden h-[min(380px,70vh)] w-full rounded-2xl border border-[color:var(--border-subtle)] bg-[var(--bg-elevated)] opacity-50 lg:block"
-        style={{ transform: "rotate(2deg)" }}
-        aria-hidden
-      />
-      <div className="relative z-10 w-full rounded-2xl bg-white p-7 text-[#111] shadow-[0_0_0_1px_rgba(0,0,0,0.06)] lg:w-[96%] lg:ml-auto">
-        <div className="flex items-center justify-between gap-3">
-          <p className="font-marketing-mono text-[10px] uppercase tracking-[0.14em] text-[#999]">VRTL SCORE</p>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#e8faf0] px-2.5 py-0.5 font-marketing-mono text-[10px] font-medium text-[#1a7a45]">
-            <span className="h-2 w-2 shrink-0 rounded-full bg-[#00e87a] animate-live-dot" aria-hidden />
-            LIVE
-          </span>
-        </div>
-        <p className="mt-1 text-[15px] font-medium text-[#111]">Acme Corp · Q2 snapshot</p>
-        <div className="my-4 h-px bg-[#eee]" />
-        <div className="flex flex-wrap items-end gap-4">
-          <p className="font-marketing-display text-[52px] font-light leading-none text-[#111]">74</p>
-          <div className="flex flex-col gap-0.5 pb-1">
-            <span className="text-xs font-medium text-[#1a7a45]">↑ 6 pts</span>
-            <span className="text-[11px] text-[#aaa]">vs last snapshot</span>
-          </div>
-        </div>
-        <div className="mt-4 flex flex-col gap-2">
-          {[
-            { n: "ChatGPT", pct: 88, fill: "#1a7a45" },
-            { n: "Gemini", pct: 61, fill: "#4a90d9" },
-            { n: "Claude", pct: 43, fill: "#c084fc" },
-          ].map((row) => (
-            <div key={row.n} className="flex items-center gap-2">
-              <span className="w-20 shrink-0 text-xs text-[#666]">{row.n}</span>
-              <div className="h-1.5 flex-1 rounded-full bg-gray-100">
-                <div className="h-full rounded-full" style={{ width: `${row.pct}%`, background: row.fill }} />
+    <div className="group/stack relative z-10 flex w-full flex-col items-center lg:items-end lg:overflow-visible lg:pr-0">
+      <p className="mb-4 font-marketing-mono text-[11px] tracking-[0.08em] text-[var(--text-secondary)] lg:mr-6 lg:text-right">
+        What you send to clients
+      </p>
+
+      <div className="animate-hero-report-float relative w-[min(100%,320px)] origin-center scale-[0.92] pb-14 pt-2 sm:w-[min(100%,360px)] sm:scale-95 lg:ml-auto lg:mr-[-32px] lg:w-[420px] lg:origin-top-right lg:scale-[1.18]">
+        {/* Page 3 — Model analysis (back) — desktop only */}
+        <div
+          className={`${paper} absolute left-0 top-2 hidden h-[400px] w-full max-w-[360px] origin-bottom-right p-5 opacity-95 lg:block lg:max-w-none`}
+          style={{ transform: "translate(-6%, 8%) rotate(-3.5deg) scale(0.92)", zIndex: 0 }}
+          aria-hidden
+        >
+          <p className="font-marketing-mono text-[9px] uppercase tracking-[0.16em] text-[#888]">Model analysis</p>
+          <p className="mt-3 text-[11px] font-medium text-[#333]">Acme Corp · by engine</p>
+          <div className="mt-4 space-y-2.5">
+            {[
+              { n: "ChatGPT", v: 88 },
+              { n: "Gemini", v: 61 },
+              { n: "Claude", v: 43 },
+            ].map((row) => (
+              <div key={row.n} className="flex items-center gap-2">
+                <span className="w-16 shrink-0 font-marketing-mono text-[10px] text-[#666]">{row.n}</span>
+                <div className="h-1 flex-1 bg-[#e8e8e8]">
+                  <div className="h-full bg-[#1a1a1a]" style={{ width: `${row.v}%` }} />
+                </div>
+                <span className="w-7 shrink-0 text-right font-marketing-mono text-[10px] text-[#444]">{row.v}</span>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          <p className="absolute bottom-4 right-4 font-marketing-mono text-[8px] text-[#bbb]">Page 3</p>
         </div>
-        <div className="mt-4 flex justify-between border-t border-gray-100 pt-3 font-marketing-mono text-[11px]">
-          <span className="text-[#aaa]">3 models tracked</span>
-          <span className="text-[#e53e3e]">2 competitors ahead</span>
+
+        {/* Page 2 — Recommendations — desktop only */}
+        <div
+          className={`${paper} absolute left-0 top-1 hidden h-[400px] w-full max-w-[360px] p-5 lg:block lg:max-w-none`}
+          style={{ transform: "translate(-2%, 4%) rotate(-1.8deg) scale(0.96)", zIndex: 1 }}
+          aria-hidden
+        >
+          <p className="font-marketing-mono text-[9px] uppercase tracking-[0.16em] text-[#888]">Recommendations</p>
+          <div className="mt-4 space-y-3">
+            <div>
+              <span className="font-marketing-mono text-[9px] font-medium text-[#c53030]">HIGH</span>
+              <p className="mt-1 text-[11px] leading-snug text-[#333]">Earn citations on category queries competitors already own.</p>
+            </div>
+            <div>
+              <span className="font-marketing-mono text-[9px] font-medium text-[#b7791f]">MED</span>
+              <p className="mt-1 text-[11px] leading-snug text-[#333]">Add proof-rich comparison pages aligned to how models answer.</p>
+            </div>
+          </div>
+          <p className="absolute bottom-4 right-4 font-marketing-mono text-[8px] text-[#bbb]">Page 2</p>
+        </div>
+
+        {/* Page 1 — Executive summary (front) */}
+        <div
+          className={`${paper} relative z-[2] mx-auto min-h-[380px] w-full max-w-[320px] p-6 transition-shadow duration-500 ease-out sm:max-w-[360px] group-hover/stack:shadow-[0_36px_90px_rgba(0,0,0,0.55),0_12px_32px_rgba(0,0,0,0.14)] lg:mx-0 lg:ml-auto lg:h-[400px] lg:max-w-none`}
+          style={{ transform: "translate(4%, 0) rotate(2deg)" }}
+        >
+          <div className="flex items-start justify-between gap-2 border-b border-[#e5e5e5] pb-3">
+            <div>
+              <p className="font-marketing-mono text-[9px] uppercase tracking-[0.16em] text-[#888]">VRTL Score</p>
+              <p className="mt-1.5 text-[14px] font-semibold text-[#111]">Executive summary</p>
+            </div>
+            <span className="shrink-0 border border-[#ddd] bg-white px-1.5 py-0.5 font-marketing-mono text-[8px] uppercase tracking-wider text-[#777]">
+              PDF
+            </span>
+          </div>
+          <p className="mt-3 text-[12px] text-[#555]">Acme Corp · Q2 2026</p>
+          <div className="mt-5 flex flex-wrap items-end gap-3">
+            <span className="font-marketing-display text-[48px] font-normal leading-none tracking-tight text-[#111]">74</span>
+            <div className="pb-1">
+              <p className="text-[10px] uppercase tracking-wide text-[#888]">Visibility score</p>
+              <p className="font-marketing-mono text-[11px] text-[#2d7a4d]">↑ 6 vs last run</p>
+            </div>
+          </div>
+          <div className="mt-5 grid grid-cols-2 gap-3 border-t border-[#ececec] pt-4">
+            <div>
+              <p className="font-marketing-mono text-[8px] uppercase tracking-wider text-[#aaa]">Mention rate</p>
+              <p className="mt-0.5 text-[15px] font-medium tabular-nums text-[#111]">62%</p>
+            </div>
+            <div>
+              <p className="font-marketing-mono text-[8px] uppercase tracking-wider text-[#aaa]">Top-3 answers</p>
+              <p className="mt-0.5 text-[15px] font-medium tabular-nums text-[#111]">4 of 6</p>
+            </div>
+          </div>
+          <p className="mt-4 text-[11px] leading-relaxed text-[#666]">
+            Strong on ChatGPT; close the gap on Gemini and Claude before renewals.
+          </p>
+          <p className="absolute bottom-4 right-4 font-marketing-mono text-[8px] text-[#bbb]">
+            Page 1<span className="hidden lg:inline"> of 3</span>
+          </p>
         </div>
       </div>
     </div>
@@ -229,9 +282,9 @@ export default function HomePage() {
     <div className="page-marketing selection:bg-[var(--accent-bg)] selection:text-[var(--text-primary)]">
       <main>
         {/* 1 — Hero */}
-        <section className="min-h-screen border-b border-[color:var(--border-subtle)] pt-[120px]">
-          <div className={`${shell} pb-24`}>
-            <div className="grid items-center gap-16 lg:grid-cols-[55%_45%] lg:gap-12">
+        <section className="min-h-screen overflow-visible border-b border-[color:var(--border-subtle)] pt-[120px]">
+          <div className={`${shell} overflow-visible pb-24`}>
+            <div className="grid items-center gap-16 overflow-visible lg:grid-cols-[55%_45%] lg:gap-8">
               <div>
                 <AnimateIn delay={0}>
                   <SectionLabel>{`// AI VISIBILITY FOR AGENCIES`}</SectionLabel>

@@ -482,3 +482,17 @@ html {
   animation: live-dot-pulse 2s ease infinite;
 }
 
+@keyframes hero-report-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.animate-hero-report-float {
+  animation: hero-report-float 7s ease-in-out infinite;
+}
+
