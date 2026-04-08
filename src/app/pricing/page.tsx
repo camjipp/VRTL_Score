@@ -8,21 +8,19 @@ import { SectionLabel } from "@/components/SectionLabel";
 import { cn } from "@/lib/cn";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
-/** Same horizontal grid as landing (`src/app/page.tsx`). */
 const shell = "mx-auto w-full max-w-[1200px] px-6 md:px-12";
 
-const sectionY = "py-16 md:py-24";
+/** Below sticky nav (60px); keeps intro + cards above the fold on desktop. */
+const pricingTop = "pt-6 pb-10 md:pt-8 md:pb-12";
 
-const cardBase =
-  "flex h-full min-h-0 flex-col gap-5 rounded-xl border border-zinc-800 bg-zinc-900 p-6 md:p-8";
-const cardFeatured =
-  "relative z-10 scale-[1.02] border-emerald-500/40 bg-zinc-900/80";
+/** Tighter rhythm than generic marketing sections — conversion path. */
+const sectionBelow = "border-b border-[color:var(--border-subtle)] py-12 md:py-16";
 
 function Check({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300",
+        "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[color:var(--border-subtle)] bg-[var(--bg-inset)] text-[var(--text-secondary)]",
         className,
       )}
     >
@@ -43,7 +41,8 @@ const plans = [
   {
     id: "starter" as const,
     name: "Foundation",
-    description: "For agencies validating AI visibility with a tight client list before you productize reporting.",
+    description:
+      "For agencies validating AI visibility with a tight client list before productizing reporting.",
     monthlyPrice: 149,
     yearlyPrice: 1490,
     clients: 5,
@@ -72,7 +71,8 @@ const plans = [
   {
     id: "pro" as const,
     name: "Scale",
-    description: "For firms managing a large book and packaging AI visibility as a core, billable line of business.",
+    description:
+      "For firms managing a large book and packaging AI visibility as a core, billable line of business.",
     monthlyPrice: 799,
     yearlyPrice: 7990,
     clients: 50,
@@ -97,11 +97,11 @@ const faqs = [
   {
     question: "How do I get started?",
     answer:
-      "Run a free snapshot during onboarding to see the product on real data. When you’re ready to cover more clients and history, pick a plan that matches your book.",
+      "Run a free snapshot during onboarding to see the product on real data. When you're ready to cover more clients and history, pick a plan that matches your book.",
   },
   {
     question: "Can I change plans later?",
-    answer: "Yes. Upgrade or downgrade anytime. We’ll prorate your billing automatically.",
+    answer: "Yes. Upgrade or downgrade anytime. We'll prorate your billing automatically.",
   },
   {
     question: "What AI providers are included?",
@@ -110,7 +110,7 @@ const faqs = [
   },
   {
     question: "Do you offer refunds?",
-    answer: "Yes. If you’re not satisfied within the first 30 days, we’ll refund your payment in full.",
+    answer: "Yes. If you're not satisfied within the first 30 days, we'll refund your payment in full.",
   },
   {
     question: "What if I exceed my client limit?",
@@ -126,12 +126,6 @@ const heroBullets = [
   "Catch client risk before churn",
   "Prove value in client calls",
   "Turn AI visibility into a billable service",
-];
-
-const howAgenciesBullets = [
-  "Spot which clients are losing AI visibility",
-  "See which competitors are replacing them",
-  "Ship a report clients actually understand",
 ];
 
 function RunSnapshotButton({
@@ -193,21 +187,18 @@ function RunSnapshotButton({
 function BillingToggle({
   isAnnual,
   setIsAnnual,
-  compact,
 }: {
   isAnnual: boolean;
   setIsAnnual: (v: boolean) => void;
-  compact?: boolean;
 }) {
   return (
-    <div className={cn("flex flex-wrap items-center justify-center gap-3", compact ? "gap-2" : "gap-4")}>
+    <div className="flex flex-wrap items-center gap-3">
       <div className="relative inline-flex items-center rounded-full border border-[color:var(--border-subtle)] bg-[var(--bg-elevated)] p-1">
         <button
           type="button"
           onClick={() => setIsAnnual(false)}
           className={cn(
-            "relative rounded-full font-medium transition-all",
-            compact ? "px-4 py-1.5 text-sm" : "px-5 py-2 text-sm",
+            "relative rounded-full px-4 py-1.5 text-sm font-medium transition-all md:px-5 md:py-2",
             !isAnnual ? "bg-[var(--text-primary)] text-black" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]",
           )}
         >
@@ -217,8 +208,7 @@ function BillingToggle({
           type="button"
           onClick={() => setIsAnnual(true)}
           className={cn(
-            "relative rounded-full font-medium transition-all",
-            compact ? "px-4 py-1.5 text-sm" : "px-5 py-2 text-sm",
+            "relative rounded-full px-4 py-1.5 text-sm font-medium transition-all md:px-5 md:py-2",
             isAnnual ? "bg-[var(--text-primary)] text-black" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]",
           )}
         >
@@ -226,10 +216,101 @@ function BillingToggle({
         </button>
       </div>
       {isAnnual && (
-        <span className="rounded-full border border-[color:var(--border-mid)] bg-[var(--bg-inset)] px-3 py-1 text-xs font-medium text-[var(--text-secondary)] md:text-sm">
+        <span className="rounded-full border border-[color:var(--border-mid)] bg-[var(--bg-inset)] px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)] md:text-sm">
           2 months free on annual
         </span>
       )}
+    </div>
+  );
+}
+
+function PlanCards({
+  isAnnual,
+  loadingPlan,
+  onCheckout,
+}: {
+  isAnnual: boolean;
+  loadingPlan: string | null;
+  onCheckout: (id: "starter" | "growth" | "pro") => void;
+}) {
+  return (
+    <div className="mt-8 grid gap-4 md:mt-10 md:grid-cols-3 md:items-stretch md:gap-5 lg:gap-6">
+      {plans.map((plan) => {
+        const price = isAnnual ? plan.yearlyPrice : plan.monthlyPrice;
+        const monthlyEquivalent = isAnnual ? Math.round(plan.yearlyPrice / 12) : plan.monthlyPrice;
+        const isLoading = loadingPlan === plan.id;
+
+        return (
+          <div
+            key={plan.name}
+            className={cn(
+              "flex h-full min-h-0 flex-col gap-4 rounded-xl border bg-[var(--bg-elevated)] p-5 md:gap-5 md:p-6",
+              "border-[color:var(--border-subtle)]",
+              plan.recommended && "border-[color:var(--accent-border)] bg-[var(--bg-surface)] shadow-[0_0_0_1px_rgba(0,232,122,0.12)]",
+            )}
+          >
+            <div className="min-h-[1.375rem] shrink-0">
+              {plan.recommended ? (
+                <p className="font-marketing-mono text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--text-muted)]">
+                  Most agencies choose this
+                </p>
+              ) : null}
+            </div>
+
+            <div className="shrink-0">
+              <h3 className="font-marketing-display text-xl font-normal text-[var(--text-primary)] md:text-2xl">{plan.name}</h3>
+              <p className="mt-2 min-h-[4.25rem] text-[15px] font-light leading-snug text-[var(--text-secondary)] md:min-h-[4.5rem]">
+                {plan.description}
+              </p>
+            </div>
+
+            <div className="flex min-h-[6.75rem] shrink-0 flex-col gap-1.5">
+              <div className="flex items-baseline gap-2">
+                <span className="font-marketing-display text-4xl font-normal tabular-nums tracking-tight text-[var(--text-primary)] md:text-5xl">
+                  ${monthlyEquivalent}
+                </span>
+                <span className="text-sm font-light text-[var(--text-secondary)]">/month</span>
+              </div>
+              <p className="text-sm font-light text-[var(--text-secondary)]">
+                Typical ROI: 1 retained client pays for this 10–30x
+              </p>
+              {isAnnual ? (
+                <p className="text-sm font-light text-[var(--text-muted)]">${price.toLocaleString()} billed annually</p>
+              ) : (
+                <p className="text-sm font-light text-[var(--text-muted)]">
+                  Save ${(plan.monthlyPrice * 12 - plan.yearlyPrice).toLocaleString()}/year on annual
+                </p>
+              )}
+            </div>
+
+            <div className="flex shrink-0 flex-col gap-2">
+              <RunSnapshotButton
+                loading={isLoading}
+                onClick={() => onCheckout(plan.id)}
+                variant={plan.recommended ? "primary" : "outline"}
+                className={cn(!plan.recommended && "font-normal")}
+              />
+              <Link
+                href="/preview"
+                className="text-center text-sm font-normal text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+              >
+                See example report
+              </Link>
+            </div>
+
+            <div className="border-t border-[color:var(--border-subtle)] pt-4 md:pt-5">
+              <ul className="flex flex-col gap-2.5">
+                {plan.highlights.map((line) => (
+                  <li key={line} className="flex items-start gap-3 text-[15px] font-light leading-snug text-[var(--text-secondary)]">
+                    <Check className="mt-0.5" />
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -306,24 +387,24 @@ function PricingContent() {
   if (isPaywall) {
     return (
       <div className="page-marketing selection:bg-[var(--accent-bg)] selection:text-[var(--text-primary)]">
-        <main className="min-h-screen">
-          <section className={cn("border-b border-[color:var(--border-subtle)]", sectionY)}>
+        <main>
+          <section className={cn("border-b border-[color:var(--border-subtle)]", pricingTop)}>
             <div className={shell}>
-              <div className="text-center">
-                <SectionLabel noMargin>{`// CHOOSE PLAN`}</SectionLabel>
-                <h1 className="mt-6 text-4xl font-semibold tracking-tight text-[var(--text-primary)] md:text-5xl">
-                  Choose your plan
-                </h1>
-                <p className="mx-auto mt-4 max-w-2xl text-base font-light text-[var(--text-secondary)]">
-                  Generate your first report on onboarding, then scale when you&apos;re ready.
-                </p>
+              <SectionLabel noMargin className="mb-0">
+                {`// CHOOSE PLAN`}
+              </SectionLabel>
+              <h1 className="mt-3 font-marketing-display text-[1.75rem] font-normal leading-[1.12] tracking-[-0.03em] text-[var(--text-primary)] md:text-4xl">
+                Choose your plan
+              </h1>
+              <p className="mt-3 max-w-xl text-[15px] font-light leading-relaxed text-[var(--text-secondary)]">
+                Generate your first report on onboarding, then scale when you&apos;re ready.
+              </p>
+
+              <div className="mt-5">
+                <BillingToggle isAnnual={isAnnual} setIsAnnual={setIsAnnual} />
               </div>
 
-              <div className="mt-10">
-                <BillingToggle compact isAnnual={isAnnual} setIsAnnual={setIsAnnual} />
-              </div>
-
-              <div className="mt-10 grid gap-6 md:grid-cols-3 md:gap-8 md:items-stretch">
+              <div className="mt-6 grid gap-4 md:mt-8 md:grid-cols-3 md:items-stretch md:gap-5">
                 {plans.map((plan) => {
                   const monthlyEquivalent = isAnnual ? Math.round(plan.yearlyPrice / 12) : plan.monthlyPrice;
                   const isSelected = selectedPlan === plan.id;
@@ -335,42 +416,41 @@ function PricingContent() {
                       type="button"
                       onClick={() => setSelectedPlan(plan.id)}
                       className={cn(
-                        "flex h-full flex-col gap-5 rounded-xl border p-6 text-left transition-colors",
-                        "border-zinc-800 bg-zinc-900",
-                        isSelected && "border-emerald-500/40 bg-zinc-900/80",
-                        !isSelected && isRecommended && cardFeatured,
-                        !isSelected && !isRecommended && "hover:border-zinc-700",
+                        "flex flex-col gap-4 rounded-xl border p-5 text-left transition-colors md:gap-5 md:p-6",
+                        "border-[color:var(--border-subtle)] bg-[var(--bg-elevated)]",
+                        isSelected && "border-[color:var(--accent-border)] bg-[var(--bg-surface)]",
+                        !isSelected && isRecommended && "border-[color:var(--accent-border)] bg-[var(--bg-surface)]",
+                        !isSelected && !isRecommended && "hover:border-[color:var(--border-mid)]",
                       )}
                     >
-                      <div className="min-h-[2.25rem]">
+                      <div className="min-h-[1.375rem]">
                         {plan.recommended ? (
-                          <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-500">
+                          <p className="font-marketing-mono text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--text-muted)]">
                             Most agencies choose this
                           </p>
                         ) : null}
                       </div>
-
                       <div>
-                        <h3 className="text-lg font-medium text-[var(--text-primary)]">{plan.name}</h3>
-                        <p className="mt-1 text-sm text-[var(--text-muted)]">
+                        <h3 className="font-marketing-display text-lg font-normal text-[var(--text-primary)]">{plan.name}</h3>
+                        <p className="mt-1 text-sm font-light text-[var(--text-muted)]">
                           {plan.clients === 50 ? "50+" : plan.clients} clients
                         </p>
                       </div>
-
-                      <div className="flex min-h-[5.5rem] flex-col gap-2">
+                      <div className="flex flex-col gap-1.5 text-left">
                         <div className="flex items-baseline gap-2">
-                          <span className="text-4xl font-semibold tracking-tight text-[var(--text-primary)] md:text-5xl">
+                          <span className="font-marketing-display text-3xl font-normal tabular-nums text-[var(--text-primary)] md:text-4xl">
                             ${monthlyEquivalent}
                           </span>
                           <span className="text-sm text-[var(--text-secondary)]">/mo</span>
                         </div>
-                        <p className="text-sm text-zinc-400">Typical ROI: 1 retained client pays for this 10–30x</p>
+                        <p className="text-sm font-light text-[var(--text-secondary)]">
+                          Typical ROI: 1 retained client pays for this 10–30x
+                        </p>
                       </div>
-
-                      <ul className="flex flex-1 flex-col gap-3 text-left">
+                      <ul className="flex flex-1 flex-col gap-2 border-t border-[color:var(--border-subtle)] pt-4 text-left">
                         {plan.highlights.map((line) => (
-                          <li key={line} className="flex items-start gap-3 text-sm text-zinc-400">
-                            <Check className="mt-0.5" />
+                          <li key={line} className="flex items-start gap-2 text-sm font-light text-[var(--text-secondary)]">
+                            <Check className="mt-0.5 h-4 w-4" />
                             <span>{line}</span>
                           </li>
                         ))}
@@ -380,15 +460,15 @@ function PricingContent() {
                 })}
               </div>
 
-              <div className="mt-10 flex flex-col items-center gap-6">
+              <div className="mt-8 flex flex-col items-start gap-4 border-t border-[color:var(--border-subtle)] pt-8 md:flex-row md:items-center md:justify-between">
                 <RunSnapshotButton
                   loading={!!loadingPlan}
                   onClick={() => handleCheckout((selectedPlan || "growth") as "starter" | "growth" | "pro")}
-                  className="w-full max-w-md sm:w-auto"
+                  className="w-full max-w-xs sm:w-auto"
                 />
                 <Link
                   href="/preview"
-                  className="text-sm font-normal text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+                  className="text-sm font-normal text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 >
                   See example report
                 </Link>
@@ -403,178 +483,111 @@ function PricingContent() {
   return (
     <div className="page-marketing selection:bg-[var(--accent-bg)] selection:text-[var(--text-primary)]">
       <main>
-        <section className={cn("border-b border-[color:var(--border-subtle)]", sectionY)}>
+        {/* 1–2: Compact intro + pricing cards (single section, above the fold) */}
+        <section className={cn("border-b border-[color:var(--border-subtle)]", pricingTop)}>
           <div className={shell}>
-            <div className="text-center">
-              <SectionLabel noMargin>{`// PRICING`}</SectionLabel>
-              <h1 className="mt-6 text-4xl font-semibold tracking-tight text-[var(--text-primary)] md:text-5xl md:leading-[1.1]">
-                Pricing built for agencies that want to win AI search
-              </h1>
-              <p className="mx-auto mt-5 max-w-2xl text-lg font-light leading-relaxed text-zinc-400">
-                Most agencies lose clients without even knowing why. VRTL Score shows you where you&apos;re being replaced —
-                and how to fix it.
-              </p>
+            <SectionLabel noMargin className="mb-0">
+              {`// PRICING`}
+            </SectionLabel>
 
-              <ul className="mx-auto mt-10 max-w-xl space-y-3 text-left text-base font-light text-[var(--text-secondary)]">
-                {heroBullets.map((item) => (
-                  <li key={item} className="flex gap-3">
-                    <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[var(--text-muted)]" aria-hidden />
-                    {item}
-                  </li>
-                ))}
-              </ul>
+            <h1 className="mt-3 max-w-[760px] font-marketing-display text-[2rem] font-normal leading-[1.08] tracking-[-0.03em] text-[var(--text-primary)] md:text-[2.75rem] lg:text-[3.25rem]">
+              Pricing built for agencies that want to win AI search
+            </h1>
 
-              <div className="mt-10">
-                <BillingToggle isAnnual={isAnnual} setIsAnnual={setIsAnnual} />
-              </div>
-            </div>
-          </div>
-        </section>
+            <p className="mt-4 max-w-[640px] text-lg font-light leading-relaxed text-[var(--text-secondary)]">
+              Most agencies lose clients without even knowing why. VRTL Score shows you where you&apos;re being replaced — and
+              how to fix it.
+            </p>
 
-        <section className={cn("border-b border-[color:var(--border-subtle)]", sectionY)}>
-          <div className={shell}>
-            <div className="grid gap-6 overflow-visible py-1 lg:grid-cols-3 lg:items-stretch lg:gap-8 lg:py-2">
-              {plans.map((plan) => {
-                const price = isAnnual ? plan.yearlyPrice : plan.monthlyPrice;
-                const monthlyEquivalent = isAnnual ? Math.round(plan.yearlyPrice / 12) : plan.monthlyPrice;
-                const isLoading = loadingPlan === plan.id;
-
-                return (
-                  <div
-                    key={plan.name}
-                    className={cn(cardBase, plan.recommended && cardFeatured)}
-                  >
-                    <div className="min-h-[2.25rem] shrink-0">
-                      {plan.recommended ? (
-                        <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-500">
-                          Most agencies choose this
-                        </p>
-                      ) : null}
-                    </div>
-
-                    <div className="shrink-0">
-                      <h3 className="text-lg font-medium text-[var(--text-primary)]">{plan.name}</h3>
-                      <p className="mt-2 min-h-[4.5rem] text-sm font-light leading-relaxed text-[var(--text-secondary)]">
-                        {plan.description}
-                      </p>
-                    </div>
-
-                    <div className="flex min-h-[7.5rem] shrink-0 flex-col gap-2">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-4xl font-semibold tracking-tight text-[var(--text-primary)] md:text-5xl">
-                          ${monthlyEquivalent}
-                        </span>
-                        <span className="text-sm text-[var(--text-secondary)]">/month</span>
-                      </div>
-                      <p className="text-sm text-zinc-400">Typical ROI: 1 retained client pays for this 10–30x</p>
-                      {isAnnual && (
-                        <p className="text-sm text-[var(--text-secondary)]">${price.toLocaleString()} billed annually</p>
-                      )}
-                      {!isAnnual && (
-                        <p className="text-sm text-[var(--text-secondary)]">
-                          Save ${(plan.monthlyPrice * 12 - plan.yearlyPrice).toLocaleString()}/year on annual
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex min-h-[5.25rem] shrink-0 flex-col gap-2">
-                      <RunSnapshotButton
-                        loading={isLoading}
-                        onClick={() => handleCheckout(plan.id)}
-                        variant={plan.recommended ? "primary" : "outline"}
-                        className={cn(!plan.recommended && "font-normal")}
-                      />
-                      <Link
-                        href="/preview"
-                        className="text-center text-sm font-normal text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
-                      >
-                        See example report
-                      </Link>
-                    </div>
-
-                    <ul className="flex flex-1 flex-col gap-3">
-                      {plan.highlights.map((line) => (
-                        <li key={line} className="flex items-start gap-3 text-sm text-zinc-400">
-                          <Check className="mt-0.5" />
-                          <span>{line}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="mt-10 rounded-xl border border-zinc-800 bg-zinc-900 p-6 md:mt-12 md:p-8">
-              <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
-                <div>
-                  <h3 className="text-lg font-medium text-[var(--text-primary)]">More than 50 clients?</h3>
-                  <p className="mt-2 max-w-xl text-sm font-light text-[var(--text-secondary)]">
-                    Custom pricing, rollout support, and terms that match how your agency sells.
-                  </p>
-                </div>
-                <a
-                  href="mailto:hello@vrtlscore.com"
-                  className="shrink-0 rounded-full border border-[color:var(--border-mid)] px-6 py-3 text-sm font-medium text-[var(--text-primary)] transition-colors hover:border-[color:var(--border-strong)]"
-                >
-                  Contact sales →
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className={cn("border-b border-[color:var(--border-subtle)] bg-[var(--bg-surface)]", sectionY)}>
-          <div className={shell}>
-            <h2 className="text-center text-4xl font-semibold tracking-tight text-[var(--text-primary)] md:text-5xl">
-              How agencies use VRTL Score
-            </h2>
-            <ul className="mt-10 grid gap-6 md:grid-cols-3">
-              {howAgenciesBullets.map((item) => (
-                <li
-                  key={item}
-                  className="flex h-full min-h-[8rem] flex-col rounded-xl border border-zinc-800 bg-zinc-900 p-6 text-sm font-light leading-relaxed text-zinc-400"
-                >
+            <ul className="mt-4 flex max-w-[720px] flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-x-8 sm:gap-y-1">
+              {heroBullets.map((item) => (
+                <li key={item} className="flex items-center gap-2 text-sm font-light text-[var(--text-secondary)]">
+                  <span className="h-1 w-1 shrink-0 rounded-full bg-[var(--text-muted)]" aria-hidden />
                   {item}
                 </li>
               ))}
             </ul>
+
+            <div className="mt-5">
+              <BillingToggle isAnnual={isAnnual} setIsAnnual={setIsAnnual} />
+            </div>
+
+            <PlanCards isAnnual={isAnnual} loadingPlan={loadingPlan} onCheckout={handleCheckout} />
           </div>
         </section>
 
-        <section className={cn("border-b border-[color:var(--border-subtle)]", sectionY)}>
+        {/* 3: Enterprise */}
+        <section className={sectionBelow}>
           <div className={shell}>
-            <h2 className="text-center text-4xl font-semibold tracking-tight text-[var(--text-primary)] md:text-5xl">
-              At a glance
+            <div className="flex flex-col justify-between gap-6 rounded-xl border border-[color:var(--border-subtle)] bg-[var(--bg-elevated)] px-5 py-6 md:flex-row md:items-center md:px-8 md:py-7">
+              <div className="min-w-0">
+                <h2 className="font-marketing-display text-xl font-normal text-[var(--text-primary)] md:text-2xl">
+                  More than 50 clients?
+                </h2>
+                <p className="mt-2 max-w-xl text-[15px] font-light leading-relaxed text-[var(--text-secondary)]">
+                  Custom pricing, rollout support, and terms that match how your agency sells.
+                </p>
+              </div>
+              <a
+                href="mailto:hello@vrtlscore.com"
+                className="inline-flex shrink-0 items-center justify-center rounded-full border border-[color:var(--border-mid)] px-6 py-3 text-sm font-medium text-[var(--text-primary)] transition-colors hover:border-[color:var(--border-strong)]"
+              >
+                Contact sales →
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* 4: Comparison */}
+        <section className={sectionBelow}>
+          <div className={shell}>
+            <h2 className="max-w-[720px] font-marketing-display text-[1.75rem] font-normal leading-[1.15] tracking-[-0.02em] text-[var(--text-primary)] md:text-[2.25rem]">
+              What changes at each level
             </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-center text-base font-light text-zinc-400">
-              What actually moves the needle for your book
+            <p className="mt-3 max-w-xl text-base font-light text-[var(--text-secondary)]">
+              What actually changes as you scale reporting
             </p>
 
-            <div className="mt-10 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
+            <div className="mt-8 overflow-hidden rounded-xl border border-[color:var(--border-subtle)] bg-[var(--bg-elevated)]">
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="w-full min-w-[560px]">
                   <thead>
-                    <tr className="border-b border-zinc-800 bg-zinc-950">
-                      <th className="px-6 py-5 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">
+                    <tr className="border-b border-[color:var(--border-subtle)] bg-[var(--bg-inset)]">
+                      <th className="px-5 py-4 text-left font-marketing-mono text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--text-muted)] md:px-6 md:py-5">
                         &nbsp;
                       </th>
-                      <th className="px-6 py-5 text-center text-sm font-medium text-zinc-300">Foundation</th>
-                      <th className="px-6 py-5 text-center text-sm font-medium text-[var(--text-primary)] bg-emerald-500/5">
+                      <th className="px-5 py-4 text-center text-sm font-medium text-[var(--text-secondary)] md:px-6 md:py-5">
+                        Foundation
+                      </th>
+                      <th className="px-5 py-4 text-center text-sm font-medium text-[var(--text-primary)] bg-[var(--accent-bg)] md:px-6 md:py-5">
                         Agency
                       </th>
-                      <th className="px-6 py-5 text-center text-sm font-medium text-zinc-300">Scale</th>
+                      <th className="px-5 py-4 text-center text-sm font-medium text-[var(--text-secondary)] md:px-6 md:py-5">
+                        Scale
+                      </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-800">
-                    {comparisonFeatures.map((feature) => (
-                      <tr key={feature.name} className="bg-zinc-900">
-                        <td className="px-6 py-5 text-sm text-zinc-400">{feature.name}</td>
-                        <td className="px-6 py-5 text-center text-sm text-zinc-300">{feature.starter}</td>
-                        <td className="px-6 py-5 text-center text-sm font-medium text-[var(--text-primary)] bg-emerald-500/5">
+                  <tbody>
+                    {comparisonFeatures.map((feature, i) => (
+                      <tr
+                        key={feature.name}
+                        className={cn(
+                          "border-b border-[color:var(--border-subtle)] last:border-b-0",
+                          i % 2 === 1 && "bg-[var(--bg-surface)]/50",
+                        )}
+                      >
+                        <td className="px-5 py-4 text-[15px] font-light text-[var(--text-secondary)] md:px-6 md:py-5">
+                          {feature.name}
+                        </td>
+                        <td className="px-5 py-4 text-center text-[15px] font-light text-[var(--text-secondary)] md:px-6 md:py-5">
+                          {feature.starter}
+                        </td>
+                        <td className="px-5 py-4 text-center text-[15px] font-medium text-[var(--text-primary)] bg-[var(--accent-bg)] md:px-6 md:py-5">
                           {feature.growth}
                         </td>
-                        <td className="px-6 py-5 text-center text-sm text-zinc-300">{feature.pro}</td>
+                        <td className="px-5 py-4 text-center text-[15px] font-light text-[var(--text-secondary)] md:px-6 md:py-5">
+                          {feature.pro}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -584,38 +597,40 @@ function PricingContent() {
           </div>
         </section>
 
-        <section className={cn("border-b border-[color:var(--border-subtle)]", sectionY)}>
+        {/* 5: FAQ */}
+        <section className={sectionBelow}>
           <div className={shell}>
-            <h2 className="text-center text-4xl font-semibold tracking-tight text-[var(--text-primary)] md:text-5xl">
+            <h2 className="font-marketing-display text-[1.75rem] font-normal leading-[1.15] text-[var(--text-primary)] md:text-[2.25rem]">
               Questions
             </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-center text-base font-light text-zinc-400">
+            <p className="mt-3 max-w-xl text-base font-light text-[var(--text-secondary)]">
               Straight answers on plans and billing
             </p>
 
-            <div className="mt-10 grid gap-6 sm:grid-cols-2">
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 sm:gap-6">
               {faqs.map((faq) => (
                 <div
                   key={faq.question}
-                  className="flex h-full flex-col rounded-xl border border-zinc-800 bg-zinc-900 p-6"
+                  className="flex h-full min-h-[11rem] flex-col rounded-xl border border-[color:var(--border-subtle)] bg-[var(--bg-elevated)] p-6 md:min-h-[12rem] md:p-7"
                 >
                   <h3 className="text-base font-medium text-[var(--text-primary)]">{faq.question}</h3>
-                  <p className="mt-3 flex-1 text-sm font-light leading-relaxed text-zinc-400">{faq.answer}</p>
+                  <p className="mt-3 flex-1 text-[15px] font-light leading-relaxed text-[var(--text-secondary)]">{faq.answer}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className={sectionY}>
+        {/* 6: Final CTA */}
+        <section className="border-b border-[color:var(--border-subtle)] py-14 md:py-20">
           <div className={cn(shell, "text-center")}>
-            <h2 className="text-4xl font-semibold tracking-tight text-[var(--text-primary)] md:text-5xl">
+            <h2 className="mx-auto max-w-[640px] font-marketing-display text-[1.75rem] font-normal leading-[1.15] text-[var(--text-primary)] md:text-[2.5rem]">
               See where you&apos;re being replaced
             </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-base font-light text-zinc-400">
+            <p className="mx-auto mt-4 max-w-md text-base font-light text-[var(--text-secondary)]">
               Run a snapshot, walk into your next client call with proof.
             </p>
-            <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-6">
+            <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row sm:flex-wrap sm:gap-5">
               <RunSnapshotButton
                 loading={loadingPlan === "growth"}
                 onClick={() => handleCheckout("growth")}
@@ -628,13 +643,13 @@ function PricingContent() {
               >
                 See example report
               </Link>
-              <Link
-                href="/"
-                className="text-sm font-normal text-[var(--text-muted)] transition-colors hover:text-[var(--text-secondary)]"
-              >
-                ← Back to home
-              </Link>
             </div>
+            <Link
+              href="/"
+              className="mt-6 inline-block text-sm font-normal text-[var(--text-muted)] transition-colors hover:text-[var(--text-secondary)]"
+            >
+              Back to home
+            </Link>
           </div>
         </section>
       </main>
