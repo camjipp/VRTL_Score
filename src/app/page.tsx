@@ -13,192 +13,356 @@ const SIGNUP_HREF = "/signup";
 
 const shell = "mx-auto w-full max-w-[1200px] px-6 md:px-12";
 
-const MODEL_PILLS: Array<{ name: string; iconSrc: string }> = [
-  { name: "ChatGPT", iconSrc: "/ai/icons8-chatgpt.svg" },
-  { name: "Gemini", iconSrc: "/ai/gemini.png" },
-  { name: "Claude", iconSrc: "/ai/icons8-claude.svg" },
-  { name: "Perplexity", iconSrc: "/ai/perplexity.png" },
-];
+const HERO_TRACK_MODELS = [
+  { src: "/ai/icons8-chatgpt.svg", label: "ChatGPT" },
+  { src: "/ai/gemini.png", label: "Gemini" },
+  { src: "/ai/icons8-claude.svg", label: "Claude" },
+  { src: "/ai/perplexity.png", label: "Perplexity" },
+] as const;
 
-function ModelPill({ name, iconSrc }: { name: string; iconSrc: string }) {
+function HeroTracksAcross() {
   return (
-    <span
-      className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] p-2 transition-all duration-200 ease-out hover:border-[rgba(255,255,255,0.14)] hover:shadow-[0_0_24px_rgba(0,232,122,0.12)]"
-      title={name}
-    >
-      {/* eslint-disable-next-line @next/next/no-img-element -- local /ai icons (png + svg); monochrome for system-badge read */}
-      <img
-        alt={name}
-        className="h-[25px] w-[25px] shrink-0 object-contain brightness-0 invert opacity-[0.85]"
-        height={25}
-        src={iconSrc}
-        width={25}
-      />
-    </span>
+    <div className="mt-10 flex min-w-0 max-w-full flex-nowrap items-center gap-3 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <span
+        className="shrink-0 whitespace-nowrap font-marketing-mono text-[11px] uppercase tracking-[0.1em] text-[var(--text-muted)]"
+        style={{ fontFamily: "var(--font-mono)" }}
+      >
+        Tracks across
+      </span>
+      <div className="flex shrink-0 flex-nowrap items-center gap-2">
+        {HERO_TRACK_MODELS.map((model) => (
+          <div
+            key={model.label}
+            className="flex shrink-0 items-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)]"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "5px 10px",
+            }}
+            title={model.label}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element -- local /ai assets; small decorative icons */}
+            <img
+              alt=""
+              aria-hidden
+              className="shrink-0 object-contain"
+              height={14}
+              src={model.src}
+              width={14}
+              style={{
+                width: "14px",
+                height: "14px",
+                opacity: 0.7,
+                filter: "brightness(0) invert(1)",
+                objectFit: "contain",
+              }}
+            />
+            <span
+              className="hidden font-marketing-mono text-[11px] tracking-[0.06em] text-[var(--text-secondary)] sm:inline"
+              style={{ fontFamily: "var(--font-mono)", color: "var(--text-secondary)" }}
+            >
+              {model.label}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
-const paperHero = "border border-[#d4d4d4] bg-[#fafafa] text-[#111] rounded-[2px] shadow-[0_40px_120px_rgba(0,0,0,0.6)]";
-
-/** Semi-circular score arc (same geometry as PDF ScoreRing, scaled for hero). */
-function HeroScoreArc({ score }: { score: number }) {
-  const W = 108;
-  const H = 78;
-  const CX = 54;
-  const CY = 38;
-  const R = 32;
-  const sw = 7;
-  const pct = Math.min(100, Math.max(0, score)) / 100;
-  const arcLen = (270 / 360) * (2 * Math.PI * R);
-  const filled = pct * arcLen;
-  const rest = Math.max(0.001, arcLen - filled);
-  const rad = (d: number) => (d * Math.PI) / 180;
-  const pt = (angleDeg: number) => ({
-    x: CX + R * Math.cos(rad(angleDeg)),
-    y: CY + R * Math.sin(rad(angleDeg)),
-  });
-  const p0 = pt(135);
-  const p1 = pt(45);
-  const d = `M ${p0.x.toFixed(2)} ${p0.y.toFixed(2)} A ${R} ${R} 0 1 1 ${p1.x.toFixed(2)} ${p1.y.toFixed(2)}`;
-
+function HeroPdfPreviewCard() {
   return (
-    <div className="relative h-[78px] w-[108px] shrink-0">
-      <svg className="absolute left-0 top-0" height={H} viewBox={`0 0 ${W} ${H}`} width={W} aria-hidden>
-        <path d={d} fill="none" stroke="#D1D5DB" strokeLinecap="butt" strokeWidth={sw} />
-        <path
-          d={d}
-          fill="none"
-          stroke="#00e87a"
-          strokeDasharray={`${filled} ${rest + arcLen}`}
-          strokeLinecap="butt"
-          strokeWidth={sw}
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center pb-3 pt-0">
-        <span className="font-marketing-body text-[26px] font-extrabold leading-none tracking-tight text-[#0f1117]">{score}</span>
-        <span className="font-marketing-mono text-[7px] font-medium text-[#94a3b8]">/100</span>
+    <div className="relative w-full max-w-[420px]">
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "#1a1a1a",
+          borderRadius: "16px",
+          transform: "rotate(2.5deg) translateY(8px)",
+          border: "1px solid rgba(255,255,255,0.06)",
+        }}
+      />
+      <div
+        className="font-marketing-body"
+        style={{
+          position: "relative",
+          background: "#ffffff",
+          borderRadius: "14px",
+          padding: "24px",
+          transform: "rotate(-0.5deg)",
+          color: "#111",
+          boxShadow: "0 40px 120px rgba(0,0,0,0.55), 0 12px 32px rgba(0,0,0,0.12)",
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div>
+            <div
+              className="font-marketing-mono"
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "9px",
+                color: "#aaa",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+              }}
+            >
+              AI Authority Report
+            </div>
+            <div style={{ fontSize: "15px", fontWeight: 500, color: "#111", marginTop: "2px" }}>Executive summary</div>
+            <div
+              className="font-marketing-mono"
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "10px",
+                color: "#bbb",
+                marginTop: "2px",
+              }}
+            >
+              Your Client · April 1, 2026
+            </div>
+          </div>
+          <div
+            className="font-marketing-mono"
+            style={{
+              background: "#111",
+              color: "#fff",
+              fontFamily: "var(--font-mono)",
+              fontSize: "9px",
+              padding: "3px 8px",
+              borderRadius: "4px",
+              letterSpacing: "0.08em",
+            }}
+          >
+            PDF
+          </div>
+        </div>
+
+        <div style={{ height: "1px", background: "#f0f0f0", margin: "14px 0" }} />
+
+        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+          <div style={{ position: "relative", width: "72px", height: "72px", flexShrink: 0 }}>
+            <svg width="72" height="72" viewBox="0 0 72 72" aria-hidden shapeRendering="geometricPrecision">
+              <circle
+                cx="36"
+                cy="36"
+                r="28"
+                fill="none"
+                stroke="#e8e8e8"
+                strokeWidth="5"
+                strokeDasharray="131 176"
+                strokeDashoffset="-22"
+                strokeLinecap="round"
+                transform="rotate(135 36 36)"
+              />
+              <circle
+                cx="36"
+                cy="36"
+                r="28"
+                fill="none"
+                stroke="#00e87a"
+                strokeWidth="5"
+                strokeDasharray="89 218"
+                strokeDashoffset="-22"
+                strokeLinecap="round"
+                transform="rotate(135 36 36)"
+              />
+            </svg>
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <span style={{ fontSize: "20px", fontWeight: 300, color: "#111", lineHeight: 1 }}>68</span>
+              <span
+                className="font-marketing-mono"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "8px",
+                  color: "#aaa",
+                  marginTop: "1px",
+                }}
+              >
+                /100
+              </span>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr 1fr",
+              gap: "6px",
+              flex: 1,
+              minWidth: 0,
+            }}
+          >
+            {(
+              [
+                { label: "Mention rate", value: "62%", color: "#111" },
+                { label: "Top position", value: "60%", color: "#111" },
+                { label: "Authority", value: "0%", color: "#e53e3e" },
+              ] as const
+            ).map((stat) => (
+              <div
+                key={stat.label}
+                style={{
+                  background: "#f5f5f5",
+                  border: "1px solid #e8e8e8",
+                  borderRadius: "6px",
+                  padding: "8px 6px",
+                  textAlign: "center",
+                }}
+              >
+                <div style={{ fontSize: "15px", fontWeight: 500, color: stat.color }}>{stat.value}</div>
+                <div
+                  className="font-marketing-mono"
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "8px",
+                    color: "#888",
+                    marginTop: "2px",
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {stat.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ marginTop: "14px" }}>
+          <div
+            className="font-marketing-mono"
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "9px",
+              color: "#888",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              marginBottom: "8px",
+            }}
+          >
+            Competitive ranking
+          </div>
+          {(
+            [
+              { rank: "#1", name: "Your client", bar: 100, color: "#00e87a", you: true },
+              { rank: "#2", name: "Competitor A", bar: 75, color: "#d0d0d0", you: false },
+              { rank: "#3", name: "Competitor B", bar: 65, color: "#d0d0d0", you: false },
+            ] as const
+          ).map((row) => (
+            <div
+              key={row.rank}
+              style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "5px" }}
+            >
+              <span
+                className="font-marketing-mono"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "10px",
+                  color: row.you ? "#00e87a" : "#bbb",
+                  width: "20px",
+                }}
+              >
+                {row.rank}
+              </span>
+              <span
+                style={{
+                  fontSize: "11px",
+                  color: row.you ? "#111" : "#666",
+                  flex: 1,
+                  fontWeight: row.you ? 500 : 400,
+                }}
+              >
+                {row.name}
+              </span>
+              <div
+                style={{
+                  width: "80px",
+                  height: "3px",
+                  background: "#f0f0f0",
+                  borderRadius: "999px",
+                  overflow: "hidden",
+                  flexShrink: 0,
+                }}
+              >
+                <div
+                  style={{
+                    width: `${row.bar}%`,
+                    height: "100%",
+                    background: row.color,
+                    borderRadius: "999px",
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div
+          style={{
+            marginTop: "12px",
+            padding: "8px 10px",
+            background: "#fffbf0",
+            border: "1px solid #fde68a",
+            borderRadius: "6px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          <div
+            className="font-marketing-mono"
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "8px",
+              fontWeight: 600,
+              color: "#92600a",
+              background: "#fef3c7",
+              padding: "2px 6px",
+              borderRadius: "3px",
+              letterSpacing: "0.05em",
+            }}
+          >
+            RISK
+          </div>
+          <div>
+            <div style={{ fontSize: "11px", fontWeight: 500, color: "#92600a" }}>Fragile lead</div>
+            <div style={{ fontSize: "10px", color: "#b45309", marginTop: "1px" }}>Competitors within range</div>
+          </div>
+        </div>
+
+        <p
+          className="font-marketing-mono mt-3 text-right text-[7px] text-[#cbd5e1]"
+          style={{ fontFamily: "var(--font-mono)" }}
+        >
+          Sample
+        </p>
       </div>
-      <p className="absolute bottom-0 left-0 right-0 text-center font-marketing-mono text-[6px] font-semibold uppercase tracking-[0.14em] text-[#94a3b8]">
-        AI Authority Score
-      </p>
     </div>
   );
 }
 
 function HeroReportStack() {
-  const maxM = 18;
-  const rankRows = [
-    { rank: 1, name: "Client", mentions: 18, client: true },
-    { rank: 2, name: "Competitor A", mentions: 17, client: false },
-    { rank: 3, name: "Competitor B", mentions: 16, client: false },
-  ];
-
   return (
     <div className="relative z-10 flex w-full flex-col items-center lg:items-end lg:justify-center lg:overflow-visible lg:pr-0">
-      <div className="relative flex w-full max-w-[min(100%,420px)] flex-col items-center justify-center lg:ml-auto lg:mr-[-12px] lg:items-end lg:-translate-y-[5.5rem] xl:-translate-y-[6rem]">
-        <div className="relative w-[min(100%,316px)] pb-4 pt-0 sm:w-[min(100%,360px)] lg:w-[400px]">
+      <div className="relative flex w-full max-w-[min(100%,440px)] flex-col items-center justify-center lg:ml-auto lg:mr-[-12px] lg:items-end lg:-translate-y-[5.5rem] xl:-translate-y-[6rem]">
+        <div className="relative w-full max-w-[420px] pb-6 pt-0">
           <div
             aria-hidden
             className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[118%] w-[118%] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle_at_center,rgba(34,197,94,0.12),transparent_70%)]"
           />
-          <div className="group/pdf relative z-[1] origin-center rotate-[-2deg] scale-[1.05] transition-transform duration-300 ease-out group-hover/pdf:-translate-y-[6px] group-hover/pdf:scale-[1.08]">
-            <div className={`${paperHero} relative mx-auto flex w-full max-w-[316px] flex-col p-2.5 sm:max-w-[360px] lg:mx-0 lg:ml-auto lg:max-w-none`}>
-              <div className="flex items-start justify-between gap-2 border-b border-[#e5e7eb] pb-2">
-            <div className="min-w-0">
-              <p className="font-marketing-mono text-[6.5px] font-semibold uppercase tracking-[0.16em] text-[#94a3b8]">
-                AI Authority Report
-              </p>
-              <p className="mt-1 text-[11px] font-bold leading-tight text-[#0f1117]">Executive summary</p>
-            </div>
-            <span className="shrink-0 border border-[#d1d5db] bg-white px-1.5 py-0.5 font-marketing-mono text-[6.5px] font-bold uppercase tracking-wider text-[#64748b]">
-              PDF
-            </span>
-              </div>
-
-              <div className="pt-2">
-            <p className="text-[10px] font-bold text-[#334155]">Your Client</p>
-            <p className="mt-0.5 font-marketing-mono text-[7px] font-medium text-[#94a3b8]">April 1, 2026</p>
-              </div>
-
-              <div className="mt-2 flex gap-2 border-t border-[#e5e7eb] pt-2">
-            <HeroScoreArc score={68} />
-            <div className="w-px shrink-0 self-stretch bg-[#e5e7eb]" aria-hidden />
-            <div className="grid min-h-[42px] min-w-0 flex-1 grid-cols-3 gap-0.5">
-              {[
-                { val: "62%", lab: "Mention rate" },
-                { val: "60%", lab: "Top position" },
-                { val: "0%", lab: "Authority", warn: true },
-              ].map((k) => (
-                <div
-                  key={k.lab}
-                  className="flex min-h-[42px] min-w-0 flex-col items-center justify-center rounded border border-[#e5e7eb] bg-white px-1 py-1 text-center"
-                >
-                  <p
-                    className={`font-marketing-body text-[11px] font-extrabold tabular-nums leading-none ${k.warn ? "text-[#dc2626]" : "text-[#0f1117]"}`}
-                  >
-                    {k.val}
-                  </p>
-                  <p className="mt-0.5 font-marketing-mono text-[6px] font-semibold uppercase leading-tight tracking-[0.08em] text-[#94a3b8]">
-                    {k.lab}
-                  </p>
-                </div>
-              ))}
-              </div>
-              </div>
-
-              <div className="mt-2 border-t border-[#e5e7eb] pt-2">
-            <p className="font-marketing-mono text-[6.5px] font-semibold uppercase tracking-[0.12em] text-[#64748b]">
-              Competitive ranking
-            </p>
-            <div className="mt-1.5 overflow-hidden rounded-sm border border-[#e5e7eb] bg-white">
-              {rankRows.map((row) => {
-                const barPct = Math.round((row.mentions / maxM) * 100);
-                return (
-                  <div key={row.rank} className="flex border-b border-[#f1f5f9] last:border-b-0">
-                    <div className={`w-[3px] shrink-0 self-stretch ${row.client ? "bg-[#00e87a]" : "bg-transparent"}`} aria-hidden />
-                    <div
-                      className={`grid min-h-[20px] min-w-0 flex-1 grid-cols-[22px_minmax(0,1fr)_52px_2.75rem] items-center gap-x-1 py-0.5 pl-1.5 pr-1.5 ${row.client ? "bg-[#ecfdf5]/90" : "bg-white"}`}
-                    >
-                      <span
-                        className={`text-left font-marketing-mono text-[7.5px] tabular-nums ${row.client ? "font-bold text-[#0f172a]" : "font-medium text-[#94a3b8]"}`}
-                      >
-                        #{row.rank}
-                      </span>
-                      <span
-                        className={`min-w-0 truncate text-[8px] leading-none ${row.client ? "font-bold text-[#0f1117]" : "font-medium text-[#475569]"}`}
-                      >
-                        {row.name}
-                      </span>
-                      <div className="h-[3px] w-[52px] shrink-0 justify-self-start rounded-sm bg-[#f1f5f9]">
-                        <div
-                          className={`h-full rounded-sm ${row.client ? "bg-[#00e87a]" : "bg-[#94a3b8]"}`}
-                          style={{ width: `${barPct}%`, opacity: row.client ? 1 : 0.38 }}
-                        />
-                      </div>
-                      <span className="text-right font-marketing-mono text-[7.5px] font-semibold tabular-nums text-[#475569]">
-                        {row.mentions}/30
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-              </div>
-
-              <div className="mt-2 border-t border-[#e5e7eb] pt-2">
-            <div className="rounded-sm border border-amber-200/55 border-t-2 border-t-amber-500/85 bg-amber-50/50 px-1.5 py-1">
-              <span className="inline-block rounded border border-amber-300/80 bg-white/90 px-1 py-px font-marketing-mono text-[6px] font-bold uppercase tracking-wide text-amber-800">
-                RISK
-              </span>
-              <p className="mt-0.5 text-[8px] font-bold leading-tight text-[#0f1117]">Fragile lead</p>
-              <p className="mt-0.5 text-[7px] leading-snug text-[#64748b]">Competitors within range</p>
-            </div>
-              </div>
-
-              <p className="absolute bottom-2.5 right-2.5 font-marketing-mono text-[7px] font-medium text-[#cbd5e1]">
-                Sample
-              </p>
-            </div>
+          <div className="group/pdf relative z-[1] mx-auto origin-center transition-transform duration-300 ease-out group-hover/pdf:-translate-y-1.5 group-hover/pdf:scale-[1.02] lg:ml-auto">
+            <HeroPdfPreviewCard />
           </div>
         </div>
       </div>
@@ -397,14 +561,7 @@ export default function HomePage() {
                   </div>
                 </AnimateIn>
                 <AnimateIn delay={400}>
-                  <div className="mt-12 flex max-w-[240px] flex-wrap items-center gap-2 sm:gap-2.5">
-                    <span className="shrink-0 font-marketing-mono text-[11px] uppercase tracking-[0.12em] text-[var(--text-muted)]">
-                      Tracks across
-                    </span>
-                    {MODEL_PILLS.map((m) => (
-                      <ModelPill key={m.name} iconSrc={m.iconSrc} name={m.name} />
-                    ))}
-                  </div>
+                  <HeroTracksAcross />
                 </AnimateIn>
               </div>
               <AnimateIn delay={150} className="self-center">
