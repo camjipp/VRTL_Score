@@ -112,12 +112,12 @@ function HeroReportStack() {
             aria-hidden
             className="pointer-events-none absolute -bottom-2 left-1/2 z-0 h-3 w-[min(96%,400px)] -translate-x-1/2 rounded-[100%] bg-black/20 blur-md sm:h-3.5 lg:bottom-[-6px] lg:w-[88%]"
           />
-        {/* Brand glow — behind stacked pages */}
+        {/* Brand glow: behind stacked pages */}
         <div
           aria-hidden
           className="pointer-events-none absolute left-[2%] top-[6%] z-0 hidden h-[88%] w-[94%] max-w-[384px] rounded-sm bg-[radial-gradient(ellipse_72%_60%_at_50%_42%,rgba(0,232,122,0.09),transparent_68%)] blur-[36px] lg:block lg:max-w-none"
         />
-        {/* Page 3 — Recommendations — desktop only */}
+        {/* Page 3: Recommendations (desktop only) */}
         <div
           className={`${paperBack} absolute left-[2%] top-0 hidden min-h-[392px] w-[96%] max-w-[384px] p-2.5 opacity-[0.68] lg:block lg:max-w-none`}
           style={{ transform: "translate(-5.25%, 5.5%) rotate(-2.4deg) scale(0.922)", zIndex: 0 }}
@@ -134,7 +134,7 @@ function HeroReportStack() {
             <li className="flex gap-1.5 text-[8px] leading-snug text-[#334155]">
               <span className="mt-0.5 h-1 w-1 shrink-0 rounded-full bg-[#ef4444]" />
               <span>
-                <span className="font-marketing-mono font-bold text-[#b91c1c]">HIGH</span> Close authority gap — citations at 0%.
+                <span className="font-marketing-mono font-bold text-[#b91c1c]">HIGH</span> Close authority gap: citations at 0%.
               </span>
             </li>
             <li className="flex gap-1.5 text-[8px] leading-snug text-[#374151]">
@@ -146,7 +146,7 @@ function HeroReportStack() {
             <li className="flex gap-1.5 text-[8px] leading-snug text-[#374151]">
               <span className="mt-0.5 h-1 w-1 shrink-0 rounded-full bg-[#d97706]" />
               <span>
-                <span className="font-marketing-mono font-bold text-[#b45309]">MED</span> Increase third-party citations.
+                <span className="font-marketing-mono font-bold text-[#b45309]">MED</span> Increase third party citations.
               </span>
             </li>
           </ul>
@@ -155,7 +155,7 @@ function HeroReportStack() {
           <p className="absolute bottom-2.5 right-2.5 font-marketing-mono text-[7px] text-[#d1d5db]">3</p>
         </div>
 
-        {/* Page 2 — Model Analysis — desktop only (middle of stack) */}
+        {/* Page 2: Model Analysis (desktop only, middle of stack) */}
         <div
           className={`${paperBack} absolute left-[2%] top-0 hidden min-h-[392px] w-[96%] max-w-[384px] p-2.5 opacity-[0.76] lg:block lg:max-w-none`}
           style={{ transform: "translate(-2.75%, 3%) rotate(-1.2deg) scale(0.952)", zIndex: 1 }}
@@ -200,7 +200,7 @@ function HeroReportStack() {
           <p className="absolute bottom-2.5 right-2.5 font-marketing-mono text-[7px] text-[#d1d5db]">2</p>
         </div>
 
-        {/* Page 1 — Executive summary (front) */}
+        {/* Page 1: Executive summary (front) */}
         <div
           className={`${paper} relative z-[2] mx-auto flex w-full max-w-[316px] flex-col p-2.5 transition-shadow duration-500 ease-out sm:max-w-[360px] group-hover/stack:shadow-[0_22px_56px_rgba(0,0,0,0.34),0_8px_20px_rgba(0,0,0,0.08)] lg:mx-0 lg:ml-auto lg:max-w-none`}
           style={{ transform: "translate(2.75%, 0) rotate(1deg)" }}
@@ -395,7 +395,7 @@ const faqItems: Array<{ q: string; a: string }> = [
   },
   {
     q: "How is the score calculated?",
-    a: "The score combines three dimensions: how often your client is mentioned (mention rate), where they appear in the response (top, middle, or bottom), and whether they're cited with sources. Results are normalized across models into a single executive-ready number.",
+    a: "The score combines three dimensions: how often your client is mentioned (mention rate), where they appear in the response (top, middle, or bottom), and whether they're cited with sources. Results are normalized across models into one number executives can use.",
   },
   {
     q: "How is this different from SEO rank tracking?",
@@ -403,10 +403,10 @@ const faqItems: Array<{ q: string; a: string }> = [
   },
   {
     q: "What do agencies charge clients for this?",
-    a: "Most agencies position this as an AI visibility audit at $500–$1,500 per report, or a monthly monitoring retainer of $800–$2,500. VRTL Score gives you the product to deliver it and the PDF to justify the fee.",
+    a: "Most agencies position this as an AI visibility audit at $500 to $1,500 per report, or a monthly monitoring retainer of $800 to $2,500. VRTL Score gives you the product to deliver it and the PDF to justify the fee.",
   },
   {
-    q: "Can I white-label the reports?",
+    q: "Can I white label the reports?",
     a: "Yes. PDF reports include your agency logo and branding. They're designed to be handed directly to clients as a professional deliverable, supporting renewals, upsells, and new business pitches.",
   },
   {
@@ -454,7 +454,7 @@ export default function HomePage() {
   return (
     <div className="page-marketing selection:bg-[var(--accent-bg)] selection:text-[var(--text-primary)]">
       <main>
-        {/* 1 — Hero */}
+        {/* 1: Hero */}
         <section className="min-h-screen overflow-visible border-b border-[color:var(--border-subtle)] pt-[120px]">
           <div className={`${shell} overflow-visible pb-24`}>
             <div className="grid items-start gap-16 overflow-visible lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center lg:gap-10">
@@ -515,7 +515,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 2 — Problem */}
+        {/* 2: Problem */}
         <section className="border-b border-[color:var(--border-subtle)] bg-[var(--bg-surface)] py-[120px]">
           <div className={shell}>
             <AnimateIn delay={0}>
@@ -550,7 +550,7 @@ export default function HomePage() {
                   delay={300}
                   index="03 / REVENUE"
                   title="No way to sell it as a service"
-                  body="AI visibility is the fastest-growing agency service. Without a product to deliver, you're watching others charge for it."
+                  body="Among agency services, AI visibility is growing fastest. Without a product to deliver, you're watching others charge for it."
                 />
               </div>
             </div>
@@ -562,7 +562,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 3 — Product */}
+        {/* 3: Product */}
         <section className="scroll-mt-24 border-b border-[color:var(--border-subtle)] py-[120px]" id="product">
           <div className={shell}>
             <AnimateIn delay={0}>
@@ -572,12 +572,12 @@ export default function HomePage() {
             </AnimateIn>
             <AnimateIn delay={100}>
               <p className="mt-4 max-w-[500px] text-lg font-light text-[var(--text-secondary)]">
-                VRTL Score turns AI visibility into a client-ready report with model breakdowns, competitor pressure, and
+                VRTL Score turns AI visibility into a report ready for clients, with model breakdowns, competitor pressure, and
                 prioritized actions.
               </p>
             </AnimateIn>
             <div className="mt-12 grid gap-6 md:grid-cols-3 md:items-stretch md:gap-6">
-              <ProductPreviewCard caption="Executive summary — one screen they understand" delay={0} label="Executive summary">
+              <ProductPreviewCard caption="Executive summary: one screen they understand" delay={0} label="Executive summary">
                 <div className="flex flex-1 flex-col">
                   <div className="flex flex-wrap items-end gap-x-3 gap-y-1">
                     <span className="font-marketing-mono text-[52px] font-light leading-[0.95] tracking-tight text-[var(--text-primary)] tabular-nums md:text-[56px]">
@@ -596,7 +596,7 @@ export default function HomePage() {
                     </span>
                   </div>
                   <p className="mt-auto pt-5 text-[12px] font-light leading-relaxed text-[var(--text-secondary)]">
-                    One composite number across engines — built to trend on every client call.
+                    One composite number across engines, built to trend on every client call.
                   </p>
                   <div className="mt-4 shrink-0">
                     <div className="flex justify-between font-marketing-mono text-[8px] uppercase tracking-wider text-[var(--text-muted)]">
@@ -609,10 +609,10 @@ export default function HomePage() {
                   </div>
                 </div>
               </ProductPreviewCard>
-              <ProductPreviewCard caption="Model breakdown — where each engine puts them" delay={100} label="Model analysis">
+              <ProductPreviewCard caption="Model breakdown: where each engine puts them" delay={100} label="Model analysis">
                 <div className="flex min-h-0 flex-1 flex-col">
                   <div>
-                    <p className="text-[12px] font-medium text-[var(--text-primary)]">Per-engine visibility</p>
+                    <p className="text-[12px] font-medium text-[var(--text-primary)]">Visibility by engine</p>
                     <p className="mt-0.5 text-[10px] font-light text-[var(--text-muted)]">Same prompts · normalized scores</p>
                   </div>
                   <div className="mt-5 flex flex-1 flex-col justify-center space-y-2.5">
@@ -635,11 +635,11 @@ export default function HomePage() {
                     ))}
                   </div>
                   <p className="mt-auto border-t border-white/[0.08] pt-3 text-[11px] font-light leading-snug text-[var(--text-secondary)]">
-                    40-point spread — lead the recap with the weakest surface first.
+                    About 40 points from best to worst engine. Lead the recap with the weakest surface first.
                   </p>
                 </div>
               </ProductPreviewCard>
-              <ProductPreviewCard caption="Recommended actions — prioritized next steps" delay={200} label="Recommended actions">
+              <ProductPreviewCard caption="Recommended actions: prioritized next steps" delay={200} label="Recommended actions">
                 <div className="flex min-h-0 flex-1 flex-col">
                   <div className="shrink-0">
                     <p className="text-[12px] font-semibold text-[var(--text-primary)]">Next steps</p>
@@ -653,7 +653,7 @@ export default function HomePage() {
                         HIGH
                       </span>
                       <span className="min-w-0 text-[12px] font-light leading-snug text-[var(--text-secondary)]">
-                        Close the citation gap on head-term prompts your client should own.
+                        Close the citation gap on head term prompts your client should own.
                       </span>
                     </li>
                     <li className="flex gap-2.5">
@@ -663,7 +663,7 @@ export default function HomePage() {
                         MED
                       </span>
                       <span className="min-w-0 text-[12px] font-light leading-snug text-[var(--text-secondary)]">
-                        Align on-page proof with passages models are already quoting.
+                        Align on page proof with passages models are already quoting.
                       </span>
                     </li>
                     <li className="flex gap-2.5">
@@ -691,7 +691,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 4 — Agencies */}
+        {/* 4: Agencies */}
         <section className="border-b border-[color:var(--border-subtle)] bg-[var(--bg-surface)] py-[120px]">
           <div className={shell}>
             <AnimateIn delay={0}>
@@ -706,14 +706,14 @@ export default function HomePage() {
                 </AnimateIn>
                 <AnimateIn delay={100}>
                   <p className="mt-4 max-w-[380px] text-base font-light leading-[1.7] text-[var(--text-secondary)]">
-                    Package AI visibility into a deliverable you price, repeat, and renew on — not another internal dashboard
+                    Package AI visibility into a deliverable you price, repeat, and renew on. Not another internal dashboard
                     only your team sees.
                   </p>
                 </AnimateIn>
                 <AnimateIn delay={150}>
                   <div className="mt-8 rounded-xl border border-[color:var(--border-subtle)] bg-[var(--bg-elevated)] px-6 py-5">
                     <p className="text-xl font-medium">
-                      <span style={{ color: "#00e87a" }}>$2K–$10K</span>
+                      <span style={{ color: "#00e87a" }}>$2K to $10K</span>
                       <span className="text-[var(--text-primary)]"> /mo service layer</span>
                     </p>
                     <p className="mt-1 text-[13px] font-light text-[var(--text-secondary)]">
@@ -727,7 +727,7 @@ export default function HomePage() {
                       We ran this for a client and immediately saw where they were losing visibility in AI answers.
                     </blockquote>
                     <figcaption className="mt-2 font-marketing-mono text-xs text-[var(--text-muted)]">
-                      — Principal, search-focused agency
+                      Principal, agency focused on search
                     </figcaption>
                   </figure>
                 </AnimateIn>
@@ -766,7 +766,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 5 — Framework */}
+        {/* 5: Framework */}
         <section className="border-b border-[color:var(--border-subtle)] py-20 md:py-[80px]">
           <div className={shell}>
             <AnimateIn delay={0}>
@@ -779,7 +779,7 @@ export default function HomePage() {
             </AnimateIn>
             <AnimateIn delay={150}>
               <p className="mx-auto mt-4 max-w-[500px] text-center text-base font-light leading-[1.7] text-[var(--text-secondary)]">
-                Answer-engine visibility is simply: do models mention you, where, and as a source?
+                Visibility in answer engines is simple: do models mention you, where, and as a source?
               </p>
             </AnimateIn>
             <div className="mt-12 grid gap-4 md:grid-cols-3 md:items-stretch">
@@ -825,7 +825,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 6 — Breakout */}
+        {/* 6: Breakout */}
         <section className="border-b border-[color:var(--border-subtle)] px-6 py-[140px] md:px-12">
           <AnimateIn delay={0}>
             <p className="mx-auto max-w-[800px] text-center font-marketing-display text-[56px] font-normal leading-[1.1] text-[var(--text-primary)]">
@@ -845,12 +845,12 @@ export default function HomePage() {
               >
                 Run a free snapshot →
               </Link>
-              <p className="mt-3 text-xs text-[var(--text-muted)]">Generate a client-ready report in minutes.</p>
+              <p className="mt-3 text-xs text-[var(--text-muted)]">Generate a report ready for clients in minutes.</p>
             </div>
           </AnimateIn>
         </section>
 
-        {/* 7 — FAQ */}
+        {/* 7: FAQ */}
         <section className="scroll-mt-24 border-b border-[color:var(--border-subtle)] bg-[var(--bg-surface)] py-[120px]" id="faq">
           <div className="mx-auto max-w-[720px] px-6 md:px-12">
             <SectionLabel className="mb-3 text-center" noMargin>
@@ -866,7 +866,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 8 — Closing */}
+        {/* 8: Closing */}
         <section className="px-6 py-[140px] md:px-12">
           <AnimateIn delay={0}>
             <h2 className="mx-auto max-w-[700px] text-center font-marketing-display text-[52px] font-normal leading-none text-[var(--text-primary)]">
