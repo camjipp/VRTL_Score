@@ -13,57 +13,61 @@ const SIGNUP_HREF = "/signup";
 
 const shell = "mx-auto w-full max-w-[1200px] px-6 md:px-12";
 
-const HERO_TRACK_MODELS = [
-  { src: "/ai/icons8-chatgpt.svg", label: "ChatGPT" },
-  { src: "/ai/gemini.png", label: "Gemini" },
-  { src: "/ai/icons8-claude.svg", label: "Claude" },
-  { src: "/ai/perplexity.png", label: "Perplexity" },
+const HERO_TRACK_LOGOS = [
+  { src: "/ai/icons8-chatgpt.svg", alt: "ChatGPT" },
+  { src: "/ai/gemini.png", alt: "Gemini" },
+  { src: "/ai/icons8-claude.svg", alt: "Claude" },
+  { src: "/ai/perplexity.png", alt: "Perplexity" },
 ] as const;
 
 function HeroTracksAcross() {
   return (
-    <div className="mt-10 flex min-w-0 max-w-full flex-nowrap items-center gap-3 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div
+      className="flex items-center gap-3"
+      style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "40px" }}
+    >
       <span
-        className="shrink-0 whitespace-nowrap font-marketing-mono text-[11px] uppercase tracking-[0.1em] text-[var(--text-muted)]"
-        style={{ fontFamily: "var(--font-mono)" }}
+        className="font-marketing-mono text-[11px] uppercase tracking-[0.1em] text-[var(--text-muted)]"
+        style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: "11px",
+          letterSpacing: "0.1em",
+          textTransform: "uppercase",
+          whiteSpace: "nowrap",
+        }}
       >
         Tracks across
       </span>
-      <div className="flex shrink-0 flex-nowrap items-center gap-2">
-        {HERO_TRACK_MODELS.map((model) => (
+      <div className="flex items-center" style={{ display: "flex", alignItems: "center" }}>
+        {HERO_TRACK_LOGOS.map((logo, i) => (
           <div
-            key={model.label}
-            className="flex shrink-0 items-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)]"
+            key={logo.alt}
             style={{
+              width: "28px",
+              height: "28px",
+              borderRadius: "50%",
+              background: "#1a1a1a",
+              border: "2px solid #070707",
               display: "flex",
               alignItems: "center",
-              gap: "6px",
-              padding: "5px 10px",
+              justifyContent: "center",
+              marginLeft: i === 0 ? "0" : "-8px",
+              zIndex: 4 - i,
+              position: "relative",
             }}
-            title={model.label}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element -- local /ai assets; small decorative icons */}
+            {/* eslint-disable-next-line @next/next/no-img-element -- local /ai assets; hero model marks */}
             <img
-              alt=""
-              aria-hidden
-              className="shrink-0 object-contain"
-              height={14}
-              src={model.src}
-              width={14}
+              alt={logo.alt}
+              src={logo.src}
               style={{
                 width: "14px",
                 height: "14px",
-                opacity: 0.7,
-                filter: "brightness(0) invert(1)",
                 objectFit: "contain",
+                filter: "brightness(0) invert(1)",
+                opacity: 0.8,
               }}
             />
-            <span
-              className="hidden font-marketing-mono text-[11px] tracking-[0.06em] text-[var(--text-secondary)] sm:inline"
-              style={{ fontFamily: "var(--font-mono)", color: "var(--text-secondary)" }}
-            >
-              {model.label}
-            </span>
           </div>
         ))}
       </div>
@@ -73,16 +77,31 @@ function HeroTracksAcross() {
 
 function HeroPdfPreviewCard() {
   return (
-    <div className="relative w-full max-w-[420px]">
+    <div className="relative w-full max-w-[400px]">
       <div
         aria-hidden
         style={{
           position: "absolute",
-          inset: 0,
-          background: "#1a1a1a",
-          borderRadius: "16px",
-          transform: "rotate(2.5deg) translateY(8px)",
-          border: "1px solid rgba(255,255,255,0.06)",
+          top: "12px",
+          left: "6px",
+          right: "-6px",
+          bottom: "-12px",
+          background: "#e8e8e8",
+          borderRadius: "2px",
+          transform: "rotate(2.5deg)",
+        }}
+      />
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          top: "6px",
+          left: "3px",
+          right: "-3px",
+          bottom: "-6px",
+          background: "#f2f2f2",
+          borderRadius: "2px",
+          transform: "rotate(1.2deg)",
         }}
       />
       <div
@@ -90,11 +109,10 @@ function HeroPdfPreviewCard() {
         style={{
           position: "relative",
           background: "#ffffff",
-          borderRadius: "14px",
+          borderRadius: "2px",
           padding: "24px",
-          transform: "rotate(-0.5deg)",
           color: "#111",
-          boxShadow: "0 40px 120px rgba(0,0,0,0.55), 0 12px 32px rgba(0,0,0,0.12)",
+          boxShadow: "0 2px 40px rgba(0,0,0,0.4)",
         }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -132,7 +150,7 @@ function HeroPdfPreviewCard() {
               fontFamily: "var(--font-mono)",
               fontSize: "9px",
               padding: "3px 8px",
-              borderRadius: "4px",
+              borderRadius: "2px",
               letterSpacing: "0.08em",
             }}
           >
@@ -150,7 +168,7 @@ function HeroPdfPreviewCard() {
                 cy="36"
                 r="28"
                 fill="none"
-                stroke="#e8e8e8"
+                stroke="#f0f0f0"
                 strokeWidth="5"
                 strokeDasharray="131 176"
                 strokeDashoffset="-22"
@@ -214,9 +232,9 @@ function HeroPdfPreviewCard() {
               <div
                 key={stat.label}
                 style={{
-                  background: "#f5f5f5",
-                  border: "1px solid #e8e8e8",
-                  borderRadius: "6px",
+                  background: "#fafafa",
+                  border: "1px solid #f0f0f0",
+                  borderRadius: "2px",
                   padding: "8px 6px",
                   textAlign: "center",
                 }}
@@ -227,7 +245,7 @@ function HeroPdfPreviewCard() {
                   style={{
                     fontFamily: "var(--font-mono)",
                     fontSize: "8px",
-                    color: "#888",
+                    color: "#aaa",
                     marginTop: "2px",
                     lineHeight: 1.3,
                   }}
@@ -245,7 +263,7 @@ function HeroPdfPreviewCard() {
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: "9px",
-              color: "#888",
+              color: "#aaa",
               letterSpacing: "0.1em",
               textTransform: "uppercase",
               marginBottom: "8px",
@@ -256,8 +274,8 @@ function HeroPdfPreviewCard() {
           {(
             [
               { rank: "#1", name: "Your client", bar: 100, color: "#00e87a", you: true },
-              { rank: "#2", name: "Competitor A", bar: 75, color: "#d0d0d0", you: false },
-              { rank: "#3", name: "Competitor B", bar: 65, color: "#d0d0d0", you: false },
+              { rank: "#2", name: "Competitor A", bar: 75, color: "#e0e0e0", you: false },
+              { rank: "#3", name: "Competitor B", bar: 65, color: "#e0e0e0", you: false },
             ] as const
           ).map((row) => (
             <div
@@ -278,7 +296,7 @@ function HeroPdfPreviewCard() {
               <span
                 style={{
                   fontSize: "11px",
-                  color: row.you ? "#111" : "#666",
+                  color: row.you ? "#111" : "#888",
                   flex: 1,
                   fontWeight: row.you ? 500 : 400,
                 }}
@@ -314,7 +332,7 @@ function HeroPdfPreviewCard() {
             padding: "8px 10px",
             background: "#fffbf0",
             border: "1px solid #fde68a",
-            borderRadius: "6px",
+            borderRadius: "2px",
             display: "flex",
             alignItems: "center",
             gap: "8px",
@@ -329,7 +347,7 @@ function HeroPdfPreviewCard() {
               color: "#92600a",
               background: "#fef3c7",
               padding: "2px 6px",
-              borderRadius: "3px",
+              borderRadius: "2px",
               letterSpacing: "0.05em",
             }}
           >
@@ -340,13 +358,6 @@ function HeroPdfPreviewCard() {
             <div style={{ fontSize: "10px", color: "#b45309", marginTop: "1px" }}>Competitors within range</div>
           </div>
         </div>
-
-        <p
-          className="font-marketing-mono mt-3 text-right text-[7px] text-[#cbd5e1]"
-          style={{ fontFamily: "var(--font-mono)" }}
-        >
-          Sample
-        </p>
       </div>
     </div>
   );
@@ -355,8 +366,8 @@ function HeroPdfPreviewCard() {
 function HeroReportStack() {
   return (
     <div className="relative z-10 flex w-full flex-col items-center lg:items-end lg:justify-center lg:overflow-visible lg:pr-0">
-      <div className="relative flex w-full max-w-[min(100%,440px)] flex-col items-center justify-center lg:ml-auto lg:mr-[-12px] lg:items-end lg:-translate-y-[5.5rem] xl:-translate-y-[6rem]">
-        <div className="relative w-full max-w-[420px] pb-6 pt-0">
+      <div className="relative flex w-full max-w-[min(100%,400px)] flex-col items-center justify-center lg:ml-auto lg:mr-[-12px] lg:items-end lg:-translate-y-[5.5rem] xl:-translate-y-[6rem]">
+        <div className="relative w-full max-w-[400px] pb-6 pt-0">
           <div
             aria-hidden
             className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[118%] w-[118%] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle_at_center,rgba(34,197,94,0.12),transparent_70%)]"
