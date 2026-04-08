@@ -40,99 +40,164 @@ function ModelPill({ name, iconSrc }: { name: string; iconSrc: string }) {
 }
 
 const paper =
-  "border border-[#dadada] bg-[#fafafa] text-[#111] shadow-[0_28px_70px_rgba(0,0,0,0.45),0_8px_24px_rgba(0,0,0,0.12)] rounded-[3px]";
+  "border border-[#d4d4d4] bg-[#fafafa] text-[#111] shadow-[0_24px_56px_rgba(0,0,0,0.42),0_4px_14px_rgba(0,0,0,0.1)] rounded-[2px]";
 
 function HeroReportStack() {
   return (
     <div className="group/stack relative z-10 flex w-full flex-col items-center lg:items-end lg:overflow-visible lg:pr-0">
-      <p className="mb-4 font-marketing-mono text-[11px] tracking-[0.08em] text-[var(--text-secondary)] lg:mr-6 lg:text-right">
+      <p className="mb-3 font-marketing-mono text-[11px] tracking-[0.08em] text-[var(--text-secondary)] lg:mr-6 lg:text-right">
         What you send to clients
       </p>
 
-      <div className="animate-hero-report-float relative w-[min(100%,320px)] origin-center scale-[0.92] pb-14 pt-2 sm:w-[min(100%,360px)] sm:scale-95 lg:ml-auto lg:mr-[-32px] lg:w-[420px] lg:origin-top-right lg:scale-[1.18]">
-        {/* Page 3 — Model analysis (back) — desktop only */}
+      <div className="animate-hero-report-float relative w-[min(100%,300px)] origin-center scale-[0.9] pb-16 pt-1 sm:w-[min(100%,340px)] sm:scale-[0.94] lg:ml-auto lg:mr-[-28px] lg:w-[440px] lg:origin-top-right lg:scale-[1.14]">
+        {/* Page 3 — Recommendations (furthest back) — desktop only */}
         <div
-          className={`${paper} absolute left-0 top-2 hidden h-[400px] w-full max-w-[360px] origin-bottom-right p-5 opacity-95 lg:block lg:max-w-none`}
-          style={{ transform: "translate(-6%, 8%) rotate(-3.5deg) scale(0.92)", zIndex: 0 }}
+          className={`${paper} absolute left-0 top-1 hidden min-h-[420px] w-full max-w-[380px] p-3.5 opacity-[0.97] lg:block lg:max-w-none`}
+          style={{ transform: "translate(-7%, 9%) rotate(-3.8deg) scale(0.91)", zIndex: 0 }}
           aria-hidden
         >
-          <p className="font-marketing-mono text-[9px] uppercase tracking-[0.16em] text-[#888]">Model analysis</p>
-          <p className="mt-3 text-[11px] font-medium text-[#333]">Acme Corp · by engine</p>
-          <div className="mt-4 space-y-2.5">
+          <p className="font-marketing-mono text-[8px] uppercase tracking-[0.18em] text-[#737373]">Recommendations</p>
+          <p className="mt-1 font-marketing-mono text-[7px] uppercase tracking-wider text-[#a3a3a3]">Acme Corp · priority actions</p>
+          <div className="mt-3 space-y-2 border-t border-[#e5e5e5] pt-2.5">
+            <div className="border-b border-[#eee] pb-2">
+              <span className="font-marketing-mono text-[8px] font-medium text-[#c53030]">HIGH</span>
+              <p className="mt-0.5 text-[10px] font-medium leading-snug text-[#262626]">Close authority gap</p>
+              <p className="mt-0.5 text-[9px] leading-[1.45] text-[#525252]">
+                Citations at 0%. Publish proof-backed pages models can quote.
+              </p>
+            </div>
+            <div className="border-b border-[#eee] pb-2">
+              <span className="font-marketing-mono text-[8px] font-medium text-[#c53030]">HIGH</span>
+              <p className="mt-0.5 text-[10px] font-medium leading-snug text-[#262626]">Counter competitor mentions</p>
+              <p className="mt-0.5 text-[9px] leading-[1.45] text-[#525252]">
+                Owala tied on mentions. Differentiate on category proof and comparisons.
+              </p>
+            </div>
+            <div>
+              <span className="font-marketing-mono text-[8px] font-medium text-[#b45309]">MED</span>
+              <p className="mt-0.5 text-[10px] font-medium leading-snug text-[#262626]">Increase citations</p>
+              <p className="mt-0.5 text-[9px] leading-[1.45] text-[#525252]">Trade press, reviews, and third-party references.</p>
+            </div>
+          </div>
+          <p className="absolute bottom-3 right-3 font-marketing-mono text-[7px] text-[#bdbdbd]">3</p>
+        </div>
+
+        {/* Page 2 — Model breakdown (middle) — desktop only */}
+        <div
+          className={`${paper} absolute left-0 top-0.5 hidden min-h-[420px] w-full max-w-[380px] p-3.5 lg:block lg:max-w-none`}
+          style={{ transform: "translate(-3%, 5%) rotate(-2deg) scale(0.95)", zIndex: 1 }}
+          aria-hidden
+        >
+          <p className="font-marketing-mono text-[8px] uppercase tracking-[0.18em] text-[#737373]">Model analysis</p>
+          <p className="mt-1 font-marketing-mono text-[7px] uppercase tracking-wider text-[#a3a3a3]">Scores by engine · vs portfolio avg</p>
+          <div className="mt-3 space-y-2.5 border-t border-[#e5e5e5] pt-2.5">
             {[
-              { n: "ChatGPT", v: 88 },
-              { n: "Gemini", v: 61 },
-              { n: "Claude", v: 43 },
+              { label: "OPENAI", pct: 90, vs: "+38 vs avg", tone: "high" as const },
+              { label: "GEMINI", pct: 39, vs: "-13 vs avg", tone: "mid" as const },
+              { label: "ANTHROPIC", pct: 26, vs: "-26 vs avg", tone: "low" as const },
             ].map((row) => (
-              <div key={row.n} className="flex items-center gap-2">
-                <span className="w-16 shrink-0 font-marketing-mono text-[10px] text-[#666]">{row.n}</span>
-                <div className="h-1 flex-1 bg-[#e8e8e8]">
-                  <div className="h-full bg-[#1a1a1a]" style={{ width: `${row.v}%` }} />
+              <div key={row.label} className="border-b border-[#eee] pb-2 last:border-b-0 last:pb-0">
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="font-marketing-mono text-[8px] uppercase tracking-[0.12em] text-[#525252]">{row.label}</span>
+                  <span
+                    className={`font-marketing-mono text-[8px] ${
+                      row.tone === "high" ? "text-[#00e87a]" : row.tone === "mid" ? "text-[#737373]" : "text-[#a3a3a3]"
+                    }`}
+                  >
+                    {row.vs}
+                  </span>
                 </div>
-                <span className="w-7 shrink-0 text-right font-marketing-mono text-[10px] text-[#444]">{row.v}</span>
+                <div className="mt-1.5 h-[3px] w-full bg-[#e5e5e5]">
+                  <div
+                    className="h-full bg-[#171717]"
+                    style={{
+                      width: `${row.pct}%`,
+                      opacity: row.tone === "high" ? 1 : row.tone === "mid" ? 0.75 : 0.5,
+                    }}
+                  />
+                </div>
+                <p className="mt-1 font-marketing-mono text-[9px] tabular-nums text-[#404040]">{row.pct}/100</p>
               </div>
             ))}
           </div>
-          <p className="absolute bottom-4 right-4 font-marketing-mono text-[8px] text-[#bbb]">Page 3</p>
-        </div>
-
-        {/* Page 2 — Recommendations — desktop only */}
-        <div
-          className={`${paper} absolute left-0 top-1 hidden h-[400px] w-full max-w-[360px] p-5 lg:block lg:max-w-none`}
-          style={{ transform: "translate(-2%, 4%) rotate(-1.8deg) scale(0.96)", zIndex: 1 }}
-          aria-hidden
-        >
-          <p className="font-marketing-mono text-[9px] uppercase tracking-[0.16em] text-[#888]">Recommendations</p>
-          <div className="mt-4 space-y-3">
-            <div>
-              <span className="font-marketing-mono text-[9px] font-medium text-[#c53030]">HIGH</span>
-              <p className="mt-1 text-[11px] leading-snug text-[#333]">Earn citations on category queries competitors already own.</p>
-            </div>
-            <div>
-              <span className="font-marketing-mono text-[9px] font-medium text-[#b7791f]">MED</span>
-              <p className="mt-1 text-[11px] leading-snug text-[#333]">Add proof-rich comparison pages aligned to how models answer.</p>
-            </div>
-          </div>
-          <p className="absolute bottom-4 right-4 font-marketing-mono text-[8px] text-[#bbb]">Page 2</p>
+          <p className="absolute bottom-3 right-3 font-marketing-mono text-[7px] text-[#bdbdbd]">2</p>
         </div>
 
         {/* Page 1 — Executive summary (front) */}
         <div
-          className={`${paper} relative z-[2] mx-auto min-h-[380px] w-full max-w-[320px] p-6 transition-shadow duration-500 ease-out sm:max-w-[360px] group-hover/stack:shadow-[0_36px_90px_rgba(0,0,0,0.55),0_12px_32px_rgba(0,0,0,0.14)] lg:mx-0 lg:ml-auto lg:h-[400px] lg:max-w-none`}
-          style={{ transform: "translate(4%, 0) rotate(2deg)" }}
+          className={`${paper} relative z-[2] mx-auto min-h-[400px] w-full max-w-[300px] p-3.5 transition-shadow duration-500 ease-out sm:max-w-[340px] group-hover/stack:shadow-[0_32px_80px_rgba(0,0,0,0.5),0_10px_28px_rgba(0,0,0,0.12)] lg:mx-0 lg:ml-auto lg:min-h-[420px] lg:max-w-none`}
+          style={{ transform: "translate(5%, 0) rotate(1.8deg)" }}
         >
-          <div className="flex items-start justify-between gap-2 border-b border-[#e5e5e5] pb-3">
-            <div>
-              <p className="font-marketing-mono text-[9px] uppercase tracking-[0.16em] text-[#888]">VRTL Score</p>
-              <p className="mt-1.5 text-[14px] font-semibold text-[#111]">Executive summary</p>
+          <div className="flex items-start justify-between gap-2 border-b border-[#e0e0e0] pb-2">
+            <div className="min-w-0">
+              <p className="font-marketing-mono text-[8px] uppercase tracking-[0.16em] text-[#737373]">AI Authority Report</p>
+              <p className="mt-1 text-[13px] font-semibold leading-tight text-[#0a0a0a]">Executive summary</p>
             </div>
-            <span className="shrink-0 border border-[#ddd] bg-white px-1.5 py-0.5 font-marketing-mono text-[8px] uppercase tracking-wider text-[#777]">
+            <span className="shrink-0 border border-[#d4d4d4] bg-white px-1 py-0.5 font-marketing-mono text-[7px] uppercase tracking-wider text-[#737373]">
               PDF
             </span>
           </div>
-          <p className="mt-3 text-[12px] text-[#555]">Acme Corp · Q2 2026</p>
-          <div className="mt-5 flex flex-wrap items-end gap-3">
-            <span className="font-marketing-display text-[48px] font-normal leading-none tracking-tight text-[#111]">74</span>
-            <div className="pb-1">
-              <p className="text-[10px] uppercase tracking-wide text-[#888]">Visibility score</p>
-              <p className="font-marketing-mono text-[11px] text-[#2d7a4d]">↑ 6 vs last run</p>
+          <p className="mt-2 text-[11px] font-medium text-[#404040]">Acme Corp</p>
+          <p className="font-marketing-mono text-[8px] text-[#a3a3a3]">April 1, 2026</p>
+
+          <div className="mt-3 flex flex-wrap items-end gap-2 border-t border-[#eee] pt-2.5">
+            <span className="font-marketing-display text-[44px] font-normal leading-[0.95] tracking-tight text-[#0a0a0a] sm:text-[48px]">
+              68
+            </span>
+            <div className="pb-0.5">
+              <p className="font-marketing-mono text-[7px] uppercase tracking-[0.14em] text-[#a3a3a3]">AI Authority Score</p>
+              <p className="font-marketing-mono text-[8px] text-[#737373]">/100</p>
             </div>
           </div>
-          <div className="mt-5 grid grid-cols-2 gap-3 border-t border-[#ececec] pt-4">
-            <div>
-              <p className="font-marketing-mono text-[8px] uppercase tracking-wider text-[#aaa]">Mention rate</p>
-              <p className="mt-0.5 text-[15px] font-medium tabular-nums text-[#111]">62%</p>
-            </div>
-            <div>
-              <p className="font-marketing-mono text-[8px] uppercase tracking-wider text-[#aaa]">Top-3 answers</p>
-              <p className="mt-0.5 text-[15px] font-medium tabular-nums text-[#111]">4 of 6</p>
-            </div>
+
+          <div className="mt-2.5 grid grid-cols-3 gap-1.5 border border-[#e8e8e8] bg-white p-2">
+            {[
+              { lab: "Mention rate", val: "62%" },
+              { lab: "Top position", val: "60%" },
+              { lab: "Authority", val: "0%" },
+            ].map((m) => (
+              <div key={m.lab} className="min-w-0 border-r border-[#f0f0f0] pr-1.5 last:border-r-0 last:pr-0">
+                <p className="font-marketing-mono text-[6.5px] uppercase leading-tight tracking-[0.08em] text-[#a3a3a3]">
+                  {m.lab}
+                </p>
+                <p
+                  className={`mt-0.5 font-marketing-mono text-[14px] font-medium tabular-nums leading-none ${
+                    m.lab === "Authority" ? "text-[#dc2626]" : "text-[#171717]"
+                  }`}
+                >
+                  {m.val}
+                </p>
+              </div>
+            ))}
           </div>
-          <p className="mt-4 text-[11px] leading-relaxed text-[#666]">
-            Strong on ChatGPT; close the gap on Gemini and Claude before renewals.
+
+          <p className="mt-2.5 font-marketing-mono text-[7px] uppercase tracking-[0.14em] text-[#a3a3a3]">
+            Competitive ranking
           </p>
-          <p className="absolute bottom-4 right-4 font-marketing-mono text-[8px] text-[#bbb]">
-            Page 1<span className="hidden lg:inline"> of 3</span>
+          <div className="mt-1 space-y-0.5 border border-[#e8e8e8] bg-white p-2 font-marketing-mono text-[9px]">
+            <div className="flex justify-between gap-2 text-[#171717]">
+              <span className="text-[#737373]">#1</span>
+              <span className="min-w-0 flex-1 truncate font-medium">Client</span>
+              <span className="shrink-0 text-[#00e87a]">You</span>
+            </div>
+            <div className="flex justify-between gap-2 text-[#404040]">
+              <span className="text-[#a3a3a3]">#2</span>
+              <span className="min-w-0 flex-1 truncate">Competitor A</span>
+              <span className="shrink-0 text-[#737373]">18/30</span>
+            </div>
+            <div className="flex justify-between gap-2 text-[#525252]">
+              <span className="text-[#a3a3a3]">#3</span>
+              <span className="min-w-0 flex-1 truncate">Competitor B</span>
+              <span className="shrink-0 text-[#737373]">17/30</span>
+            </div>
+          </div>
+
+          <p className="mt-2 border-l-2 border-[#d4d4d4] pl-2 text-[9px] font-medium leading-snug text-[#525252]">
+            Lead is thin. Competitors within range.
+          </p>
+
+          <p className="absolute bottom-2.5 right-3 font-marketing-mono text-[7px] text-[#bdbdbd]">
+            1<span className="hidden lg:inline"> / 3</span>
           </p>
         </div>
       </div>
