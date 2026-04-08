@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 
 const linkClass =
@@ -14,10 +15,16 @@ export function Footer() {
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <div className="grid grid-cols-2 gap-10 md:grid-cols-3 lg:grid-cols-5 lg:gap-8">
           <div className="col-span-2 lg:col-span-1">
-            <p className="font-marketing-body text-base font-medium text-[var(--text-primary)]">
-              VRTL <span className="text-[var(--text-secondary)]">Score</span>
-            </p>
-            <p className="mt-3 max-w-[220px] text-sm font-light leading-relaxed text-[var(--text-secondary)]">
+            <Link className="inline-block" href="/">
+              <Image
+                alt="VRTL Score"
+                className="h-10 w-auto object-contain object-left md:h-11"
+                height={44}
+                src="/brand/White_VRTL.png"
+                width={180}
+              />
+            </Link>
+            <p className="mt-4 max-w-[220px] text-sm font-light leading-relaxed text-[var(--text-secondary)]">
               AI visibility for agencies that want to win.
             </p>
             <div className="mt-6 flex items-center gap-3">

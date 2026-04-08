@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -39,10 +40,15 @@ export function SiteNav() {
       )}
     >
       <div className="mx-auto flex h-full max-w-[1200px] items-center justify-between">
-        <Link className="flex shrink-0 items-center gap-3 font-marketing-body text-base font-medium" href="/">
-          <span className={isDarkPage ? "text-[var(--text-primary)]" : "text-text"}>VRTL</span>
-          <span className={cn("h-4 w-px", isDarkPage ? "bg-[var(--border-mid)]" : "bg-border")} aria-hidden />
-          <span className={isDarkPage ? "text-[var(--text-secondary)]" : "text-text-2"}>Score</span>
+        <Link className="relative flex h-8 shrink-0 items-center" href="/">
+          <Image
+            alt="VRTL Score"
+            className="h-7 w-auto object-contain object-left md:h-8"
+            height={32}
+            priority
+            src={isDarkPage ? "/brand/White_VRTL.png" : "/brand/VRTL_Solo.png"}
+            width={160}
+          />
         </Link>
 
         <nav className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-10 md:flex" aria-label="Main">
