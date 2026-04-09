@@ -1506,7 +1506,7 @@ function PageHeader({ clientName, trailing }: { clientName: string; trailing?: R
               <path d="M4.5 2L8.5 6l-4 4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </span>
-          <span className="truncate font-semibold text-text" aria-current="page">
+          <span className="font-app-display truncate font-normal text-text" aria-current="page">
             {clientName}
           </span>
         </nav>
@@ -2492,7 +2492,9 @@ function DecisionSurface({
             )}
             <div className="min-w-0 flex-1">
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3">Client overview</p>
-              <h1 className="mt-0.5 truncate text-lg font-semibold tracking-tight text-text sm:text-xl">{client.name}</h1>
+              <h1 className="font-app-display mt-0.5 truncate text-lg font-normal tracking-tight text-text sm:text-xl">
+                {client.name}
+              </h1>
               {client.website ? (
                 <a
                   href={client.website}
@@ -2520,7 +2522,7 @@ function DecisionSurface({
             <div className="space-y-5 px-5 py-6 sm:px-7 sm:py-6 lg:border-r lg:border-white/[0.035]">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3/75">Primary diagnosis</p>
-                <p className="mt-0.5 max-w-2xl text-[1.5rem] font-semibold leading-[1.18] tracking-[-0.02em] text-text sm:text-[1.625rem] sm:leading-tight">
+                <p className="font-app-display mt-0.5 max-w-2xl text-[1.5rem] font-normal leading-[1.22] tracking-[-0.02em] text-text sm:text-[1.625rem] sm:leading-tight">
                   {problemLine}
                 </p>
                 <p className="mt-2 max-w-xl text-[13px] font-normal leading-relaxed text-text-3/88">{causeLine}</p>

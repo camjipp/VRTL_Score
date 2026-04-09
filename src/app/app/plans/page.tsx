@@ -211,7 +211,10 @@ export default function PlansPage() {
 
       {/* Headline — no subtitle on paywall */}
       <div className="text-center mb-2">
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl" style={{ color: PAYWALL.text }}>
+        <h1
+          className="font-app-display text-2xl font-normal tracking-tight sm:text-3xl"
+          style={{ color: PAYWALL.text }}
+        >
           Choose your plan
         </h1>
       </div>

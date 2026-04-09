@@ -77,7 +77,9 @@ export default function NewClientPage() {
 
       {/* Header — 16px after breadcrumb, 12px between title and subtitle */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-[#E6EDF3]">Create New Client</h1>
+        <h1 className="font-app-display text-2xl font-normal tracking-tight text-[#E6EDF3]">
+          Create New Client
+        </h1>
         <p className="mt-3 text-sm text-[#8B98A5]">
           Add a client to track their AI visibility and competitive landscape.
         </p>

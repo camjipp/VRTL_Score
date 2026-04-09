@@ -75,6 +75,14 @@
   --authority-stable: 148 163 184;   /* blue-gray */
   --authority-watchlist: 245 158 11; /* toned amber */
   --authority-losing: 127 29 29;     /* deep red */
+
+  /* Typography: DM Sans for all UI; Instrument Serif only via .font-app-display */
+  font-family: var(--font-body, var(--font-dm-sans), system-ui, sans-serif);
+}
+
+/* Landing-aligned serif — page titles & key diagnosis lines in the app only */
+.vrtl-app .font-app-display {
+  font-family: var(--font-display, var(--font-instrument-serif), Georgia, serif);
 }
 
 html,

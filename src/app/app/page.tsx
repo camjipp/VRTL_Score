@@ -1069,7 +1069,9 @@ function EmptyState() {
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent" aria-hidden />
       <div className="relative">
       <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3">Portfolio</p>
-      <h2 className="mt-3 text-xl font-semibold tracking-tight text-text sm:text-2xl">Initialize your portfolio</h2>
+      <h2 className="font-app-display mt-3 text-xl font-normal tracking-tight text-text sm:text-2xl">
+        Initialize your portfolio
+      </h2>
       <p className="mt-2 max-w-md text-[14px] leading-relaxed text-text-2">
         Add a brand to index authority across ChatGPT, Gemini, and Claude — gaps, displacers, and trend in one surface.
       </p>
@@ -1450,6 +1452,11 @@ export default function AppPage() {
       />
 
       <div className="flex-1 space-y-2.5 px-5 pb-6 pt-3 sm:space-y-3 sm:px-6 sm:pt-4">
+        {clients.length > 0 ? (
+          <h1 className="font-app-display text-[1.375rem] font-normal leading-tight tracking-tight text-text sm:text-2xl">
+            Dashboard
+          </h1>
+        ) : null}
         {showLogoFailedBanner && (
           <Alert variant="warning" className="flex items-center justify-between gap-4">
             <AlertDescription>
