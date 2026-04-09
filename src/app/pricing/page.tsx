@@ -19,7 +19,9 @@ const sectionBlock = "border-b border-white/10 pb-16 md:pb-20";
 
 function PricingEyebrow({ children }: { children: ReactNode }) {
   return (
-    <p className="font-marketing-mono text-[11px] uppercase tracking-[0.12em] text-emerald-500">{children}</p>
+    <p className="font-marketing-mono text-[11px] uppercase tracking-[0.12em] text-[var(--accent-marketing)]">
+      {children}
+    </p>
   );
 }
 
@@ -162,7 +164,8 @@ function RunSnapshotButton({
         base,
         shape,
         sizeCls,
-        variant === "primary" && "bg-emerald-500 text-black hover:brightness-110 hover:scale-[1.02]",
+        variant === "primary" &&
+          "bg-[var(--accent-marketing)] text-black hover:brightness-110 hover:scale-[1.02]",
         variant === "outline" &&
           "border border-white/15 bg-transparent font-normal text-white/70 hover:border-white/25 hover:text-white/90 hover:brightness-110",
         className,
@@ -250,7 +253,7 @@ function PlanCards({
           "flex h-full min-h-0 flex-col space-y-4 rounded-xl border border-white/15 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-7 transition-all duration-200 ease-out md:p-8",
           "hover:scale-[1.01]",
           plan.recommended
-            ? "z-10 scale-[1.03] border-emerald-500/30 from-white/[0.06] to-white/[0.02] shadow-[0_0_40px_rgba(34,197,94,0.15)]"
+            ? "z-10 scale-[1.03] border-[rgba(0,232,122,0.3)] from-white/[0.06] to-white/[0.02] shadow-[0_0_40px_rgba(0,232,122,0.15)]"
             : "from-white/[0.03] to-white/[0.01]",
         );
 
@@ -258,7 +261,7 @@ function PlanCards({
           <div key={plan.name} className="flex min-h-0 flex-col">
             <div className="flex min-h-[2.25rem] items-end justify-center pb-2 md:min-h-[2.5rem]">
               {plan.recommended ? (
-                <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-wide text-emerald-400">
+                <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-wide text-[var(--accent-marketing)]">
                   Most agencies choose this
                 </span>
               ) : null}
@@ -395,7 +398,7 @@ function PricingContent() {
 
   if (isPaywall) {
     return (
-      <div className="page-marketing selection:bg-emerald-500/10 selection:text-white">
+      <div className="page-marketing selection:bg-[var(--accent-bg)] selection:text-white">
         <main>
           <section className={cn("border-b border-white/10", pricingTop)}>
             <div className={shell}>
@@ -421,16 +424,16 @@ function PricingContent() {
                     "flex flex-col space-y-4 rounded-xl border border-white/15 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-7 text-left transition-all duration-200 ease-out md:p-8",
                     "hover:scale-[1.01]",
                     plan.recommended &&
-                      "scale-[1.03] border-emerald-500/30 from-white/[0.06] to-white/[0.02] shadow-[0_0_40px_rgba(34,197,94,0.15)]",
+                      "scale-[1.03] border-[rgba(0,232,122,0.3)] from-white/[0.06] to-white/[0.02] shadow-[0_0_40px_rgba(0,232,122,0.15)]",
                     !plan.recommended && "from-white/[0.03] to-white/[0.01]",
-                    (isSelected || (!isSelected && isRecommended)) && "ring-1 ring-emerald-500/35",
+                    (isSelected || (!isSelected && isRecommended)) && "ring-1 ring-[rgba(0,232,122,0.35)]",
                   );
 
                   return (
                     <div key={plan.id} className="flex flex-col">
                       <div className="flex min-h-[2.25rem] items-end justify-center pb-2">
                         {plan.recommended ? (
-                          <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-wide text-emerald-400">
+                          <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-wide text-[var(--accent-marketing)]">
                             Most agencies choose this
                           </span>
                         ) : null}
@@ -488,7 +491,7 @@ function PricingContent() {
   }
 
   return (
-    <div className="page-marketing selection:bg-emerald-500/10 selection:text-white">
+    <div className="page-marketing selection:bg-[var(--accent-bg)] selection:text-white">
       <main>
         <section className={cn("border-b border-white/10", pricingTop)}>
           <div className={shell}>
@@ -557,7 +560,7 @@ function PricingContent() {
                         &nbsp;
                       </th>
                       <th className="px-6 py-5 text-center text-sm font-semibold text-white/90 md:px-8 md:py-6">Foundation</th>
-                      <th className="border-x border-emerald-500/20 bg-emerald-500/[0.08] px-6 py-5 text-center text-sm font-semibold text-white md:px-8 md:py-6">
+                      <th className="border-x border-[rgba(0,232,122,0.2)] bg-[rgba(0,232,122,0.08)] px-6 py-5 text-center text-sm font-semibold text-white md:px-8 md:py-6">
                         Agency
                       </th>
                       <th className="px-6 py-5 text-center text-sm font-semibold text-white/90 md:px-8 md:py-6">Scale</th>
@@ -576,7 +579,7 @@ function PricingContent() {
                         <td className="px-6 py-5 text-center text-[15px] font-light text-white/75 md:px-8 md:py-6">
                           {feature.starter}
                         </td>
-                        <td className="border-x border-emerald-500/20 bg-emerald-500/[0.08] px-6 py-5 text-center text-[15px] font-medium text-white md:px-8 md:py-6">
+                        <td className="border-x border-[rgba(0,232,122,0.2)] bg-[rgba(0,232,122,0.08)] px-6 py-5 text-center text-[15px] font-medium text-white md:px-8 md:py-6">
                           {feature.growth}
                         </td>
                         <td className="px-6 py-5 text-center text-[15px] font-light text-white/75 md:px-8 md:py-6">
@@ -625,7 +628,7 @@ function PricingContent() {
                 loading={loadingPlan === "growth"}
                 onClick={() => handleCheckout("growth")}
                 size="large"
-                className="w-full shadow-[0_0_30px_rgba(34,197,94,0.2)] sm:w-auto"
+                className="w-full shadow-[0_0_30px_rgba(0,232,122,0.2)] sm:w-auto"
               />
               <Link
                 href="/preview"
@@ -652,7 +655,7 @@ export default function PricingPage() {
     <Suspense
       fallback={
         <div className="page-marketing flex min-h-screen items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-emerald-500" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-[var(--accent-marketing)]" />
         </div>
       }
     >
