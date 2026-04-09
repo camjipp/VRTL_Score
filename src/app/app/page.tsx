@@ -224,6 +224,37 @@ function portfolioLastSnapshotLabel(clients: ClientWithStats[]): string {
   return `Last snapshot ${formatRelativeSnapshot(latest)}`;
 }
 
+/** Lowest average family score across clients with model data — portfolio weak point. */
+function portfolioWeakestFamilyLabel(clients: ClientWithStats[]): string | null {
+  const families: ModelFamily[] = ["chatgpt", "gemini", "claude"];
+  const sums: Record<ModelFamily, { sum: number; n: number }> = {
+    chatgpt: { sum: 0, n: 0 },
+    gemini: { sum: 0, n: 0 },
+    claude: { sum: 0, n: 0 },
+  };
+  clients.forEach((c) => {
+    if (!c.providerFamilyScores) return;
+    families.forEach((f) => {
+      const s = c.providerFamilyScores![f];
+      if (typeof s === "number") {
+        sums[f].sum += s;
+        sums[f].n += 1;
+      }
+    });
+  });
+  let worst: ModelFamily | null = null;
+  let worstAvg = 101;
+  families.forEach((f) => {
+    if (sums[f].n === 0) return;
+    const avg = sums[f].sum / sums[f].n;
+    if (avg < worstAvg) {
+      worstAvg = avg;
+      worst = f;
+    }
+  });
+  return worst ? modelFamilyLabel(worst) : null;
+}
+
 function attentionDetailSuffix(c: ClientWithStats): string {
   const parts: string[] = [];
   const delta =
@@ -259,31 +290,27 @@ function clientStoryLine(c: ClientWithStats): string {
   return "Stable authority signal. Monitor weak channels.";
 }
 
-const CARD_STATUS_STYLES: Record<
-  "dominant" | "watchlist" | "stable" | "losing",
-  { bg: string; color: string; label: string }
-> = {
-  dominant: { bg: "#EAF3DE", color: "#3B6D11", label: "Dominant" },
-  watchlist: { bg: "#FAEEDA", color: "#854F0B", label: "Watchlist" },
-  stable: { bg: "rgba(148, 163, 184, 0.2)", color: "#CBD5E1", label: "Stable" },
-  losing: { bg: "#FCEBEB", color: "#A32D2D", label: "Losing ground" },
-};
-
 function CardStatusBadge({ bucket }: { bucket: TriageBucket }) {
-  const key = bucket === "losing" ? "losing" : bucket === "watchlist" ? "watchlist" : bucket === "stable" ? "stable" : "dominant";
-  const s = CARD_STATUS_STYLES[key];
+  const key =
+    bucket === "losing" ? "losing" : bucket === "watchlist" ? "watchlist" : bucket === "stable" ? "stable" : "dominant";
+  const label =
+    key === "losing" ? "Losing ground" : key === "watchlist" ? "Watchlist" : key === "stable" ? "Stable" : "Dominant";
+  const styles: Record<typeof key, string> = {
+    dominant:
+      "border-authority-dominant/30 bg-authority-dominant/[0.09] text-authority-dominant",
+    watchlist:
+      "border-authority-watchlist/30 bg-authority-watchlist/[0.08] text-authority-watchlist",
+    stable: "border-white/[0.12] bg-white/[0.04] text-text-2",
+    losing: "border-authority-losing/35 bg-authority-losing/[0.1] text-authority-losing",
+  };
   return (
     <span
-      className="shrink-0 rounded-[20px] font-medium"
-      style={{
-        fontSize: 11,
-        fontWeight: 500,
-        padding: "3px 9px",
-        background: s.bg,
-        color: s.color,
-      }}
+      className={cn(
+        "shrink-0 rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em]",
+        styles[key]
+      )}
     >
-      {s.label}
+      {label}
     </span>
   );
 }
@@ -292,15 +319,12 @@ function CardDeltaBadge({ delta }: { delta: number }) {
   const neg = delta < 0;
   return (
     <span
-      className="inline-flex items-center gap-0.5 rounded-[20px] font-medium tabular-nums"
-      style={{
-        fontSize: 12,
-        fontWeight: 500,
-        padding: "3px 9px",
-        borderRadius: 20,
-        background: neg ? "#FCEBEB" : "#EAF3DE",
-        color: neg ? "#A32D2D" : "#3B6D11",
-      }}
+      className={cn(
+        "inline-flex items-center gap-0.5 rounded-md border px-2 py-0.5 text-[11px] font-medium tabular-nums tracking-tight",
+        neg
+          ? "border-authority-losing/25 bg-authority-losing/[0.08] text-authority-losing"
+          : "border-authority-dominant/25 bg-authority-dominant/[0.08] text-authority-dominant"
+      )}
     >
       {neg ? "↓" : "↑"} {neg ? Math.abs(delta) : `+${delta}`} vs last
     </span>
@@ -328,64 +352,119 @@ function PriorityAlertBar({
   const attention = useMemo(() => sorted.filter(clientNeedsAttention), [sorted]);
   const stable = attention.length === 0;
 
-  const pillClass = (b: TriageBucket) =>
+  const counts = useMemo(() => {
+    let dominant = 0;
+    let watchlist = 0;
+    let losing = 0;
+    clients.forEach((c) => {
+      const b = triageBucket(c);
+      if (b === "dominant") dominant += 1;
+      else if (b === "watchlist") watchlist += 1;
+      else if (b === "losing") losing += 1;
+    });
+    return { dominant, watchlist, losing };
+  }, [clients]);
+
+  const weakestPortfolio = useMemo(() => portfolioWeakestFamilyLabel(clients), [clients]);
+  const snapshotLine = portfolioLastSnapshotLabel(clients);
+
+  const filterBtn = (b: "losing" | "watchlist" | "dominant") =>
     cn(
-      "rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors",
+      "px-3 py-1.5 text-[11px] font-semibold tracking-tight transition-colors",
       triageFilter === b
-        ? "border-white/20 bg-white/[0.08] text-text"
-        : "border-white/[0.08] bg-transparent text-text-2 hover:border-white/15 hover:text-text"
+        ? "rounded-md bg-white/[0.1] text-text shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
+        : "rounded-md text-text-2 hover:text-text"
     );
 
   return (
-    <div className="mb-6 flex flex-wrap items-center gap-3 border-b border-white/[0.12] py-2.5 text-[13px]">
-      {stable ? (
-        <>
-          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#639922]" aria-hidden />
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-            <span className="font-medium text-text">All clients stable</span>
-            <span className="text-text-2">· {portfolioLastSnapshotLabel(clients)}</span>
+    <div className="mb-4 rounded-xl border border-white/[0.08] bg-[#0a0a0a]/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <div className="border-b border-white/[0.06] px-4 py-3 sm:px-5">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3/90">
+          Portfolio intelligence
+        </p>
+        <div className="mt-3 flex flex-wrap items-end gap-x-6 gap-y-4 sm:gap-x-8">
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-wider text-text-3">Dominant</p>
+            <p className="mt-0.5 text-2xl font-semibold tabular-nums tracking-tight text-text">{counts.dominant}</p>
           </div>
-        </>
-      ) : (
-        <>
-          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#E24B4A]" aria-hidden />
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-            <span className="font-medium text-text">
-              {attention.length} client{attention.length === 1 ? "" : "s"}{" "}
-              {attention.length === 1 ? "needs" : "need"} attention
-            </span>
-            <span className="text-text-2">
-              → {attention[0]!.name}
-              {(() => {
-                const d = attentionDetailSuffix(attention[0]!);
-                return d ? ` ${d}` : "";
-              })()}
-              {attention.length > 1
-                ? `, ${attention
-                    .slice(1, 3)
-                    .map((c) => c.name)
-                    .join(", ")}${attention.length > 3 ? ", …" : ""}`
-                : ""}
-            </span>
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-wider text-text-3">Watchlist</p>
+            <p className="mt-0.5 text-2xl font-semibold tabular-nums tracking-tight text-text">{counts.watchlist}</p>
           </div>
-          {attention.length > 1 ? (
-            <a href="#clients-overview" className="shrink-0 text-[12px] text-text-2 no-underline hover:text-text">
-              View all
-            </a>
-          ) : null}
-        </>
-      )}
-      <div className="flex shrink-0 flex-wrap items-center gap-2 sm:ml-auto">
-        {(["losing", "watchlist", "dominant"] as const).map((b) => (
-          <button
-            key={b}
-            type="button"
-            onClick={() => onToggleFilter(b)}
-            className={pillClass(b)}
-          >
-            {b === "losing" ? "Losing Ground" : b === "watchlist" ? "Watchlist" : "Dominant"}
-          </button>
-        ))}
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-wider text-text-3">Losing ground</p>
+            <p
+              className={cn(
+                "mt-0.5 text-2xl font-semibold tabular-nums tracking-tight",
+                counts.losing > 0 ? "text-authority-losing" : "text-text"
+              )}
+            >
+              {counts.losing}
+            </p>
+          </div>
+          <div className="min-w-[140px] sm:min-w-[160px]">
+            <p className="text-[10px] font-medium uppercase tracking-wider text-text-3">Coverage</p>
+            <p className="mt-0.5 text-[13px] font-medium leading-snug text-text-2">{snapshotLine}</p>
+          </div>
+          <div className="min-w-[120px]">
+            <p className="text-[10px] font-medium uppercase tracking-wider text-text-3">Weakest model</p>
+            <p className="mt-0.5 text-[13px] font-medium">
+              {weakestPortfolio ? (
+                <span className="text-text">{weakestPortfolio}</span>
+              ) : (
+                <span className="text-text-3">Insufficient data</span>
+              )}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 text-[13px]">
+          {stable ? (
+            <>
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-authority-dominant/90" aria-hidden />
+              <span className="font-medium text-text">No immediate portfolio actions</span>
+              <span className="hidden text-text-3 sm:inline">·</span>
+              <span className="text-text-2">Attention queue clear for this view.</span>
+            </>
+          ) : (
+            <>
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-authority-losing" aria-hidden />
+              <span className="font-medium text-text">
+                {attention.length} client{attention.length === 1 ? "" : "s"} need attention
+              </span>
+              <span className="min-w-0 text-text-2">
+                <span className="text-text-3">—</span> {attention[0]!.name}
+                {(() => {
+                  const d = attentionDetailSuffix(attention[0]!);
+                  return d ? ` · ${d}` : "";
+                })()}
+                {attention.length > 1
+                  ? ` · ${attention
+                      .slice(1, 3)
+                      .map((c) => c.name)
+                      .join(", ")}${attention.length > 3 ? ", …" : ""}`
+                  : ""}
+              </span>
+              {attention.length > 1 ? (
+                <a href="#clients-overview" className="shrink-0 text-[12px] text-text-2 underline-offset-2 hover:text-text hover:underline">
+                  View queue
+                </a>
+              ) : null}
+            </>
+          )}
+        </div>
+        <div
+          className="inline-flex w-full shrink-0 flex-wrap items-center gap-0.5 rounded-lg border border-white/[0.08] bg-black/40 p-0.5 sm:w-auto"
+          role="group"
+          aria-label="Filter by status"
+        >
+          {(["losing", "watchlist", "dominant"] as const).map((b) => (
+            <button key={b} type="button" onClick={() => onToggleFilter(b)} className={filterBtn(b)}>
+              {b === "losing" ? "Losing" : b === "watchlist" ? "Watchlist" : "Dominant"}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -404,6 +483,8 @@ function ClientCard({ client }: { client: ClientWithStats }) {
   const router = useRouter();
   const hasData = client.latestScore !== null;
   const bucket = triageBucket(client);
+  const authorityState = getAuthorityState(client);
+  const stateBar = getAuthorityStateBar(authorityState);
   const domain = faviconDomain(client.website);
   const faviconUrl = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=32` : null;
   const weakestLabel = client.worstModel ? displayModelName(client.worstModel) : null;
@@ -430,95 +511,104 @@ function ClientCard({ client }: { client: ClientWithStats }) {
         }
       }}
       className={cn(
-        "client-card group flex h-full min-h-[200px] cursor-pointer flex-col rounded-[12px] border border-white/[0.12] bg-surface p-5 transition-[border-color] duration-150",
-        "hover:border-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+        "client-card group relative flex h-full min-h-[228px] cursor-pointer flex-col overflow-hidden rounded-xl border border-white/[0.08] bg-[#0c0c0c] transition-[border-color,box-shadow] duration-200",
+        "shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] hover:border-white/[0.14]",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-white/15",
+        "border-l-[3px]",
+        stateBar
       )}
     >
-      <div className="mb-4 flex items-center gap-2.5">
-        <span
-          className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden bg-white/[0.06]"
-          style={{ borderRadius: 6 }}
-        >
-          {faviconUrl ? (
-            <img src={faviconUrl} alt="" className="h-[18px] w-[18px] object-contain" width={18} height={18} />
-          ) : (
-            <span className="text-[10px] font-medium text-text-3">{client.name.charAt(0)}</span>
-          )}
-        </span>
-        <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-text">{client.name}</span>
-        <CardStatusBadge bucket={bucket} />
-        <svg
-          width={16}
-          height={16}
-          viewBox="0 0 16 16"
-          fill="none"
-          className="shrink-0 text-text-3"
-          aria-hidden
-        >
-          <path
-            d="M6 12L10 8L6 4"
-            stroke="currentColor"
-            strokeWidth={1.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </div>
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.04] via-transparent to-transparent opacity-90" aria-hidden />
+      <div className="relative flex h-full flex-col px-4 pb-4 pt-4 sm:px-5 sm:pb-5 sm:pt-5">
+        <div className="flex items-start gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/[0.08] bg-black/30">
+            {faviconUrl ? (
+              <img src={faviconUrl} alt="" className="h-[20px] w-[20px] object-contain" width={20} height={20} />
+            ) : (
+              <span className="text-[11px] font-semibold text-text-3">{client.name.charAt(0)}</span>
+            )}
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="truncate text-[15px] font-semibold tracking-tight text-text">{client.name}</p>
+                {client.website ? (
+                  <p className="mt-0.5 truncate text-[11px] text-text-3">{displayUrl(client.website)}</p>
+                ) : null}
+              </div>
+              <CardStatusBadge bucket={bucket} />
+            </div>
+          </div>
+          <svg
+            width={16}
+            height={16}
+            viewBox="0 0 16 16"
+            fill="none"
+            className="mt-1 shrink-0 text-text-3 transition-colors group-hover:text-text-2"
+            aria-hidden
+          >
+            <path
+              d="M6 12L10 8L6 4"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
 
-      {!hasData ? (
-        <>
-          <div className="flex flex-1 flex-col items-start justify-center gap-3 py-2">
-            <span className="text-[13px] text-text-3">No snapshot data</span>
+        {!hasData ? (
+          <div className="mt-5 flex flex-1 flex-col rounded-lg border border-dashed border-white/[0.1] bg-black/25 px-4 py-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-3">Awaiting signal</p>
+            <p className="mt-2 text-[15px] font-medium leading-snug text-text">No authority baseline yet</p>
+            <p className="mt-1.5 max-w-[280px] text-[13px] leading-relaxed text-text-2">
+              Run a snapshot to index this brand across tracked models and surface displacers.
+            </p>
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 router.push(`/app/clients/${client.id}`);
               }}
-              className="cursor-pointer rounded-lg border border-white/15 bg-transparent px-3.5 py-1.5 text-[12px] font-medium text-text-2 transition-colors hover:border-white/25 hover:text-text"
+              className="mt-4 inline-flex w-fit items-center gap-2 rounded-lg border border-authority-dominant/35 bg-authority-dominant/[0.12] px-3.5 py-2 text-[12px] font-semibold text-authority-dominant transition-colors hover:bg-authority-dominant/[0.18]"
             >
               Run snapshot
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
             </button>
           </div>
-          <div
-            className="mt-auto border-t border-white/[0.12]"
-            style={{ marginTop: 12, paddingTop: 12, borderTopWidth: 0.5 }}
-            aria-hidden
-          />
-        </>
-      ) : (
-        <>
-          <div className="mb-2 flex items-baseline gap-2.5">
-            <span
-              className="tabular-nums text-text"
-              style={{ fontSize: 48, fontWeight: 500, letterSpacing: "-2px", lineHeight: 1 }}
-            >
-              {client.latestScore}
-            </span>
-            {showDelta ? <CardDeltaBadge delta={delta!} /> : null}
-          </div>
-          <p className="mb-auto flex-1 text-[13px] leading-snug text-text-2" style={{ lineHeight: 1.4 }}>
-            {story}
-          </p>
-          <div
-            className="mt-3 flex flex-wrap items-center gap-4 border-t border-white/[0.12]"
-            style={{ marginTop: 12, paddingTop: 12, borderTopWidth: 0.5 }}
-          >
-            {weakestLabel ? (
-              <span className="text-[12px] text-text-3">
-                Weakest
-                <span className="ml-1.5 font-medium text-text-2">{weakestLabel}</span>
-              </span>
-            ) : null}
-            {showDisplacer ? (
-              <span className="text-[12px] text-text-3">
-                Displaced by
-                <span className="ml-1.5 font-medium text-text-2">{displacer}</span>
-              </span>
-            ) : null}
-          </div>
-        </>
-      )}
+        ) : (
+          <>
+            <div className="mt-5 flex flex-wrap items-end gap-3">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-text-3">Authority index</p>
+                <div className="mt-1 flex flex-wrap items-baseline gap-2.5">
+                  <span className="tabular-nums text-[44px] font-semibold leading-none tracking-[-0.04em] text-text">
+                    {client.latestScore}
+                  </span>
+                  {showDelta ? <CardDeltaBadge delta={delta!} /> : null}
+                </div>
+              </div>
+            </div>
+            <p className="mt-4 flex-1 text-[13px] leading-relaxed text-text-2">{story}</p>
+            <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 border-t border-white/[0.07] pt-4 text-[12px]">
+              {weakestLabel ? (
+                <span className="text-text-3">
+                  Weakest model
+                  <span className="ml-2 font-medium text-text">{weakestLabel}</span>
+                </span>
+              ) : null}
+              {showDisplacer ? (
+                <span className="text-text-3">
+                  Displaced by
+                  <span className="ml-2 font-medium text-text-2">{displacer}</span>
+                </span>
+              ) : null}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -526,10 +616,7 @@ function ClientCard({ client }: { client: ClientWithStats }) {
 function ClientCardsGrid({ clients }: { clients: ClientWithStats[] }) {
   return (
     <section id="clients-overview">
-      <div
-        className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2 xl:grid-cols-3"
-        style={{ gap: 16 }}
-      >
+      <div className="grid grid-cols-1 items-stretch gap-3 md:grid-cols-2 md:gap-4 xl:grid-cols-3">
         {clients.map((client) => (
           <ClientCard key={client.id} client={client} />
         ))}
@@ -941,22 +1028,21 @@ function ClientTable({ clients }: { clients: ClientWithStats[] }) {
 
 function EmptyState() {
   return (
-    <div className="mx-auto max-w-md rounded-app-lg border border-dashed border-white/10 bg-surface/50 px-6 py-12 text-center">
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-app bg-surface-2">
-        <svg className="h-6 w-6 text-text-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-      </div>
-      <h2 className="mt-4 text-base font-semibold text-text">Add your first client</h2>
-      <p className="mt-1 text-sm text-text-2">Add a client to start measuring AI authority.</p>
+    <div className="mx-auto max-w-lg rounded-xl border border-white/[0.08] bg-[#0a0a0a] px-8 py-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:px-10 sm:py-12">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3">Command center</p>
+      <h2 className="mt-3 text-xl font-semibold tracking-tight text-text sm:text-2xl">Initialize your portfolio</h2>
+      <p className="mt-2 max-w-md text-[14px] leading-relaxed text-text-2">
+        Add a brand to begin indexing authority across ChatGPT, Gemini, and Claude — displacers, gaps, and trend in one
+        view.
+      </p>
       <Link
         href="/app/clients/new"
-        className="mt-6 inline-flex items-center gap-2 rounded-app border border-white/10 bg-surface px-4 py-2 text-sm font-medium text-text transition-colors hover:bg-surface-2"
+        className="mt-8 inline-flex items-center gap-2 rounded-lg border border-authority-dominant/40 bg-authority-dominant/[0.14] px-5 py-2.5 text-sm font-semibold text-authority-dominant transition-colors hover:bg-authority-dominant/[0.22]"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
-        Add client
+        Add first client
       </Link>
     </div>
   );
@@ -1280,21 +1366,21 @@ export default function AppPage() {
     <>
       <TopBar
         primaryAction={
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
             <Link
               href={runSnapshotHref}
-              className="inline-flex h-9 items-center gap-2 rounded-app border border-white/15 bg-white/[0.07] px-3 text-sm font-medium text-text transition-colors hover:bg-white/10"
+              className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/[0.12] bg-white/[0.06] px-3.5 text-[13px] font-semibold text-text shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-colors hover:border-white/[0.18] hover:bg-white/[0.09]"
             >
-              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
               </svg>
               Run snapshot
             </Link>
             <Link
               href="/app/clients/new"
-              className="inline-flex h-9 items-center gap-2 rounded-app border border-white/10 bg-surface px-3.5 text-sm font-medium text-text transition-colors hover:bg-surface-2"
+              className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/[0.08] bg-transparent px-3.5 text-[13px] font-medium text-text-2 transition-colors hover:border-white/[0.14] hover:text-text"
             >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
               </svg>
               Add client
@@ -1302,17 +1388,29 @@ export default function AppPage() {
           </div>
         }
         filters={
-          <input
-            type="text"
-            placeholder="Search clients..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-9 w-44 rounded-app border border-white/10 bg-surface px-3 text-sm text-text placeholder:text-text-3 focus:border-white/20 focus:outline-none"
-          />
+          <div className="relative w-full">
+            <svg
+              className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+              aria-hidden
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+            <input
+              type="search"
+              placeholder="Search portfolio…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-9 w-full rounded-lg border border-white/[0.08] bg-black/35 py-2 pl-9 pr-3 text-[13px] text-text placeholder:text-text-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-colors focus:border-white/[0.16] focus:outline-none"
+            />
+          </div>
         }
       />
 
-      <div className="flex-1 space-y-4 p-6">
+      <div className="flex-1 space-y-3 px-5 pb-6 pt-4 sm:space-y-4 sm:px-6 sm:pt-5">
         {showLogoFailedBanner && (
           <Alert variant="warning" className="flex items-center justify-between gap-4">
             <AlertDescription>
@@ -1344,9 +1442,16 @@ export default function AppPage() {
         {clients.length === 0 ? (
           <EmptyState />
         ) : triageSortedClients.length === 0 && searchQuery ? (
-          <div className="rounded-app-lg border border-white/5 bg-surface/50 py-4 text-center">
-            <p className="text-xs text-text-2">No clients match &quot;{searchQuery}&quot;</p>
-            <button onClick={() => setSearchQuery("")} className="mt-2 text-sm text-text hover:underline">
+          <div className="rounded-xl border border-white/[0.08] bg-[#0a0a0a]/90 px-6 py-8 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-3">No matches</p>
+            <p className="mt-2 text-sm text-text-2">
+              Nothing in this portfolio matches <span className="text-text">&quot;{searchQuery}&quot;</span>
+            </p>
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="mt-4 text-[13px] font-medium text-text underline-offset-4 hover:underline"
+            >
               Clear search
             </button>
           </div>

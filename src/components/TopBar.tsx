@@ -30,33 +30,34 @@ export function TopBar({ primaryAction, filters, className }: TopBarProps) {
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 border-b border-white/5 bg-bg px-6 py-4 sm:flex-row sm:items-center sm:justify-between",
+        "border-b border-white/[0.06] bg-bg/95 px-5 py-3 backdrop-blur-sm sm:px-6",
         className
       )}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+      <div className="flex min-w-0 shrink-0 items-center gap-3">
         <div className="relative" ref={menuRef}>
           <button
             type="button"
             onClick={() => setMenuOpen(!menuOpen)}
-            className="flex items-center gap-2.5 transition-opacity hover:opacity-90"
+            className="flex items-center gap-2.5 rounded-md py-0.5 transition-opacity hover:opacity-90"
           >
             {agency?.brand_logo_url ? (
               <img
                 src={agency.brand_logo_url}
                 alt=""
-                className="h-8 w-8 shrink-0 rounded-full border border-white/10 object-cover"
+                className="h-7 w-7 shrink-0 rounded-full border border-white/[0.08] object-cover ring-1 ring-white/[0.04]"
               />
             ) : (
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-surface-2 text-sm font-medium text-white/80">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.04] text-[13px] font-medium text-white/75 ring-1 ring-white/[0.04]">
                 {agency?.name?.charAt(0) ?? "A"}
               </div>
             )}
-            <span className="font-medium text-white/85 tracking-tight">
+            <span className="text-[15px] font-medium tracking-tight text-white/90">
               {agency?.name ?? "Agency"}
             </span>
             <svg
-              className={cn("h-3.5 w-3.5 shrink-0 text-white/40 transition-transform", menuOpen && "rotate-180")}
+              className={cn("h-3 w-3 shrink-0 text-white/35 transition-transform", menuOpen && "rotate-180")}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -66,7 +67,7 @@ export function TopBar({ primaryAction, filters, className }: TopBarProps) {
             </svg>
           </button>
           {menuOpen && (
-            <div className="absolute left-0 top-full z-50 mt-1 min-w-[180px] rounded-app border border-white/5 bg-surface py-1 shadow-lg">
+            <div className="absolute left-0 top-full z-50 mt-1.5 min-w-[188px] rounded-lg border border-white/[0.08] bg-[#111111] py-1 shadow-[0_12px_40px_rgba(0,0,0,0.55)]">
               <Link
                 href="/"
                 onClick={() => setMenuOpen(false)}
@@ -94,9 +95,14 @@ export function TopBar({ primaryAction, filters, className }: TopBarProps) {
           )}
         </div>
       </div>
-      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-        {filters}
-        {primaryAction}
+      <div className="flex min-w-0 flex-1 flex-col gap-2.5 sm:flex-row sm:items-stretch sm:justify-end sm:gap-3">
+        {filters ? (
+          <div className="min-w-0 flex-1 sm:max-w-md sm:flex-initial lg:max-w-sm">{filters}</div>
+        ) : null}
+        {primaryAction ? (
+          <div className="flex shrink-0 flex-wrap items-center gap-2 sm:items-center">{primaryAction}</div>
+        ) : null}
+      </div>
       </div>
     </div>
   );
