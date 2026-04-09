@@ -43,15 +43,15 @@ function HeroTracksAcross() {
           <div
             key={logo.alt}
             style={{
-              width: "36px",
-              height: "36px",
+              width: "40px",
+              height: "40px",
               borderRadius: "50%",
               background: "#2a2a2a",
-              border: "2px solid #070707",
+              border: "2.5px solid #070707",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              marginLeft: i === 0 ? "0" : "-10px",
+              marginLeft: i === 0 ? "0" : "-11px",
               zIndex: 4 - i,
               position: "relative",
             }}
@@ -61,8 +61,8 @@ function HeroTracksAcross() {
               alt={logo.alt}
               src={logo.src}
               style={{
-                width: "16px",
-                height: "16px",
+                width: "18px",
+                height: "18px",
                 objectFit: "contain",
                 filter: "brightness(0) invert(1)",
                 opacity: 1,
