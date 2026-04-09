@@ -15,67 +15,113 @@ type SubscriptionInfo = {
   has_stripe: boolean;
 };
 
+/** Canonical copy + limits from /pricing — ids unchanged for Stripe/API. */
 const PLANS = [
   {
-    id: "starter",
-    name: "Starter",
+    id: "starter" as const,
+    name: "Foundation",
+    clients: 5 as const,
+    description:
+      "For agencies validating AI visibility with a tight client list before productizing reporting.",
     monthlyPrice: 149,
     annualPrice: 1490,
-    description: "Perfect for small agencies getting started",
-    features: [
+    recommended: false,
+    highlights: [
       "Up to 5 clients",
-      "50 snapshots/month",
-      "All AI providers",
-      "PDF exports",
-      "Email support",
+      "Basic report branding",
+      "30-day snapshot history",
+      "4 competitors tracked per client",
     ],
   },
   {
-    id: "growth",
-    name: "Growth",
+    id: "growth" as const,
+    name: "Agency",
+    clients: 20 as const,
+    description: "For agencies running client reporting and closing retainers with AI visibility.",
     monthlyPrice: 399,
     annualPrice: 3990,
-    description: "For growing agencies with more clients",
-    popular: true,
-    features: [
-      "Up to 25 clients",
-      "250 snapshots/month",
-      "All AI providers",
-      "PDF exports",
-      "White-label reports",
-      "Priority support",
+    recommended: true,
+    highlights: [
+      "Up to 20 clients",
+      "Full PDF branding (logo, colors, footer)",
+      "Unlimited history + priority snapshot runs",
+      "8 competitors per client",
     ],
   },
   {
-    id: "pro",
-    name: "Pro",
+    id: "pro" as const,
+    name: "Scale",
+    clients: 50 as const,
+    description:
+      "For firms managing a large book and packaging AI visibility as a core, billable line of business.",
     monthlyPrice: 799,
     annualPrice: 7990,
-    description: "For established agencies at scale",
-    features: [
-      "Unlimited clients",
-      "Unlimited snapshots",
-      "All AI providers",
-      "PDF exports",
-      "White-label reports",
-      "API access",
-      "Dedicated support",
+    recommended: false,
+    highlights: [
+      "50+ clients",
+      "Everything in Agency",
+      "Fastest runs + dedicated account manager",
+      "8 competitors per client",
     ],
   },
-] as const;
+];
 
-/** Matches landing `--accent-marketing` / product accent */
-const ACCENT = "#22c55e";
-const ACCENT_RGB = "34, 197, 94";
+const shell = "mx-auto w-full max-w-[1200px] px-4 sm:px-6";
 
-const PAYWALL = {
-  pageBg: "#070707",
-  cardBg: "rgba(255,255,255,0.02)",
-  border: "rgba(255,255,255,0.08)",
-  text: "#f4f4f5",
-  textMuted: "rgba(255,255,255,0.45)",
-  toggleTrack: "rgba(255,255,255,0.06)",
-} as const;
+function Check({ className }: { className?: string }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white/65 md:h-5 md:w-5",
+        className,
+      )}
+    >
+      <svg aria-hidden="true" fill="none" height="10" viewBox="0 0 24 24" width="10" className="md:h-3 md:w-3">
+        <path
+          d="M20 6L9 17l-5-5"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2.5"
+        />
+      </svg>
+    </span>
+  );
+}
+
+function BillingToggle({ isAnnual, setIsAnnual }: { isAnnual: boolean; setIsAnnual: (v: boolean) => void }) {
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3">
+      <div className="relative inline-flex items-center rounded-full border border-white/15 bg-white/[0.04] p-0.5">
+        <button
+          type="button"
+          onClick={() => setIsAnnual(false)}
+          className={cn(
+            "relative rounded-full px-3 py-1 text-xs font-medium transition-all duration-200 ease-out md:px-5 md:py-1.5 md:text-sm",
+            !isAnnual ? "bg-white text-black" : "text-white/55 hover:text-white/75",
+          )}
+        >
+          Monthly
+        </button>
+        <button
+          type="button"
+          onClick={() => setIsAnnual(true)}
+          className={cn(
+            "relative rounded-full px-3 py-1 text-xs font-medium transition-all duration-200 ease-out md:px-5 md:py-1.5 md:text-sm",
+            isAnnual ? "bg-white text-black" : "text-white/55 hover:text-white/75",
+          )}
+        >
+          Annual
+        </button>
+      </div>
+      {isAnnual ? (
+        <span className="rounded-full border border-white/15 bg-white/[0.04] px-2 py-0.5 text-[10px] font-medium text-white/70 md:px-2.5 md:py-1 md:text-xs">
+          2 months free on annual
+        </span>
+      ) : null}
+    </div>
+  );
+}
 
 export default function PlansPage() {
   const supabase = getSupabaseBrowserClient();
@@ -190,207 +236,181 @@ export default function PlansPage() {
   const isPostPurchase = Boolean(subscription?.has_stripe);
 
   return (
-    <div
-      className="flex min-h-screen flex-col items-center px-4 pb-20 pt-12 sm:px-6 sm:pb-24 sm:pt-16"
-      style={{ backgroundColor: PAYWALL.pageBg }}
-    >
-      <Link href="/app" className="mb-10 flex shrink-0 sm:mb-12">
-        <Image
-          src="/brand/VRTL_Solo.png"
-          alt="VRTL Score"
-          width={140}
-          height={40}
-          className="h-9 w-auto opacity-95 sm:h-10"
-          priority
-        />
-      </Link>
+    <div className="page-marketing selection:bg-[var(--accent-bg)] selection:text-white flex min-h-screen flex-col text-[var(--text-primary)]">
+      <div className={cn(shell, "flex flex-1 flex-col pt-3 pb-4 sm:pt-4 sm:pb-5")}>
+        <Link href="/app" className="mb-3 flex shrink-0 justify-center sm:mb-4">
+          <Image
+            src="/brand/VRTL_Solo.png"
+            alt="VRTL Score"
+            width={120}
+            height={34}
+            className="h-7 w-auto opacity-95 sm:h-8"
+            priority
+          />
+        </Link>
 
-      <div className="mb-10 max-w-2xl text-center sm:mb-12">
-        <h1 className="font-app-display text-3xl font-normal leading-[1.15] tracking-tight text-white sm:text-4xl md:text-[2.5rem] md:leading-tight">
-          Choose your plan
-        </h1>
-      </div>
-
-      {error && (
-        <div className="mt-2 w-full max-w-5xl">
-          <Alert variant="danger">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
+        <div className="mb-3 text-center sm:mb-4">
+          <p className="font-marketing-mono text-[10px] uppercase tracking-[0.12em] text-[var(--accent-marketing)] sm:text-[11px]">
+            {`// CHOOSE PLAN`}
+          </p>
+          <h1 className="mt-1.5 font-marketing-display text-[1.35rem] font-normal leading-[1.12] tracking-[-0.03em] text-white sm:text-[1.65rem] md:text-3xl">
+            Choose your plan
+          </h1>
         </div>
-      )}
 
-      {/* Billing toggle — active: green + black text; inactive: muted */}
-      <div className="flex justify-center">
-        <div
-          className="inline-flex items-center gap-0.5 rounded-full p-1"
-          style={{ backgroundColor: PAYWALL.toggleTrack }}
-        >
-          <button
-            type="button"
-            onClick={() => setIsAnnual(false)}
-            className={cn(
-              "rounded-full px-6 py-2.5 text-sm font-semibold transition-all duration-200 md:px-7 md:py-3",
-              !isAnnual ? "text-black shadow-sm" : "text-white/40 hover:bg-white/[0.04] hover:text-white/55"
-            )}
-            style={!isAnnual ? { backgroundColor: ACCENT } : undefined}
-          >
-            Monthly
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsAnnual(true)}
-            className={cn(
-              "inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold transition-all duration-200 md:px-7 md:py-3",
-              isAnnual ? "text-black shadow-sm" : "text-white/40 hover:bg-white/[0.04] hover:text-white/55"
-            )}
-            style={isAnnual ? { backgroundColor: ACCENT } : undefined}
-          >
-            Annual
-            <span
-              className={cn(
-                "rounded-full px-2 py-0.5 text-xs font-semibold",
-                isAnnual ? "bg-black/15 text-black/80" : "border border-white/10 bg-white/[0.06] text-white/50"
-              )}
-            >
-              Save 17%
-            </span>
-          </button>
+        {error ? (
+          <div className="mb-3 w-full">
+            <Alert variant="danger">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          </div>
+        ) : null}
+
+        <div className="mb-3 flex justify-center sm:mb-4">
+          <BillingToggle isAnnual={isAnnual} setIsAnnual={setIsAnnual} />
         </div>
-      </div>
 
-      {loading && (
-        <div className="mt-14 grid w-full max-w-6xl gap-8 md:mt-16 md:grid-cols-3 md:gap-10">
-          {[...Array(3)].map((_, i) => (
-            <div
-              key={i}
-              className="h-[28rem] animate-pulse rounded-2xl border border-white/[0.06]"
-              style={{ backgroundColor: PAYWALL.cardBg }}
-            />
-          ))}
-        </div>
-      )}
-
-      {!loading && (
-        <div className="mt-14 grid w-full max-w-6xl gap-8 md:mt-16 md:grid-cols-3 md:items-start md:gap-10">
-          {PLANS.map((plan) => {
-            const planIndex = PLANS.findIndex((p) => p.id === plan.id);
-            const isCurrentPlan = isPostPurchase && subscription?.plan === plan.id;
-            const isDowngrade = isPostPurchase && currentPlanIndex > planIndex;
-            const isUpgrade = isPostPurchase && currentPlanIndex < planIndex && currentPlanIndex >= 0;
-            const price = isAnnual ? plan.annualPrice : plan.monthlyPrice;
-            const monthlyEquivalent = isAnnual ? Math.round(plan.annualPrice / 12) : plan.monthlyPrice;
-
-            const ctaLabel = (() => {
-              if (checkoutLoading === plan.id || (isCurrentPlan && portalLoading)) return null;
-              if (isPostPurchase) {
-                if (isCurrentPlan) return "Manage plan";
-                if (isDowngrade) return "Downgrade";
-                if (isUpgrade) return "Upgrade";
-              }
-              return `Start ${plan.name}`;
-            })();
-
-            const isGrowth = plan.id === "growth";
-
-            return (
+        {loading ? (
+          <div className="mt-1 grid flex-1 grid-cols-1 gap-4 md:grid-cols-3 md:items-stretch md:gap-5 lg:gap-6">
+            {[...Array(3)].map((_, i) => (
               <div
-                key={plan.id}
-                className={cn(
-                  "relative flex flex-col rounded-2xl border p-7 transition-all duration-300 sm:p-8",
-                  isGrowth && "z-[1] md:scale-[1.02]"
-                )}
-                style={{
-                  backgroundColor: PAYWALL.cardBg,
-                  borderColor: isGrowth ? `rgba(${ACCENT_RGB}, 0.45)` : PAYWALL.border,
-                  boxShadow: isGrowth
-                    ? `0 0 0 1px rgba(${ACCENT_RGB}, 0.2), 0 8px 32px rgba(${ACCENT_RGB}, 0.14), 0 24px 48px rgba(0,0,0,0.35)`
-                    : "0 12px 40px rgba(0,0,0,0.25)",
-                }}
-              >
-                {isGrowth && (
-                  <div className="absolute -top-3 left-1/2 z-[2] -translate-x-1/2 whitespace-nowrap">
-                    <span
-                      className="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em]"
-                      style={{
-                        backgroundColor: `rgba(${ACCENT_RGB}, 0.18)`,
-                        borderColor: `rgba(${ACCENT_RGB}, 0.35)`,
-                        color: ACCENT,
-                      }}
-                    >
-                      Most agencies choose this
-                    </span>
+                key={i}
+                className="h-[22rem] animate-pulse rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] md:h-[20rem]"
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="mt-1 grid flex-1 grid-cols-1 gap-4 overflow-visible md:grid-cols-3 md:items-stretch md:gap-5 lg:gap-6">
+            {PLANS.map((plan) => {
+              const planIndex = PLANS.findIndex((p) => p.id === plan.id);
+              const isCurrentPlan = isPostPurchase && subscription?.plan === plan.id;
+              const isDowngrade = isPostPurchase && currentPlanIndex > planIndex;
+              const isUpgrade = isPostPurchase && currentPlanIndex < planIndex && currentPlanIndex >= 0;
+              const price = isAnnual ? plan.annualPrice : plan.monthlyPrice;
+              const monthlyEquivalent = isAnnual ? Math.round(plan.annualPrice / 12) : plan.monthlyPrice;
+              const annualSavings = plan.monthlyPrice * 12 - plan.annualPrice;
+
+              const ctaLabel = (() => {
+                if (checkoutLoading === plan.id || (isCurrentPlan && portalLoading)) return null;
+                if (isPostPurchase) {
+                  if (isCurrentPlan) return "Manage plan";
+                  if (isDowngrade) return "Downgrade";
+                  if (isUpgrade) return "Upgrade";
+                }
+                return `Get ${plan.name}`;
+              })();
+
+              const showPrimaryCta = plan.recommended && !isDowngrade;
+
+              const cardClass = cn(
+                "flex h-full min-h-0 flex-col rounded-xl border bg-gradient-to-b p-4 transition-all duration-200 ease-out md:p-5",
+                "hover:scale-[1.01]",
+                plan.recommended
+                  ? "z-10 scale-[1.02] border-[rgba(0,232,122,0.3)] from-white/[0.06] to-white/[0.02] shadow-[0_0_32px_rgba(0,232,122,0.12)] md:scale-[1.03]"
+                  : "border-white/15 from-white/[0.03] to-white/[0.01]",
+              );
+
+              return (
+                <div key={plan.id} className="flex min-h-0 flex-col">
+                  <div className="flex min-h-[1.5rem] items-end justify-center pb-1 md:min-h-[1.75rem] md:pb-1.5">
+                    {plan.recommended ? (
+                      <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[var(--accent-marketing)] md:px-3 md:text-xs">
+                        Most agencies choose this
+                      </span>
+                    ) : null}
                   </div>
-                )}
 
-                <div className="mb-8">
-                  <h3 className="text-lg font-semibold tracking-tight text-white">{plan.name}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-white/55">{plan.description}</p>
-                </div>
+                  <div className={cardClass}>
+                    <div className="shrink-0 space-y-1">
+                      <h3 className="font-marketing-display text-lg font-normal text-white md:text-xl">{plan.name}</h3>
+                      <p className="text-[13px] font-light leading-snug text-white/70 md:text-[14px]">{plan.description}</p>
+                    </div>
 
-                <div className="mb-8">
-                  <div className="flex flex-wrap items-baseline gap-1">
-                    <span className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">${monthlyEquivalent}</span>
-                    <span className="text-base font-medium text-white/45">/month</span>
-                  </div>
-                  {isAnnual && <p className="mt-2 text-sm text-white/45">${price}/year billed annually</p>}
-                </div>
+                    <div className="mt-3 shrink-0 space-y-0.5 md:mt-3.5">
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="font-marketing-display text-3xl font-normal tabular-nums tracking-tight text-white md:text-4xl">
+                          ${monthlyEquivalent}
+                        </span>
+                        <span className="text-xs font-light text-white/60 md:text-sm">/month</span>
+                      </div>
+                      <p className="text-xs font-light leading-snug text-white/65 md:text-[13px]">
+                        Typical ROI: 1 retained client pays for this 10–30x
+                      </p>
+                      {isAnnual ? (
+                        <p className="text-xs font-light text-white/50 md:text-sm">${price.toLocaleString()} billed annually</p>
+                      ) : (
+                        <p className="text-xs font-light text-white/50 md:text-sm">
+                          Save ${annualSavings.toLocaleString()}/year on annual
+                        </p>
+                      )}
+                    </div>
 
-                <ul className="mb-10 flex-1 space-y-3.5">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-3 text-sm leading-snug text-white/70">
-                      <svg
-                        className="mt-0.5 h-5 w-5 shrink-0"
-                        style={{ color: `rgba(${ACCENT_RGB}, 0.75)` }}
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        aria-hidden
+                    <div className="mt-3 flex shrink-0 flex-col gap-1.5 md:mt-3.5">
+                      <button
+                        type="button"
+                        onClick={() => handleSelectPlan(plan.id)}
+                        disabled={checkoutLoading === plan.id || portalLoading}
+                        className={cn(
+                          "inline-flex w-full items-center justify-center gap-1 rounded-full px-4 py-2 text-xs font-medium transition-all duration-200 ease-out disabled:opacity-50 active:scale-[0.98] md:px-5 md:py-2.5 md:text-sm",
+                          showPrimaryCta
+                            ? "bg-[var(--accent-marketing)] text-black hover:brightness-110"
+                            : "border border-white/15 bg-transparent font-normal text-white/70 hover:border-white/25 hover:text-white/90",
+                        )}
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                      </svg>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
+                        {checkoutLoading === plan.id || (isCurrentPlan && portalLoading) ? (
+                          <span className="flex items-center gap-2">
+                            <svg className="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              />
+                            </svg>
+                            Processing…
+                          </span>
+                        ) : (
+                          <>
+                            {ctaLabel}
+                            <span aria-hidden="true">→</span>
+                          </>
+                        )}
+                      </button>
+                      <Link
+                        href="/preview"
+                        className="text-center text-[11px] font-normal text-white/60 transition-all duration-200 ease-out hover:text-white/85 md:text-sm"
+                      >
+                        See example report
+                      </Link>
+                    </div>
 
-                <button
-                  type="button"
-                  onClick={() => handleSelectPlan(plan.id)}
-                  disabled={checkoutLoading === plan.id || portalLoading}
-                  className={cn(
-                    "flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-all disabled:opacity-50",
-                    plan.id === "growth" &&
-                      "bg-[#22c55e] text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] hover:bg-[#16a34a]",
-                    plan.id === "pro" && "border-2 border-[#22c55e] bg-transparent text-[#22c55e] hover:bg-[rgba(34,197,94,0.1)]",
-                    plan.id === "starter" &&
-                      "border border-white/[0.1] bg-white/[0.03] text-white/50 hover:border-white/[0.14] hover:bg-white/[0.05] hover:text-white/65"
-                  )}
-                >
-                  {checkoutLoading === plan.id || (isCurrentPlan && portalLoading) ? (
-                    <>
-                      <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                      </svg>
-                      Loading…
-                    </>
-                  ) : (
-                    ctaLabel
-                  )}
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
+                    <div className="mt-3 border-t border-white/10 pt-2.5 md:mt-3.5 md:pt-3">
+                      <ul className="flex flex-col space-y-1.5 md:space-y-2">
+                        {plan.highlights.map((line) => (
+                          <li key={line} className="flex items-start gap-2 text-[12px] font-light leading-snug text-white/70 md:text-[13px]">
+                            <Check className="mt-0.5" />
+                            <span>{line}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
-      <p className="mt-12 max-w-md text-center text-sm text-white/45 sm:mt-16">
-        Need help choosing?{" "}
-        <a href="mailto:support@vrtlscore.com" className="font-medium text-[#22c55e] transition-colors hover:text-[#4ade80]">
-          Contact us
-        </a>
-      </p>
+        <p className="mt-3 text-center text-[11px] text-white/45 md:mt-4 md:text-xs">
+          Need help choosing?{" "}
+          <a
+            href="mailto:support@vrtlscore.com"
+            className="font-medium text-[var(--accent-marketing)] transition-colors hover:brightness-110"
+          >
+            Contact us
+          </a>
+        </p>
+      </div>
     </div>
   );
 }
