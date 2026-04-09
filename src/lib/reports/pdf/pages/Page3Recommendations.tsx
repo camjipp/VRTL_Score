@@ -116,7 +116,9 @@ export function Page3Recommendations({ data }: { data: ReportData }) {
         <PdfTraceMarker page={3} section="Page3:after_header" />
 
         <ChapterTitle title="Recommendations" />
-        <Text style={styles.intro}>Urgent first. Work the list in order when bandwidth is thin.</Text>
+        <Text style={styles.intro}>
+          Highest-impact moves first—each card ties finding to business risk, a concrete execution path, and a measurable outcome tied to recommendation share where possible.
+        </Text>
 
         <View style={styles.cardsBlock} wrap={false}>
           {data.recommendations.map((r, i) => {

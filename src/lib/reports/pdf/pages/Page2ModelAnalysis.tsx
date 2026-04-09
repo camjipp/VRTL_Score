@@ -114,21 +114,21 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sansBold,
     color: colors.ink3,
   },
-  evMonoWrap: {
+  evProseWrap: {
     minHeight: 74,
     backgroundColor: colors.surface,
     borderRadius: 3,
     borderWidth: 1,
     borderColor: colors.rule,
     paddingVertical: 8,
-    paddingHorizontal: 6,
+    paddingHorizontal: 8,
     justifyContent: "flex-start",
   },
-  evMono: {
-    fontFamily: fonts.mono,
-    fontSize: 6.5,
-    lineHeight: 1.42,
-    color: colors.ink2,
+  evProse: {
+    fontFamily: fonts.sans,
+    fontSize: 8,
+    lineHeight: 1.48,
+    color: colors.ink,
   },
   evNote: {
     fontSize: 8,
@@ -184,8 +184,8 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
   const spreadLine = `${spread}-POINT SPREAD`;
   const descLine =
     spread === 0
-      ? "No spread across models. Scores align."
-      : `${spread} points separate best and worst model. Assistant answers diverge sharply.`;
+      ? "No spread across assistant families in this snapshot."
+      : `${spread} points separate best and worst—buyers get different short lists depending on which assistant they use.`;
 
   return (
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
@@ -239,7 +239,7 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
 
         <PdfTraceMarker page={2} section="Page2:after_model_grid" />
 
-        <Text style={styles.sectionTitle}>Evidence preview</Text>
+        <Text style={styles.sectionTitle}>What assistants are surfacing</Text>
         <View style={styles.evidenceRow} wrap={false}>
           {data.evidencePreview.map((ev, i) => {
             const labelLine = formatEvidenceLogPillLabel(String(ev.label));
@@ -254,8 +254,8 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
                 <View style={[styles.evidenceAccent, { backgroundColor: colors.ink3 }]} />
                 <View style={styles.evidenceInner}>
                   <Text style={styles.evLabel}>{labelLine}</Text>
-                  <View style={styles.evMonoWrap}>
-                    <Text style={styles.evMono}>{snippetLine}</Text>
+                  <View style={styles.evProseWrap}>
+                    <Text style={styles.evProse}>{snippetLine}</Text>
                   </View>
                   {ev.note ? <Text style={styles.evNote}>{noteLine}</Text> : null}
                 </View>

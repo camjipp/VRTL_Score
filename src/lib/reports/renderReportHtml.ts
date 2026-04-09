@@ -231,12 +231,12 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
     const gap = avgScore - worstModel[1];
     insights.push({
       priority: "HIGH",
-      title: `${wName} Authority Gap`,
-      insight: `${wName} scores ${worstModel[1]}, ${gap} points below your average.`,
-      whyItMatters: `${wName} carries real query volume. Weak scores invite displacement.`,
-      action: `Publish comparison and citation-backed pages tuned to ${wName}.`,
-      expectedImpact: `Lift ${wName} score by 10–15 points within 60 days.`,
-      consequence: `Lag here hands discovery to whoever looks stronger on this surface.`,
+      title: `${wName} exposure gap`,
+      insight: `${wName} scores ${worstModel[1]} (${gap} points under your average)—on that surface you are not in the same recommendation tier as your best model.`,
+      whyItMatters: `Buyers asking assistants that lean on ${wName} often get answers that omit or downrank you; that is direct share loss on those journeys.`,
+      action: `Ship 3–5 comparison or “vs.” pages with cited facts; add direct-answer FAQ blocks for the query shapes this model returns; align product schema and entity naming on priority URLs.`,
+      expectedImpact: `Target +10–15 points on ${wName} within 60–90 days, measured on the next snapshot.`,
+      consequence: `Until this closes, competitors keep collecting the recommendations you never appear in.`,
     });
   }
   
@@ -244,12 +244,12 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
   if (metrics.topCompetitor && metrics.topCompetitor.mentions >= metrics.mentioned) {
     insights.push({
       priority: "HIGH",
-      title: "Competitive Authority Threat",
-      insight: `${metrics.topCompetitor.name} is mentioned ${metrics.topCompetitor.mentions} times vs. your ${metrics.mentioned}.`,
-      whyItMatters: "Assistants already rank them ahead of you on key answers.",
-      action: "Audit their proof points. Counter with differentiated claims and citations.",
-      expectedImpact: "Reach parity within 90 days.",
-      consequence: `${metrics.topCompetitor.name} can own the default recommendation if you wait.`,
+      title: "Competitor ahead on mentions",
+      insight: `${metrics.topCompetitor.name} is named in ${metrics.topCompetitor.mentions} answers vs. your ${metrics.mentioned}.`,
+      whyItMatters: "Assistants already treat them as the safer default on overlapping intents.",
+      action: "Map their cited URLs and proof; counter with differentiated comparison pages, third-party reviews/trade mentions, and clearer entity + offer copy.",
+      expectedImpact: "Narrow the mention gap in 90 days; reclaim top-position answers on head-to-head intents.",
+      consequence: `${metrics.topCompetitor.name} solidifies as the model’s “obvious pick” while you stay optional.`,
     });
   }
   
@@ -257,12 +257,12 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
   if (metrics.isFragileLeadership) {
     insights.push({
       priority: "HIGH",
-      title: "Fragile Leadership Position",
-      insight: `You're #1, but ${metrics.competitorsWithinRange.length} competitor${metrics.competitorsWithinRange.length > 1 ? "s are" : " is"} within striking distance.`,
-      whyItMatters: "Thin leads flip fast. One strong content push from a rival changes the table.",
-      action: "Raise velocity: proof, citations, and comparison assets before they close the gap.",
-      expectedImpact: "Open a 5+ mention cushion.",
-      consequence: `At this parity, a single competitor sprint can overtake you in weeks.`,
+      title: "Thin lead — default slot at risk",
+      insight: `You rank #1, but ${metrics.competitorsWithinRange.length} competitor${metrics.competitorsWithinRange.length > 1 ? "s sit" : " sits"} within a couple of mentions.`,
+      whyItMatters: "Parity means the next credible content or citation sprint from a rival can swap who the assistant recommends first.",
+      action: "Lock a 5+ mention cushion: refresh hero SKUs, publish 2–3 citation-backed comparison assets, and earn one net-new trusted third-party mention per month.",
+      expectedImpact: "Measurable separation on the next snapshot; lower risk of losing the default recommendation.",
+      consequence: `Without a cushion, you are one competitor push away from trading places.`,
     });
   }
   
@@ -270,12 +270,12 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
   if (metrics.isContestedMarket && !metrics.isFragileLeadership) {
     insights.push({
       priority: "MEDIUM",
-      title: "Contested Market, No Clear Leader",
-      insight: `All ${metrics.allEntities.length} tracked entities are within 3 mentions of each other.`,
-      whyItMatters: "No lock-in: whoever differentiates first takes the default answer.",
-      action: "90-day push on comparison content and citations. Move before a rival does.",
-      expectedImpact: "Clear #1 with a 10+ mention edge.",
-      consequence: `Contested sets reward speed. Waiting cedes the breakout to someone else.`,
+      title: "Crowded set — break the tie",
+      insight: `All ${metrics.allEntities.length} tracked brands sit within a tight mention band.`,
+      whyItMatters: "No one owns the story yet; the first brand with clearer proof and citations tends to win the default answer.",
+      action: "Pick two high-intent themes; ship cited comparison + FAQ content; pursue review and trade press placements that assistants can cite.",
+      expectedImpact: "Open a 10+ mention edge on priority intents within a quarter.",
+      consequence: `Slow movers stay interchangeable in model answers—and lose the recommendation lottery.`,
     });
   }
   
@@ -283,12 +283,12 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
   if (metrics.mentionRate < 50) {
     insights.push({
       priority: "HIGH",
-      title: "Low Authority Coverage",
-      insight: `Authority signals appear in only ${metrics.mentionRate}% of AI responses.`,
-      whyItMatters: "Most category queries never put you in the authoritative set.",
-      action: "PR, backlinks, structured data. Raise mention coverage with proof.",
-      expectedImpact: "Reach 70%+ coverage to enter the consideration set.",
-      consequence: `Absence compounds: models reinforce what they already see.`,
+      title: "Low AI recommendation coverage",
+      insight: `You appear in only ${metrics.mentionRate}% of tested answers.`,
+      whyItMatters: "Most assistant responses in this set never put you in front of the buyer.",
+      action: "Fix entity and category coverage first, then layer cited comparison pages, structured FAQs, and third-party proof (reviews, press, associations).",
+      expectedImpact: "Move toward 70%+ mention coverage on priority clusters; track lift by model.",
+      consequence: `Every cycle you stay out, models reinforce the brands they already name.`,
     });
   }
   
@@ -296,12 +296,12 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
   if (metrics.topPositionRate < 30 && metrics.mentionRate >= 50) {
     insights.push({
       priority: "MEDIUM",
-      title: "Positioning Weakness",
-      insight: `Mentioned but only in top position ${metrics.topPositionRate}% of the time.`,
-      whyItMatters: "You are in the set, rarely first. First pick wins the click.",
-      action: "Sharpen differentiation and proof on priority URLs.",
-      expectedImpact: "Raise top-position share on priority intents.",
-      consequence: `Second in the answer set is second in the funnel.`,
+      title: "In the set, rarely first",
+      insight: `Only ${metrics.topPositionRate}% of answers place you in the top recommendation slot.`,
+      whyItMatters: "Mid-list mentions get skimmed; first position drives the click and the “default” mental model.",
+      action: "Tighten headline claims on priority URLs; add cited differentiators; align FAQs to the exact questions assistants answer.",
+      expectedImpact: "Raise top-position rate on money intents within 60–90 days.",
+      consequence: `You stay visible but not chosen—pipeline leaks to whoever is listed first.`,
     });
   }
   
@@ -309,12 +309,12 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
   if (metrics.citationRate < 20) {
     insights.push({
       priority: "MEDIUM",
-      title: "Authority Gap",
-      insight: `Only ${metrics.citationRate}% of mentions include citations.`,
-      whyItMatters: "Low citations read as low authority to the model.",
-      action: "Earn mentions from trade press, reviews, and trusted third parties.",
-      expectedImpact: "Citations typically add 5 to 10 points.",
-      consequence: `Competitors with stronger citation profiles will keep winning the cite.`,
+      title: "Weak citation footprint",
+      insight: `Only ${metrics.citationRate}% of responses include verifiable citations tied to you.`,
+      whyItMatters: "Models weight third-party proof when deciding who sounds authoritative.",
+      action: "Earn 3–5 durable citations (trade press, reviews, partners, standards bodies) and surface them on pages assistants retrieve.",
+      expectedImpact: "Citation rate and authority scores typically move 5–10 points when proof is real and crawlable.",
+      consequence: `Rivals with richer proof keep winning the “trusted answer” slot.`,
     });
   }
   
@@ -323,12 +323,12 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
     const sName = formatProviderDisplayName(strongModels[0][0]);
     insights.push({
       priority: "LOW",
-      title: `${sName} Strength (Replicate)`,
-      insight: `${sName} scores you ${strongModels[0][1]}, your highest.`,
-      whyItMatters: "You already have a winning pattern on this surface.",
-      action: "Clone structure, facts, and citation style onto weaker models.",
-      expectedImpact: "Pull weaker models up with the same playbook.",
-      consequence: `Ignoring the playbook leaves easy points on the table.`,
+      title: `Clone what works on ${sName}`,
+      insight: `${sName} is your strongest surface at ${strongModels[0][1]}.`,
+      whyItMatters: "You already have a template for facts, structure, and proof that one model rewards.",
+      action: "Document URL patterns, schema, and citation types from winners; replicate on the two weakest models first.",
+      expectedImpact: "Faster lift on trailing models with less guesswork.",
+      consequence: `Leaving the playbook unused leaves easy share on the table.`,
     });
   }
   
@@ -336,12 +336,12 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
   if ((score ?? 0) >= 70 && insights.length === 0) {
     insights.push({
       priority: "LOW",
-      title: "Strong Position (Maintain)",
-      insight: "Your AI authority is competitive. Maintain current strategy.",
-      whyItMatters: "Complacency is how leaders get passed.",
-      action: "Keep shipping proof; watch competitor moves weekly.",
-      expectedImpact: "Hold tier-one visibility.",
-      consequence: `Strong scores decay without maintenance.`,
+      title: "Defend the position",
+      insight: "Scores are strong relative to the set.",
+      whyItMatters: "Leaders get studied; competitors will copy proof and out-cite you if you pause.",
+      action: "Run a light monthly refresh: new citations, updated comparisons, monitor rival moves.",
+      expectedImpact: "Hold recommendation share and top-position rate.",
+      consequence: `Neglect lets a disciplined rival close the gap.`,
     });
   }
   
@@ -386,57 +386,152 @@ function generateBottomLine(data: ReportData, metrics: ReturnType<typeof calcula
   const { client } = data;
   const name = client.name;
   const mention = metrics.mentionRate;
+  const absent = 100 - mention;
   const top = metrics.topPositionRate;
+  const parts: string[] = [];
 
-  let leadSentence = "";
-  if (mention >= 70) {
-    leadSentence = `${name} appears in ${mention}% of AI answers`;
-  } else if (mention >= 40) {
-    leadSentence = `${name} appears in ${mention}% of AI answers`;
+  if (metrics.clientRank === 1) {
+    parts.push(
+      `You currently lead this set for AI recommendation share, appearing in ${mention}% of tested assistant answers.`,
+    );
+    parts.push(
+      `That still leaves ${absent}% of answers with no mention of ${name}—each one is recommendation share you do not control when buyers ask for options.`,
+    );
   } else {
-    leadSentence = `${name} appears in only ${mention}% of AI answers`;
+    parts.push(
+      `${name} appears in ${mention}% of tested answers; ${absent}% omit you entirely—treat those as lost AI recommendation share on those paths.`,
+    );
   }
 
   if (top >= 50) {
-    leadSentence += `, ranking first or second in most`;
-  } else if (top > 0) {
-    leadSentence += `, rarely first in the answer`;
+    parts.push(
+      `When assistants do include you, you land in the first or second slot about ${top}% of the time—that top-of-answer position is what backs a “default” recommendation.`,
+    );
+  } else if (mention >= 35 && top > 0) {
+    parts.push(
+      `Top-position rate is ${top}%, so even when you appear you are often not the assistant’s first pick—high-intent traffic still leaks to whoever is listed ahead of you.`,
+    );
   }
-
-  const rest: string[] = [];
 
   if (metrics.isFragileLeadership) {
-    rest.push(`You rank #1, but the lead is thin`);
+    const n = metrics.competitorsWithinRange.length;
+    const names = metrics.competitorsWithinRange
+      .slice(0, 3)
+      .map((e) => e.name)
+      .join(", ");
+    parts.push(
+      `The lead is narrow: ${n} competitor${n > 1 ? "s are" : " is"} close enough on mentions (${names}${n > 3 ? ", …" : ""}) to replace your default recommendation slot with a focused push on content, entities, and citations—without that intervention, parity works against you.`,
+    );
   } else if (metrics.isContestedMarket) {
-    rest.push(`No lock-in. First brand to break wins`);
+    parts.push(
+      `Mentions are stacked across the set; the first brand to standardize proof, comparison narratives, and citations will tend to own the default assistant answer.`,
+    );
   } else if (metrics.leader && !metrics.leader.isClient && metrics.gapToLeader > 0) {
-    rest.push(
-      `${metrics.leader.name} leads by ${metrics.gapToLeader} mentions (${metrics.gapToLeader <= 3 ? "narrow" : "material"} gap).`,
+    parts.push(
+      `${metrics.leader.name} leads by ${metrics.gapToLeader} mentions—closing that gap is the commercial priority for AI-driven discovery.`,
     );
   } else if (metrics.clientRank === 1 && metrics.allEntities.length > 1) {
-    const lead = metrics.mentioned - (metrics.allEntities[1]?.mentions ?? 0);
-    rest.push(
-      `You lead by ${lead} mention${lead !== 1 ? "s" : ""} (${lead <= 2 ? "thin margin" : "defensible"}).`,
-    );
+    const second = metrics.allEntities[1];
+    if (second) {
+      const lead = metrics.mentioned - second.mentions;
+      if (lead <= 2) {
+        parts.push(
+          `${second.name} is within ${lead === 0 ? "a tie" : `${lead} mention${lead === 1 ? "" : "s"}`}—close enough that assistants can flip who they recommend first.`,
+        );
+      }
+    }
   }
 
-  return [leadSentence, ...rest].filter(Boolean).join(". ") + ".";
+  return parts.join(" ");
 }
 
 function generateTensionStatement(metrics: ReturnType<typeof calculateMetrics>): string {
   if (metrics.isFragileLeadership) {
-    return `You rank first, but coverage is tight. One sprint can flip it.`;
+    return `You look like #1 on volume, but parity means the next credible sprint from a rival can swap who assistants recommend first.`;
   }
   if (metrics.isContestedMarket) {
-    return `No clear leader. First brand to differentiate owns the default answer.`;
+    return `No one has locked the narrative yet—speed and proof decide who wins the default recommendation.`;
   }
   if (metrics.gapToLeader > 5) {
-    return `${metrics.leader?.name} leads by ${metrics.gapToLeader} mentions. Models reinforce what they already see. Close the gap or lose ground.`;
+    return `${metrics.leader?.name} leads by ${metrics.gapToLeader} mentions; models keep reinforcing what they already see until you change the inputs.`;
   }
   if (metrics.mentionRate < 50) {
-    return `Most category queries skip you. Absence compounds.`;
+    return `Most answers in this sample skip you—absence compounds into weaker retrieval over time.`;
   }
   return "";
+}
+
+/** Client-readable evidence (no raw JSON); used in HTML + React-PDF pipelines. */
+export function clientEvidenceCallout(
+  raw: string | null,
+  pj: Extraction | null,
+  clientName: string,
+  kind: "strength" | "vulnerable",
+  competitorsNamed: string,
+): { quote: string; impact: string } {
+  let prose = normalizeDisplayText((raw || pj?.evidence_snippet || "").trim());
+  if (/^\s*[\[{]/.test(prose)) prose = "";
+  prose = prose.replace(/\s+/g, " ").trim();
+  if (prose.length > 210) {
+    const cut = prose.slice(0, 210);
+    const sp = cut.lastIndexOf(" ");
+    prose = (sp > 70 ? cut.slice(0, sp) : cut) + "…";
+  }
+  if (kind === "strength") {
+    return {
+      quote:
+        prose ||
+        `On this pattern, assistants include ${clientName} among the brands they present to buyers evaluating the category.`,
+      impact:
+        "That is active recommendation share. Refresh proof and citations so a competitor cannot erode the slot on the next model update.",
+    };
+  }
+  const comp = competitorsNamed || "Competitors";
+  return {
+    quote:
+      prose ||
+      `This answer covered the category without naming ${clientName}; recommendation share on similar intents went elsewhere.`,
+    impact: `${comp} owned the narrative here—close the hole with cited comparison pages, direct-answer FAQs for these query shapes, and third-party proof assistants can retrieve.`,
+  };
+}
+
+export type ReportMetricsSnapshot = ReturnType<typeof calculateMetrics>;
+
+export function buildDataSummaryInterpretation(metrics: ReportMetricsSnapshot, clientName: string): string {
+  const absent = 100 - metrics.mentionRate;
+  const parts: string[] = [];
+  if (metrics.clientRank === 1 && metrics.isFragileLeadership) {
+    parts.push(
+      `${clientName} tops the mention table, but several rivals sit within striking distance—so volume leadership does not yet mean a stable default recommendation.`,
+    );
+  } else if (metrics.clientRank === 1) {
+    parts.push(
+      `You lead on mentions; use the rates below to see where you still forfeit answers entirely or only appear mid-list.`,
+    );
+  } else {
+    parts.push(
+      `The tables quantify who wins mentions today and how far you trail on volume—priority is closing distance on the intents that drive revenue.`,
+    );
+  }
+  if (metrics.citationRate < 25) {
+    parts.push(
+      `Citation coverage is ${metrics.citationRate}%—without third-party proof, assistants have less to anchor a durable recommendation.`,
+    );
+  }
+  if (absent > 25) {
+    parts.push(
+      `${absent}% of answers did not name ${clientName}; each is missed AI recommendation share on that query path.`,
+    );
+  }
+  return parts.join(" ");
+}
+
+export function buildRecommendedNextSteps(clientName: string): string {
+  return [
+    `What happens next: your agency runs this as an ongoing program—not a one-off readout. We own monthly (or agreed) snapshots, sequencing of the fixes in this report, and re-measurement by model so progress shows up in scores.`,
+    `${clientName} approves positioning, key pages, and brand risk; we execute audits, content and schema updates, citation outreach, and iteration against the weakest surfaces first.`,
+    `Typical engagement: 90-day execution sprints with snapshot checkpoints; expand scope as recommendation share stabilizes or new competitors enter the set.`,
+  ].join(" ");
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -922,10 +1017,11 @@ export function renderReportHtml(data: ReportData): string {
             <div class="context-label">Authority</div>
           </div>
         </div>
+        <p class="body-small" style="margin-top:10px;max-width:42rem">${escapeHtml(`In this sample, ${100 - metrics.mentionRate}% of assistant answers did not include ${client.name}. Each miss is recommendation share you are not capturing when buyers ask AI for options in this category.`)}</p>
       </div>
     </div>
     
-    ${tensionStatement ? `<div class="tension-alert no-break">${tensionStatement}</div>` : ""}
+    ${tensionStatement ? `<div class="tension-alert no-break">${escapeHtml(tensionStatement)}</div>` : ""}
     
     <div class="bottom-line no-break">
       <div class="bottom-line-title">THE BOTTOM LINE</div>
@@ -993,10 +1089,11 @@ export function renderReportHtml(data: ReportData): string {
     </div>
     
     <div class="h2">Model-by-model performance</div>
-    <div class="body body-intro">Each AI model ranks you differently. Understanding where you're strong (and weak) reveals exactly where to focus.</div>
+    <div class="body body-intro">Each assistant family scores you differently—gaps here are gaps in who sees you when they ask AI for a recommendation.</div>
     
     <div class="model-grid no-break">
       ${models.map(([name, val]) => {
+        const displayName = formatProviderDisplayName(name);
         const modelAccent = pdfScoreAccent(val);
         const delta = val - avgModelScore;
         const isAboveAvg = delta > 0;
@@ -1005,23 +1102,26 @@ export function renderReportHtml(data: ReportData): string {
 
         let modelInsight = "";
         if (isStrong) {
-          modelInsight = `Your strongest model. Content strategy resonates here. Replicate this approach for weaker models.`;
+          modelInsight = `Your strongest surface—this is the pattern to copy onto weaker models before rivals narrow the gap.`;
         } else if (isWeak) {
-          modelInsight = `Critical gap. ${name} users may not surface your brand. Prioritize content this model indexes well.`;
+          modelInsight =
+            displayName === "Anthropic"
+              ? `On Anthropic-powered answers, the brand is often absent from the recommendation set—effectively invisible in many category decisions this assistant influences.`
+              : `${displayName} returns answers where you are frequently missing from the short list buyers see—recommendation share on this path is going to others.`;
         } else {
-          modelInsight = `Moderate performance. Incremental improvement is possible with targeted optimization.`;
+          modelInsight = `Room to move with targeted comparison content, FAQs, and citations before a competitor locks the default answer here.`;
         }
 
         const modelCompContext = isStrong
-          ? `Competitors will likely focus here to close the gap.`
+          ? `Expect competitors to push here; refresh proof and cited facts proactively.`
           : isWeak
-            ? `Competitors may already dominate recommendations on this model.`
-            : `Room to differentiate before competitors claim this space.`;
+            ? `Whoever fixes retrieval and proof on this surface first tends to collect the mentions you are not getting.`
+            : `Differentiate now—mediocre scores become hard losses once a rival owns the narrative.`;
 
         return `
         <div class="model-card" style="--model-accent: ${modelAccent}; border-left-color: ${modelAccent};">
           <div class="model-header">
-            <div class="model-name">${escapeHtml(name)}</div>
+            <div class="model-name">${escapeHtml(displayName)}</div>
             <div class="model-score">${Math.round(val)}</div>
           </div>
           <div class="model-bar">
@@ -1063,20 +1163,20 @@ export function renderReportHtml(data: ReportData): string {
     ` : ""}
     
     <!-- Evidence Preview on Page 2 to fill space -->
-    <div class="h2 section-gap">Evidence preview</div>
-    <div class="body body-intro">A sample of what AI models are actually saying about ${escapeHtml(client.name)}.</div>
+    <div class="h2 section-gap">What assistants are surfacing</div>
+    <div class="body body-intro">Human-readable examples from this snapshot—no raw model output. Use them to see where you win inclusion and where recommendation share leaks.</div>
     
     ${strengthExamples.length > 0 ? strengthExamples.slice(0, 1).map((r) => {
       const pj = r.parsed_json;
       const chip = evidencePdfChip("STRENGTH");
-      const snippet = r.raw_text?.slice(0, 150) || pj?.evidence_snippet?.slice(0, 150) || "Response content";
+      const { quote, impact } = clientEvidenceCallout(r.raw_text, pj, client.name, "strength", "");
       return `
       <div class="evidence-block no-break" style="--ev-border: ${chip.border}; border-left-color: ${chip.border};">
         <div class="evidence-header">
           <span class="evidence-chip" style="background:${chip.bg};color:${chip.color};border-color:${chip.border}">Strength</span>
         </div>
-        <div class="evidence-quote">"${escapeHtml(snippet)}…"</div>
-        <div class="evidence-impact">Positioning reads as a primary recommendation. Maintain supporting authority signals.</div>
+        <div class="evidence-quote">${escapeHtml(quote)}</div>
+        <div class="evidence-impact">${escapeHtml(impact)}</div>
       </div>
       `;
     }).join("") : ""}
@@ -1084,15 +1184,15 @@ export function renderReportHtml(data: ReportData): string {
     ${vulnerableExamples.length > 0 ? vulnerableExamples.slice(0, 1).map((r) => {
       const pj = r.parsed_json;
       const chip = evidencePdfChip("VULNERABLE");
-      const snippet = r.raw_text?.slice(0, 150) || "Response where competitors were mentioned but you were not.";
-      const competitors = pj?.competitors_mentioned?.slice(0, 2).join(", ") || "competitors";
+      const competitors = pj?.competitors_mentioned?.slice(0, 3).join(", ") || "Competitors";
+      const { quote, impact } = clientEvidenceCallout(r.raw_text, pj, client.name, "vulnerable", competitors);
       return `
       <div class="evidence-block no-break" style="--ev-border: ${chip.border}; border-left-color: ${chip.border};">
         <div class="evidence-header">
           <span class="evidence-chip" style="background:${chip.bg};color:${chip.color};border-color:${chip.border}">Vulnerable</span>
         </div>
-        <div class="evidence-quote">"${escapeHtml(snippet)}…"</div>
-        <div class="evidence-impact">${escapeHtml(competitors)} surfaced; your brand did not. Close the discovery gap with targeted authority building.</div>
+        <div class="evidence-quote">${escapeHtml(quote)}</div>
+        <div class="evidence-impact">${escapeHtml(impact)}</div>
       </div>
       `;
     }).join("") : ""}
@@ -1119,7 +1219,7 @@ export function renderReportHtml(data: ReportData): string {
     </div>
     
     <div class="h2">Prioritized actions</div>
-    <div class="body body-intro">Based on your snapshot, these are the highest-impact improvements, ranked by urgency and potential impact.</div>
+    <div class="body body-intro">Highest-impact moves first—each row ties finding → business risk → concrete execution → expected measurable lift.</div>
     
     ${insights.map((insight, idx) => `
     <div class="insight-card no-break">
@@ -1142,23 +1242,23 @@ export function renderReportHtml(data: ReportData): string {
     `).join("")}
     
     <div class="method-box no-break insight-panel section-gap">
-      <div class="method-title">30-day execution plan</div>
+      <div class="method-title">30-day execution plan (agency-led)</div>
       <div class="plan-grid">
         <div class="plan-cell">
           <div class="plan-phase">Week 1 to 2</div>
-          <div class="plan-copy">Audit content for AI extractability. Identify authority gaps. Benchmark competitor content.</div>
+          <div class="plan-copy">We audit structured content, schema, entity consistency, and citation gaps; benchmark competitor proof so priorities are explicit.</div>
         </div>
         <div class="plan-cell">
           <div class="plan-phase">Week 2 to 3</div>
-          <div class="plan-copy">Implement priority #1 recommendation. Focus resources on the weakest model.</div>
+          <div class="plan-copy">We rebuild the weakest model surface first—shipped pages, FAQs, and schema aligned to how that assistant retrieves answers.</div>
         </div>
         <div class="plan-cell">
           <div class="plan-phase">Week 3 to 4</div>
-          <div class="plan-copy">Build authority signals. Earn citations from trusted sources. Counter-position versus competitors.</div>
+          <div class="plan-copy">We expand authority through cited comparison assets, reviews, trade press, and trusted third-party mentions assistants can cite.</div>
         </div>
         <div class="plan-cell">
           <div class="plan-phase">Week 4+</div>
-          <div class="plan-copy">Run follow-up analysis to measure progress. Iterate on strategy based on results.</div>
+          <div class="plan-copy">We re-measure with the next snapshot, read deltas by model, and lock the following 30-day sprint—no guessing whether it worked.</div>
         </div>
       </div>
     </div>
@@ -1185,6 +1285,7 @@ export function renderReportHtml(data: ReportData): string {
     </div>
     
     <div class="h2">Signal summary</div>
+    <p class="body no-break" style="margin-bottom:14px;max-width:46rem;line-height:1.55">${escapeHtml(buildDataSummaryInterpretation(metrics, client.name))}</p>
     <table class="data-table no-break">
       <thead>
         <tr>
@@ -1314,6 +1415,11 @@ export function renderReportHtml(data: ReportData): string {
           <div class="method-value">${competitors.length >= 3 ? "High" : competitors.length > 0 ? "Medium" : "Low"}</div>
         </div>
       </div>
+    </div>
+    
+    <div class="method-box no-break section-gap" style="border-left:3px solid var(--pdf-accent, #6b9ebc)">
+      <div class="method-title">What happens next</div>
+      <div class="method-text">${escapeHtml(buildRecommendedNextSteps(client.name))}</div>
     </div>
     
     <div class="page-footer">

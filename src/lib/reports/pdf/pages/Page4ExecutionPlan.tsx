@@ -137,7 +137,7 @@ export function Page4ExecutionPlan({ data }: { data: ReportData }) {
 
         <ChapterTitle title="Execution Plan" />
         <Text style={styles.intro}>
-          Four-step execution sequence. Adjust dates to your cadence. Lock discovery before you scale execution.
+          How we operationalize the findings: four agency-led steps—discovery on your properties, rebuild the weakest assistant surface, expand proof, then re-measure and iterate.
         </Text>
 
         <PdfTraceMarker page={4} section="Page4:before_phases" />
@@ -157,7 +157,7 @@ export function Page4ExecutionPlan({ data }: { data: ReportData }) {
                 <View style={styles.accentBar} />
                 <View style={styles.stepCard}>
                   <Text style={styles.stepHeader}>{header}</Text>
-                  <Text style={styles.blockLabel}>What to do</Text>
+                  <Text style={styles.blockLabel}>What we execute</Text>
                   <Text style={styles.copy}>{main}</Text>
                   {impact ? (
                     <View style={styles.impactBlock}>

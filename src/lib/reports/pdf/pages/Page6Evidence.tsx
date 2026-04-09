@@ -147,6 +147,32 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontFamily: fonts.sans,
   },
+  nextOuter: {
+    marginTop: rhythm.md,
+    flexDirection: "row",
+    borderRadius: 4,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: colors.rule,
+    minHeight: 72,
+  },
+  nextBar: { width: 3, backgroundColor: colors.cyan },
+  nextInner: {
+    flex: 1,
+    paddingVertical: rhythm.md,
+    paddingHorizontal: rhythm.md,
+    backgroundColor: colors.surface2,
+  },
+  nextTitle: {
+    fontSize: 7,
+    fontWeight: 400,
+    letterSpacing: 0.1,
+    color: colors.ink3,
+    textTransform: "uppercase",
+    marginBottom: 6,
+    fontFamily: fonts.sansBold,
+  },
+  nextBody: { fontSize: 9, lineHeight: 1.52, color: colors.ink, fontFamily: fonts.sans },
 });
 
 function logLabelPill(label: string): { bg: string; fg: string } {
@@ -255,6 +281,14 @@ export function Page6Evidence({ data }: { data: ReportData }) {
               <Text style={styles.chipNum}>{String(data.meta.generated)}</Text>
             </View>
             <Text style={styles.chipLab}>Generated</Text>
+          </View>
+        </View>
+
+        <View style={styles.nextOuter} wrap={false}>
+          <View style={styles.nextBar} />
+          <View style={styles.nextInner}>
+            <Text style={styles.nextTitle}>What happens next</Text>
+            <Text style={styles.nextBody}>{data.recommendedNextSteps}</Text>
           </View>
         </View>
 

@@ -26,6 +26,14 @@ const C = {
 } as const;
 
 const styles = StyleSheet.create({
+  interpret: {
+    fontSize: 9,
+    lineHeight: 1.55,
+    color: colors.ink,
+    marginBottom: rhythm.md,
+    fontFamily: fonts.sans,
+    maxWidth: 520,
+  },
   h: {
     fontSize: 8,
     fontWeight: 400,
@@ -135,6 +143,7 @@ export function Page5DataSummary({ data }: { data: ReportData }) {
         <PdfTraceMarker page={5} section="Page5:after_header" />
 
         <ChapterTitle title="Data Summary" />
+        <Text style={styles.interpret}>{data.dataSummaryInterpretation}</Text>
         <Text style={[styles.h, styles.hFirst]}>Signals</Text>
         <View style={{ marginBottom: space.section, width: 540 }}>
           <View style={styles.th}>

@@ -1,6 +1,9 @@
 import type { ReportData as SnapshotReportInput } from "@/lib/reports/renderReportHtml";
 import {
+  buildDataSummaryInterpretation,
+  buildRecommendedNextSteps,
   buildSnapshotReportDerived,
+  clientEvidenceCallout,
   getSnapshotEvidenceLabel,
 } from "@/lib/reports/renderReportHtml";
 import type {
@@ -14,7 +17,6 @@ import type {
   SignalRow,
 } from "@/lib/reports/pdf/types";
 import { formatProviderDisplayName } from "@/lib/reports/formatProviderDisplayName";
-import { normalizeDisplayText } from "@/lib/text/normalizeDisplayText";
 import { PDF_METHODOLOGY_TEXT } from "@/lib/reports/pdfTheme";
 
 function normalizeRecommendationPriority(p: string | undefined): RecommendationCard["priority"] {
@@ -31,19 +33,19 @@ function formatLongDate(d: string) {
 const DEFAULT_EXECUTION: ExecutionPhase[] = [
   {
     phase: "Week 1 to 2",
-    text: "Audit structured content, schema, and citation gaps. Benchmark competitor proof and entity consistency.",
+    text: "We audit structured content, schema, entity consistency, and citation gaps; benchmark competitor proof so priorities are explicit.",
   },
   {
     phase: "Week 2 to 3",
-    text: "Execute the top recommendation. Focus the weakest model until the score moves.",
+    text: "We rebuild the weakest model surface first—shipped pages, FAQs, and schema aligned to how that assistant retrieves answers.",
   },
   {
     phase: "Week 3–4",
-    text: "Add authority: reviews, press, authoritative backlinks. Counter competitors where they lead the narrative.",
+    text: "We expand authority through cited comparison assets, reviews, trade press, and trusted third-party mentions assistants can cite.",
   },
   {
     phase: "Week 4+",
-    text: "Re-run the snapshot. Read deltas by model and intent cluster. Lock the next 30-day plan.",
+    text: "We re-measure with the next snapshot, read deltas by model, and lock the following 30-day sprint.",
   },
 ];
 
@@ -53,47 +55,40 @@ function buildModelInsights(name: string, val: number, _avg: number): string[] {
   const isWeak = val < 50;
   if (isStrong) {
     return [
-      "Strongest surface. Copy what works here onto the weak models.",
-      "Rivals will push here; refresh proof and citations before they do.",
+      "Strongest surface—this is the pattern to copy onto weaker models before rivals narrow the gap.",
+      "Expect competitors to push here; refresh proof and cited facts proactively.",
     ];
   }
   if (isWeak) {
     const first =
       name === "Anthropic"
-        ? "Anthropic visibility is weak. Your brand is frequently absent from category answers."
-        : `${name} visibility is low. Your brand is frequently absent from category answers.`;
-    return [first, "Prioritize factual, citation-dense pages this model pulls from."];
+        ? "On Anthropic-powered answers, the brand is often absent from the recommendation set—effectively invisible in many category decisions this assistant influences."
+        : `${name} returns answers where you are frequently missing from the short list buyers see—recommendation share on this path is going to others.`;
+    return [first, "Ship 3–5 cited comparison pages plus direct-answer FAQ blocks for the query shapes this model returns."];
   }
   return [
-    "Room to move. Targeted page updates should shift the score.",
-    "Differentiate before a competitor locks the default answer here.",
+    "Room to move with targeted comparison content, FAQs, and citations before a competitor locks the default answer here.",
+    "Differentiate now—mediocre scores become hard losses once a rival owns the narrative.",
   ];
 }
 
 function buildStrategicTakeaway(models: [string, number][], _avg: number): string {
   void _avg;
   if (models.length === 0) {
-    return "No per-model scores yet. Populate provider scores to prioritize spend.";
+    return "No per-model scores yet—once populated, we sequence spend against the widest spread first.";
   }
   const hi = models[0][1];
   const lo = models[models.length - 1][1];
   if (hi >= 70 && lo < 50) {
-    return `${Math.round(hi - lo)} points separate your best and worst model. Assistants recommend different winners. Close the gap before a competitor owns the default answer.`;
+    return `${Math.round(hi - lo)} points separate your best and worst assistant surface—buyers get different short lists depending on which AI they use. Rebuild the weak surface with cited comparisons and FAQs before a competitor locks the default recommendation there.`;
   }
   if (models.every(([, s]) => s >= 70)) {
-    return "Strong across the board. Shift to defense: watch competitors and refresh proof.";
+    return "Strong across engines—treat this as defense: monitor rivals, refresh proof monthly, and protect first-position answers.";
   }
   if (models.every(([, s]) => s < 50)) {
-    return "Weak everywhere. Fix authority and citations before model-by-model tactics.";
+    return "Weak across the board—fix entity clarity, citations, and category coverage before fine-tuning model-by-model.";
   }
-  return "Mixed board. Lift the weakest model first; protect what already works.";
-}
-
-function evidenceSnippet(raw: string | null, parsedSnippet: string | undefined, max = 240): string {
-  const src = normalizeDisplayText(raw?.trim() || parsedSnippet?.trim() || "");
-  if (!src) return "—";
-  const t = src.slice(0, max);
-  return src.length > max ? `${t}…` : t;
+  return "Mixed board—we lift the weakest model first while holding the surfaces that already win recommendation share.";
 }
 
 /**
@@ -135,25 +130,46 @@ export function mapSnapshotToReactPdfData(
   const evidencePreview: EvidencePreview[] = [];
   if (strengthExamples[0]) {
     const pj = strengthExamples[0].parsed_json;
+    const { quote, impact } = clientEvidenceCallout(
+      strengthExamples[0].raw_text,
+      pj ?? null,
+      client.name,
+      "strength",
+      "",
+    );
     evidencePreview.push({
       label: "STRENGTH",
-      snippet: evidenceSnippet(strengthExamples[0].raw_text, pj?.evidence_snippet),
-      note: "Maintain top position with consistent proof and updated citations.",
+      snippet: quote,
+      note: impact,
     });
   }
   if (vulnerableExamples[0]) {
     const pj = vulnerableExamples[0].parsed_json;
-    const comps = pj?.competitors_mentioned?.slice(0, 2).join(", ") || "Competitors";
+    const comps = pj?.competitors_mentioned?.slice(0, 3).join(", ") || "Competitors";
+    const { quote, impact } = clientEvidenceCallout(
+      vulnerableExamples[0].raw_text,
+      pj ?? null,
+      client.name,
+      "vulnerable",
+      comps,
+    );
     evidencePreview.push({
       label: "VULNERABLE",
-      snippet: evidenceSnippet(vulnerableExamples[0].raw_text, pj?.evidence_snippet),
-      note: `${comps} surfaced without you. Close the gap.`,
+      snippet: quote,
+      note: impact,
     });
   }
   if (evidencePreview.length === 0 && responses[0]) {
+    const r0 = responses[0];
+    const pj0 = r0.parsed_json ?? null;
+    const lab = getSnapshotEvidenceLabel(pj0);
+    const kind: "strength" | "vulnerable" = lab === "STRENGTH" ? "strength" : "vulnerable";
+    const comps0 = pj0?.competitors_mentioned?.slice(0, 3).join(", ") || "Competitors";
+    const { quote, impact } = clientEvidenceCallout(r0.raw_text, pj0, client.name, kind, comps0);
     evidencePreview.push({
-      label: getSnapshotEvidenceLabel(responses[0].parsed_json),
-      snippet: evidenceSnippet(responses[0].raw_text, responses[0].parsed_json?.evidence_snippet),
+      label: lab,
+      snippet: quote,
+      note: impact,
     });
   }
 
@@ -294,6 +310,8 @@ export function mapSnapshotToReactPdfData(
       generated: formatLongDate(snapshot.created_at),
     },
     strategicTakeaway: buildStrategicTakeaway(models, avgModelScore),
+    dataSummaryInterpretation: buildDataSummaryInterpretation(metrics, client.name),
+    recommendedNextSteps: buildRecommendedNextSteps(client.name),
     agencyLogoUrl: agency.brand_logo_url ?? null,
     agencyName: agency.name,
   };
