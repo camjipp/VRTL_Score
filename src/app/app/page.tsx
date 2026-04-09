@@ -118,12 +118,12 @@ function getAuthorityStateFromScore(score: number | null): AuthorityState {
   return "Losing Ground";
 }
 
-/** 3px left bar color for Risk Map cells (no full-cell tint) */
+/** Thin left accent for Risk Map cells — low contrast, score carries hierarchy */
 function getAuthorityStateBar(state: AuthorityState): string {
-  if (state === "Dominant") return "border-l-authority-dominant";
-  if (state === "Stable") return "border-l-authority-stable";
-  if (state === "Watchlist") return "border-l-authority-watchlist";
-  return "border-l-authority-losing";
+  if (state === "Dominant") return "border-l-2 border-l-authority-dominant/35 pl-1.5";
+  if (state === "Stable") return "border-l-2 border-l-authority-stable/40 pl-1.5";
+  if (state === "Watchlist") return "border-l-2 border-l-authority-watchlist/40 pl-1.5";
+  return "border-l-2 border-l-authority-losing/40 pl-1.5";
 }
 
 type TriageBucket = "losing" | "watchlist" | "stable" | "dominant";
@@ -280,14 +280,14 @@ function clientStoryLine(c: ClientWithStats): string {
   if (!hasData) return "";
   const state = getAuthorityState(c);
   const wm = c.worstModel ? displayModelName(c.worstModel) : null;
-  if (state === "Dominant") return "Leading across all tracked models";
+  if (state === "Dominant") return "Leading on every tracked model.";
   if (state === "Losing Ground") {
-    return wm ? `Authority failure on ${wm}. Act now.` : "Critical authority gap. Act now.";
+    return wm ? `Authority collapses on ${wm}. Act now.` : "Critical gap. Act now.";
   }
   if (state === "Watchlist") {
-    return wm ? `Losing ground on ${wm}. Needs attention.` : "Flagged for monitoring. Run a snapshot to diagnose.";
+    return wm ? `Slipping on ${wm}. Fix before it compounds.` : "Elevated risk. Run a snapshot to isolate the gap.";
   }
-  return "Stable authority signal. Monitor weak channels.";
+  return "Stable. Protect the weakest channel.";
 }
 
 function CardStatusBadge({ bucket }: { bucket: TriageBucket }) {
@@ -377,15 +377,15 @@ function PriorityAlertBar({
     );
 
   return (
-    <div className="relative mb-3 overflow-hidden rounded-2xl border border-white/[0.05] bg-[#080a0c] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+    <div className="relative mb-3 overflow-hidden rounded-2xl border border-white/[0.04] bg-[#080a0c] shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.028] via-transparent to-transparent"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.02] via-transparent to-transparent"
         aria-hidden
       />
       <div className="relative">
-        <div className="border-b border-white/[0.04] px-4 py-3.5 sm:px-5 sm:py-4">
+        <div className="border-b border-white/[0.035] px-4 py-3.5 sm:px-5 sm:py-4">
           <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-text-3/80">Portfolio command</p>
-          <div className="mt-3 rounded-xl bg-gradient-to-b from-black/20 to-black/40 px-3 py-3.5 ring-1 ring-inset ring-white/[0.04] sm:px-4 sm:py-4">
+          <div className="mt-4">
             <div className="flex flex-wrap items-end gap-x-7 gap-y-5 sm:gap-x-9 lg:gap-x-10">
               <div>
                 <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-text-3/90">Dominant</p>
@@ -415,7 +415,7 @@ function PriorityAlertBar({
                   {counts.losing}
                 </p>
               </div>
-              <div className="min-w-[min(100%,10rem)] flex-1 border-t border-white/[0.05] pt-4 sm:min-w-[9.5rem] sm:border-l sm:border-t-0 sm:pl-7 sm:pt-0">
+              <div className="min-w-[min(100%,10rem)] flex-1 border-t border-white/[0.04] pt-4 sm:min-w-[9.5rem] sm:border-l sm:border-t-0 sm:border-white/[0.04] sm:pl-7 sm:pt-0">
                 <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-text-3/90">Coverage</p>
                 <p className="mt-1 text-[13px] font-medium leading-snug text-text-2">{snapshotLine}</p>
               </div>
@@ -432,16 +432,16 @@ function PriorityAlertBar({
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5 sm:py-3.5">
-          <div className="flex min-w-0 flex-1 flex-col gap-0.5 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2 sm:gap-y-1">
+        <div className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5 sm:py-3">
+          <div className="flex min-w-0 flex-1 flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2.5 sm:gap-y-1">
             {stable ? (
               <>
                 <span className="inline-flex items-center gap-2">
                   <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-authority-dominant/85" aria-hidden />
                   <span className="text-[13px] font-semibold text-text">Portfolio stable.</span>
                 </span>
-                <span className="pl-3.5 text-[13px] text-text-2 sm:pl-0">
-                  No clients at risk in this view.
+                <span className="pl-3.5 text-[13px] text-text-3 sm:pl-2">
+                  No clients at risk.
                 </span>
               </>
             ) : (
@@ -449,10 +449,10 @@ function PriorityAlertBar({
                 <span className="inline-flex items-center gap-2">
                   <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-authority-losing/90" aria-hidden />
                   <span className="text-[13px] font-semibold text-text">
-                    Authority risk · {attention.length} account{attention.length === 1 ? "" : "s"}
+                    {attention.length === 1 ? "1 client needs attention." : `${attention.length} clients need attention.`}
                   </span>
                 </span>
-                <span className="break-words pl-3.5 text-[13px] leading-snug text-text-2 sm:pl-1">
+                <span className="break-words pl-3.5 text-[13px] leading-snug text-text-3 sm:pl-1">
                   {attention[0]!.name}
                   {(() => {
                     const d = attentionDetailSuffix(attention[0]!);
@@ -477,7 +477,7 @@ function PriorityAlertBar({
             )}
           </div>
           <div
-            className="inline-flex w-full shrink-0 items-center gap-px rounded-xl bg-black/45 p-px sm:w-auto sm:rounded-[11px]"
+            className="inline-flex w-full shrink-0 items-center gap-px rounded-xl p-px ring-1 ring-inset ring-white/[0.05] sm:w-auto sm:rounded-[11px]"
             role="group"
             aria-label="Filter by status"
           >
@@ -506,8 +506,6 @@ function ClientCard({ client }: { client: ClientWithStats }) {
   const router = useRouter();
   const hasData = client.latestScore !== null;
   const bucket = triageBucket(client);
-  const authorityState = getAuthorityState(client);
-  const stateBar = getAuthorityStateBar(authorityState);
   const needsAttention = clientNeedsAttention(client);
   const domain = faviconDomain(client.website);
   const faviconUrl = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=32` : null;
@@ -544,10 +542,8 @@ function ClientCard({ client }: { client: ClientWithStats }) {
       className={cn(
         "client-card group relative flex h-full min-h-[236px] cursor-pointer flex-col overflow-hidden rounded-2xl",
         "border border-white/[0.05] bg-[#090b0d] transition-[border-color,box-shadow] duration-200",
-        "shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] hover:border-white/[0.09]",
+        "shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] hover:border-white/[0.08]",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-white/12",
-        "border-l-[3px]",
-        stateBar,
         urgencySurface
       )}
     >
@@ -594,7 +590,7 @@ function ClientCard({ client }: { client: ClientWithStats }) {
         </div>
 
         {!hasData ? (
-          <div className="mt-5 flex flex-1 flex-col rounded-xl bg-gradient-to-b from-white/[0.015] to-black/40 px-4 py-5 ring-1 ring-inset ring-dashed ring-white/[0.08]">
+          <div className="mt-5 flex flex-1 flex-col rounded-xl bg-black/15 px-4 py-5 ring-1 ring-inset ring-dashed ring-white/[0.06]">
             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3/90">Awaiting signal</p>
             <p className="mt-2.5 text-[15px] font-semibold leading-snug tracking-tight text-text">No authority baseline yet</p>
             <p className="mt-2 max-w-[280px] text-[13px] leading-relaxed text-text-2">
@@ -616,22 +612,20 @@ function ClientCard({ client }: { client: ClientWithStats }) {
           </div>
         ) : (
           <>
-            <div className="mt-5 rounded-xl bg-black/45 px-3.5 py-3.5 ring-1 ring-inset ring-white/[0.05] sm:px-4 sm:py-4">
-              <div className="flex flex-wrap items-end justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-text-3/85">Authority index</p>
-                  <div className="mt-2 flex flex-wrap items-baseline gap-3">
-                    <span className="tabular-nums text-[2.75rem] font-semibold leading-[0.95] tracking-[-0.045em] text-text sm:text-[3rem]">
-                      {client.latestScore}
-                    </span>
-                    {showDelta ? <CardDeltaBadge delta={delta!} /> : null}
-                  </div>
-                  <p className="mt-2 text-[11px] font-medium leading-tight text-text-3/90">Composite across models · 0–100</p>
+            <div className="mt-5 border-t border-white/[0.04] pt-4">
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-text-3/75">Authority index</p>
+                <div className="mt-1 flex flex-wrap items-end gap-2.5">
+                  <span className="tabular-nums text-[3rem] font-semibold leading-[0.9] tracking-[-0.05em] text-text sm:text-[3.25rem]">
+                    {client.latestScore}
+                  </span>
+                  {showDelta ? <CardDeltaBadge delta={delta!} /> : null}
                 </div>
+                <p className="mt-1 text-[10px] font-normal leading-snug text-text-3/65">Composite across models · 0–100</p>
               </div>
             </div>
-            <p className="mt-4 flex-1 text-[13px] font-medium leading-relaxed text-text-2">{story}</p>
-            <div className="mt-auto flex flex-wrap gap-x-6 gap-y-2 border-t border-white/[0.05] pt-4 text-[12px]">
+            <p className="mt-4 flex-1 text-[13px] font-normal leading-relaxed text-text-2">{story}</p>
+            <div className="mt-auto flex flex-wrap gap-x-6 gap-y-2 border-t border-white/[0.04] pt-3.5 text-[12px]">
               {weakestLabel ? (
                 <span className="text-text-3">
                   Weakest model
@@ -678,7 +672,7 @@ function ClientsRequiringAttention({ clients }: { clients: ClientWithStats[] }) 
   if (attention.length === 0) {
     return (
       <section className="rounded-app-lg border border-white/5 bg-surface">
-        <div className="px-3 py-2 text-xs text-text-2">Portfolio stable. No widening gaps detected.</div>
+        <div className="px-3 py-2 text-xs text-text-3">Portfolio stable. No widening gaps.</div>
       </section>
     );
   }
@@ -776,11 +770,11 @@ function ModelExposureSummary({ clients }: { clients: ClientWithStats[] }) {
           const avgGap = d.gapCount > 0 ? Math.round(d.gapSum / d.gapCount) : null;
           const avgIndex = d.analyzed > 0 ? Math.round(d.scoreSum / d.analyzed) : null;
           return (
-            <div key={family} className="rounded-app-lg border border-white/5 bg-surface p-4">
-              <div className="text-xs font-medium text-text-2 mb-2">{modelFamilyLabel(family)}</div>
-              <div className="text-2xl font-semibold tabular-nums text-text">{d.analyzed}<span className="text-sm font-normal text-text-3">/{totalClients}</span></div>
-              <div className="text-[10px] text-text-3 mt-0.5">clients analyzed</div>
-              <div className="mt-4 pt-3 border-t border-white/5 space-y-1.5 text-xs">
+            <div key={family} className="rounded-app-lg bg-surface/80 p-4 ring-1 ring-inset ring-white/[0.04]">
+              <div className="text-xs font-medium text-text-2 mb-1.5">{modelFamilyLabel(family)}</div>
+              <div className="text-2xl font-semibold tabular-nums tracking-tight text-text">{d.analyzed}<span className="text-sm font-normal text-text-3">/{totalClients}</span></div>
+              <div className="text-[10px] text-text-3/90 mt-0.5">clients analyzed</div>
+              <div className="mt-4 pt-3 border-t border-white/[0.04] space-y-1.5 text-xs">
                 <div className="flex justify-between">
                   <span className="text-text-3">State</span>
                   <span className="tabular-nums text-text-2">D <strong>{d.dominant}</strong> · S <strong>{d.stable}</strong> · W <strong>{d.watchlist}</strong> · L <strong>{d.losing}</strong></span>
@@ -823,7 +817,7 @@ function RiskMapCell({
   const deltaFormatted = delta !== null && delta !== 0 ? (delta > 0 ? `+${delta}` : `${delta}`) : null;
   return (
     <td className="w-20 min-w-[4.5rem] bg-surface px-0 py-0 align-top text-right" title={title}>
-      <div className={cn("flex flex-col border-l-[3px] py-1 pl-1.5 pr-1.5 text-right", stateBar)}>
+      <div className={cn("flex flex-col py-1.5 pr-1.5 text-right", stateBar)}>
         <span className="text-lg font-semibold tabular-nums text-text leading-tight">{score ?? "—"}</span>
         {deltaFormatted !== null && (
           <span className={cn("text-[10px] tabular-nums", delta !== null && delta < 0 ? "text-authority-losing" : "text-authority-dominant")}>

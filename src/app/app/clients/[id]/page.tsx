@@ -196,7 +196,7 @@ function getVerdictSentence(
   detail: SnapshotDetailResponse | null
 ): string {
   if (score === null || providers.length === 0) {
-    return "Run a snapshot to diagnose your AI authority.";
+    return "Run a snapshot to index AI authority.";
   }
   const sorted = [...providers].sort((a, b) => a[1] - b[1]);
   const weakest = sorted[0];
@@ -204,15 +204,15 @@ function getVerdictSentence(
   const weakestScore = weakest[1];
   const mentionRate = detail ? pct(detail.summary.client_mentioned_count, detail.summary.responses_count || 1) : null;
   if (weakestScore < 40) {
-    return `${weakestName} authority is critically underperforming, creating displacement risk.`;
+    return `${weakestName} is critically underindexed — displacement risk is high.`;
   }
   if (weakestScore < 60) {
-    return `${weakestName} authority is underperforming; monitor for displacement.`;
+    return `${weakestName} is underindexed; displacement pressure is building.`;
   }
   if (mentionRate !== null && mentionRate < 50) {
-    return "Citation coverage is below threshold; authority is vulnerable across models.";
+    return "Citation coverage below threshold; exposure is elevated across models.";
   }
-  return "Authority is stable across models; maintain and monitor weakest channel.";
+  return "Authority holds across models; defend the weakest channel.";
 }
 
 /* Compact AI Authority trend line (single meaningful chart under index). */
@@ -2033,25 +2033,25 @@ function AIAnswerMarketShareChart({
 
   if (proofZone) {
     return (
-      <div className="overflow-hidden rounded-2xl bg-[#0a0c0e] ring-1 ring-inset ring-white/[0.05]">
-        <div className="flex flex-col gap-5 px-5 py-5 sm:flex-row sm:items-start sm:justify-between sm:gap-8 sm:px-6 sm:py-6">
-          <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-text-3/80">Authority gap · competitive set</p>
-            <h3 className="mt-1.5 text-lg font-semibold tracking-tight text-text sm:text-xl">Mention share in model answers</h3>
-            <p className="mt-2 max-w-2xl text-[13px] font-normal leading-relaxed text-text-3">{gapLine}</p>
+      <div className="overflow-hidden rounded-2xl bg-[#090b0d]/95 ring-1 ring-inset ring-white/[0.04]">
+        <div className="flex flex-col gap-6 px-5 py-5 sm:flex-row sm:items-start sm:justify-between sm:gap-10 sm:px-6 sm:py-6">
+          <div className="min-w-0 flex-1 sm:pt-0.5">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3/78">Authority gap · competitive set</p>
+            <h3 className="mt-1 text-lg font-semibold tracking-tight text-text sm:text-xl">Mention share in model answers</h3>
+            <p className="mt-2 max-w-2xl text-[13px] font-normal leading-relaxed text-text-3/88">{gapLine}</p>
           </div>
           {clientRow ? (
-            <div className="shrink-0 rounded-xl bg-black/35 px-4 py-3 text-right ring-1 ring-inset ring-white/[0.06] sm:min-w-[7.5rem]">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3/85">Your position</p>
-              <p className="mt-0.5 text-2xl font-semibold tabular-nums tracking-tight text-text">#{clientRow.rank}</p>
-              <p className="text-[12px] font-medium tabular-nums text-text-2">{clientRow.share}% share</p>
+            <div className="shrink-0 self-stretch rounded-xl bg-black/22 px-4 py-3.5 text-right ring-1 ring-inset ring-white/[0.045] sm:min-w-[7.75rem] sm:self-auto">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-text-3/78">Your position</p>
+              <p className="mt-1 text-[1.75rem] font-semibold tabular-nums leading-none tracking-tight text-text sm:text-3xl">#{clientRow.rank}</p>
+              <p className="mt-1 text-[11px] font-medium tabular-nums text-text-3/90">{clientRow.share}% share</p>
             </div>
           ) : null}
         </div>
-        <ul className="border-t border-white/[0.04]">
+        <ul className="border-t border-white/[0.035]">
           {rows.map((row) => (
-            <li key={row.name} className="border-b border-white/[0.04] px-5 py-3.5 last:border-b-0 sm:px-6 sm:py-4">
-              <div className="flex items-start gap-3 sm:gap-4">
+            <li key={row.name} className="border-b border-white/[0.035] px-5 py-4 last:border-b-0 sm:px-6 sm:py-[1.125rem]">
+              <div className="flex items-start gap-3.5 sm:gap-4">
                 <span
                   className={cn(
                     "flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[11px] font-bold tabular-nums ring-1 ring-inset",
@@ -2289,9 +2289,9 @@ function getModelTerminalStatus(score: number): ModelTerminalStatus {
 }
 
 function modelTerminalPillClass(s: ModelTerminalStatus): string {
-  if (s === "strong") return "border border-authority-dominant/30 bg-authority-dominant/[0.1] text-authority-dominant";
-  if (s === "degrading") return "border border-authority-watchlist/30 bg-authority-watchlist/[0.1] text-authority-watchlist";
-  return "border border-authority-losing/30 bg-authority-losing/[0.12] text-authority-losing";
+  if (s === "strong") return "border border-authority-dominant/22 bg-authority-dominant/[0.08] text-authority-dominant";
+  if (s === "degrading") return "border border-authority-watchlist/22 bg-authority-watchlist/[0.08] text-authority-watchlist";
+  return "border border-authority-losing/22 bg-authority-losing/[0.09] text-authority-losing";
 }
 
 function modelTerminalLabel(s: ModelTerminalStatus): string {
@@ -2301,15 +2301,15 @@ function modelTerminalLabel(s: ModelTerminalStatus): string {
 }
 
 function getModelDiagnosisOneLine(key: (typeof VULN_MODELS)[number], terminal: ModelTerminalStatus): string {
-  if (terminal === "strong") return "Strong entity coverage. Mirror this structure elsewhere.";
+  if (terminal === "strong") return "Strong coverage. Replicate this pattern elsewhere.";
   if (terminal === "degrading") {
     return key === "gemini"
-      ? "Retrieval gap detected. Content needs a model-specific audit."
-      : "Retrieval softening. Tighten entities and citations.";
+      ? "Retrieval gap. Run a model-specific audit."
+      : "Retrieval weakening. Tighten entities and citations.";
   }
   return key === "anthropic"
-    ? "Authority failure. Not cited in structured answers."
-    : "Critical retrieval gap. Rebuild structured signals.";
+    ? "No citations in structured answers — authority is absent."
+    : "Critical gap. Rebuild structured signals.";
 }
 
 function primaryActionUpside(priority: StrategicInsight["priority"]): string {
@@ -2441,44 +2441,44 @@ function DecisionSurface({
   const weakestName = weakestEntry ? getProviderDisplayName(weakestEntry[0]) : null;
 
   const problemLine =
-    score == null || !weakestName ? "Run a snapshot to surface the weak channel." : `You are losing authority due to ${weakestName}`;
+    score == null || !weakestName ? "Run a snapshot to isolate the weak channel." : `Primary loss vector: ${weakestName}.`;
 
   const causeLine =
     primary?.whyItMatters?.trim() ||
     (weakestName
-      ? `Not being retrieved in ${weakestName} answers. Displacement is accelerating.`
+      ? `Not surfacing in ${weakestName} answers. Displacement is accelerating.`
       : "Run a snapshot to isolate retrieval failure.");
 
   const topBullets = primary ? tacticalActionBullets(primary.action) : [];
 
   const actionCardTone =
     primary?.priority === "HIGH"
-      ? "border-authority-losing/18 bg-authority-losing/[0.04] ring-1 ring-inset ring-authority-losing/8"
+      ? "border-authority-losing/12 bg-authority-losing/[0.028] ring-1 ring-inset ring-authority-losing/6"
       : primary?.priority === "MEDIUM"
-        ? "border-authority-watchlist/20 bg-authority-watchlist/[0.04] ring-1 ring-inset ring-authority-watchlist/8"
-        : "border-authority-dominant/20 bg-authority-dominant/[0.04] ring-1 ring-inset ring-authority-dominant/8";
+        ? "border-authority-watchlist/16 bg-authority-watchlist/[0.035] ring-1 ring-inset ring-authority-watchlist/7"
+        : "border-authority-dominant/16 bg-authority-dominant/[0.035] ring-1 ring-inset ring-authority-dominant/7";
   const actionEyebrowClass =
     primary?.priority === "HIGH"
-      ? "text-authority-losing"
+      ? "text-authority-losing/95"
       : primary?.priority === "MEDIUM"
         ? "text-authority-watchlist"
         : "text-authority-dominant";
   const actionUpsideClass =
     primary?.priority === "HIGH"
-      ? "text-authority-losing/90"
+      ? "text-authority-losing/85"
       : primary?.priority === "MEDIUM"
-        ? "text-authority-watchlist/90"
-        : "text-authority-dominant/90";
+        ? "text-authority-watchlist/88"
+        : "text-authority-dominant/88";
 
   return (
-    <section className="w-full border-b border-white/[0.04] pb-6">
-      <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-[#090b0d] shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
+    <section className="w-full border-b border-white/[0.035] pb-6">
+      <div className="relative overflow-hidden rounded-2xl border border-white/[0.045] bg-[#090b0d] shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
         <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.03] via-transparent to-transparent"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.02] via-transparent to-transparent"
           aria-hidden
         />
         <div className="relative">
-          <div className="flex flex-wrap items-center gap-3 border-b border-white/[0.04] px-5 py-4 sm:px-7 sm:py-5">
+          <div className="flex flex-wrap items-center gap-3 border-b border-white/[0.035] px-5 py-4 sm:px-7 sm:py-4">
             {logoSrc ? (
               <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-black/35 ring-1 ring-inset ring-white/[0.06]">
                 <img src={logoSrc} alt="" className="h-7 w-7 object-contain" width={28} height={28} />
@@ -2515,29 +2515,29 @@ function DecisionSurface({
           </div>
 
           <div className="grid gap-0 lg:grid-cols-[1fr_minmax(260px,300px)]">
-            <div className="space-y-5 px-5 py-6 sm:px-7 sm:py-7 lg:border-r lg:border-white/[0.04]">
+            <div className="space-y-5 px-5 py-6 sm:px-7 sm:py-6 lg:border-r lg:border-white/[0.035]">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-text-3/85">Primary diagnosis</p>
-                <p className="mt-1 max-w-2xl text-[1.375rem] font-semibold leading-[1.2] tracking-tight text-text sm:text-2xl sm:leading-tight">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3/75">Primary diagnosis</p>
+                <p className="mt-0.5 max-w-2xl text-[1.5rem] font-semibold leading-[1.18] tracking-[-0.02em] text-text sm:text-[1.625rem] sm:leading-tight">
                   {problemLine}
                 </p>
-                <p className="mt-2.5 max-w-xl text-[13px] font-normal leading-relaxed text-text-3">{causeLine}</p>
+                <p className="mt-2 max-w-xl text-[13px] font-normal leading-relaxed text-text-3/88">{causeLine}</p>
               </div>
 
               {primary && (
-                <div className={cn("max-w-xl rounded-xl px-5 py-4", actionCardTone)}>
-                  <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <span className={cn("text-[10px] font-semibold uppercase tracking-[0.12em]", actionEyebrowClass)}>
+                <div className={cn("max-w-xl rounded-xl px-5 py-4 sm:py-[1.125rem]", actionCardTone)}>
+                  <div className="flex flex-wrap items-baseline justify-between gap-2 gap-y-1">
+                    <span className={cn("text-[10px] font-semibold uppercase tracking-[0.1em]", actionEyebrowClass)}>
                       Recommended action
                     </span>
                     <span className={cn("text-[11px] font-semibold tabular-nums", actionUpsideClass)}>
                       {primaryActionUpside(primary.priority)}
                     </span>
                   </div>
-                  <p className="mt-2.5 text-[15px] font-semibold leading-snug text-text">{primary.title}</p>
-                  <ul className="mt-3.5 space-y-1.5 border-t border-white/[0.05] pt-3.5">
+                  <p className="mt-2 text-[15px] font-semibold leading-snug text-text">{primary.title}</p>
+                  <ul className="mt-3 space-y-1.5 border-t border-white/[0.035] pt-3">
                     {topBullets.map((b, i) => (
-                      <li key={i} className="flex gap-2 text-[13px] leading-snug text-text-2">
+                      <li key={i} className="flex gap-2 text-[13px] leading-snug text-text-2/95">
                         <span className="mt-0.5 font-medium text-text-3" aria-hidden>
                           ·
                         </span>
@@ -2566,20 +2566,20 @@ function DecisionSurface({
               </div>
             </div>
 
-            <div className="flex flex-col justify-between border-t border-white/[0.04] bg-black/20 px-5 py-6 sm:px-7 sm:py-7 lg:border-t-0">
+            <div className="flex flex-col justify-between border-t border-white/[0.035] bg-black/12 px-5 py-6 sm:px-7 sm:py-6 lg:border-t-0">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3/80">Authority index</p>
-                <div className="mt-1.5 flex flex-wrap items-end gap-2.5">
-                  <span className="text-[3.25rem] font-semibold leading-[0.92] tracking-[-0.045em] text-text tabular-nums sm:text-[4rem]">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-text-3/72">Authority index</p>
+                <div className="mt-0.5 flex flex-wrap items-end gap-2">
+                  <span className="text-[3.5rem] font-semibold leading-[0.88] tracking-[-0.05em] text-text tabular-nums sm:text-[4.25rem]">
                     {score ?? "—"}
                   </span>
                   {delta !== null && delta !== 0 ? (
                     <span
                       className={cn(
-                        "mb-0.5 inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold tabular-nums ring-1 ring-inset",
+                        "mb-1 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-semibold tabular-nums ring-1 ring-inset",
                         delta < 0
-                          ? "bg-authority-losing/[0.08] text-authority-losing ring-authority-losing/15"
-                          : "bg-authority-dominant/[0.08] text-authority-dominant ring-authority-dominant/15"
+                          ? "bg-authority-losing/[0.06] text-authority-losing/95 ring-authority-losing/12"
+                          : "bg-authority-dominant/[0.06] text-authority-dominant/95 ring-authority-dominant/12"
                       )}
                     >
                       {delta < 0 ? <span aria-hidden>↓</span> : <span aria-hidden>↑</span>}
@@ -2587,17 +2587,17 @@ function DecisionSurface({
                         {delta > 0 ? "+" : ""}
                         {delta}
                       </span>
-                      <span className="font-normal text-text-3/90">vs last</span>
+                      <span className="font-normal text-text-3/80">vs last</span>
                     </span>
                   ) : null}
                 </div>
-                <p className="mt-1.5 text-[11px] font-normal leading-snug text-text-3/70">
+                <p className="mt-1 text-[10px] font-normal leading-snug text-text-3/58">
                   Composite across tracked models · 0–100
                 </p>
               </div>
-              <div className="mt-7 border-t border-white/[0.04] pt-4 lg:mt-8">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3/80">Status</p>
-                <p className="mt-1 text-[12px] font-normal leading-relaxed text-text-2">{getScoreLabel(score).description}</p>
+              <div className="mt-6 border-t border-white/[0.035] pt-3.5 lg:mt-7">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-text-3/75">Status</p>
+                <p className="mt-0.5 text-[11px] font-normal leading-relaxed text-text-3/85">{getScoreLabel(score).description}</p>
               </div>
             </div>
           </div>
@@ -2624,8 +2624,8 @@ function WhatIsWrongSection({ providers }: { providers: [string, number][] }) {
       noTopRule
       className="!space-y-3 !pt-5"
     >
-      <div className="overflow-hidden rounded-2xl bg-[#0a0c0e] ring-1 ring-inset ring-white/[0.05]">
-        <div className="divide-y divide-white/[0.04]">
+      <div className="overflow-hidden rounded-2xl bg-[#090b0d]/90 ring-1 ring-inset ring-white/[0.035]">
+        <div className="divide-y divide-white/[0.035]">
           {VULN_MODELS.map((key) => {
             const entry = providerByKey.get(key);
             const modelScore = entry ? entry[1] : null;
@@ -2699,34 +2699,34 @@ function DiagnosisModelRow({
   );
 
   return (
-    <div className="px-4 py-4 sm:px-5 sm:py-5">
+    <div className="px-4 py-3.5 sm:px-5 sm:py-4">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="group/model-row w-full cursor-pointer select-none rounded-lg bg-transparent text-left transition-colors hover:bg-white/[0.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/12"
+        className="group/model-row w-full cursor-pointer select-none rounded-lg bg-transparent text-left transition-colors hover:bg-white/[0.015] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/12"
         aria-expanded={open}
       >
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 md:flex-nowrap md:items-center">
-          <div className="flex min-w-0 items-center gap-2.5 md:w-[140px]">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black/30 ring-1 ring-inset ring-white/[0.06]">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2.5 md:flex-nowrap md:items-center">
+          <div className="flex min-w-0 items-center gap-2.5 md:w-[140px] md:shrink-0">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black/25 ring-1 ring-inset ring-white/[0.05]">
               <img src={logoUrl} alt="" className="h-[18px] w-[18px] object-contain" width={18} height={18} />
             </span>
-            <span className="truncate text-[14px] font-semibold tracking-tight text-text">{label}</span>
+            <span className="truncate text-[13px] font-semibold tracking-tight text-text">{label}</span>
           </div>
-          <div className="order-last min-h-[6px] w-full min-w-0 flex-1 md:order-none md:max-w-md">
-            <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.07]">
+          <div className="order-last min-h-[5px] w-full min-w-0 flex-1 md:order-none md:max-w-md">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
               <div className={cn("h-full rounded-full transition-[width] duration-300", barFill)} style={{ width: `${barPct}%` }} />
             </div>
           </div>
           {score != null ? (
-            <span className="w-12 shrink-0 text-right text-xl font-semibold tabular-nums tracking-tight text-text">{score}</span>
+            <span className="w-11 shrink-0 text-right text-lg font-semibold tabular-nums tracking-tight text-text md:w-12 md:text-xl">{score}</span>
           ) : (
-            <span className="w-12 shrink-0 text-right text-text-3">—</span>
+            <span className="w-11 shrink-0 text-right text-text-3 md:w-12">—</span>
           )}
           <span className={cn("shrink-0 rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide", modelTerminalPillClass(terminal))}>
             {modelTerminalLabel(terminal)}
           </span>
-          <div className="ml-auto flex shrink-0 items-center gap-1.5">
+          <div className="ml-auto flex shrink-0 items-center gap-1">
             <span
               className="hidden text-[11px] font-medium text-text-3 sm:inline [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/model-row:opacity-100"
               aria-hidden
@@ -2754,14 +2754,14 @@ function DiagnosisModelRow({
             </svg>
           </div>
         </div>
-        <p className="mt-3 text-left text-[13px] leading-relaxed text-text-2">{diagnosisLine}</p>
+        <p className="mt-2.5 text-left text-[13px] leading-relaxed text-text-2/95">{diagnosisLine}</p>
       </button>
       <div
         className="grid transition-[grid-template-rows] duration-200 ease-out"
         style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
       >
         <div className="min-h-0 overflow-hidden">
-          <div className="mt-5 border-t border-white/[0.04] pt-6 sm:pt-7">
+          <div className="mt-6 border-t border-white/[0.03] pt-8 sm:pt-9">
             <div className="playbook-header">Playbook · {label}</div>
             <div className="playbook-section-rule" aria-hidden />
             <div className="pb-1 pr-0 sm:pr-1">

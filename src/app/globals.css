@@ -328,34 +328,34 @@ html {
 
 .playbook-section-rule {
   height: 1px;
-  background: rgb(var(--text-3) / 0.1);
-  margin: 18px 0 16px;
+  background: rgb(var(--text-3) / 0.07);
+  margin: 22px 0 18px;
 }
 
 .playbook-section-label {
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
-  color: rgb(var(--text-3) / 0.75);
-  margin-bottom: 8px;
+  color: rgb(var(--text-3) / 0.68);
+  margin-bottom: 10px;
 }
 
 .playbook-header {
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgb(var(--text-3) / 0.8);
-  margin-bottom: 2px;
+  color: rgb(var(--text-3) / 0.72);
+  margin-bottom: 0;
 }
 
 .playbook-lead-sentence {
   font-size: 13px;
-  color: rgb(var(--text));
+  color: rgb(var(--text) / 0.95);
   font-weight: 400;
-  line-height: 1.5;
-  margin-bottom: 12px;
+  line-height: 1.55;
+  margin-bottom: 14px;
   max-width: 520px;
 }
 
@@ -389,19 +389,24 @@ html {
   display: grid;
   grid-template-columns: minmax(120px, 140px) 1fr;
   gap: 0 14px;
-  padding-top: 14px;
-  margin-top: 18px;
-  border-top: 1px solid rgb(var(--text-3) / 0.1);
+  padding-top: 18px;
+  margin-top: 28px;
+  border-top: 1px solid rgb(var(--text-3) / 0.08);
 }
 
 .playbook-impact-label {
-  font-size: 12px;
-  color: rgb(var(--text-3));
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgb(var(--text-3) / 0.78);
+  padding-top: 2px;
 }
 
 .playbook-impact-value {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
+  line-height: 1.45;
   color: rgb(var(--text));
 }
 
