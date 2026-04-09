@@ -958,7 +958,7 @@ function RunSnapshotButton({
       onClick={onRunSnapshot}
       disabled={running}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-[13px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition-colors hover:bg-accent-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090b0d] disabled:opacity-50",
+        "inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-[13px] font-semibold text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] transition-colors hover:bg-accent-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090b0d] disabled:opacity-50",
         className
       )}
     >
