@@ -5,9 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
-import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 import { Alert, AlertDescription } from "@/components/ui/Alert";
+import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 async function onboard(accessToken: string) {
   const res = await fetchWithTimeout(
@@ -23,8 +23,8 @@ async function onboard(accessToken: string) {
   return (await res.json()) as { agency_id: string };
 }
 
-const inputBase =
-  "w-full rounded-[10px] border px-4 py-3 text-[#E6EDF3] placeholder:text-[#8B98A5] transition-all focus:outline-none focus:border-[#10A37F] focus:shadow-[0_0_0_1px_#10A37F] bg-[#0E141B] border-[#1A212B]";
+const inputClass =
+  "auth-input w-full rounded-md border border-white/[0.1] bg-[#141414] px-[14px] py-3 text-sm text-[var(--text-primary)] placeholder:text-[#555] outline-none transition-shadow disabled:opacity-50";
 
 export function LoginForm({ nextPath, siteOrigin = "" }: { nextPath: string; siteOrigin?: string }) {
   const router = useRouter();
@@ -74,7 +74,6 @@ export function LoginForm({ nextPath, siteOrigin = "" }: { nextPath: string; sit
       const serverOrigin = siteOrigin ? siteOrigin.replace(/\/$/, "") : "";
       const isLocalhost = (url: string) =>
         /^https?:\/\/localhost(:\d+)?(\/|$)/i.test(url) || url.startsWith("http://127.0.0.1");
-      // Never redirect to localhost when user is on production: use server origin, or current origin if we're on a live site.
       let baseUrl = serverOrigin || currentOrigin;
       if (currentOrigin && !isLocalhost(currentOrigin) && (!baseUrl || isLocalhost(baseUrl))) {
         baseUrl = currentOrigin;
@@ -95,7 +94,6 @@ export function LoginForm({ nextPath, siteOrigin = "" }: { nextPath: string; sit
         setError(oauthError.message || "Google sign-in failed. Try again or use email.");
         return;
       }
-      // Supabase redirects the window; no further action here
     } catch (err) {
       setError(err instanceof Error ? err.message : "Google sign-in failed. Try again or use email.");
     }
@@ -103,9 +101,11 @@ export function LoginForm({ nextPath, siteOrigin = "" }: { nextPath: string; sit
 
   return (
     <>
-      <form className="space-y-4" onSubmit={handleSubmit}>
+      <form className="space-y-5" onSubmit={handleSubmit}>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-[#E6EDF3]">Email</label>
+          <label className="mb-2 block font-marketing-mono text-[11px] uppercase tracking-[0.08em] text-[var(--text-muted)]">
+            Email
+          </label>
           <input
             type="email"
             autoComplete="email"
@@ -114,15 +114,17 @@ export function LoginForm({ nextPath, siteOrigin = "" }: { nextPath: string; sit
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={busy}
-            className={inputBase}
+            className={inputClass}
           />
         </div>
 
         <div>
-          <div className="mb-1.5 flex items-center justify-between">
-            <label className="text-sm font-medium text-[#E6EDF3]">Password</label>
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <label className="font-marketing-mono text-[11px] uppercase tracking-[0.08em] text-[var(--text-muted)]">
+              Password
+            </label>
             <Link
-              className="text-xs text-[#8B98A5] hover:text-[#10A37F] transition-colors"
+              className="font-marketing-mono text-[11px] tracking-[0.04em] text-[var(--text-muted)] transition-colors hover:text-[var(--accent-marketing)]"
               href="/forgot-password"
             >
               Forgot password?
@@ -137,19 +139,19 @@ export function LoginForm({ nextPath, siteOrigin = "" }: { nextPath: string; sit
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={busy}
-            className={inputBase}
+            className={inputClass}
           />
         </div>
 
-        <label className="flex items-center gap-2 cursor-pointer">
+        <label className="flex cursor-pointer items-center gap-2.5">
           <input
             type="checkbox"
             checked={rememberMe}
             onChange={(e) => setRememberMe(e.target.checked)}
             disabled={busy}
-            className="h-4 w-4 rounded border-[#1A212B] text-[#10A37F] accent-[#10A37F] bg-[#0E141B]"
+            className="h-4 w-4 rounded border-white/15 bg-[#141414] accent-[var(--accent-marketing)]"
           />
-          <span className="text-sm text-[#8B98A5]">Remember me</span>
+          <span className="text-sm font-light text-[var(--text-secondary)]">Remember me</span>
         </label>
 
         {error && (
@@ -161,26 +163,25 @@ export function LoginForm({ nextPath, siteOrigin = "" }: { nextPath: string; sit
         <button
           type="submit"
           disabled={busy}
-          className="w-full h-12 rounded-[10px] text-base font-semibold text-white transition-colors disabled:opacity-50 bg-[#10A37F] hover:bg-[#0e8f6f]"
+          className="font-marketing-body mt-1 w-full cursor-pointer rounded-md border-0 bg-[var(--accent-marketing)] py-3.5 text-sm font-medium text-black transition hover:brightness-110 disabled:opacity-50"
         >
           {busy ? "Signing in..." : "Sign in"}
         </button>
       </form>
 
-      {/* OR divider */}
-      <div className="my-6 flex items-center gap-3">
-        <div className="flex-1 h-px bg-[#1A212B]" />
-        <span className="text-xs font-medium text-[#8B98A5]">OR</span>
-        <div className="flex-1 h-px bg-[#1A212B]" />
+      <div className="my-7 flex items-center gap-3">
+        <div className="h-px flex-1 bg-white/[0.06]" />
+        <span className="font-marketing-mono text-[11px] tracking-[0.08em] text-[var(--text-muted)]">OR</span>
+        <div className="h-px flex-1 bg-white/[0.06]" />
       </div>
 
       <button
         type="button"
         onClick={handleGoogleSignIn}
         disabled={busy}
-        className="w-full h-12 rounded-[10px] border text-sm font-medium text-[#E6EDF3] border-[#1A212B] bg-[#0E141B] hover:border-[#10A37F]/50 hover:bg-[#0E141B] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+        className="font-marketing-body flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-md border border-white/[0.1] bg-[#161616] py-3 text-sm text-[var(--text-secondary)] transition-colors hover:border-white/[0.16] hover:bg-[#1a1a1a] hover:text-[var(--text-primary)] disabled:opacity-50"
       >
-        <svg className="h-5 w-5" viewBox="0 0 24 24">
+        <svg className="h-5 w-5 shrink-0 opacity-80" viewBox="0 0 24 24">
           <path
             fill="currentColor"
             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -201,32 +202,29 @@ export function LoginForm({ nextPath, siteOrigin = "" }: { nextPath: string; sit
         Continue with Google
       </button>
 
-      <p className="mt-6 text-center text-sm text-[#8B98A5]">
+      <p className="mt-8 text-center text-sm font-light text-[var(--text-muted)]">
         New to VRTL?{" "}
-        <Link href="/signup" className="font-medium text-[#10A37F] hover:underline">
+        <Link href="/signup" className="text-[var(--accent-marketing)] transition-colors hover:underline">
           Sign up
         </Link>
       </p>
 
-      {/* Full-screen loader during sign-in */}
       {busy && (
         <div
-          className="fixed inset-0 z-50 flex min-h-screen flex-col items-center justify-center bg-[#05070A]/95 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex min-h-screen flex-col items-center justify-center bg-[var(--bg-base)]/95 backdrop-blur-sm"
           role="status"
           aria-live="polite"
         >
           <Image
-            src="/brand/VRTL_Solo.png"
+            src="/brand/White_VRTL.png"
             alt=""
-            width={180}
-            height={64}
-            className="mb-6 h-12 w-auto brightness-0 invert opacity-95 animate-pulse"
+            width={160}
+            height={40}
+            className="mb-6 h-8 w-auto opacity-90 animate-pulse"
             priority
           />
-          <div
-            className="h-6 w-6 animate-spin rounded-full border-2 border-[#1A212B] border-t-[#10A37F]"
-          />
-          <p className="mt-4 text-sm text-[#8B98A5]">Signing you in…</p>
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/[0.08] border-t-[var(--accent-marketing)]" />
+          <p className="mt-4 text-sm text-[var(--text-secondary)]">Signing you in…</p>
         </div>
       )}
     </>

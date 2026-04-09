@@ -125,6 +125,12 @@ html {
   animation-play-state: paused;
 }
 
+/* Auth surfaces (login / onboarding) — shared with Tailwind `auth-input` */
+.auth-input:focus {
+  border-color: rgba(0, 232, 122, 0.4) !important;
+  box-shadow: 0 0 0 3px rgba(0, 232, 122, 0.06);
+}
+
 /* Stagger animation for grid items */
 @keyframes fade-up {
   from {
