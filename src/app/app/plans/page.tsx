@@ -62,18 +62,19 @@ const PLANS = [
       "Dedicated support",
     ],
   },
-];
+] as const;
+
+/** Matches landing `--accent-marketing` / product accent */
+const ACCENT = "#22c55e";
+const ACCENT_RGB = "34, 197, 94";
 
 const PAYWALL = {
-  pageBg: "#05070A",
-  cardBg: "#0B0F14",
-  border: "#1A212B",
-  text: "#E6EDF3",
-  textMuted: "#8B98A5",
-  accent: "#10A37F",
-  accentHover: "#0e8f6f",
-  cardShadow: "0 10px 30px rgba(0,0,0,0.35)",
-  buttonShadow: "0 6px 20px rgba(16,163,127,0.25)",
+  pageBg: "#070707",
+  cardBg: "rgba(255,255,255,0.02)",
+  border: "rgba(255,255,255,0.08)",
+  text: "#f4f4f5",
+  textMuted: "rgba(255,255,255,0.45)",
+  toggleTrack: "rgba(255,255,255,0.06)",
 } as const;
 
 export default function PlansPage() {
@@ -89,14 +90,12 @@ export default function PlansPage() {
   useEffect(() => {
     async function load() {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (!user) return;
 
-        const { data: membership } = await supabase
-          .from("agency_users")
-          .select("agency_id")
-          .eq("user_id", user.id)
-          .maybeSingle();
+        const { data: membership } = await supabase.from("agency_users").select("agency_id").eq("user_id", user.id).maybeSingle();
 
         if (membership?.agency_id) {
           const { data: agency } = await supabase
@@ -188,64 +187,52 @@ export default function PlansPage() {
   }
 
   const currentPlanIndex = PLANS.findIndex((p) => p.id === subscription?.plan);
-
-  /** Pre-purchase: no Stripe customer yet → show only purchase CTAs. Post-purchase: has Stripe → show Manage/Upgrade/Downgrade. */
   const isPostPurchase = Boolean(subscription?.has_stripe);
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-start py-10 px-4 sm:px-6"
+      className="flex min-h-screen flex-col items-center px-4 pb-20 pt-12 sm:px-6 sm:pb-24 sm:pt-16"
       style={{ backgroundColor: PAYWALL.pageBg }}
     >
-      {/* Logo */}
-      <Link href="/app" className="mb-8 flex shrink-0">
+      <Link href="/app" className="mb-10 flex shrink-0 sm:mb-12">
         <Image
           src="/brand/VRTL_Solo.png"
           alt="VRTL Score"
           width={140}
           height={40}
-          className="h-8 w-auto opacity-95"
+          className="h-9 w-auto opacity-95 sm:h-10"
           priority
         />
       </Link>
 
-      {/* Headline — no subtitle on paywall */}
-      <div className="text-center mb-2">
-        <h1
-          className="font-app-display text-2xl font-normal tracking-tight sm:text-3xl"
-          style={{ color: PAYWALL.text }}
-        >
+      <div className="mb-10 max-w-2xl text-center sm:mb-12">
+        <h1 className="font-app-display text-3xl font-normal leading-[1.15] tracking-tight text-white sm:text-4xl md:text-[2.5rem] md:leading-tight">
           Choose your plan
         </h1>
       </div>
 
-      {/* Error */}
       {error && (
-        <div className="w-full max-w-4xl mt-4">
+        <div className="mt-2 w-full max-w-5xl">
           <Alert variant="danger">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         </div>
       )}
 
-      {/* Billing toggle — segmented control; savings badge readable in both states */}
-      <div className="flex justify-center mt-6">
+      {/* Billing toggle — active: green + black text; inactive: muted */}
+      <div className="flex justify-center">
         <div
-          className="inline-flex items-center gap-0 rounded-[10px] p-0.5"
-          style={{ backgroundColor: PAYWALL.border }}
+          className="inline-flex items-center gap-0.5 rounded-full p-1"
+          style={{ backgroundColor: PAYWALL.toggleTrack }}
         >
           <button
             type="button"
             onClick={() => setIsAnnual(false)}
             className={cn(
-              "rounded-lg px-5 py-2.5 text-sm font-medium transition-all",
-              !isAnnual ? "text-white" : "hover:bg-white/5"
+              "rounded-full px-6 py-2.5 text-sm font-semibold transition-all duration-200 md:px-7 md:py-3",
+              !isAnnual ? "text-black shadow-sm" : "text-white/40 hover:bg-white/[0.04] hover:text-white/55"
             )}
-            style={
-              !isAnnual
-                ? { backgroundColor: PAYWALL.accent, boxShadow: PAYWALL.buttonShadow }
-                : { color: PAYWALL.textMuted }
-            }
+            style={!isAnnual ? { backgroundColor: ACCENT } : undefined}
           >
             Monthly
           </button>
@@ -253,23 +240,17 @@ export default function PlansPage() {
             type="button"
             onClick={() => setIsAnnual(true)}
             className={cn(
-              "rounded-lg px-5 py-2.5 text-sm font-medium transition-all flex items-center gap-2",
-              isAnnual ? "text-white" : "hover:bg-white/5"
+              "inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold transition-all duration-200 md:px-7 md:py-3",
+              isAnnual ? "text-black shadow-sm" : "text-white/40 hover:bg-white/[0.04] hover:text-white/55"
             )}
-            style={
-              isAnnual
-                ? { backgroundColor: PAYWALL.accent, boxShadow: PAYWALL.buttonShadow }
-                : { color: PAYWALL.textMuted }
-            }
+            style={isAnnual ? { backgroundColor: ACCENT } : undefined}
           >
             Annual
             <span
-              className="rounded-full px-2 py-0.5 text-xs font-medium border border-current"
-              style={
-                isAnnual
-                  ? { backgroundColor: "rgba(0,0,0,0.2)", color: "#fff", borderColor: "rgba(255,255,255,0.4)" }
-                  : { backgroundColor: "rgba(16,163,127,0.2)", color: PAYWALL.accent }
-              }
+              className={cn(
+                "rounded-full px-2 py-0.5 text-xs font-semibold",
+                isAnnual ? "bg-black/15 text-black/80" : "border border-white/10 bg-white/[0.06] text-white/50"
+              )}
             >
               Save 17%
             </span>
@@ -277,26 +258,25 @@ export default function PlansPage() {
         </div>
       </div>
 
-      {/* Loading */}
       {loading && (
-        <div className="grid gap-6 md:grid-cols-3 w-full max-w-5xl mt-10">
+        <div className="mt-14 grid w-full max-w-6xl gap-8 md:mt-16 md:grid-cols-3 md:gap-10">
           {[...Array(3)].map((_, i) => (
             <div
               key={i}
-              className="h-96 rounded-[12px] animate-pulse"
-              style={{ backgroundColor: PAYWALL.cardBg, border: `1px solid ${PAYWALL.border}` }}
+              className="h-[28rem] animate-pulse rounded-2xl border border-white/[0.06]"
+              style={{ backgroundColor: PAYWALL.cardBg }}
             />
           ))}
         </div>
       )}
 
-      {/* Plans */}
       {!loading && (
-        <div className="grid gap-6 md:grid-cols-3 w-full max-w-5xl mt-10">
+        <div className="mt-14 grid w-full max-w-6xl gap-8 md:mt-16 md:grid-cols-3 md:items-start md:gap-10">
           {PLANS.map((plan) => {
+            const planIndex = PLANS.findIndex((p) => p.id === plan.id);
             const isCurrentPlan = isPostPurchase && subscription?.plan === plan.id;
-            const isDowngrade = isPostPurchase && currentPlanIndex > PLANS.indexOf(plan);
-            const isUpgrade = isPostPurchase && currentPlanIndex < PLANS.indexOf(plan) && currentPlanIndex >= 0;
+            const isDowngrade = isPostPurchase && currentPlanIndex > planIndex;
+            const isUpgrade = isPostPurchase && currentPlanIndex < planIndex && currentPlanIndex >= 0;
             const price = isAnnual ? plan.annualPrice : plan.monthlyPrice;
             const monthlyEquivalent = isAnnual ? Math.round(plan.annualPrice / 12) : plan.monthlyPrice;
 
@@ -310,70 +290,62 @@ export default function PlansPage() {
               return `Start ${plan.name}`;
             })();
 
+            const isGrowth = plan.id === "growth";
+
             return (
               <div
                 key={plan.id}
-                className="relative flex flex-col rounded-[12px] border p-6 transition-all"
+                className={cn(
+                  "relative flex flex-col rounded-2xl border p-7 transition-all duration-300 sm:p-8",
+                  isGrowth && "z-[1] md:scale-[1.02]"
+                )}
                 style={{
                   backgroundColor: PAYWALL.cardBg,
-                  border: `1px solid ${plan.popular ? PAYWALL.accent : PAYWALL.border}`,
-                  boxShadow: PAYWALL.cardShadow,
+                  borderColor: isGrowth ? `rgba(${ACCENT_RGB}, 0.45)` : PAYWALL.border,
+                  boxShadow: isGrowth
+                    ? `0 0 0 1px rgba(${ACCENT_RGB}, 0.2), 0 8px 32px rgba(${ACCENT_RGB}, 0.14), 0 24px 48px rgba(0,0,0,0.35)`
+                    : "0 12px 40px rgba(0,0,0,0.25)",
                 }}
               >
-                {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                {isGrowth && (
+                  <div className="absolute -top-3 left-1/2 z-[2] -translate-x-1/2 whitespace-nowrap">
                     <span
-                      className="rounded-full px-3 py-1 text-xs font-medium text-white"
-                      style={{ backgroundColor: PAYWALL.accent }}
+                      className="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em]"
+                      style={{
+                        backgroundColor: `rgba(${ACCENT_RGB}, 0.18)`,
+                        borderColor: `rgba(${ACCENT_RGB}, 0.35)`,
+                        color: ACCENT,
+                      }}
                     >
-                      Most popular
+                      Most agencies choose this
                     </span>
                   </div>
                 )}
 
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold" style={{ color: PAYWALL.text }}>
-                    {plan.name}
-                  </h3>
-                  <p className="mt-1 text-sm" style={{ color: PAYWALL.textMuted }}>
-                    {plan.description}
-                  </p>
+                <div className="mb-8">
+                  <h3 className="text-lg font-semibold tracking-tight text-white">{plan.name}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-white/55">{plan.description}</p>
                 </div>
 
-                {/* Price — number dominant */}
-                <div className="mb-6">
-                  <div className="flex items-baseline gap-1 flex-wrap">
-                    <span
-                      className="text-4xl font-bold tracking-tight sm:text-5xl"
-                      style={{ color: PAYWALL.text }}
-                    >
-                      ${monthlyEquivalent}
-                    </span>
-                    <span className="text-base font-medium" style={{ color: PAYWALL.textMuted }}>
-                      /month
-                    </span>
+                <div className="mb-8">
+                  <div className="flex flex-wrap items-baseline gap-1">
+                    <span className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">${monthlyEquivalent}</span>
+                    <span className="text-base font-medium text-white/45">/month</span>
                   </div>
-                  {isAnnual && (
-                    <p className="mt-1 text-sm" style={{ color: PAYWALL.textMuted }}>
-                      ${price}/year billed annually
-                    </p>
-                  )}
+                  {isAnnual && <p className="mt-2 text-sm text-white/45">${price}/year billed annually</p>}
                 </div>
 
-                <ul className="mb-6 flex-1 space-y-3">
+                <ul className="mb-10 flex-1 space-y-3.5">
                   {plan.features.map((feature) => (
-                    <li
-                      key={feature}
-                      className="flex items-center gap-3 text-sm"
-                      style={{ color: PAYWALL.textMuted }}
-                    >
+                    <li key={feature} className="flex items-start gap-3 text-sm leading-snug text-white/70">
                       <svg
-                        className="h-5 w-5 shrink-0"
-                        style={{ color: PAYWALL.accent }}
+                        className="mt-0.5 h-5 w-5 shrink-0"
+                        style={{ color: `rgba(${ACCENT_RGB}, 0.75)` }}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
                         strokeWidth={2}
+                        aria-hidden
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                       </svg>
@@ -382,37 +354,26 @@ export default function PlansPage() {
                   ))}
                 </ul>
 
-                {/* CTA: pre-purchase = Start [Plan]; post-purchase = Manage / Upgrade / Downgrade */}
                 <button
                   type="button"
                   onClick={() => handleSelectPlan(plan.id)}
                   disabled={checkoutLoading === plan.id || portalLoading}
                   className={cn(
-                    "w-full rounded-[10px] h-12 text-sm font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50",
-                    plan.popular && "bg-[#10A37F] text-white border-0 hover:bg-[#0e8f6f]",
-                    plan.id === "pro" && "bg-transparent border-2 border-[#10A37F] text-[#10A37F] hover:bg-[#10A37F]/10",
-                    plan.id === "starter" && "bg-transparent border border-[#1A212B] text-[#E6EDF3] hover:border-[#8B98A5]"
+                    "flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-all disabled:opacity-50",
+                    plan.id === "growth" &&
+                      "bg-[#22c55e] text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] hover:bg-[#16a34a]",
+                    plan.id === "pro" && "border-2 border-[#22c55e] bg-transparent text-[#22c55e] hover:bg-[rgba(34,197,94,0.1)]",
+                    plan.id === "starter" &&
+                      "border border-white/[0.1] bg-white/[0.03] text-white/50 hover:border-white/[0.14] hover:bg-white/[0.05] hover:text-white/65"
                   )}
-                  style={plan.popular ? { boxShadow: PAYWALL.buttonShadow } : undefined}
                 >
                   {checkoutLoading === plan.id || (isCurrentPlan && portalLoading) ? (
                     <>
                       <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        />
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                        />
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                       </svg>
-                      Loading...
+                      Loading…
                     </>
                   ) : (
                     ctaLabel
@@ -424,14 +385,9 @@ export default function PlansPage() {
         </div>
       )}
 
-      {/* Help text */}
-      <p className="mt-8 text-center text-sm" style={{ color: PAYWALL.textMuted }}>
+      <p className="mt-12 max-w-md text-center text-sm text-white/45 sm:mt-16">
         Need help choosing?{" "}
-        <a
-          href="mailto:support@vrtlscore.com"
-          className="font-medium hover:underline"
-          style={{ color: PAYWALL.accent }}
-        >
+        <a href="mailto:support@vrtlscore.com" className="font-medium text-[#22c55e] transition-colors hover:text-[#4ade80]">
           Contact us
         </a>
       </p>
