@@ -100,7 +100,7 @@ function getScoreLabel(score: number | null): { label: string; description: stri
 
 function getAuthorityStatusTone(score: number | null): string {
   if (score === null) return "border-white/15 bg-white/[0.06] text-text-2";
-  if (score >= 80) return "border-accent/35 bg-accent/12 text-accent";
+  if (score >= 80) return "border-white/20 bg-white/[0.06] text-text";
   if (score >= 60) return "border-sky-400/35 bg-sky-400/10 text-sky-200";
   if (score >= 40) return "border-authority-watchlist/35 bg-authority-watchlist/12 text-authority-watchlist";
   return "border-authority-losing/35 bg-authority-losing/12 text-authority-losing";
@@ -108,7 +108,7 @@ function getAuthorityStatusTone(score: number | null): string {
 
 function getScoreColor(score: number | null): string {
   if (score === null) return "text-text-3";
-  if (score >= 80) return "text-authority-dominant";
+  if (score >= 80) return "text-text";
   if (score >= 50) return "text-authority-watchlist";
   return "text-authority-losing";
 }
@@ -293,7 +293,7 @@ function VerdictCommandCenter({
   const verdict = getVerdictSentence(score, providers, detail);
 
   return (
-    <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+    <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
       {/* Left: identity, index, diagnosis, trend */}
       <div className="flex items-start gap-4">
         {faviconUrl && (
@@ -309,10 +309,10 @@ function VerdictCommandCenter({
             </a>
           )}
           <div className="mt-3 flex flex-wrap items-baseline gap-3">
-            <span className="text-4xl font-semibold tabular-nums tracking-tight text-text">{score ?? "—"}</span>
-            <span className="text-sm text-text-3">AI Authority Index</span>
+            <span className="text-6xl font-semibold tabular-nums tracking-tight text-text">{score ?? "—"}</span>
+            <span className="text-sm text-white/75">AI Authority Index</span>
             {delta !== null && delta !== 0 && (
-              <span className={cn("text-sm tabular-nums", delta > 0 ? "text-authority-dominant" : "text-authority-losing")}>
+              <span className={cn("text-sm tabular-nums", delta > 0 ? "text-white/75" : "text-authority-losing")}>
                 {delta > 0 ? "+" : ""}{delta} vs last
               </span>
             )}
@@ -958,7 +958,7 @@ function RunSnapshotButton({
       onClick={onRunSnapshot}
       disabled={running}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-[13px] font-semibold text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] transition-colors hover:bg-accent-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090b0d] disabled:opacity-50",
+        "inline-flex items-center justify-center gap-2 rounded-lg bg-[#22c55e] px-5 py-2.5 text-[13px] font-semibold text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] transition-colors hover:bg-[#16a34a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090b0d] disabled:opacity-50",
         className
       )}
     >
@@ -1438,7 +1438,7 @@ function CompetitiveAuthorityRanking({
                         <td className="py-1.5 text-right tabular-nums font-medium text-text">{entity.score}</td>
                         <td className="py-1.5 text-right w-14">
                           {entity.delta !== null && (
-                            <span className={cn("text-[10px]", entity.delta > 0 ? "text-authority-dominant" : entity.delta < 0 ? "text-authority-losing" : "text-text-3")}>
+                            <span className={cn("text-[10px]", entity.delta > 0 ? "text-white/75" : entity.delta < 0 ? "text-authority-losing" : "text-text-3")}>
                               {entity.delta > 0 ? "+" : ""}{entity.delta}
                             </span>
                           )}
@@ -1477,11 +1477,11 @@ function DashboardSection({
   noTopRule?: boolean;
 }) {
   return (
-    <section className={cn("w-full space-y-4 pt-5", !noTopRule && "border-t border-white/[0.06]", className)}>
+    <section className={cn("w-full space-y-3 pt-4", !noTopRule && "border-t border-white/[0.08]", className)}>
       <header className={cn(headerClassName)}>
-        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3">Intelligence</p>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/75">Intelligence</p>
         <h2 className="mt-1 text-base font-semibold tracking-tight text-text">{title}</h2>
-        {subtitle != null ? <div className="mt-1.5 max-w-2xl text-[13px] leading-relaxed text-text-2">{subtitle}</div> : null}
+        {subtitle != null ? <div className="mt-1.5 max-w-2xl text-[13px] leading-relaxed text-white/75">{subtitle}</div> : null}
       </header>
       {children}
     </section>
@@ -1506,7 +1506,7 @@ function PageHeader({ clientName, trailing }: { clientName: string; trailing?: R
               <path d="M4.5 2L8.5 6l-4 4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </span>
-          <span className="font-app-display truncate font-normal text-text" aria-current="page">
+          <span className="truncate font-semibold text-text" aria-current="page">
             {clientName}
           </span>
         </nav>
@@ -1989,10 +1989,10 @@ function AIAnswerMarketShareChart({
   if (rows.length === 0) {
     if (proofZone) {
       return (
-        <div className="rounded-2xl bg-black/20 px-6 py-10 text-center ring-1 ring-inset ring-dashed ring-white/[0.08]">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3">Competitive standing</p>
+        <div className="rounded-2xl border border-dashed border-white/[0.12] bg-[#0B0F14] px-6 py-9 text-center">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/75">Competitive standing</p>
           <p className="mt-2 text-[15px] font-semibold text-text">No mention-share data yet</p>
-          <p className="mt-1.5 text-sm leading-relaxed text-text-2">
+          <p className="mt-1.5 text-sm leading-relaxed text-white/75">
             Run a snapshot to rank how often you appear versus competitors in this set.
           </p>
         </div>
@@ -2033,24 +2033,24 @@ function AIAnswerMarketShareChart({
 
   if (proofZone) {
     return (
-      <div className="overflow-hidden rounded-2xl bg-[#090b0d]/95 ring-1 ring-inset ring-white/[0.04]">
-        <div className="flex flex-col gap-6 px-5 py-5 sm:flex-row sm:items-start sm:justify-between sm:gap-10 sm:px-6 sm:py-6">
+        <div className="overflow-hidden rounded-2xl border border-white/20 bg-[#0B0F14]">
+        <div className="flex flex-col gap-5 px-5 py-5 sm:flex-row sm:items-start sm:justify-between sm:gap-8 sm:px-6 sm:py-5">
           <div className="min-w-0 flex-1 sm:pt-0.5">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3/78">Authority gap · competitive set</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/75">Authority gap · competitive set</p>
             <h3 className="mt-1 text-lg font-semibold tracking-tight text-text sm:text-xl">Mention share in model answers</h3>
-            <p className="mt-2 max-w-2xl text-[13px] font-normal leading-relaxed text-text-3/88">{gapLine}</p>
+            <p className="mt-2 max-w-2xl text-[13px] font-normal leading-relaxed text-white/75">{gapLine}</p>
           </div>
           {clientRow ? (
-            <div className="shrink-0 self-stretch rounded-xl bg-black/22 px-4 py-3.5 text-right ring-1 ring-inset ring-white/[0.045] sm:min-w-[7.75rem] sm:self-auto">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-text-3/78">Your position</p>
+            <div className="shrink-0 self-stretch rounded-xl border border-white/[0.12] bg-black/25 px-4 py-3.5 text-right sm:min-w-[7.75rem] sm:self-auto">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/75">Your position</p>
               <p className="mt-1 text-[1.75rem] font-semibold tabular-nums leading-none tracking-tight text-text sm:text-3xl">#{clientRow.rank}</p>
-              <p className="mt-1 text-[11px] font-medium tabular-nums text-text-3/90">{clientRow.share}% share</p>
+              <p className="mt-1 text-[11px] font-medium tabular-nums text-white/75">{clientRow.share}% share</p>
             </div>
           ) : null}
         </div>
-        <ul className="border-t border-white/[0.035]">
+        <ul className="border-t border-white/[0.08]">
           {rows.map((row) => (
-            <li key={row.name} className="border-b border-white/[0.035] px-5 py-4 last:border-b-0 sm:px-6 sm:py-[1.125rem]">
+            <li key={row.name} className="border-b border-white/[0.08] px-5 py-4 last:border-b-0 sm:px-6 sm:py-[1.125rem]">
               <div className="flex items-start gap-3.5 sm:gap-4">
                 <span
                   className={cn(
@@ -2064,7 +2064,7 @@ function AIAnswerMarketShareChart({
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <span className={cn("text-[13px] font-semibold tracking-tight", row.isClient ? "text-text" : "text-text-2")}>
+                    <span className={cn("text-[13px] font-semibold tracking-tight", row.isClient ? "text-text" : "text-white/80")}>
                       {normalizeBrandName(row.name)}
                       {row.isClient ? (
                         <span className="ml-2 align-middle text-[10px] font-medium uppercase tracking-[0.1em] text-text-3/90">
@@ -2075,7 +2075,7 @@ function AIAnswerMarketShareChart({
                     <span
                       className={cn(
                         "shrink-0 text-[13px] font-semibold tabular-nums",
-                        row.isClient ? "text-authority-losing/95" : "text-text-2"
+                        row.isClient ? "text-authority-losing/95" : "text-white/75"
                       )}
                     >
                       {row.share}%
@@ -2443,7 +2443,7 @@ function DecisionSurface({
   const problemLine =
     score == null || !weakestName
       ? "Run a snapshot to isolate the weak channel."
-      : `${weakestName} drives the majority of lost visibility in this snapshot.`;
+      : `Primary loss: ${weakestName}`;
 
   const causeLine =
     primary?.whyItMatters?.trim() ||
@@ -2458,29 +2458,25 @@ function DecisionSurface({
       ? "border-authority-losing/12 bg-authority-losing/[0.028] ring-1 ring-inset ring-authority-losing/6"
       : primary?.priority === "MEDIUM"
         ? "border-authority-watchlist/16 bg-authority-watchlist/[0.035] ring-1 ring-inset ring-authority-watchlist/7"
-        : "border-authority-dominant/16 bg-authority-dominant/[0.035] ring-1 ring-inset ring-authority-dominant/7";
+        : "border-white/[0.14] bg-white/[0.04] ring-1 ring-inset ring-white/[0.08]";
   const actionEyebrowClass =
     primary?.priority === "HIGH"
       ? "text-authority-losing/95"
       : primary?.priority === "MEDIUM"
         ? "text-authority-watchlist"
-        : "text-authority-dominant";
+        : "text-text-2";
   const actionUpsideClass =
     primary?.priority === "HIGH"
       ? "text-authority-losing/85"
       : primary?.priority === "MEDIUM"
         ? "text-authority-watchlist/88"
-        : "text-authority-dominant/88";
+        : "text-text-2/90";
 
   return (
-    <section className="w-full border-b border-white/[0.035] pb-6">
-      <div className="relative overflow-hidden rounded-2xl border border-white/[0.045] bg-[#090b0d] shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
-        <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.02] via-transparent to-transparent"
-          aria-hidden
-        />
+    <section className="w-full border-b border-white/[0.08] pb-5">
+      <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-[#0B0F14]">
         <div className="relative">
-          <div className="flex flex-wrap items-center gap-3 border-b border-white/[0.035] px-5 py-4 sm:px-7 sm:py-4">
+          <div className="flex flex-wrap items-center gap-3 border-b border-white/[0.08] px-5 py-3.5 sm:px-6 sm:py-4">
             {logoSrc ? (
               <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-black/35 ring-1 ring-inset ring-white/[0.06]">
                 <img src={logoSrc} alt="" className="h-7 w-7 object-contain" width={28} height={28} />
@@ -2491,16 +2487,14 @@ function DecisionSurface({
               </span>
             )}
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3">Client overview</p>
-              <h1 className="font-app-display mt-0.5 truncate text-lg font-normal tracking-tight text-text sm:text-xl">
-                {client.name}
-              </h1>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/75">Client overview</p>
+              <h1 className="mt-0.5 truncate text-lg font-semibold tracking-tight text-text sm:text-xl">{client.name}</h1>
               {client.website ? (
                 <a
                   href={client.website}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-0.5 block truncate text-[13px] text-text-2 transition-colors hover:text-text"
+                  className="mt-0.5 block truncate text-[13px] text-white/75 transition-colors hover:text-text"
                 >
                   {(domain || client.website).replace(/^https?:\/\//, "").replace(/\/$/, "")}
                 </a>
@@ -2519,13 +2513,13 @@ function DecisionSurface({
           </div>
 
           <div className="grid gap-0 lg:grid-cols-[1fr_minmax(260px,300px)]">
-            <div className="space-y-5 px-5 py-6 sm:px-7 sm:py-6 lg:border-r lg:border-white/[0.035]">
+            <div className="space-y-4 px-5 py-5 sm:px-6 sm:py-5 lg:border-r lg:border-white/[0.08]">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3/75">Primary diagnosis</p>
-                <p className="font-app-display mt-0.5 max-w-2xl text-[1.5rem] font-normal leading-[1.22] tracking-[-0.02em] text-text sm:text-[1.625rem] sm:leading-tight">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/75">Primary diagnosis</p>
+                <p className="mt-1 max-w-2xl text-xl font-semibold leading-snug tracking-tight text-text sm:text-2xl">
                   {problemLine}
                 </p>
-                <p className="mt-2 max-w-xl text-[13px] font-normal leading-relaxed text-text-3/88">{causeLine}</p>
+                <p className="mt-2 max-w-xl text-[13px] font-normal leading-relaxed text-white/75">{causeLine}</p>
               </div>
 
               {primary && (
@@ -2539,9 +2533,9 @@ function DecisionSurface({
                     </span>
                   </div>
                   <p className="mt-2 text-[15px] font-semibold leading-snug text-text">{primary.title}</p>
-                  <ul className="mt-3 space-y-1.5 border-t border-white/[0.035] pt-3">
+                  <ul className="mt-3 space-y-1.5 border-t border-white/[0.08] pt-3">
                     {topBullets.map((b, i) => (
-                      <li key={i} className="flex gap-2 text-[13px] leading-snug text-text-2/95">
+                      <li key={i} className="flex gap-2 text-[13px] leading-snug text-white/75">
                         <span className="mt-0.5 font-medium text-text-3" aria-hidden>
                           ·
                         </span>
@@ -2570,11 +2564,11 @@ function DecisionSurface({
               </div>
             </div>
 
-            <div className="flex flex-col justify-between border-t border-white/[0.035] bg-black/12 px-5 py-6 sm:px-7 sm:py-6 lg:border-t-0">
+            <div className="flex flex-col justify-between border-t border-white/[0.08] bg-black/20 px-5 py-5 sm:px-6 sm:py-5 lg:border-t-0">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-text-3/72">Authority index</p>
-                <div className="mt-0.5 flex flex-wrap items-end gap-2">
-                  <span className="text-[3.5rem] font-semibold leading-[0.88] tracking-[-0.05em] text-text tabular-nums sm:text-[4.25rem]">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/75">Authority index</p>
+                <div className="mt-1 flex flex-wrap items-end gap-2">
+                  <span className="text-6xl font-semibold leading-[0.95] tracking-tight text-text tabular-nums sm:text-7xl">
                     {score ?? "—"}
                   </span>
                   {delta !== null && delta !== 0 ? (
@@ -2583,7 +2577,7 @@ function DecisionSurface({
                         "mb-1 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-semibold tabular-nums ring-1 ring-inset",
                         delta < 0
                           ? "bg-authority-losing/[0.06] text-authority-losing/95 ring-authority-losing/12"
-                          : "bg-authority-dominant/[0.06] text-authority-dominant/95 ring-authority-dominant/12"
+                          : "bg-white/[0.06] text-white/80 ring-white/15"
                       )}
                     >
                       {delta < 0 ? <span aria-hidden>↓</span> : <span aria-hidden>↑</span>}
@@ -2595,13 +2589,13 @@ function DecisionSurface({
                     </span>
                   ) : null}
                 </div>
-                <p className="mt-1 text-[10px] font-normal leading-snug text-text-3/58">
+                <p className="mt-1 text-[10px] font-normal leading-snug text-white/65">
                   Composite across tracked models · 0–100
                 </p>
               </div>
-              <div className="mt-6 border-t border-white/[0.035] pt-3.5 lg:mt-7">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-text-3/75">Status</p>
-                <p className="mt-0.5 text-[11px] font-normal leading-relaxed text-text-3/85">{getScoreLabel(score).description}</p>
+              <div className="mt-5 border-t border-white/[0.08] pt-3 lg:mt-6">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/75">Status</p>
+                <p className="mt-0.5 text-[11px] font-normal leading-relaxed text-white/75">{getScoreLabel(score).description}</p>
               </div>
             </div>
           </div>
@@ -2626,10 +2620,10 @@ function WhatIsWrongSection({ providers }: { providers: [string, number][] }) {
       title="Where you're winning and losing"
       subtitle="Per-model retrieval. Expand a row for the playbook."
       noTopRule
-      className="!space-y-3 !pt-5"
+      className="!space-y-3 !border-t !border-white/[0.08] !pt-5"
     >
-      <div className="overflow-hidden rounded-2xl bg-[#090b0d]/90 ring-1 ring-inset ring-white/[0.035]">
-        <div className="divide-y divide-white/[0.035]">
+      <div className="overflow-hidden rounded-2xl border border-white/20 bg-[#0B0F14]">
+        <div className="divide-y divide-white/[0.08]">
           {VULN_MODELS.map((key) => {
             const entry = providerByKey.get(key);
             const modelScore = entry ? entry[1] : null;
@@ -2707,16 +2701,16 @@ function DiagnosisModelRow({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="group/model-row w-full cursor-pointer select-none rounded-lg bg-transparent text-left transition-colors hover:bg-white/[0.015] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/35"
+        className="group/model-row w-full cursor-pointer select-none rounded-lg bg-transparent text-left transition-colors hover:bg-white/[0.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
         aria-expanded={open}
         aria-label={open ? `Hide playbook for ${label}` : `View playbook for ${label}`}
       >
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2.5 md:flex-nowrap md:items-center">
           <div className="flex min-w-0 items-center gap-2.5 md:w-[140px] md:shrink-0">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black/25 ring-1 ring-inset ring-white/[0.05]">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black/25 ring-1 ring-inset ring-white/10">
               <img src={logoUrl} alt="" className="h-[18px] w-[18px] object-contain" width={18} height={18} />
             </span>
-            <span className="truncate text-[13px] font-semibold tracking-tight text-text">{label}</span>
+            <span className="truncate text-[13px] font-semibold tracking-tight text-white/90">{label}</span>
           </div>
           <div className="order-last min-h-[5px] w-full min-w-0 flex-1 md:order-none md:max-w-md">
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
@@ -2758,14 +2752,14 @@ function DiagnosisModelRow({
             </svg>
           </div>
         </div>
-        <p className="mt-2.5 text-left text-[13px] leading-relaxed text-text-2/95">{diagnosisLine}</p>
+        <p className="mt-2.5 text-left text-[13px] font-medium leading-relaxed text-white/75">{diagnosisLine}</p>
       </button>
       <div
         className="grid transition-[grid-template-rows] duration-200 ease-out"
         style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
       >
         <div className="min-h-0 overflow-hidden">
-          <div className="mt-6 border-t border-white/[0.03] pt-8 sm:pt-9">
+          <div className="mt-5 border-t border-white/[0.08] pt-6 sm:pt-7">
             <div className="playbook-header">Playbook · {label}</div>
             <div className="playbook-section-rule" aria-hidden />
             <div className="pb-1 pr-0 sm:pr-1">
@@ -3669,7 +3663,7 @@ export default function ClientDetailPage() {
     : [];
   return (
     <div className="min-h-screen pb-20 md:pb-0">
-      <div className="mx-auto max-w-[1180px] space-y-5 px-5 py-5 md:px-8 md:py-7">
+      <div className="mx-auto max-w-[1180px] space-y-4 px-5 py-4 md:px-8 md:py-6">
         {/* Loading */}
         {loading && (
           <div className="space-y-4">
@@ -3751,7 +3745,7 @@ export default function ClientDetailPage() {
             <DashboardSection
               title="Why you're losing"
               subtitle="How often you are mentioned versus the competitive set in this snapshot — same framing as the authority report."
-              className="!space-y-4 !pt-5"
+              className="!space-y-3 !pt-4"
               headerClassName="[&_div]:text-[13px] [&_div]:font-normal [&_div]:leading-relaxed [&_div]:text-text-3/85"
             >
               <AIAnswerMarketShareChart
