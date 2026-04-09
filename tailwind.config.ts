@@ -26,7 +26,7 @@ const config: Config = {
         muted: "rgb(var(--muted) / <alpha-value>)",
         /* Authority states (app theme) */
         authority: {
-          dominant: "rgb(var(--authority-dominant, 34 197 94) / <alpha-value>)",
+          dominant: "rgb(var(--accent) / <alpha-value>)",
           stable: "rgb(var(--authority-stable, 148 163 184) / <alpha-value>)",
           watchlist: "rgb(var(--authority-watchlist, 245 158 11) / <alpha-value>)",
           losing: "rgb(var(--authority-losing, 127 29 29) / <alpha-value>)",

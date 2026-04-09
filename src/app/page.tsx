@@ -180,7 +180,7 @@ function HeroPdfPreviewCard() {
                 cy="44"
                 r="34"
                 fill="none"
-                stroke="#00e87a"
+                stroke="var(--accent-marketing)"
                 strokeWidth="6"
                 strokeDasharray="108 265"
                 strokeDashoffset="-27"
@@ -273,7 +273,7 @@ function HeroPdfPreviewCard() {
           </div>
           {(
             [
-              { rank: "#1", name: "Your client", bar: 100, color: "#00e87a", you: true },
+              { rank: "#1", name: "Your client", bar: 100, color: "var(--accent-marketing)", you: true },
               { rank: "#2", name: "Competitor A", bar: 75, color: "#e0e0e0", you: false },
               { rank: "#3", name: "Competitor B", bar: 65, color: "#e0e0e0", you: false },
             ] as const
@@ -287,7 +287,7 @@ function HeroPdfPreviewCard() {
                 style={{
                   fontFamily: "var(--font-mono)",
                   fontSize: "12px",
-                  color: row.you ? "#00e87a" : "#bbb",
+                  color: row.you ? "var(--accent-marketing)" : "#bbb",
                   width: "24px",
                 }}
               >
@@ -390,7 +390,7 @@ function PresenceDotRow({ green, label }: { label: string; green: number }) {
         {Array.from({ length: total }, (_, i) => (
           <span
             key={i}
-            className={`h-1.5 w-1.5 shrink-0 rounded-full ${i < green ? "bg-[#00e87a]" : "bg-[#333]"}`}
+            className={`h-1.5 w-1.5 shrink-0 rounded-full ${i < green ? "bg-[var(--accent-marketing)]" : "bg-[#333]"}`}
           />
         ))}
       </div>
@@ -780,7 +780,7 @@ export default function HomePage() {
                 <AnimateIn delay={150}>
                   <div className="mt-8 rounded-xl border border-[color:var(--border-subtle)] bg-[var(--bg-elevated)] px-6 py-5">
                     <p className="text-xl font-medium">
-                      <span style={{ color: "#00e87a" }}>$2K to $10K</span>
+                      <span style={{ color: "var(--accent-marketing)" }}>$2K to $10K</span>
                       <span className="text-[var(--text-primary)]"> /mo service layer</span>
                     </p>
                     <p className="mt-1 text-[13px] font-light text-[var(--text-secondary)]">
@@ -868,7 +868,7 @@ export default function HomePage() {
                     Are you near the top or missing from the answer?
                   </p>
                   <div className="mt-auto space-y-1 pt-4 text-[10px] leading-relaxed">
-                    <p className="text-[#00e87a]">#1 Your client</p>
+                    <p className="text-[var(--accent-marketing)]">#1 Your client</p>
                     <p className="text-[#555]">#2 Competitor A</p>
                     <p className="text-[#444]">#3 Competitor B</p>
                   </div>
@@ -881,7 +881,7 @@ export default function HomePage() {
                   <div className="mt-auto pt-4">
                     <p className="text-[10px] text-[#555]">Citations: 0%</p>
                     <div className="mt-1 h-[3px] w-full rounded-full bg-[#1a1a1a]">
-                      <div className="h-full w-0 rounded-full bg-[#00e87a]" />
+                      <div className="h-full w-0 rounded-full bg-[var(--accent-marketing)]" />
                     </div>
                     <p className="mt-1 text-[10px] text-[#555]">Target: 15%+</p>
                     <p className="mt-1 text-[10px] text-[#444]">Improve with press + backlinks</p>

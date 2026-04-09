@@ -70,8 +70,8 @@ export function DownloadPdfButton({ snapshotId, className, variant = "default", 
           disabled={busy}
           onClick={download}
           className={cn(
-            "inline-flex h-9 items-center gap-1.5 rounded-md border border-white/15 bg-transparent px-3 text-sm font-medium text-text-2 transition-colors hover:border-white/25 hover:bg-white/[0.05] hover:text-text disabled:opacity-50",
-            success && "border-emerald-500/40 text-emerald-200"
+            "inline-flex h-9 items-center gap-1.5 rounded-lg border border-white/[0.1] bg-transparent px-3 text-[13px] font-semibold text-text-2 transition-colors hover:border-white/[0.14] hover:bg-white/[0.04] hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/35 disabled:opacity-50",
+            success && "border-accent/40 text-accent"
           )}
         >
           {busy ? (
@@ -104,12 +104,12 @@ export function DownloadPdfButton({ snapshotId, className, variant = "default", 
           disabled={busy}
           onClick={download}
           className={cn(
-            "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all",
+            "inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/35",
             busy
-              ? "bg-gray-400 text-white cursor-wait"
+              ? "cursor-wait border-white/[0.06] bg-white/[0.06] text-text-3"
               : success
-                ? "bg-emerald-600 text-white"
-                : "bg-text text-white shadow-sm hover:bg-text/90"
+                ? "border-accent/35 bg-accent/15 text-accent shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+                : "border-white/[0.1] bg-white/[0.04] text-text shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-white/[0.14] hover:bg-white/[0.07]"
           )}
         >
           {busy ? (
@@ -143,12 +143,12 @@ export function DownloadPdfButton({ snapshotId, className, variant = "default", 
         disabled={busy}
         onClick={download}
         className={cn(
-          "group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl px-6 py-4 text-base font-semibold text-white shadow-xl transition-all",
+          "group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border px-6 py-4 text-base font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
           busy
-            ? "bg-gray-400 cursor-wait"
+            ? "cursor-wait border-white/[0.08] bg-white/[0.08] text-text-3"
             : success
-              ? "bg-emerald-600"
-              : "bg-text shadow-sm hover:bg-text/90"
+              ? "border-accent/40 bg-accent/15 text-accent shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
+              : "border-white/[0.12] bg-white/[0.04] text-text shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-accent/35 hover:bg-accent/[0.08]"
         )}
       >
         {/* Icon */}

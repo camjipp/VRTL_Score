@@ -91,16 +91,16 @@ function errorMessage(e: unknown): string {
 }
 
 function getScoreLabel(score: number | null): { label: string; description: string } {
-  if (score === null) return { label: "Watchlist", description: "Run a snapshot to diagnose your AI authority architecture" };
-  if (score >= 80) return { label: "Dominant", description: "High authority signal density. Consistently surfaced and cited across AI models." };
-  if (score >= 60) return { label: "Stable", description: "Present across models, but not yet the default authority" };
-  if (score >= 40) return { label: "Watchlist", description: "Authority is inconsistent and vulnerable to competitor displacement" };
-  return { label: "Losing Ground", description: "Critical authority weakness. Rarely surfaced or cited in AI-generated responses." };
+  if (score === null) return { label: "Watchlist", description: "Run a snapshot to establish an authority baseline." };
+  if (score >= 80) return { label: "Dominant", description: "Strong signal density; surfaced and cited consistently across models." };
+  if (score >= 60) return { label: "Stable", description: "Present across models; not yet the default authority." };
+  if (score >= 40) return { label: "Watchlist", description: "Inconsistent signal; vulnerable to displacement." };
+  return { label: "Losing Ground", description: "Weak signal; rarely surfaced or cited in model answers." };
 }
 
 function getAuthorityStatusTone(score: number | null): string {
   if (score === null) return "border-white/15 bg-white/[0.06] text-text-2";
-  if (score >= 80) return "border-authority-dominant/35 bg-authority-dominant/12 text-authority-dominant";
+  if (score >= 80) return "border-accent/35 bg-accent/12 text-accent";
   if (score >= 60) return "border-sky-400/35 bg-sky-400/10 text-sky-200";
   if (score >= 40) return "border-authority-watchlist/35 bg-authority-watchlist/12 text-authority-watchlist";
   return "border-authority-losing/35 bg-authority-losing/12 text-authority-losing";
@@ -196,7 +196,7 @@ function getVerdictSentence(
   detail: SnapshotDetailResponse | null
 ): string {
   if (score === null || providers.length === 0) {
-    return "Run a snapshot to index AI authority.";
+    return "Run a snapshot to index authority.";
   }
   const sorted = [...providers].sort((a, b) => a[1] - b[1]);
   const weakest = sorted[0];
@@ -204,15 +204,15 @@ function getVerdictSentence(
   const weakestScore = weakest[1];
   const mentionRate = detail ? pct(detail.summary.client_mentioned_count, detail.summary.responses_count || 1) : null;
   if (weakestScore < 40) {
-    return `${weakestName} is critically underindexed — displacement risk is high.`;
+    return `${weakestName} is critically underindexed; displacement risk is high.`;
   }
   if (weakestScore < 60) {
-    return `${weakestName} is underindexed; displacement pressure is building.`;
+    return `${weakestName} is underindexed; displacement pressure is rising.`;
   }
   if (mentionRate !== null && mentionRate < 50) {
-    return "Citation coverage below threshold; exposure is elevated across models.";
+    return "Citation coverage below threshold; cross-model exposure is elevated.";
   }
-  return "Authority holds across models; defend the weakest channel.";
+  return "Authority holds; defend the weakest channel.";
 }
 
 /* Compact AI Authority trend line (single meaningful chart under index). */
@@ -958,7 +958,7 @@ function RunSnapshotButton({
       onClick={onRunSnapshot}
       disabled={running}
       className={cn(
-        "inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-medium text-text transition-colors hover:border-white/25 hover:bg-white/10 disabled:opacity-50",
+        "inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-[13px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition-colors hover:bg-accent-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090b0d] disabled:opacity-50",
         className
       )}
     >
@@ -2289,7 +2289,7 @@ function getModelTerminalStatus(score: number): ModelTerminalStatus {
 }
 
 function modelTerminalPillClass(s: ModelTerminalStatus): string {
-  if (s === "strong") return "border border-authority-dominant/22 bg-authority-dominant/[0.08] text-authority-dominant";
+  if (s === "strong") return "border border-accent/25 bg-accent/10 text-accent";
   if (s === "degrading") return "border border-authority-watchlist/22 bg-authority-watchlist/[0.08] text-authority-watchlist";
   return "border border-authority-losing/22 bg-authority-losing/[0.09] text-authority-losing";
 }
@@ -2441,12 +2441,14 @@ function DecisionSurface({
   const weakestName = weakestEntry ? getProviderDisplayName(weakestEntry[0]) : null;
 
   const problemLine =
-    score == null || !weakestName ? "Run a snapshot to isolate the weak channel." : `Primary loss vector: ${weakestName}.`;
+    score == null || !weakestName
+      ? "Run a snapshot to isolate the weak channel."
+      : `${weakestName} drives the majority of lost visibility in this snapshot.`;
 
   const causeLine =
     primary?.whyItMatters?.trim() ||
     (weakestName
-      ? `Not surfacing in ${weakestName} answers. Displacement is accelerating.`
+      ? `Absent from ${weakestName} answers; displacement is accelerating.`
       : "Run a snapshot to isolate retrieval failure.");
 
   const topBullets = primary ? tacticalActionBullets(primary.action) : [];
@@ -2489,7 +2491,7 @@ function DecisionSurface({
               </span>
             )}
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3">Client dossier</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3">Client overview</p>
               <h1 className="mt-0.5 truncate text-lg font-semibold tracking-tight text-text sm:text-xl">{client.name}</h1>
               {client.website ? (
                 <a
@@ -2553,7 +2555,7 @@ function DecisionSurface({
                   running={running}
                   snapshotStatus={snapshotStatus}
                   onRunSnapshot={runSnapshot}
-                  className="!flex !h-10 !min-h-[40px] !items-center !rounded-lg !border !border-authority-dominant/35 !bg-authority-dominant/[0.12] !px-5 !py-0 !text-[13px] !font-semibold !text-authority-dominant !shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] hover:!border-authority-dominant/45 hover:!bg-authority-dominant/[0.18]"
+                  className="!flex !h-10 !min-h-[40px] !items-center !rounded-lg !px-5 !py-0"
                 />
                 {snapshotId ? (
                   <DownloadPdfButton
@@ -2620,7 +2622,7 @@ function WhatIsWrongSection({ providers }: { providers: [string, number][] }) {
   return (
     <DashboardSection
       title="Where you're winning and losing"
-      subtitle="Model-level retrieval posture. Expand a row for the full playbook."
+      subtitle="Per-model retrieval. Expand a row for the playbook."
       noTopRule
       className="!space-y-3 !pt-5"
     >
@@ -2688,7 +2690,7 @@ function DiagnosisModelRow({
   const [open, setOpen] = useState(false);
   const barFill =
     terminal === "strong"
-      ? "bg-authority-dominant"
+      ? "bg-accent"
       : terminal === "degrading"
         ? "bg-authority-watchlist"
         : "bg-authority-losing";
@@ -2703,8 +2705,9 @@ function DiagnosisModelRow({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="group/model-row w-full cursor-pointer select-none rounded-lg bg-transparent text-left transition-colors hover:bg-white/[0.015] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/12"
+        className="group/model-row w-full cursor-pointer select-none rounded-lg bg-transparent text-left transition-colors hover:bg-white/[0.015] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/35"
         aria-expanded={open}
+        aria-label={open ? `Hide playbook for ${label}` : `View playbook for ${label}`}
       >
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2.5 md:flex-nowrap md:items-center">
           <div className="flex min-w-0 items-center gap-2.5 md:w-[140px] md:shrink-0">
@@ -2726,12 +2729,11 @@ function DiagnosisModelRow({
           <span className={cn("shrink-0 rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide", modelTerminalPillClass(terminal))}>
             {modelTerminalLabel(terminal)}
           </span>
-          <div className="ml-auto flex shrink-0 items-center gap-1">
+          <div className="ml-auto flex shrink-0 items-center justify-end gap-1.5 md:min-w-[7.25rem]">
             <span
-              className="hidden text-[11px] font-medium text-text-3 sm:inline [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/model-row:opacity-100"
-              aria-hidden
+              className="hidden text-[11px] font-medium text-text-3 md:inline [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/model-row:opacity-100"
             >
-              {open ? "Hide" : "Playbook"}
+              {open ? "Hide playbook" : "View playbook"}
             </span>
             <svg
               width={18}
@@ -2739,7 +2741,7 @@ function DiagnosisModelRow({
               viewBox="0 0 16 16"
               fill="none"
               className={cn(
-                "shrink-0 text-text-2 transition-transform duration-200 ease-out",
+                "shrink-0 text-text-2 transition-transform duration-200 ease-out md:text-text-3",
                 open && "rotate-180"
               )}
               aria-hidden

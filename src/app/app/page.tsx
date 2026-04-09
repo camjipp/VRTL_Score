@@ -120,7 +120,7 @@ function getAuthorityStateFromScore(score: number | null): AuthorityState {
 
 /** Thin left accent for Risk Map cells — low contrast, score carries hierarchy */
 function getAuthorityStateBar(state: AuthorityState): string {
-  if (state === "Dominant") return "border-l-2 border-l-authority-dominant/35 pl-1.5";
+  if (state === "Dominant") return "border-l-2 border-l-accent/40 pl-1.5";
   if (state === "Stable") return "border-l-2 border-l-authority-stable/40 pl-1.5";
   if (state === "Watchlist") return "border-l-2 border-l-authority-watchlist/40 pl-1.5";
   return "border-l-2 border-l-authority-losing/40 pl-1.5";
@@ -146,7 +146,7 @@ function triageOrder(c: ClientWithStats): number {
 
 function StatusPill({ state }: { state: AuthorityState }) {
   const dotClass =
-    state === "Dominant" ? "bg-authority-dominant/90" :
+    state === "Dominant" ? "bg-accent/90" :
     state === "Stable" ? "bg-authority-stable/90" :
     state === "Watchlist" ? "bg-authority-watchlist/90" : "bg-authority-losing/90";
   return (
@@ -171,7 +171,7 @@ function Delta({ value }: { value: number | null }) {
   if (value === null) return <span className="text-text-3">—</span>;
   if (value === 0) return <span className="tabular-nums text-text-2">0</span>;
   return (
-    <span className={cn("tabular-nums font-medium", value > 0 ? "text-authority-dominant" : "text-authority-losing")}>
+    <span className={cn("tabular-nums font-medium", value > 0 ? "text-accent" : "text-authority-losing")}>
       {value > 0 ? "+" : "−"}{Math.abs(value)}
     </span>
   );
@@ -181,7 +181,7 @@ function Delta({ value }: { value: number | null }) {
 function MomentumArrow({ delta }: { delta: number | null }) {
   if (delta === null || delta === 0) return <span className="text-text-2">—</span>;
   if (delta < 0) return <span className="text-authority-losing" aria-label="Widening gap">▲</span>;
-  return <span className="text-authority-dominant" aria-label="Narrowing gap">▼</span>;
+  return <span className="text-accent" aria-label="Narrowing gap">▼</span>;
 }
 
 function TrendArrow({ value }: { value: number | null }) {
@@ -191,7 +191,7 @@ function TrendArrow({ value }: { value: number | null }) {
 function ModelDot({ model }: { model: string | null }) {
   if (!model) return null;
   const p = (model || "").toLowerCase();
-  const color = p.includes("openai") || p.includes("chatgpt") ? "bg-authority-dominant"
+  const color = p.includes("openai") || p.includes("chatgpt") ? "bg-accent"
     : p.includes("gemini") || p.includes("google") ? "bg-authority-watchlist"
     : p.includes("anthropic") || p.includes("claude") ? "bg-authority-losing"
     : "bg-authority-stable";
@@ -282,12 +282,12 @@ function clientStoryLine(c: ClientWithStats): string {
   const wm = c.worstModel ? displayModelName(c.worstModel) : null;
   if (state === "Dominant") return "Leading on every tracked model.";
   if (state === "Losing Ground") {
-    return wm ? `Authority collapses on ${wm}. Act now.` : "Critical gap. Act now.";
+    return wm ? `Concentrated loss on ${wm}. Act now.` : "Critical gap. Act now.";
   }
   if (state === "Watchlist") {
-    return wm ? `Slipping on ${wm}. Fix before it compounds.` : "Elevated risk. Run a snapshot to isolate the gap.";
+    return wm ? `Slipping on ${wm}. Address before it compounds.` : "Elevated risk; isolate the gap with a snapshot.";
   }
-  return "Stable. Protect the weakest channel.";
+  return "Stable. Shore up the weakest channel.";
 }
 
 function CardStatusBadge({ bucket }: { bucket: TriageBucket }) {
@@ -297,7 +297,7 @@ function CardStatusBadge({ bucket }: { bucket: TriageBucket }) {
     key === "losing" ? "Losing ground" : key === "watchlist" ? "Watchlist" : key === "stable" ? "Stable" : "Dominant";
   const styles: Record<typeof key, string> = {
     dominant:
-      "border-authority-dominant/20 bg-authority-dominant/[0.07] text-authority-dominant",
+      "border-accent/22 bg-accent/10 text-accent",
     watchlist:
       "border-authority-watchlist/22 bg-authority-watchlist/[0.06] text-authority-watchlist",
     stable: "border-white/[0.08] bg-white/[0.03] text-text-2",
@@ -323,7 +323,7 @@ function CardDeltaBadge({ delta }: { delta: number }) {
         "inline-flex items-center gap-0.5 rounded-md border px-2 py-0.5 text-[11px] font-medium tabular-nums tracking-tight",
         neg
           ? "border-authority-losing/18 bg-authority-losing/[0.06] text-authority-losing"
-          : "border-authority-dominant/18 bg-authority-dominant/[0.06] text-authority-dominant"
+          : "border-accent/20 bg-accent/10 text-accent"
       )}
     >
       {neg ? "↓" : "↑"} {neg ? Math.abs(delta) : `+${delta}`} vs last
@@ -372,7 +372,11 @@ function PriorityAlertBar({
     cn(
       "min-w-[4.5rem] px-3 py-2 text-[11px] font-semibold tracking-tight transition-[color,background-color,box-shadow]",
       triageFilter === b
-        ? "rounded-[7px] bg-white/[0.12] text-text shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+        ? b === "dominant"
+          ? "rounded-[7px] bg-accent/14 text-accent shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
+          : b === "losing"
+            ? "rounded-[7px] bg-authority-losing/12 text-authority-losing shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
+            : "rounded-[7px] bg-authority-watchlist/12 text-authority-watchlist shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
         : "rounded-[7px] text-text-3 hover:bg-white/[0.04] hover:text-text-2"
     );
 
@@ -384,7 +388,7 @@ function PriorityAlertBar({
       />
       <div className="relative">
         <div className="border-b border-white/[0.035] px-4 py-3.5 sm:px-5 sm:py-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-text-3/80">Portfolio command</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-text-3/80">Portfolio overview</p>
           <div className="mt-4">
             <div className="flex flex-wrap items-end gap-x-7 gap-y-5 sm:gap-x-9 lg:gap-x-10">
               <div>
@@ -437,7 +441,7 @@ function PriorityAlertBar({
             {stable ? (
               <>
                 <span className="inline-flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-authority-dominant/85" aria-hidden />
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent/90" aria-hidden />
                   <span className="text-[13px] font-semibold text-text">Portfolio stable.</span>
                 </span>
                 <span className="pl-3.5 text-[13px] text-text-3 sm:pl-2">
@@ -602,7 +606,7 @@ function ClientCard({ client }: { client: ClientWithStats }) {
                 e.stopPropagation();
                 router.push(`/app/clients/${client.id}`);
               }}
-              className="mt-5 inline-flex w-fit items-center gap-2 rounded-lg border border-authority-dominant/22 bg-authority-dominant/[0.08] px-4 py-2 text-[12px] font-semibold text-authority-dominant transition-colors hover:border-authority-dominant/30 hover:bg-authority-dominant/[0.12]"
+              className="mt-5 inline-flex w-fit items-center gap-2 rounded-lg bg-accent px-4 py-2 text-[12px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition-colors hover:bg-accent-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45"
             >
               Run snapshot
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -820,7 +824,7 @@ function RiskMapCell({
       <div className={cn("flex flex-col py-1.5 pr-1.5 text-right", stateBar)}>
         <span className="text-lg font-semibold tabular-nums text-text leading-tight">{score ?? "—"}</span>
         {deltaFormatted !== null && (
-          <span className={cn("text-[10px] tabular-nums", delta !== null && delta < 0 ? "text-authority-losing" : "text-authority-dominant")}>
+          <span className={cn("text-[10px] tabular-nums", delta !== null && delta < 0 ? "text-authority-losing" : "text-accent")}>
             {deltaFormatted}
           </span>
         )}
@@ -956,7 +960,7 @@ function TopThreats({ clients }: { clients: ClientWithStats[] }) {
 function StatusDot({ score, status }: { score: number | null; status: string }) {
   if (status === "running") return <span className="h-2.5 w-2.5 rounded-full bg-authority-watchlist" />;
   if (score === null) return <span className="h-2.5 w-2.5 rounded-full bg-authority-stable/60" />;
-  if (score >= 70) return <span className="h-2.5 w-2.5 rounded-full bg-authority-dominant" />;
+  if (score >= 70) return <span className="h-2.5 w-2.5 rounded-full bg-accent" />;
   if (score >= 40) return <span className="h-2.5 w-2.5 rounded-full bg-authority-watchlist" />;
   return <span className="h-2.5 w-2.5 rounded-full bg-authority-losing" />;
 }
@@ -1004,7 +1008,7 @@ function ClientTable({ clients }: { clients: ClientWithStats[] }) {
                         <Link
                           href={`/app/clients/${client.id}`}
                           onClick={(e) => e.stopPropagation()}
-                          className="ml-2 inline-flex items-center gap-1 rounded-app border border-white/10 bg-surface px-2 py-1 text-[11px] font-medium text-text transition-colors hover:bg-surface-2"
+                          className="ml-2 inline-flex items-center gap-1 rounded-md bg-accent px-2.5 py-1 text-[11px] font-semibold text-white transition-colors hover:bg-accent-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
                         >
                           Run snapshot
                         </Link>
@@ -1064,15 +1068,14 @@ function EmptyState() {
     <div className="relative mx-auto max-w-lg overflow-hidden rounded-2xl border border-white/[0.05] bg-[#080a0c] px-8 py-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] sm:px-10 sm:py-12">
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent" aria-hidden />
       <div className="relative">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3">Command center</p>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3">Portfolio</p>
       <h2 className="mt-3 text-xl font-semibold tracking-tight text-text sm:text-2xl">Initialize your portfolio</h2>
       <p className="mt-2 max-w-md text-[14px] leading-relaxed text-text-2">
-        Add a brand to begin indexing authority across ChatGPT, Gemini, and Claude — displacers, gaps, and trend in one
-        view.
+        Add a brand to index authority across ChatGPT, Gemini, and Claude — gaps, displacers, and trend in one surface.
       </p>
       <Link
         href="/app/clients/new"
-        className="mt-8 inline-flex items-center gap-2 rounded-lg border border-authority-dominant/40 bg-authority-dominant/[0.14] px-5 py-2.5 text-sm font-semibold text-authority-dominant transition-colors hover:bg-authority-dominant/[0.22]"
+        className="mt-8 inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition-colors hover:bg-accent-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#080a0c]"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -1405,7 +1408,7 @@ export default function AppPage() {
           <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
             <Link
               href={runSnapshotHref}
-              className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.05] px-3.5 text-[13px] font-semibold text-text shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-colors hover:border-white/[0.12] hover:bg-white/[0.08]"
+              className="inline-flex h-9 items-center gap-2 rounded-lg bg-accent px-3.5 text-[13px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition-colors hover:bg-accent-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b0d10]"
             >
               <svg className="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
@@ -1440,7 +1443,7 @@ export default function AppPage() {
               placeholder="Search portfolio…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 w-full rounded-lg border border-white/[0.06] bg-black/25 py-2 pl-9 pr-3 text-[13px] text-text placeholder:text-text-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] transition-colors focus:border-white/[0.12] focus:outline-none"
+              className="h-9 w-full rounded-lg border border-white/[0.06] bg-black/25 py-2 pl-9 pr-3 text-[13px] text-text placeholder:text-text-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] transition-colors focus:border-accent/40 focus:outline-none focus:ring-2 focus:ring-accent/25"
             />
           </div>
         }

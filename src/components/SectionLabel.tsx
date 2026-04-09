@@ -17,7 +17,7 @@ export function SectionLabel({ children, className, noMargin }: SectionLabelProp
         !noMargin && "mb-4",
         className
       )}
-      style={{ color: "#00e87a" }}
+      style={{ color: "var(--accent-marketing)" }}
     >
       {children}
     </p>
