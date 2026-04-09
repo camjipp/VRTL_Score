@@ -297,11 +297,11 @@ function CardStatusBadge({ bucket }: { bucket: TriageBucket }) {
     key === "losing" ? "Losing ground" : key === "watchlist" ? "Watchlist" : key === "stable" ? "Stable" : "Dominant";
   const styles: Record<typeof key, string> = {
     dominant:
-      "border-authority-dominant/30 bg-authority-dominant/[0.09] text-authority-dominant",
+      "border-authority-dominant/20 bg-authority-dominant/[0.07] text-authority-dominant",
     watchlist:
-      "border-authority-watchlist/30 bg-authority-watchlist/[0.08] text-authority-watchlist",
-    stable: "border-white/[0.12] bg-white/[0.04] text-text-2",
-    losing: "border-authority-losing/35 bg-authority-losing/[0.1] text-authority-losing",
+      "border-authority-watchlist/22 bg-authority-watchlist/[0.06] text-authority-watchlist",
+    stable: "border-white/[0.08] bg-white/[0.03] text-text-2",
+    losing: "border-authority-losing/25 bg-authority-losing/[0.08] text-authority-losing",
   };
   return (
     <span
@@ -322,8 +322,8 @@ function CardDeltaBadge({ delta }: { delta: number }) {
       className={cn(
         "inline-flex items-center gap-0.5 rounded-md border px-2 py-0.5 text-[11px] font-medium tabular-nums tracking-tight",
         neg
-          ? "border-authority-losing/25 bg-authority-losing/[0.08] text-authority-losing"
-          : "border-authority-dominant/25 bg-authority-dominant/[0.08] text-authority-dominant"
+          ? "border-authority-losing/18 bg-authority-losing/[0.06] text-authority-losing"
+          : "border-authority-dominant/18 bg-authority-dominant/[0.06] text-authority-dominant"
       )}
     >
       {neg ? "↓" : "↑"} {neg ? Math.abs(delta) : `+${delta}`} vs last
@@ -370,100 +370,123 @@ function PriorityAlertBar({
 
   const filterBtn = (b: "losing" | "watchlist" | "dominant") =>
     cn(
-      "px-3 py-1.5 text-[11px] font-semibold tracking-tight transition-colors",
+      "min-w-[4.5rem] px-3 py-2 text-[11px] font-semibold tracking-tight transition-[color,background-color,box-shadow]",
       triageFilter === b
-        ? "rounded-md bg-white/[0.1] text-text shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
-        : "rounded-md text-text-2 hover:text-text"
+        ? "rounded-[7px] bg-white/[0.12] text-text shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+        : "rounded-[7px] text-text-3 hover:bg-white/[0.04] hover:text-text-2"
     );
 
   return (
-    <div className="mb-4 rounded-xl border border-white/[0.08] bg-[#0a0a0a]/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-      <div className="border-b border-white/[0.06] px-4 py-3 sm:px-5">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3/90">
-          Portfolio intelligence
-        </p>
-        <div className="mt-3 flex flex-wrap items-end gap-x-6 gap-y-4 sm:gap-x-8">
-          <div>
-            <p className="text-[10px] font-medium uppercase tracking-wider text-text-3">Dominant</p>
-            <p className="mt-0.5 text-2xl font-semibold tabular-nums tracking-tight text-text">{counts.dominant}</p>
-          </div>
-          <div>
-            <p className="text-[10px] font-medium uppercase tracking-wider text-text-3">Watchlist</p>
-            <p className="mt-0.5 text-2xl font-semibold tabular-nums tracking-tight text-text">{counts.watchlist}</p>
-          </div>
-          <div>
-            <p className="text-[10px] font-medium uppercase tracking-wider text-text-3">Losing ground</p>
-            <p
-              className={cn(
-                "mt-0.5 text-2xl font-semibold tabular-nums tracking-tight",
-                counts.losing > 0 ? "text-authority-losing" : "text-text"
-              )}
-            >
-              {counts.losing}
-            </p>
-          </div>
-          <div className="min-w-[140px] sm:min-w-[160px]">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-text-3">Coverage</p>
-            <p className="mt-0.5 text-[13px] font-medium leading-snug text-text-2">{snapshotLine}</p>
-          </div>
-          <div className="min-w-[120px]">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-text-3">Weakest model</p>
-            <p className="mt-0.5 text-[13px] font-medium">
-              {weakestPortfolio ? (
-                <span className="text-text">{weakestPortfolio}</span>
-              ) : (
-                <span className="text-text-3">Insufficient data</span>
-              )}
-            </p>
+    <div className="relative mb-3 overflow-hidden rounded-2xl border border-white/[0.05] bg-[#080a0c] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+      <div
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.028] via-transparent to-transparent"
+        aria-hidden
+      />
+      <div className="relative">
+        <div className="border-b border-white/[0.04] px-4 py-3.5 sm:px-5 sm:py-4">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-text-3/80">Portfolio command</p>
+          <div className="mt-3 rounded-xl bg-gradient-to-b from-black/20 to-black/40 px-3 py-3.5 ring-1 ring-inset ring-white/[0.04] sm:px-4 sm:py-4">
+            <div className="flex flex-wrap items-end gap-x-7 gap-y-5 sm:gap-x-9 lg:gap-x-10">
+              <div>
+                <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-text-3/90">Dominant</p>
+                <p className="mt-1 text-[1.65rem] font-semibold leading-none tabular-nums tracking-tight text-text sm:text-[1.85rem]">
+                  {counts.dominant}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-text-3/90">Watchlist</p>
+                <p
+                  className={cn(
+                    "mt-1 text-[1.65rem] font-semibold leading-none tabular-nums tracking-tight sm:text-[1.85rem]",
+                    counts.watchlist > 0 ? "text-authority-watchlist" : "text-text"
+                  )}
+                >
+                  {counts.watchlist}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-text-3/90">Losing ground</p>
+                <p
+                  className={cn(
+                    "mt-1 text-[1.65rem] font-semibold leading-none tabular-nums tracking-tight sm:text-[1.85rem]",
+                    counts.losing > 0 ? "text-authority-losing" : "text-text"
+                  )}
+                >
+                  {counts.losing}
+                </p>
+              </div>
+              <div className="min-w-[min(100%,10rem)] flex-1 border-t border-white/[0.05] pt-4 sm:min-w-[9.5rem] sm:border-l sm:border-t-0 sm:pl-7 sm:pt-0">
+                <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-text-3/90">Coverage</p>
+                <p className="mt-1 text-[13px] font-medium leading-snug text-text-2">{snapshotLine}</p>
+              </div>
+              <div className="min-w-[min(100%,10rem)] flex-1 sm:min-w-[8.5rem]">
+                <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-text-3/90">Portfolio weak point</p>
+                <p className="mt-1 text-[13px] font-semibold">
+                  {weakestPortfolio ? (
+                    <span className="text-text">{weakestPortfolio}</span>
+                  ) : (
+                    <span className="font-medium text-text-3">Insufficient data</span>
+                  )}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      <div className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5">
-        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 text-[13px]">
-          {stable ? (
-            <>
-              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-authority-dominant/90" aria-hidden />
-              <span className="font-medium text-text">No immediate portfolio actions</span>
-              <span className="hidden text-text-3 sm:inline">·</span>
-              <span className="text-text-2">Attention queue clear for this view.</span>
-            </>
-          ) : (
-            <>
-              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-authority-losing" aria-hidden />
-              <span className="font-medium text-text">
-                {attention.length} client{attention.length === 1 ? "" : "s"} need attention
-              </span>
-              <span className="min-w-0 text-text-2">
-                <span className="text-text-3">—</span> {attention[0]!.name}
-                {(() => {
-                  const d = attentionDetailSuffix(attention[0]!);
-                  return d ? ` · ${d}` : "";
-                })()}
-                {attention.length > 1
-                  ? ` · ${attention
-                      .slice(1, 3)
-                      .map((c) => c.name)
-                      .join(", ")}${attention.length > 3 ? ", …" : ""}`
-                  : ""}
-              </span>
-              {attention.length > 1 ? (
-                <a href="#clients-overview" className="shrink-0 text-[12px] text-text-2 underline-offset-2 hover:text-text hover:underline">
-                  View queue
-                </a>
-              ) : null}
-            </>
-          )}
-        </div>
-        <div
-          className="inline-flex w-full shrink-0 flex-wrap items-center gap-0.5 rounded-lg border border-white/[0.08] bg-black/40 p-0.5 sm:w-auto"
-          role="group"
-          aria-label="Filter by status"
-        >
-          {(["losing", "watchlist", "dominant"] as const).map((b) => (
-            <button key={b} type="button" onClick={() => onToggleFilter(b)} className={filterBtn(b)}>
-              {b === "losing" ? "Losing" : b === "watchlist" ? "Watchlist" : "Dominant"}
-            </button>
-          ))}
+        <div className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5 sm:py-3.5">
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2 sm:gap-y-1">
+            {stable ? (
+              <>
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-authority-dominant/85" aria-hidden />
+                  <span className="text-[13px] font-semibold text-text">Portfolio stable.</span>
+                </span>
+                <span className="pl-3.5 text-[13px] text-text-2 sm:pl-0">
+                  No clients at risk in this view.
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-authority-losing/90" aria-hidden />
+                  <span className="text-[13px] font-semibold text-text">
+                    Authority risk · {attention.length} account{attention.length === 1 ? "" : "s"}
+                  </span>
+                </span>
+                <span className="break-words pl-3.5 text-[13px] leading-snug text-text-2 sm:pl-1">
+                  {attention[0]!.name}
+                  {(() => {
+                    const d = attentionDetailSuffix(attention[0]!);
+                    return d ? ` · ${d}` : "";
+                  })()}
+                  {attention.length > 1
+                    ? ` · Also: ${attention
+                        .slice(1, 3)
+                        .map((c) => c.name)
+                        .join(", ")}${attention.length > 3 ? ", …" : ""}`
+                    : ""}
+                </span>
+                {attention.length > 1 ? (
+                  <a
+                    href="#clients-overview"
+                    className="shrink-0 pl-3.5 text-[12px] font-medium text-text-2 underline-offset-4 hover:text-text hover:underline sm:pl-2"
+                  >
+                    Review queue
+                  </a>
+                ) : null}
+              </>
+            )}
+          </div>
+          <div
+            className="inline-flex w-full shrink-0 items-center gap-px rounded-xl bg-black/45 p-px sm:w-auto sm:rounded-[11px]"
+            role="group"
+            aria-label="Filter by status"
+          >
+            {(["losing", "watchlist", "dominant"] as const).map((b) => (
+              <button key={b} type="button" onClick={() => onToggleFilter(b)} className={filterBtn(b)}>
+                {b === "losing" ? "Losing" : b === "watchlist" ? "Watchlist" : "Dominant"}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -485,6 +508,7 @@ function ClientCard({ client }: { client: ClientWithStats }) {
   const bucket = triageBucket(client);
   const authorityState = getAuthorityState(client);
   const stateBar = getAuthorityStateBar(authorityState);
+  const needsAttention = clientNeedsAttention(client);
   const domain = faviconDomain(client.website);
   const faviconUrl = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=32` : null;
   const weakestLabel = client.worstModel ? displayModelName(client.worstModel) : null;
@@ -499,6 +523,13 @@ function ClientCard({ client }: { client: ClientWithStats }) {
 
   const goClient = () => router.push(`/app/clients/${client.id}`);
 
+  const urgencySurface =
+    bucket === "losing"
+      ? "ring-1 ring-inset ring-authority-losing/12"
+      : needsAttention && bucket === "watchlist"
+        ? "ring-1 ring-inset ring-authority-watchlist/14"
+        : "";
+
   return (
     <div
       role="button"
@@ -511,17 +542,22 @@ function ClientCard({ client }: { client: ClientWithStats }) {
         }
       }}
       className={cn(
-        "client-card group relative flex h-full min-h-[228px] cursor-pointer flex-col overflow-hidden rounded-xl border border-white/[0.08] bg-[#0c0c0c] transition-[border-color,box-shadow] duration-200",
-        "shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] hover:border-white/[0.14]",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-white/15",
+        "client-card group relative flex h-full min-h-[236px] cursor-pointer flex-col overflow-hidden rounded-2xl",
+        "border border-white/[0.05] bg-[#090b0d] transition-[border-color,box-shadow] duration-200",
+        "shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] hover:border-white/[0.09]",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-white/12",
         "border-l-[3px]",
-        stateBar
+        stateBar,
+        urgencySurface
       )}
     >
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.04] via-transparent to-transparent opacity-90" aria-hidden />
-      <div className="relative flex h-full flex-col px-4 pb-4 pt-4 sm:px-5 sm:pb-5 sm:pt-5">
+      <div
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.02] via-transparent to-black/[0.35]"
+        aria-hidden
+      />
+      <div className="relative flex h-full flex-col px-4 pb-4 pt-4 sm:px-5 sm:pb-5 sm:pt-[1.125rem]">
         <div className="flex items-start gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/[0.08] bg-black/30">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black/35 ring-1 ring-inset ring-white/[0.06]">
             {faviconUrl ? (
               <img src={faviconUrl} alt="" className="h-[20px] w-[20px] object-contain" width={20} height={20} />
             ) : (
@@ -533,7 +569,7 @@ function ClientCard({ client }: { client: ClientWithStats }) {
               <div className="min-w-0">
                 <p className="truncate text-[15px] font-semibold tracking-tight text-text">{client.name}</p>
                 {client.website ? (
-                  <p className="mt-0.5 truncate text-[11px] text-text-3">{displayUrl(client.website)}</p>
+                  <p className="mt-1 truncate text-[11px] font-medium text-text-3/90">{displayUrl(client.website)}</p>
                 ) : null}
               </div>
               <CardStatusBadge bucket={bucket} />
@@ -544,7 +580,7 @@ function ClientCard({ client }: { client: ClientWithStats }) {
             height={16}
             viewBox="0 0 16 16"
             fill="none"
-            className="mt-1 shrink-0 text-text-3 transition-colors group-hover:text-text-2"
+            className="mt-1 shrink-0 text-text-3/80 transition-colors group-hover:text-text-2"
             aria-hidden
           >
             <path
@@ -558,10 +594,10 @@ function ClientCard({ client }: { client: ClientWithStats }) {
         </div>
 
         {!hasData ? (
-          <div className="mt-5 flex flex-1 flex-col rounded-lg border border-dashed border-white/[0.1] bg-black/25 px-4 py-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-3">Awaiting signal</p>
-            <p className="mt-2 text-[15px] font-medium leading-snug text-text">No authority baseline yet</p>
-            <p className="mt-1.5 max-w-[280px] text-[13px] leading-relaxed text-text-2">
+          <div className="mt-5 flex flex-1 flex-col rounded-xl bg-gradient-to-b from-white/[0.015] to-black/40 px-4 py-5 ring-1 ring-inset ring-dashed ring-white/[0.08]">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3/90">Awaiting signal</p>
+            <p className="mt-2.5 text-[15px] font-semibold leading-snug tracking-tight text-text">No authority baseline yet</p>
+            <p className="mt-2 max-w-[280px] text-[13px] leading-relaxed text-text-2">
               Run a snapshot to index this brand across tracked models and surface displacers.
             </p>
             <button
@@ -570,7 +606,7 @@ function ClientCard({ client }: { client: ClientWithStats }) {
                 e.stopPropagation();
                 router.push(`/app/clients/${client.id}`);
               }}
-              className="mt-4 inline-flex w-fit items-center gap-2 rounded-lg border border-authority-dominant/35 bg-authority-dominant/[0.12] px-3.5 py-2 text-[12px] font-semibold text-authority-dominant transition-colors hover:bg-authority-dominant/[0.18]"
+              className="mt-5 inline-flex w-fit items-center gap-2 rounded-lg border border-authority-dominant/22 bg-authority-dominant/[0.08] px-4 py-2 text-[12px] font-semibold text-authority-dominant transition-colors hover:border-authority-dominant/30 hover:bg-authority-dominant/[0.12]"
             >
               Run snapshot
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -580,23 +616,26 @@ function ClientCard({ client }: { client: ClientWithStats }) {
           </div>
         ) : (
           <>
-            <div className="mt-5 flex flex-wrap items-end gap-3">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-text-3">Authority index</p>
-                <div className="mt-1 flex flex-wrap items-baseline gap-2.5">
-                  <span className="tabular-nums text-[44px] font-semibold leading-none tracking-[-0.04em] text-text">
-                    {client.latestScore}
-                  </span>
-                  {showDelta ? <CardDeltaBadge delta={delta!} /> : null}
+            <div className="mt-5 rounded-xl bg-black/45 px-3.5 py-3.5 ring-1 ring-inset ring-white/[0.05] sm:px-4 sm:py-4">
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-text-3/85">Authority index</p>
+                  <div className="mt-2 flex flex-wrap items-baseline gap-3">
+                    <span className="tabular-nums text-[2.75rem] font-semibold leading-[0.95] tracking-[-0.045em] text-text sm:text-[3rem]">
+                      {client.latestScore}
+                    </span>
+                    {showDelta ? <CardDeltaBadge delta={delta!} /> : null}
+                  </div>
+                  <p className="mt-2 text-[11px] font-medium leading-tight text-text-3/90">Composite across models · 0–100</p>
                 </div>
               </div>
             </div>
-            <p className="mt-4 flex-1 text-[13px] leading-relaxed text-text-2">{story}</p>
-            <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 border-t border-white/[0.07] pt-4 text-[12px]">
+            <p className="mt-4 flex-1 text-[13px] font-medium leading-relaxed text-text-2">{story}</p>
+            <div className="mt-auto flex flex-wrap gap-x-6 gap-y-2 border-t border-white/[0.05] pt-4 text-[12px]">
               {weakestLabel ? (
                 <span className="text-text-3">
                   Weakest model
-                  <span className="ml-2 font-medium text-text">{weakestLabel}</span>
+                  <span className="ml-2 font-semibold text-text">{weakestLabel}</span>
                 </span>
               ) : null}
               {showDisplacer ? (
@@ -616,7 +655,7 @@ function ClientCard({ client }: { client: ClientWithStats }) {
 function ClientCardsGrid({ clients }: { clients: ClientWithStats[] }) {
   return (
     <section id="clients-overview">
-      <div className="grid grid-cols-1 items-stretch gap-3 md:grid-cols-2 md:gap-4 xl:grid-cols-3">
+      <div className="grid grid-cols-1 items-stretch gap-2.5 sm:gap-3 md:grid-cols-2 md:gap-3.5 xl:grid-cols-3">
         {clients.map((client) => (
           <ClientCard key={client.id} client={client} />
         ))}
@@ -1028,7 +1067,9 @@ function ClientTable({ clients }: { clients: ClientWithStats[] }) {
 
 function EmptyState() {
   return (
-    <div className="mx-auto max-w-lg rounded-xl border border-white/[0.08] bg-[#0a0a0a] px-8 py-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:px-10 sm:py-12">
+    <div className="relative mx-auto max-w-lg overflow-hidden rounded-2xl border border-white/[0.05] bg-[#080a0c] px-8 py-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] sm:px-10 sm:py-12">
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent" aria-hidden />
+      <div className="relative">
       <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3">Command center</p>
       <h2 className="mt-3 text-xl font-semibold tracking-tight text-text sm:text-2xl">Initialize your portfolio</h2>
       <p className="mt-2 max-w-md text-[14px] leading-relaxed text-text-2">
@@ -1044,6 +1085,7 @@ function EmptyState() {
         </svg>
         Add first client
       </Link>
+      </div>
     </div>
   );
 }
@@ -1369,7 +1411,7 @@ export default function AppPage() {
           <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
             <Link
               href={runSnapshotHref}
-              className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/[0.12] bg-white/[0.06] px-3.5 text-[13px] font-semibold text-text shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-colors hover:border-white/[0.18] hover:bg-white/[0.09]"
+              className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.05] px-3.5 text-[13px] font-semibold text-text shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-colors hover:border-white/[0.12] hover:bg-white/[0.08]"
             >
               <svg className="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
@@ -1378,7 +1420,7 @@ export default function AppPage() {
             </Link>
             <Link
               href="/app/clients/new"
-              className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/[0.08] bg-transparent px-3.5 text-[13px] font-medium text-text-2 transition-colors hover:border-white/[0.14] hover:text-text"
+              className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/[0.06] bg-black/20 px-3.5 text-[13px] font-medium text-text-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-colors hover:border-white/[0.1] hover:bg-black/30 hover:text-text"
             >
               <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -1404,13 +1446,13 @@ export default function AppPage() {
               placeholder="Search portfolio…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 w-full rounded-lg border border-white/[0.08] bg-black/35 py-2 pl-9 pr-3 text-[13px] text-text placeholder:text-text-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-colors focus:border-white/[0.16] focus:outline-none"
+              className="h-9 w-full rounded-lg border border-white/[0.06] bg-black/25 py-2 pl-9 pr-3 text-[13px] text-text placeholder:text-text-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] transition-colors focus:border-white/[0.12] focus:outline-none"
             />
           </div>
         }
       />
 
-      <div className="flex-1 space-y-3 px-5 pb-6 pt-4 sm:space-y-4 sm:px-6 sm:pt-5">
+      <div className="flex-1 space-y-2.5 px-5 pb-6 pt-3 sm:space-y-3 sm:px-6 sm:pt-4">
         {showLogoFailedBanner && (
           <Alert variant="warning" className="flex items-center justify-between gap-4">
             <AlertDescription>
@@ -1442,7 +1484,7 @@ export default function AppPage() {
         {clients.length === 0 ? (
           <EmptyState />
         ) : triageSortedClients.length === 0 && searchQuery ? (
-          <div className="rounded-xl border border-white/[0.08] bg-[#0a0a0a]/90 px-6 py-8 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+          <div className="rounded-2xl border border-white/[0.05] bg-[#080a0c] px-6 py-8 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-text-3">No matches</p>
             <p className="mt-2 text-sm text-text-2">
               Nothing in this portfolio matches <span className="text-text">&quot;{searchQuery}&quot;</span>

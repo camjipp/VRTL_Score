@@ -30,34 +30,35 @@ export function TopBar({ primaryAction, filters, className }: TopBarProps) {
   return (
     <div
       className={cn(
-        "border-b border-white/[0.06] bg-bg/95 px-5 py-3 backdrop-blur-sm sm:px-6",
+        "relative border-b border-white/[0.05] bg-bg/90 px-5 py-2.5 backdrop-blur-md sm:px-6 sm:py-3",
+        "before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/[0.07] before:to-transparent",
         className
       )}
     >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-5">
       <div className="flex min-w-0 shrink-0 items-center gap-3">
         <div className="relative" ref={menuRef}>
           <button
             type="button"
             onClick={() => setMenuOpen(!menuOpen)}
-            className="flex items-center gap-2.5 rounded-md py-0.5 transition-opacity hover:opacity-90"
+            className="flex h-9 items-center gap-2.5 rounded-lg border border-white/[0.06] bg-black/20 py-0 pl-1.5 pr-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-colors hover:border-white/[0.09] hover:bg-black/30"
           >
             {agency?.brand_logo_url ? (
               <img
                 src={agency.brand_logo_url}
                 alt=""
-                className="h-7 w-7 shrink-0 rounded-full border border-white/[0.08] object-cover ring-1 ring-white/[0.04]"
+                className="h-7 w-7 shrink-0 rounded-md border border-white/[0.06] object-cover"
               />
             ) : (
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.04] text-[13px] font-medium text-white/75 ring-1 ring-white/[0.04]">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-white/[0.06] bg-white/[0.04] text-[12px] font-semibold text-white/80">
                 {agency?.name?.charAt(0) ?? "A"}
               </div>
             )}
-            <span className="text-[15px] font-medium tracking-tight text-white/90">
+            <span className="max-w-[160px] truncate text-[13px] font-semibold tracking-tight text-text">
               {agency?.name ?? "Agency"}
             </span>
             <svg
-              className={cn("h-3 w-3 shrink-0 text-white/35 transition-transform", menuOpen && "rotate-180")}
+              className={cn("h-3 w-3 shrink-0 text-text-3 transition-transform", menuOpen && "rotate-180")}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -95,12 +96,12 @@ export function TopBar({ primaryAction, filters, className }: TopBarProps) {
           )}
         </div>
       </div>
-      <div className="flex min-w-0 flex-1 flex-col gap-2.5 sm:flex-row sm:items-stretch sm:justify-end sm:gap-3">
+      <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-end sm:gap-2.5">
         {filters ? (
           <div className="min-w-0 flex-1 sm:max-w-md sm:flex-initial lg:max-w-sm">{filters}</div>
         ) : null}
         {primaryAction ? (
-          <div className="flex shrink-0 flex-wrap items-center gap-2 sm:items-center">{primaryAction}</div>
+          <div className="flex shrink-0 flex-wrap items-center gap-2 sm:items-stretch">{primaryAction}</div>
         ) : null}
       </div>
       </div>
