@@ -29,6 +29,7 @@ export function sanitizeReportDataForPdf(data: ReportData): ReportData {
     strategicTakeaway: sanitizePdfString(data.strategicTakeaway),
     dataSummaryInterpretation: sanitizePdfString(data.dataSummaryInterpretation),
     recommendedNextSteps: sanitizePdfString(data.recommendedNextSteps),
+    recommendedNextStepsVisible: data.recommendedNextStepsVisible,
     agencyLogoUrl: data.agencyLogoUrl,
     agencyName: data.agencyName == null ? data.agencyName : sanitizePdfString(data.agencyName),
     meta: {

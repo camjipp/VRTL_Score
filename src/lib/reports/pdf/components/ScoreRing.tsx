@@ -10,15 +10,15 @@ import { colors, fonts } from "../theme";
  * Score + “/100” stay vertically centered in the full arc viewport (unchanged).
  * “OVERALL SCORE” is layered in the lower opening only — it does not shift the numbers.
  */
-const W = 172;
-const H = 124;
+const W = 188;
+const H = 132;
 const CX = W / 2;
-const CY = 62;
-const R = 54;
-const STROKE = 13;
+const CY = 66;
+const R = 58;
+const STROKE = 14;
 
 /** Must match `heroLeft` width on Page 1 so the ring is centered in the column. */
-export const SCORE_RING_COLUMN_W = 180;
+export const SCORE_RING_COLUMN_W = 196;
 
 /** Fine-tune optical center of the digit stack inside the arc (pt). */
 const STACK_NUDGE_X = 0;
@@ -102,7 +102,7 @@ export function ScoreRing({ score }: Props) {
           >
             <Text
               style={{
-                fontSize: 42,
+                fontSize: 48,
                 fontWeight: 400,
                 color: colors.ink,
                 fontFamily: fonts.sansBold,

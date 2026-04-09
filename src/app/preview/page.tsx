@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { getDefaultRecommendedNextStepsBody } from "@/lib/reports/pdfTheme";
 import { stanleyData } from "@/lib/reports/pdf/stanleyData";
 import type { ReportData } from "@/lib/reports/pdf/types";
 
@@ -75,8 +76,8 @@ function buildPublicPreviewData(base: ReportData): ReportData {
       "You lead the rank table, but a wide spread across models is the risk: assistants can recommend different winners. Standardize facts, citations, and comparison narratives before a competitor locks the default answer.",
     dataSummaryInterpretation:
       "You lead this anonymized sample, but the rates below show where answers still omit the brand or lack citations—treat those rows as unstable recommendation share until proof and comparisons close the gaps.",
-    recommendedNextSteps:
-      "What happens next: we run this as an ongoing program—monthly or agreed snapshots, sequencing the fixes above, and re-measurement by assistant family. Your team approves positioning and risk; we execute audits, page and schema work, citation outreach, and iteration against the weakest surfaces first. Typical shape: 90-day sprints with snapshot checkpoints.",
+    recommendedNextSteps: getDefaultRecommendedNextStepsBody("your weakest assistant surface"),
+    recommendedNextStepsVisible: true,
     recommendations: base.recommendations.map((r, i) => ({
       ...r,
       title:

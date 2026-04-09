@@ -1,6 +1,6 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { PAGE, colors, fonts, rhythm, space, baseStyles } from "../theme";
+import { PAGE, colors, fonts, rhythm, space, baseStyles, BODY_MAX_W } from "../theme";
 import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
@@ -27,12 +27,12 @@ const C = {
 
 const styles = StyleSheet.create({
   interpret: {
-    fontSize: 9,
-    lineHeight: 1.55,
+    fontSize: 9.5,
+    lineHeight: 1.68,
     color: colors.ink,
-    marginBottom: rhythm.md,
+    marginBottom: 0,
     fontFamily: fonts.sans,
-    maxWidth: 520,
+    maxWidth: BODY_MAX_W,
   },
   h: {
     fontSize: 8,
@@ -41,10 +41,10 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: colors.ink3,
     marginBottom: rhythm.sm,
-    marginTop: rhythm.xs,
+    marginTop: space.block,
     fontFamily: fonts.sansBold,
   },
-  hFirst: { marginTop: 0 },
+  hFirst: { marginTop: rhythm.md },
   th: {
     flexDirection: "row",
     backgroundColor: colors.surface2,
@@ -142,10 +142,13 @@ export function Page5DataSummary({ data }: { data: ReportData }) {
         <PdfHeader data={data} variant="inner" pageNum={5} />
         <PdfTraceMarker page={5} section="Page5:after_header" />
 
-        <ChapterTitle title="Data Summary" />
+        <ChapterTitle
+          title="Data summary"
+          subtitle="What the tables imply before you scan the rows—then the numbers below quantify each signal."
+        />
         <Text style={styles.interpret}>{data.dataSummaryInterpretation}</Text>
         <Text style={[styles.h, styles.hFirst]}>Signals</Text>
-        <View style={{ marginBottom: space.section, width: 540 }}>
+        <View style={{ marginBottom: space.block, width: 540 }}>
           <View style={styles.th}>
             <Text style={[styles.thText, { width: S.sig }]}>Signal</Text>
             <Text style={[styles.thText, { width: S.cnt, textAlign: "center" }]}>Count</Text>
@@ -154,11 +157,7 @@ export function Page5DataSummary({ data }: { data: ReportData }) {
             <Text style={[styles.thText, { width: S.note, textAlign: "right" }]}>Action</Text>
           </View>
           {data.signalSummary.map((row, i) => (
-            <View
-              key={`sig-${i}`}
-              style={[styles.tr, i % 2 === 1 ? styles.trAlt : {}]}
-              wrap={false}
-            >
+            <View key={`sig-${i}`} style={[styles.tr, i % 2 === 1 ? styles.trAlt : {}]}>
               <View style={{ width: S.sig, flexDirection: "row", alignItems: "center" }}>
                 <View style={[styles.dot, { backgroundColor: colors.cyan }]} />
                 <Text style={styles.tdStrong}>{row.signal}</Text>
@@ -198,7 +197,6 @@ export function Page5DataSummary({ data }: { data: ReportData }) {
               <View
                 key={`cmp-${i}`}
                 style={[styles.tr, isYou ? styles.trYou : i % 2 === 1 ? styles.trAlt : {}]}
-                wrap={false}
               >
                 <Text style={[isYou ? styles.tdStrong : styles.td, { width: C.brand }]}>{row.brand}</Text>
                 <View style={{ width: C.bar, flexDirection: "row", alignItems: "center" }}>

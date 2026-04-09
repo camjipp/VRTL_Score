@@ -28,6 +28,10 @@ type AgencyForReport = {
   name: string;
   brand_logo_url?: string | null;
   brand_accent?: string | null;
+  /** When true, omit “What happens next” from the PDF */
+  hide_report_closing?: boolean;
+  /** Agency-written closing (plain text); optional DB column */
+  report_closing_override?: string | null;
 };
 
 function parseAgencyForReport(value: unknown): AgencyForReport | null {
@@ -38,10 +42,17 @@ function parseAgencyForReport(value: unknown): AgencyForReport | null {
     typeof v.brand_logo_url === "string" ? v.brand_logo_url : (v.brand_logo_url ?? null);
   const brand_accent =
     typeof v.brand_accent === "string" ? v.brand_accent : (v.brand_accent ?? null);
+  const hide_report_closing = v.hide_report_closing === true;
+  const report_closing_override =
+    typeof v.report_closing_override === "string" && v.report_closing_override.trim()
+      ? v.report_closing_override
+      : null;
   return {
     name: v.name,
     brand_logo_url: brand_logo_url as string | null,
     brand_accent: brand_accent as string | null,
+    hide_report_closing,
+    report_closing_override,
   };
 }
 
@@ -245,6 +256,8 @@ export async function GET(req: Request) {
     const selectCols = ["name"];
     if (agencyCols.has("brand_logo_url")) selectCols.push("brand_logo_url");
     if (agencyCols.has("brand_accent")) selectCols.push("brand_accent");
+    if (agencyCols.has("hide_report_closing")) selectCols.push("hide_report_closing");
+    if (agencyCols.has("report_closing_override")) selectCols.push("report_closing_override");
 
     const agencyRes = await supabase
       .from("agencies")
@@ -294,7 +307,13 @@ export async function GET(req: Request) {
 
     const snap = snapshotRes.data;
     const snapshotInput = {
-      agency,
+      agency: {
+        name: agency.name,
+        brand_logo_url: agency.brand_logo_url ?? null,
+        brand_accent: agency.brand_accent ?? null,
+        hideRecommendedNextSteps: agency.hide_report_closing === true,
+        recommendedNextStepsOverride: agency.report_closing_override ?? null,
+      },
       client: {
         ...clientRes.data,
         name: clientRes.data.name?.trim() || "Client",
@@ -316,6 +335,8 @@ export async function GET(req: Request) {
     pdfData = mapSnapshotToReactPdfData(snapshotInput, {
       name: agency.name,
       brand_logo_url: agency.brand_logo_url ?? null,
+      hideRecommendedNextSteps: agency.hide_report_closing === true,
+      recommendedNextStepsOverride: agency.report_closing_override ?? null,
     });
 
     console.log("[pdf] react-pdf", {

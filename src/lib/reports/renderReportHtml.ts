@@ -8,6 +8,7 @@ import {
   PDF_REPORT_TITLE,
   pdfScoreAccent,
   resolvePdfAccent,
+  resolveRecommendedNextStepsForReport,
 } from "@/lib/reports/pdfTheme";
 
 type ProviderScores = Record<string, number>;
@@ -17,6 +18,10 @@ export type ReportData = {
     name: string;
     brand_logo_url?: string | null;
     brand_accent?: string | null;
+    /** Omit “What happens next” from the HTML/PDF-oriented export */
+    hideRecommendedNextSteps?: boolean;
+    /** Replace default closing copy (plain text) */
+    recommendedNextStepsOverride?: string | null;
   };
   client: {
     name: string;
@@ -526,14 +531,6 @@ export function buildDataSummaryInterpretation(metrics: ReportMetricsSnapshot, c
   return parts.join(" ");
 }
 
-export function buildRecommendedNextSteps(clientName: string): string {
-  return [
-    `What happens next: your agency runs this as an ongoing program—not a one-off readout. We own monthly (or agreed) snapshots, sequencing of the fixes in this report, and re-measurement by model so progress shows up in scores.`,
-    `${clientName} approves positioning, key pages, and brand risk; we execute audits, content and schema updates, citation outreach, and iteration against the weakest surfaces first.`,
-    `Typical engagement: 90-day execution sprints with snapshot checkpoints; expand scope as recommendation share stabilizes or new competitors enter the set.`,
-  ].join(" ");
-}
-
 /* ═══════════════════════════════════════════════════════════════════════════
    SHARED DERIVED DATA (HTML + React-PDF)
 ═══════════════════════════════════════════════════════════════════════════ */
@@ -576,7 +573,14 @@ export function renderReportHtml(data: ReportData): string {
   const { metrics, insights, tier, models, avgModelScore } = derived;
   const bottomLine = derived.bottomLine;
   const tensionStatement = derived.tensionNote ?? "";
-  
+  const weakestSurfaceName =
+    models.length > 0 ? formatProviderDisplayName(models[models.length - 1][0]) : "";
+  const reportClosing = resolveRecommendedNextStepsForReport({
+    hide: agency.hideRecommendedNextSteps,
+    override: agency.recommendedNextStepsOverride ?? null,
+    weakestModelSurface: weakestSurfaceName,
+  });
+
   // Get best/worst evidence examples
   const labeledResponses = responses.map((r, idx) => ({
     ...r,
@@ -1417,10 +1421,14 @@ export function renderReportHtml(data: ReportData): string {
       </div>
     </div>
     
-    <div class="method-box no-break section-gap" style="border-left:3px solid var(--pdf-accent, #6b9ebc)">
+    ${
+      reportClosing.visible && reportClosing.text.trim()
+        ? `<div class="method-box no-break section-gap" style="border-left:3px solid var(--pdf-accent, #6b9ebc)">
       <div class="method-title">What happens next</div>
-      <div class="method-text">${escapeHtml(buildRecommendedNextSteps(client.name))}</div>
-    </div>
+      <div class="method-text" style="white-space:pre-line;line-height:1.65">${escapeHtml(reportClosing.text)}</div>
+    </div>`
+        : ""
+    }
     
     <div class="page-footer">
       <span>Confidential: ${escapeHtml(client.name)}</span>

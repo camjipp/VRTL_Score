@@ -1,6 +1,6 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { PAGE, colors, fonts, rhythm, baseStyles } from "../theme";
+import { PAGE, colors, fonts, rhythm, baseStyles, space, BODY_MAX_W } from "../theme";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
@@ -9,11 +9,22 @@ import { ScoreRing, SCORE_RING_COLUMN_W } from "../components/ScoreRing";
 /** Inner row columns sum to 537 (540 − 3pt accent rail) */
 const W = { rank: 30, name: 116, bar: 231, count: 66, pill: 91 } as const;
 
+function splitSummaryBullets(text: string): string[] {
+  const raw = text.replace(/\s+/g, " ").trim();
+  if (!raw) return [];
+  return raw
+    .split(". ")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((c) => (c.endsWith(".") ? c : `${c}.`))
+    .slice(0, 6);
+}
+
 const styles = StyleSheet.create({
   hero: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: rhythm.lg,
+    marginBottom: space.block,
     backgroundColor: colors.surface,
     borderRadius: 6,
     borderWidth: 1,
@@ -34,7 +45,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    minHeight: 124,
+    minHeight: 132,
   },
   kpiTile: {
     flex: 1,
@@ -89,7 +100,7 @@ const styles = StyleSheet.create({
     borderColor: colors.rule,
   },
   calloutBar: { width: 3, backgroundColor: colors.ink3 },
-  calloutInner: { flex: 1, paddingVertical: rhythm.md, paddingHorizontal: rhythm.lg },
+  calloutInner: { flex: 1, paddingVertical: space.cardPad - 2, paddingHorizontal: space.cardPad },
   calloutKicker: {
     fontSize: 6,
     fontWeight: 400,
@@ -100,8 +111,29 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   calloutBody: {
-    fontSize: 10.5,
-    lineHeight: 1.74,
+    fontSize: 10,
+    lineHeight: 1.72,
+    color: colors.ink,
+    fontFamily: fonts.sans,
+    maxWidth: BODY_MAX_W,
+  },
+  bulletRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 8,
+    maxWidth: BODY_MAX_W + 8,
+  },
+  bulletMark: {
+    width: 14,
+    fontSize: 10,
+    lineHeight: 1.72,
+    color: colors.ink3,
+    fontFamily: fonts.sansBold,
+  },
+  bulletText: {
+    flex: 1,
+    fontSize: 10,
+    lineHeight: 1.72,
     color: colors.ink,
     fontFamily: fonts.sans,
   },
@@ -111,8 +143,8 @@ const styles = StyleSheet.create({
     color: colors.ink3,
     letterSpacing: 0.12,
     textTransform: "uppercase",
-    marginBottom: rhythm.md,
-    marginTop: rhythm.sm,
+    marginBottom: rhythm.sm,
+    marginTop: space.block,
     fontFamily: fonts.sansBold,
   },
   rankOuter: {
@@ -145,13 +177,13 @@ const styles = StyleSheet.create({
   deltaBehind: { backgroundColor: colors.surface2 },
   deltaTied: { backgroundColor: colors.surface2 },
   deltaTxt: { fontSize: 6.5, fontWeight: 400, color: colors.ink3, fontFamily: fonts.sansBold },
-  alertRow: { flexDirection: "row", marginTop: rhythm.lg, alignItems: "stretch" },
+  alertRow: { flexDirection: "row", marginTop: space.block, alignItems: "stretch" },
   alertSp: { marginRight: rhythm.sm },
   alertCard: {
     flex: 1,
-    borderRadius: 4,
-    paddingVertical: rhythm.lg,
-    paddingHorizontal: rhythm.md,
+    borderRadius: 6,
+    paddingVertical: space.cardPad,
+    paddingHorizontal: space.cardPad,
     borderWidth: 1,
     borderColor: colors.rule,
     minHeight: 96,
@@ -187,6 +219,8 @@ export function Page1Overview({ data }: { data: ReportData }) {
   const statusUpper = String(data.status).toUpperCase();
   const leadingPill = data.rank === 1 ? "LEADING" : "CHALLENGER";
   const authEmpty = data.authorityScore === 0;
+  const bottomBullets = splitSummaryBullets(data.bottomLine);
+  const bottomLines = bottomBullets.length ? bottomBullets : [data.bottomLine.trim() || "—"];
 
   return (
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
@@ -195,7 +229,7 @@ export function Page1Overview({ data }: { data: ReportData }) {
         <PdfHeader data={data} variant="cover" />
         <PdfTraceMarker page={1} section="Page1:after_header" />
 
-        <View style={styles.hero} wrap={false} minPresenceAhead={180}>
+        <View style={styles.hero} wrap={false}>
           <View style={styles.heroLeft}>
             <ScoreRing score={data.overallScore} />
           </View>
@@ -222,7 +256,7 @@ export function Page1Overview({ data }: { data: ReportData }) {
           </View>
         </View>
 
-        <View style={styles.statusStrip} wrap={false}>
+        <View style={[styles.statusStrip, { marginBottom: space.block }]} wrap={false}>
           <View style={styles.statusCell}>
             <Text style={[styles.statusText, { color: colors.ink2 }]}>{statusUpper}</Text>
           </View>
@@ -234,11 +268,16 @@ export function Page1Overview({ data }: { data: ReportData }) {
           </View>
         </View>
 
-        <View style={styles.calloutWrap} wrap={false}>
+        <View style={[styles.calloutWrap, { marginBottom: space.block }]} wrap={false}>
           <View style={styles.calloutBar} />
           <View style={styles.calloutInner}>
-            <Text style={styles.calloutKicker}>BOTTOM LINE</Text>
-            <Text style={styles.calloutBody}>{data.bottomLine}</Text>
+            <Text style={styles.calloutKicker}>Bottom line</Text>
+            {bottomLines.map((line, i) => (
+              <View key={`bl-${i}`} style={styles.bulletRow} wrap={false}>
+                <Text style={styles.bulletMark}>•</Text>
+                <Text style={styles.bulletText}>{line}</Text>
+              </View>
+            ))}
           </View>
         </View>
 
@@ -296,7 +335,7 @@ export function Page1Overview({ data }: { data: ReportData }) {
           );
         })}
 
-        <View style={styles.alertRow} wrap={false} minPresenceAhead={140}>
+        <View style={styles.alertRow} wrap={false}>
           <View style={[styles.alertCard, styles.alertWin, styles.alertSp]}>
             <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.green }]}>
               <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.green, fontFamily: fonts.sansBold }}>WIN</Text>

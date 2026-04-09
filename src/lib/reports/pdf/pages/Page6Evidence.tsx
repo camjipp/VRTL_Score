@@ -1,6 +1,6 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { PAGE, colors, fonts, rhythm, baseStyles } from "../theme";
+import { PAGE, colors, fonts, rhythm, baseStyles, space, BODY_MAX_W } from "../theme";
 import { formatEvidenceFieldDisplay, formatEvidenceLogPillLabel } from "@/lib/reports/formatEvidenceFieldDisplay";
 import { sanitizePdfString } from "../sanitizeReportData";
 import { ChapterTitle } from "../components/ChapterTitle";
@@ -8,7 +8,6 @@ import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
-/** 28+102+40+44+72+40+214 = 540 */
 const W = {
   idx: 28,
   label: 102,
@@ -27,10 +26,10 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: colors.ink3,
     marginBottom: rhythm.sm,
-    marginTop: rhythm.md,
+    marginTop: space.block,
     fontFamily: fonts.sansBold,
   },
-  subHeadFirst: { marginTop: rhythm.sm },
+  subHeadFirst: { marginTop: 0 },
   th: {
     flexDirection: "row",
     backgroundColor: colors.surface2,
@@ -69,12 +68,12 @@ const styles = StyleSheet.create({
   },
   sigPillTxt: { fontSize: 6, fontWeight: 400, fontFamily: fonts.sansBold },
   method: {
-    marginTop: rhythm.lg,
+    marginTop: space.block,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.rule,
-    borderRadius: 4,
-    padding: rhythm.md,
+    borderRadius: 8,
+    padding: space.cardPad,
     overflow: "hidden",
   },
   methodTitle: {
@@ -86,16 +85,22 @@ const styles = StyleSheet.create({
     letterSpacing: 0.12,
     textTransform: "uppercase",
   },
-  methodBody: { fontSize: 9, lineHeight: 1.55, color: colors.ink, fontFamily: fonts.sans },
+  methodBody: {
+    fontSize: 9.5,
+    lineHeight: 1.68,
+    color: colors.ink,
+    fontFamily: fonts.sans,
+    maxWidth: BODY_MAX_W,
+  },
   chipDeck: {
-    marginTop: rhythm.lg,
+    marginTop: space.block,
     width: 540,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.rule,
-    borderRadius: 4,
-    paddingVertical: rhythm.md,
-    paddingHorizontal: rhythm.md,
+    borderRadius: 8,
+    paddingVertical: space.cardPad,
+    paddingHorizontal: space.cardPad,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "stretch",
@@ -106,12 +111,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.paper,
     borderWidth: 1,
     borderColor: colors.rule,
-    borderRadius: 4,
+    borderRadius: 6,
     paddingVertical: rhythm.md,
     paddingHorizontal: rhythm.xs,
     alignItems: "center",
     justifyContent: "flex-start",
-    minHeight: 58,
+    minHeight: 56,
   },
   chipValWrap: {
     width: "100%",
@@ -140,28 +145,29 @@ const styles = StyleSheet.create({
   ynY: { backgroundColor: colors.surface2, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 4 },
   ynN: { backgroundColor: colors.surface2, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 4 },
   sampleCaption: {
-    fontSize: 8,
+    fontSize: 8.5,
     fontWeight: 400,
-    color: colors.ink3,
+    color: colors.ink2,
     marginBottom: rhythm.sm,
     marginTop: 2,
     fontFamily: fonts.sans,
+    lineHeight: 1.5,
+    maxWidth: BODY_MAX_W,
   },
   nextOuter: {
-    marginTop: rhythm.md,
+    marginTop: space.block,
     flexDirection: "row",
-    borderRadius: 4,
+    borderRadius: 8,
     overflow: "hidden",
     borderWidth: 1,
     borderColor: colors.rule,
-    minHeight: 72,
+    backgroundColor: colors.surface2,
   },
   nextBar: { width: 3, backgroundColor: colors.cyan },
   nextInner: {
     flex: 1,
-    paddingVertical: rhythm.md,
-    paddingHorizontal: rhythm.md,
-    backgroundColor: colors.surface2,
+    paddingVertical: space.cardPad,
+    paddingHorizontal: space.cardPad,
   },
   nextTitle: {
     fontSize: 7,
@@ -169,10 +175,16 @@ const styles = StyleSheet.create({
     letterSpacing: 0.1,
     color: colors.ink3,
     textTransform: "uppercase",
-    marginBottom: 6,
+    marginBottom: 8,
     fontFamily: fonts.sansBold,
   },
-  nextBody: { fontSize: 9, lineHeight: 1.52, color: colors.ink, fontFamily: fonts.sans },
+  nextBody: {
+    fontSize: 9.5,
+    lineHeight: 1.65,
+    color: colors.ink,
+    fontFamily: fonts.sans,
+    maxWidth: BODY_MAX_W,
+  },
 });
 
 function logLabelPill(label: string): { bg: string; fg: string } {
@@ -184,6 +196,8 @@ function logLabelPill(label: string): { bg: string; fg: string } {
 }
 
 export function Page6Evidence({ data }: { data: ReportData }) {
+  const hasLog = data.evidenceLog.length > 0;
+
   return (
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
       <View style={baseStyles.pageBody}>
@@ -191,79 +205,87 @@ export function Page6Evidence({ data }: { data: ReportData }) {
         <PdfHeader data={data} variant="inner" pageNum={6} />
         <PdfTraceMarker page={6} section="Page6:after_header" />
 
-        <ChapterTitle title="Evidence & Methodology" />
+        <ChapterTitle
+          title="Evidence & methodology"
+          subtitle="Controlled test summary and a compact response log—no raw model dumps."
+        />
 
-        <Text style={[styles.subHead, styles.subHeadFirst]}>Evidence log</Text>
-        <Text style={styles.sampleCaption}>Sample of responses</Text>
-        <View style={{ marginBottom: rhythm.sm }}>
-          <View style={styles.th}>
-            <Text style={[styles.thText, { width: W.idx }]}>#</Text>
-            <Text style={[styles.thText, { width: W.label }]}>Signal</Text>
-            <Text style={[styles.thText, { width: W.yn }]}>Incl.</Text>
-            <Text style={[styles.thText, { width: W.pos }]}>Pos</Text>
-            <Text style={[styles.thText, { width: W.str }]}>Strength</Text>
-            <Text style={[styles.thText, { width: W.comp }]}>#Comp</Text>
-            <Text style={[styles.thText, { width: W.rest }]}>Notes</Text>
-          </View>
-          {data.evidenceLog.map((row, rowIdx) => {
-            const yn = row.mentioned === "Yes";
-            const lp = logLabelPill(row.label);
-            const strengthDisp = formatEvidenceFieldDisplay(sanitizePdfString(String(row.strength ?? "")));
-            const positionDisp = formatEvidenceFieldDisplay(sanitizePdfString(String(row.position ?? "")));
-            return (
-              <View
-                key={`evl-${row.idx}`}
-                style={[styles.tr, rowIdx % 2 === 1 ? styles.trAlt : {}]}
-                wrap={false}
-              >
-                <Text style={[styles.td, { width: W.idx }]}>{String(row.idx)}</Text>
-                <View style={{ width: W.label, justifyContent: "center" }}>
-                  <View style={[styles.sigPill, { backgroundColor: lp.bg }]}>
-                    <Text style={[styles.sigPillTxt, { color: lp.fg }]}>
-                      {formatEvidenceLogPillLabel(sanitizePdfString(row.label))}
-                    </Text>
-                  </View>
-                </View>
-                <View style={{ width: W.yn, alignItems: "flex-start" }}>
-                  <View style={yn ? styles.ynY : styles.ynN}>
-                    <Text
-                      style={{
-                        fontSize: 6.5,
-                        fontWeight: 400,
-                        color: yn ? colors.ink2 : colors.ink3,
-                        fontFamily: fonts.sansBold,
-                      }}
-                    >
-                      {yn ? "YES" : "NO"}
-                    </Text>
-                  </View>
-                </View>
-                <Text style={[styles.td, { width: W.pos }]}>{positionDisp}</Text>
-                <Text
-                  style={[
-                    styles.td,
-                    {
-                      width: W.str,
-                      fontFamily: fonts.sansBold,
-                      fontSize: 7,
-                    },
-                  ]}
-                >
-                  {strengthDisp}
-                </Text>
-                <Text style={[styles.td, { width: W.comp }]}>{row.competitors}</Text>
-                <Text style={[styles.td, { width: W.rest, fontSize: 7 }]}>—</Text>
+        {hasLog ? (
+          <>
+            <Text style={[styles.subHead, styles.subHeadFirst]}>Response sample</Text>
+            <Text style={styles.sampleCaption}>Structured fields from a subset of analyzed answers.</Text>
+            <View style={{ marginBottom: rhythm.sm }}>
+              <View style={styles.th}>
+                <Text style={[styles.thText, { width: W.idx }]}>#</Text>
+                <Text style={[styles.thText, { width: W.label }]}>Signal</Text>
+                <Text style={[styles.thText, { width: W.yn }]}>Incl.</Text>
+                <Text style={[styles.thText, { width: W.pos }]}>Pos</Text>
+                <Text style={[styles.thText, { width: W.str }]}>Strength</Text>
+                <Text style={[styles.thText, { width: W.comp }]}>#Comp</Text>
+                <Text style={[styles.thText, { width: W.rest }]}>Notes</Text>
               </View>
-            );
-          })}
-        </View>
+              {data.evidenceLog.map((row, rowIdx) => {
+                const yn = row.mentioned === "Yes";
+                const lp = logLabelPill(row.label);
+                const strengthDisp = formatEvidenceFieldDisplay(sanitizePdfString(String(row.strength ?? "")));
+                const positionDisp = formatEvidenceFieldDisplay(sanitizePdfString(String(row.position ?? "")));
+                return (
+                  <View
+                    key={`evl-${row.idx}`}
+                    style={[styles.tr, rowIdx % 2 === 1 ? styles.trAlt : {}]}
+                  >
+                    <Text style={[styles.td, { width: W.idx }]}>{String(row.idx)}</Text>
+                    <View style={{ width: W.label, justifyContent: "center" }}>
+                      <View style={[styles.sigPill, { backgroundColor: lp.bg }]}>
+                        <Text style={[styles.sigPillTxt, { color: lp.fg }]}>
+                          {formatEvidenceLogPillLabel(sanitizePdfString(row.label))}
+                        </Text>
+                      </View>
+                    </View>
+                    <View style={{ width: W.yn, alignItems: "flex-start" }}>
+                      <View style={yn ? styles.ynY : styles.ynN}>
+                        <Text
+                          style={{
+                            fontSize: 6.5,
+                            fontWeight: 400,
+                            color: yn ? colors.ink2 : colors.ink3,
+                            fontFamily: fonts.sansBold,
+                          }}
+                        >
+                          {yn ? "YES" : "NO"}
+                        </Text>
+                      </View>
+                    </View>
+                    <Text style={[styles.td, { width: W.pos }]}>{positionDisp}</Text>
+                    <Text
+                      style={[
+                        styles.td,
+                        {
+                          width: W.str,
+                          fontFamily: fonts.sansBold,
+                          fontSize: 7,
+                        },
+                      ]}
+                    >
+                      {strengthDisp}
+                    </Text>
+                    <Text style={[styles.td, { width: W.comp }]}>{row.competitors}</Text>
+                    <Text style={[styles.td, { width: W.rest, fontSize: 7 }]}>—</Text>
+                  </View>
+                );
+              })}
+            </View>
+          </>
+        ) : null}
 
-        <View style={styles.method} wrap={false}>
-          <Text style={styles.methodTitle}>Methodology</Text>
-          <Text style={styles.methodBody}>{data.methodology}</Text>
-        </View>
+        {data.methodology?.trim() ? (
+          <View style={styles.method}>
+            <Text style={styles.methodTitle}>Methodology</Text>
+            <Text style={styles.methodBody}>{data.methodology}</Text>
+          </View>
+        ) : null}
 
-        <View style={styles.chipDeck} wrap={false}>
+        <View style={styles.chipDeck}>
           <View style={styles.chip}>
             <View style={styles.chipValWrap}>
               <Text style={styles.chipNum}>{String(data.meta.responses)}</Text>
@@ -284,13 +306,15 @@ export function Page6Evidence({ data }: { data: ReportData }) {
           </View>
         </View>
 
-        <View style={styles.nextOuter} wrap={false}>
-          <View style={styles.nextBar} />
-          <View style={styles.nextInner}>
-            <Text style={styles.nextTitle}>What happens next</Text>
-            <Text style={styles.nextBody}>{data.recommendedNextSteps}</Text>
+        {data.recommendedNextStepsVisible !== false && data.recommendedNextSteps?.trim() ? (
+          <View style={styles.nextOuter}>
+            <View style={styles.nextBar} />
+            <View style={styles.nextInner}>
+              <Text style={styles.nextTitle}>What happens next</Text>
+              <Text style={styles.nextBody}>{data.recommendedNextSteps}</Text>
+            </View>
           </View>
-        </View>
+        ) : null}
 
         <PdfTraceMarker page={6} section="Page6:before_footer" />
         <PdfFooter data={data} />

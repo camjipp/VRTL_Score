@@ -1,11 +1,11 @@
 import type { ReportData as SnapshotReportInput } from "@/lib/reports/renderReportHtml";
 import {
   buildDataSummaryInterpretation,
-  buildRecommendedNextSteps,
   buildSnapshotReportDerived,
   clientEvidenceCallout,
   getSnapshotEvidenceLabel,
 } from "@/lib/reports/renderReportHtml";
+import { resolveRecommendedNextStepsForReport } from "@/lib/reports/pdfTheme";
 import type {
   CompetitiveTableRow,
   EvidenceLogRow,
@@ -96,7 +96,12 @@ function buildStrategicTakeaway(models: [string, number][], _avg: number): strin
  */
 export function mapSnapshotToReactPdfData(
   input: SnapshotReportInput,
-  agency: { name: string; brand_logo_url?: string | null }
+  agency: {
+    name: string;
+    brand_logo_url?: string | null;
+    hideRecommendedNextSteps?: boolean;
+    recommendedNextStepsOverride?: string | null;
+  },
 ): ReactPdfReportData {
   const { client, snapshot, competitors, responses } = input;
   const derived = buildSnapshotReportDerived(input);
@@ -274,6 +279,19 @@ export function mapSnapshotToReactPdfData(
         ? `${metrics.topCompetitor.mentions} mentions`
         : "Watch weekly";
 
+  const weakestSurfaceName =
+    models.length > 0 ? formatProviderDisplayName(models[models.length - 1][0]) : "";
+  const hideClosing =
+    agency.hideRecommendedNextSteps === true ||
+    input.agency.hideRecommendedNextSteps === true;
+  const closingOverride =
+    agency.recommendedNextStepsOverride ?? input.agency.recommendedNextStepsOverride ?? null;
+  const closing = resolveRecommendedNextStepsForReport({
+    hide: hideClosing,
+    override: closingOverride,
+    weakestModelSurface: weakestSurfaceName,
+  });
+
   return {
     clientName: client.name,
     domain: client.website?.replace(/^https?:\/\//i, "") || "—",
@@ -311,7 +329,8 @@ export function mapSnapshotToReactPdfData(
     },
     strategicTakeaway: buildStrategicTakeaway(models, avgModelScore),
     dataSummaryInterpretation: buildDataSummaryInterpretation(metrics, client.name),
-    recommendedNextSteps: buildRecommendedNextSteps(client.name),
+    recommendedNextSteps: closing.text,
+    recommendedNextStepsVisible: closing.visible,
     agencyLogoUrl: agency.brand_logo_url ?? null,
     agencyName: agency.name,
   };

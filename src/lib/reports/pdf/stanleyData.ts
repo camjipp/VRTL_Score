@@ -1,5 +1,5 @@
 import type { ReportData } from "./types";
-import { PDF_METHODOLOGY_TEXT } from "@/lib/reports/pdfTheme";
+import { getDefaultRecommendedNextStepsBody, PDF_METHODOLOGY_TEXT } from "@/lib/reports/pdfTheme";
 
 /** Fixture for PDF preview and health checks (sample client data). */
 export const stanleyData: ReportData = {
@@ -192,8 +192,8 @@ export const stanleyData: ReportData = {
     "Sixty-four points separate OpenAI from Anthropic—buyers get different short lists depending on which assistant they use. Rebuild the weak surfaces with cited comparisons and FAQs before a competitor locks the default recommendation there.",
   dataSummaryInterpretation:
     "Stanley leads the mention table, but Owala is tied and the next brands sit one to two mentions back—this is a contested default, not a locked win. Forty percent of answers omit you entirely, and citation coverage is 0%, so assistants have little third-party proof to anchor you ahead.",
-  recommendedNextSteps:
-    "What happens next: your agency runs this as an ongoing program—not a one-off readout. We own monthly (or agreed) snapshots, sequencing of the fixes in this report, and re-measurement by model so progress shows up in scores. Stanley approves positioning, key pages, and brand risk; we execute audits, content and schema updates, citation outreach, and iteration against the weakest surfaces first. Typical shape: 90-day execution sprints with snapshot checkpoints; expand scope as recommendation share stabilizes or new competitors enter the set.",
+  recommendedNextSteps: getDefaultRecommendedNextStepsBody("Anthropic"),
+  recommendedNextStepsVisible: true,
   agencyName: "Northbridge Digital",
   agencyLogoUrl: null,
 };

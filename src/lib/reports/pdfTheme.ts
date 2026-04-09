@@ -19,6 +19,46 @@ export const PDF_REPORT_TITLE = "Competitive AI Presence Report";
 export const PDF_METHODOLOGY_TEXT =
   "We run a fixed set of category and brand-intent prompts against leading assistants, then score how often you appear, how you are positioned, and whether answers cite verifiable sources. Results are directional: use them alongside your CRM, search, and revenue data.";
 
+/**
+ * Default “What happens next” body — agency voice only (no platform/provider).
+ * `weakestModelSurface` is a display name, e.g. "Anthropic", from the snapshot.
+ */
+export function getDefaultRecommendedNextStepsBody(weakestModelSurface: string): string {
+  const w =
+    weakestModelSurface.trim() || "the weakest assistant surface in this snapshot";
+  return [
+    "We execute this as an ongoing program — not a one-time report.",
+    "",
+    "Over the next 30–90 days, we will:",
+    "• Prioritize the highest-impact fixes identified in this report",
+    `• Rebuild weak model surfaces (starting with ${w})`,
+    "• Expand citation and authority signals",
+    "• Re-measure performance across models",
+    "",
+    "Each snapshot tracks progress and informs the next set of actions.",
+  ].join("\n");
+}
+
+export type ResolveRecommendedNextStepsOptions = {
+  /** When true, omit the section entirely from exports */
+  hide?: boolean;
+  /** Agency-written body; replaces default when non-empty after trim */
+  override?: string | null;
+  weakestModelSurface: string;
+};
+
+export function resolveRecommendedNextStepsForReport(
+  opts: ResolveRecommendedNextStepsOptions,
+): { visible: boolean; text: string } {
+  if (opts.hide) return { visible: false, text: "" };
+  const custom = opts.override?.trim();
+  if (custom) return { visible: true, text: custom };
+  return {
+    visible: true,
+    text: getDefaultRecommendedNextStepsBody(opts.weakestModelSurface),
+  };
+}
+
 const ACCENT_FALLBACK = "#6b9ebc";
 
 /** Agency accent on dark: ignore near-black defaults; keep a cool restrained default. */

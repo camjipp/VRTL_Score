@@ -99,8 +99,10 @@ export type ReportData = {
   strategicTakeaway: string;
   /** Plain-language read on what the data tables imply */
   dataSummaryInterpretation: string;
-  /** Closing: ownership, cadence, ongoing program (no fluff) */
+  /** Closing body for “What happens next” (agency voice); empty when hidden */
   recommendedNextSteps: string;
+  /** When false, the closing section is omitted (default true) */
+  recommendedNextStepsVisible?: boolean;
   agencyLogoUrl?: string | null;
   agencyName?: string | null;
 };

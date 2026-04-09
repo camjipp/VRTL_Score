@@ -37,12 +37,19 @@ export const rhythm = {
   xl: 20,
 } as const;
 
+/**
+ * Layout system (pt): section = major gaps after titles; block = between components;
+ * cardPad = internal card padding (~20–24px at 72dpi ≈ 20–24pt).
+ */
 export const space = {
   pagePad: PAGE.margin,
-  section: 16,
-  block: 10,
-  cardPad: 14,
+  section: 40,
+  block: 24,
+  cardPad: 22,
 } as const;
+
+/** Narrow measure for long prose (~660px web ≈ 495pt; use 480 for margin safety) */
+export const BODY_MAX_W = 480;
 
 /** Built-in PDF fonts only — no registration, works in serverless (e.g. /var/task). */
 export const fonts = {
@@ -63,42 +70,50 @@ export const baseStyles = StyleSheet.create({
   },
   pageBody: {
     paddingTop: PAGE.margin,
-    paddingBottom: 44,
+    paddingBottom: 52,
     paddingHorizontal: PAGE.margin,
-    flexGrow: 1,
   },
   headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: rhythm.md,
+    marginBottom: space.block,
     paddingBottom: rhythm.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.rule,
   },
   /** Primary report label — left rail of every page */
   reportTitleMain: {
-    fontSize: 10.5,
+    fontSize: 8,
     fontWeight: 400,
-    color: colors.ink,
-    letterSpacing: 0,
+    color: colors.ink3,
+    letterSpacing: 0.08,
+    textTransform: "uppercase",
     fontFamily: fonts.sansBold,
   },
   headerAgency: {
-    fontSize: 8.5,
+    fontSize: 7.5,
     fontWeight: 400,
-    color: colors.ink,
-    marginTop: 4,
-    fontFamily: fonts.sansBold,
+    color: colors.ink2,
+    marginTop: 3,
+    fontFamily: fonts.sans,
   },
   /** First heading in page body (chapter); not duplicated in header */
   chapterTitle: {
-    fontSize: 13.5,
+    fontSize: 15,
     fontWeight: 400,
     color: colors.ink,
     fontFamily: fonts.sansBold,
     marginBottom: rhythm.xs,
-    letterSpacing: 0.02,
+    letterSpacing: -0.02,
+  },
+  chapterSubtitle: {
+    fontSize: 9,
+    lineHeight: 1.55,
+    color: colors.ink2,
+    fontFamily: fonts.sans,
+    maxWidth: BODY_MAX_W,
+    marginBottom: 0,
   },
   reportTitle: {
     fontSize: 11,
@@ -117,18 +132,18 @@ export const baseStyles = StyleSheet.create({
     maxWidth: 240,
   },
   clientName: {
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: 400,
     color: colors.ink,
     textAlign: "right",
     fontFamily: fonts.sansBold,
   },
   metaLine: {
-    fontSize: 9,
+    fontSize: 8.5,
     color: colors.ink3,
     textAlign: "right",
-    marginTop: 4,
-    lineHeight: 1.4,
+    marginTop: 3,
+    lineHeight: 1.45,
     fontFamily: fonts.sans,
   },
   sectionLabel: {
@@ -150,20 +165,22 @@ export const baseStyles = StyleSheet.create({
   },
   body: {
     fontSize: 9,
-    lineHeight: 1.66,
+    lineHeight: 1.72,
     color: colors.ink,
     fontWeight: 400,
     fontFamily: fonts.sans,
+    maxWidth: BODY_MAX_W,
   },
   bodyLarge: {
-    fontSize: 9.5,
-    lineHeight: 1.62,
+    fontSize: 10,
+    lineHeight: 1.68,
     color: colors.ink,
     fontFamily: fonts.sans,
+    maxWidth: BODY_MAX_W,
   },
   footer: {
     position: "absolute",
-    bottom: 22,
+    bottom: 20,
     left: PAGE.margin,
     right: PAGE.margin,
     flexDirection: "row",
@@ -171,17 +188,17 @@ export const baseStyles = StyleSheet.create({
     alignItems: "center",
     borderTopWidth: 1,
     borderTopColor: colors.rule,
-    paddingTop: 6,
+    paddingTop: 8,
   },
   footerText: {
-    fontSize: 7,
-    color: colors.ink4,
+    fontSize: 7.5,
+    color: colors.ink3,
     fontFamily: fonts.sans,
   },
   footerPageNum: {
-    fontSize: 7,
-    color: colors.ink3,
-    fontFamily: fonts.sans,
+    fontSize: 7.5,
+    color: colors.ink2,
+    fontFamily: fonts.sansBold,
   },
   card: {
     backgroundColor: colors.paper,
