@@ -170,7 +170,7 @@ export function LoginForm({ nextPath, siteOrigin = "" }: { nextPath: string; sit
         <button
           type="submit"
           disabled={busy}
-          className="font-marketing-body mt-5 w-full rounded-md border-0 bg-[var(--accent-marketing)] py-[13px] text-sm font-medium tracking-[0.01em] text-black transition hover:brightness-110 disabled:opacity-50"
+          className="font-marketing-body mt-5 w-full cursor-pointer rounded-md border-0 bg-[var(--accent-marketing)] py-[13px] text-sm font-medium tracking-[0.01em] text-black transition hover:brightness-110 disabled:opacity-50"
         >
           {busy ? "Signing in..." : "Sign in"}
         </button>
@@ -186,7 +186,7 @@ export function LoginForm({ nextPath, siteOrigin = "" }: { nextPath: string; sit
         type="button"
         onClick={handleGoogleSignIn}
         disabled={busy}
-        className="font-marketing-body flex w-full items-center justify-center gap-2.5 rounded-md border border-white/[0.08] bg-transparent py-3 text-sm text-[#888] transition-colors hover:border-white/16 hover:text-[#efefef] disabled:opacity-50"
+        className="font-marketing-body flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-md border border-white/[0.08] bg-[#161616] py-3 text-sm text-[#888] transition-colors hover:border-white/20 hover:bg-[#1c1c1c] hover:text-[#efefef] disabled:opacity-50"
       >
         <svg className="h-5 w-5" viewBox="0 0 24 24">
           <path
