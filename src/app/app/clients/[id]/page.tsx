@@ -164,11 +164,11 @@ function SnapshotSelector({
 
   return (
     <div className="flex items-center gap-2">
-      <label className="text-sm text-text-2">Snapshot:</label>
+      <label className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Snapshot</label>
       <select
         value={selectedId ?? ""}
         onChange={(e) => onSelect(e.target.value)}
-        className="rounded-app border border-white/10 bg-surface px-3 py-1.5 text-sm text-text focus:border-white/20 focus:outline-none"
+        className="h-9 min-w-[200px] max-w-[min(100vw-8rem,280px)] rounded-lg border border-white/[0.1] bg-black/40 px-3 py-1.5 text-[13px] font-medium text-text shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] focus:border-white/[0.18] focus:outline-none"
       >
         {snapshots.map((s, idx) => (
           <option key={s.id} value={s.id}>
@@ -1477,33 +1477,41 @@ function DashboardSection({
   noTopRule?: boolean;
 }) {
   return (
-    <section className={cn("w-full pt-6 space-y-4", !noTopRule && "border-t border-white/[0.06]", className)}>
+    <section className={cn("w-full space-y-4 pt-5", !noTopRule && "border-t border-white/[0.06]", className)}>
       <header className={cn(headerClassName)}>
-        <h2 className="text-base font-semibold tracking-tight text-text">{title}</h2>
-        {subtitle != null ? <div className="mt-1 max-w-2xl text-sm leading-relaxed text-text-2">{subtitle}</div> : null}
+        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3">Intelligence</p>
+        <h2 className="mt-1 text-base font-semibold tracking-tight text-text">{title}</h2>
+        {subtitle != null ? <div className="mt-1.5 max-w-2xl text-[13px] leading-relaxed text-text-2">{subtitle}</div> : null}
       </header>
       {children}
     </section>
   );
 }
 
-function PageHeader({ clientName }: { clientName: string }) {
+function PageHeader({ clientName, trailing }: { clientName: string; trailing?: ReactNode }) {
   return (
-    <header className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-white/[0.06] pb-4">
-      <BackLink href="/app" label="Back to Dashboard" />
-      <nav className="flex min-w-0 flex-1 items-center gap-1.5 text-sm" aria-label="Breadcrumb">
-        <Link href="/app" className="font-medium text-text-2 transition-colors hover:text-text">Dashboard</Link>
-        <span className="text-white/25" aria-hidden>
-          /
-        </span>
-        <Link href="/app" className="font-medium text-text-2 transition-colors hover:text-text">Clients</Link>
-        <span className="text-white/25" aria-hidden>
-          /
-        </span>
-        <span className="truncate font-semibold text-text" aria-current="page">
-          {clientName}
-        </span>
-      </nav>
+    <header className="flex flex-col gap-4 border-b border-white/[0.08] pb-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-2">
+        <BackLink
+          href="/app"
+          label="Dashboard"
+          className="shrink-0 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-2 text-[13px] font-medium text-text-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-white/[0.12] hover:bg-white/[0.05] hover:text-text"
+        />
+        <nav className="flex min-w-0 items-center gap-2 text-[13px]" aria-label="Breadcrumb">
+          <Link href="/app" className="font-medium text-text-3 transition-colors hover:text-text-2">
+            Clients
+          </Link>
+          <span className="text-text-3/80" aria-hidden>
+            <svg className="h-3 w-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.5}>
+              <path d="M4.5 2L8.5 6l-4 4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
+          <span className="truncate font-semibold text-text" aria-current="page">
+            {clientName}
+          </span>
+        </nav>
+      </div>
+      {trailing ? <div className="shrink-0 sm:pl-2">{trailing}</div> : null}
     </header>
   );
 }
@@ -1979,13 +1987,24 @@ function AIAnswerMarketShareChart({
   }, [detail, clientName]);
 
   if (rows.length === 0) {
+    if (proofZone) {
+      return (
+        <div className="rounded-xl border border-dashed border-white/[0.12] bg-black/25 px-6 py-10 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3">Competitive standing</p>
+          <p className="mt-2 text-[15px] font-semibold text-text">No mention-share data yet</p>
+          <p className="mt-1.5 text-sm leading-relaxed text-text-2">
+            Run a snapshot to rank how often you appear versus competitors in this set.
+          </p>
+        </div>
+      );
+    }
     return (
       <>
         <div className="grid place-items-center py-2">
           <div className="h-40 w-40 rounded-full border-8 border-white/[0.08]" />
         </div>
         <p className="mt-4 text-sm font-normal text-text-3">Run a snapshot to generate citation share by brand.</p>
-        {!proofZone && onRunSnapshot && (
+        {onRunSnapshot && (
           <div className="mt-3 flex justify-end">
             <RunSnapshotButton running={running ?? false} snapshotStatus={snapshotStatus ?? null} onRunSnapshot={onRunSnapshot} />
           </div>
@@ -1996,6 +2015,90 @@ function AIAnswerMarketShareChart({
 
   const clientRow = rows.find((r) => r.isClient) ?? null;
   const topCompetitor = rows.find((r) => !r.isClient) ?? null;
+  const shareGap =
+    clientRow && topCompetitor ? Math.max(0, topCompetitor.share - clientRow.share) : null;
+  const gapLine = proofZone
+    ? shareGap != null
+      ? `Losing ground. ${shareGap}% gap to leader`
+      : "Share gap. Run another snapshot"
+    : gapTrendDelta != null
+      ? gapTrendDelta > 0
+        ? `Closing gap: -${Math.abs(gapTrendDelta)}% vs leader`
+        : gapTrendDelta < 0
+          ? `Losing ground: +${Math.abs(gapTrendDelta)}% gap to leader`
+          : "Stalled vs leader"
+      : shareGap != null
+        ? `Trailing leader by ${shareGap}%`
+        : "Leader gap unavailable";
+
+  if (proofZone) {
+    return (
+      <div className="overflow-hidden rounded-xl border border-white/[0.08] bg-[#0c0c0c] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+        <div className="flex flex-col gap-4 border-b border-white/[0.06] px-5 py-5 sm:flex-row sm:items-end sm:justify-between sm:px-6 sm:py-6">
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3">Authority gap · competitive set</p>
+            <h3 className="mt-1 text-lg font-semibold tracking-tight text-text sm:text-xl">Mention share in model answers</h3>
+            <p className="mt-2 max-w-2xl text-[13px] leading-relaxed text-text-2">{gapLine}</p>
+          </div>
+          {clientRow ? (
+            <div className="shrink-0 rounded-lg border border-white/[0.1] bg-black/35 px-4 py-3 text-right shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Your position</p>
+              <p className="mt-1 text-2xl font-semibold tabular-nums text-text">#{clientRow.rank}</p>
+              <p className="text-sm font-medium tabular-nums text-text-2">{clientRow.share}% share</p>
+            </div>
+          ) : null}
+        </div>
+        <ul className="divide-y divide-white/[0.06]">
+          {rows.map((row) => (
+            <li key={row.name} className="px-5 py-4 sm:px-6">
+              <div className="flex items-start gap-4">
+                <span
+                  className={cn(
+                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-xs font-bold tabular-nums",
+                    row.isLeader
+                      ? "border-white/[0.14] bg-white/[0.07] text-text"
+                      : "border-white/[0.08] bg-black/40 text-text-2"
+                  )}
+                >
+                  {row.rank}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <span className={cn("text-[14px] font-semibold tracking-tight", row.isClient ? "text-text" : "text-text-2")}>
+                      {normalizeBrandName(row.name)}
+                      {row.isClient ? (
+                        <span className="ml-2 align-middle text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">
+                          You
+                        </span>
+                      ) : null}
+                    </span>
+                    <span
+                      className={cn(
+                        "shrink-0 text-sm font-semibold tabular-nums",
+                        row.isClient ? "text-authority-losing" : "text-text-2"
+                      )}
+                    >
+                      {row.share}%
+                    </span>
+                  </div>
+                  <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.07]">
+                    <div
+                      className={cn(
+                        "h-full rounded-full",
+                        row.isClient ? "bg-authority-losing/85" : row.isLeader ? "bg-white/30" : "bg-white/15"
+                      )}
+                      style={{ width: `${row.share}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
   const donutSize = 152;
   const strokeWidth = 24;
   const radius = (donutSize - strokeWidth) / 2;
@@ -2006,9 +2109,7 @@ function AIAnswerMarketShareChart({
   const slices = rows.map((row, idx) => {
     const length = (row.share / 100) * circumference;
     const stroke = row.isClient
-      ? proofZone
-        ? "rgba(248,113,113,0.95)"
-        : "rgba(245,158,11,0.95)"
+      ? "rgba(245,158,11,0.95)"
       : row.isLeader
         ? neutral[0]
         : neutral[Math.min(idx, neutral.length - 1)];
@@ -2032,24 +2133,8 @@ function AIAnswerMarketShareChart({
 
   const wrapClass = "relative h-[170px] w-[170px]";
 
-  const shareGap =
-    clientRow && topCompetitor ? Math.max(0, topCompetitor.share - clientRow.share) : null;
-  const gapLine = proofZone
-    ? shareGap != null
-      ? `Losing ground. ${shareGap}% gap to leader`
-      : "Share gap. Run another snapshot"
-    : gapTrendDelta != null
-      ? gapTrendDelta > 0
-        ? `Closing gap: -${Math.abs(gapTrendDelta)}% vs leader`
-        : gapTrendDelta < 0
-          ? `Losing ground: +${Math.abs(gapTrendDelta)}% gap to leader`
-          : "Stalled vs leader"
-      : shareGap != null
-        ? `Trailing leader by ${shareGap}%`
-        : "Leader gap unavailable";
-
   const donutBlock = (
-    <div className="grid place-items-center shrink-0">
+    <div className="grid shrink-0 place-items-center">
       <div className={wrapClass}>
         <svg viewBox={`0 0 ${donutSize} ${donutSize}`} className="-rotate-90 h-full w-full" aria-hidden>
           <circle
@@ -2066,13 +2151,13 @@ function AIAnswerMarketShareChart({
           <div className="text-center">
             <p className="text-2xl font-medium tabular-nums text-text">{clientRow ? `#${clientRow.rank}` : "—"}</p>
             <p className="mt-0.5 text-sm font-normal tabular-nums text-text-2">{clientRow ? `${clientRow.share}%` : "—"}</p>
-            {!sideBySide && !proofZone && (
+            {!sideBySide && (
               <p className="mt-1 max-w-[120px] text-[10px] leading-snug text-text-3">{gapLine}</p>
             )}
           </div>
         </div>
       </div>
-      {sideBySide && !proofZone && (
+      {sideBySide && (
         <p className="mt-2 max-w-[160px] text-center text-[11px] leading-snug text-text-2">{gapLine}</p>
       )}
     </div>
@@ -2088,9 +2173,7 @@ function AIAnswerMarketShareChart({
                 className="h-2 w-2 shrink-0 rounded-full"
                 style={{
                   backgroundColor: row.isClient
-                    ? proofZone
-                      ? "rgba(248,113,113,0.95)"
-                      : "rgba(245,158,11,0.95)"
+                    ? "rgba(245,158,11,0.95)"
                     : row.isLeader
                       ? neutral[0]
                       : neutral[Math.min(i, neutral.length - 1)],
@@ -2101,18 +2184,10 @@ function AIAnswerMarketShareChart({
                 {row.isClient ? " (You)" : ""}
               </span>
             </div>
-            <span className={cn("shrink-0 tabular-nums", row.isClient ? "font-medium text-red-300" : "font-normal text-text-3")}>
+            <span className={cn("shrink-0 tabular-nums", row.isClient ? "font-medium text-authority-watchlist" : "font-normal text-text-3")}>
               {row.share}%
             </span>
           </div>
-          {proofZone && (
-            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-sm bg-white/[0.08]">
-              <div
-                className={cn("h-full rounded-sm", row.isClient ? "bg-red-500/70" : "bg-white/25")}
-                style={{ width: `${row.share}%` }}
-              />
-            </div>
-          )}
         </li>
       ))}
     </ul>
@@ -2120,15 +2195,7 @@ function AIAnswerMarketShareChart({
 
   return (
     <div className="space-y-2">
-      {proofZone ? (
-        <>
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-8">
-            {donutBlock}
-            <div className="min-w-0 flex-1">{shareList}</div>
-          </div>
-          <p className="mt-3 text-[13px] font-normal text-text-2">{gapLine}</p>
-        </>
-      ) : sideBySide ? (
+      {sideBySide ? (
         <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-start sm:gap-6">
           {donutBlock}
           {shareList}
@@ -2222,9 +2289,9 @@ function getModelTerminalStatus(score: number): ModelTerminalStatus {
 }
 
 function modelTerminalPillClass(s: ModelTerminalStatus): string {
-  if (s === "strong") return "bg-emerald-500/15 text-emerald-300";
-  if (s === "degrading") return "bg-amber-500/15 text-amber-300";
-  return "bg-red-500/15 text-red-300";
+  if (s === "strong") return "border border-authority-dominant/30 bg-authority-dominant/[0.1] text-authority-dominant";
+  if (s === "degrading") return "border border-authority-watchlist/30 bg-authority-watchlist/[0.1] text-authority-watchlist";
+  return "border border-authority-losing/30 bg-authority-losing/[0.12] text-authority-losing";
 }
 
 function modelTerminalLabel(s: ModelTerminalStatus): string {
@@ -2233,11 +2300,11 @@ function modelTerminalLabel(s: ModelTerminalStatus): string {
   return "Critical";
 }
 
-/** 2px left border accent for diagnosis rows and playbook (no row background tint). */
-function modelTerminalBorderHex(s: ModelTerminalStatus): string {
-  if (s === "strong") return "#639922";
-  if (s === "degrading") return "#EF9F27";
-  return "#E24B4A";
+/** Left border accent for diagnosis rows and playbook (theme tokens). */
+function modelTerminalBorderClass(s: ModelTerminalStatus): string {
+  if (s === "strong") return "border-l-authority-dominant";
+  if (s === "degrading") return "border-l-authority-watchlist";
+  return "border-l-authority-losing";
 }
 
 function getModelDiagnosisOneLine(key: (typeof VULN_MODELS)[number], terminal: ModelTerminalStatus): string {
@@ -2347,11 +2414,8 @@ function DecisionSurface({
   score,
   previousScore,
   providers,
-  snapshots,
   snapshotId,
   snapshotStatus,
-  selectedSnapshotId,
-  onSelectSnapshotId,
   runSnapshot,
   running,
   competitors,
@@ -2361,11 +2425,8 @@ function DecisionSurface({
   score: number | null;
   previousScore: number | null;
   providers: [string, number][];
-  snapshots: SnapshotRow[];
   snapshotId: string | null;
   snapshotStatus: string | null;
-  selectedSnapshotId: string | null;
-  onSelectSnapshotId: (id: string) => void;
   runSnapshot: () => void;
   running: boolean;
   competitors: CompetitorRow[];
@@ -2397,104 +2458,156 @@ function DecisionSurface({
 
   const topBullets = primary ? tacticalActionBullets(primary.action) : [];
 
-  return (
-    <section className="w-full border-b border-white/[0.08] pb-6">
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-white/[0.06] pb-3">
-        <div className="flex min-w-0 flex-wrap items-center gap-2">
-          {logoSrc ? (
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08]">
-              <img src={logoSrc} alt="" className="h-6 w-6 object-contain" width={24} height={24} />
-            </span>
-          ) : (
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-white/[0.08] text-xs font-medium text-text-3">
-              {client.name.charAt(0)}
-            </span>
-          )}
-          <div className="min-w-0">
-            <h1 className="truncate text-base font-medium tracking-tight text-text">{client.name}</h1>
-            <p className="truncate text-xs font-normal text-text-2">{domain || client.website || "—"}</p>
-          </div>
-          <span
-            className={cn("ml-0.5 shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-medium", getAuthorityStatusTone(score))}
-          >
-            {statusLabel}
-          </span>
-        </div>
-        <div className="[&_label]:text-[10px] [&_label]:font-normal [&_label]:text-text-3 [&_select]:h-7 [&_select]:max-w-[220px] [&_select]:rounded-md [&_select]:border [&_select]:border-white/10 [&_select]:bg-transparent [&_select]:py-1 [&_select]:text-[11px] [&_select]:font-normal [&_select]:text-text-2">
-          <SnapshotSelector snapshots={snapshots} selectedId={selectedSnapshotId} onSelect={onSelectSnapshotId} />
-        </div>
-      </div>
+  const actionCardTone =
+    primary?.priority === "HIGH"
+      ? "border-authority-losing/35 bg-authority-losing/[0.07]"
+      : primary?.priority === "MEDIUM"
+        ? "border-authority-watchlist/30 bg-authority-watchlist/[0.06]"
+        : "border-authority-dominant/30 bg-authority-dominant/[0.06]";
+  const actionEyebrowClass =
+    primary?.priority === "HIGH"
+      ? "text-authority-losing"
+      : primary?.priority === "MEDIUM"
+        ? "text-authority-watchlist"
+        : "text-authority-dominant";
+  const actionUpsideClass =
+    primary?.priority === "HIGH"
+      ? "text-authority-losing/90"
+      : primary?.priority === "MEDIUM"
+        ? "text-authority-watchlist/90"
+        : "text-authority-dominant/90";
 
-      <div
-        className="mt-4"
-        style={{
-          border: "1px solid rgba(255, 255, 255, 0.08)",
-          borderRadius: 12,
-          padding: "28px 28px 24px",
-          marginBottom: 32,
-        }}
-      >
-        <div>
-          <div className="flex items-baseline" style={{ gap: 12 }}>
-            <span className="text-[56px] font-medium leading-none tracking-[-0.03em] text-text tabular-nums md:text-[64px]">
-              {score ?? "—"}
-            </span>
-            {delta !== null && delta !== 0 && (
-              <span
-                className={cn(
-                  "inline-flex items-center gap-0.5 rounded-full px-2.5 py-1 text-[13px] font-medium tabular-nums",
-                  delta < 0 ? "bg-red-500/20 text-red-300" : "bg-emerald-500/20 text-emerald-300"
-                )}
-              >
-                {delta < 0 ? <span aria-hidden>↓</span> : <span aria-hidden>↑</span>}
-                <span>
-                  {delta > 0 ? "+" : ""}
-                  {delta}
-                </span>
-                <span className="font-normal opacity-80">vs last</span>
+  return (
+    <section className="w-full border-b border-white/[0.06] pb-6">
+      <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0a0a0a] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+        <div
+          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.045] via-transparent to-transparent"
+          aria-hidden
+        />
+        <div className="relative">
+          <div className="flex flex-wrap items-center gap-3 border-b border-white/[0.06] px-5 py-4 sm:px-7 sm:py-5">
+            {logoSrc ? (
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/[0.1] bg-black/30">
+                <img src={logoSrc} alt="" className="h-7 w-7 object-contain" width={28} height={28} />
+              </span>
+            ) : (
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/[0.1] bg-black/30 text-sm font-semibold text-text-3">
+                {client.name.charAt(0)}
               </span>
             )}
-          </div>
-          <span className="mt-1 block text-[12px] text-text-3">Overall VrtlScore / 100</span>
-        </div>
-
-        <div className="mt-4 space-y-2">
-          <p className="max-w-2xl text-base font-medium leading-snug text-text">{problemLine}</p>
-          <p className="max-w-2xl text-sm font-normal leading-snug text-text-2">{causeLine}</p>
-        </div>
-
-        {primary && (
-          <div className="mt-5 max-w-xl rounded-xl border border-red-500/35 bg-red-500/[0.08] px-5 py-[18px]">
-            <div className="flex items-baseline justify-between gap-2">
-              <span className="text-[11px] font-medium uppercase tracking-wide text-red-300">Fix this first</span>
-              <span className="text-[13px] font-medium tabular-nums text-red-200">{primaryActionUpside(primary.priority)}</span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3">Client dossier</p>
+              <h1 className="mt-0.5 truncate text-lg font-semibold tracking-tight text-text sm:text-xl">{client.name}</h1>
+              {client.website ? (
+                <a
+                  href={client.website}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-0.5 block truncate text-[13px] text-text-2 transition-colors hover:text-text"
+                >
+                  {(domain || client.website).replace(/^https?:\/\//, "").replace(/\/$/, "")}
+                </a>
+              ) : (
+                <p className="mt-0.5 text-[13px] text-text-3">No site on file</p>
+              )}
             </div>
-            <p className="mt-2 text-base font-medium text-text">{primary.title}</p>
-            <ul className="mt-2 space-y-1">
-              {topBullets.map((b, i) => (
-                <li key={i} className="text-[13px] font-normal leading-snug text-red-300/90">
-                  → {b}
-                </li>
-              ))}
-            </ul>
+            <span
+              className={cn(
+                "shrink-0 rounded-md border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em]",
+                getAuthorityStatusTone(score)
+              )}
+            >
+              {statusLabel}
+            </span>
           </div>
-        )}
 
-        <div className="mt-5 flex flex-wrap items-center gap-2">
-          <RunSnapshotButton
-            running={running}
-            snapshotStatus={snapshotStatus}
-            onRunSnapshot={runSnapshot}
-            className="!h-auto !rounded-lg !border-0 !bg-text !px-4 !py-2 !text-[13px] !font-medium !text-surface !shadow-none hover:!opacity-90"
-          />
-          {snapshotId && (
-            <DownloadPdfButton
-              snapshotId={snapshotId}
-              variant="ghost"
-              label="Download report"
-              className="inline-block [&_button]:!rounded-lg [&_button]:!border [&_button]:!border-white/15 [&_button]:!bg-transparent [&_button]:!px-4 [&_button]:!py-2 [&_button]:!text-[13px] [&_button]:!font-medium [&_button]:!text-text-2"
-            />
-          )}
+          <div className="grid gap-0 lg:grid-cols-[1fr_minmax(260px,300px)]">
+            <div className="space-y-5 px-5 py-6 sm:px-7 sm:py-7 lg:border-r lg:border-white/[0.06]">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3">Primary diagnosis</p>
+                <p className="mt-2 max-w-2xl text-xl font-semibold leading-snug tracking-tight text-text sm:text-2xl">
+                  {problemLine}
+                </p>
+                <p className="mt-2 max-w-xl text-[14px] leading-relaxed text-text-2">{causeLine}</p>
+              </div>
+
+              {primary && (
+                <div className={cn("max-w-xl rounded-xl border px-5 py-4", actionCardTone)}>
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <span className={cn("text-[10px] font-semibold uppercase tracking-[0.14em]", actionEyebrowClass)}>
+                      Recommended action
+                    </span>
+                    <span className={cn("text-[12px] font-semibold tabular-nums", actionUpsideClass)}>
+                      {primaryActionUpside(primary.priority)}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-[15px] font-semibold leading-snug text-text">{primary.title}</p>
+                  <ul className="mt-3 space-y-1.5 border-t border-white/[0.06] pt-3">
+                    {topBullets.map((b, i) => (
+                      <li key={i} className="flex gap-2 text-[13px] leading-snug text-text-2">
+                        <span className="mt-0.5 font-medium text-text-3" aria-hidden>
+                          ·
+                        </span>
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                <RunSnapshotButton
+                  running={running}
+                  snapshotStatus={snapshotStatus}
+                  onRunSnapshot={runSnapshot}
+                  className="!h-10 !rounded-lg !border !border-authority-dominant/40 !bg-authority-dominant/[0.14] !px-5 !py-2 !text-[13px] !font-semibold !text-authority-dominant !shadow-none hover:!bg-authority-dominant/[0.2]"
+                />
+                {snapshotId ? (
+                  <DownloadPdfButton
+                    snapshotId={snapshotId}
+                    variant="ghost"
+                    label="Download report"
+                    className="inline-block [&_button]:!h-10 [&_button]:!rounded-lg [&_button]:!border [&_button]:!border-white/[0.12] [&_button]:!bg-white/[0.05] [&_button]:!px-5 [&_button]:!py-2 [&_button]:!text-[13px] [&_button]:!font-semibold [&_button]:!text-text [&_button]:!shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] [&_button]:hover:!border-white/[0.18] [&_button]:hover:!bg-white/[0.08]"
+                  />
+                ) : null}
+              </div>
+            </div>
+
+            <div className="flex flex-col justify-between border-t border-white/[0.06] bg-black/25 px-5 py-6 sm:px-7 sm:py-7 lg:border-t-0">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3">Authority index</p>
+                <div className="mt-3 flex flex-wrap items-end gap-3">
+                  <span className="text-5xl font-semibold leading-none tracking-[-0.04em] text-text tabular-nums sm:text-[3.5rem]">
+                    {score ?? "—"}
+                  </span>
+                  {delta !== null && delta !== 0 ? (
+                    <span
+                      className={cn(
+                        "mb-1 inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-[12px] font-semibold tabular-nums",
+                        delta < 0
+                          ? "border-authority-losing/30 bg-authority-losing/[0.1] text-authority-losing"
+                          : "border-authority-dominant/30 bg-authority-dominant/[0.1] text-authority-dominant"
+                      )}
+                    >
+                      {delta < 0 ? <span aria-hidden>↓</span> : <span aria-hidden>↑</span>}
+                      <span>
+                        {delta > 0 ? "+" : ""}
+                        {delta}
+                      </span>
+                      <span className="font-normal text-text-3">vs last</span>
+                    </span>
+                  ) : null}
+                </div>
+                <p className="mt-3 text-[12px] leading-relaxed text-text-3">
+                  Composite VrtlScore across tracked models · scale 0–100
+                </p>
+              </div>
+              <div className="mt-8 border-t border-white/[0.06] pt-5 lg:mt-6">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Status</p>
+                <p className="mt-1.5 text-[13px] font-medium text-text-2">{getScoreLabel(score).description}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -2512,9 +2625,14 @@ function WhatIsWrongSection({ providers }: { providers: [string, number][] }) {
   }, [providers]);
 
   return (
-    <DashboardSection title="Where you're winning and losing" noTopRule className="!space-y-1 !pt-4">
-      <div>
-        <div>
+    <DashboardSection
+      title="Where you're winning and losing"
+      subtitle="Model-level retrieval posture. Expand a row for the full playbook."
+      noTopRule
+      className="!space-y-3 !pt-5"
+    >
+      <div className="overflow-hidden rounded-xl border border-white/[0.08] bg-[#0c0c0c] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+        <div className="divide-y divide-white/[0.06]">
           {VULN_MODELS.map((key) => {
             const entry = providerByKey.get(key);
             const modelScore = entry ? entry[1] : null;
@@ -2575,9 +2693,12 @@ function DiagnosisModelRow({
   playbook: ModelPlaybookSpec;
 }) {
   const [open, setOpen] = useState(false);
-  const borderHex = modelTerminalBorderHex(terminal);
   const barFill =
-    terminal === "strong" ? "bg-emerald-500" : terminal === "degrading" ? "bg-amber-500" : "bg-red-500";
+    terminal === "strong"
+      ? "bg-authority-dominant"
+      : terminal === "degrading"
+        ? "bg-authority-watchlist"
+        : "bg-authority-losing";
   const impactValueClass = cn(
     "playbook-impact-value flex flex-col gap-1",
     terminal === "critical" && "playbook-impact-value--critical",
@@ -2585,55 +2706,49 @@ function DiagnosisModelRow({
   );
 
   return (
-    <div className="border-b border-white/[0.06] pt-3 last:border-b-0">
-      <div
-        style={{
-          borderLeft: `2px solid ${borderHex}`,
-          paddingLeft: 14,
-          paddingBottom: 14,
-          marginBottom: 4,
-        }}
+    <div className={cn("border-l-[3px] px-4 py-4 sm:px-5", modelTerminalBorderClass(terminal))}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="group/model-row w-full cursor-pointer select-none rounded-lg bg-transparent text-left transition-colors hover:bg-white/[0.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/15"
+        aria-expanded={open}
       >
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          className="group/model-row w-full cursor-pointer select-none rounded-sm bg-transparent py-0 text-left hover:bg-white/[0.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
-          aria-expanded={open}
-        >
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 md:flex-nowrap md:items-center">
-          <div className="flex min-w-0 items-center gap-2 md:w-[132px]">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08]">
-              <img src={logoUrl} alt="" className="h-4 w-4 object-contain" width={16} height={16} />
+          <div className="flex min-w-0 items-center gap-2.5 md:w-[140px]">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/[0.1] bg-black/25">
+              <img src={logoUrl} alt="" className="h-[18px] w-[18px] object-contain" width={18} height={18} />
             </span>
-            <span className="truncate text-[13px] font-medium text-text">{label}</span>
+            <span className="truncate text-[14px] font-semibold tracking-tight text-text">{label}</span>
           </div>
           <div className="order-last min-h-[6px] w-full min-w-0 flex-1 md:order-none md:max-w-md">
-            <div className="h-1.5 w-full overflow-hidden rounded-sm bg-white/[0.08]">
-              <div className={cn("h-full rounded-sm", barFill)} style={{ width: `${barPct}%` }} />
+            <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.07]">
+              <div className={cn("h-full rounded-full transition-[width] duration-300", barFill)} style={{ width: `${barPct}%` }} />
             </div>
           </div>
           {score != null ? (
-            <span className="w-11 shrink-0 text-right text-lg font-medium tabular-nums text-text md:w-12">{score}</span>
+            <span className="w-12 shrink-0 text-right text-xl font-semibold tabular-nums tracking-tight text-text">{score}</span>
           ) : (
-            <span className="w-11 shrink-0 text-right text-text-3">—</span>
+            <span className="w-12 shrink-0 text-right text-text-3">—</span>
           )}
-          <span className={cn("shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-medium", modelTerminalPillClass(terminal))}>
+          <span className={cn("shrink-0 rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide", modelTerminalPillClass(terminal))}>
             {modelTerminalLabel(terminal)}
           </span>
           <div className="ml-auto flex shrink-0 items-center gap-1.5">
             <span
-              className="text-[11px] text-text-3 transition-opacity duration-150 ease-in-out opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/model-row:opacity-100"
+              className="hidden text-[11px] font-medium text-text-3 sm:inline [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/model-row:opacity-100"
               aria-hidden
             >
-              View playbook ›
+              {open ? "Hide" : "Playbook"}
             </span>
             <svg
-              width={16}
-              height={16}
+              width={18}
+              height={18}
               viewBox="0 0 16 16"
               fill="none"
-              className="shrink-0 text-text-3 transition-transform duration-200 ease-in-out"
-              style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
+              className={cn(
+                "shrink-0 text-text-2 transition-transform duration-200 ease-out",
+                open && "rotate-180"
+              )}
               aria-hidden
             >
               <path
@@ -2646,22 +2761,14 @@ function DiagnosisModelRow({
             </svg>
           </div>
         </div>
-          <p className="mt-2 text-[13px] font-normal leading-snug text-text-2">{diagnosisLine}</p>
-        </button>
-      </div>
+        <p className="mt-3 text-left text-[13px] leading-relaxed text-text-2">{diagnosisLine}</p>
+      </button>
       <div
         className="grid transition-[grid-template-rows] duration-200 ease-out"
         style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
       >
         <div className="min-h-0 overflow-hidden">
-          <div
-            className="mt-3 bg-transparent"
-            style={{
-              borderLeft: `2px solid ${borderHex}`,
-              paddingLeft: 16,
-              marginTop: 12,
-            }}
-          >
+          <div className={cn("mt-4 border-l-[3px] bg-black/20 py-1 pl-4 sm:pl-5", modelTerminalBorderClass(terminal))}>
             <div className="playbook-header">PLAYBOOK · {label.toUpperCase()}</div>
             <div className="playbook-section-rule" aria-hidden />
             <div className="pb-2 pr-2">
@@ -2692,19 +2799,9 @@ function DiagnosisModelRow({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="block text-text-3 hover:text-text-2"
-                style={{
-                  display: "block",
-                  marginLeft: "auto",
-                  marginTop: 16,
-                  fontSize: 12,
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: 0,
-                }}
+                className="ml-auto mt-4 block text-[12px] font-medium text-text-3 transition-colors hover:text-text"
               >
-                ▲ Collapse
+                Collapse playbook
               </button>
             </div>
           </div>
@@ -3575,7 +3672,7 @@ export default function ClientDetailPage() {
     : [];
   return (
     <div className="min-h-screen pb-20 md:pb-0">
-      <div className="mx-auto max-w-[1200px] space-y-4 px-5 py-6 md:px-8 md:py-8">
+      <div className="mx-auto max-w-[1180px] space-y-5 px-5 py-5 md:px-8 md:py-7">
         {/* Loading */}
         {loading && (
           <div className="space-y-4">
@@ -3604,7 +3701,18 @@ export default function ClientDetailPage() {
 
         {client && (
           <>
-            <PageHeader clientName={client.name} />
+            <PageHeader
+              clientName={client.name}
+              trailing={
+                snapshots.length > 0 ? (
+                  <SnapshotSelector
+                    snapshots={snapshots}
+                    selectedId={selectedSnapshotId}
+                    onSelect={setSelectedSnapshotId}
+                  />
+                ) : null
+              }
+            />
 
             {selectedSnapshot?.status === "running" && (
               <SnapshotProgress startedAt={selectedSnapshot?.started_at ?? selectedSnapshot?.created_at ?? null} />
@@ -3633,11 +3741,8 @@ export default function ClientDetailPage() {
               score={selectedSnapshot?.vrtl_score ?? null}
               previousScore={previousSnapshot?.vrtl_score ?? null}
               providers={providers}
-              snapshots={snapshots}
               snapshotId={selectedSnapshot?.id ?? null}
               snapshotStatus={selectedSnapshot?.status ?? null}
-              selectedSnapshotId={selectedSnapshotId}
-              onSelectSnapshotId={setSelectedSnapshotId}
               runSnapshot={runSnapshot}
               running={running}
               competitors={competitors}
@@ -3646,7 +3751,11 @@ export default function ClientDetailPage() {
 
             <WhatIsWrongSection providers={providers} />
 
-            <DashboardSection title="Why you're losing" className="!space-y-2 !pt-4 opacity-[0.85]">
+            <DashboardSection
+              title="Why you're losing"
+              subtitle="How often you are mentioned versus the competitive set in this snapshot — same framing as the authority report."
+              className="!space-y-3 !pt-6"
+            >
               <AIAnswerMarketShareChart
                 clientName={client.name}
                 detail={snapshotDetail}
