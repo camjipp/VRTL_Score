@@ -32,7 +32,7 @@ function LoginBrandSide() {
 
       <div className="min-w-0">
         <p className="mb-5 font-marketing-mono text-[11px] uppercase tracking-[0.12em] text-[var(--accent-marketing)]">
-          // AI VISIBILITY FOR AGENCIES
+          {"// AI VISIBILITY FOR AGENCIES"}
         </p>
 
         <h1 className="mb-4 max-w-[380px] font-marketing-display text-[2.625rem] font-normal leading-[1.1] tracking-[-0.02em] text-[#efefef]">
@@ -173,7 +173,7 @@ export default async function LoginPage({
       <div className="flex min-h-screen w-full flex-col justify-center bg-[#0c0c0c] px-6 py-10 md:w-[45%] md:items-center md:px-16 md:py-16">
         <div className="w-full max-w-[360px] md:mx-auto">
           <p className="mb-3 font-marketing-mono text-[11px] uppercase tracking-[0.12em] text-[var(--accent-marketing)]">
-            // SIGN IN
+            {"// SIGN IN"}
           </p>
 
           <h2 className="mb-1.5 font-marketing-display text-[28px] font-normal tracking-[-0.02em] text-[#efefef]">
