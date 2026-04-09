@@ -33,9 +33,9 @@ const SECTIONS = [
 
 type SectionId = (typeof SECTIONS)[number]["id"];
 
-/** Dashboard-aligned surface — 16px radius per spec */
+/** Dashboard-aligned surface — subtle, same family as main app cards */
 const cardSurface =
-  "rounded-[16px] border border-white/[0.06] bg-white/[0.02] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]";
+  "rounded-2xl border border-white/[0.08] bg-[#0B0F14]/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]";
 
 const inputDark =
   "w-full rounded-lg border border-white/[0.08] bg-black/25 px-3.5 py-2.5 text-[13px] text-text placeholder:text-text-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-colors focus:border-accent/40 focus:outline-none focus:ring-2 focus:ring-accent/20";
@@ -259,7 +259,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-5 pb-2">
+    <div className="mx-auto w-full max-w-[1100px] space-y-4 px-5 pb-8 pt-3 sm:px-6 sm:pt-3.5">
       <nav className="flex items-center gap-1.5 text-[13px]">
         <Link href="/app" className="text-text-2 transition-colors hover:text-text">
           Clients
@@ -288,11 +288,11 @@ export default function SettingsPage() {
       )}
 
       {loading && (
-        <div className="flex flex-col gap-5 lg:flex-row lg:gap-8">
-          <div className="w-full shrink-0 lg:w-52">
-            <div className="space-y-2">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-10">
+          <div className="w-full shrink-0 lg:w-[11.5rem]">
+            <div className="space-y-1.5">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className={cn("h-10 animate-pulse", cardSurface)} />
+                <div key={i} className={cn("h-9 animate-pulse rounded-lg bg-white/[0.04]")} />
               ))}
             </div>
           </div>
@@ -303,29 +303,39 @@ export default function SettingsPage() {
       )}
 
       {!loading && (
-        <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
-          <nav className={cn("shrink-0 lg:w-52", cardSurface, "p-2")}>
-            <div className="space-y-0.5">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-10">
+          <nav
+            className="shrink-0 lg:w-[11.5rem] lg:border-r lg:border-white/[0.06] lg:pr-6"
+            aria-label="Settings sections"
+          >
+            <div className="flex flex-row gap-1 overflow-x-auto pb-1 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:pb-0">
               {SECTIONS.map((section) => (
                 <button
                   key={section.id}
                   type="button"
                   onClick={() => setActiveSection(section.id)}
                   className={cn(
-                    "flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-[13px] font-medium transition-colors",
+                    "flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-left text-[13px] font-medium transition-colors duration-150",
+                    "lg:w-full",
                     activeSection === section.id
-                      ? "bg-accent/12 text-accent"
-                      : "text-text-2 hover:bg-white/[0.04] hover:text-text"
+                      ? "bg-white/[0.08] text-text"
+                      : "text-text-3/70 hover:bg-white/[0.05] hover:text-text-2"
                   )}
                 >
-                  <SectionIcon icon={section.icon} className="h-4 w-4 shrink-0 opacity-90" />
+                  <SectionIcon
+                    icon={section.icon}
+                    className={cn(
+                      "h-4 w-4 shrink-0",
+                      activeSection === section.id ? "text-text" : "text-text-3/65"
+                    )}
+                  />
                   {section.label}
                 </button>
               ))}
             </div>
           </nav>
 
-          <div className="min-w-0 flex-1 space-y-5">
+          <div className="min-w-0 flex-1 space-y-4">
             {activeSection === "profile" && settings && (
               <form onSubmit={handleSaveProfile} className={cn(cardSurface)}>
                 <div className="space-y-5 p-5 sm:p-6">

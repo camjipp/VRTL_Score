@@ -3777,7 +3777,7 @@ export default function ClientDetailPage() {
 
       {/* Desktop: sticky download bar after scroll (unchanged behavior) */}
       {stickyVisible && client && selectedSnapshot && (selectedSnapshot.status?.toLowerCase().includes("complete") || selectedSnapshot.status?.toLowerCase().includes("success")) && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 hidden border-t border-white/5 bg-surface py-2 pl-[var(--app-sidebar-width,240px)] pr-6 md:block">
+        <div className="fixed bottom-0 left-0 right-0 z-50 hidden border-t border-white/5 bg-surface py-2 pl-[var(--app-sidebar-width,220px)] pr-6 md:block">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-text-2">Ready to share with {client.name}</span>
             <DownloadPdfButton snapshotId={selectedSnapshot.id} variant="compact" />
