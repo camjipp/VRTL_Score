@@ -307,9 +307,9 @@ html {
 /* Client dashboard — playbook terminal spec sheet */
 .playbook-grid {
   display: grid;
-  grid-template-columns: 140px 1fr;
-  gap: 10px 16px;
-  margin-top: 8px;
+  grid-template-columns: minmax(120px, 140px) 1fr;
+  gap: 8px 14px;
+  margin-top: 6px;
 }
 
 .playbook-grid-label {
@@ -327,26 +327,27 @@ html {
 }
 
 .playbook-section-rule {
-  height: 0.5px;
-  background: rgb(var(--text-3) / 0.35);
-  margin: 16px 0;
+  height: 1px;
+  background: rgb(var(--text-3) / 0.1);
+  margin: 18px 0 16px;
 }
 
 .playbook-section-label {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgb(var(--text-3));
-  margin-bottom: 10px;
+  color: rgb(var(--text-3) / 0.75);
+  margin-bottom: 8px;
 }
 
 .playbook-header {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgb(var(--text-3));
+  color: rgb(var(--text-3) / 0.8);
+  margin-bottom: 2px;
 }
 
 .playbook-lead-sentence {
@@ -386,11 +387,11 @@ html {
 
 .playbook-impact-row {
   display: grid;
-  grid-template-columns: 140px 1fr;
-  gap: 0 16px;
-  padding-top: 12px;
-  margin-top: 16px;
-  border-top: 0.5px solid rgb(var(--text-3) / 0.35);
+  grid-template-columns: minmax(120px, 140px) 1fr;
+  gap: 0 14px;
+  padding-top: 14px;
+  margin-top: 18px;
+  border-top: 1px solid rgb(var(--text-3) / 0.1);
 }
 
 .playbook-impact-label {

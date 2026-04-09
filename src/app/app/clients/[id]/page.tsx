@@ -1989,7 +1989,7 @@ function AIAnswerMarketShareChart({
   if (rows.length === 0) {
     if (proofZone) {
       return (
-        <div className="rounded-xl border border-dashed border-white/[0.12] bg-black/25 px-6 py-10 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+        <div className="rounded-2xl bg-black/20 px-6 py-10 text-center ring-1 ring-inset ring-dashed ring-white/[0.08]">
           <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3">Competitive standing</p>
           <p className="mt-2 text-[15px] font-semibold text-text">No mention-share data yet</p>
           <p className="mt-1.5 text-sm leading-relaxed text-text-2">
@@ -2033,59 +2033,59 @@ function AIAnswerMarketShareChart({
 
   if (proofZone) {
     return (
-      <div className="overflow-hidden rounded-xl border border-white/[0.08] bg-[#0c0c0c] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-        <div className="flex flex-col gap-4 border-b border-white/[0.06] px-5 py-5 sm:flex-row sm:items-end sm:justify-between sm:px-6 sm:py-6">
-          <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3">Authority gap · competitive set</p>
-            <h3 className="mt-1 text-lg font-semibold tracking-tight text-text sm:text-xl">Mention share in model answers</h3>
-            <p className="mt-2 max-w-2xl text-[13px] leading-relaxed text-text-2">{gapLine}</p>
+      <div className="overflow-hidden rounded-2xl bg-[#0a0c0e] ring-1 ring-inset ring-white/[0.05]">
+        <div className="flex flex-col gap-5 px-5 py-5 sm:flex-row sm:items-start sm:justify-between sm:gap-8 sm:px-6 sm:py-6">
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-text-3/80">Authority gap · competitive set</p>
+            <h3 className="mt-1.5 text-lg font-semibold tracking-tight text-text sm:text-xl">Mention share in model answers</h3>
+            <p className="mt-2 max-w-2xl text-[13px] font-normal leading-relaxed text-text-3">{gapLine}</p>
           </div>
           {clientRow ? (
-            <div className="shrink-0 rounded-lg border border-white/[0.1] bg-black/35 px-4 py-3 text-right shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Your position</p>
-              <p className="mt-1 text-2xl font-semibold tabular-nums text-text">#{clientRow.rank}</p>
-              <p className="text-sm font-medium tabular-nums text-text-2">{clientRow.share}% share</p>
+            <div className="shrink-0 rounded-xl bg-black/35 px-4 py-3 text-right ring-1 ring-inset ring-white/[0.06] sm:min-w-[7.5rem]">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3/85">Your position</p>
+              <p className="mt-0.5 text-2xl font-semibold tabular-nums tracking-tight text-text">#{clientRow.rank}</p>
+              <p className="text-[12px] font-medium tabular-nums text-text-2">{clientRow.share}% share</p>
             </div>
           ) : null}
         </div>
-        <ul className="divide-y divide-white/[0.06]">
+        <ul className="border-t border-white/[0.04]">
           {rows.map((row) => (
-            <li key={row.name} className="px-5 py-4 sm:px-6">
-              <div className="flex items-start gap-4">
+            <li key={row.name} className="border-b border-white/[0.04] px-5 py-3.5 last:border-b-0 sm:px-6 sm:py-4">
+              <div className="flex items-start gap-3 sm:gap-4">
                 <span
                   className={cn(
-                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-xs font-bold tabular-nums",
+                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[11px] font-bold tabular-nums ring-1 ring-inset",
                     row.isLeader
-                      ? "border-white/[0.14] bg-white/[0.07] text-text"
-                      : "border-white/[0.08] bg-black/40 text-text-2"
+                      ? "bg-white/[0.06] text-text ring-white/[0.08]"
+                      : "bg-black/30 text-text-2 ring-white/[0.05]"
                   )}
                 >
                   {row.rank}
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <span className={cn("text-[14px] font-semibold tracking-tight", row.isClient ? "text-text" : "text-text-2")}>
+                    <span className={cn("text-[13px] font-semibold tracking-tight", row.isClient ? "text-text" : "text-text-2")}>
                       {normalizeBrandName(row.name)}
                       {row.isClient ? (
-                        <span className="ml-2 align-middle text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">
+                        <span className="ml-2 align-middle text-[10px] font-medium uppercase tracking-[0.1em] text-text-3/90">
                           You
                         </span>
                       ) : null}
                     </span>
                     <span
                       className={cn(
-                        "shrink-0 text-sm font-semibold tabular-nums",
-                        row.isClient ? "text-authority-losing" : "text-text-2"
+                        "shrink-0 text-[13px] font-semibold tabular-nums",
+                        row.isClient ? "text-authority-losing/95" : "text-text-2"
                       )}
                     >
                       {row.share}%
                     </span>
                   </div>
-                  <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.07]">
+                  <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-white/[0.06]">
                     <div
                       className={cn(
                         "h-full rounded-full",
-                        row.isClient ? "bg-authority-losing/85" : row.isLeader ? "bg-white/30" : "bg-white/15"
+                        row.isClient ? "bg-authority-losing/75" : row.isLeader ? "bg-white/25" : "bg-white/12"
                       )}
                       style={{ width: `${row.share}%` }}
                     />
@@ -2300,13 +2300,6 @@ function modelTerminalLabel(s: ModelTerminalStatus): string {
   return "Critical";
 }
 
-/** Left border accent for diagnosis rows and playbook (theme tokens). */
-function modelTerminalBorderClass(s: ModelTerminalStatus): string {
-  if (s === "strong") return "border-l-authority-dominant";
-  if (s === "degrading") return "border-l-authority-watchlist";
-  return "border-l-authority-losing";
-}
-
 function getModelDiagnosisOneLine(key: (typeof VULN_MODELS)[number], terminal: ModelTerminalStatus): string {
   if (terminal === "strong") return "Strong entity coverage. Mirror this structure elsewhere.";
   if (terminal === "degrading") {
@@ -2460,10 +2453,10 @@ function DecisionSurface({
 
   const actionCardTone =
     primary?.priority === "HIGH"
-      ? "border-authority-losing/35 bg-authority-losing/[0.07]"
+      ? "border-authority-losing/18 bg-authority-losing/[0.04] ring-1 ring-inset ring-authority-losing/8"
       : primary?.priority === "MEDIUM"
-        ? "border-authority-watchlist/30 bg-authority-watchlist/[0.06]"
-        : "border-authority-dominant/30 bg-authority-dominant/[0.06]";
+        ? "border-authority-watchlist/20 bg-authority-watchlist/[0.04] ring-1 ring-inset ring-authority-watchlist/8"
+        : "border-authority-dominant/20 bg-authority-dominant/[0.04] ring-1 ring-inset ring-authority-dominant/8";
   const actionEyebrowClass =
     primary?.priority === "HIGH"
       ? "text-authority-losing"
@@ -2478,20 +2471,20 @@ function DecisionSurface({
         : "text-authority-dominant/90";
 
   return (
-    <section className="w-full border-b border-white/[0.06] pb-6">
-      <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0a0a0a] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+    <section className="w-full border-b border-white/[0.04] pb-6">
+      <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-[#090b0d] shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
         <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.045] via-transparent to-transparent"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.03] via-transparent to-transparent"
           aria-hidden
         />
         <div className="relative">
-          <div className="flex flex-wrap items-center gap-3 border-b border-white/[0.06] px-5 py-4 sm:px-7 sm:py-5">
+          <div className="flex flex-wrap items-center gap-3 border-b border-white/[0.04] px-5 py-4 sm:px-7 sm:py-5">
             {logoSrc ? (
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/[0.1] bg-black/30">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-black/35 ring-1 ring-inset ring-white/[0.06]">
                 <img src={logoSrc} alt="" className="h-7 w-7 object-contain" width={28} height={28} />
               </span>
             ) : (
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/[0.1] bg-black/30 text-sm font-semibold text-text-3">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-black/35 text-sm font-semibold text-text-3 ring-1 ring-inset ring-white/[0.06]">
                 {client.name.charAt(0)}
               </span>
             )}
@@ -2522,27 +2515,27 @@ function DecisionSurface({
           </div>
 
           <div className="grid gap-0 lg:grid-cols-[1fr_minmax(260px,300px)]">
-            <div className="space-y-5 px-5 py-6 sm:px-7 sm:py-7 lg:border-r lg:border-white/[0.06]">
+            <div className="space-y-5 px-5 py-6 sm:px-7 sm:py-7 lg:border-r lg:border-white/[0.04]">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3">Primary diagnosis</p>
-                <p className="mt-2 max-w-2xl text-xl font-semibold leading-snug tracking-tight text-text sm:text-2xl">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-text-3/85">Primary diagnosis</p>
+                <p className="mt-1 max-w-2xl text-[1.375rem] font-semibold leading-[1.2] tracking-tight text-text sm:text-2xl sm:leading-tight">
                   {problemLine}
                 </p>
-                <p className="mt-2 max-w-xl text-[14px] leading-relaxed text-text-2">{causeLine}</p>
+                <p className="mt-2.5 max-w-xl text-[13px] font-normal leading-relaxed text-text-3">{causeLine}</p>
               </div>
 
               {primary && (
-                <div className={cn("max-w-xl rounded-xl border px-5 py-4", actionCardTone)}>
+                <div className={cn("max-w-xl rounded-xl px-5 py-4", actionCardTone)}>
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <span className={cn("text-[10px] font-semibold uppercase tracking-[0.14em]", actionEyebrowClass)}>
+                    <span className={cn("text-[10px] font-semibold uppercase tracking-[0.12em]", actionEyebrowClass)}>
                       Recommended action
                     </span>
-                    <span className={cn("text-[12px] font-semibold tabular-nums", actionUpsideClass)}>
+                    <span className={cn("text-[11px] font-semibold tabular-nums", actionUpsideClass)}>
                       {primaryActionUpside(primary.priority)}
                     </span>
                   </div>
-                  <p className="mt-2 text-[15px] font-semibold leading-snug text-text">{primary.title}</p>
-                  <ul className="mt-3 space-y-1.5 border-t border-white/[0.06] pt-3">
+                  <p className="mt-2.5 text-[15px] font-semibold leading-snug text-text">{primary.title}</p>
+                  <ul className="mt-3.5 space-y-1.5 border-t border-white/[0.05] pt-3.5">
                     {topBullets.map((b, i) => (
                       <li key={i} className="flex gap-2 text-[13px] leading-snug text-text-2">
                         <span className="mt-0.5 font-medium text-text-3" aria-hidden>
@@ -2555,38 +2548,38 @@ function DecisionSurface({
                 </div>
               )}
 
-              <div className="flex flex-wrap items-center gap-3 pt-1">
+              <div className="flex flex-wrap items-stretch gap-2 pt-0.5">
                 <RunSnapshotButton
                   running={running}
                   snapshotStatus={snapshotStatus}
                   onRunSnapshot={runSnapshot}
-                  className="!h-10 !rounded-lg !border !border-authority-dominant/40 !bg-authority-dominant/[0.14] !px-5 !py-2 !text-[13px] !font-semibold !text-authority-dominant !shadow-none hover:!bg-authority-dominant/[0.2]"
+                  className="!flex !h-10 !min-h-[40px] !items-center !rounded-lg !border !border-authority-dominant/35 !bg-authority-dominant/[0.12] !px-5 !py-0 !text-[13px] !font-semibold !text-authority-dominant !shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] hover:!border-authority-dominant/45 hover:!bg-authority-dominant/[0.18]"
                 />
                 {snapshotId ? (
                   <DownloadPdfButton
                     snapshotId={snapshotId}
                     variant="ghost"
                     label="Download report"
-                    className="inline-block [&_button]:!h-10 [&_button]:!rounded-lg [&_button]:!border [&_button]:!border-white/[0.12] [&_button]:!bg-white/[0.05] [&_button]:!px-5 [&_button]:!py-2 [&_button]:!text-[13px] [&_button]:!font-semibold [&_button]:!text-text [&_button]:!shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] [&_button]:hover:!border-white/[0.18] [&_button]:hover:!bg-white/[0.08]"
+                    className="inline-flex [&_button]:!flex [&_button]:!h-10 [&_button]:!min-h-[40px] [&_button]:!items-center [&_button]:!rounded-lg [&_button]:!border [&_button]:!border-white/[0.08] [&_button]:!bg-white/[0.04] [&_button]:!px-5 [&_button]:!py-0 [&_button]:!text-[13px] [&_button]:!font-semibold [&_button]:!text-text-2 [&_button]:!shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] [&_button]:hover:!border-white/[0.12] [&_button]:hover:!bg-white/[0.07] [&_button]:hover:!text-text"
                   />
                 ) : null}
               </div>
             </div>
 
-            <div className="flex flex-col justify-between border-t border-white/[0.06] bg-black/25 px-5 py-6 sm:px-7 sm:py-7 lg:border-t-0">
+            <div className="flex flex-col justify-between border-t border-white/[0.04] bg-black/20 px-5 py-6 sm:px-7 sm:py-7 lg:border-t-0">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-3">Authority index</p>
-                <div className="mt-3 flex flex-wrap items-end gap-3">
-                  <span className="text-5xl font-semibold leading-none tracking-[-0.04em] text-text tabular-nums sm:text-[3.5rem]">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3/80">Authority index</p>
+                <div className="mt-1.5 flex flex-wrap items-end gap-2.5">
+                  <span className="text-[3.25rem] font-semibold leading-[0.92] tracking-[-0.045em] text-text tabular-nums sm:text-[4rem]">
                     {score ?? "—"}
                   </span>
                   {delta !== null && delta !== 0 ? (
                     <span
                       className={cn(
-                        "mb-1 inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-[12px] font-semibold tabular-nums",
+                        "mb-0.5 inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold tabular-nums ring-1 ring-inset",
                         delta < 0
-                          ? "border-authority-losing/30 bg-authority-losing/[0.1] text-authority-losing"
-                          : "border-authority-dominant/30 bg-authority-dominant/[0.1] text-authority-dominant"
+                          ? "bg-authority-losing/[0.08] text-authority-losing ring-authority-losing/15"
+                          : "bg-authority-dominant/[0.08] text-authority-dominant ring-authority-dominant/15"
                       )}
                     >
                       {delta < 0 ? <span aria-hidden>↓</span> : <span aria-hidden>↑</span>}
@@ -2594,17 +2587,17 @@ function DecisionSurface({
                         {delta > 0 ? "+" : ""}
                         {delta}
                       </span>
-                      <span className="font-normal text-text-3">vs last</span>
+                      <span className="font-normal text-text-3/90">vs last</span>
                     </span>
                   ) : null}
                 </div>
-                <p className="mt-3 text-[12px] leading-relaxed text-text-3">
-                  Composite VrtlScore across tracked models · scale 0–100
+                <p className="mt-1.5 text-[11px] font-normal leading-snug text-text-3/70">
+                  Composite across tracked models · 0–100
                 </p>
               </div>
-              <div className="mt-8 border-t border-white/[0.06] pt-5 lg:mt-6">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Status</p>
-                <p className="mt-1.5 text-[13px] font-medium text-text-2">{getScoreLabel(score).description}</p>
+              <div className="mt-7 border-t border-white/[0.04] pt-4 lg:mt-8">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3/80">Status</p>
+                <p className="mt-1 text-[12px] font-normal leading-relaxed text-text-2">{getScoreLabel(score).description}</p>
               </div>
             </div>
           </div>
@@ -2631,8 +2624,8 @@ function WhatIsWrongSection({ providers }: { providers: [string, number][] }) {
       noTopRule
       className="!space-y-3 !pt-5"
     >
-      <div className="overflow-hidden rounded-xl border border-white/[0.08] bg-[#0c0c0c] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-        <div className="divide-y divide-white/[0.06]">
+      <div className="overflow-hidden rounded-2xl bg-[#0a0c0e] ring-1 ring-inset ring-white/[0.05]">
+        <div className="divide-y divide-white/[0.04]">
           {VULN_MODELS.map((key) => {
             const entry = providerByKey.get(key);
             const modelScore = entry ? entry[1] : null;
@@ -2706,16 +2699,16 @@ function DiagnosisModelRow({
   );
 
   return (
-    <div className={cn("border-l-[3px] px-4 py-4 sm:px-5", modelTerminalBorderClass(terminal))}>
+    <div className="px-4 py-4 sm:px-5 sm:py-5">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="group/model-row w-full cursor-pointer select-none rounded-lg bg-transparent text-left transition-colors hover:bg-white/[0.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/15"
+        className="group/model-row w-full cursor-pointer select-none rounded-lg bg-transparent text-left transition-colors hover:bg-white/[0.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/12"
         aria-expanded={open}
       >
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 md:flex-nowrap md:items-center">
           <div className="flex min-w-0 items-center gap-2.5 md:w-[140px]">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/[0.1] bg-black/25">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black/30 ring-1 ring-inset ring-white/[0.06]">
               <img src={logoUrl} alt="" className="h-[18px] w-[18px] object-contain" width={18} height={18} />
             </span>
             <span className="truncate text-[14px] font-semibold tracking-tight text-text">{label}</span>
@@ -2768,10 +2761,10 @@ function DiagnosisModelRow({
         style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
       >
         <div className="min-h-0 overflow-hidden">
-          <div className={cn("mt-4 border-l-[3px] bg-black/20 py-1 pl-4 sm:pl-5", modelTerminalBorderClass(terminal))}>
-            <div className="playbook-header">PLAYBOOK · {label.toUpperCase()}</div>
+          <div className="mt-5 border-t border-white/[0.04] pt-6 sm:pt-7">
+            <div className="playbook-header">Playbook · {label}</div>
             <div className="playbook-section-rule" aria-hidden />
-            <div className="pb-2 pr-2">
+            <div className="pb-1 pr-0 sm:pr-1">
               <div className="playbook-section-label">Diagnosis</div>
               <PlaybookSpecGrid rows={playbook.diagnosisRows} />
               <div className="playbook-section-rule" aria-hidden />
@@ -2799,9 +2792,9 @@ function DiagnosisModelRow({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="ml-auto mt-4 block text-[12px] font-medium text-text-3 transition-colors hover:text-text"
+                className="ml-auto mt-5 block text-[11px] font-medium uppercase tracking-wide text-text-3 transition-colors hover:text-text-2"
               >
-                Collapse playbook
+                Collapse
               </button>
             </div>
           </div>
@@ -3754,7 +3747,8 @@ export default function ClientDetailPage() {
             <DashboardSection
               title="Why you're losing"
               subtitle="How often you are mentioned versus the competitive set in this snapshot — same framing as the authority report."
-              className="!space-y-3 !pt-6"
+              className="!space-y-4 !pt-5"
+              headerClassName="[&_div]:text-[13px] [&_div]:font-normal [&_div]:leading-relaxed [&_div]:text-text-3/85"
             >
               <AIAnswerMarketShareChart
                 clientName={client.name}
