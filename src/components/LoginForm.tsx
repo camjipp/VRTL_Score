@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
+
+import { BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -216,11 +218,11 @@ export function LoginForm({ nextPath, siteOrigin = "" }: { nextPath: string; sit
           aria-live="polite"
         >
           <Image
-            src="/brand/White_VRTL.png"
+            src={BRAND_LOCKUP_SRC}
             alt=""
-            width={160}
-            height={40}
-            className="mb-6 h-8 w-auto opacity-90 animate-pulse"
+            width={280}
+            height={72}
+            className="mb-6 h-8 w-auto max-w-[min(280px,85vw)] object-contain object-center opacity-90 animate-pulse"
             priority
           />
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/[0.08] border-t-[var(--accent-marketing)]" />

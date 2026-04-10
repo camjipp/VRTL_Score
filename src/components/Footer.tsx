@@ -3,6 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
+
 const linkClass =
   "block text-[13px] font-light text-[var(--text-secondary)] transition-colors duration-150 hover:text-[var(--text-primary)]";
 
@@ -20,8 +22,8 @@ export function Footer() {
                 alt="VRTL Score"
                 className="h-10 w-auto object-contain object-left md:h-11"
                 height={44}
-                src="/brand/White_VRTL.png"
-                width={180}
+                src={BRAND_LOCKUP_SRC}
+                width={240}
               />
             </Link>
             <p className="mt-4 max-w-[220px] text-sm font-light leading-relaxed text-[var(--text-secondary)]">

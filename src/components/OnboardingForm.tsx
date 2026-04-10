@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/Alert";
 import { cn } from "@/lib/cn";
+import { BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 const authInputClass =
@@ -23,11 +24,11 @@ function OnboardingHeader({ showExit }: { showExit: boolean }) {
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-white/[0.06] bg-[var(--bg-base)] px-6 md:px-10">
       <Link href="/" className="flex shrink-0 items-center">
         <Image
-          src="/brand/White_VRTL.png"
+          src={BRAND_LOCKUP_SRC}
           alt="VRTL Score"
-          width={140}
-          height={28}
-          className="h-7 w-auto"
+          width={200}
+          height={52}
+          className="h-7 w-auto max-w-[min(220px,70vw)] object-contain object-left"
           priority
         />
       </Link>

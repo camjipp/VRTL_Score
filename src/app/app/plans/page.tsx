@@ -8,6 +8,7 @@ import { ensureOnboarded } from "@/lib/onboard";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { Alert, AlertDescription } from "@/components/ui/Alert";
 import { cn } from "@/lib/cn";
+import { BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
 
 type SubscriptionInfo = {
   plan: string | null;
@@ -240,11 +241,11 @@ export default function PlansPage() {
       <div className={cn(shell, "flex flex-1 flex-col pt-3 pb-4 sm:pt-4 sm:pb-5")}>
         <Link href="/app" className="mb-3 flex shrink-0 justify-center sm:mb-4">
           <Image
-            src="/brand/White_VRTL.png"
+            src={BRAND_LOCKUP_SRC}
             alt="VRTL Score"
-            width={200}
-            height={48}
-            className="h-7 w-auto max-w-[min(220px,90vw)] object-contain object-center opacity-95 sm:h-8"
+            width={280}
+            height={72}
+            className="h-7 w-auto max-w-[min(280px,90vw)] object-contain object-center opacity-95 sm:h-8"
             priority
           />
         </Link>

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
 import { ensureOnboarded } from "@/lib/onboard";
 import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 
@@ -201,11 +202,11 @@ export function AppEntitlementGate({ children }: Props) {
         <div className="w-full max-w-sm px-6">
           <div className="mb-8 flex justify-center">
             <Image
-              src="/brand/White_VRTL.png"
+              src={BRAND_LOCKUP_SRC}
               alt="VRTL Score"
-              width={220}
-              height={56}
-              className="h-12 w-auto max-w-[min(240px,85vw)] object-contain object-center opacity-95"
+              width={280}
+              height={72}
+              className="h-12 w-auto max-w-[min(280px,85vw)] object-contain object-center opacity-95"
               priority
             />
           </div>

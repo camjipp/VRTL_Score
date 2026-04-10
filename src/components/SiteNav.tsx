@@ -47,7 +47,7 @@ export function SiteNav() {
             className="h-8 min-h-[32px] w-auto object-contain object-left md:h-9 md:min-h-[36px]"
             height={36}
             priority
-            src={isDarkPage ? "/brand/White_VRTL.png" : BRAND_LOCKUP_SRC}
+            src={BRAND_LOCKUP_SRC}
             width={240}
           />
         </Link>
