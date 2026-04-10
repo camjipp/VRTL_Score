@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { createContext, useState, useEffect } from "react";
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
 import { cn } from "@/lib/cn";
 
 type Agency = {
@@ -226,14 +227,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   className="block max-w-full opacity-90 transition-opacity hover:opacity-100"
                 >
                   <img
-                    src="/brand/vrtl-score-lockup.png"
+                    src={BRAND_LOCKUP_SRC}
                     alt="VRTL Score"
                     className={cn(
                       "mx-auto block h-auto w-auto max-w-full object-contain object-center",
                       sidebarCollapsed ? "max-h-[36px]" : "max-h-[42px]"
                     )}
-                    width={424}
-                    height={116}
+                    width={320}
+                    height={88}
                     decoding="async"
                   />
                 </Link>

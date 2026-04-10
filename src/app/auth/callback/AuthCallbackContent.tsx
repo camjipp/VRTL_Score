@@ -110,11 +110,11 @@ export function AuthCallbackContent() {
       style={{ backgroundColor: "#05070A" }}
     >
       <Image
-        src="/brand/VRTL_Solo.png"
+        src="/brand/White_VRTL.png"
         alt="VRTL Score"
-        width={140}
-        height={40}
-        className="mb-6 h-8 w-auto brightness-0 invert opacity-95 animate-pulse"
+        width={200}
+        height={48}
+        className="mb-6 h-8 w-auto max-w-[min(220px,85vw)] object-contain object-center opacity-95 animate-pulse"
         priority
       />
       <div

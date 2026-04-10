@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import { Suspense } from "react";
 
+import { BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
 import { AppAuthGate } from "@/components/AppAuthGate";
 import { AppEntitlementGate } from "@/components/AppEntitlementGate";
 import { AppShell } from "@/components/AppShell";
@@ -16,11 +17,11 @@ function LoadingScreen() {
   return (
     <div className="vrtl-app flex min-h-screen flex-col items-center justify-center bg-bg">
       <Image
-        src="/brand/VRTL_Solo.png"
+        src={BRAND_LOCKUP_SRC}
         alt=""
-        width={160}
-        height={56}
-        className="mb-6 h-12 w-auto animate-pulse opacity-90"
+        width={280}
+        height={72}
+        className="mb-6 h-12 w-auto max-w-[min(280px,85vw)] animate-pulse object-contain object-center opacity-90"
         priority
       />
       <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/10 border-t-text-2" />

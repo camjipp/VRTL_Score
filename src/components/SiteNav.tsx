@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
+import { BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
 import { cn } from "@/lib/cn";
 
 const navLinks = [
@@ -46,8 +47,8 @@ export function SiteNav() {
             className="h-8 min-h-[32px] w-auto object-contain object-left md:h-9 md:min-h-[36px]"
             height={36}
             priority
-            src={isDarkPage ? "/brand/White_VRTL.png" : "/brand/VRTL_Solo.png"}
-            width={180}
+            src={isDarkPage ? "/brand/White_VRTL.png" : BRAND_LOCKUP_SRC}
+            width={240}
           />
         </Link>
 

@@ -201,11 +201,11 @@ export function AppEntitlementGate({ children }: Props) {
         <div className="w-full max-w-sm px-6">
           <div className="mb-8 flex justify-center">
             <Image
-              src="/brand/VRTL_Solo.png"
+              src="/brand/White_VRTL.png"
               alt="VRTL Score"
-              width={180}
-              height={64}
-              className="h-12 w-auto brightness-0 invert opacity-95"
+              width={220}
+              height={56}
+              className="h-12 w-auto max-w-[min(240px,85vw)] object-contain object-center opacity-95"
               priority
             />
           </div>
