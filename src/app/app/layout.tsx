@@ -19,9 +19,9 @@ function LoadingScreen() {
       <Image
         src={BRAND_LOCKUP_SRC}
         alt=""
-        width={280}
-        height={72}
-        className="mb-6 h-12 w-auto max-w-[min(280px,85vw)] animate-pulse object-contain object-center opacity-90"
+        width={560}
+        height={144}
+        className="mb-6 h-24 w-auto max-w-[min(560px,85vw)] animate-pulse object-contain object-center opacity-90"
         priority
       />
       <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/10 border-t-text-2" />

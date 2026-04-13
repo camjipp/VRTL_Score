@@ -8,9 +8,9 @@ export default function AppLoading() {
       <Image
         src={BRAND_LOCKUP_SRC}
         alt="VRTL Score"
-        width={280}
-        height={72}
-        className="mb-6 h-12 w-auto max-w-[min(280px,85vw)] animate-pulse object-contain object-center"
+        width={560}
+        height={144}
+        className="mb-6 h-24 w-auto max-w-[min(560px,85vw)] animate-pulse object-contain object-center"
         priority
       />
       <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-text/20 border-t-text" />

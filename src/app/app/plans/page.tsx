@@ -243,9 +243,9 @@ export default function PlansPage() {
           <Image
             src={BRAND_LOCKUP_SRC}
             alt="VRTL Score"
-            width={280}
-            height={72}
-            className="h-7 w-auto max-w-[min(280px,90vw)] object-contain object-center opacity-95 sm:h-8"
+            width={560}
+            height={144}
+            className="h-14 w-auto max-w-[min(560px,90vw)] object-contain object-center opacity-95 sm:h-16"
             priority
           />
         </Link>

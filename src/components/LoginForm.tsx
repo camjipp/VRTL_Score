@@ -220,9 +220,9 @@ export function LoginForm({ nextPath, siteOrigin = "" }: { nextPath: string; sit
           <Image
             src={BRAND_LOCKUP_SRC}
             alt=""
-            width={280}
-            height={72}
-            className="mb-6 h-8 w-auto max-w-[min(280px,85vw)] object-contain object-center opacity-90 animate-pulse"
+            width={560}
+            height={144}
+            className="mb-6 h-16 w-auto max-w-[min(560px,85vw)] object-contain object-center opacity-90 animate-pulse"
             priority
           />
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/[0.08] border-t-[var(--accent-marketing)]" />

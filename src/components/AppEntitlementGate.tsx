@@ -204,9 +204,9 @@ export function AppEntitlementGate({ children }: Props) {
             <Image
               src={BRAND_LOCKUP_SRC}
               alt="VRTL Score"
-              width={280}
-              height={72}
-              className="h-12 w-auto max-w-[min(280px,85vw)] object-contain object-center opacity-95"
+              width={560}
+              height={144}
+              className="h-24 w-auto max-w-[min(560px,85vw)] object-contain object-center opacity-95"
               priority
             />
           </div>

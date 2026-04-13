@@ -21,14 +21,14 @@ const primaryBtnClass =
 
 function OnboardingHeader({ showExit }: { showExit: boolean }) {
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-white/[0.06] bg-[var(--bg-base)] px-6 md:px-10">
+    <header className="flex h-[72px] shrink-0 items-center justify-between border-b border-white/[0.06] bg-[var(--bg-base)] px-6 md:px-10">
       <Link href="/" className="flex shrink-0 items-center">
         <Image
           src={BRAND_LOCKUP_SRC}
           alt="VRTL Score"
-          width={200}
-          height={52}
-          className="h-7 w-auto max-w-[min(220px,70vw)] object-contain object-left"
+          width={400}
+          height={104}
+          className="h-14 w-auto max-w-[min(440px,70vw)] object-contain object-left"
           priority
         />
       </Link>

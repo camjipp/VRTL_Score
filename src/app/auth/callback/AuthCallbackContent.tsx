@@ -113,9 +113,9 @@ export function AuthCallbackContent() {
       <Image
         src={BRAND_LOCKUP_SRC}
         alt="VRTL Score"
-        width={280}
-        height={72}
-        className="mb-6 h-8 w-auto max-w-[min(280px,85vw)] object-contain object-center opacity-95 animate-pulse"
+        width={560}
+        height={144}
+        className="mb-6 h-16 w-auto max-w-[min(560px,85vw)] object-contain object-center opacity-95 animate-pulse"
         priority
       />
       <div

@@ -20,10 +20,10 @@ export function Footer() {
             <Link className="inline-block" href="/">
               <Image
                 alt="VRTL Score"
-                className="h-10 w-auto object-contain object-left md:h-11"
-                height={44}
+                className="h-20 w-auto object-contain object-left md:h-[88px]"
+                height={88}
                 src={BRAND_LOCKUP_SRC}
-                width={240}
+                width={480}
               />
             </Link>
             <p className="mt-4 max-w-[220px] text-sm font-light leading-relaxed text-[var(--text-secondary)]">

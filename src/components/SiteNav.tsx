@@ -34,21 +34,21 @@ export function SiteNav() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 h-[60px] border-b px-6 md:px-12",
+        "sticky top-0 z-50 h-[80px] border-b px-6 md:px-12",
         isDarkPage
           ? "border-b border-[rgba(255,255,255,0.06)] bg-[rgba(7,7,7,0.92)] backdrop-blur-[16px]"
           : "border-border/40 bg-white/90 backdrop-blur-xl"
       )}
     >
       <div className="mx-auto flex h-full max-w-[1200px] items-center justify-between">
-        <Link className="relative flex min-h-8 shrink-0 items-center md:min-h-9" href="/">
+        <Link className="relative flex min-h-16 shrink-0 items-center md:min-h-[72px]" href="/">
           <Image
             alt="VRTL Score"
-            className="h-8 min-h-[32px] w-auto object-contain object-left md:h-9 md:min-h-[36px]"
-            height={36}
+            className="h-16 min-h-16 w-auto object-contain object-left md:h-[72px] md:min-h-[72px]"
+            height={72}
             priority
             src={BRAND_LOCKUP_SRC}
-            width={240}
+            width={480}
           />
         </Link>
 
@@ -108,7 +108,7 @@ export function SiteNav() {
       {mobileOpen && (
         <div
           className={cn(
-            "absolute left-4 right-4 top-[60px] z-50 rounded-lg border p-4 shadow-lg md:hidden",
+            "absolute left-4 right-4 top-[80px] z-50 rounded-lg border p-4 shadow-lg md:hidden",
             isDarkPage ? "border-[color:var(--border-subtle)] bg-[var(--bg-elevated)]" : "border-border bg-surface"
           )}
         >
