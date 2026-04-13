@@ -230,17 +230,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   title="VRTL Score"
                   className={cn(
                     "block max-w-full opacity-90 transition-opacity hover:opacity-100",
-                    !sidebarCollapsed && "w-full"
+                    !sidebarCollapsed && "flex w-full justify-center"
                   )}
                 >
                   <img
                     src={BRAND_LOCKUP_SRC}
                     alt="VRTL Score"
                     className={cn(
-                      "mx-auto block max-w-full bg-transparent object-contain object-center",
+                      "mx-auto block bg-transparent object-contain object-center",
                       sidebarCollapsed
-                        ? "h-auto max-h-[38px] w-full"
-                        : "h-[59px] w-full"
+                        ? "h-auto max-h-7 w-auto max-w-full"
+                        : "h-9 w-auto max-w-[min(100%,168px)]"
                     )}
                     width={BRAND_LOCKUP_IMAGE_WIDTH}
                     height={BRAND_LOCKUP_IMAGE_HEIGHT}
