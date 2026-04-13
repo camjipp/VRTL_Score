@@ -6,8 +6,9 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import {
+  BRAND_LOCKUP_IMAGE_HEIGHT,
   BRAND_LOCKUP_IMAGE_UNOPTIMIZED,
-  BRAND_LOCKUP_INTRINSIC_SIZE,
+  BRAND_LOCKUP_IMAGE_WIDTH,
   BRAND_LOCKUP_SRC,
 } from "@/lib/brand/logo";
 import { cn } from "@/lib/cn";
@@ -47,17 +48,17 @@ export function SiteNav() {
       <div className="mx-auto flex max-w-[1200px] items-center justify-between">
         <Link
           href="/"
-          className="relative flex h-6 shrink-0 items-center"
+          className="relative flex h-8 shrink-0 items-center md:h-9"
         >
           <Image
             alt="VRTL Score"
-            className="h-6 w-auto max-h-6 max-w-[min(132px,42vw)] bg-transparent object-contain object-left md:max-w-[min(150px,18vw)]"
-            height={BRAND_LOCKUP_INTRINSIC_SIZE}
+            className="h-8 w-auto max-h-8 max-w-[min(240px,72vw)] bg-transparent object-contain object-left md:h-9 md:max-h-9 md:max-w-[min(280px,40vw)]"
+            height={BRAND_LOCKUP_IMAGE_HEIGHT}
             priority
-            sizes="(max-width: 768px) 42vw, 150px"
+            sizes="(max-width: 768px) 72vw, 280px"
             src={BRAND_LOCKUP_SRC}
             unoptimized={BRAND_LOCKUP_IMAGE_UNOPTIMIZED}
-            width={BRAND_LOCKUP_INTRINSIC_SIZE}
+            width={BRAND_LOCKUP_IMAGE_WIDTH}
           />
         </Link>
 

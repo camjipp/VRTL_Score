@@ -4,8 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 
 import {
+  BRAND_LOCKUP_IMAGE_HEIGHT,
   BRAND_LOCKUP_IMAGE_UNOPTIMIZED,
-  BRAND_LOCKUP_INTRINSIC_SIZE,
+  BRAND_LOCKUP_IMAGE_WIDTH,
   BRAND_LOCKUP_SRC,
 } from "@/lib/brand/logo";
 import { useRouter } from "next/navigation";
@@ -224,8 +225,8 @@ export function LoginForm({ nextPath, siteOrigin = "" }: { nextPath: string; sit
           <Image
             src={BRAND_LOCKUP_SRC}
             alt=""
-            width={BRAND_LOCKUP_INTRINSIC_SIZE}
-            height={BRAND_LOCKUP_INTRINSIC_SIZE}
+            width={BRAND_LOCKUP_IMAGE_WIDTH}
+            height={BRAND_LOCKUP_IMAGE_HEIGHT}
             className="mb-6 h-11 w-auto max-w-[min(240px,85vw)] bg-transparent object-contain object-center opacity-90 animate-pulse"
             priority
             sizes="(max-width: 768px) 85vw, 240px"

@@ -4,8 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 
 import {
+  BRAND_LOCKUP_IMAGE_HEIGHT,
   BRAND_LOCKUP_IMAGE_UNOPTIMIZED,
-  BRAND_LOCKUP_INTRINSIC_SIZE,
+  BRAND_LOCKUP_IMAGE_WIDTH,
   BRAND_LOCKUP_SRC,
 } from "@/lib/brand/logo";
 
@@ -25,11 +26,11 @@ export function Footer() {
               <Image
                 alt="VRTL Score"
                 className="h-[53px] w-auto max-w-[min(280px,85vw)] bg-transparent object-contain object-left md:h-[75px] md:max-w-[min(360px,90vw)]"
-                height={BRAND_LOCKUP_INTRINSIC_SIZE}
+                height={BRAND_LOCKUP_IMAGE_HEIGHT}
                 sizes="(max-width: 768px) 85vw, 360px"
                 src={BRAND_LOCKUP_SRC}
                 unoptimized={BRAND_LOCKUP_IMAGE_UNOPTIMIZED}
-                width={BRAND_LOCKUP_INTRINSIC_SIZE}
+                width={BRAND_LOCKUP_IMAGE_WIDTH}
               />
             </Link>
             <p className="mt-4 max-w-[220px] text-sm font-light leading-relaxed text-[var(--text-secondary)]">

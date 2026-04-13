@@ -5,7 +5,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { createContext, useState, useEffect } from "react";
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
-import { BRAND_LOCKUP_INTRINSIC_SIZE, BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
+import {
+  BRAND_LOCKUP_IMAGE_HEIGHT,
+  BRAND_LOCKUP_IMAGE_WIDTH,
+  BRAND_LOCKUP_SRC,
+} from "@/lib/brand/logo";
 import { cn } from "@/lib/cn";
 
 type Agency = {
@@ -238,8 +242,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         ? "h-auto max-h-[38px] w-full"
                         : "h-[59px] w-full"
                     )}
-                    width={BRAND_LOCKUP_INTRINSIC_SIZE}
-                    height={BRAND_LOCKUP_INTRINSIC_SIZE}
+                    width={BRAND_LOCKUP_IMAGE_WIDTH}
+                    height={BRAND_LOCKUP_IMAGE_HEIGHT}
                     decoding="async"
                   />
                 </Link>

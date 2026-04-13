@@ -8,8 +8,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/Alert";
 import { cn } from "@/lib/cn";
 import {
+  BRAND_LOCKUP_IMAGE_HEIGHT,
   BRAND_LOCKUP_IMAGE_UNOPTIMIZED,
-  BRAND_LOCKUP_INTRINSIC_SIZE,
+  BRAND_LOCKUP_IMAGE_WIDTH,
   BRAND_LOCKUP_SRC,
 } from "@/lib/brand/logo";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -33,8 +34,8 @@ function OnboardingHeader({ showExit }: { showExit: boolean }) {
         <Image
           src={BRAND_LOCKUP_SRC}
           alt="VRTL Score"
-          width={BRAND_LOCKUP_INTRINSIC_SIZE}
-          height={BRAND_LOCKUP_INTRINSIC_SIZE}
+          width={BRAND_LOCKUP_IMAGE_WIDTH}
+          height={BRAND_LOCKUP_IMAGE_HEIGHT}
           className="h-full w-auto max-w-[min(260px,72vw)] bg-transparent object-contain object-left md:max-w-[min(300px,50vw)]"
           priority
           sizes="(max-width: 768px) 72vw, 300px"

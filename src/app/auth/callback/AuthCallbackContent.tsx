@@ -6,8 +6,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import {
+  BRAND_LOCKUP_IMAGE_HEIGHT,
   BRAND_LOCKUP_IMAGE_UNOPTIMIZED,
-  BRAND_LOCKUP_INTRINSIC_SIZE,
+  BRAND_LOCKUP_IMAGE_WIDTH,
   BRAND_LOCKUP_SRC,
 } from "@/lib/brand/logo";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -117,8 +118,8 @@ export function AuthCallbackContent() {
       <Image
         src={BRAND_LOCKUP_SRC}
         alt="VRTL Score"
-        width={BRAND_LOCKUP_INTRINSIC_SIZE}
-        height={BRAND_LOCKUP_INTRINSIC_SIZE}
+        width={BRAND_LOCKUP_IMAGE_WIDTH}
+        height={BRAND_LOCKUP_IMAGE_HEIGHT}
         className="mb-6 h-11 w-auto max-w-[min(240px,85vw)] bg-transparent object-contain object-center opacity-95 animate-pulse"
         priority
         sizes="(max-width: 768px) 85vw, 240px"
