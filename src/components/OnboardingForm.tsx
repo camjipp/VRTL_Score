@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/Alert";
 import { cn } from "@/lib/cn";
-import { BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
+import { BRAND_LOCKUP_INTRINSIC_SIZE, BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 const authInputClass =
@@ -22,14 +22,18 @@ const primaryBtnClass =
 function OnboardingHeader({ showExit }: { showExit: boolean }) {
   return (
     <header className="flex h-[72px] shrink-0 items-center justify-between border-b border-white/[0.06] bg-[var(--bg-base)] px-6 md:px-10">
-      <Link href="/" className="flex shrink-0 items-center">
+      <Link
+        href="/"
+        className="flex h-14 w-[min(280px,72vw)] shrink-0 items-center overflow-hidden md:h-16 md:w-[min(340px,50vw)]"
+      >
         <Image
           src={BRAND_LOCKUP_SRC}
           alt="VRTL Score"
-          width={400}
-          height={104}
-          className="h-14 w-auto max-w-[min(440px,70vw)] object-contain object-left"
+          width={BRAND_LOCKUP_INTRINSIC_SIZE}
+          height={BRAND_LOCKUP_INTRINSIC_SIZE}
+          className="h-full w-full object-cover object-[50%_45%]"
           priority
+          sizes="(max-width: 768px) 72vw, 340px"
         />
       </Link>
       {showExit && (

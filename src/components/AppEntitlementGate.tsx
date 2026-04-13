@@ -4,7 +4,7 @@ import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
+import { BRAND_LOCKUP_INTRINSIC_SIZE, BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
 import { ensureOnboarded } from "@/lib/onboard";
 import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 
@@ -204,10 +204,11 @@ export function AppEntitlementGate({ children }: Props) {
             <Image
               src={BRAND_LOCKUP_SRC}
               alt="VRTL Score"
-              width={560}
-              height={144}
-              className="h-24 w-auto max-w-[min(560px,85vw)] object-contain object-center opacity-95"
+              width={BRAND_LOCKUP_INTRINSIC_SIZE}
+              height={BRAND_LOCKUP_INTRINSIC_SIZE}
+              className="h-24 w-[min(400px,88vw)] object-cover object-[50%_45%] opacity-95"
               priority
+              sizes="(max-width: 768px) 88vw, 400px"
             />
           </div>
 

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
+import { BRAND_LOCKUP_INTRINSIC_SIZE, BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
 
 const linkClass =
   "block text-[13px] font-light text-[var(--text-secondary)] transition-colors duration-150 hover:text-[var(--text-primary)]";
@@ -17,13 +17,14 @@ export function Footer() {
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <div className="grid grid-cols-2 gap-10 md:grid-cols-3 lg:grid-cols-5 lg:gap-8">
           <div className="col-span-2 lg:col-span-1">
-            <Link className="inline-block" href="/">
+            <Link className="inline-block overflow-hidden" href="/">
               <Image
                 alt="VRTL Score"
-                className="h-20 w-auto object-contain object-left md:h-[88px]"
-                height={88}
+                className="h-20 w-[min(320px,85vw)] object-cover object-[50%_45%] md:h-28 md:w-[min(420px,90vw)]"
+                height={BRAND_LOCKUP_INTRINSIC_SIZE}
+                sizes="(max-width: 768px) 85vw, 420px"
                 src={BRAND_LOCKUP_SRC}
-                width={480}
+                width={BRAND_LOCKUP_INTRINSIC_SIZE}
               />
             </Link>
             <p className="mt-4 max-w-[220px] text-sm font-light leading-relaxed text-[var(--text-secondary)]">

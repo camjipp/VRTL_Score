@@ -4,7 +4,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
+import { BRAND_LOCKUP_INTRINSIC_SIZE, BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type AppAuthGateProps = {
@@ -42,10 +42,11 @@ export function AppAuthGate({ children }: AppAuthGateProps) {
         <Image
           src={BRAND_LOCKUP_SRC}
           alt="VRTL Score"
-          width={560}
-          height={144}
-          className="mb-6 h-24 w-auto max-w-[min(560px,85vw)] animate-pulse object-contain object-center"
+          width={BRAND_LOCKUP_INTRINSIC_SIZE}
+          height={BRAND_LOCKUP_INTRINSIC_SIZE}
+          className="mb-6 h-24 w-[min(400px,88vw)] animate-pulse object-cover object-[50%_45%]"
           priority
+          sizes="(max-width: 768px) 88vw, 400px"
         />
         <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-text/20 border-t-text" />
       </div>
