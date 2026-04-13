@@ -10,4 +10,4 @@
 export const BRAND_LOCKUP_SRC = "/brand/VRTLScore_New_Logo.png";
 
 /** Pixel width/height of `BRAND_LOCKUP_SRC` (square). */
-export const BRAND_LOCKUP_INTRINSIC_SIZE = 1024;
+export const BRAND_LOCKUP_INTRINSIC_SIZE = 2000;
