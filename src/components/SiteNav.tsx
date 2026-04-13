@@ -34,23 +34,23 @@ export function SiteNav() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 h-[64px] border-b px-6 md:px-12",
+        "relative sticky top-0 z-50 border-b px-6 py-4 md:px-12 md:py-5",
         isDarkPage
           ? "border-b border-[rgba(255,255,255,0.06)] bg-[rgba(7,7,7,0.92)] backdrop-blur-[16px]"
           : "border-border/40 bg-white/90 backdrop-blur-xl"
       )}
     >
-      <div className="mx-auto flex h-full max-w-[1200px] items-center justify-between">
+      <div className="mx-auto flex max-w-[1200px] items-center justify-between">
         <Link
           href="/"
-          className="relative flex h-[35px] w-[min(160px,35vw)] shrink-0 items-center overflow-hidden md:h-[46px] md:w-[min(200px,26vw)]"
+          className="relative flex h-6 w-[min(118px,42vw)] shrink-0 items-center overflow-hidden md:w-[min(132px,16vw)]"
         >
           <Image
             alt="VRTL Score"
             className="h-full w-full object-cover object-[50%_45%]"
             height={BRAND_LOCKUP_INTRINSIC_SIZE}
             priority
-            sizes="(max-width: 768px) 35vw, 200px"
+            sizes="(max-width: 768px) 42vw, 132px"
             src={BRAND_LOCKUP_SRC}
             width={BRAND_LOCKUP_INTRINSIC_SIZE}
           />
@@ -61,7 +61,7 @@ export function SiteNav() {
             <Link
               key={link.href}
               className={cn(
-                "text-[13px] font-medium transition-colors duration-150",
+                "text-[13px] font-normal transition-colors duration-150",
                 isDarkPage
                   ? "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                   : "text-text-2 hover:text-text"
@@ -76,7 +76,7 @@ export function SiteNav() {
         <div className="hidden shrink-0 items-center gap-6 md:flex">
           <Link
             className={cn(
-              "text-[13px] font-medium transition-colors duration-150",
+              "text-[13px] font-normal transition-colors duration-150",
               isDarkPage
                 ? "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 : "text-text-2 hover:text-text"
@@ -112,7 +112,7 @@ export function SiteNav() {
       {mobileOpen && (
         <div
           className={cn(
-            "absolute left-4 right-4 top-[64px] z-50 rounded-lg border p-4 shadow-lg md:hidden",
+            "absolute left-4 right-4 top-full z-50 mt-2 rounded-lg border p-4 shadow-lg md:hidden",
             isDarkPage ? "border-[color:var(--border-subtle)] bg-[var(--bg-elevated)]" : "border-border bg-surface"
           )}
         >
