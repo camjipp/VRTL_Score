@@ -8,7 +8,11 @@ import { ensureOnboarded } from "@/lib/onboard";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { Alert, AlertDescription } from "@/components/ui/Alert";
 import { cn } from "@/lib/cn";
-import { BRAND_LOCKUP_INTRINSIC_SIZE, BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
+import {
+  BRAND_LOCKUP_IMAGE_UNOPTIMIZED,
+  BRAND_LOCKUP_INTRINSIC_SIZE,
+  BRAND_LOCKUP_SRC,
+} from "@/lib/brand/logo";
 
 type SubscriptionInfo = {
   plan: string | null;
@@ -245,9 +249,10 @@ export default function PlansPage() {
             alt="VRTL Score"
             width={BRAND_LOCKUP_INTRINSIC_SIZE}
             height={BRAND_LOCKUP_INTRINSIC_SIZE}
-            className="h-10 w-[min(200px,60vw)] object-cover object-[50%_45%] opacity-95 sm:h-11 sm:w-[min(240px,57vw)]"
+            className="h-10 w-auto max-w-[min(260px,88vw)] bg-transparent object-contain object-center opacity-95 sm:h-11 sm:max-w-[min(300px,85vw)]"
             priority
-            sizes="(max-width: 640px) 60vw, 240px"
+            sizes="(max-width: 640px) 88vw, 300px"
+            unoptimized={BRAND_LOCKUP_IMAGE_UNOPTIMIZED}
           />
         </Link>
 

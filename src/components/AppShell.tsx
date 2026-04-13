@@ -225,7 +225,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   href="/app"
                   title="VRTL Score"
                   className={cn(
-                    "block max-w-full overflow-hidden opacity-90 transition-opacity hover:opacity-100",
+                    "block max-w-full opacity-90 transition-opacity hover:opacity-100",
                     !sidebarCollapsed && "w-full"
                   )}
                 >
@@ -233,10 +233,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     src={BRAND_LOCKUP_SRC}
                     alt="VRTL Score"
                     className={cn(
-                      "mx-auto block max-w-full object-center",
+                      "mx-auto block max-w-full bg-transparent object-contain object-center",
                       sidebarCollapsed
-                        ? "h-auto max-h-[38px] w-full object-contain"
-                        : "h-[59px] w-full object-cover"
+                        ? "h-auto max-h-[38px] w-full"
+                        : "h-[59px] w-full"
                     )}
                     width={BRAND_LOCKUP_INTRINSIC_SIZE}
                     height={BRAND_LOCKUP_INTRINSIC_SIZE}

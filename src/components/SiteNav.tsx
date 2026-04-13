@@ -5,7 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
-import { BRAND_LOCKUP_INTRINSIC_SIZE, BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
+import {
+  BRAND_LOCKUP_IMAGE_UNOPTIMIZED,
+  BRAND_LOCKUP_INTRINSIC_SIZE,
+  BRAND_LOCKUP_SRC,
+} from "@/lib/brand/logo";
 import { cn } from "@/lib/cn";
 
 const navLinks = [
@@ -43,15 +47,16 @@ export function SiteNav() {
       <div className="mx-auto flex max-w-[1200px] items-center justify-between">
         <Link
           href="/"
-          className="relative flex h-6 w-[min(118px,42vw)] shrink-0 items-center overflow-hidden md:w-[min(132px,16vw)]"
+          className="relative flex h-6 shrink-0 items-center"
         >
           <Image
             alt="VRTL Score"
-            className="h-full w-full object-cover object-[50%_45%]"
+            className="h-6 w-auto max-h-6 max-w-[min(132px,42vw)] bg-transparent object-contain object-left md:max-w-[min(150px,18vw)]"
             height={BRAND_LOCKUP_INTRINSIC_SIZE}
             priority
-            sizes="(max-width: 768px) 42vw, 132px"
+            sizes="(max-width: 768px) 42vw, 150px"
             src={BRAND_LOCKUP_SRC}
+            unoptimized={BRAND_LOCKUP_IMAGE_UNOPTIMIZED}
             width={BRAND_LOCKUP_INTRINSIC_SIZE}
           />
         </Link>

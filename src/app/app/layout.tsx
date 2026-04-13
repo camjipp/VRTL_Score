@@ -3,7 +3,11 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import { Suspense } from "react";
 
-import { BRAND_LOCKUP_INTRINSIC_SIZE, BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
+import {
+  BRAND_LOCKUP_IMAGE_UNOPTIMIZED,
+  BRAND_LOCKUP_INTRINSIC_SIZE,
+  BRAND_LOCKUP_SRC,
+} from "@/lib/brand/logo";
 import { AppAuthGate } from "@/components/AppAuthGate";
 import { AppEntitlementGate } from "@/components/AppEntitlementGate";
 import { AppShell } from "@/components/AppShell";
@@ -21,9 +25,10 @@ function LoadingScreen() {
         alt=""
         width={BRAND_LOCKUP_INTRINSIC_SIZE}
         height={BRAND_LOCKUP_INTRINSIC_SIZE}
-        className="mb-6 h-16 w-[min(268px,58vw)] animate-pulse object-cover object-[50%_45%] opacity-90"
+        className="mb-6 h-16 w-auto max-w-[min(280px,85vw)] animate-pulse bg-transparent object-contain object-center opacity-90"
         priority
-        sizes="(max-width: 768px) 58vw, 268px"
+        sizes="(max-width: 768px) 85vw, 280px"
+        unoptimized={BRAND_LOCKUP_IMAGE_UNOPTIMIZED}
       />
       <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/10 border-t-text-2" />
     </div>

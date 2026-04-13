@@ -7,7 +7,11 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/Alert";
 import { cn } from "@/lib/cn";
-import { BRAND_LOCKUP_INTRINSIC_SIZE, BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
+import {
+  BRAND_LOCKUP_IMAGE_UNOPTIMIZED,
+  BRAND_LOCKUP_INTRINSIC_SIZE,
+  BRAND_LOCKUP_SRC,
+} from "@/lib/brand/logo";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 const authInputClass =
@@ -24,16 +28,17 @@ function OnboardingHeader({ showExit }: { showExit: boolean }) {
     <header className="flex h-12 shrink-0 items-center justify-between border-b border-white/[0.06] bg-[var(--bg-base)] px-6 md:px-10 md:h-14">
       <Link
         href="/"
-        className="flex h-[38px] w-[min(186px,48vw)] shrink-0 items-center overflow-hidden md:h-[43px] md:w-[min(226px,34vw)]"
+        className="flex h-[38px] shrink-0 items-center md:h-[43px]"
       >
         <Image
           src={BRAND_LOCKUP_SRC}
           alt="VRTL Score"
           width={BRAND_LOCKUP_INTRINSIC_SIZE}
           height={BRAND_LOCKUP_INTRINSIC_SIZE}
-          className="h-full w-full object-cover object-[50%_45%]"
+          className="h-full w-auto max-w-[min(260px,72vw)] bg-transparent object-contain object-left md:max-w-[min(300px,50vw)]"
           priority
-          sizes="(max-width: 768px) 48vw, 226px"
+          sizes="(max-width: 768px) 72vw, 300px"
+          unoptimized={BRAND_LOCKUP_IMAGE_UNOPTIMIZED}
         />
       </Link>
       {showExit && (

@@ -5,7 +5,11 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { BRAND_LOCKUP_INTRINSIC_SIZE, BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
+import {
+  BRAND_LOCKUP_IMAGE_UNOPTIMIZED,
+  BRAND_LOCKUP_INTRINSIC_SIZE,
+  BRAND_LOCKUP_SRC,
+} from "@/lib/brand/logo";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 
@@ -115,9 +119,10 @@ export function AuthCallbackContent() {
         alt="VRTL Score"
         width={BRAND_LOCKUP_INTRINSIC_SIZE}
         height={BRAND_LOCKUP_INTRINSIC_SIZE}
-        className="mb-6 h-11 w-[min(214px,58vw)] object-cover object-[50%_45%] opacity-95 animate-pulse"
+        className="mb-6 h-11 w-auto max-w-[min(240px,85vw)] bg-transparent object-contain object-center opacity-95 animate-pulse"
         priority
-        sizes="(max-width: 768px) 58vw, 214px"
+        sizes="(max-width: 768px) 85vw, 240px"
+        unoptimized={BRAND_LOCKUP_IMAGE_UNOPTIMIZED}
       />
       <div
         className="h-8 w-8 animate-spin rounded-full border-2 border-[#1A212B] border-t-[#10A37F]"

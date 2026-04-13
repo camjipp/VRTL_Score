@@ -23,6 +23,11 @@ const PDF_DIR = /[\\/]lib[\\/]reports[\\/]pdf[\\/]/;
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  images: {
+    dangerouslyAllowSVG: true,
+    contentDispositionType: "attachment",
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+  },
   /**
    * Keep @react-pdf out of the webpack server bundle so pdfkit internals
    * (PDF-spec dictionary keys like 'S') aren't mangled by Terser/SWC.

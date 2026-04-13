@@ -3,7 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { BRAND_LOCKUP_INTRINSIC_SIZE, BRAND_LOCKUP_SRC } from "@/lib/brand/logo";
+import {
+  BRAND_LOCKUP_IMAGE_UNOPTIMIZED,
+  BRAND_LOCKUP_INTRINSIC_SIZE,
+  BRAND_LOCKUP_SRC,
+} from "@/lib/brand/logo";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -222,9 +226,10 @@ export function LoginForm({ nextPath, siteOrigin = "" }: { nextPath: string; sit
             alt=""
             width={BRAND_LOCKUP_INTRINSIC_SIZE}
             height={BRAND_LOCKUP_INTRINSIC_SIZE}
-            className="mb-6 h-11 w-[min(214px,58vw)] object-cover object-[50%_45%] opacity-90 animate-pulse"
+            className="mb-6 h-11 w-auto max-w-[min(240px,85vw)] bg-transparent object-contain object-center opacity-90 animate-pulse"
             priority
-            sizes="(max-width: 768px) 58vw, 214px"
+            sizes="(max-width: 768px) 85vw, 240px"
+            unoptimized={BRAND_LOCKUP_IMAGE_UNOPTIMIZED}
           />
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/[0.08] border-t-[var(--accent-marketing)]" />
           <p className="mt-4 text-sm text-[var(--text-secondary)]">Signing you in…</p>
