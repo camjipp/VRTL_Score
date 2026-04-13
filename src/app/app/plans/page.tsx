@@ -245,9 +245,9 @@ export default function PlansPage() {
             alt="VRTL Score"
             width={BRAND_LOCKUP_INTRINSIC_SIZE}
             height={BRAND_LOCKUP_INTRINSIC_SIZE}
-            className="h-14 w-[min(300px,90vw)] object-cover object-[50%_45%] opacity-95 sm:h-16 sm:w-[min(360px,85vw)]"
+            className="h-10 w-[min(200px,60vw)] object-cover object-[50%_45%] opacity-95 sm:h-11 sm:w-[min(240px,57vw)]"
             priority
-            sizes="(max-width: 640px) 90vw, 360px"
+            sizes="(max-width: 640px) 60vw, 240px"
           />
         </Link>
 

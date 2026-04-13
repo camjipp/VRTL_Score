@@ -20,9 +20,9 @@ export function Footer() {
             <Link className="inline-block overflow-hidden" href="/">
               <Image
                 alt="VRTL Score"
-                className="h-20 w-[min(320px,85vw)] object-cover object-[50%_45%] md:h-28 md:w-[min(420px,90vw)]"
+                className="h-[53px] w-[min(214px,56vw)] object-cover object-[50%_45%] md:h-[75px] md:w-[min(280px,60vw)]"
                 height={BRAND_LOCKUP_INTRINSIC_SIZE}
-                sizes="(max-width: 768px) 85vw, 420px"
+                sizes="(max-width: 768px) 56vw, 280px"
                 src={BRAND_LOCKUP_SRC}
                 width={BRAND_LOCKUP_INTRINSIC_SIZE}
               />

@@ -21,10 +21,10 @@ const primaryBtnClass =
 
 function OnboardingHeader({ showExit }: { showExit: boolean }) {
   return (
-    <header className="flex h-[72px] shrink-0 items-center justify-between border-b border-white/[0.06] bg-[var(--bg-base)] px-6 md:px-10">
+    <header className="flex h-12 shrink-0 items-center justify-between border-b border-white/[0.06] bg-[var(--bg-base)] px-6 md:px-10 md:h-14">
       <Link
         href="/"
-        className="flex h-14 w-[min(280px,72vw)] shrink-0 items-center overflow-hidden md:h-16 md:w-[min(340px,50vw)]"
+        className="flex h-[38px] w-[min(186px,48vw)] shrink-0 items-center overflow-hidden md:h-[43px] md:w-[min(226px,34vw)]"
       >
         <Image
           src={BRAND_LOCKUP_SRC}
@@ -33,7 +33,7 @@ function OnboardingHeader({ showExit }: { showExit: boolean }) {
           height={BRAND_LOCKUP_INTRINSIC_SIZE}
           className="h-full w-full object-cover object-[50%_45%]"
           priority
-          sizes="(max-width: 768px) 72vw, 340px"
+          sizes="(max-width: 768px) 48vw, 226px"
         />
       </Link>
       {showExit && (

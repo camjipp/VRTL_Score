@@ -235,8 +235,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     className={cn(
                       "mx-auto block max-w-full object-center",
                       sidebarCollapsed
-                        ? "h-auto max-h-[56px] w-full object-contain"
-                        : "h-[88px] w-full object-cover"
+                        ? "h-auto max-h-[38px] w-full object-contain"
+                        : "h-[59px] w-full object-cover"
                     )}
                     width={BRAND_LOCKUP_INTRINSIC_SIZE}
                     height={BRAND_LOCKUP_INTRINSIC_SIZE}

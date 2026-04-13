@@ -206,9 +206,9 @@ export function AppEntitlementGate({ children }: Props) {
               alt="VRTL Score"
               width={BRAND_LOCKUP_INTRINSIC_SIZE}
               height={BRAND_LOCKUP_INTRINSIC_SIZE}
-              className="h-24 w-[min(400px,88vw)] object-cover object-[50%_45%] opacity-95"
+              className="h-16 w-[min(268px,58vw)] object-cover object-[50%_45%] opacity-95"
               priority
-              sizes="(max-width: 768px) 88vw, 400px"
+              sizes="(max-width: 768px) 58vw, 268px"
             />
           </div>
 
