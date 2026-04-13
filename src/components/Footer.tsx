@@ -20,12 +20,12 @@ export function Footer() {
   return (
     <footer className="border-t border-[color:var(--border-subtle)] bg-[var(--bg-surface)] pt-16 pb-10 md:pt-16 md:pb-10">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
-        <div className="grid grid-cols-2 gap-10 md:grid-cols-3 lg:grid-cols-5 lg:gap-8">
-          <div className="col-span-2 lg:col-span-1">
-            <Link className="inline-block" href="/">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-10 md:grid-cols-3 md:gap-x-10 lg:grid-cols-[minmax(260px,1.15fr)_repeat(4,minmax(0,1fr))] lg:gap-x-10 xl:gap-x-12">
+          <div className="col-span-2 min-w-0 md:col-span-2 lg:col-span-1">
+            <Link className="inline-block max-w-full" href="/">
               <Image
                 alt="VRTL Score"
-                className="h-[53px] w-auto max-w-[min(280px,85vw)] bg-transparent object-contain object-left md:h-[75px] md:max-w-[min(360px,90vw)]"
+                className="h-[48px] w-auto max-w-full bg-transparent object-contain object-left md:h-[56px] lg:h-[64px]"
                 height={BRAND_LOCKUP_IMAGE_HEIGHT}
                 sizes="(max-width: 768px) 85vw, 360px"
                 src={BRAND_LOCKUP_SRC}
@@ -73,7 +73,7 @@ export function Footer() {
             </div>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <h3 className={headingClass}>Company</h3>
             <ul className="mt-4 space-y-2.5">
               {[
@@ -92,7 +92,7 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <h3 className={headingClass}>Product</h3>
             <ul className="mt-4 space-y-2.5">
               {[
@@ -110,7 +110,7 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <h3 className={headingClass}>Models</h3>
             <ul className="mt-4 space-y-2.5">
               {["ChatGPT", "Claude", "Gemini", "Perplexity", "DeepSeek"].map((label) => (
@@ -123,7 +123,7 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <h3 className={headingClass}>Resources</h3>
             <ul className="mt-4 space-y-2.5">
               {[
