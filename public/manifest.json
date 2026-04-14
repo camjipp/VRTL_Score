@@ -8,14 +8,14 @@
   "theme_color": "#080808",
   "icons": [
     {
-      "src": "/brand/VRTLScore_New_Logo.png",
+      "src": "/brand/VRTLScore_Favicon.jpg",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/jpeg"
     },
     {
-      "src": "/brand/VRTLScore_New_Logo.png",
+      "src": "/brand/VRTLScore_Favicon.jpg",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/jpeg"
     }
   ]
 }

@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { DM_Mono, DM_Sans, Instrument_Serif } from "next/font/google";
 
 import { SiteNav } from "@/components/SiteNav";
-import { BRAND_LOCKUP_RASTER_ICON_SRC } from "@/lib/brand/logo";
+import { BRAND_FAVICON_SRC } from "@/lib/brand/logo";
 
 import "./globals.css";
 
@@ -66,11 +66,8 @@ export const metadata: Metadata = {
     images: ["/og-image.png"],
   },
   icons: {
-    icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: BRAND_LOCKUP_RASTER_ICON_SRC, type: "image/png" },
-    ],
-    apple: BRAND_LOCKUP_RASTER_ICON_SRC,
+    icon: [{ url: BRAND_FAVICON_SRC, type: "image/jpeg", sizes: "1024x1024" }],
+    apple: BRAND_FAVICON_SRC,
   },
   manifest: "/manifest.json",
 };
