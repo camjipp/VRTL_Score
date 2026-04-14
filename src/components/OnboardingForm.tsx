@@ -302,8 +302,18 @@ export function OnboardingForm() {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       if (!ent.ok && ent.status === 403) {
-        router.replace(`/app/plans`);
-        return;
+        try {
+          const body = (await ent.json()) as { code?: string; entitled?: boolean; reason?: string };
+          const paywall =
+            body.code === "SUBSCRIPTION_INACTIVE" || (body.entitled === false && body.reason === "paywall");
+          if (paywall) {
+            router.replace(`/app/plans`);
+            return;
+          }
+        } catch {
+          // Ambiguous 403 body — do not assume paywall
+        }
+        // NOT_ONBOARDED / unknown 403: do not send to billing — fall through to app
       }
 
       router.replace(isInternalPath(nextPath) ? nextPath : "/app");

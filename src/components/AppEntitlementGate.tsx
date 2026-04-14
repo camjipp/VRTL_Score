@@ -31,6 +31,17 @@ const GATE_DARK = {
   textMuted: "#8B98A5",
 } as const;
 
+/** Set `localStorage.setItem("vrtl_debug_entitlements", "1")` then refresh to log /api/entitlements outcomes. */
+function logEntitlementTrace(status: number, detail: unknown) {
+  if (typeof window === "undefined") return;
+  try {
+    if (localStorage.getItem("vrtl_debug_entitlements") !== "1") return;
+    console.info("[AppEntitlementGate] /api/entitlements", { status, detail });
+  } catch {
+    // ignore
+  }
+}
+
 export function AppEntitlementGate({ children }: Props) {
   const router = useRouter();
   const pathname = usePathname();
@@ -58,11 +69,12 @@ export function AppEntitlementGate({ children }: Props) {
     // Always allow through to paywall — no entitlement check on /app/plans
     if (pathname === "/app/plans") {
       setReady(true);
-      hasChecked.current = true;
+      // Must clear: otherwise navigating plans → /app would skip the entitlement run (hasChecked+ready stayed true).
+      hasChecked.current = false;
       return;
     }
 
-    // If already checked and entitled, don't re-check
+    // If already checked and entitled, don't re-check (same /app session)
     if (hasChecked.current && ready) return;
 
     // Check cache first (unless coming from checkout - always revalidate)
@@ -112,18 +124,49 @@ export function AppEntitlementGate({ children }: Props) {
         );
 
         if (res.ok) {
+          logEntitlementTrace(res.status, "entitled");
           entitlementCache = { entitled: true, timestamp: Date.now() };
           return "ok";
         }
 
         if (res.status === 403) {
+          try {
+            const body = (await res.json()) as {
+              code?: string;
+              entitled?: boolean;
+              error?: string;
+              reason?: string;
+            };
+            logEntitlementTrace(403, body);
+            // DB/read issues should not send users to billing; only explicit inactive subscription does.
+            if (body.code === "NOT_ONBOARDED" || body.error === "User not onboarded") {
+              return "retry";
+            }
+            if (
+              body.code === "SUBSCRIPTION_INACTIVE" ||
+              (body.entitled === false && body.reason === "paywall")
+            ) {
+              return "paywall";
+            }
+          } catch {
+            logEntitlementTrace(403, "parse_error");
+            return "retry";
+          }
           return "paywall";
         }
 
         if (res.status === 401) {
+          logEntitlementTrace(401, "unauthorized");
           return "auth";
         }
 
+        let errText = "";
+        try {
+          errText = await res.text();
+        } catch {
+          errText = "";
+        }
+        logEntitlementTrace(res.status, errText.slice(0, 200));
         return "retry";
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
@@ -212,7 +255,7 @@ export function AppEntitlementGate({ children }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [isCheckoutSuccess, pathname, router]);
+  }, [isCheckoutSuccess, pathname, ready, router]);
 
   if (!ready) {
     // First-time load: show full "Activating your subscription..." card (dark theme)

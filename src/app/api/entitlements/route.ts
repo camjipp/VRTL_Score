@@ -50,8 +50,18 @@ export async function GET(req: Request) {
     .select("agency_id")
     .eq("user_id", user.id)
     .maybeSingle();
-  if (agencyUser.error || !agencyUser.data?.agency_id) {
-    return NextResponse.json({ error: "User not onboarded" }, { status: 403 });
+  if (agencyUser.error) {
+    console.error("[entitlements] agency_users query failed", agencyUser.error);
+    return NextResponse.json(
+      { error: agencyUser.error.message ?? "Agency lookup failed", code: "AGENCY_LOOKUP_FAILED" },
+      { status: 500 }
+    );
+  }
+  if (!agencyUser.data?.agency_id) {
+    return NextResponse.json(
+      { error: "User not onboarded", code: "NOT_ONBOARDED" },
+      { status: 403 }
+    );
   }
 
   const agencyId = agencyUser.data.agency_id as string;
@@ -77,10 +87,19 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: agencyRes.error.message }, { status: 500 });
   }
 
-  const isActive = Boolean((agencyRes.data as { is_active?: unknown }).is_active);
-  if (!isActive) {
+  // Align with app UI (/app/plans, settings): null/undefined is_active means "active" (legacy rows).
+  // Only an explicit false blocks access when billing is enabled.
+  const rawActive = (agencyRes.data as { is_active?: unknown }).is_active;
+  const explicitlyInactive = rawActive === false;
+  if (explicitlyInactive) {
     return NextResponse.json(
-      { entitled: false, agencyId, billingEnabled: true, reason: "paywall" },
+      {
+        entitled: false,
+        agencyId,
+        billingEnabled: true,
+        reason: "paywall",
+        code: "SUBSCRIPTION_INACTIVE",
+      },
       { status: 403 }
     );
   }

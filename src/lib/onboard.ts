@@ -4,7 +4,12 @@ import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 export async function ensureOnboarded(): Promise<{ agencyId: string; accessToken: string }> {
   const supabase = getSupabaseBrowserClient();
   const sessionRes = await supabase.auth.getSession();
-  const accessToken = sessionRes.data.session?.access_token;
+  let accessToken = sessionRes.data.session?.access_token;
+  // After a full page reload, the first read can occasionally be empty; refresh restores a valid JWT.
+  if (!accessToken) {
+    const { data } = await supabase.auth.refreshSession();
+    accessToken = data.session?.access_token;
+  }
   if (!accessToken) throw new Error("Not authenticated");
 
   const res = await fetchWithTimeout(
