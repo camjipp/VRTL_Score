@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
+import {
+  activateAgencyFromCheckoutSession,
+  resolveAgencyIdForSubscription,
+  updateAgencyRowFromSubscription,
+} from "@/lib/stripe/agencySubscriptionSync";
 import { getStripe } from "@/lib/stripe";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 
@@ -10,7 +15,7 @@ export const runtime = "nodejs";
 async function getRawBody(req: NextRequest): Promise<Buffer> {
   const reader = req.body?.getReader();
   if (!reader) throw new Error("No body");
-  
+
   const chunks: Uint8Array[] = [];
   while (true) {
     const { done, value } = await reader.read();
@@ -22,7 +27,7 @@ async function getRawBody(req: NextRequest): Promise<Buffer> {
 
 export async function POST(req: NextRequest) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  
+
   if (!webhookSecret) {
     console.error("Missing STRIPE_WEBHOOK_SECRET");
     return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
@@ -45,98 +50,112 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = getSupabaseAdminClient();
+  const stripe = getStripe();
 
   try {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        const agencyId = session.metadata?.agency_id;
         const planId = session.metadata?.plan_id;
 
-        if (agencyId) {
-          // Activate the agency
-          await supabase
-            .from("agencies")
-            .update({
-              is_active: true,
-              stripe_subscription_id: session.subscription as string,
-              plan: planId || "starter",
-            })
-            .eq("id", agencyId);
-
-          console.log(`Agency ${agencyId} activated with plan ${planId}`);
+        const result = await activateAgencyFromCheckoutSession(supabase, session, planId);
+        if (!result.ok) {
+          console.error("[stripe webhook] checkout.session.completed failed", result);
+          return NextResponse.json({ error: result.error ?? "checkout activation failed" }, { status: 500 });
         }
+        console.log(
+          `[stripe webhook] Agency ${result.agencyId} activated via checkout (rows=${result.rowCount})`
+        );
         break;
       }
 
       case "customer.subscription.updated": {
         const subscription = event.data.object as Stripe.Subscription;
-        let agencyId = subscription.metadata?.agency_id;
-        // Fallback: look up agency by stripe_subscription_id (e.g. when metadata missing from Portal updates)
-        if (!agencyId && subscription.id) {
-          const { data: agency } = await supabase
-            .from("agencies")
-            .select("id")
-            .eq("stripe_subscription_id", subscription.id)
-            .single();
-          agencyId = agency?.id ?? undefined;
+        const agencyId = await resolveAgencyIdForSubscription(supabase, subscription);
+        if (!agencyId) {
+          console.warn(
+            "[stripe webhook] customer.subscription.updated: could not resolve agency",
+            subscription.id
+          );
+          break;
         }
-        if (agencyId) {
-          const isActive = subscription.status === "active" || subscription.status === "trialing";
-          await supabase
-            .from("agencies")
-            .update({
-              is_active: isActive,
-              plan: subscription.metadata?.plan_id || "starter",
-            })
-            .eq("id", agencyId);
-          console.log(`Agency ${agencyId} subscription updated: ${subscription.status}`);
+        const { error } = await updateAgencyRowFromSubscription(supabase, subscription, agencyId);
+        if (error) {
+          console.error("[stripe webhook] subscription.updated DB error", error);
+          return NextResponse.json({ error }, { status: 500 });
         }
+        console.log(`[stripe webhook] Agency ${agencyId} subscription updated: ${subscription.status}`);
         break;
       }
 
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
-        let agencyId = subscription.metadata?.agency_id;
-        if (!agencyId && subscription.id) {
-          const { data: agency } = await supabase
-            .from("agencies")
-            .select("id")
-            .eq("stripe_subscription_id", subscription.id)
-            .single();
-          agencyId = agency?.id ?? undefined;
+        const agencyId = await resolveAgencyIdForSubscription(supabase, subscription);
+        if (!agencyId) {
+          console.warn(
+            "[stripe webhook] customer.subscription.deleted: could not resolve agency",
+            subscription.id
+          );
+          break;
         }
-        if (agencyId) {
-          await supabase
-            .from("agencies")
-            .update({
-              is_active: false,
-              stripe_subscription_id: null,
-            })
-            .eq("id", agencyId);
-          console.log(`Agency ${agencyId} subscription cancelled`);
+        const { error } = await supabase
+          .from("agencies")
+          .update({
+            is_active: false,
+            stripe_subscription_id: null,
+          })
+          .eq("id", agencyId);
+        if (error) {
+          console.error("[stripe webhook] subscription.deleted DB error", error.message);
+          return NextResponse.json({ error: error.message }, { status: 500 });
         }
+        console.log(`[stripe webhook] Agency ${agencyId} subscription cancelled`);
+        break;
+      }
+
+      case "invoice.paid": {
+        const invoice = event.data.object as Stripe.Invoice;
+        const parent = invoice.parent;
+        const subRef =
+          parent?.type === "subscription_details" && parent.subscription_details?.subscription
+            ? parent.subscription_details.subscription
+            : null;
+        const subId =
+          typeof subRef === "string"
+            ? subRef
+            : subRef && typeof subRef === "object" && "id" in subRef
+              ? (subRef as Stripe.Subscription).id
+              : null;
+        if (!subId) break;
+
+        const subscription = await stripe.subscriptions.retrieve(subId);
+        const agencyId = await resolveAgencyIdForSubscription(supabase, subscription);
+        if (!agencyId) {
+          console.warn("[stripe webhook] invoice.paid: could not resolve agency", subId);
+          break;
+        }
+        const { error } = await updateAgencyRowFromSubscription(supabase, subscription, agencyId);
+        if (error) {
+          console.error("[stripe webhook] invoice.paid DB error", error);
+          return NextResponse.json({ error }, { status: 500 });
+        }
+        console.log(`[stripe webhook] Agency ${agencyId} refreshed from invoice.paid`);
         break;
       }
 
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
-        console.log(`Payment failed for invoice ${invoice.id}`);
-        // Could send email notification here
+        console.log(`[stripe webhook] Payment failed for invoice ${invoice.id}`);
         break;
       }
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        console.log(`[stripe webhook] Unhandled event type: ${event.type}`);
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
     console.error("Webhook processing error:", error);
-    return NextResponse.json(
-      { error: "Webhook processing failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Webhook processing failed" }, { status: 500 });
   }
 }
-
