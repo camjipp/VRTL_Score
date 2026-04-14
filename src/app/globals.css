@@ -46,6 +46,8 @@
 
 /* ═══ App: Dark intelligence theme (white-label ready) ═══ */
 .vrtl-app {
+  max-width: 100%;
+  overflow-x: clip;
   --bg: 11 13 16;           /* #0B0D10 */
   --bg-2: 15 18 34;         /* #0F1216 sidebar */
   --surface: 17 20 24;       /* #111418 */

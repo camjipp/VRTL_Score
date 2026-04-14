@@ -18,6 +18,9 @@ export function getStripe(): Stripe {
 
 // Price IDs - you'll create these in Stripe Dashboard
 // For now, we'll create them programmatically on first use
+//
+// Annual amounts = 10 × monthly (USD), matching marketing: pay for 10 months per year billed.
+// UI “monthly” under annual uses (annualCents / 12) rounded to cents — see `lib/pricing/billingMath.ts`.
 export const PLANS = {
   starter: {
     name: "Starter",
@@ -43,8 +46,8 @@ export const PLANS = {
   },
   pro: {
     name: "Pro",
-    monthlyPrice: 66600, // $666 in cents
-    annualPrice: 802800, // $8,028/yr ($669 × 12) in cents
+    monthlyPrice: 74900, // $749 in cents
+    annualPrice: 749000, // $7,490/yr (10 mo effective, same pattern as other tiers)
     features: {
       maxClients: 999,
       maxCompetitors: 999,

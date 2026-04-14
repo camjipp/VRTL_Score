@@ -315,7 +315,7 @@ export function OnboardingForm() {
   }
 
   return (
-    <main className="page-marketing min-h-screen">
+    <main className="page-marketing min-h-screen min-w-0 max-w-full overflow-x-hidden">
       <OnboardingHeader showExit={isAuthenticated === true} />
       <div className="mx-auto max-w-6xl px-6 py-10 md:px-10 md:py-14 lg:px-12">
         {isAuthenticated === null && (

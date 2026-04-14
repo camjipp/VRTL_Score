@@ -30,7 +30,7 @@ export function TopBar({ primaryAction, filters, className }: TopBarProps) {
   return (
     <div
       className={cn(
-        "relative z-[100] border-b border-white/[0.05] bg-bg/90 px-5 py-2.5 backdrop-blur-md sm:px-6 sm:py-3",
+        "relative z-[100] w-full max-w-full min-w-0 border-b border-white/[0.05] bg-bg/90 px-5 py-2.5 backdrop-blur-md sm:px-6 sm:py-3",
         "before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/[0.07] before:to-transparent",
         className
       )}

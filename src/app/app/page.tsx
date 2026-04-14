@@ -1470,7 +1470,7 @@ export default function AppPage() {
         }
       />
 
-      <div className="flex-1 space-y-2 px-5 pb-5 pt-3 sm:space-y-2.5 sm:px-6 sm:pt-3.5">
+      <div className="flex-1 min-w-0 max-w-full space-y-2 overflow-x-hidden px-5 pb-5 pt-3 sm:space-y-2.5 sm:px-6 sm:pt-3.5">
         {clients.length > 0 ? (
           <h1 className="font-app-display text-[1.375rem] font-normal leading-tight tracking-tight text-text sm:text-2xl">
             Dashboard

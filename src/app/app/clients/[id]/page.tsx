@@ -165,7 +165,7 @@ function SnapshotSelector({
   return (
     <div className="flex items-center gap-2">
       <label className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Snapshot</label>
-      <div className="relative min-w-[200px] max-w-[min(100vw-8rem,280px)]">
+      <div className="relative min-w-0 max-w-[280px] flex-1 sm:flex-initial sm:min-w-[200px]">
         <select
           value={selectedId ?? ""}
           onChange={(e) => onSelect(e.target.value)}
@@ -1525,7 +1525,9 @@ function PageHeader({ clientName, trailing }: { clientName: string; trailing?: R
           </span>
         </nav>
       </div>
-      {trailing ? <div className="shrink-0 sm:pl-2">{trailing}</div> : null}
+      {trailing ? (
+        <div className="min-w-0 w-full sm:w-auto sm:shrink-0 sm:pl-2">{trailing}</div>
+      ) : null}
     </header>
   );
 }
@@ -3676,8 +3678,8 @@ export default function ClientDetailPage() {
     ? Object.entries(selectedSnapshot.score_by_provider)
     : [];
   return (
-    <div className="min-h-screen pb-20 md:pb-0">
-      <div className="mx-auto max-w-[1180px] space-y-4 px-5 py-4 md:px-8 md:py-6">
+    <div className="min-h-screen min-w-0 max-w-full overflow-x-hidden pb-20 md:pb-0">
+      <div className="mx-auto min-w-0 max-w-[1180px] space-y-4 px-4 py-4 sm:px-5 md:px-8 md:py-6">
         {/* Loading */}
         {loading && (
           <div className="space-y-4">
@@ -3791,7 +3793,7 @@ export default function ClientDetailPage() {
 
       {/* Desktop: sticky download bar after scroll (unchanged behavior) */}
       {stickyVisible && client && selectedSnapshot && (selectedSnapshot.status?.toLowerCase().includes("complete") || selectedSnapshot.status?.toLowerCase().includes("success")) && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 hidden border-t border-white/5 bg-surface py-2 pl-[var(--app-sidebar-width,220px)] pr-6 md:block">
+        <div className="fixed bottom-0 left-0 right-0 z-50 hidden border-t border-white/5 bg-surface py-2 pl-4 pr-6 lg:block lg:pl-[var(--app-sidebar-width,220px)]">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-text-2">Ready to share with {client.name}</span>
             <DownloadPdfButton snapshotId={selectedSnapshot.id} variant="compact" />

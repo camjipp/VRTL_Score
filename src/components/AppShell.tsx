@@ -109,6 +109,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [busy, setBusy] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [agency, setAgency] = useState<Agency | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [hash, setHash] = useState("");
@@ -121,6 +122,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
+
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileNavOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileNavOpen]);
 
   useEffect(() => {
     async function loadData() {
@@ -212,9 +226,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         }
       >
         {!isPaywall && (
+          <>
           <aside
             className={cn(
-              "fixed left-0 top-0 z-40 flex h-full flex-col border-r border-white/[0.06] bg-bg transition-[width] duration-200 ease-out",
+              "fixed left-0 top-0 z-40 hidden h-full flex-col border-r border-white/[0.06] bg-bg transition-[width] duration-200 ease-out lg:flex",
               sidebarCollapsed ? "w-[68px]" : "w-[220px]"
             )}
           >
@@ -303,12 +318,113 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </nav>
             </div>
           </aside>
+
+          <header className="fixed left-0 right-0 top-0 z-[45] flex h-14 items-center gap-2 border-b border-white/[0.06] bg-bg/95 px-3 backdrop-blur-md lg:hidden">
+            <button
+              type="button"
+              aria-label="Open menu"
+              aria-expanded={mobileNavOpen}
+              onClick={() => setMobileNavOpen(true)}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-black/20 text-text-2 transition-colors hover:border-white/[0.12] hover:bg-white/[0.04] hover:text-text"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+            </button>
+            <Link
+              href="/app"
+              className="flex min-w-0 flex-1 items-center justify-center pr-10 opacity-90 transition-opacity hover:opacity-100"
+              title="VRTL Score"
+            >
+              <img
+                src={BRAND_LOCKUP_SRC}
+                alt="VRTL Score"
+                className="mx-auto h-8 w-auto max-w-[min(100%,200px)] bg-transparent object-contain object-center"
+                width={BRAND_LOCKUP_IMAGE_WIDTH}
+                height={BRAND_LOCKUP_IMAGE_HEIGHT}
+                decoding="async"
+              />
+            </Link>
+          </header>
+
+          {mobileNavOpen ? (
+            <>
+              <div
+                className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-[1px] lg:hidden"
+                aria-hidden
+                onClick={() => setMobileNavOpen(false)}
+              />
+              <div
+                className="fixed left-0 top-0 z-[201] flex h-full w-[min(288px,88vw)] flex-col border-r border-white/[0.06] bg-bg shadow-[8px_0_40px_rgba(0,0,0,0.45)] lg:hidden"
+                role="dialog"
+                aria-modal
+                aria-label="App navigation"
+              >
+                <div className="flex shrink-0 items-center justify-between border-b border-white/[0.06] px-4 py-3">
+                  <span className="font-marketing-mono text-[10px] font-medium uppercase tracking-[0.12em] text-text-3">
+                    Navigate
+                  </span>
+                  <button
+                    type="button"
+                    aria-label="Close menu"
+                    onClick={() => setMobileNavOpen(false)}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-text-2 transition-colors hover:bg-white/[0.06] hover:text-text"
+                  >
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <nav className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-2 py-3" aria-label="App">
+                  <div className="flex flex-1 flex-col gap-0.5">
+                    {primaryNavLinks.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        title={link.hint}
+                        onClick={() => setMobileNavOpen(false)}
+                        className={cn(
+                          "flex items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-[13px] font-medium tracking-tight transition-colors duration-150",
+                          isActive(link.href)
+                            ? "bg-white/[0.07] text-text"
+                            : "text-text-3/65 hover:bg-white/[0.04] hover:text-text-2",
+                        )}
+                      >
+                        <NavGlyph
+                          name={link.icon}
+                          className={cn("h-[18px] w-[18px]", isActive(link.href) ? "text-text" : "text-text-3/70")}
+                        />
+                        <span className="truncate">{link.label}</span>
+                      </Link>
+                    ))}
+                  </div>
+                  <div className="mt-3 border-t border-white/[0.05] pt-3" role="group" aria-label="Coming soon">
+                    <p className="px-2.5 pb-1.5 text-[9px] font-medium uppercase tracking-[0.12em] text-text-3/45">Soon</p>
+                    <div className="space-y-0.5">
+                      {COMING_SOON_LINKS.map((item) => (
+                        <div
+                          key={item.label}
+                          className="flex cursor-not-allowed items-center gap-2 rounded-lg px-2.5 py-1.5 text-[11px] font-medium text-text-3/40"
+                          aria-disabled="true"
+                          title={`${item.label}: coming soon`}
+                        >
+                          <NavGlyph name={item.icon} className="h-4 w-4 text-text-3/40" />
+                          <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </nav>
+              </div>
+            </>
+          ) : null}
+          </>
         )}
 
         <main
           className={cn(
-            "min-h-screen min-w-0 flex flex-col",
-            !isPaywall && "pl-[var(--app-sidebar-width,220px)]"
+            "min-h-screen min-w-0 w-full max-w-full flex flex-col overflow-x-hidden",
+            !isPaywall && "pt-14 pl-0 lg:pt-0 lg:pl-[var(--app-sidebar-width,220px)]"
           )}
         >
           {children}

@@ -8,6 +8,7 @@ import { ensureOnboarded } from "@/lib/onboard";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { Alert, AlertDescription } from "@/components/ui/Alert";
 import { cn } from "@/lib/cn";
+import { formatMonthlyPriceDisplay, monthlyEquivalentFromAnnualUsd } from "@/lib/pricing/billingMath";
 import {
   BRAND_LOCKUP_IMAGE_HEIGHT,
   BRAND_LOCKUP_IMAGE_UNOPTIMIZED,
@@ -60,8 +61,8 @@ const PLANS = [
     clients: 50 as const,
     description:
       "For firms managing a large book and packaging AI visibility as a core, billable line of business.",
-    monthlyPrice: 666,
-    annualPrice: 8028,
+    monthlyPrice: 749,
+    annualPrice: 7490,
     recommended: false,
     highlights: [
       "50+ clients",
@@ -245,7 +246,7 @@ export default function PlansPage() {
   const isPostPurchase = Boolean(subscription?.has_stripe);
 
   return (
-    <div className="page-marketing selection:bg-[var(--accent-bg)] selection:text-white flex min-h-screen flex-col text-[var(--text-primary)]">
+    <div className="page-marketing flex min-h-screen min-w-0 max-w-full flex-col overflow-x-hidden text-[var(--text-primary)] selection:bg-[var(--accent-bg)] selection:text-white">
       <div className={cn(shell, "flex flex-1 flex-col pt-3 pb-4 sm:pt-4 sm:pb-5")}>
         <Link href="/app" className="mb-3 flex shrink-0 justify-center sm:mb-4">
           <Image
@@ -298,7 +299,10 @@ export default function PlansPage() {
               const isDowngrade = isPostPurchase && currentPlanIndex > planIndex;
               const isUpgrade = isPostPurchase && currentPlanIndex < planIndex && currentPlanIndex >= 0;
               const price = isAnnual ? plan.annualPrice : plan.monthlyPrice;
-              const monthlyEquivalent = isAnnual ? Math.round(plan.annualPrice / 12) : plan.monthlyPrice;
+              const monthlyEquivalentRaw = isAnnual
+                ? monthlyEquivalentFromAnnualUsd(plan.annualPrice)
+                : plan.monthlyPrice;
+              const monthlyEquivalentDisplay = formatMonthlyPriceDisplay(monthlyEquivalentRaw);
               const annualSavings = plan.monthlyPrice * 12 - plan.annualPrice;
 
               const ctaLabel = (() => {
@@ -336,7 +340,7 @@ export default function PlansPage() {
                     <div className="mt-3 shrink-0 space-y-0.5 md:mt-3.5">
                       <div className="flex items-baseline gap-1.5">
                         <span className="font-marketing-display text-3xl font-normal tabular-nums tracking-tight text-white transition-all duration-300 ease-out md:text-4xl">
-                          ${monthlyEquivalent}
+                          ${monthlyEquivalentDisplay}
                         </span>
                         <span className="text-xs font-light text-white/60 md:text-sm">/month</span>
                       </div>

@@ -43,7 +43,8 @@ export const rhythm = {
  */
 export const space = {
   pagePad: PAGE.margin,
-  section: 40,
+  /** Chapter gaps — kept moderate to avoid orphan whitespace before page breaks */
+  section: 32,
   block: 24,
   cardPad: 22,
 } as const;

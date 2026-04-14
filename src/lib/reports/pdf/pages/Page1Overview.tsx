@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.cardPad,
     borderWidth: 1,
     borderColor: colors.rule,
-    minHeight: 96,
+    minHeight: 72,
     overflow: "hidden",
   },
   alertWin: { backgroundColor: colors.greenLight, borderTopWidth: 2, borderTopColor: colors.green },
@@ -273,7 +273,7 @@ export function Page1Overview({ data }: { data: ReportData }) {
           <View style={styles.calloutInner}>
             <Text style={styles.calloutKicker}>Bottom line</Text>
             {bottomLines.map((line, i) => (
-              <View key={`bl-${i}`} style={styles.bulletRow} wrap={false}>
+              <View key={`bl-${i}`} style={styles.bulletRow}>
                 <Text style={styles.bulletMark}>•</Text>
                 <Text style={styles.bulletText}>{line}</Text>
               </View>
@@ -290,7 +290,7 @@ export function Page1Overview({ data }: { data: ReportData }) {
             delta === null ? "" : delta === 0 ? "0" : delta > 0 ? `+${delta}` : String(delta);
           const isClient = !!c.isClient;
           return (
-            <View key={`rank-${c.name}`} style={styles.rankOuter} wrap={false}>
+            <View key={`rank-${c.name}`} style={styles.rankOuter}>
               <View style={[styles.rankAccent, { backgroundColor: isClient ? colors.cyan : "transparent" }]} />
               <View
                 style={[styles.rankInner, { backgroundColor: isClient ? colors.cyanLight : "transparent" }]}
@@ -335,7 +335,7 @@ export function Page1Overview({ data }: { data: ReportData }) {
           );
         })}
 
-        <View style={styles.alertRow} wrap={false}>
+        <View style={styles.alertRow}>
           <View style={[styles.alertCard, styles.alertWin, styles.alertSp]}>
             <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.green }]}>
               <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.green, fontFamily: fonts.sansBold }}>WIN</Text>

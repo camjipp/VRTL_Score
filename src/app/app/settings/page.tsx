@@ -83,7 +83,7 @@ function getPlanDisplay(plan: string | null) {
   const plans: Record<string, { name: string; price: string }> = {
     starter: { name: "Starter", price: "$149/mo" },
     growth: { name: "Growth", price: "$399/mo" },
-    pro: { name: "Pro", price: "$666/mo" },
+    pro: { name: "Pro", price: "$749/mo" },
   };
   return plans[plan || "starter"] || plans.starter;
 }
@@ -259,7 +259,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1100px] space-y-4 px-5 pb-8 pt-3 sm:px-6 sm:pt-3.5">
+    <div className="mx-auto min-w-0 max-w-[1100px] space-y-4 overflow-x-hidden px-5 pb-8 pt-3 sm:px-6 sm:pt-3.5">
       <nav className="flex items-center gap-1.5 text-[13px]">
         <Link href="/app" className="text-text-2 transition-colors hover:text-text">
           Clients

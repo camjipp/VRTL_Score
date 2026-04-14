@@ -16,8 +16,8 @@ export type ModelAnalysisCardProps = {
 /** Three columns + gaps = 540pt content: 172 + 12 + 172 + 12 + 172 */
 export const MODEL_CARD_WIDTH = 172;
 const INNER_W = MODEL_CARD_WIDTH - 14;
-/** Equal-height analysis cards */
-const CARD_MIN_H = 136;
+/** Equal-height analysis cards — keep moderate to reduce forced page breaks */
+const CARD_MIN_H = 120;
 
 const styles = StyleSheet.create({
   root: {

@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
 import { cn } from "@/lib/cn";
+import { formatMonthlyPriceDisplay, monthlyEquivalentFromAnnualUsd } from "@/lib/pricing/billingMath";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 const shell = "mx-auto w-full max-w-[1200px] px-6 md:px-12";
@@ -80,8 +81,8 @@ const plans = [
     id: "pro" as const,
     name: "Scale",
     description: "Higher volume, faster runs, and a dedicated contact as AI visibility becomes core to your offer.",
-    monthlyPrice: 666,
-    yearlyPrice: 8028,
+    monthlyPrice: 749,
+    yearlyPrice: 7490,
     clients: 50,
     highlights: [
       "50+ clients",
@@ -97,9 +98,10 @@ const recommendedPillClass =
 
 function planBillingFigures(plan: (typeof plans)[number], isAnnual: boolean) {
   const annualTotal = plan.yearlyPrice;
-  const monthlyEquivalent = isAnnual ? Math.round(annualTotal / 12) : plan.monthlyPrice;
+  const monthlyEquivalentRaw = isAnnual ? monthlyEquivalentFromAnnualUsd(annualTotal) : plan.monthlyPrice;
   const saveVsMonthlyYear = plan.monthlyPrice * 12 - annualTotal;
-  return { annualTotal, monthlyEquivalent, saveVsMonthlyYear };
+  const monthlyEquivalentDisplay = formatMonthlyPriceDisplay(monthlyEquivalentRaw);
+  return { annualTotal, monthlyEquivalentDisplay, saveVsMonthlyYear };
 }
 
 function PlanPriceSubline({ plan, isAnnual }: { plan: (typeof plans)[number]; isAnnual: boolean }) {
@@ -155,7 +157,7 @@ const faqs = [
   {
     question: "Is there a long-term contract?",
     answer:
-      "No. Monthly plans cancel anytime. Foundation and Agency annual plans are billed upfront and include two months versus paying monthly. Scale annual is priced separately.",
+      "No. Monthly plans cancel anytime. Annual is billed upfront; each tier is priced for better unit economics than paying month-to-month.",
   },
 ];
 
@@ -273,7 +275,7 @@ function PlanCards({
   return (
     <div className="mt-6 grid gap-6 overflow-visible md:mt-7 md:grid-cols-3 md:items-stretch md:gap-7 lg:gap-8">
       {plans.map((plan) => {
-        const { monthlyEquivalent } = planBillingFigures(plan, isAnnual);
+        const { monthlyEquivalentDisplay } = planBillingFigures(plan, isAnnual);
         const isLoading = loadingPlan === plan.id;
 
         const cardClass = cn(
@@ -303,7 +305,7 @@ function PlanCards({
               <div className="flex min-h-[6.75rem] shrink-0 flex-col gap-1.5">
                 <div className="flex items-baseline gap-2">
                   <span className="font-marketing-display text-4xl font-normal tabular-nums tracking-tight text-white transition-all duration-300 ease-out md:text-5xl">
-                    ${monthlyEquivalent}
+                    ${monthlyEquivalentDisplay}
                   </span>
                   <span className="text-sm font-light text-white/60">/month</span>
                 </div>
@@ -417,8 +419,8 @@ function PricingContent() {
 
   if (isPaywall) {
     return (
-      <div className="page-marketing selection:bg-[var(--accent-bg)] selection:text-white">
-        <main>
+      <div className="page-marketing min-w-0 max-w-full overflow-x-hidden selection:bg-[var(--accent-bg)] selection:text-white">
+        <main className="min-w-0">
           <section className={cn("border-b border-white/10", pricingTop)}>
             <div className={shell}>
               <PricingEyebrow>{`// CHOOSE PLAN`}</PricingEyebrow>
@@ -435,7 +437,7 @@ function PricingContent() {
 
               <div className="mt-6 grid gap-6 overflow-visible md:mt-7 md:grid-cols-3 md:items-stretch md:gap-7">
                 {plans.map((plan) => {
-                  const { monthlyEquivalent } = planBillingFigures(plan, isAnnual);
+                  const { monthlyEquivalentDisplay } = planBillingFigures(plan, isAnnual);
                   const isSelected = selectedPlan === plan.id;
                   const isRecommended = plan.recommended && !selectedPlan;
 
@@ -463,7 +465,7 @@ function PricingContent() {
                         <div className="flex flex-col gap-1.5 text-left">
                           <div className="flex items-baseline gap-2">
                             <span className="font-marketing-display text-3xl font-normal tabular-nums text-white transition-all duration-300 ease-out md:text-4xl">
-                              ${monthlyEquivalent}
+                              ${monthlyEquivalentDisplay}
                             </span>
                             <span className="text-sm text-white/60">/mo</span>
                           </div>
@@ -507,8 +509,8 @@ function PricingContent() {
   }
 
   return (
-    <div className="page-marketing selection:bg-[var(--accent-bg)] selection:text-white">
-      <main>
+    <div className="page-marketing min-w-0 max-w-full overflow-x-hidden selection:bg-[var(--accent-bg)] selection:text-white">
+      <main className="min-w-0">
         <section className={cn("border-b border-white/10", pricingTop)}>
           <div className={shell}>
             <PricingEyebrow>{`// PRICING`}</PricingEyebrow>
