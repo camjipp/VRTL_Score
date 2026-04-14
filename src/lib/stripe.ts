@@ -43,8 +43,8 @@ export const PLANS = {
   },
   pro: {
     name: "Pro",
-    monthlyPrice: 79900, // $799 in cents
-    annualPrice: 799000, // $7,990 in cents (10 months)
+    monthlyPrice: 66600, // $666 in cents
+    annualPrice: 802800, // $8,028/yr ($669 × 12) in cents
     features: {
       maxClients: 999,
       maxCompetitors: 999,

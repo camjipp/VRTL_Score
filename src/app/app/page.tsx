@@ -1057,24 +1057,52 @@ function ClientTable({ clients }: { clients: ClientWithStats[] }) {
 
 function EmptyState() {
   return (
-    <div className="relative mx-auto max-w-lg overflow-hidden rounded-2xl border border-white/20 bg-[#0B0F14] px-8 py-9 sm:px-10 sm:py-10">
-      <div className="relative">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/75">Portfolio</p>
-      <h2 className="mt-3 text-xl font-semibold tracking-tight text-text sm:text-2xl">
-        Initialize your portfolio
-      </h2>
-      <p className="mt-2 max-w-md text-[14px] leading-relaxed text-white/75">
-        Add a brand to index authority across ChatGPT, Gemini, and Claude — gaps, displacers, and trend in one surface.
-      </p>
-      <Link
-        href="/app/clients/new"
-        className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#22c55e] px-5 py-2.5 text-sm font-semibold text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] transition-colors hover:bg-[#16a34a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0F14]"
+    <div className="relative mx-auto w-full max-w-xl overflow-hidden rounded-2xl border border-white/20 bg-[#0B0F14] px-10 py-12 shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:max-w-2xl sm:px-14 sm:py-14">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.4]"
+        aria-hidden
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)
+          `,
+          backgroundSize: "28px 28px",
+          maskImage: "radial-gradient(ellipse 80% 70% at 50% 40%, black 20%, transparent 75%)",
+          WebkitMaskImage: "radial-gradient(ellipse 80% 70% at 50% 40%, black 20%, transparent 75%)",
+        }}
+      />
+      <svg
+        className="pointer-events-none absolute -right-8 bottom-0 h-40 w-56 text-white/[0.04] sm:h-48 sm:w-64"
+        viewBox="0 0 200 80"
+        fill="none"
+        aria-hidden
       >
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-        </svg>
-        Add first client
-      </Link>
+        <path
+          d="M0 65 L40 52 L72 58 L110 38 L148 48 L200 22"
+          stroke="currentColor"
+          strokeWidth="1.25"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path d="M0 65 L200 65" stroke="currentColor" strokeWidth="0.5" strokeOpacity="0.5" />
+      </svg>
+      <div className="relative z-[1] mx-auto max-w-lg text-center">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/55">Portfolio</p>
+        <h2 className="mt-3 font-app-display text-2xl font-normal tracking-tight text-text sm:text-[1.75rem]">
+          Your portfolio is empty
+        </h2>
+        <p className="mt-3 text-[15px] font-medium leading-snug text-white/88 sm:text-base">
+          No data yet — your clients are already being ranked by AI.
+        </p>
+        <p className="mt-3 text-[14px] font-light leading-relaxed text-white/65 sm:text-[15px]">
+          Add your first client to see where they appear in AI — and who is replacing them.
+        </p>
+        <Link
+          href="/app/clients/new"
+          className="mt-9 inline-flex h-12 min-w-[min(100%,280px)] items-center justify-center rounded-xl bg-[#22c55e] px-8 text-[15px] font-semibold tracking-tight text-black shadow-[0_0_0_1px_rgba(255,255,255,0.12),0_8px_32px_rgba(34,197,94,0.35),inset_0_1px_0_rgba(255,255,255,0.25)] transition-all hover:bg-[#16a34a] hover:shadow-[0_0_0_1px_rgba(255,255,255,0.14),0_12px_40px_rgba(34,197,94,0.4),inset_0_1px_0_rgba(255,255,255,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0F14] sm:h-[3.25rem] sm:min-w-[300px] sm:px-10 sm:text-base"
+        >
+          + Add your first client
+        </Link>
       </div>
     </div>
   );
@@ -1477,7 +1505,9 @@ export default function AppPage() {
           />
         ) : null}
         {clients.length === 0 ? (
-          <EmptyState />
+          <div className="flex min-h-[min(70vh,640px)] flex-col items-center justify-center py-10 sm:min-h-[min(72vh,680px)] sm:py-14">
+            <EmptyState />
+          </div>
         ) : triageSortedClients.length === 0 && searchQuery ? (
           <div className="rounded-2xl border border-white/20 bg-[#0B0F14] px-6 py-7 text-center">
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/75">No matches</p>

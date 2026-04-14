@@ -65,6 +65,18 @@ function isInternalPath(p: string | null | undefined): p is string {
   return typeof p === "string" && p.startsWith("/");
 }
 
+/** Supabase / auth providers use several phrasings for an existing email on sign-up. */
+function isAlreadyRegisteredAuthMessage(message: string): boolean {
+  const m = message.toLowerCase();
+  return (
+    m.includes("already registered") ||
+    m.includes("already been registered") ||
+    m.includes("user already exists") ||
+    m.includes("email address is already") ||
+    m.includes("already in use")
+  );
+}
+
 type AgencySettings = {
   agency_id: string;
   name: string;
@@ -411,11 +423,28 @@ export function OnboardingForm() {
                     </span>
                   </label>
 
-                  {authError && (
-                    <Alert variant={authError.includes("confirm") ? "warning" : "danger"}>
-                      <AlertDescription>{authError}</AlertDescription>
-                    </Alert>
-                  )}
+                  {authError &&
+                    (isAlreadyRegisteredAuthMessage(authError) ? (
+                      <div
+                        className="mt-4 rounded-md border border-white/[0.1] bg-[#141414]/50 px-3.5 py-3 sm:px-4"
+                        role="status"
+                      >
+                        <p className="text-center text-sm font-light leading-relaxed text-[var(--text-secondary)] sm:text-left">
+                          Already have an account?{" "}
+                          <Link
+                            href="/login"
+                            className="font-medium text-[var(--accent-marketing)] transition-colors hover:underline hover:opacity-95"
+                          >
+                            Sign in
+                          </Link>{" "}
+                          to continue.
+                        </p>
+                      </div>
+                    ) : (
+                      <Alert variant={authError.includes("confirm") ? "warning" : "danger"}>
+                        <AlertDescription>{authError}</AlertDescription>
+                      </Alert>
+                    ))}
 
                   <button type="submit" disabled={authBusy || !legalAccepted} className={primaryBtnClass}>
                     {authBusy ? (

@@ -50,8 +50,7 @@ const plans = [
   {
     id: "starter" as const,
     name: "Foundation",
-    description:
-      "For agencies validating AI visibility with a tight client list before productizing reporting.",
+    description: "Pilot model-level visibility on a focused client set before you standardize reporting.",
     monthlyPrice: 149,
     yearlyPrice: 1490,
     clients: 5,
@@ -65,7 +64,7 @@ const plans = [
   {
     id: "growth" as const,
     name: "Agency",
-    description: "For agencies running client reporting and closing retainers with AI visibility.",
+    description: "Ongoing snapshots and reporting for accounts you already support and renew.",
     monthlyPrice: 399,
     yearlyPrice: 3990,
     clients: 20,
@@ -80,10 +79,9 @@ const plans = [
   {
     id: "pro" as const,
     name: "Scale",
-    description:
-      "For firms managing a large book and packaging AI visibility as a core, billable line of business.",
-    monthlyPrice: 799,
-    yearlyPrice: 7990,
+    description: "Higher volume, faster runs, and a dedicated contact as AI visibility becomes core to your offer.",
+    monthlyPrice: 666,
+    yearlyPrice: 8028,
     clients: 50,
     highlights: [
       "50+ clients",
@@ -93,6 +91,35 @@ const plans = [
     ],
   },
 ];
+
+const recommendedPillClass =
+  "inline-flex rounded border border-emerald-500/10 bg-white/[0.02] px-1.5 py-0.5 font-marketing-mono text-[9px] font-medium tracking-[0.06em] text-emerald-400/45";
+
+function planBillingFigures(plan: (typeof plans)[number], isAnnual: boolean) {
+  const annualTotal = plan.yearlyPrice;
+  const monthlyEquivalent = isAnnual ? Math.round(annualTotal / 12) : plan.monthlyPrice;
+  const saveVsMonthlyYear = plan.monthlyPrice * 12 - annualTotal;
+  return { annualTotal, monthlyEquivalent, saveVsMonthlyYear };
+}
+
+function PlanPriceSubline({ plan, isAnnual }: { plan: (typeof plans)[number]; isAnnual: boolean }) {
+  const { annualTotal, saveVsMonthlyYear } = planBillingFigures(plan, isAnnual);
+  if (isAnnual) {
+    return (
+      <p className="text-sm font-light text-white/50 transition-opacity duration-200 ease-out">
+        ${annualTotal.toLocaleString()} billed annually
+      </p>
+    );
+  }
+  if (saveVsMonthlyYear > 0) {
+    return (
+      <p className="text-sm font-light text-white/50 transition-opacity duration-200 ease-out">
+        Save ${saveVsMonthlyYear.toLocaleString()}/year on annual
+      </p>
+    );
+  }
+  return null;
+}
 
 const comparisonFeatures = [
   { name: "Active clients", starter: "5", growth: "20", pro: "50+" },
@@ -106,7 +133,7 @@ const faqs = [
   {
     question: "How do I get started?",
     answer:
-      "Run a free snapshot during onboarding to see the product on real data. When you're ready to cover more clients and history, pick a plan that matches your book.",
+      "Complete onboarding and run a snapshot on live data. When you need more clients, history, or seats, choose the tier that matches your book.",
   },
   {
     question: "Can I change plans later?",
@@ -127,14 +154,15 @@ const faqs = [
   },
   {
     question: "Is there a long-term contract?",
-    answer: "No. Monthly plans cancel anytime. Annual is billed upfront with two months included free.",
+    answer:
+      "No. Monthly plans cancel anytime. Foundation and Agency annual plans are billed upfront and include two months versus paying monthly. Scale annual is priced separately.",
   },
 ];
 
 const heroBullets = [
-  "Catch client risk before churn",
-  "Prove value in client calls",
-  "Turn AI visibility into a billable service",
+  "Displacement signals before renewals",
+  "Evidence for QBRs and strategy reviews",
+  "Package visibility as part of your stack",
 ];
 
 function RunSnapshotButton({
@@ -245,8 +273,7 @@ function PlanCards({
   return (
     <div className="mt-6 grid gap-6 overflow-visible md:mt-7 md:grid-cols-3 md:items-stretch md:gap-7 lg:gap-8">
       {plans.map((plan) => {
-        const price = isAnnual ? plan.yearlyPrice : plan.monthlyPrice;
-        const monthlyEquivalent = isAnnual ? Math.round(plan.yearlyPrice / 12) : plan.monthlyPrice;
+        const { monthlyEquivalent } = planBillingFigures(plan, isAnnual);
         const isLoading = loadingPlan === plan.id;
 
         const cardClass = cn(
@@ -261,9 +288,7 @@ function PlanCards({
           <div key={plan.name} className="flex min-h-0 flex-col">
             <div className="flex min-h-[2.25rem] items-end justify-center pb-2 md:min-h-[2.5rem]">
               {plan.recommended ? (
-                <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-wide text-[var(--accent-marketing)]">
-                  Most agencies choose this
-                </span>
+                <span className={recommendedPillClass}>Recommended</span>
               ) : null}
             </div>
 
@@ -277,21 +302,15 @@ function PlanCards({
 
               <div className="flex min-h-[6.75rem] shrink-0 flex-col gap-1.5">
                 <div className="flex items-baseline gap-2">
-                  <span className="font-marketing-display text-4xl font-normal tabular-nums tracking-tight text-white md:text-5xl">
+                  <span className="font-marketing-display text-4xl font-normal tabular-nums tracking-tight text-white transition-all duration-300 ease-out md:text-5xl">
                     ${monthlyEquivalent}
                   </span>
                   <span className="text-sm font-light text-white/60">/month</span>
                 </div>
-                <p className="text-sm font-light text-white/65">
-                  Typical ROI: 1 retained client pays for this 10–30x
+                <p className="text-sm font-light text-white/55">
+                  Often aligns with a single retained engagement on your book.
                 </p>
-                {isAnnual ? (
-                  <p className="text-sm font-light text-white/50">${price.toLocaleString()} billed annually</p>
-                ) : (
-                  <p className="text-sm font-light text-white/50">
-                    Save ${(plan.monthlyPrice * 12 - plan.yearlyPrice).toLocaleString()}/year on annual
-                  </p>
-                )}
+                <PlanPriceSubline plan={plan} isAnnual={isAnnual} />
               </div>
 
               <div className="flex shrink-0 flex-col gap-2">
@@ -416,7 +435,7 @@ function PricingContent() {
 
               <div className="mt-6 grid gap-6 overflow-visible md:mt-7 md:grid-cols-3 md:items-stretch md:gap-7">
                 {plans.map((plan) => {
-                  const monthlyEquivalent = isAnnual ? Math.round(plan.yearlyPrice / 12) : plan.monthlyPrice;
+                  const { monthlyEquivalent } = planBillingFigures(plan, isAnnual);
                   const isSelected = selectedPlan === plan.id;
                   const isRecommended = plan.recommended && !selectedPlan;
 
@@ -432,11 +451,7 @@ function PricingContent() {
                   return (
                     <div key={plan.id} className="flex flex-col">
                       <div className="flex min-h-[2.25rem] items-end justify-center pb-2">
-                        {plan.recommended ? (
-                          <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-wide text-[var(--accent-marketing)]">
-                            Most agencies choose this
-                          </span>
-                        ) : null}
+                        {plan.recommended ? <span className={recommendedPillClass}>Recommended</span> : null}
                       </div>
                       <button type="button" onClick={() => setSelectedPlan(plan.id)} className={btnClass}>
                         <div>
@@ -447,14 +462,15 @@ function PricingContent() {
                         </div>
                         <div className="flex flex-col gap-1.5 text-left">
                           <div className="flex items-baseline gap-2">
-                            <span className="font-marketing-display text-3xl font-normal tabular-nums text-white md:text-4xl">
+                            <span className="font-marketing-display text-3xl font-normal tabular-nums text-white transition-all duration-300 ease-out md:text-4xl">
                               ${monthlyEquivalent}
                             </span>
                             <span className="text-sm text-white/60">/mo</span>
                           </div>
-                          <p className="text-sm font-light text-white/65">
-                            Typical ROI: 1 retained client pays for this 10–30x
+                          <p className="text-sm font-light text-white/55">
+                            Often aligns with a single retained engagement on your book.
                           </p>
+                          <PlanPriceSubline plan={plan} isAnnual={isAnnual} />
                         </div>
                         <ul className="flex flex-1 flex-col space-y-2 border-t border-white/10 pt-4 text-left">
                           {plan.highlights.map((line) => (
@@ -498,12 +514,12 @@ function PricingContent() {
             <PricingEyebrow>{`// PRICING`}</PricingEyebrow>
 
             <h1 className="mt-3 max-w-[760px] font-marketing-display text-[2rem] font-normal leading-[1.08] tracking-[-0.03em] text-white md:text-[2.75rem] lg:text-[3.25rem]">
-              Pricing built for agencies that want to win AI search
+              Plans for agencies standardizing AI visibility
             </h1>
 
             <p className="mt-5 max-w-[640px] text-lg font-light leading-relaxed text-white/80">
-              Most agencies lose clients without even knowing why. VRTL Score shows you where you&apos;re being replaced — and
-              how to fix it.
+              Model-level answers, reporting, and displacement context—structured so your team can operationalize it across
+              accounts.
             </p>
 
             <ul className="mt-4 flex max-w-[720px] flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-x-8 sm:gap-y-1">

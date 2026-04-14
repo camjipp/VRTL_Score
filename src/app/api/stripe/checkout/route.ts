@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getStripe, PLANS, PlanId, BillingInterval } from "@/lib/stripe";
+import { getStripe, PLANS, type PlanId, type BillingInterval } from "@/lib/stripe";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
+
+/** Customer-facing names (match marketing pricing). */
+const CHECKOUT_PLAN_LABEL: Record<PlanId, string> = {
+  starter: "Foundation",
+  growth: "Agency",
+  pro: "Scale",
+};
 
 export async function POST(req: NextRequest) {
   try {
@@ -84,8 +91,11 @@ export async function POST(req: NextRequest) {
           price_data: {
             currency: "usd",
             product_data: {
-              name: `VRTL Score ${plan.name}`,
-              description: `${interval === "annual" ? "Annual" : "Monthly"} subscription`,
+              name: `VRTL Score ${CHECKOUT_PLAN_LABEL[planId]}`,
+              description:
+                interval === "annual"
+                  ? "Annual subscription — billed today, renews yearly"
+                  : "Monthly subscription — billed today, renews monthly",
             },
             unit_amount: price,
             recurring: {
@@ -96,7 +106,6 @@ export async function POST(req: NextRequest) {
         },
       ],
       subscription_data: {
-        trial_period_days: 7,
         metadata: {
           agency_id: agency.id,
           plan_id: planId,

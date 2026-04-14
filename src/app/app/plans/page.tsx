@@ -60,8 +60,8 @@ const PLANS = [
     clients: 50 as const,
     description:
       "For firms managing a large book and packaging AI visibility as a core, billable line of business.",
-    monthlyPrice: 799,
-    annualPrice: 7990,
+    monthlyPrice: 666,
+    annualPrice: 8028,
     recommended: false,
     highlights: [
       "50+ clients",
@@ -73,6 +73,9 @@ const PLANS = [
 ];
 
 const shell = "mx-auto w-full max-w-[1200px] px-4 sm:px-6";
+
+const recommendedPillClass =
+  "inline-flex rounded border border-emerald-500/10 bg-white/[0.02] px-1.5 py-0.5 font-marketing-mono text-[9px] font-medium tracking-[0.06em] text-emerald-400/45 md:px-1.5 md:py-0.5";
 
 function Check({ className }: { className?: string }) {
   return (
@@ -321,11 +324,7 @@ export default function PlansPage() {
               return (
                 <div key={plan.id} className="flex min-h-0 flex-col">
                   <div className="flex min-h-[1.5rem] items-end justify-center pb-1 md:min-h-[1.75rem] md:pb-1.5">
-                    {plan.recommended ? (
-                      <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[var(--accent-marketing)] md:px-3 md:text-xs">
-                        Most agencies choose this
-                      </span>
-                    ) : null}
+                    {plan.recommended ? <span className={recommendedPillClass}>Recommended</span> : null}
                   </div>
 
                   <div className={cardClass}>
@@ -336,21 +335,23 @@ export default function PlansPage() {
 
                     <div className="mt-3 shrink-0 space-y-0.5 md:mt-3.5">
                       <div className="flex items-baseline gap-1.5">
-                        <span className="font-marketing-display text-3xl font-normal tabular-nums tracking-tight text-white md:text-4xl">
+                        <span className="font-marketing-display text-3xl font-normal tabular-nums tracking-tight text-white transition-all duration-300 ease-out md:text-4xl">
                           ${monthlyEquivalent}
                         </span>
                         <span className="text-xs font-light text-white/60 md:text-sm">/month</span>
                       </div>
-                      <p className="text-xs font-light leading-snug text-white/65 md:text-[13px]">
-                        Typical ROI: 1 retained client pays for this 10–30x
+                      <p className="text-xs font-light leading-snug text-white/55 md:text-[13px]">
+                        Often aligns with a single retained engagement on your book.
                       </p>
                       {isAnnual ? (
-                        <p className="text-xs font-light text-white/50 md:text-sm">${price.toLocaleString()} billed annually</p>
-                      ) : (
-                        <p className="text-xs font-light text-white/50 md:text-sm">
+                        <p className="text-xs font-light text-white/50 transition-opacity duration-200 ease-out md:text-sm">
+                          ${price.toLocaleString()} billed annually
+                        </p>
+                      ) : annualSavings > 0 ? (
+                        <p className="text-xs font-light text-white/50 transition-opacity duration-200 ease-out md:text-sm">
                           Save ${annualSavings.toLocaleString()}/year on annual
                         </p>
-                      )}
+                      ) : null}
                     </div>
 
                     <div className="mt-3 flex shrink-0 flex-col gap-1.5 md:mt-3.5">

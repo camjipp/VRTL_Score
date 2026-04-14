@@ -165,17 +165,31 @@ function SnapshotSelector({
   return (
     <div className="flex items-center gap-2">
       <label className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-3">Snapshot</label>
-      <select
-        value={selectedId ?? ""}
-        onChange={(e) => onSelect(e.target.value)}
-        className="h-9 min-w-[200px] max-w-[min(100vw-8rem,280px)] rounded-lg border border-white/[0.1] bg-black/40 px-3 py-1.5 text-[13px] font-medium text-text shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] focus:border-white/[0.18] focus:outline-none"
-      >
-        {snapshots.map((s, idx) => (
-          <option key={s.id} value={s.id}>
-            {idx === 0 ? "Latest" : new Date(s.created_at).toLocaleDateString()} · {s.vrtl_score ?? "—"}
-          </option>
-        ))}
-      </select>
+      <div className="relative min-w-[200px] max-w-[min(100vw-8rem,280px)]">
+        <select
+          value={selectedId ?? ""}
+          onChange={(e) => onSelect(e.target.value)}
+          className={cn(
+            "h-9 w-full cursor-pointer appearance-none rounded-lg border border-white/[0.1] bg-black/40 py-1.5 pl-3 pr-8 text-[13px] font-medium text-text",
+            "shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]",
+            "focus:border-white/25 focus:outline-none focus:ring-2 focus:ring-white/15"
+          )}
+        >
+          {snapshots.map((s, idx) => (
+            <option key={s.id} value={s.id}>
+              {idx === 0 ? "Latest" : new Date(s.created_at).toLocaleDateString()} · {s.vrtl_score ?? "—"}
+            </option>
+          ))}
+        </select>
+        <span
+          className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-text-3"
+          aria-hidden
+        >
+          <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </span>
+      </div>
     </div>
   );
 }

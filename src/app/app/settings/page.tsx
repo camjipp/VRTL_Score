@@ -83,7 +83,7 @@ function getPlanDisplay(plan: string | null) {
   const plans: Record<string, { name: string; price: string }> = {
     starter: { name: "Starter", price: "$149/mo" },
     growth: { name: "Growth", price: "$399/mo" },
-    pro: { name: "Pro", price: "$799/mo" },
+    pro: { name: "Pro", price: "$666/mo" },
   };
   return plans[plan || "starter"] || plans.starter;
 }
