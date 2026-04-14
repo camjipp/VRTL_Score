@@ -176,7 +176,10 @@ export function Page3Recommendations({ data }: { data: ReportData }) {
         />
 
         {first ? (
-          <View style={[styles.heroCard, isHigh ? { borderTopColor: HIGH_ACCENT } : { borderTopColor: colors.ink3 }]}>
+          <View
+            wrap={false}
+            style={[styles.heroCard, isHigh ? { borderTopColor: HIGH_ACCENT } : { borderTopColor: colors.ink3 }]}
+          >
             <Text style={styles.heroKicker}>Primary action</Text>
             <View style={styles.heroPri}>
               <Text style={styles.heroPriTxt}>{`${first.priority} PRIORITY`}</Text>
@@ -209,7 +212,7 @@ export function Page3Recommendations({ data }: { data: ReportData }) {
           const cardHigh = r.priority === "HIGH";
           const idx = i + 2;
           return (
-            <View key={`rec-${r.priority}-${i}`} style={[styles.card, cardHigh ? styles.cardHigh : {}]}>
+            <View key={`rec-${r.priority}-${i}`} wrap={false} style={[styles.card, cardHigh ? styles.cardHigh : {}]}>
               <View style={[styles.leftStripe, { backgroundColor: STRIPE_BG }]}>
                 <Text style={styles.stripeNum}>{String(idx)}</Text>
               </View>

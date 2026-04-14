@@ -246,49 +246,52 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
           })}
         </View>
 
-        {data.evidencePreview.length > 0 ? (
-          <View style={{ width: CONTENT_W }}>
-            <Text style={styles.sectionLabel}>Example answers</Text>
-            <View style={styles.evidenceRow}>
-              {data.evidencePreview.map((ev, i) => {
-                const labelLine = formatEvidenceLogPillLabel(String(ev.label));
-                const snippetLine = String(ev.snippet);
-                const noteLine = ev.note ? String(ev.note) : "";
-                return (
-                  <View
-                    key={`ev-${i}`}
-                    style={[styles.exampleCard, i === 0 ? { marginRight: EVIDENCE_GAP } : {}]}
-                    wrap={false}
-                  >
-                    <View style={styles.exampleAccent} />
-                    <View style={styles.exampleInner}>
-                      <Text style={styles.exampleKicker}>Client-readable excerpt</Text>
-                      <Text style={styles.exampleBadge}>{labelLine}</Text>
-                      <View style={styles.exampleQuote}>
-                        <Text style={styles.exampleQuoteText} orphans={2} widows={2}>
-                          {snippetLine}
-                        </Text>
+        {data.evidencePreview.length > 0 || data.strategicTakeaway ? (
+          <View wrap={false}>
+            {data.evidencePreview.length > 0 ? (
+              <View style={{ width: CONTENT_W }}>
+                <Text style={styles.sectionLabel}>Example answers</Text>
+                <View style={styles.evidenceRow}>
+                  {data.evidencePreview.map((ev, i) => {
+                    const labelLine = formatEvidenceLogPillLabel(String(ev.label));
+                    const snippetLine = String(ev.snippet);
+                    const noteLine = ev.note ? String(ev.note) : "";
+                    return (
+                      <View
+                        key={`ev-${i}`}
+                        style={[styles.exampleCard, i === 0 ? { marginRight: EVIDENCE_GAP } : {}]}
+                        wrap={false}
+                      >
+                        <View style={styles.exampleAccent} />
+                        <View style={styles.exampleInner}>
+                          <Text style={styles.exampleKicker}>Client-readable excerpt</Text>
+                          <Text style={styles.exampleBadge}>{labelLine}</Text>
+                          <View style={styles.exampleQuote}>
+                            <Text style={styles.exampleQuoteText} orphans={2} widows={2}>
+                              {snippetLine}
+                            </Text>
+                          </View>
+                          {noteLine ? <Text style={styles.exampleNote}>{noteLine}</Text> : null}
+                        </View>
                       </View>
-                      {noteLine ? <Text style={styles.exampleNote}>{noteLine}</Text> : null}
-                    </View>
-                  </View>
-                );
-              })}
-            </View>
+                    );
+                  })}
+                </View>
+              </View>
+            ) : null}
+            {data.strategicTakeaway ? (
+              <View style={styles.takeawayOuter}>
+                <View style={styles.takeawayBar} />
+                <View style={styles.takeawayInner}>
+                  <Text style={styles.takeawayTitle}>Strategic takeaway</Text>
+                  <Text style={styles.takeawayBody}>{data.strategicTakeaway}</Text>
+                </View>
+              </View>
+            ) : null}
           </View>
         ) : null}
 
         <PdfTraceMarker page={3} section="Page2:after_evidence_preview" />
-
-        {data.strategicTakeaway ? (
-          <View style={styles.takeawayOuter}>
-            <View style={styles.takeawayBar} />
-            <View style={styles.takeawayInner}>
-              <Text style={styles.takeawayTitle}>Strategic takeaway</Text>
-              <Text style={styles.takeawayBody}>{data.strategicTakeaway}</Text>
-            </View>
-          </View>
-        ) : null}
 
         <PdfTraceMarker page={3} section="Page2:before_footer" />
         <PdfFooter data={data} />

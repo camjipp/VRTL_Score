@@ -282,22 +282,22 @@ export function Page1Overview({ data }: { data: ReportData }): ReactElement[] {
   );
 
   const alertsBlock = (
-    <View style={styles.alertRow} wrap={false}>
-      <View style={[styles.alertCard, styles.alertWin, styles.alertSp]}>
+    <View style={styles.alertRow}>
+      <View style={[styles.alertCard, styles.alertWin, styles.alertSp]} wrap={false}>
         <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.green }]}>
           <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.green, fontFamily: fonts.sansBold }}>WIN</Text>
         </View>
         <Text style={styles.alertTitle}>{data.alerts.win.title}</Text>
         <Text style={styles.alertDetail}>{data.alerts.win.detail}</Text>
       </View>
-      <View style={[styles.alertCard, styles.alertRisk, styles.alertSp]}>
+      <View style={[styles.alertCard, styles.alertRisk, styles.alertSp]} wrap={false}>
         <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.orange }]}>
           <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.orange, fontFamily: fonts.sansBold }}>RISK</Text>
         </View>
         <Text style={styles.alertTitle}>{data.alerts.risk.title}</Text>
         <Text style={styles.alertDetail}>{data.alerts.risk.detail}</Text>
       </View>
-      <View style={[styles.alertCard, styles.alertPri]}>
+      <View style={[styles.alertCard, styles.alertPri]} wrap={false}>
         <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.red }]}>
           <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.red, fontFamily: fonts.sansBold }}>PRIORITY</Text>
         </View>
