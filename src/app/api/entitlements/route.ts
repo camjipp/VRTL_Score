@@ -44,7 +44,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: userRes.error?.message ?? "Unauthorized" }, { status: 401 });
   }
 
-  // Platform admins (ADMIN_EMAILS): bypass workspace lookup — not the same as agency owner/member roles.
+  // Internal platform operators only (ADMIN_EMAILS env). Not a “customer admin” tier — bypasses billing for support/testing.
   if (isAdminEmail(user.email)) {
     if (entitlementsDebug()) {
       console.info("[entitlements] platform_admin_bypass", {
@@ -61,7 +61,7 @@ export async function GET(req: Request) {
     });
   }
 
-  // One row per user is expected; limit(1) avoids PGRST116 if duplicates exist in DB.
+  // Single workspace per user: one agency_users row; limit(1) avoids PGRST116 if duplicates exist in DB.
   const agencyUser = await supabase
     .from("agency_users")
     .select("agency_id,role")

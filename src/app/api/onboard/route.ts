@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
-import { readInvitedAgencyId } from "@/lib/supabase/readInvitedAgencyId";
 
 function bearerToken(req: Request): string | null {
   const header = req.headers.get("authorization") || req.headers.get("Authorization");
@@ -38,31 +37,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ agency_id: existing.data.agency_id });
   }
 
-  // Team members: join an existing subscribed workspace via Auth metadata (set in Supabase or your invite flow).
-  // Without this, first onboard creates a brand-new agency (usually unpaid) → entitlement paywall on refresh.
-  const invitedAgencyId = readInvitedAgencyId(user);
-  if (invitedAgencyId) {
-    const agencyCheck = await supabase.from("agencies").select("id").eq("id", invitedAgencyId).maybeSingle();
-    if (agencyCheck.data?.id) {
-      const joined = await supabase
-        .from("agency_users")
-        .upsert(
-          { agency_id: invitedAgencyId, user_id: user.id, role: "member" },
-          { onConflict: "user_id" }
-        )
-        .select("agency_id")
-        .single();
-      if (joined.data?.agency_id) {
-        return NextResponse.json({ agency_id: joined.data.agency_id });
-      }
-      console.error("[onboard] invited agency join failed", joined.error);
-      return NextResponse.json(
-        { error: joined.error?.message ?? "Could not join invited workspace" },
-        { status: 500 }
-      );
-    }
-  }
-
+  // One customer = one workspace: create the agency and link this user as owner (product has no multi-user invite flow).
   // Create agency + agency_user with best-effort idempotency.
   // Strategy:
   // 1) Create agency.
