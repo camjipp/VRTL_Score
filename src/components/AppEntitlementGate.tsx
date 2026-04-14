@@ -77,8 +77,10 @@ export function AppEntitlementGate({ children }: Props) {
 
     let cancelled = false;
     let attempts = 0;
-    const maxAttempts = isCheckoutSuccess ? 8 : 1;
+    /** Checkout: Stripe webhook can lag — poll longer. Normal load: retry transient API errors (500, cold start) instead of sending users to /app/plans. */
+    const maxAttempts = isCheckoutSuccess ? 8 : 4;
     const pollInterval = 1500;
+    const retryDelayMs = 600;
 
     const statusMessages = [
       "Activating your subscription...",
@@ -91,7 +93,13 @@ export function AppEntitlementGate({ children }: Props) {
       "Ready in seconds...",
     ];
 
-    async function checkEntitlements(): Promise<boolean> {
+    /**
+     * `paywall` = 403 from API (not subscribed / inactive agency) — only case we send user to /app/plans.
+     * `ok` = entitled.
+     * `retry` = transient (5xx, network, onboard hiccup) — do not treat as paywall.
+     * `auth` = 401 — session invalid; caller should send to login.
+     */
+    async function checkEntitlements(): Promise<"ok" | "paywall" | "retry" | "auth"> {
       try {
         lastNetworkError.current = false;
         setAuthError(null);
@@ -104,29 +112,31 @@ export function AppEntitlementGate({ children }: Props) {
         );
 
         if (res.ok) {
-          // Cache the successful result
           entitlementCache = { entitled: true, timestamp: Date.now() };
-          return true;
+          return "ok";
         }
 
         if (res.status === 403) {
-          return false;
+          return "paywall";
         }
 
-        return false;
+        if (res.status === 401) {
+          return "auth";
+        }
+
+        return "retry";
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         if (msg === "Failed to fetch" || msg.includes("load failed") || msg.includes("aborted")) {
           lastNetworkError.current = true;
           if (!cancelled) setAuthError("Connection failed. Refresh the page to try again.");
         }
-        return false;
+        return "retry";
       }
     }
 
     async function run() {
       while (attempts < maxAttempts && !cancelled) {
-        // Update progress and status
         const progressPercent = Math.min(90, ((attempts + 1) / maxAttempts) * 100);
         if (!cancelled) {
           setProgress(progressPercent);
@@ -134,14 +144,13 @@ export function AppEntitlementGate({ children }: Props) {
         }
 
         attempts++;
-        const entitled = await checkEntitlements();
+        const outcome = await checkEntitlements();
 
-        if (entitled) {
+        if (outcome === "ok") {
           if (!cancelled) {
             setProgress(100);
             setStatusText("Welcome!");
-            // Small delay to show 100%
-            await new Promise(r => setTimeout(r, 300));
+            await new Promise((r) => setTimeout(r, 300));
             try {
               sessionStorage.setItem(FIRST_LOAD_KEY, "1");
             } catch {
@@ -153,30 +162,35 @@ export function AppEntitlementGate({ children }: Props) {
           return;
         }
 
-        // If not entitled and not from checkout, redirect (unless it was a network error)
-        if (!isCheckoutSuccess) {
-          if (lastNetworkError.current) {
-            if (!cancelled) setStatusText("Connection failed. Refresh the page to try again.");
-            return;
+        if (outcome === "auth") {
+          if (!cancelled) {
+            router.replace(`/login?next=${encodeURIComponent(pathname ?? "/app")}`);
           }
-          router.replace(`/app/plans`);
           return;
         }
 
-        // If from checkout, wait and retry
+        if (outcome === "paywall") {
+          if (!isCheckoutSuccess) {
+            router.replace(`/app/plans`);
+            return;
+          }
+          if (attempts < maxAttempts) {
+            await new Promise((resolve) => setTimeout(resolve, pollInterval));
+          }
+          continue;
+        }
+
+        // retry: transient error — wait and try again (checkout uses longer pollInterval below)
         if (attempts < maxAttempts) {
-          await new Promise(resolve => setTimeout(resolve, pollInterval));
+          await new Promise((resolve) => setTimeout(resolve, isCheckoutSuccess ? pollInterval : retryDelayMs));
         }
       }
 
-      // All attempts exhausted
       if (!cancelled && isCheckoutSuccess) {
-        // Grant access anyway - webhook will catch up
-        // Store in cache so navigation doesn't break
         entitlementCache = { entitled: true, timestamp: Date.now() };
         setProgress(100);
         setStatusText("Welcome!");
-        await new Promise(r => setTimeout(r, 300));
+        await new Promise((r) => setTimeout(r, 300));
         try {
           sessionStorage.setItem(FIRST_LOAD_KEY, "1");
         } catch {
@@ -185,7 +199,12 @@ export function AppEntitlementGate({ children }: Props) {
         setReady(true);
         hasChecked.current = true;
       } else if (!cancelled) {
-        router.replace(`/app/plans`);
+        if (lastNetworkError.current) {
+          setStatusText("Connection failed. Refresh the page to try again.");
+          return;
+        }
+        setAuthError("We couldn't verify your workspace. Refresh the page, or try again in a moment.");
+        setStatusText("Couldn't verify access");
       }
     }
 
@@ -193,7 +212,7 @@ export function AppEntitlementGate({ children }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [isCheckoutSuccess, pathname]);
+  }, [isCheckoutSuccess, pathname, router]);
 
   if (!ready) {
     // First-time load: show full "Activating your subscription..." card (dark theme)

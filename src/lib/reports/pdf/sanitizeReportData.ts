@@ -15,6 +15,64 @@ export function sanitizePdfString(raw: string): string {
   return normalizeDisplayText(s);
 }
 
+function humanizeJsonSnippetValue(val: unknown, depth: number): string {
+  if (depth > 4) return "";
+  if (val == null) return "";
+  if (typeof val === "string") return sanitizePdfString(val);
+  if (typeof val === "number" || typeof val === "boolean") return String(val);
+  if (Array.isArray(val)) {
+    return val
+      .map((x) => humanizeJsonSnippetValue(x, depth + 1))
+      .filter(Boolean)
+      .join("; ");
+  }
+  if (typeof val === "object") {
+    return Object.entries(val as Record<string, unknown>)
+      .map(([k, v]) => {
+        const key = sanitizePdfString(String(k).replace(/_/g, " "));
+        const inner = humanizeJsonSnippetValue(v, depth + 1);
+        return inner ? `${key}: ${inner}` : "";
+      })
+      .filter(Boolean)
+      .join(". ");
+  }
+  return "";
+}
+
+/** JSON-like evidence snippets → plain-language lines (client PDF; no raw code blocks). */
+export function formatEvidenceSnippetForPdf(raw: string): string {
+  const cleaned = sanitizePdfString(String(raw)).trim();
+  if (!cleaned) return "—";
+  const looksJson =
+    (cleaned.startsWith("{") && cleaned.endsWith("}")) ||
+    (cleaned.startsWith("[") && cleaned.endsWith("]"));
+  if (!looksJson) return cleaned;
+  try {
+    const v = JSON.parse(cleaned) as unknown;
+    if (typeof v === "string") return sanitizePdfString(v);
+    if (Array.isArray(v)) {
+      if (v.length === 0) return "—";
+      if (v.every((x) => typeof x === "string")) {
+        return v.map((s, i) => `${i + 1}. ${sanitizePdfString(String(s))}`).join("\n");
+      }
+      const lines = v
+        .map((item, i) => {
+          const h = humanizeJsonSnippetValue(item, 0);
+          return h ? `${i + 1}. ${h}` : "";
+        })
+        .filter(Boolean);
+      return lines.length ? lines.join("\n\n") : "—";
+    }
+    if (v && typeof v === "object") {
+      const out = humanizeJsonSnippetValue(v, 0);
+      return out || "—";
+    }
+  } catch {
+    return cleaned;
+  }
+  return cleaned;
+}
+
 /** Deep-copy ReportData with every string field sanitized for PDF output. */
 export function sanitizeReportDataForPdf(data: ReportData): ReportData {
   return {
@@ -71,7 +129,7 @@ export function sanitizeReportDataForPdf(data: ReportData): ReportData {
     evidencePreview: data.evidencePreview.map((e) => ({
       ...e,
       label: sanitizePdfString(e.label),
-      snippet: sanitizePdfString(e.snippet),
+      snippet: formatEvidenceSnippetForPdf(e.snippet),
       note: e.note != null ? sanitizePdfString(e.note) : e.note,
     })),
     executionPhases: data.executionPhases.map((p) => ({

@@ -138,9 +138,9 @@ export function Page5DataSummary({ data }: { data: ReportData }) {
   return (
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
       <View style={baseStyles.pageBody}>
-        <PdfTraceMarker page={5} section="Page5:start" />
-        <PdfHeader data={data} variant="inner" pageNum={5} />
-        <PdfTraceMarker page={5} section="Page5:after_header" />
+        <PdfTraceMarker page={6} section="Page5:start" />
+        <PdfHeader data={data} variant="inner" pageNum={6} />
+        <PdfTraceMarker page={6} section="Page5:after_header" />
 
         <ChapterTitle
           title="Data summary"
@@ -242,7 +242,7 @@ export function Page5DataSummary({ data }: { data: ReportData }) {
           })}
         </View>
 
-        <PdfTraceMarker page={5} section="Page5:before_footer" />
+        <PdfTraceMarker page={6} section="Page5:before_footer" />
         <PdfFooter data={data} />
       </View>
     </Page>

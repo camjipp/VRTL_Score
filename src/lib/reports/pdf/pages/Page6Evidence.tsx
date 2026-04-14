@@ -201,9 +201,9 @@ export function Page6Evidence({ data }: { data: ReportData }) {
   return (
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
       <View style={baseStyles.pageBody}>
-        <PdfTraceMarker page={6} section="Page6:start" />
-        <PdfHeader data={data} variant="inner" pageNum={6} />
-        <PdfTraceMarker page={6} section="Page6:after_header" />
+        <PdfTraceMarker page={7} section="Page6:start" />
+        <PdfHeader data={data} variant="inner" pageNum={7} />
+        <PdfTraceMarker page={7} section="Page6:after_header" />
 
         <ChapterTitle
           title="Evidence & methodology"
@@ -285,7 +285,7 @@ export function Page6Evidence({ data }: { data: ReportData }) {
           </View>
         ) : null}
 
-        <View style={styles.chipDeck}>
+        <View style={styles.chipDeck} wrap={false}>
           <View style={styles.chip}>
             <View style={styles.chipValWrap}>
               <Text style={styles.chipNum}>{String(data.meta.responses)}</Text>
@@ -316,7 +316,7 @@ export function Page6Evidence({ data }: { data: ReportData }) {
           </View>
         ) : null}
 
-        <PdfTraceMarker page={6} section="Page6:before_footer" />
+        <PdfTraceMarker page={7} section="Page6:before_footer" />
         <PdfFooter data={data} />
       </View>
     </Page>

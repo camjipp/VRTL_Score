@@ -1,4 +1,5 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
+import type { ReactElement } from "react";
 import type { ReportData } from "../types";
 import { PAGE, colors, fonts, rhythm, baseStyles, space, BODY_MAX_W } from "../theme";
 import { PdfFooter } from "../components/PdfFooter";
@@ -211,7 +212,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export function Page1Overview({ data }: { data: ReportData }) {
+export function Page1Overview({ data }: { data: ReportData }): ReactElement[] {
   const maxM = Math.max(...data.competitors.map((c) => c.mentions), 1);
   const clientM = data.competitors.find((c) => c.isClient)?.mentions ?? 0;
 
@@ -222,8 +223,92 @@ export function Page1Overview({ data }: { data: ReportData }) {
   const bottomBullets = splitSummaryBullets(data.bottomLine);
   const bottomLines = bottomBullets.length ? bottomBullets : [data.bottomLine.trim() || "—"];
 
-  return (
-    <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
+  const rankingBlock = (
+    <View>
+      <Text style={styles.rankHeader}>Competitive ranking</Text>
+      {data.competitors.map((c) => {
+        const widthPct = Math.min(100, Math.max(0, Math.round((c.mentions / maxM) * 100)));
+        const barRest = Math.max(0, 100 - widthPct);
+        const delta = c.isClient ? null : c.mentions - clientM;
+        const deltaStr =
+          delta === null ? "" : delta === 0 ? "0" : delta > 0 ? `+${delta}` : String(delta);
+        const isClient = !!c.isClient;
+        return (
+          <View key={`rank-${c.name}`} style={styles.rankOuter}>
+            <View style={[styles.rankAccent, { backgroundColor: isClient ? colors.cyan : "transparent" }]} />
+            <View
+              style={[styles.rankInner, { backgroundColor: isClient ? colors.cyanLight : "transparent" }]}
+            >
+              <Text
+                style={[
+                  styles.rankIdx,
+                  isClient ? {} : { color: colors.ink4, fontFamily: fonts.sans },
+                ]}
+              >{`#${c.rank}`}</Text>
+              <Text style={isClient ? styles.rankNameClient : styles.rankName}>{c.name}</Text>
+              <View style={styles.barWrap}>
+                <View style={styles.barInner}>
+                  <View
+                    style={[
+                      { flex: widthPct <= 0 ? 0 : widthPct },
+                      isClient ? styles.barFill : styles.barFillNeu,
+                    ]}
+                  />
+                  <View style={[{ flex: barRest }, styles.barRest]} />
+                </View>
+              </View>
+              <Text style={styles.rankCount}>{`${c.mentions}/${data.meta.responses}`}</Text>
+              <View style={styles.pillCell}>
+                {deltaStr !== "" ? (
+                  <View
+                    style={[
+                      styles.deltaPill,
+                      deltaStr === "0"
+                        ? styles.deltaTied
+                        : deltaStr.startsWith("-")
+                          ? styles.deltaBehind
+                          : styles.deltaAhead,
+                    ]}
+                  >
+                    <Text style={styles.deltaTxt}>{deltaStr}</Text>
+                  </View>
+                ) : null}
+              </View>
+            </View>
+          </View>
+        );
+      })}
+    </View>
+  );
+
+  const alertsBlock = (
+    <View style={styles.alertRow} wrap={false}>
+      <View style={[styles.alertCard, styles.alertWin, styles.alertSp]}>
+        <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.green }]}>
+          <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.green, fontFamily: fonts.sansBold }}>WIN</Text>
+        </View>
+        <Text style={styles.alertTitle}>{data.alerts.win.title}</Text>
+        <Text style={styles.alertDetail}>{data.alerts.win.detail}</Text>
+      </View>
+      <View style={[styles.alertCard, styles.alertRisk, styles.alertSp]}>
+        <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.orange }]}>
+          <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.orange, fontFamily: fonts.sansBold }}>RISK</Text>
+        </View>
+        <Text style={styles.alertTitle}>{data.alerts.risk.title}</Text>
+        <Text style={styles.alertDetail}>{data.alerts.risk.detail}</Text>
+      </View>
+      <View style={[styles.alertCard, styles.alertPri]}>
+        <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.red }]}>
+          <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.red, fontFamily: fonts.sansBold }}>PRIORITY</Text>
+        </View>
+        <Text style={styles.alertTitle}>{data.alerts.priority.title}</Text>
+        <Text style={styles.alertDetail}>{data.alerts.priority.detail}</Text>
+      </View>
+    </View>
+  );
+
+  return [
+    <Page key="p1-cover" size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
       <View style={baseStyles.pageBody}>
         <PdfTraceMarker page={1} section="Page1:start" />
         <PdfHeader data={data} variant="cover" />
@@ -250,7 +335,7 @@ export function Page1Overview({ data }: { data: ReportData }) {
             <View style={[styles.kpiTile, authEmpty ? { opacity: 0.88 } : {}]}>
               <Text style={[styles.kpiVal, authEmpty ? { color: colors.ink4 } : {}]}>{data.authorityScore}%</Text>
               <Text style={[styles.kpiLab, authEmpty ? { color: colors.ink4 } : {}]}>
-                Authority{"\u00A0"}(citations)
+                Authority (citations)
               </Text>
             </View>
           </View>
@@ -268,100 +353,35 @@ export function Page1Overview({ data }: { data: ReportData }) {
           </View>
         </View>
 
-        <View style={[styles.calloutWrap, { marginBottom: space.block }]} wrap={false}>
+        <View style={[styles.calloutWrap, { marginBottom: 0 }]} wrap={false}>
           <View style={styles.calloutBar} />
           <View style={styles.calloutInner}>
             <Text style={styles.calloutKicker}>Bottom line</Text>
             {bottomLines.map((line, i) => (
-              <View key={`bl-${i}`} style={styles.bulletRow}>
+              <View key={`bl-${i}`} style={styles.bulletRow} wrap={false}>
                 <Text style={styles.bulletMark}>•</Text>
-                <Text style={styles.bulletText}>{line}</Text>
+                <Text style={styles.bulletText} orphans={2} widows={2}>
+                  {line}
+                </Text>
               </View>
             ))}
           </View>
         </View>
 
-        <Text style={styles.rankHeader}>Competitive ranking</Text>
-        {data.competitors.map((c) => {
-          const widthPct = Math.min(100, Math.max(0, Math.round((c.mentions / maxM) * 100)));
-          const barRest = Math.max(0, 100 - widthPct);
-          const delta = c.isClient ? null : c.mentions - clientM;
-          const deltaStr =
-            delta === null ? "" : delta === 0 ? "0" : delta > 0 ? `+${delta}` : String(delta);
-          const isClient = !!c.isClient;
-          return (
-            <View key={`rank-${c.name}`} style={styles.rankOuter}>
-              <View style={[styles.rankAccent, { backgroundColor: isClient ? colors.cyan : "transparent" }]} />
-              <View
-                style={[styles.rankInner, { backgroundColor: isClient ? colors.cyanLight : "transparent" }]}
-              >
-                <Text
-                  style={[
-                    styles.rankIdx,
-                    isClient ? {} : { color: colors.ink4, fontFamily: fonts.sans },
-                  ]}
-                >{`#${c.rank}`}</Text>
-                <Text style={isClient ? styles.rankNameClient : styles.rankName}>{c.name}</Text>
-                <View style={styles.barWrap}>
-                  <View style={styles.barInner}>
-                    <View
-                      style={[
-                        { flex: widthPct <= 0 ? 0 : widthPct },
-                        isClient ? styles.barFill : styles.barFillNeu,
-                      ]}
-                    />
-                    <View style={[{ flex: barRest }, styles.barRest]} />
-                  </View>
-                </View>
-                <Text style={styles.rankCount}>{`${c.mentions}/${data.meta.responses}`}</Text>
-                <View style={styles.pillCell}>
-                  {deltaStr !== "" ? (
-                    <View
-                      style={[
-                        styles.deltaPill,
-                        deltaStr === "0"
-                          ? styles.deltaTied
-                          : deltaStr.startsWith("-")
-                            ? styles.deltaBehind
-                            : styles.deltaAhead,
-                      ]}
-                    >
-                      <Text style={styles.deltaTxt}>{deltaStr}</Text>
-                    </View>
-                  ) : null}
-                </View>
-              </View>
-            </View>
-          );
-        })}
-
-        <View style={styles.alertRow}>
-          <View style={[styles.alertCard, styles.alertWin, styles.alertSp]}>
-            <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.green }]}>
-              <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.green, fontFamily: fonts.sansBold }}>WIN</Text>
-            </View>
-            <Text style={styles.alertTitle}>{data.alerts.win.title}</Text>
-            <Text style={styles.alertDetail}>{data.alerts.win.detail}</Text>
-          </View>
-          <View style={[styles.alertCard, styles.alertRisk, styles.alertSp]}>
-            <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.orange }]}>
-              <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.orange, fontFamily: fonts.sansBold }}>RISK</Text>
-            </View>
-            <Text style={styles.alertTitle}>{data.alerts.risk.title}</Text>
-            <Text style={styles.alertDetail}>{data.alerts.risk.detail}</Text>
-          </View>
-          <View style={[styles.alertCard, styles.alertPri]}>
-            <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.red }]}>
-              <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.red, fontFamily: fonts.sansBold }}>PRIORITY</Text>
-            </View>
-            <Text style={styles.alertTitle}>{data.alerts.priority.title}</Text>
-            <Text style={styles.alertDetail}>{data.alerts.priority.detail}</Text>
-          </View>
-        </View>
-
-        <PdfTraceMarker page={1} section="Page1:before_footer" />
+        <PdfTraceMarker page={1} section="Page1:cover_before_footer" />
         <PdfFooter data={data} />
       </View>
-    </Page>
-  );
+    </Page>,
+    <Page key="p1-ranking" size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
+      <View style={baseStyles.pageBody}>
+        <PdfTraceMarker page={2} section="Page1:ranking_start" />
+        <PdfHeader data={data} variant="inner" pageNum={2} />
+        <PdfTraceMarker page={2} section="Page1:ranking_after_header" />
+        {rankingBlock}
+        {alertsBlock}
+        <PdfTraceMarker page={2} section="Page1:ranking_before_footer" />
+        <PdfFooter data={data} />
+      </View>
+    </Page>,
+  ];
 }

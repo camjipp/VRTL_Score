@@ -8,11 +8,26 @@ const styles = StyleSheet.create({
   },
 });
 
-export function ChapterTitle({ title, subtitle }: { title: string; subtitle?: string }) {
+/** `minPresenceAhead` reduces orphan headings at page bottoms (react-pdf, pt). */
+export function ChapterTitle({
+  title,
+  subtitle,
+  minPresenceAhead = 72,
+}: {
+  title: string;
+  subtitle?: string;
+  minPresenceAhead?: number;
+}) {
   return (
-    <View style={styles.wrap}>
-      <Text style={baseStyles.chapterTitle}>{title}</Text>
-      {subtitle ? <Text style={baseStyles.chapterSubtitle}>{subtitle}</Text> : null}
+    <View style={styles.wrap} minPresenceAhead={minPresenceAhead}>
+      <Text style={baseStyles.chapterTitle} orphans={2}>
+        {title}
+      </Text>
+      {subtitle ? (
+        <Text style={baseStyles.chapterSubtitle} orphans={2} widows={2}>
+          {subtitle}
+        </Text>
+      ) : null}
     </View>
   );
 }

@@ -192,19 +192,19 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
   return (
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
       <View style={baseStyles.pageBody}>
-        <PdfTraceMarker page={2} section="Page2:start" />
-        <PdfHeader data={data} variant="inner" pageNum={2} />
-        <PdfTraceMarker page={2} section="Page2:after_header" />
+        <PdfTraceMarker page={3} section="Page2:start" />
+        <PdfHeader data={data} variant="inner" pageNum={3} />
+        <PdfTraceMarker page={3} section="Page2:after_header" />
 
         <ChapterTitle title="Model analysis" subtitle={spreadSubtitle} />
 
         {best && worst ? (
-          <View style={styles.contrastRow}>
+          <View style={styles.contrastRow} wrap={false}>
             <View style={[styles.contrastCard, styles.contrastCardLeft]}>
               <Text style={styles.contrastLabel}>Strongest surface</Text>
               <Text style={styles.contrastScore}>{best.score}</Text>
               <Text style={styles.contrastName}>{best.name}</Text>
-              <Text style={styles.contrastBlurb}>
+              <Text style={styles.contrastBlurb} orphans={2} widows={2}>
                 {best.insights[0] ? String(best.insights[0]) : "Lead with the content pattern this assistant already rewards."}
               </Text>
             </View>
@@ -212,7 +212,7 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
               <Text style={styles.contrastLabel}>Weakest surface</Text>
               <Text style={styles.contrastScore}>{worst.score}</Text>
               <Text style={styles.contrastName}>{worst.name}</Text>
-              <Text style={styles.contrastBlurb}>
+              <Text style={styles.contrastBlurb} orphans={2} widows={2}>
                 {worst.insights[0] ? String(worst.insights[0]) : "This path is where recommendation share is leaking today."}
               </Text>
             </View>
@@ -247,7 +247,7 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
         </View>
 
         {data.evidencePreview.length > 0 ? (
-          <>
+          <View style={{ width: CONTENT_W }}>
             <Text style={styles.sectionLabel}>Example answers</Text>
             <View style={styles.evidenceRow}>
               {data.evidencePreview.map((ev, i) => {
@@ -258,13 +258,16 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
                   <View
                     key={`ev-${i}`}
                     style={[styles.exampleCard, i === 0 ? { marginRight: EVIDENCE_GAP } : {}]}
+                    wrap={false}
                   >
                     <View style={styles.exampleAccent} />
                     <View style={styles.exampleInner}>
                       <Text style={styles.exampleKicker}>Client-readable excerpt</Text>
                       <Text style={styles.exampleBadge}>{labelLine}</Text>
                       <View style={styles.exampleQuote}>
-                        <Text style={styles.exampleQuoteText}>{snippetLine}</Text>
+                        <Text style={styles.exampleQuoteText} orphans={2} widows={2}>
+                          {snippetLine}
+                        </Text>
                       </View>
                       {noteLine ? <Text style={styles.exampleNote}>{noteLine}</Text> : null}
                     </View>
@@ -272,10 +275,10 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
                 );
               })}
             </View>
-          </>
+          </View>
         ) : null}
 
-        <PdfTraceMarker page={2} section="Page2:after_evidence_preview" />
+        <PdfTraceMarker page={3} section="Page2:after_evidence_preview" />
 
         {data.strategicTakeaway ? (
           <View style={styles.takeawayOuter}>
@@ -287,7 +290,7 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
           </View>
         ) : null}
 
-        <PdfTraceMarker page={2} section="Page2:before_footer" />
+        <PdfTraceMarker page={3} section="Page2:before_footer" />
         <PdfFooter data={data} />
       </View>
     </Page>

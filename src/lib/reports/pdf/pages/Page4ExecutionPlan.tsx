@@ -114,16 +114,16 @@ export function Page4ExecutionPlan({ data }: { data: ReportData }) {
   return (
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
       <View style={baseStyles.pageBody}>
-        <PdfTraceMarker page={4} section="Page4:start" />
-        <PdfHeader data={data} variant="inner" pageNum={4} />
-        <PdfTraceMarker page={4} section="Page4:after_header" />
+        <PdfTraceMarker page={5} section="Page4:start" />
+        <PdfHeader data={data} variant="inner" pageNum={5} />
+        <PdfTraceMarker page={5} section="Page4:after_header" />
 
         <ChapterTitle
           title="Execution plan"
           subtitle="How we operationalize this snapshot—discovery, rebuild, proof, then measured iteration."
         />
 
-        <PdfTraceMarker page={4} section="Page4:before_phases" />
+        <PdfTraceMarker page={5} section="Page4:before_phases" />
         <View>
           {phases.map((ph, i) => {
             const phaseLine = String(ph.phase);
@@ -150,7 +150,7 @@ export function Page4ExecutionPlan({ data }: { data: ReportData }) {
           })}
         </View>
 
-        <PdfTraceMarker page={4} section="Page4:before_footer" />
+        <PdfTraceMarker page={5} section="Page4:before_footer" />
         <PdfFooter data={data} />
       </View>
     </Page>

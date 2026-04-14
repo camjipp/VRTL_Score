@@ -1,5 +1,8 @@
-import { Document, type DocumentProps } from "@react-pdf/renderer";
+import { Document, Font, type DocumentProps } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
+
+/** Prevent Helvetica syllable splits that read as corrupted mid-word characters in exports. */
+Font.registerHyphenationCallback((word) => (word.length === 0 ? [] : [word]));
 import type { ReportData } from "./types";
 import { Page1Overview } from "./pages/Page1Overview";
 import { Page2ModelAnalysis } from "./pages/Page2ModelAnalysis";
@@ -15,7 +18,11 @@ import {
   shouldRenderRecommendationsPage,
 } from "./reportPageVisibility";
 
-type PageBuilder = { num: number; render: (data: ReportData) => ReactElement; include: (d: ReportData) => boolean };
+type PageBuilder = {
+  num: number;
+  render: (data: ReportData) => ReactElement | ReactElement[];
+  include: (d: ReportData) => boolean;
+};
 
 const PAGE_BUILDERS: PageBuilder[] = [
   { num: 1, render: (d) => <Page1Overview key="p1" data={d} />, include: () => true },
@@ -58,7 +65,10 @@ export function ReportDocument({ data, pages }: ReportDocumentProps): ReactEleme
   const children = PAGE_BUILDERS.filter((p) => {
     if (probe) return probe.has(p.num);
     return p.include(data);
-  }).map((p) => p.render(data));
+  }).flatMap((p) => {
+    const rendered = p.render(data);
+    return Array.isArray(rendered) ? rendered : [rendered];
+  });
 
   return (
     <Document title={`AI Authority Report: ${data.clientName}`} author={data.agencyName ?? ""} subject={data.clientName}>

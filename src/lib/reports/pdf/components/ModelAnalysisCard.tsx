@@ -187,7 +187,9 @@ export function ModelAnalysisCard({
           return (
             <View key={`${modelId}-row-${idx}`} style={styles.bulletRow} wrap={false}>
               <View style={[styles.dot, { backgroundColor: colors.ink4 }]} />
-              <Text style={styles.bulletText}>{lineText}</Text>
+              <Text style={styles.bulletText} orphans={2} widows={2}>
+                {lineText}
+              </Text>
             </View>
           );
         })}

@@ -166,9 +166,9 @@ export function Page3Recommendations({ data }: { data: ReportData }) {
   return (
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
       <View style={baseStyles.pageBody}>
-        <PdfTraceMarker page={3} section="Page3:start" />
-        <PdfHeader data={data} variant="inner" pageNum={3} />
-        <PdfTraceMarker page={3} section="Page3:after_header" />
+        <PdfTraceMarker page={4} section="Page3:start" />
+        <PdfHeader data={data} variant="inner" pageNum={4} />
+        <PdfTraceMarker page={4} section="Page3:after_header" />
 
         <ChapterTitle
           title="Recommendations"
@@ -185,10 +185,18 @@ export function Page3Recommendations({ data }: { data: ReportData }) {
             <Text style={styles.heroInsight}>{String(first.insight)}</Text>
             <Text style={styles.heroOutcomeLabel}>Expected outcome</Text>
             <Text style={styles.heroOutcome}>{String(first.expectedOutcome)}</Text>
-            <Text style={[styles.micro, styles.microSpaced]}>Why it matters</Text>
-            <Text style={styles.body}>{String(first.explanation)}</Text>
-            <Text style={[styles.micro, styles.microSpaced]}>What we do</Text>
-            <Text style={styles.body}>{String(first.action)}</Text>
+            <View wrap={false}>
+              <Text style={[styles.micro, styles.microSpaced]}>Why it matters</Text>
+              <Text style={styles.body} orphans={2} widows={2}>
+                {String(first.explanation)}
+              </Text>
+            </View>
+            <View wrap={false}>
+              <Text style={[styles.micro, styles.microSpaced]}>What we do</Text>
+              <Text style={styles.body} orphans={2} widows={2}>
+                {String(first.action)}
+              </Text>
+            </View>
           </View>
         ) : null}
 
@@ -212,10 +220,18 @@ export function Page3Recommendations({ data }: { data: ReportData }) {
                 </View>
                 <Text style={styles.title}>{titleLine}</Text>
                 <Text style={styles.insight}>{insightLine}</Text>
-                <Text style={styles.micro}>Why it matters</Text>
-                <Text style={styles.body}>{explLine}</Text>
-                <Text style={[styles.micro, styles.microSpaced]}>What we do</Text>
-                <Text style={styles.body}>{actLine}</Text>
+                <View wrap={false}>
+                  <Text style={styles.micro}>Why it matters</Text>
+                  <Text style={styles.body} orphans={2} widows={2}>
+                    {explLine}
+                  </Text>
+                </View>
+                <View wrap={false}>
+                  <Text style={[styles.micro, styles.microSpaced]}>What we do</Text>
+                  <Text style={styles.body} orphans={2} widows={2}>
+                    {actLine}
+                  </Text>
+                </View>
               </View>
               <View style={styles.sep} />
               <View style={styles.right}>
@@ -226,7 +242,7 @@ export function Page3Recommendations({ data }: { data: ReportData }) {
           );
         })}
 
-        <PdfTraceMarker page={3} section="Page3:after_recommendations" />
+        <PdfTraceMarker page={4} section="Page3:after_recommendations" />
         <PdfFooter data={data} />
       </View>
     </Page>
