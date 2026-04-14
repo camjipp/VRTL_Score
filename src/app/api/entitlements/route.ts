@@ -18,6 +18,10 @@ function billingEnabled(): boolean {
   return String(process.env.BILLING_ENABLED ?? "").toLowerCase() === "true";
 }
 
+function entitlementsDebug(): boolean {
+  return String(process.env.ENTITLEMENTS_DEBUG ?? "").trim() === "1";
+}
+
 function isMissingColumnError(e: unknown): boolean {
   if (!e || typeof e !== "object") return false;
   const any = e as { code?: unknown; message?: unknown; details?: unknown };
@@ -40,16 +44,31 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: userRes.error?.message ?? "Unauthorized" }, { status: 401 });
   }
 
-  // Admin bypass: allowlisted admins can always access /app (needed to activate agencies).
+  // Platform admins (ADMIN_EMAILS): bypass workspace lookup — not the same as agency owner/member roles.
   if (isAdminEmail(user.email)) {
-    return NextResponse.json({ entitled: true, agencyId: null, billingEnabled: billingEnabled(), admin: true });
+    if (entitlementsDebug()) {
+      console.info("[entitlements] platform_admin_bypass", {
+        userId: user.id,
+        email: user.email,
+      });
+    }
+    return NextResponse.json({
+      entitled: true,
+      agencyId: null,
+      billingEnabled: billingEnabled(),
+      admin: true,
+      role: null,
+    });
   }
 
+  // One row per user is expected; limit(1) avoids PGRST116 if duplicates exist in DB.
   const agencyUser = await supabase
     .from("agency_users")
-    .select("agency_id")
+    .select("agency_id,role")
     .eq("user_id", user.id)
+    .limit(1)
     .maybeSingle();
+
   if (agencyUser.error) {
     console.error("[entitlements] agency_users query failed", agencyUser.error);
     return NextResponse.json(
@@ -58,6 +77,9 @@ export async function GET(req: Request) {
     );
   }
   if (!agencyUser.data?.agency_id) {
+    if (entitlementsDebug()) {
+      console.info("[entitlements] not_onboarded", { userId: user.id, email: user.email });
+    }
     return NextResponse.json(
       { error: "User not onboarded", code: "NOT_ONBOARDED" },
       { status: 403 }
@@ -65,10 +87,19 @@ export async function GET(req: Request) {
   }
 
   const agencyId = agencyUser.data.agency_id as string;
+  const membershipRole = (agencyUser.data as { role?: string | null }).role ?? null;
 
   // If billing is not enabled, treat all onboarded agencies as entitled (internal mode).
   if (!billingEnabled()) {
-    return NextResponse.json({ entitled: true, agencyId, billingEnabled: false });
+    if (entitlementsDebug()) {
+      console.info("[entitlements] entitled_billing_off", {
+        userId: user.id,
+        email: user.email,
+        agencyId,
+        role: membershipRole,
+      });
+    }
+    return NextResponse.json({ entitled: true, agencyId, billingEnabled: false, role: membershipRole });
   }
 
   // v1 entitlement model (pre-Stripe): agencies.is_active must be true.
@@ -92,6 +123,15 @@ export async function GET(req: Request) {
   const rawActive = (agencyRes.data as { is_active?: unknown }).is_active;
   const explicitlyInactive = rawActive === false;
   if (explicitlyInactive) {
+    if (entitlementsDebug()) {
+      console.info("[entitlements] subscription_inactive", {
+        userId: user.id,
+        email: user.email,
+        agencyId,
+        role: membershipRole,
+        is_active: rawActive,
+      });
+    }
     return NextResponse.json(
       {
         entitled: false,
@@ -99,12 +139,28 @@ export async function GET(req: Request) {
         billingEnabled: true,
         reason: "paywall",
         code: "SUBSCRIPTION_INACTIVE",
+        role: membershipRole,
       },
       { status: 403 }
     );
   }
 
-  return NextResponse.json({ entitled: true, agencyId, billingEnabled: true });
+  if (entitlementsDebug()) {
+    console.info("[entitlements] entitled", {
+      userId: user.id,
+      email: user.email,
+      agencyId,
+      role: membershipRole,
+      is_active: rawActive,
+    });
+  }
+
+  return NextResponse.json({
+    entitled: true,
+    agencyId,
+    billingEnabled: true,
+    role: membershipRole,
+  });
 }
 
 

@@ -124,7 +124,17 @@ export function AppEntitlementGate({ children }: Props) {
         );
 
         if (res.ok) {
-          logEntitlementTrace(res.status, "entitled");
+          try {
+            const body = (await res.json()) as {
+              role?: string | null;
+              agencyId?: string | null;
+              admin?: boolean;
+              billingEnabled?: boolean;
+            };
+            logEntitlementTrace(res.status, body);
+          } catch {
+            logEntitlementTrace(res.status, "entitled");
+          }
           entitlementCache = { entitled: true, timestamp: Date.now() };
           return "ok";
         }
