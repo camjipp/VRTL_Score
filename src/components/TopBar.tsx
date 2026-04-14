@@ -30,7 +30,7 @@ export function TopBar({ primaryAction, filters, className }: TopBarProps) {
   return (
     <div
       className={cn(
-        "relative border-b border-white/[0.05] bg-bg/90 px-5 py-2.5 backdrop-blur-md sm:px-6 sm:py-3",
+        "relative z-[100] border-b border-white/[0.05] bg-bg/90 px-5 py-2.5 backdrop-blur-md sm:px-6 sm:py-3",
         "before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/[0.07] before:to-transparent",
         className
       )}
@@ -68,7 +68,7 @@ export function TopBar({ primaryAction, filters, className }: TopBarProps) {
             </svg>
           </button>
           {menuOpen && (
-            <div className="absolute left-0 top-full z-50 mt-1.5 min-w-[188px] rounded-lg border border-white/[0.08] bg-[#111111] py-1 shadow-[0_12px_40px_rgba(0,0,0,0.55)]">
+            <div className="absolute left-0 top-full z-[100] mt-2 min-w-[188px] rounded-lg border border-white/[0.08] bg-[#111111] py-1 shadow-[0_12px_40px_rgba(0,0,0,0.55)]">
               <Link
                 href="/"
                 onClick={() => setMenuOpen(false)}
