@@ -1,7 +1,7 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
 import { PAGE, colors, fonts, rhythm, baseStyles, space, BODY_MAX_W } from "../theme";
-import { formatEvidenceFieldDisplay, formatEvidenceLogPillLabel } from "@/lib/reports/formatEvidenceFieldDisplay";
+import { formatEvidenceLogPillLabel, formatPdfEvidenceTableCell } from "@/lib/reports/formatEvidenceFieldDisplay";
 import { sanitizePdfString } from "../sanitizeReportData";
 import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfFooter } from "../components/PdfFooter";
@@ -207,7 +207,7 @@ export function Page6Evidence({ data }: { data: ReportData }) {
 
         <ChapterTitle
           title="Evidence & methodology"
-          subtitle="Controlled test summary and a compact response log—no raw model dumps."
+          subtitle="Controlled test summary and a compact response log. No raw model dumps."
         />
 
         {hasLog ? (
@@ -222,13 +222,16 @@ export function Page6Evidence({ data }: { data: ReportData }) {
                 <Text style={[styles.thText, { width: W.pos }]}>Pos</Text>
                 <Text style={[styles.thText, { width: W.str }]}>Strength</Text>
                 <Text style={[styles.thText, { width: W.comp }]}>#Comp</Text>
-                <Text style={[styles.thText, { width: W.rest }]}>Notes</Text>
+                <Text style={[styles.thText, { width: W.rest }]}>Context</Text>
               </View>
               {data.evidenceLog.map((row, rowIdx) => {
                 const yn = row.mentioned === "Yes";
                 const lp = logLabelPill(row.label);
-                const strengthDisp = formatEvidenceFieldDisplay(sanitizePdfString(String(row.strength ?? "")));
-                const positionDisp = formatEvidenceFieldDisplay(sanitizePdfString(String(row.position ?? "")));
+                const strengthDisp = formatPdfEvidenceTableCell(sanitizePdfString(String(row.strength ?? "")));
+                const positionDisp = formatPdfEvidenceTableCell(sanitizePdfString(String(row.position ?? "")));
+                const noteDisp = row.note?.trim()
+                  ? sanitizePdfString(row.note)
+                  : "No signal";
                 return (
                   <View
                     key={`evl-${row.idx}`}
@@ -269,8 +272,12 @@ export function Page6Evidence({ data }: { data: ReportData }) {
                     >
                       {strengthDisp}
                     </Text>
-                    <Text style={[styles.td, { width: W.comp }]}>{row.competitors}</Text>
-                    <Text style={[styles.td, { width: W.rest, fontSize: 7 }]}>—</Text>
+                    <Text style={[styles.td, { width: W.comp }]}>
+                      {formatPdfEvidenceTableCell(sanitizePdfString(String(row.competitors ?? "")))}
+                    </Text>
+                    <Text style={[styles.td, { width: W.rest, fontSize: 7, lineHeight: 1.45 }]}>
+                      {noteDisp}
+                    </Text>
                   </View>
                 );
               })}

@@ -172,7 +172,7 @@ export function Page3Recommendations({ data }: { data: ReportData }) {
 
         <ChapterTitle
           title="Recommendations"
-          subtitle="Highest-impact moves first—concrete execution tied to measurable recommendation outcomes."
+          subtitle="Highest-impact moves first: concrete execution tied to measurable recommendation outcomes."
         />
 
         {first ? (

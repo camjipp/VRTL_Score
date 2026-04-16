@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
 export function ChapterTitle({
   title,
   subtitle,
-  minPresenceAhead = 72,
+  minPresenceAhead = 56,
 }: {
   title: string;
   subtitle?: string;

@@ -61,6 +61,8 @@ export type EvidenceLogRow = {
   position: string;
   strength: string;
   competitors: string;
+  /** Short prompt/context line for the Notes column (truncated at source). */
+  note?: string;
 };
 
 /** Drives the full multi-page AI authority briefing */

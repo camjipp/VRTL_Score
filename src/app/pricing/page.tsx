@@ -1,18 +1,25 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
+import {
+  BRAND_LOCKUP_IMAGE_HEIGHT,
+  BRAND_LOCKUP_IMAGE_UNOPTIMIZED,
+  BRAND_LOCKUP_IMAGE_WIDTH,
+  BRAND_LOCKUP_SRC,
+} from "@/lib/brand/logo";
 import { cn } from "@/lib/cn";
 import { formatMonthlyPriceDisplay, monthlyEquivalentFromAnnualUsd } from "@/lib/pricing/billingMath";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 const shell = "mx-auto w-full max-w-[1200px] px-6 md:px-12";
 
-/** ~25% tighter top than prior pt-6/pt-8 — connects hero to page. */
-const pricingTop = "pt-[18px] pb-8 md:pt-6 md:pb-10";
+/** Tighter top so logo → label → heading reads as one cluster. */
+const pricingTop = "pt-4 pb-8 md:pt-5 md:pb-10";
 
 /** Vertical rhythm between major blocks (below hero). */
 const sectionGap = "mt-28 md:mt-32";
@@ -93,8 +100,12 @@ const plans = [
   },
 ];
 
-const recommendedPillClass =
-  "inline-flex rounded border border-emerald-500/10 bg-white/[0.02] px-1.5 py-0.5 font-marketing-mono text-[9px] font-medium tracking-[0.06em] text-emerald-400/45";
+/** Intentional “product choice” marker above Agency — legible, restrained emerald. */
+const recommendedPillClass = cn(
+  "inline-flex min-h-[2rem] items-center justify-center rounded-md border border-emerald-400/30",
+  "bg-emerald-500/[0.09] px-3.5 py-1.5 font-marketing-mono text-[10px] font-semibold uppercase tracking-[0.11em]",
+  "text-emerald-200/95 shadow-[0_0_24px_rgba(0,232,122,0.12)] md:min-h-[2.25rem] md:px-4 md:text-[11px]",
+);
 
 function planBillingFigures(plan: (typeof plans)[number], isAnnual: boolean) {
   const annualTotal = plan.yearlyPrice;
@@ -231,13 +242,13 @@ function BillingToggle({
   setIsAnnual: (v: boolean) => void;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      <div className="relative inline-flex items-center rounded-full border border-white/15 bg-white/[0.04] p-1">
+    <div className="flex w-full flex-col items-center gap-2.5">
+      <div className="relative inline-flex shrink-0 items-center rounded-full border border-white/15 bg-white/[0.04] p-1">
         <button
           type="button"
           onClick={() => setIsAnnual(false)}
           className={cn(
-            "relative rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-200 ease-out md:px-5 md:py-2",
+            "relative rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-200 ease-out md:px-5 md:py-2",
             !isAnnual ? "bg-white text-black" : "text-white/55 hover:text-white/75",
           )}
         >
@@ -247,18 +258,24 @@ function BillingToggle({
           type="button"
           onClick={() => setIsAnnual(true)}
           className={cn(
-            "relative rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-200 ease-out md:px-5 md:py-2",
+            "relative rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-200 ease-out md:px-5 md:py-2",
             isAnnual ? "bg-white text-black" : "text-white/55 hover:text-white/75",
           )}
         >
           Annual
         </button>
       </div>
-      {isAnnual && (
-        <span className="rounded-full border border-white/15 bg-white/[0.04] px-2.5 py-1 text-xs font-medium text-white/70 md:text-sm">
+      <div className="flex min-h-[2.25rem] w-full max-w-[min(100%,20rem)] items-center justify-center md:min-h-[2.5rem]">
+        <span
+          className={cn(
+            "rounded-full border border-white/12 bg-white/[0.04] px-3 py-1.5 text-center text-xs font-medium text-white/75 transition-opacity duration-200 ease-out md:px-3.5 md:text-[13px]",
+            isAnnual ? "opacity-100" : "pointer-events-none opacity-0",
+          )}
+          aria-hidden={!isAnnual}
+        >
           2 months free on annual
         </span>
-      )}
+      </div>
     </div>
   );
 }
@@ -288,7 +305,7 @@ function PlanCards({
 
         return (
           <div key={plan.name} className="flex min-h-0 flex-col">
-            <div className="flex min-h-[2.25rem] items-end justify-center pb-2 md:min-h-[2.5rem]">
+            <div className="flex min-h-[3rem] items-end justify-center pb-2.5 md:min-h-[3.25rem] md:pb-3">
               {plan.recommended ? (
                 <span className={recommendedPillClass}>Recommended</span>
               ) : null}
@@ -423,19 +440,33 @@ function PricingContent() {
         <main className="min-w-0">
           <section className={cn("border-b border-white/10", pricingTop)}>
             <div className={shell}>
-              <PricingEyebrow>{`// CHOOSE PLAN`}</PricingEyebrow>
-              <h1 className="mt-3 font-marketing-display text-[1.75rem] font-normal leading-[1.12] tracking-[-0.03em] text-white md:text-4xl">
-                Choose your plan
-              </h1>
-              <p className="mt-5 max-w-xl text-[15px] font-light leading-relaxed text-white/80">
-                Generate your first report on onboarding, then scale when you&apos;re ready.
-              </p>
+              <div className="flex w-full flex-col items-center text-center">
+                <Link href="/app" className="mb-1 flex shrink-0 justify-center md:mb-1.5">
+                  <Image
+                    src={BRAND_LOCKUP_SRC}
+                    alt="VRTL Score"
+                    width={BRAND_LOCKUP_IMAGE_WIDTH}
+                    height={BRAND_LOCKUP_IMAGE_HEIGHT}
+                    className="h-9 w-auto max-w-[min(240px,88vw)] bg-transparent object-contain object-center opacity-95 md:h-10 md:max-w-[min(280px,85vw)]"
+                    priority
+                    sizes="(max-width: 768px) 88vw, 280px"
+                    unoptimized={BRAND_LOCKUP_IMAGE_UNOPTIMIZED}
+                  />
+                </Link>
+                <PricingEyebrow>{`// CHOOSE PLAN`}</PricingEyebrow>
+                <h1 className="mt-2 font-marketing-display text-[1.75rem] font-normal leading-[1.12] tracking-[-0.03em] text-white md:mt-2.5 md:text-4xl">
+                  Choose your plan
+                </h1>
+                <p className="mt-3 max-w-xl text-[15px] font-light leading-relaxed text-white/80 md:mt-4">
+                  Generate your first report on onboarding, then scale when you&apos;re ready.
+                </p>
 
-              <div className="mt-3">
-                <BillingToggle isAnnual={isAnnual} setIsAnnual={setIsAnnual} />
+                <div className="mt-5 w-full md:mt-6">
+                  <BillingToggle isAnnual={isAnnual} setIsAnnual={setIsAnnual} />
+                </div>
               </div>
 
-              <div className="mt-6 grid gap-6 overflow-visible md:mt-7 md:grid-cols-3 md:items-stretch md:gap-7">
+              <div className="mt-6 grid w-full gap-6 overflow-visible md:mt-7 md:grid-cols-3 md:items-stretch md:gap-7">
                 {plans.map((plan) => {
                   const { monthlyEquivalentDisplay } = planBillingFigures(plan, isAnnual);
                   const isSelected = selectedPlan === plan.id;
@@ -452,7 +483,7 @@ function PricingContent() {
 
                   return (
                     <div key={plan.id} className="flex flex-col">
-                      <div className="flex min-h-[2.25rem] items-end justify-center pb-2">
+                      <div className="flex min-h-[3rem] items-end justify-center pb-2.5 md:min-h-[3.25rem] md:pb-3">
                         {plan.recommended ? <span className={recommendedPillClass}>Recommended</span> : null}
                       </div>
                       <button type="button" onClick={() => setSelectedPlan(plan.id)} className={btnClass}>
@@ -488,7 +519,7 @@ function PricingContent() {
                 })}
               </div>
 
-              <div className="mt-8 flex flex-col items-start gap-4 border-t border-white/10 pt-8 md:flex-row md:items-center md:justify-between">
+              <div className="mt-8 flex w-full flex-col items-start gap-4 border-t border-white/10 pt-8 md:flex-row md:items-center md:justify-between">
                 <RunSnapshotButton
                   loading={!!loadingPlan}
                   onClick={() => handleCheckout((selectedPlan || "growth") as "starter" | "growth" | "pro")}
@@ -515,11 +546,11 @@ function PricingContent() {
           <div className={shell}>
             <PricingEyebrow>{`// PRICING`}</PricingEyebrow>
 
-            <h1 className="mt-3 max-w-[760px] font-marketing-display text-[2rem] font-normal leading-[1.08] tracking-[-0.03em] text-white md:text-[2.75rem] lg:text-[3.25rem]">
+            <h1 className="mt-2 max-w-[760px] font-marketing-display text-[2rem] font-normal leading-[1.08] tracking-[-0.03em] text-white md:mt-2.5 md:text-[2.75rem] lg:text-[3.25rem]">
               Plans for agencies standardizing AI visibility
             </h1>
 
-            <p className="mt-5 max-w-[640px] text-lg font-light leading-relaxed text-white/80">
+            <p className="mt-4 max-w-[640px] text-lg font-light leading-relaxed text-white/80 md:mt-5">
               Model-level answers, reporting, and displacement context—structured so your team can operationalize it across
               accounts.
             </p>
@@ -533,7 +564,7 @@ function PricingContent() {
               ))}
             </ul>
 
-            <div className="mt-3">
+            <div className="mt-5 flex justify-center md:mt-6">
               <BillingToggle isAnnual={isAnnual} setIsAnnual={setIsAnnual} />
             </div>
 

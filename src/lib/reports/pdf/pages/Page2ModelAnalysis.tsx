@@ -187,7 +187,7 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
   const spreadSubtitle =
     spread === 0
       ? "Scores align across assistant families in this snapshot."
-      : `${spread} points from best to worst surface—buyers see different short lists by assistant.`;
+      : `${spread} points from best to worst surface. Buyers see different short lists by assistant.`;
 
   return (
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>

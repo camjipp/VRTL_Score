@@ -75,8 +75,11 @@ const PLANS = [
 
 const shell = "mx-auto w-full max-w-[1200px] px-4 sm:px-6";
 
-const recommendedPillClass =
-  "inline-flex rounded border border-emerald-500/10 bg-white/[0.02] px-1.5 py-0.5 font-marketing-mono text-[9px] font-medium tracking-[0.06em] text-emerald-400/45 md:px-1.5 md:py-0.5";
+const recommendedPillClass = cn(
+  "inline-flex min-h-[2rem] items-center justify-center rounded-md border border-emerald-400/30",
+  "bg-emerald-500/[0.09] px-3.5 py-1.5 font-marketing-mono text-[10px] font-semibold uppercase tracking-[0.11em]",
+  "text-emerald-200/95 shadow-[0_0_24px_rgba(0,232,122,0.12)] md:min-h-[2.25rem] md:px-4 md:text-[11px]",
+);
 
 function Check({ className }: { className?: string }) {
   return (
@@ -101,13 +104,13 @@ function Check({ className }: { className?: string }) {
 
 function BillingToggle({ isAnnual, setIsAnnual }: { isAnnual: boolean; setIsAnnual: (v: boolean) => void }) {
   return (
-    <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3">
-      <div className="relative inline-flex items-center rounded-full border border-white/15 bg-white/[0.04] p-0.5">
+    <div className="flex w-full max-w-md flex-col items-center gap-2 md:gap-2.5">
+      <div className="relative inline-flex shrink-0 items-center rounded-full border border-white/15 bg-white/[0.04] p-0.5">
         <button
           type="button"
           onClick={() => setIsAnnual(false)}
           className={cn(
-            "relative rounded-full px-3 py-1 text-xs font-medium transition-all duration-200 ease-out md:px-5 md:py-1.5 md:text-sm",
+            "relative rounded-full px-3 py-1 text-xs font-medium transition-colors duration-200 ease-out md:px-5 md:py-1.5 md:text-sm",
             !isAnnual ? "bg-white text-black" : "text-white/55 hover:text-white/75",
           )}
         >
@@ -117,18 +120,24 @@ function BillingToggle({ isAnnual, setIsAnnual }: { isAnnual: boolean; setIsAnnu
           type="button"
           onClick={() => setIsAnnual(true)}
           className={cn(
-            "relative rounded-full px-3 py-1 text-xs font-medium transition-all duration-200 ease-out md:px-5 md:py-1.5 md:text-sm",
+            "relative rounded-full px-3 py-1 text-xs font-medium transition-colors duration-200 ease-out md:px-5 md:py-1.5 md:text-sm",
             isAnnual ? "bg-white text-black" : "text-white/55 hover:text-white/75",
           )}
         >
           Annual
         </button>
       </div>
-      {isAnnual ? (
-        <span className="rounded-full border border-white/15 bg-white/[0.04] px-2 py-0.5 text-[10px] font-medium text-white/70 md:px-2.5 md:py-1 md:text-xs">
+      <div className="flex min-h-[2rem] w-full max-w-[min(100%,20rem)] items-center justify-center md:min-h-[2.25rem]">
+        <span
+          className={cn(
+            "rounded-full border border-white/12 bg-white/[0.04] px-2.5 py-1 text-center text-[10px] font-medium text-white/75 transition-opacity duration-200 ease-out md:px-3 md:py-1.5 md:text-xs",
+            isAnnual ? "opacity-100" : "pointer-events-none opacity-0",
+          )}
+          aria-hidden={!isAnnual}
+        >
           2 months free on annual
         </span>
-      ) : null}
+      </div>
     </div>
   );
 }
@@ -248,24 +257,24 @@ export default function PlansPage() {
   return (
     <div className="page-marketing flex min-h-screen min-w-0 max-w-full flex-col overflow-x-hidden text-[var(--text-primary)] selection:bg-[var(--accent-bg)] selection:text-white">
       <div className={cn(shell, "flex flex-1 flex-col pt-3 pb-4 sm:pt-4 sm:pb-5")}>
-        <Link href="/app" className="mb-3 flex shrink-0 justify-center sm:mb-4">
+        <Link href="/app" className="mb-1.5 flex shrink-0 justify-center sm:mb-2">
           <Image
             src={BRAND_LOCKUP_SRC}
             alt="VRTL Score"
             width={BRAND_LOCKUP_IMAGE_WIDTH}
             height={BRAND_LOCKUP_IMAGE_HEIGHT}
-            className="h-10 w-auto max-w-[min(260px,88vw)] bg-transparent object-contain object-center opacity-95 sm:h-11 sm:max-w-[min(300px,85vw)]"
+            className="h-9 w-auto max-w-[min(240px,88vw)] bg-transparent object-contain object-center opacity-95 sm:h-10 sm:max-w-[min(280px,85vw)] md:h-11 md:max-w-[min(300px,85vw)]"
             priority
             sizes="(max-width: 640px) 88vw, 300px"
             unoptimized={BRAND_LOCKUP_IMAGE_UNOPTIMIZED}
           />
         </Link>
 
-        <div className="mb-3 text-center sm:mb-4">
+        <div className="mb-2.5 text-center sm:mb-3">
           <p className="font-marketing-mono text-[10px] uppercase tracking-[0.12em] text-[var(--accent-marketing)] sm:text-[11px]">
             {`// CHOOSE PLAN`}
           </p>
-          <h1 className="mt-1.5 font-marketing-display text-[1.35rem] font-normal leading-[1.12] tracking-[-0.03em] text-white sm:text-[1.65rem] md:text-3xl">
+          <h1 className="mt-1 font-marketing-display text-[1.35rem] font-normal leading-[1.12] tracking-[-0.03em] text-white sm:mt-1.5 sm:text-[1.65rem] md:text-3xl">
             Choose your plan
           </h1>
         </div>
@@ -278,7 +287,7 @@ export default function PlansPage() {
           </div>
         ) : null}
 
-        <div className="mb-3 flex justify-center sm:mb-4">
+        <div className="mb-3 flex justify-center sm:mb-3.5">
           <BillingToggle isAnnual={isAnnual} setIsAnnual={setIsAnnual} />
         </div>
 
@@ -327,7 +336,7 @@ export default function PlansPage() {
 
               return (
                 <div key={plan.id} className="flex min-h-0 flex-col">
-                  <div className="flex min-h-[1.5rem] items-end justify-center pb-1 md:min-h-[1.75rem] md:pb-1.5">
+                  <div className="flex min-h-[3rem] items-end justify-center pb-2 md:min-h-[3.25rem] md:pb-2.5">
                     {plan.recommended ? <span className={recommendedPillClass}>Recommended</span> : null}
                   </div>
 

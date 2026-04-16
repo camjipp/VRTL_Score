@@ -43,9 +43,9 @@ export const rhythm = {
  */
 export const space = {
   pagePad: PAGE.margin,
-  /** Chapter gaps — kept moderate to avoid orphan whitespace before page breaks */
-  section: 32,
-  block: 24,
+  /** Chapter gaps — slightly tighter to reduce half-empty pages */
+  section: 26,
+  block: 20,
   cardPad: 22,
 } as const;
 
@@ -71,24 +71,24 @@ export const baseStyles = StyleSheet.create({
   },
   pageBody: {
     paddingTop: PAGE.margin,
-    paddingBottom: 52,
+    paddingBottom: 46,
     paddingHorizontal: PAGE.margin,
   },
   headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: space.block,
+    marginBottom: rhythm.lg,
     paddingBottom: rhythm.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.rule,
   },
-  /** Primary report label — left rail of every page */
+  /** Primary report label — minimal header */
   reportTitleMain: {
-    fontSize: 8,
+    fontSize: 7,
     fontWeight: 400,
-    color: colors.ink3,
-    letterSpacing: 0.08,
+    color: colors.ink4,
+    letterSpacing: 0.1,
     textTransform: "uppercase",
     fontFamily: fonts.sansBold,
   },
@@ -130,21 +130,22 @@ export const baseStyles = StyleSheet.create({
   },
   headerMeta: {
     alignItems: "flex-end",
-    maxWidth: 240,
+    maxWidth: 300,
   },
   clientName: {
-    fontSize: 17,
+    fontSize: 14,
     fontWeight: 400,
     color: colors.ink,
     textAlign: "right",
     fontFamily: fonts.sansBold,
+    lineHeight: 1.2,
   },
   metaLine: {
-    fontSize: 8.5,
-    color: colors.ink3,
+    fontSize: 7.5,
+    color: colors.ink4,
     textAlign: "right",
-    marginTop: 3,
-    lineHeight: 1.45,
+    marginTop: 4,
+    lineHeight: 1.4,
     fontFamily: fonts.sans,
   },
   sectionLabel: {

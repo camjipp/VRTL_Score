@@ -120,7 +120,7 @@ export function Page4ExecutionPlan({ data }: { data: ReportData }) {
 
         <ChapterTitle
           title="Execution plan"
-          subtitle="How we operationalize this snapshot—discovery, rebuild, proof, then measured iteration."
+          subtitle="How we operationalize this snapshot: discovery, rebuild, proof, then measured iteration."
         />
 
         <PdfTraceMarker page={5} section="Page4:before_phases" />

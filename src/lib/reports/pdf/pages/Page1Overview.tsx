@@ -13,12 +13,17 @@ const W = { rank: 30, name: 116, bar: 231, count: 66, pill: 91 } as const;
 function splitSummaryBullets(text: string): string[] {
   const raw = text.replace(/\s+/g, " ").trim();
   if (!raw) return [];
-  return raw
-    .split(". ")
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .map((c) => (c.endsWith(".") ? c : `${c}.`))
-    .slice(0, 6);
+  if (raw.includes("\n")) {
+    return raw
+      .split(/\n+/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .slice(0, 6)
+      .map((c) => (/[.!?]$/.test(c) ? c : `${c}.`));
+  }
+  const parts = raw.split(/(?<=[.!?])\s+/).map((s) => s.trim()).filter(Boolean);
+  if (parts.length === 0) return [];
+  return parts.slice(0, 6).map((c) => (/[.!?]$/.test(c) ? c : `${c}.`));
 }
 
 const styles = StyleSheet.create({
@@ -94,21 +99,25 @@ const styles = StyleSheet.create({
   calloutWrap: {
     flexDirection: "row",
     marginBottom: rhythm.lg,
-    borderRadius: 4,
+    borderRadius: 6,
     overflow: "hidden",
-    backgroundColor: colors.surface2,
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.rule,
   },
-  calloutBar: { width: 3, backgroundColor: colors.ink3 },
-  calloutInner: { flex: 1, paddingVertical: space.cardPad - 2, paddingHorizontal: space.cardPad },
+  calloutBar: { width: 4, backgroundColor: colors.cyan },
+  calloutInner: {
+    flex: 1,
+    paddingVertical: space.cardPad + 4,
+    paddingHorizontal: space.cardPad + 2,
+  },
   calloutKicker: {
-    fontSize: 6,
+    fontSize: 7,
     fontWeight: 400,
-    color: colors.ink4,
+    color: colors.ink3,
     fontFamily: fonts.sansBold,
-    letterSpacing: 0.15,
-    marginBottom: rhythm.sm,
+    letterSpacing: 0.14,
+    marginBottom: rhythm.md,
     textTransform: "uppercase",
   },
   calloutBody: {
@@ -121,20 +130,21 @@ const styles = StyleSheet.create({
   bulletRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: 8,
+    marginBottom: 12,
     maxWidth: BODY_MAX_W + 8,
   },
   bulletMark: {
-    width: 14,
-    fontSize: 10,
-    lineHeight: 1.72,
-    color: colors.ink3,
+    width: 16,
+    fontSize: 11,
+    lineHeight: 1.65,
+    color: colors.cyan,
     fontFamily: fonts.sansBold,
+    marginTop: 1,
   },
   bulletText: {
     flex: 1,
-    fontSize: 10,
-    lineHeight: 1.72,
+    fontSize: 10.5,
+    lineHeight: 1.68,
     color: colors.ink,
     fontFamily: fonts.sans,
   },
@@ -187,7 +197,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.cardPad,
     borderWidth: 1,
     borderColor: colors.rule,
-    minHeight: 72,
+    minHeight: 64,
     overflow: "hidden",
   },
   alertWin: { backgroundColor: colors.greenLight, borderTopWidth: 2, borderTopColor: colors.green },
@@ -221,7 +231,9 @@ export function Page1Overview({ data }: { data: ReportData }): ReactElement[] {
   const leadingPill = data.rank === 1 ? "LEADING" : "CHALLENGER";
   const authEmpty = data.authorityScore === 0;
   const bottomBullets = splitSummaryBullets(data.bottomLine);
-  const bottomLines = bottomBullets.length ? bottomBullets : [data.bottomLine.trim() || "—"];
+  const bottomLines = bottomBullets.length
+    ? bottomBullets
+    : [data.bottomLine.trim() || "No executive summary was provided for this report."];
 
   const rankingBlock = (
     <View>
@@ -283,21 +295,21 @@ export function Page1Overview({ data }: { data: ReportData }): ReactElement[] {
 
   const alertsBlock = (
     <View style={styles.alertRow}>
-      <View style={[styles.alertCard, styles.alertWin, styles.alertSp]} wrap={false}>
+      <View style={[styles.alertCard, styles.alertWin, styles.alertSp]}>
         <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.green }]}>
           <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.green, fontFamily: fonts.sansBold }}>WIN</Text>
         </View>
         <Text style={styles.alertTitle}>{data.alerts.win.title}</Text>
         <Text style={styles.alertDetail}>{data.alerts.win.detail}</Text>
       </View>
-      <View style={[styles.alertCard, styles.alertRisk, styles.alertSp]} wrap={false}>
+      <View style={[styles.alertCard, styles.alertRisk, styles.alertSp]}>
         <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.orange }]}>
           <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.orange, fontFamily: fonts.sansBold }}>RISK</Text>
         </View>
         <Text style={styles.alertTitle}>{data.alerts.risk.title}</Text>
         <Text style={styles.alertDetail}>{data.alerts.risk.detail}</Text>
       </View>
-      <View style={[styles.alertCard, styles.alertPri]} wrap={false}>
+      <View style={[styles.alertCard, styles.alertPri]}>
         <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.red }]}>
           <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.red, fontFamily: fonts.sansBold }}>PRIORITY</Text>
         </View>
@@ -353,12 +365,12 @@ export function Page1Overview({ data }: { data: ReportData }): ReactElement[] {
           </View>
         </View>
 
-        <View style={[styles.calloutWrap, { marginBottom: 0 }]} wrap={false}>
+        <View style={[styles.calloutWrap, { marginBottom: 0 }]}>
           <View style={styles.calloutBar} />
           <View style={styles.calloutInner}>
             <Text style={styles.calloutKicker}>Bottom line</Text>
             {bottomLines.map((line, i) => (
-              <View key={`bl-${i}`} style={styles.bulletRow} wrap={false}>
+              <View key={`bl-${i}`} style={styles.bulletRow}>
                 <Text style={styles.bulletMark}>•</Text>
                 <Text style={styles.bulletText} orphans={2} widows={2}>
                   {line}

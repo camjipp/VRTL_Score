@@ -25,3 +25,12 @@ export function formatEvidenceLogPillLabel(raw: string | null | undefined): stri
   if (s === "OPPORTUNITY") return "MENTIONED (NOT TOP)";
   return s;
 }
+
+const PDF_EMPTY_CELL = "No signal";
+
+/** PDF tables: avoid em-dash placeholders; keep HTML/app using formatEvidenceFieldDisplay. */
+export function formatPdfEvidenceTableCell(raw: string | null | undefined): string {
+  const s = formatEvidenceFieldDisplay(raw);
+  if (s === "—" || s.trim() === "") return PDF_EMPTY_CELL;
+  return s;
+}

@@ -5,6 +5,14 @@ import type { ReportData } from "./types";
  * Normalize user- and model-generated strings for reliable PDF rendering.
  * Strips invisible unicode via normalizeDisplayText, then PDF-safe typography.
  */
+/** Model text sometimes glues a short word with a hyphen instead of a space. */
+function repairHyphenWordGlue(s: string): string {
+  return s.replace(
+    /\b([A-Za-z][A-Za-z'-]{1,})-(each|effectively|then|than|that|this|there|these|those|when|where|while|with|from|into|onto|upon|over|out|up|in|on|at|as|is|are|was|were|and|or|but|not|no|to|of|for|by|vs|via|the|a|an)\b/gi,
+    "$1 $2",
+  );
+}
+
 export function sanitizePdfString(raw: string): string {
   if (raw === "") return raw;
   let s = normalizeDisplayText(raw);
@@ -12,6 +20,7 @@ export function sanitizePdfString(raw: string): string {
   s = s.replace(/[\u201C\u201D\u201E\u2033\u2036\u00AB\u00BB]/g, '"');
   s = s.replace(/[\u2010\u2011\u2012\u2013\u2014\u2015\u2212]/g, "-");
   s = s.replace(/\u2026/g, "...");
+  s = repairHyphenWordGlue(s);
   return normalizeDisplayText(s);
 }
 
@@ -42,7 +51,7 @@ function humanizeJsonSnippetValue(val: unknown, depth: number): string {
 /** JSON-like evidence snippets → plain-language lines (client PDF; no raw code blocks). */
 export function formatEvidenceSnippetForPdf(raw: string): string {
   const cleaned = sanitizePdfString(String(raw)).trim();
-  if (!cleaned) return "—";
+  if (!cleaned) return "No signal";
   const looksJson =
     (cleaned.startsWith("{") && cleaned.endsWith("}")) ||
     (cleaned.startsWith("[") && cleaned.endsWith("]"));
@@ -51,7 +60,7 @@ export function formatEvidenceSnippetForPdf(raw: string): string {
     const v = JSON.parse(cleaned) as unknown;
     if (typeof v === "string") return sanitizePdfString(v);
     if (Array.isArray(v)) {
-      if (v.length === 0) return "—";
+      if (v.length === 0) return "No signal";
       if (v.every((x) => typeof x === "string")) {
         return v.map((s, i) => `${i + 1}. ${sanitizePdfString(String(s))}`).join("\n");
       }
@@ -61,11 +70,11 @@ export function formatEvidenceSnippetForPdf(raw: string): string {
           return h ? `${i + 1}. ${h}` : "";
         })
         .filter(Boolean);
-      return lines.length ? lines.join("\n\n") : "—";
+      return lines.length ? lines.join("\n\n") : "No signal";
     }
     if (v && typeof v === "object") {
       const out = humanizeJsonSnippetValue(v, 0);
-      return out || "—";
+      return out || "No signal";
     }
   } catch {
     return cleaned;
@@ -156,6 +165,7 @@ export function sanitizeReportDataForPdf(data: ReportData): ReportData {
       position: sanitizePdfString(r.position),
       strength: sanitizePdfString(r.strength),
       competitors: sanitizePdfString(r.competitors),
+      note: r.note != null ? sanitizePdfString(r.note) : r.note,
     })),
   };
 }

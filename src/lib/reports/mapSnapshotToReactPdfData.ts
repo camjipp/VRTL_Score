@@ -55,40 +55,40 @@ function buildModelInsights(name: string, val: number, _avg: number): string[] {
   const isWeak = val < 50;
   if (isStrong) {
     return [
-      "Strongest surface—this is the pattern to copy onto weaker models before rivals narrow the gap.",
+      "Strongest surface: this is the pattern to copy onto weaker models before rivals narrow the gap.",
       "Expect competitors to push here; refresh proof and cited facts proactively.",
     ];
   }
   if (isWeak) {
     const first =
       name === "Anthropic"
-        ? "On Anthropic-powered answers, the brand is often absent from the recommendation set—effectively invisible in many category decisions this assistant influences."
-        : `${name} returns answers where you are frequently missing from the short list buyers see—recommendation share on this path is going to others.`;
+        ? "On Anthropic-powered answers, the brand is often absent from the recommendation set. That reads as effectively invisible in many category decisions this assistant influences."
+        : `${name} returns answers where you are frequently missing from the short list buyers see. Recommendation share on this path is going to others.`;
     return [first, "Ship 3–5 cited comparison pages plus direct-answer FAQ blocks for the query shapes this model returns."];
   }
   return [
     "Room to move with targeted comparison content, FAQs, and citations before a competitor locks the default answer here.",
-    "Differentiate now—mediocre scores become hard losses once a rival owns the narrative.",
+    "Differentiate now. Mediocre scores become hard losses once a rival owns the narrative.",
   ];
 }
 
 function buildStrategicTakeaway(models: [string, number][], _avg: number): string {
   void _avg;
   if (models.length === 0) {
-    return "No per-model scores yet—once populated, we sequence spend against the widest spread first.";
+    return "No per-model scores yet. Once populated, we sequence spend against the widest spread first.";
   }
   const hi = models[0][1];
   const lo = models[models.length - 1][1];
   if (hi >= 70 && lo < 50) {
-    return `${Math.round(hi - lo)} points separate your best and worst assistant surface—buyers get different short lists depending on which AI they use. Rebuild the weak surface with cited comparisons and FAQs before a competitor locks the default recommendation there.`;
+    return `${Math.round(hi - lo)} points separate your best and worst assistant surface. Buyers get different short lists depending on which AI they use. Rebuild the weak surface with cited comparisons and FAQs before a competitor locks the default recommendation there.`;
   }
   if (models.every(([, s]) => s >= 70)) {
-    return "Strong across engines—treat this as defense: monitor rivals, refresh proof monthly, and protect first-position answers.";
+    return "Strong across engines. Treat this as defense: monitor rivals, refresh proof monthly, and protect first-position answers.";
   }
   if (models.every(([, s]) => s < 50)) {
-    return "Weak across the board—fix entity clarity, citations, and category coverage before fine-tuning model-by-model.";
+    return "Weak across the board. Fix entity clarity, citations, and category coverage before fine-tuning model-by-model.";
   }
-  return "Mixed board—we lift the weakest model first while holding the surfaces that already win recommendation share.";
+  return "Mixed board: we lift the weakest model first while holding the surfaces that already win recommendation share.";
 }
 
 /**
@@ -249,13 +249,19 @@ export function mapSnapshotToReactPdfData(
   const evidenceLog: EvidenceLogRow[] = responses.slice(0, 10).map((r, idx) => {
     const pj = r.parsed_json;
     const compCount = pj?.competitors_mentioned?.length ?? 0;
+    const pos = (pj?.client_position ?? "").trim();
+    const str = (pj?.recommendation_strength ?? "").toString().trim();
+    const prompt = (r.prompt_text ?? "").replace(/\s+/g, " ").trim();
+    const note =
+      prompt.length > 92 ? `${prompt.slice(0, 89).trimEnd()}…` : prompt.length > 0 ? prompt : undefined;
     return {
       idx: idx + 1,
       label: getSnapshotEvidenceLabel(pj),
       mentioned: pj?.client_mentioned ? "Yes" : "No",
-      position: pj?.client_position || "—",
-      strength: pj?.recommendation_strength || "—",
-      competitors: compCount > 0 ? String(compCount) : "—",
+      position: pos || "",
+      strength: str || "",
+      competitors: String(compCount),
+      note,
     };
   });
 

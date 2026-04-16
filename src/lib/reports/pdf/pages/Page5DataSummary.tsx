@@ -121,7 +121,7 @@ function sigPillFg(s: ReportData["signalSummary"][0]["status"]) {
 function statusLabel(s: ReportData["competitiveTable"][0]["status"] | undefined) {
   if (s === "You") return "YOU";
   if (s === "Ahead" || s === "Behind" || s === "Tied") return s.toUpperCase();
-  return "—";
+  return "N/A";
 }
 
 function cmpPillStyle(s: ReportData["competitiveTable"][0]["status"] | undefined) {
@@ -144,7 +144,7 @@ export function Page5DataSummary({ data }: { data: ReportData }) {
 
         <ChapterTitle
           title="Data summary"
-          subtitle="What the tables imply before you scan the rows—then the numbers below quantify each signal."
+          subtitle="What the tables imply before you scan the rows. The numbers below quantify each signal."
         />
         <Text style={styles.interpret}>{data.dataSummaryInterpretation}</Text>
         <Text style={[styles.h, styles.hFirst]}>Signals</Text>
