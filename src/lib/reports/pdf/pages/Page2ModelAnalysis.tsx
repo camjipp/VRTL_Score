@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     width: CONTENT_W,
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: rhythm.sm,
+    marginBottom: 0,
   },
   sectionLabel: {
     fontSize: 7,
@@ -145,6 +145,23 @@ const styles = StyleSheet.create({
     lineHeight: 1.58,
     fontFamily: fonts.sans,
   },
+  vulnBlock: {
+    marginBottom: 8,
+  },
+  vulnMini: {
+    fontSize: 5.8,
+    fontFamily: fonts.sansBold,
+    letterSpacing: 0.1,
+    textTransform: "uppercase",
+    color: colors.ink3,
+    marginBottom: 4,
+  },
+  vulnBody: {
+    fontFamily: fonts.sans,
+    fontSize: 8.5,
+    lineHeight: 1.58,
+    color: colors.ink,
+  },
   takeawayOuter: {
     flexDirection: "row",
     borderRadius: 8,
@@ -177,7 +194,8 @@ const styles = StyleSheet.create({
   },
 });
 
-export function Page2ModelAnalysis({ data }: { data: ReportData }) {
+/** Model scores + contrast — own page so cards are never split from Example answers. */
+export function Page2ModelAnalysisGridPage({ data }: { data: ReportData }) {
   const a = avgOf(data.modelScores);
   const sorted = [...data.modelScores].sort((x, y) => y.score - x.score);
   const best = sorted[0];
@@ -193,13 +211,13 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
   return (
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
       <View style={baseStyles.pageBody}>
-        <PdfTraceMarker page={3} section="Page2:start" />
+        <PdfTraceMarker page={2} section="Page2Grid:start" />
         <PdfHeader data={data} variant="inner" pageNum={3} />
-        <PdfTraceMarker page={3} section="Page2:after_header" />
+        <PdfTraceMarker page={2} section="Page2Grid:after_header" />
 
         <RankingAlertsSection data={data} />
 
-        <ChapterTitle title="Model analysis" subtitle={spreadSubtitle} minPresenceAhead={32} />
+        <ChapterTitle title="Model analysis" subtitle={spreadSubtitle} minPresenceAhead={40} />
 
         {best && worst ? (
           <View style={styles.contrastRow}>
@@ -249,29 +267,81 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
           })}
         </View>
 
-        {data.evidencePreview.length > 0 ? (
+        <PdfTraceMarker page={2} section="Page2Grid:before_footer" />
+        <PdfFooter data={data} />
+      </View>
+    </Page>
+  );
+}
+
+/** Example excerpts + strategic takeaway — starts after model grid page. */
+export function Page2ModelAnalysisExamplesPage({ data }: { data: ReportData }) {
+  const hasEvidence = data.evidencePreview.length > 0;
+  const hasTakeaway = Boolean(data.strategicTakeaway?.trim());
+  if (!hasEvidence && !hasTakeaway) return null;
+
+  return (
+    <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
+      <View style={baseStyles.pageBody}>
+        <PdfTraceMarker page={3} section="Page2Examples:start" />
+        <PdfHeader data={data} variant="inner" pageNum={4} />
+        <PdfTraceMarker page={3} section="Page2Examples:after_header" />
+
+        <ChapterTitle
+          title="Example answers"
+          subtitle="Representative assistant excerpts and the strategic takeaway for this snapshot."
+          minPresenceAhead={48}
+        />
+
+        {hasEvidence ? (
           <View style={{ width: CONTENT_W }}>
-            <Text style={styles.sectionLabel}>Example answers</Text>
+            <Text style={styles.sectionLabel}>Client-readable excerpts</Text>
             <View style={styles.evidenceRow}>
               {data.evidencePreview.map((ev, i) => {
                 const labelLine = formatEvidenceLogPillLabel(String(ev.label));
-                const snippetLine = String(ev.snippet);
                 const noteLine = ev.note ? String(ev.note) : "";
+                const vuln = ev.vulnerableExcerpt;
                 return (
                   <View
                     key={`ev-${i}`}
                     style={[styles.exampleCard, i === 0 ? { marginRight: EVIDENCE_GAP } : {}]}
+                    minPresenceAhead={72}
                   >
                     <View style={styles.exampleAccent} />
                     <View style={styles.exampleInner}>
                       <Text style={styles.exampleKicker}>Client-readable excerpt</Text>
                       <Text style={styles.exampleBadge}>{labelLine}</Text>
-                      <View style={styles.exampleQuote}>
-                        <Text style={styles.exampleQuoteText} orphans={2} widows={2}>
-                          {snippetLine}
-                        </Text>
-                      </View>
-                      {noteLine ? <Text style={styles.exampleNote}>{noteLine}</Text> : null}
+                      {vuln ? (
+                        <>
+                          <View style={styles.vulnBlock}>
+                            <Text style={styles.vulnMini}>Summary</Text>
+                            <Text style={styles.vulnBody} orphans={2} widows={2}>
+                              {vuln.summary}
+                            </Text>
+                          </View>
+                          <View style={styles.vulnBlock}>
+                            <Text style={styles.vulnMini}>Competitors named</Text>
+                            <Text style={styles.vulnBody} orphans={2} widows={2}>
+                              {vuln.competitorsLine}
+                            </Text>
+                          </View>
+                          <View style={styles.vulnBlock}>
+                            <Text style={styles.vulnMini}>Implication</Text>
+                            <Text style={styles.vulnBody} orphans={2} widows={2}>
+                              {vuln.implication}
+                            </Text>
+                          </View>
+                        </>
+                      ) : (
+                        <>
+                          <View style={styles.exampleQuote}>
+                            <Text style={styles.exampleQuoteText} orphans={2} widows={2}>
+                              {String(ev.snippet)}
+                            </Text>
+                          </View>
+                          {noteLine ? <Text style={styles.exampleNote}>{noteLine}</Text> : null}
+                        </>
+                      )}
                     </View>
                   </View>
                 );
@@ -279,9 +349,10 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
             </View>
           </View>
         ) : null}
-        {data.strategicTakeaway ? (
+        {hasTakeaway ? (
           <View
-            style={[styles.takeawayOuter, data.evidencePreview.length > 0 ? { marginTop: rhythm.sm } : {}]}
+            style={[styles.takeawayOuter, hasEvidence ? { marginTop: rhythm.sm } : {}]}
+            minPresenceAhead={64}
           >
             <View style={styles.takeawayBar} />
             <View style={styles.takeawayInner}>
@@ -291,9 +362,7 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
           </View>
         ) : null}
 
-        <PdfTraceMarker page={3} section="Page2:after_evidence_preview" />
-
-        <PdfTraceMarker page={3} section="Page2:before_footer" />
+        <PdfTraceMarker page={3} section="Page2Examples:before_footer" />
         <PdfFooter data={data} />
       </View>
     </Page>

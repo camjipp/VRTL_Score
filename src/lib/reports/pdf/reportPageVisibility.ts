@@ -5,6 +5,11 @@ export function shouldRenderModelAnalysisPage(d: ReportData): boolean {
   return d.modelScores.length > 0;
 }
 
+/** Second model-analysis page: excerpts + takeaway (only when there is follow-on content). */
+export function shouldRenderModelAnalysisExamplesSubpage(d: ReportData): boolean {
+  return d.evidencePreview.length > 0 || Boolean(d.strategicTakeaway?.trim());
+}
+
 export function shouldRenderRecommendationsPage(d: ReportData): boolean {
   return d.recommendations.length > 0;
 }

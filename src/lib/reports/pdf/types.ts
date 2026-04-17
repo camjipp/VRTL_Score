@@ -27,10 +27,19 @@ export type RecommendationCard = {
   expectedOutcome: string;
 };
 
+/** PDF-only lines for vulnerable excerpts (no JSON or code in the rendered card). */
+export type VulnerableExcerptParts = {
+  summary: string;
+  competitorsLine: string;
+  implication: string;
+};
+
 export type EvidencePreview = {
   label: string;
   snippet: string;
   note?: string;
+  /** Set during PDF sanitization when label indicates a vulnerable signal. */
+  vulnerableExcerpt?: VulnerableExcerptParts;
 };
 
 export type ExecutionPhase = {

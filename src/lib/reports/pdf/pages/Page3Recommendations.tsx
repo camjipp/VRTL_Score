@@ -192,7 +192,11 @@ export function Page3Recommendations({ data }: { data: ReportData }) {
         />
 
         {first ? (
-          <View style={[styles.heroCard, isHigh ? { borderTopColor: HIGH_ACCENT } : { borderTopColor: colors.ink3 }]}>
+          <View
+            style={[styles.heroCard, isHigh ? { borderTopColor: HIGH_ACCENT } : { borderTopColor: colors.ink3 }]}
+            wrap={false}
+            minPresenceAhead={120}
+          >
             <Text style={styles.heroKicker}>Primary action</Text>
             <View style={styles.heroPri}>
               <Text style={styles.heroPriTxt}>{`${first.priority} PRIORITY`}</Text>
@@ -233,6 +237,8 @@ export function Page3Recommendations({ data }: { data: ReportData }) {
                 cardHigh ? styles.cardHigh : {},
                 i < rest.length - 1 ? { marginBottom: rhythm.sm } : { marginBottom: 0 },
               ]}
+              wrap={false}
+              minPresenceAhead={140}
             >
               <View style={[styles.leftStripe, { backgroundColor: STRIPE_BG }]}>
                 <Text style={styles.stripeNum}>{String(idx)}</Text>

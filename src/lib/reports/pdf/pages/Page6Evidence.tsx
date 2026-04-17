@@ -92,55 +92,65 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sans,
     maxWidth: BODY_MAX_W,
   },
-  chipDeck: {
+  closingPanel: {
     marginTop: space.block,
     width: 540,
-    backgroundColor: colors.surface,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.rule,
-    borderRadius: 8,
+    borderTopWidth: 3,
+    borderTopColor: colors.cyan,
+    backgroundColor: colors.surface,
     paddingVertical: space.cardPad,
     paddingHorizontal: space.cardPad,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "stretch",
+    overflow: "hidden",
   },
-  chip: {
-    flex: 1,
-    marginHorizontal: 4,
-    backgroundColor: colors.paper,
-    borderWidth: 1,
-    borderColor: colors.rule,
-    borderRadius: 6,
-    paddingVertical: rhythm.md,
-    paddingHorizontal: rhythm.xs,
-    alignItems: "center",
-    justifyContent: "flex-start",
-    minHeight: 56,
-  },
-  chipValWrap: {
-    width: "100%",
-    minHeight: 22,
-    justifyContent: "flex-end",
-    alignItems: "center",
-  },
-  chipNum: {
-    fontSize: 14,
-    fontWeight: 400,
-    color: colors.ink,
+  closingEyebrow: {
+    fontSize: 7,
     fontFamily: fonts.sansBold,
-    lineHeight: 1.15,
+    letterSpacing: 0.14,
+    textTransform: "uppercase",
+    color: colors.ink3,
+    marginBottom: rhythm.sm,
+  },
+  statsRow: {
+    flexDirection: "row",
+    alignItems: "stretch",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  statCol: {
+    flex: 1,
+    alignItems: "center",
+    paddingHorizontal: rhythm.xs,
+  },
+  statVsep: {
+    width: 1,
+    backgroundColor: colors.rule,
+    alignSelf: "stretch",
+    marginVertical: 2,
+  },
+  statVal: {
+    fontSize: 17,
+    fontFamily: fonts.sansBold,
+    color: colors.ink,
+    lineHeight: 1.2,
     textAlign: "center",
   },
-  chipLab: {
+  statLab: {
     fontSize: 6.5,
-    color: colors.ink3,
     marginTop: 8,
     textTransform: "uppercase",
     letterSpacing: 0.1,
     fontFamily: fonts.sansBold,
+    color: colors.ink3,
     textAlign: "center",
-    lineHeight: 1.2,
+  },
+  closingRule: {
+    height: 1,
+    backgroundColor: colors.rule,
+    marginVertical: rhythm.md,
+    width: "100%",
   },
   ynY: { backgroundColor: colors.surface2, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 4 },
   ynN: { backgroundColor: colors.surface2, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 4 },
@@ -153,21 +163,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sans,
     lineHeight: 1.5,
     maxWidth: BODY_MAX_W,
-  },
-  nextOuter: {
-    marginTop: space.block,
-    flexDirection: "row",
-    borderRadius: 8,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: colors.rule,
-    backgroundColor: colors.surface2,
-  },
-  nextBar: { width: 3, backgroundColor: colors.cyan },
-  nextInner: {
-    flex: 1,
-    paddingVertical: space.cardPad,
-    paddingHorizontal: space.cardPad,
   },
   nextTitle: {
     fontSize: 7,
@@ -292,36 +287,32 @@ export function Page6Evidence({ data }: { data: ReportData }) {
           </View>
         ) : null}
 
-        <View style={styles.chipDeck} wrap={false}>
-          <View style={styles.chip}>
-            <View style={styles.chipValWrap}>
-              <Text style={styles.chipNum}>{String(data.meta.responses)}</Text>
+        <View style={styles.closingPanel} minPresenceAhead={200}>
+          <Text style={styles.closingEyebrow}>Run snapshot</Text>
+          <View style={styles.statsRow}>
+            <View style={styles.statCol}>
+              <Text style={styles.statVal}>{String(data.meta.responses)}</Text>
+              <Text style={styles.statLab}>Responses</Text>
             </View>
-            <Text style={styles.chipLab}>Responses</Text>
-          </View>
-          <View style={styles.chip}>
-            <View style={styles.chipValWrap}>
-              <Text style={styles.chipNum}>{String(data.meta.confidence)}</Text>
+            <View style={styles.statVsep} />
+            <View style={styles.statCol}>
+              <Text style={styles.statVal}>{String(data.meta.confidence)}</Text>
+              <Text style={styles.statLab}>Confidence</Text>
             </View>
-            <Text style={styles.chipLab}>Confidence</Text>
-          </View>
-          <View style={styles.chip}>
-            <View style={styles.chipValWrap}>
-              <Text style={styles.chipNum}>{String(data.meta.generated)}</Text>
+            <View style={styles.statVsep} />
+            <View style={styles.statCol}>
+              <Text style={styles.statVal}>{String(data.meta.generated)}</Text>
+              <Text style={styles.statLab}>Generated</Text>
             </View>
-            <Text style={styles.chipLab}>Generated</Text>
           </View>
-        </View>
-
-        {data.recommendedNextStepsVisible !== false && data.recommendedNextSteps?.trim() ? (
-          <View style={styles.nextOuter}>
-            <View style={styles.nextBar} />
-            <View style={styles.nextInner}>
+          {data.recommendedNextStepsVisible !== false && data.recommendedNextSteps?.trim() ? (
+            <>
+              <View style={styles.closingRule} />
               <Text style={styles.nextTitle}>What happens next</Text>
               <Text style={styles.nextBody}>{data.recommendedNextSteps}</Text>
-            </View>
-          </View>
-        ) : null}
+            </>
+          ) : null}
+        </View>
 
         <PdfTraceMarker page={7} section="Page6:before_footer" />
         <PdfFooter data={data} />

@@ -5,7 +5,10 @@ import type { ReactElement } from "react";
 Font.registerHyphenationCallback((word) => (word.length === 0 ? [] : [word]));
 import type { ReportData } from "./types";
 import { Page1Overview } from "./pages/Page1Overview";
-import { Page2ModelAnalysis } from "./pages/Page2ModelAnalysis";
+import {
+  Page2ModelAnalysisExamplesPage,
+  Page2ModelAnalysisGridPage,
+} from "./pages/Page2ModelAnalysis";
 import { Page3Recommendations } from "./pages/Page3Recommendations";
 import { Page4ExecutionPlan } from "./pages/Page4ExecutionPlan";
 import { Page5DataSummary } from "./pages/Page5DataSummary";
@@ -14,6 +17,7 @@ import {
   shouldRenderDataSummaryPage,
   shouldRenderEvidenceMethodologyPage,
   shouldRenderExecutionPage,
+  shouldRenderModelAnalysisExamplesSubpage,
   shouldRenderModelAnalysisPage,
   shouldRenderRecommendationsPage,
 } from "./reportPageVisibility";
@@ -28,7 +32,11 @@ const PAGE_BUILDERS: PageBuilder[] = [
   { num: 1, render: (d) => <Page1Overview key="p1" data={d} />, include: () => true },
   {
     num: 2,
-    render: (d) => <Page2ModelAnalysis key="p2" data={d} />,
+    render: (d) => {
+      const grid = <Page2ModelAnalysisGridPage key="p2a" data={d} />;
+      if (!shouldRenderModelAnalysisExamplesSubpage(d)) return grid;
+      return [grid, <Page2ModelAnalysisExamplesPage key="p2b" data={d} />];
+    },
     include: shouldRenderModelAnalysisPage,
   },
   {
