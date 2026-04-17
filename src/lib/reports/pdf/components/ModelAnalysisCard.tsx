@@ -11,17 +11,21 @@ export type ModelAnalysisCardProps = {
   bandColor: string;
   scoreAccent: string;
   bulletDotColor: string;
+  /** Defaults to 172 (MODEL_CARD_WIDTH). */
+  cardWidth?: number;
+  /** Limit bullet count for fixed-height matrix slots. */
+  maxBullets?: number;
+  /** Tighter typography for bottom-row matrix slots. */
+  compact?: boolean;
 };
 
 /** Three columns + gaps = 540pt content: 172 + 12 + 172 + 12 + 172 */
 export const MODEL_CARD_WIDTH = 172;
-const INNER_W = MODEL_CARD_WIDTH - 14;
 /** Equal-height analysis cards — keep moderate to reduce forced page breaks */
 const CARD_MIN_H = 120;
 
 const styles = StyleSheet.create({
   root: {
-    width: MODEL_CARD_WIDTH,
     minHeight: CARD_MIN_H,
     backgroundColor: colors.paper,
     borderWidth: 1,
@@ -46,13 +50,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sansBold,
     letterSpacing: 0.03,
   },
-  scoreOnly: {
-    fontSize: 34,
-    fontWeight: 400,
-    lineHeight: 1,
-    fontFamily: fonts.sansBold,
-    marginBottom: 6,
-  },
   deltaRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -75,10 +72,8 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: colors.rule,
     marginBottom: 5,
-    width: INNER_W,
   },
   barTrack: {
-    width: INNER_W,
     height: 6,
     backgroundColor: colors.surface2,
     borderRadius: 4,
@@ -94,7 +89,6 @@ const styles = StyleSheet.create({
   },
   barWrap: {
     position: "relative",
-    width: INNER_W,
     marginBottom: 3,
   },
   avgTick: {
@@ -123,11 +117,30 @@ const styles = StyleSheet.create({
     marginRight: 7,
   },
   bulletText: {
-    width: INNER_W - 12,
     fontSize: 6.5,
     lineHeight: 1.48,
     color: colors.ink,
     fontFamily: fonts.sans,
+  },
+  bulletTextCompact: {
+    fontSize: 6,
+    lineHeight: 1.42,
+    color: colors.ink,
+    fontFamily: fonts.sans,
+  },
+  scoreLarge: {
+    fontSize: 34,
+    fontWeight: 400,
+    lineHeight: 1,
+    fontFamily: fonts.sansBold,
+    marginBottom: 6,
+  },
+  scoreCompact: {
+    fontSize: 26,
+    fontWeight: 400,
+    lineHeight: 1,
+    fontFamily: fonts.sansBold,
+    marginBottom: 4,
   },
 });
 
@@ -141,14 +154,19 @@ export function ModelAnalysisCard({
   bandColor: _bandColor,
   scoreAccent: _scoreAccent,
   bulletDotColor: _bulletDotColor,
+  cardWidth = MODEL_CARD_WIDTH,
+  maxBullets,
+  compact = false,
 }: ModelAnalysisCardProps) {
   void _bandColor;
   void _scoreAccent;
   void _bulletDotColor;
+  const innerW = cardWidth - 14;
+  const bulletLines = maxBullets != null ? insights.slice(0, maxBullets) : insights;
   const scorePct = Math.min(100, Math.max(0, Math.round(score)));
   const rest = Math.max(0, 100 - scorePct);
   const avgPos = Math.min(100, Math.max(0, Math.round(avg)));
-  const tickLeft = (INNER_W * avgPos) / 100 - 1;
+  const tickLeft = (innerW * avgPos) / 100 - 1;
 
   const nameLine = String(modelName).toUpperCase();
   const scoreLine = String(score);
@@ -160,21 +178,21 @@ export function ModelAnalysisCard({
   const posPill = deltaVsAvg >= 0;
 
   return (
-    <View style={styles.root} wrap={false}>
+    <View style={[styles.root, { width: cardWidth }]} wrap={false}>
       <View style={[styles.topBand, { backgroundColor: colors.surface2 }]} />
       <View style={styles.inner}>
         <Text style={styles.name}>{nameLine}</Text>
-        <Text style={[styles.scoreOnly, { color: colors.ink }]}>{scoreLine}</Text>
+        <Text style={[compact ? styles.scoreCompact : styles.scoreLarge, { color: colors.ink }]}>{scoreLine}</Text>
         <View style={styles.deltaRow}>
           <View style={[styles.deltaPill, posPill ? styles.deltaPillPos : styles.deltaPillNeg]}>
             <Text style={styles.deltaPillText}>{deltaLine}</Text>
           </View>
         </View>
 
-        <View style={styles.rule} />
+        <View style={[styles.rule, { width: innerW }]} />
 
-        <View style={styles.barWrap}>
-          <View style={styles.barTrack}>
+        <View style={[styles.barWrap, { width: innerW }]}>
+          <View style={[styles.barTrack, { width: innerW }]}>
             <View style={[{ flex: scorePct <= 0 ? 0 : scorePct, backgroundColor: colors.cyan }, styles.barFill]} />
             <View style={[{ flex: rest }, styles.barRest]} />
           </View>
@@ -182,12 +200,16 @@ export function ModelAnalysisCard({
         </View>
         <Text style={styles.avgLabel}>{avgLabelLine}</Text>
 
-        {insights.map((line, idx) => {
+        {bulletLines.map((line, idx) => {
           const lineText = String(line);
           return (
             <View key={`${modelId}-row-${idx}`} style={styles.bulletRow} wrap={false}>
               <View style={[styles.dot, { backgroundColor: colors.ink4 }]} />
-              <Text style={styles.bulletText} orphans={2} widows={2}>
+              <Text
+                style={[compact ? styles.bulletTextCompact : styles.bulletText, { width: innerW - 12 }]}
+                orphans={2}
+                widows={2}
+              >
                 {lineText}
               </Text>
             </View>

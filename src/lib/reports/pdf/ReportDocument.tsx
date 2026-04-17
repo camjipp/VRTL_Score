@@ -5,14 +5,13 @@ import type { ReactElement } from "react";
 Font.registerHyphenationCallback((word) => (word.length === 0 ? [] : [word]));
 import type { ReportData } from "./types";
 import { Page1Overview } from "./pages/Page1Overview";
-import {
-  Page2ModelAnalysisExamplesPage,
-  Page2ModelAnalysisGridPage,
-} from "./pages/Page2ModelAnalysis";
-import { Page3Recommendations } from "./pages/Page3Recommendations";
+import { PageModelAnalysisExamples } from "./pages/Page2ModelAnalysis";
+import { PageModelAnalysisMatrix } from "./pages/PageModelAnalysisMatrix";
+import { PageRankingAlerts } from "./pages/PageRankingAlerts";
+import { renderRecommendationPages } from "./pages/PageRecommendations";
 import { Page4ExecutionPlan } from "./pages/Page4ExecutionPlan";
 import { Page5DataSummary } from "./pages/Page5DataSummary";
-import { Page6Evidence } from "./pages/Page6Evidence";
+import { renderEvidenceSectionPages } from "./renderEvidenceSectionPages";
 import {
   shouldRenderDataSummaryPage,
   shouldRenderEvidenceMethodologyPage,
@@ -28,20 +27,27 @@ type PageBuilder = {
   include: (d: ReportData) => boolean;
 };
 
+function buildModelAnalysisSectionPages(data: ReportData): ReactElement[] {
+  const pages: ReactElement[] = [];
+  pages.push(<PageRankingAlerts key="pdf-ranking" data={data} />);
+  pages.push(<PageModelAnalysisMatrix key="pdf-matrix" data={data} />);
+  if (shouldRenderModelAnalysisExamplesSubpage(data)) {
+    const ex = <PageModelAnalysisExamples key="pdf-examples" data={data} />;
+    if (ex) pages.push(ex);
+  }
+  return pages;
+}
+
 const PAGE_BUILDERS: PageBuilder[] = [
   { num: 1, render: (d) => <Page1Overview key="p1" data={d} />, include: () => true },
   {
     num: 2,
-    render: (d) => {
-      const grid = <Page2ModelAnalysisGridPage key="p2a" data={d} />;
-      if (!shouldRenderModelAnalysisExamplesSubpage(d)) return grid;
-      return [grid, <Page2ModelAnalysisExamplesPage key="p2b" data={d} />];
-    },
+    render: (d) => buildModelAnalysisSectionPages(d),
     include: shouldRenderModelAnalysisPage,
   },
   {
     num: 3,
-    render: (d) => <Page3Recommendations key="p3" data={d} />,
+    render: (d) => renderRecommendationPages(d),
     include: shouldRenderRecommendationsPage,
   },
   {
@@ -56,7 +62,7 @@ const PAGE_BUILDERS: PageBuilder[] = [
   },
   {
     num: 6,
-    render: (d) => <Page6Evidence key="p6" data={d} />,
+    render: (d) => renderEvidenceSectionPages(d),
     include: shouldRenderEvidenceMethodologyPage,
   },
 ];

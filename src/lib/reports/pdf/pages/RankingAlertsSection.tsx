@@ -80,10 +80,7 @@ const styles = StyleSheet.create({
   },
 });
 
-/**
- * Competitive ranking + WIN/RISK/PRIORITY — rendered under Model analysis header on the same page
- * (no separate page) so the block flows with the chapter body.
- */
+/** Competitive ranking + WIN / RISK / PRIORITY — used on the dedicated snapshot slide. */
 export function RankingAlertsSection({ data }: { data: ReportData }) {
   const maxM = Math.max(...data.competitors.map((c) => c.mentions), 1);
   const clientM = data.competitors.find((c) => c.isClient)?.mentions ?? 0;
