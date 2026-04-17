@@ -17,8 +17,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderTopWidth: 3,
     borderTopColor: HIGH_ACCENT,
-    padding: space.cardPad,
-    marginBottom: space.block,
+    padding: space.cardPad - 4,
+    marginBottom: rhythm.sm,
     width: CONTENT_W,
   },
   heroKicker: {
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   microSpaced: {
-    marginTop: 10,
+    marginTop: 8,
   },
   body: {
     fontSize: 8,
@@ -203,47 +203,59 @@ export function Page3Recommendations({ data }: { data: ReportData }) {
           </View>
         ) : null}
 
-        {rest.map((r, i) => {
-          const titleLine = String(r.title);
-          const insightLine = String(r.insight);
-          const expLine = String(r.expectedOutcome);
-          const actLine = String(r.action);
-          const explLine = String(r.explanation);
-          const cardHigh = r.priority === "HIGH";
-          const idx = i + 2;
-          return (
-            <View key={`rec-${r.priority}-${i}`} wrap={false} style={[styles.card, cardHigh ? styles.cardHigh : {}]}>
-              <View style={[styles.leftStripe, { backgroundColor: STRIPE_BG }]}>
-                <Text style={styles.stripeNum}>{String(idx)}</Text>
-              </View>
-              <View style={styles.sep} />
-              <View style={styles.mid}>
-                <View style={styles.priPill}>
-                  <Text style={styles.priPillTxt}>{`${r.priority} PRIORITY`}</Text>
+        {rest.length > 0 ? (
+          <View wrap={false}>
+            {rest.map((r, i) => {
+              const titleLine = String(r.title);
+              const insightLine = String(r.insight);
+              const expLine = String(r.expectedOutcome);
+              const actLine = String(r.action);
+              const explLine = String(r.explanation);
+              const cardHigh = r.priority === "HIGH";
+              const idx = i + 2;
+              return (
+                <View
+                  key={`rec-${r.priority}-${i}`}
+                  wrap={false}
+                  style={[
+                    styles.card,
+                    cardHigh ? styles.cardHigh : {},
+                    i < rest.length - 1 ? { marginBottom: rhythm.sm } : { marginBottom: 0 },
+                  ]}
+                >
+                  <View style={[styles.leftStripe, { backgroundColor: STRIPE_BG }]}>
+                    <Text style={styles.stripeNum}>{String(idx)}</Text>
+                  </View>
+                  <View style={styles.sep} />
+                  <View style={styles.mid}>
+                    <View style={styles.priPill}>
+                      <Text style={styles.priPillTxt}>{`${r.priority} PRIORITY`}</Text>
+                    </View>
+                    <Text style={styles.title}>{titleLine}</Text>
+                    <Text style={styles.insight}>{insightLine}</Text>
+                    <View wrap={false}>
+                      <Text style={styles.micro}>Why it matters</Text>
+                      <Text style={styles.body} orphans={2} widows={2}>
+                        {explLine}
+                      </Text>
+                    </View>
+                    <View wrap={false}>
+                      <Text style={[styles.micro, styles.microSpaced]}>What we do</Text>
+                      <Text style={styles.body} orphans={2} widows={2}>
+                        {actLine}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.sep} />
+                  <View style={styles.right}>
+                    <Text style={styles.outLabel}>Expected outcome</Text>
+                    <Text style={styles.outText}>{expLine}</Text>
+                  </View>
                 </View>
-                <Text style={styles.title}>{titleLine}</Text>
-                <Text style={styles.insight}>{insightLine}</Text>
-                <View wrap={false}>
-                  <Text style={styles.micro}>Why it matters</Text>
-                  <Text style={styles.body} orphans={2} widows={2}>
-                    {explLine}
-                  </Text>
-                </View>
-                <View wrap={false}>
-                  <Text style={[styles.micro, styles.microSpaced]}>What we do</Text>
-                  <Text style={styles.body} orphans={2} widows={2}>
-                    {actLine}
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.sep} />
-              <View style={styles.right}>
-                <Text style={styles.outLabel}>Expected outcome</Text>
-                <Text style={styles.outText}>{expLine}</Text>
-              </View>
-            </View>
-          );
-        })}
+              );
+            })}
+          </View>
+        ) : null}
 
         <PdfTraceMarker page={4} section="Page3:after_recommendations" />
         <PdfFooter data={data} />

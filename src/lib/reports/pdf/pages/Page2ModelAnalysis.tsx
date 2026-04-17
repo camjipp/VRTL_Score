@@ -7,6 +7,7 @@ import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
+import { RankingAlertsSection } from "./RankingAlertsSection";
 
 const avgOf = (models: ReportData["modelScores"]) =>
   models.length ? Math.round(models.reduce((s, m) => s + m.score, 0) / models.length) : 0;
@@ -196,6 +197,8 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
         <PdfHeader data={data} variant="inner" pageNum={3} />
         <PdfTraceMarker page={3} section="Page2:after_header" />
 
+        <RankingAlertsSection data={data} />
+
         <ChapterTitle title="Model analysis" subtitle={spreadSubtitle} />
 
         {best && worst ? (
@@ -246,48 +249,47 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
           })}
         </View>
 
-        {data.evidencePreview.length > 0 || data.strategicTakeaway ? (
-          <View wrap={false}>
-            {data.evidencePreview.length > 0 ? (
-              <View style={{ width: CONTENT_W }}>
-                <Text style={styles.sectionLabel}>Example answers</Text>
-                <View style={styles.evidenceRow}>
-                  {data.evidencePreview.map((ev, i) => {
-                    const labelLine = formatEvidenceLogPillLabel(String(ev.label));
-                    const snippetLine = String(ev.snippet);
-                    const noteLine = ev.note ? String(ev.note) : "";
-                    return (
-                      <View
-                        key={`ev-${i}`}
-                        style={[styles.exampleCard, i === 0 ? { marginRight: EVIDENCE_GAP } : {}]}
-                        wrap={false}
-                      >
-                        <View style={styles.exampleAccent} />
-                        <View style={styles.exampleInner}>
-                          <Text style={styles.exampleKicker}>Client-readable excerpt</Text>
-                          <Text style={styles.exampleBadge}>{labelLine}</Text>
-                          <View style={styles.exampleQuote}>
-                            <Text style={styles.exampleQuoteText} orphans={2} widows={2}>
-                              {snippetLine}
-                            </Text>
-                          </View>
-                          {noteLine ? <Text style={styles.exampleNote}>{noteLine}</Text> : null}
-                        </View>
+        {data.evidencePreview.length > 0 ? (
+          <View wrap={false} style={{ width: CONTENT_W }}>
+            <Text style={styles.sectionLabel}>Example answers</Text>
+            <View style={styles.evidenceRow}>
+              {data.evidencePreview.map((ev, i) => {
+                const labelLine = formatEvidenceLogPillLabel(String(ev.label));
+                const snippetLine = String(ev.snippet);
+                const noteLine = ev.note ? String(ev.note) : "";
+                return (
+                  <View
+                    key={`ev-${i}`}
+                    style={[styles.exampleCard, i === 0 ? { marginRight: EVIDENCE_GAP } : {}]}
+                    wrap={false}
+                  >
+                    <View style={styles.exampleAccent} />
+                    <View style={styles.exampleInner}>
+                      <Text style={styles.exampleKicker}>Client-readable excerpt</Text>
+                      <Text style={styles.exampleBadge}>{labelLine}</Text>
+                      <View style={styles.exampleQuote}>
+                        <Text style={styles.exampleQuoteText} orphans={2} widows={2}>
+                          {snippetLine}
+                        </Text>
                       </View>
-                    );
-                  })}
-                </View>
-              </View>
-            ) : null}
-            {data.strategicTakeaway ? (
-              <View style={styles.takeawayOuter}>
-                <View style={styles.takeawayBar} />
-                <View style={styles.takeawayInner}>
-                  <Text style={styles.takeawayTitle}>Strategic takeaway</Text>
-                  <Text style={styles.takeawayBody}>{data.strategicTakeaway}</Text>
-                </View>
-              </View>
-            ) : null}
+                      {noteLine ? <Text style={styles.exampleNote}>{noteLine}</Text> : null}
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        ) : null}
+        {data.strategicTakeaway ? (
+          <View
+            style={[styles.takeawayOuter, data.evidencePreview.length > 0 ? { marginTop: space.block } : {}]}
+            wrap={false}
+          >
+            <View style={styles.takeawayBar} />
+            <View style={styles.takeawayInner}>
+              <Text style={styles.takeawayTitle}>Strategic takeaway</Text>
+              <Text style={styles.takeawayBody}>{data.strategicTakeaway}</Text>
+            </View>
           </View>
         ) : null}
 
