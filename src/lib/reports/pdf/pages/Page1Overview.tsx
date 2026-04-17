@@ -105,7 +105,8 @@ const styles = StyleSheet.create({
   calloutBar: { width: 4, backgroundColor: colors.cyan },
   calloutInner: {
     flex: 1,
-    paddingVertical: space.cardPad + 18,
+    paddingTop: 32,
+    paddingBottom: 32,
     paddingHorizontal: space.cardPad + 8,
   },
   calloutKicker: {
@@ -120,7 +121,7 @@ const styles = StyleSheet.create({
   bulletRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: 16,
+    marginBottom: 14,
     maxWidth: BODY_MAX_W + 8,
   },
   bulletMark: {
@@ -157,7 +158,7 @@ export function Page1Overview({ data }: { data: ReportData }): ReactElement[] {
         <PdfHeader data={data} variant="cover" />
         <PdfTraceMarker page={1} section="Page1:after_header" />
 
-        <View style={styles.hero} wrap={false}>
+        <View style={styles.hero}>
           <View style={styles.heroLeft}>
             <ScoreRing score={data.overallScore} />
           </View>
@@ -184,7 +185,7 @@ export function Page1Overview({ data }: { data: ReportData }): ReactElement[] {
           </View>
         </View>
 
-        <View style={[styles.statusStrip, { marginBottom: space.block }]} wrap={false}>
+        <View style={[styles.statusStrip, { marginBottom: space.block }]}>
           <View style={styles.statusCell}>
             <Text style={[styles.statusText, { color: colors.ink2 }]}>{statusUpper}</Text>
           </View>

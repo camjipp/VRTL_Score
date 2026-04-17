@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
   contrastRow: {
     width: CONTENT_W,
     flexDirection: "row",
-    marginBottom: space.block,
+    marginBottom: rhythm.sm,
     alignItems: "stretch",
   },
   contrastCard: {
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     width: CONTENT_W,
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: space.block,
+    marginBottom: rhythm.sm,
   },
   sectionLabel: {
     fontSize: 7,
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   evidenceRow: {
     width: CONTENT_W,
     flexDirection: "row",
-    marginBottom: space.block,
+    marginBottom: rhythm.sm,
     alignItems: "stretch",
   },
   exampleCard: {
@@ -199,10 +199,10 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
 
         <RankingAlertsSection data={data} />
 
-        <ChapterTitle title="Model analysis" subtitle={spreadSubtitle} />
+        <ChapterTitle title="Model analysis" subtitle={spreadSubtitle} minPresenceAhead={32} />
 
         {best && worst ? (
-          <View style={styles.contrastRow} wrap={false}>
+          <View style={styles.contrastRow}>
             <View style={[styles.contrastCard, styles.contrastCardLeft]}>
               <Text style={styles.contrastLabel}>Strongest surface</Text>
               <Text style={styles.contrastScore}>{best.score}</Text>
@@ -250,7 +250,7 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
         </View>
 
         {data.evidencePreview.length > 0 ? (
-          <View wrap={false} style={{ width: CONTENT_W }}>
+          <View style={{ width: CONTENT_W }}>
             <Text style={styles.sectionLabel}>Example answers</Text>
             <View style={styles.evidenceRow}>
               {data.evidencePreview.map((ev, i) => {
@@ -261,7 +261,6 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
                   <View
                     key={`ev-${i}`}
                     style={[styles.exampleCard, i === 0 ? { marginRight: EVIDENCE_GAP } : {}]}
-                    wrap={false}
                   >
                     <View style={styles.exampleAccent} />
                     <View style={styles.exampleInner}>
@@ -282,8 +281,7 @@ export function Page2ModelAnalysis({ data }: { data: ReportData }) {
         ) : null}
         {data.strategicTakeaway ? (
           <View
-            style={[styles.takeawayOuter, data.evidencePreview.length > 0 ? { marginTop: space.block } : {}]}
-            wrap={false}
+            style={[styles.takeawayOuter, data.evidencePreview.length > 0 ? { marginTop: rhythm.sm } : {}]}
           >
             <View style={styles.takeawayBar} />
             <View style={styles.takeawayInner}>

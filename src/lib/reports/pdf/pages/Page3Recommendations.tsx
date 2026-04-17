@@ -98,6 +98,14 @@ const styles = StyleSheet.create({
   },
   stripeNum: { fontSize: 18, fontWeight: 400, color: colors.paper, fontFamily: fonts.sansBold },
   mid: { flex: 1, paddingVertical: space.cardPad - 2, paddingHorizontal: space.cardPad, paddingRight: 12 },
+  /** Last numbered recommendation card: tighter bottom pad so footer does not clip */
+  midLast: {
+    flex: 1,
+    paddingTop: space.cardPad - 2,
+    paddingBottom: 16,
+    paddingHorizontal: space.cardPad,
+    paddingRight: 12,
+  },
   priPill: {
     alignSelf: "flex-start",
     paddingVertical: 2,
@@ -147,6 +155,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     justifyContent: "flex-start",
   },
+  rightLast: {
+    width: 128,
+    backgroundColor: colors.surface2,
+    paddingTop: space.cardPad - 2,
+    paddingBottom: 16,
+    paddingHorizontal: 12,
+    justifyContent: "flex-start",
+  },
   outLabel: {
     fontSize: 5.5,
     fontWeight: 400,
@@ -176,10 +192,7 @@ export function Page3Recommendations({ data }: { data: ReportData }) {
         />
 
         {first ? (
-          <View
-            wrap={false}
-            style={[styles.heroCard, isHigh ? { borderTopColor: HIGH_ACCENT } : { borderTopColor: colors.ink3 }]}
-          >
+          <View style={[styles.heroCard, isHigh ? { borderTopColor: HIGH_ACCENT } : { borderTopColor: colors.ink3 }]}>
             <Text style={styles.heroKicker}>Primary action</Text>
             <View style={styles.heroPri}>
               <Text style={styles.heroPriTxt}>{`${first.priority} PRIORITY`}</Text>
@@ -188,13 +201,13 @@ export function Page3Recommendations({ data }: { data: ReportData }) {
             <Text style={styles.heroInsight}>{String(first.insight)}</Text>
             <Text style={styles.heroOutcomeLabel}>Expected outcome</Text>
             <Text style={styles.heroOutcome}>{String(first.expectedOutcome)}</Text>
-            <View wrap={false}>
+            <View>
               <Text style={[styles.micro, styles.microSpaced]}>Why it matters</Text>
               <Text style={styles.body} orphans={2} widows={2}>
                 {String(first.explanation)}
               </Text>
             </View>
-            <View wrap={false}>
+            <View>
               <Text style={[styles.micro, styles.microSpaced]}>What we do</Text>
               <Text style={styles.body} orphans={2} widows={2}>
                 {String(first.action)}
@@ -203,59 +216,55 @@ export function Page3Recommendations({ data }: { data: ReportData }) {
           </View>
         ) : null}
 
-        {rest.length > 0 ? (
-          <View wrap={false}>
-            {rest.map((r, i) => {
-              const titleLine = String(r.title);
-              const insightLine = String(r.insight);
-              const expLine = String(r.expectedOutcome);
-              const actLine = String(r.action);
-              const explLine = String(r.explanation);
-              const cardHigh = r.priority === "HIGH";
-              const idx = i + 2;
-              return (
-                <View
-                  key={`rec-${r.priority}-${i}`}
-                  wrap={false}
-                  style={[
-                    styles.card,
-                    cardHigh ? styles.cardHigh : {},
-                    i < rest.length - 1 ? { marginBottom: rhythm.sm } : { marginBottom: 0 },
-                  ]}
-                >
-                  <View style={[styles.leftStripe, { backgroundColor: STRIPE_BG }]}>
-                    <Text style={styles.stripeNum}>{String(idx)}</Text>
-                  </View>
-                  <View style={styles.sep} />
-                  <View style={styles.mid}>
-                    <View style={styles.priPill}>
-                      <Text style={styles.priPillTxt}>{`${r.priority} PRIORITY`}</Text>
-                    </View>
-                    <Text style={styles.title}>{titleLine}</Text>
-                    <Text style={styles.insight}>{insightLine}</Text>
-                    <View wrap={false}>
-                      <Text style={styles.micro}>Why it matters</Text>
-                      <Text style={styles.body} orphans={2} widows={2}>
-                        {explLine}
-                      </Text>
-                    </View>
-                    <View wrap={false}>
-                      <Text style={[styles.micro, styles.microSpaced]}>What we do</Text>
-                      <Text style={styles.body} orphans={2} widows={2}>
-                        {actLine}
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={styles.sep} />
-                  <View style={styles.right}>
-                    <Text style={styles.outLabel}>Expected outcome</Text>
-                    <Text style={styles.outText}>{expLine}</Text>
-                  </View>
+        {rest.map((r, i) => {
+          const titleLine = String(r.title);
+          const insightLine = String(r.insight);
+          const expLine = String(r.expectedOutcome);
+          const actLine = String(r.action);
+          const explLine = String(r.explanation);
+          const cardHigh = r.priority === "HIGH";
+          const idx = i + 2;
+          const isLastRest = i === rest.length - 1;
+          return (
+            <View
+              key={`rec-${r.priority}-${i}`}
+              style={[
+                styles.card,
+                cardHigh ? styles.cardHigh : {},
+                i < rest.length - 1 ? { marginBottom: rhythm.sm } : { marginBottom: 0 },
+              ]}
+            >
+              <View style={[styles.leftStripe, { backgroundColor: STRIPE_BG }]}>
+                <Text style={styles.stripeNum}>{String(idx)}</Text>
+              </View>
+              <View style={styles.sep} />
+              <View style={isLastRest ? styles.midLast : styles.mid}>
+                <View style={styles.priPill}>
+                  <Text style={styles.priPillTxt}>{`${r.priority} PRIORITY`}</Text>
                 </View>
-              );
-            })}
-          </View>
-        ) : null}
+                <Text style={styles.title}>{titleLine}</Text>
+                <Text style={styles.insight}>{insightLine}</Text>
+                <View>
+                  <Text style={styles.micro}>Why it matters</Text>
+                  <Text style={styles.body} orphans={2} widows={2}>
+                    {explLine}
+                  </Text>
+                </View>
+                <View>
+                  <Text style={[styles.micro, styles.microSpaced]}>What we do</Text>
+                  <Text style={styles.body} orphans={2} widows={2}>
+                    {actLine}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.sep} />
+              <View style={isLastRest ? styles.rightLast : styles.right}>
+                <Text style={styles.outLabel}>Expected outcome</Text>
+                <Text style={styles.outText}>{expLine}</Text>
+              </View>
+            </View>
+          );
+        })}
 
         <PdfTraceMarker page={4} section="Page3:after_recommendations" />
         <PdfFooter data={data} />
