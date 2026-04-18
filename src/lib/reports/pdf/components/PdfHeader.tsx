@@ -16,7 +16,7 @@ export function PdfHeader({ data, variant = "inner", pageNum }: Props) {
   const tracePage = pageNum ?? (variant === "cover" ? 1 : 0);
 
   return (
-    <View wrap={false}>
+    <View wrap={false} fixed style={baseStyles.headerFixedWrap}>
       <View style={baseStyles.headerRow}>
         <View style={{ flex: 1, paddingRight: 12 }}>
           <PdfTraceMarker page={tracePage} section={`PdfHeader:title:${variant}`} />

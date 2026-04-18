@@ -77,6 +77,15 @@ export const baseStyles = StyleSheet.create({
     paddingBottom: 46,
     paddingHorizontal: PAGE.margin,
   },
+  /** Only header + footer use `fixed` — repeats on each page, positioned in margin band. */
+  headerFixedWrap: {
+    position: "absolute",
+    top: PAGE.margin,
+    left: PAGE.margin,
+    right: PAGE.margin,
+    backgroundColor: colors.paper,
+    zIndex: 100,
+  },
   headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",

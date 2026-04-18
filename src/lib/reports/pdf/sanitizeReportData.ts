@@ -149,23 +149,15 @@ export function formatEvidenceSnippetForPdf(raw: string): string {
   return cleaned;
 }
 
-/** PDF: drop vulnerable excerpt lines that look like raw JSON or API payloads. */
-export function isUnsafeVulnerableExcerptText(s: string): boolean {
-  const t = String(s).trim();
-  if (!t) return true;
-  const lower = t.toLowerCase();
-  if (lower.includes("client_mentioned")) return true;
-  if (lower.startsWith("json")) return true;
-  if (t.includes(": ")) return true;
+/** Raw JSON / API-shaped vulnerable blobs — strip entirely in PDF. */
+export function vulnerableExcerptBlobUnsafe(vuln: VulnerableExcerptParts, rawSnippet: string): boolean {
+  const blob = `${vuln.summary}\n${vuln.competitorsLine}\n${vuln.implication}\n${rawSnippet}`;
+  const text = blob.trim();
+  if (!text) return true;
+  if (text.includes("client_mentioned")) return true;
+  if (text.includes('"not_mentioned"')) return true;
+  if (text.toLowerCase().startsWith("json")) return true;
   return false;
-}
-
-function shouldStripVulnerableExcerptParts(parts: VulnerableExcerptParts): boolean {
-  return (
-    isUnsafeVulnerableExcerptText(parts.summary) ||
-    isUnsafeVulnerableExcerptText(parts.competitorsLine) ||
-    isUnsafeVulnerableExcerptText(parts.implication)
-  );
 }
 
 /**
@@ -280,7 +272,7 @@ export function sanitizeReportDataForPdf(data: ReportData): ReportData {
         label.toUpperCase().includes("VULNERABLE") || label.toUpperCase().includes("INVISIBLE")
           ? buildVulnerableExcerptForPdf(rawSnip, e.note, competitorNames)
           : undefined;
-      if (vulnerableExcerpt && shouldStripVulnerableExcerptParts(vulnerableExcerpt)) {
+      if (vulnerableExcerpt && vulnerableExcerptBlobUnsafe(vulnerableExcerpt, rawSnip)) {
         vulnerableExcerpt = undefined;
       }
       return {

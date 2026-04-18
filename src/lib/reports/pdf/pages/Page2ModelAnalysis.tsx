@@ -1,7 +1,7 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
+import { vulnerableExcerptBlobUnsafe } from "../sanitizeReportData";
 import { PAGE, colors, fonts, rhythm, baseStyles, CONTENT_W, pdfPageRootPadding, space, BODY_MAX_W } from "../theme";
-import { isUnsafeVulnerableExcerptText } from "../sanitizeReportData";
 import { formatEvidenceLogPillLabel } from "@/lib/reports/formatEvidenceFieldDisplay";
 import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfFooter } from "../components/PdfFooter";
@@ -166,32 +166,32 @@ export function PageModelAnalysisExamples({ data }: { data: ReportData }) {
                         <Text style={styles.exampleKicker}>Client-readable excerpt</Text>
                         <Text style={styles.exampleBadge}>{labelLine}</Text>
                         {vuln ? (
-                          <>
-                            {!isUnsafeVulnerableExcerptText(vuln.summary) ? (
+                          vulnerableExcerptBlobUnsafe(vuln, String(ev.snippet)) ? (
+                            <View style={styles.exampleQuote}>
+                              <Text style={styles.exampleQuoteText}>No excerpt available.</Text>
+                            </View>
+                          ) : (
+                            <>
                               <View style={styles.vulnBlock}>
                                 <Text style={styles.vulnMini}>Summary</Text>
                                 <Text style={styles.vulnBody} orphans={2} widows={2}>
                                   {vuln.summary}
                                 </Text>
                               </View>
-                            ) : null}
-                            {!isUnsafeVulnerableExcerptText(vuln.competitorsLine) ? (
                               <View style={styles.vulnBlock}>
                                 <Text style={styles.vulnMini}>Competitors named</Text>
                                 <Text style={styles.vulnBody} orphans={2} widows={2}>
                                   {vuln.competitorsLine}
                                 </Text>
                               </View>
-                            ) : null}
-                            {!isUnsafeVulnerableExcerptText(vuln.implication) ? (
                               <View style={styles.vulnBlock}>
                                 <Text style={styles.vulnMini}>Implication</Text>
                                 <Text style={styles.vulnBody} orphans={2} widows={2}>
                                   {vuln.implication}
                                 </Text>
                               </View>
-                            ) : null}
-                          </>
+                            </>
+                          )
                         ) : (
                           <>
                             <View style={styles.exampleQuote}>

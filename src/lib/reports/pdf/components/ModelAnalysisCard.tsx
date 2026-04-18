@@ -13,7 +13,7 @@ export type ModelAnalysisCardProps = {
   bulletDotColor: string;
   /** Defaults to 172 (MODEL_CARD_WIDTH). */
   cardWidth?: number;
-  /** Limit bullet count for fixed-height matrix slots. */
+  /** Limit bullet count for matrix row slots. */
   maxBullets?: number;
   /** Tighter typography for bottom-row matrix slots. */
   compact?: boolean;
@@ -21,12 +21,8 @@ export type ModelAnalysisCardProps = {
 
 /** Three columns + gaps = 540pt content: 172 + 12 + 172 + 12 + 172 */
 export const MODEL_CARD_WIDTH = 172;
-/** Equal-height analysis cards — keep moderate to reduce forced page breaks */
-const CARD_MIN_H = 120;
-
 const styles = StyleSheet.create({
   root: {
-    minHeight: CARD_MIN_H,
     backgroundColor: colors.paper,
     borderWidth: 1,
     borderColor: colors.rule,

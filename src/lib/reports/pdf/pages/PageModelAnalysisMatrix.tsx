@@ -9,7 +9,6 @@ import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
 const GAP = 10;
 const COL_W = (CONTENT_W - GAP) / 2;
-const ROW_H = 288;
 
 const NEUTRAL = {
   band: colors.surface2,
@@ -23,11 +22,17 @@ const styles = StyleSheet.create({
     marginTop: rhythm.sm,
     flexDirection: "column",
   },
-  row: {
+  rowTop: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "stretch",
-    height: ROW_H,
+    maxHeight: 220,
+  },
+  rowBottom: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "stretch",
+    maxHeight: 200,
   },
   slot: {
     width: COL_W,
@@ -111,7 +116,7 @@ export function PageModelAnalysisMatrix({ data }: { data: ReportData }) {
         <PdfHeader data={data} variant="inner" pageNum={3} />
         <ChapterTitle title="Model analysis" subtitle={subtitle} />
         <View style={styles.matrix}>
-          <View style={styles.row}>
+          <View style={styles.rowTop}>
             <View style={styles.slot}>
               {openai ? (
                 <ModelAnalysisCard
@@ -152,7 +157,7 @@ export function PageModelAnalysisMatrix({ data }: { data: ReportData }) {
             </View>
           </View>
           <View style={{ height: GAP }} />
-          <View style={styles.row}>
+          <View style={styles.rowBottom}>
             <View style={styles.slot}>
               {gemini ? (
                 <ModelAnalysisCard

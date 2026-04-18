@@ -19,7 +19,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderTopWidth: 3,
     borderTopColor: HIGH_ACCENT,
-    padding: space.cardPad - 4,
+    paddingTop: 20,
+    paddingBottom: 20,
+    paddingHorizontal: space.cardPad - 4,
     marginBottom: rhythm.md,
     width: CONTENT_W,
   },
@@ -88,7 +90,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   numberedCard: {
-    marginBottom: 12,
+    marginBottom: 10,
   },
   cardHigh: {
     borderLeftWidth: 3,
@@ -184,7 +186,6 @@ function HeroCard({ rec }: { rec: RecommendationCard }) {
   return (
     <View
       style={[styles.heroCard, isHigh ? { borderTopColor: HIGH_ACCENT } : { borderTopColor: colors.ink3 }]}
-      wrap={false}
     >
       <Text style={styles.heroKicker}>Primary action</Text>
       <View style={styles.heroPri}>
@@ -218,7 +219,7 @@ function NumberedCard({ rec, num }: { rec: RecommendationCard; num: number }) {
   const actLine = String(rec.action);
   const explLine = String(rec.explanation);
   return (
-    <View style={[styles.card, styles.numberedCard, cardHigh ? styles.cardHigh : {}]} wrap={false}>
+    <View style={[styles.card, styles.numberedCard, cardHigh ? styles.cardHigh : {}]}>
       <View style={[styles.leftStripe, { backgroundColor: STRIPE_BG }]}>
         <Text style={styles.stripeNum}>{String(num)}</Text>
       </View>
