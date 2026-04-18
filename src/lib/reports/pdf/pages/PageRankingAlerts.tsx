@@ -1,6 +1,6 @@
 import { Page, StyleSheet, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { PAGE, baseStyles, rhythm } from "../theme";
+import { PAGE, baseStyles, pdfPageRootPadding, rhythm } from "../theme";
 import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
 /** Slide 2 — competitive ranking + WIN / RISK / PRIORITY (no model matrix on this page). */
 export function PageRankingAlerts({ data }: { data: ReportData }) {
   return (
-    <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
+    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding]}>
       <View style={baseStyles.pageBody}>
         <PdfTraceMarker page={2} section="RankingAlerts:start" />
         <PdfHeader data={data} variant="inner" pageNum={2} />

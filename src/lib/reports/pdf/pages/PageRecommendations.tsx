@@ -2,7 +2,7 @@ import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "../types";
 import type { RecommendationCard } from "../types";
-import { PAGE, colors, fonts, rhythm, baseStyles, space, BODY_MAX_W, CONTENT_W } from "../theme";
+import { PAGE, colors, fonts, rhythm, baseStyles, pdfPageRootPadding, space, BODY_MAX_W, CONTENT_W } from "../theme";
 import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
@@ -84,9 +84,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.rule,
     borderRadius: 6,
-    marginBottom: rhythm.md,
     padding: 0,
     overflow: "hidden",
+  },
+  numberedCard: {
+    marginBottom: 12,
   },
   cardHigh: {
     borderLeftWidth: 3,
@@ -100,6 +102,13 @@ const styles = StyleSheet.create({
   },
   stripeNum: { fontSize: 18, fontWeight: 400, color: colors.paper, fontFamily: fonts.sansBold },
   mid: { flex: 1, paddingVertical: space.cardPad - 2, paddingHorizontal: space.cardPad, paddingRight: 12 },
+  midNumbered: {
+    flex: 1,
+    paddingTop: space.cardPad - 2,
+    paddingBottom: 16,
+    paddingHorizontal: space.cardPad,
+    paddingRight: 12,
+  },
   priPill: {
     alignSelf: "flex-start",
     paddingVertical: 2,
@@ -146,6 +155,14 @@ const styles = StyleSheet.create({
     width: 128,
     backgroundColor: colors.surface2,
     paddingVertical: space.cardPad - 2,
+    paddingHorizontal: 12,
+    justifyContent: "flex-start",
+  },
+  rightNumbered: {
+    width: 128,
+    backgroundColor: colors.surface2,
+    paddingTop: space.cardPad - 2,
+    paddingBottom: 16,
     paddingHorizontal: 12,
     justifyContent: "flex-start",
   },
@@ -201,12 +218,12 @@ function NumberedCard({ rec, num }: { rec: RecommendationCard; num: number }) {
   const actLine = String(rec.action);
   const explLine = String(rec.explanation);
   return (
-    <View style={[styles.card, cardHigh ? styles.cardHigh : {}]} wrap={false}>
+    <View style={[styles.card, styles.numberedCard, cardHigh ? styles.cardHigh : {}]} wrap={false}>
       <View style={[styles.leftStripe, { backgroundColor: STRIPE_BG }]}>
         <Text style={styles.stripeNum}>{String(num)}</Text>
       </View>
       <View style={styles.sep} />
-      <View style={styles.mid}>
+      <View style={styles.midNumbered}>
         <View style={styles.priPill}>
           <Text style={styles.priPillTxt}>{`${rec.priority} PRIORITY`}</Text>
         </View>
@@ -226,7 +243,7 @@ function NumberedCard({ rec, num }: { rec: RecommendationCard; num: number }) {
         </View>
       </View>
       <View style={styles.sep} />
-      <View style={styles.right}>
+      <View style={styles.rightNumbered}>
         <Text style={styles.outLabel}>Expected outcome</Text>
         <Text style={styles.outText}>{expLine}</Text>
       </View>
@@ -243,7 +260,7 @@ export function renderRecommendationPages(data: ReportData): ReactElement[] {
   const pages: ReactElement[] = [];
 
   pages.push(
-    <Page key="rec-p1" size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
+    <Page key="rec-p1" size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding]}>
       <View style={baseStyles.pageBody}>
         <PdfTraceMarker page={5} section="Rec:p1" />
         <PdfHeader data={data} variant="inner" pageNum={5} />
@@ -266,7 +283,7 @@ export function renderRecommendationPages(data: ReportData): ReactElement[] {
     if (!a) break;
     const pageIdx = (k + 1) / 2 + 1;
     pages.push(
-      <Page key={`rec-p${pageIdx}`} size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
+      <Page key={`rec-p${pageIdx}`} size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding]}>
         <View style={baseStyles.pageBody}>
           <PdfTraceMarker page={5} section={`Rec:p${pageIdx}`} />
           <PdfHeader data={data} variant="inner" pageNum={5} />

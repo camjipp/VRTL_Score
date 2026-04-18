@@ -2,6 +2,9 @@ import { StyleSheet } from "@react-pdf/renderer";
 
 /** US Letter — 612 × 792 pt; 36 pt margins on all sides */
 export const PAGE = { width: 612, height: 792, margin: 36 } as const;
+
+/** Root `<Page>` inset so body clears header/footer zones (matches legacy inner pages). */
+export const pdfPageRootPadding = { paddingTop: 72, paddingBottom: 56 } as const;
 export const CONTENT_W = PAGE.width - PAGE.margin * 2;
 
 /** PDF-safe palette (plain hex — no CSS variables in @react-pdf) */

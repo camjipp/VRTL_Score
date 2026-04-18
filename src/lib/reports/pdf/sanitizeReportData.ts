@@ -149,6 +149,25 @@ export function formatEvidenceSnippetForPdf(raw: string): string {
   return cleaned;
 }
 
+/** PDF: drop vulnerable excerpt lines that look like raw JSON or API payloads. */
+export function isUnsafeVulnerableExcerptText(s: string): boolean {
+  const t = String(s).trim();
+  if (!t) return true;
+  const lower = t.toLowerCase();
+  if (lower.includes("client_mentioned")) return true;
+  if (lower.startsWith("json")) return true;
+  if (t.includes(": ")) return true;
+  return false;
+}
+
+function shouldStripVulnerableExcerptParts(parts: VulnerableExcerptParts): boolean {
+  return (
+    isUnsafeVulnerableExcerptText(parts.summary) ||
+    isUnsafeVulnerableExcerptText(parts.competitorsLine) ||
+    isUnsafeVulnerableExcerptText(parts.implication)
+  );
+}
+
 /**
  * Client-facing vulnerable row: never show JSON, backticks, or code-shaped payloads.
  * Uses structured fields when parseable; otherwise derives short lines from snippet + note.
@@ -257,10 +276,13 @@ export function sanitizeReportDataForPdf(data: ReportData): ReportData {
       const rawSnip = String(e.snippet);
       const snippet = formatEvidenceSnippetForPdf(rawSnip);
       const competitorNames = data.competitors.map((c) => sanitizePdfString(c.name));
-      const vulnerableExcerpt =
+      let vulnerableExcerpt: VulnerableExcerptParts | undefined =
         label.toUpperCase().includes("VULNERABLE") || label.toUpperCase().includes("INVISIBLE")
           ? buildVulnerableExcerptForPdf(rawSnip, e.note, competitorNames)
           : undefined;
+      if (vulnerableExcerpt && shouldStripVulnerableExcerptParts(vulnerableExcerpt)) {
+        vulnerableExcerpt = undefined;
+      }
       return {
         ...e,
         label,

@@ -1,6 +1,6 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { PAGE, colors, fonts, rhythm, baseStyles, space, BODY_MAX_W } from "../theme";
+import { PAGE, colors, fonts, rhythm, baseStyles, pdfPageRootPadding, space, BODY_MAX_W } from "../theme";
 import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
@@ -14,8 +14,6 @@ const styles = StyleSheet.create({
     borderColor: colors.rule,
     borderRadius: 8,
     padding: space.cardPad,
-    overflow: "hidden",
-    flex: 1,
   },
   methodTitle: {
     fontSize: 8,
@@ -33,21 +31,18 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sans,
     maxWidth: BODY_MAX_W,
   },
-  fill: { flex: 1, flexDirection: "column" },
 });
 
 export function PageMethodology({ data }: { data: ReportData }) {
   return (
-    <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
+    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding]}>
       <View style={baseStyles.pageBody}>
         <PdfTraceMarker page={7} section="Methodology:start" />
         <PdfHeader data={data} variant="inner" pageNum={7} />
         <ChapterTitle title="Methodology" subtitle="How this snapshot was produced and how to read the tables." />
-        <View style={styles.fill}>
-          <View style={styles.method}>
-            <Text style={styles.methodTitle}>Overview</Text>
-            <Text style={styles.methodBody}>{data.methodology}</Text>
-          </View>
+        <View style={styles.method}>
+          <Text style={styles.methodTitle}>Overview</Text>
+          <Text style={styles.methodBody}>{data.methodology}</Text>
         </View>
         <PdfFooter data={data} />
       </View>

@@ -1,13 +1,12 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { PAGE, colors, fonts, rhythm, baseStyles, BODY_MAX_W, space } from "../theme";
+import { PAGE, colors, fonts, rhythm, baseStyles, BODY_MAX_W, pdfPageRootPadding, space } from "../theme";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
 const styles = StyleSheet.create({
   shell: {
-    flex: 1,
     flexDirection: "column",
     justifyContent: "flex-start",
   },
@@ -64,7 +63,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   nextBlock: {
-    flex: 1,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.rule,
@@ -104,7 +102,7 @@ export function PageClosing({ data }: { data: ReportData }) {
       : "";
 
   return (
-    <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
+    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding]}>
       <View style={baseStyles.pageBody}>
         <PdfTraceMarker page={7} section="Closing:start" />
         <PdfHeader data={data} variant="inner" pageNum={7} />

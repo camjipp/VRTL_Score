@@ -1,6 +1,7 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { PAGE, colors, fonts, rhythm, baseStyles, CONTENT_W, space, BODY_MAX_W } from "../theme";
+import { PAGE, colors, fonts, rhythm, baseStyles, CONTENT_W, pdfPageRootPadding, space, BODY_MAX_W } from "../theme";
+import { isUnsafeVulnerableExcerptText } from "../sanitizeReportData";
 import { formatEvidenceLogPillLabel } from "@/lib/reports/formatEvidenceFieldDisplay";
 import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfFooter } from "../components/PdfFooter";
@@ -136,7 +137,7 @@ export function PageModelAnalysisExamples({ data }: { data: ReportData }) {
   if (!hasEvidence && !hasTakeaway) return null;
 
   return (
-    <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
+    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding]}>
       <View style={baseStyles.pageBody}>
         <PdfTraceMarker page={4} section="ModelExamples:start" />
         <PdfHeader data={data} variant="inner" pageNum={4} />
@@ -166,24 +167,30 @@ export function PageModelAnalysisExamples({ data }: { data: ReportData }) {
                         <Text style={styles.exampleBadge}>{labelLine}</Text>
                         {vuln ? (
                           <>
-                            <View style={styles.vulnBlock}>
-                              <Text style={styles.vulnMini}>Summary</Text>
-                              <Text style={styles.vulnBody} orphans={2} widows={2}>
-                                {vuln.summary}
-                              </Text>
-                            </View>
-                            <View style={styles.vulnBlock}>
-                              <Text style={styles.vulnMini}>Competitors named</Text>
-                              <Text style={styles.vulnBody} orphans={2} widows={2}>
-                                {vuln.competitorsLine}
-                              </Text>
-                            </View>
-                            <View style={styles.vulnBlock}>
-                              <Text style={styles.vulnMini}>Implication</Text>
-                              <Text style={styles.vulnBody} orphans={2} widows={2}>
-                                {vuln.implication}
-                              </Text>
-                            </View>
+                            {!isUnsafeVulnerableExcerptText(vuln.summary) ? (
+                              <View style={styles.vulnBlock}>
+                                <Text style={styles.vulnMini}>Summary</Text>
+                                <Text style={styles.vulnBody} orphans={2} widows={2}>
+                                  {vuln.summary}
+                                </Text>
+                              </View>
+                            ) : null}
+                            {!isUnsafeVulnerableExcerptText(vuln.competitorsLine) ? (
+                              <View style={styles.vulnBlock}>
+                                <Text style={styles.vulnMini}>Competitors named</Text>
+                                <Text style={styles.vulnBody} orphans={2} widows={2}>
+                                  {vuln.competitorsLine}
+                                </Text>
+                              </View>
+                            ) : null}
+                            {!isUnsafeVulnerableExcerptText(vuln.implication) ? (
+                              <View style={styles.vulnBlock}>
+                                <Text style={styles.vulnMini}>Implication</Text>
+                                <Text style={styles.vulnBody} orphans={2} widows={2}>
+                                  {vuln.implication}
+                                </Text>
+                              </View>
+                            ) : null}
                           </>
                         ) : (
                           <>

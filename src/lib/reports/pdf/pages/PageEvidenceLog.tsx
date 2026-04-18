@@ -1,6 +1,6 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { PAGE, colors, fonts, rhythm, baseStyles, BODY_MAX_W } from "../theme";
+import { PAGE, colors, fonts, rhythm, baseStyles, BODY_MAX_W, pdfPageRootPadding } from "../theme";
 import { formatEvidenceLogPillLabel, formatPdfEvidenceTableCell } from "@/lib/reports/formatEvidenceFieldDisplay";
 import { sanitizePdfString } from "../sanitizeReportData";
 import { ChapterTitle } from "../components/ChapterTitle";
@@ -90,7 +90,7 @@ function logLabelPill(label: string): { bg: string; fg: string } {
 
 export function PageEvidenceLog({ data }: { data: ReportData }) {
   return (
-    <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
+    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding]}>
       <View style={baseStyles.pageBody}>
         <PdfTraceMarker page={7} section="EvidenceLog:start" />
         <PdfHeader data={data} variant="inner" pageNum={7} />

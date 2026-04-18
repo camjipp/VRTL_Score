@@ -1,6 +1,6 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ModelScoreRow, ReportData } from "../types";
-import { PAGE, colors, fonts, rhythm, baseStyles, CONTENT_W, space } from "../theme";
+import { PAGE, colors, fonts, rhythm, baseStyles, CONTENT_W, pdfPageRootPadding, space } from "../theme";
 import { ModelAnalysisCard } from "../components/ModelAnalysisCard";
 import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfFooter } from "../components/PdfFooter";
@@ -9,8 +9,7 @@ import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
 const GAP = 10;
 const COL_W = (CONTENT_W - GAP) / 2;
-const TOP_ROW_H = 288;
-const BOT_ROW_H = 218;
+const ROW_H = 288;
 
 const NEUTRAL = {
   band: colors.surface2,
@@ -22,11 +21,13 @@ const styles = StyleSheet.create({
   matrix: {
     width: CONTENT_W,
     marginTop: rhythm.sm,
+    flexDirection: "column",
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "stretch",
+    height: ROW_H,
   },
   slot: {
     width: COL_W,
@@ -104,13 +105,13 @@ export function PageModelAnalysisMatrix({ data }: { data: ReportData }) {
       : `${spread} points from best to worst. Buyers see different short lists by assistant.`;
 
   return (
-    <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
+    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding]}>
       <View style={baseStyles.pageBody}>
         <PdfTraceMarker page={3} section="ModelMatrix:start" />
         <PdfHeader data={data} variant="inner" pageNum={3} />
         <ChapterTitle title="Model analysis" subtitle={subtitle} />
         <View style={styles.matrix}>
-          <View style={[styles.row, { height: TOP_ROW_H }]}>
+          <View style={styles.row}>
             <View style={styles.slot}>
               {openai ? (
                 <ModelAnalysisCard
@@ -151,7 +152,7 @@ export function PageModelAnalysisMatrix({ data }: { data: ReportData }) {
             </View>
           </View>
           <View style={{ height: GAP }} />
-          <View style={[styles.row, { height: BOT_ROW_H }]}>
+          <View style={styles.row}>
             <View style={styles.slot}>
               {gemini ? (
                 <ModelAnalysisCard
