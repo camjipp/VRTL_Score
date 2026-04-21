@@ -12,7 +12,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:check": "node scripts/supabase_healthcheck.mjs"
+    "db:check": "node scripts/supabase_healthcheck.mjs",
+    "pdf:sample": "npx tsx --tsconfig tsconfig.tools.json scripts/render-sample-pdf.ts"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.3.2",
