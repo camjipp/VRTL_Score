@@ -1,26 +1,27 @@
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "../types";
-import { colors, fonts, rhythm, space, BODY_MAX_W } from "../theme";
+import { colors, fonts, rhythm, space, BODY_MAX_W, CONTENT_W } from "../theme";
 import { FixedInnerPage } from "../components/FixedInnerPage";
 import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
+const W = CONTENT_W;
 const S = {
-  sig: 184,
-  cnt: 44,
-  rate: 44,
-  pill: 100,
-  note: 168,
+  sig: 176,
+  cnt: 42,
+  rate: 42,
+  pill: 95,
+  note: W - 176 - 42 - 42 - 95,
 } as const;
 
 const C = {
-  brand: 108,
-  bar: 176,
-  m: 48,
-  r: 48,
-  vs: 52,
-  st: 108,
+  brand: 103,
+  bar: 168,
+  m: 46,
+  r: 46,
+  vs: 50,
+  st: W - 103 - 168 - 46 - 46 - 50,
 } as const;
 
 const styles = StyleSheet.create({
@@ -51,7 +52,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.rule,
     alignItems: "center",
-    width: 540,
+    width: W,
   },
   thText: {
     fontSize: 6.5,
@@ -68,7 +69,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: rhythm.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.rule,
-    width: 540,
+    width: W,
     minHeight: 36,
   },
   trAlt: { backgroundColor: colors.surface },
@@ -142,7 +143,7 @@ export function Page08DataSummary({ data }: { data: ReportData }): ReactElement 
       />
       <Text style={styles.interpret}>{data.dataSummaryInterpretation}</Text>
       <Text style={[styles.h, styles.hFirst]}>Signals</Text>
-      <View style={{ marginBottom: space.block, width: 540 }}>
+      <View style={{ marginBottom: space.block, width: W }}>
         <View style={styles.th}>
           <Text style={[styles.thText, { width: S.sig }]}>Signal</Text>
           <Text style={[styles.thText, { width: S.cnt, textAlign: "center" }]}>Count</Text>
@@ -171,7 +172,7 @@ export function Page08DataSummary({ data }: { data: ReportData }): ReactElement 
       </View>
 
       <Text style={styles.h}>Competitive set</Text>
-      <View style={{ width: 540 }}>
+      <View style={{ flexGrow: 1, minHeight: 0, width: W }}>
         <View style={styles.th}>
           <Text style={[styles.thText, { width: C.brand }]}>Brand</Text>
           <Text style={[styles.thText, { width: C.bar }]}>Mentions</Text>

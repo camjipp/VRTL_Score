@@ -14,15 +14,17 @@ const styles = StyleSheet.create({
 /** PAGE 2 — Competitive snapshot only (fixed template). */
 export function Page02CompetitiveSnapshot({ data }: { data: ReportData }): ReactElement {
   return (
-    <FixedInnerPage data={data} pageNum={2} pagePaddingTop={90}>
+    <FixedInnerPage data={data} pageNum={2}>
       <PdfTraceMarker page={2} section="Fixed:P2" />
-      <View style={styles.block}>
-        <ChapterTitle
-          title="Competitive snapshot"
-          subtitle="How you rank today and the three signals we are watching in this test set."
-        />
+      <View style={{ flex: 1, flexDirection: "column", minHeight: 0 }}>
+        <View style={styles.block}>
+          <ChapterTitle
+            title="Competitive snapshot"
+            subtitle="How you rank today and the three signals we are watching in this test set."
+          />
+        </View>
+        <RankingAlertsSection data={data} />
       </View>
-      <RankingAlertsSection data={data} />
     </FixedInnerPage>
   );
 }

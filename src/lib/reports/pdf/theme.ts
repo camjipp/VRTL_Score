@@ -3,9 +3,14 @@ import { StyleSheet } from "@react-pdf/renderer";
 /** US Letter — 612 × 792 pt; 36 pt margins on all sides */
 export const PAGE = { width: 612, height: 792, margin: 36 } as const;
 
-/** Root `<Page>` inset so body clears header/footer zones (matches legacy inner pages). */
+/** Slide layout: horizontal inset for designed pages (48pt each side → 516pt content width). */
+export const PDF_SLIDE_HORIZONTAL_PAD = 48;
+
+/** Root `<Page>` inset so body clears header/footer zones (legacy / probes). */
 export const pdfPageRootPadding = { paddingTop: 72, paddingBottom: 56 } as const;
-export const CONTENT_W = PAGE.width - PAGE.margin * 2;
+
+/** Content width inside slide pages (`paddingHorizontal: 48`). */
+export const CONTENT_W = PAGE.width - PDF_SLIDE_HORIZONTAL_PAD * 2;
 
 /** PDF-safe palette (plain hex — no CSS variables in @react-pdf) */
 export const colors = {
@@ -78,6 +83,25 @@ export const baseStyles = StyleSheet.create({
     height: PAGE.height,
     flexDirection: "column",
   },
+  /** Designed slide `<Page>`: fixed padding; content uses `pdfSlideContent` inside (no double horizontal inset). */
+  pdfSlidePage: {
+    width: PAGE.width,
+    height: PAGE.height,
+    backgroundColor: colors.paper,
+    fontFamily: fonts.sans,
+    fontWeight: 400,
+    color: colors.ink,
+    flexDirection: "column",
+    paddingTop: 90,
+    paddingBottom: 56,
+    paddingHorizontal: PDF_SLIDE_HORIZONTAL_PAD,
+  },
+  /** Stretches between fixed header and fixed footer on slide pages. */
+  pdfSlideContent: {
+    flex: 1,
+    flexDirection: "column",
+    minHeight: 0,
+  },
   pageBody: {
     paddingTop: PAGE.margin,
     paddingBottom: 46,
@@ -95,9 +119,9 @@ export const baseStyles = StyleSheet.create({
   /** Only header + footer use `fixed` — repeats on each page, positioned in margin band. */
   headerFixedWrap: {
     position: "absolute",
-    top: PAGE.margin,
-    left: PAGE.margin,
-    right: PAGE.margin,
+    top: 0,
+    left: PDF_SLIDE_HORIZONTAL_PAD,
+    right: PDF_SLIDE_HORIZONTAL_PAD,
     backgroundColor: colors.paper,
     zIndex: 100,
   },
@@ -210,8 +234,8 @@ export const baseStyles = StyleSheet.create({
   footer: {
     position: "absolute",
     bottom: 20,
-    left: PAGE.margin,
-    right: PAGE.margin,
+    left: PDF_SLIDE_HORIZONTAL_PAD,
+    right: PDF_SLIDE_HORIZONTAL_PAD,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",

@@ -1,7 +1,7 @@
 import { Page, View } from "@react-pdf/renderer";
 import type { ReactNode } from "react";
 import type { ReportData } from "../types";
-import { PAGE, baseStyles, pdfPageRootPadding } from "../theme";
+import { PAGE, baseStyles } from "../theme";
 import { PdfFooter } from "./PdfFooter";
 import { PdfHeader } from "./PdfHeader";
 
@@ -10,25 +10,23 @@ type Props = {
   /** Trace / header hint only — not guaranteed to match PDF page index when sections are skipped. */
   pageNum: number;
   children: ReactNode;
-  /** Use flex body so children can distribute vertical space (e.g. execution plan). */
-  bodyVariant?: "default" | "flex";
-  /** Top inset for `<Page>` so chapter titles clear the fixed running header (default matches `pdfPageRootPadding`). */
+  /** Slide top inset — default 90 so titles clear the fixed header; use 100 on methodology if needed. */
   pagePaddingTop?: number;
 };
 
+const bodyColumn = { flex: 1, flexDirection: "column" as const, minHeight: 0 };
+
 /**
- * Fixed-template inner page: one physical `<Page>` with header + footer and a single body slot.
- * Content layout is owned by each template — this shell does not implement flow-based breaks.
+ * Fixed-template inner page: one physical `<Page>` with slide padding, header + footer, and a flex body slot.
  */
-export function FixedInnerPage({ data, pageNum, children, bodyVariant = "default", pagePaddingTop }: Props) {
-  const bodyStyle = bodyVariant === "flex" ? baseStyles.pageBodyFlex : baseStyles.pageBody;
-  const pagePad =
-    pagePaddingTop != null ? { ...pdfPageRootPadding, paddingTop: pagePaddingTop } : pdfPageRootPadding;
+export function FixedInnerPage({ data, pageNum, children, pagePaddingTop }: Props) {
+  const pageStyle =
+    pagePaddingTop != null ? [baseStyles.pdfSlidePage, { paddingTop: pagePaddingTop }] : baseStyles.pdfSlidePage;
   return (
-    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pagePad, baseStyles.pageColumn]}>
-      <View style={bodyStyle}>
+    <Page size={[PAGE.width, PAGE.height]} style={pageStyle}>
+      <View style={baseStyles.pdfSlideContent}>
         <PdfHeader data={data} variant="inner" pageNum={pageNum} />
-        {children}
+        <View style={bodyColumn}>{children}</View>
         <PdfFooter data={data} />
       </View>
     </Page>

@@ -105,8 +105,7 @@ const styles = StyleSheet.create({
   calloutBar: { width: 4, backgroundColor: colors.cyan },
   calloutInner: {
     flex: 1,
-    paddingTop: 28,
-    paddingBottom: 28,
+    paddingVertical: 32,
     paddingHorizontal: space.cardPad + 8,
   },
   calloutKicker: {
@@ -153,11 +152,12 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
     : [data.bottomLine.trim() || "No executive summary was provided for this report."];
 
   return (
-    <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
-      <View style={baseStyles.pageBody}>
+    <Page size={[PAGE.width, PAGE.height]} style={baseStyles.pdfSlidePage}>
+      <View style={baseStyles.pdfSlideContent}>
         <PdfTraceMarker page={1} section="Fixed:P1" />
         <PdfHeader data={data} variant="cover" />
 
+        <View style={{ flex: 1, flexDirection: "column", minHeight: 0 }}>
         <View style={styles.hero}>
           <View style={styles.heroLeft}>
             <ScoreRing score={data.overallScore} />
@@ -179,7 +179,7 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
           </View>
         </View>
 
-        <View style={[styles.statusStrip, { marginBottom: space.block }]}>
+        <View style={[styles.statusStrip, { marginBottom: rhythm.md }]}>
           <View style={styles.statusCell}>
             <Text style={[styles.statusText, { color: colors.ink2 }]}>{statusUpper}</Text>
           </View>
@@ -191,7 +191,7 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
           </View>
         </View>
 
-        <View style={styles.calloutWrap}>
+        <View style={[styles.calloutWrap, { flex: 1 }]}>
           <View style={styles.calloutBar} />
           <View style={styles.calloutInner}>
             <Text style={styles.calloutKicker}>Bottom line</Text>
@@ -204,6 +204,7 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
               </View>
             ))}
           </View>
+        </View>
         </View>
 
         <PdfFooter data={data} />

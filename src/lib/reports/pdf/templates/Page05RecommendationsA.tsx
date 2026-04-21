@@ -1,3 +1,4 @@
+import { View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "../types";
 import { sliceRecommendationsForFixedTemplates } from "../fixed/fixedRecommendationSlices";
@@ -12,14 +13,22 @@ export function Page05RecommendationsA({ data }: { data: ReportData }): ReactEle
   const [first, second] = page5Pair;
 
   return (
-    <FixedInnerPage data={data} pageNum={5} pagePaddingTop={90}>
+    <FixedInnerPage data={data} pageNum={5}>
       <PdfTraceMarker page={5} section="Fixed:P5" />
       <ChapterTitle
         title="Recommendations"
         subtitle="Highest-impact moves first: concrete execution tied to measurable recommendation outcomes."
       />
-      {first ? <PrimaryRecommendationCard rec={first} /> : null}
-      {second ? <NumberedRecommendationCard rec={second} num={2} /> : null}
+      {first ? (
+        <View style={second ? {} : { flexGrow: 1, minHeight: 0 }}>
+          <PrimaryRecommendationCard rec={first} />
+        </View>
+      ) : null}
+      {second ? (
+        <View style={{ flexGrow: 1, minHeight: 0 }}>
+          <NumberedRecommendationCard rec={second} num={2} />
+        </View>
+      ) : null}
     </FixedInnerPage>
   );
 }

@@ -1,18 +1,13 @@
-import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
+import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "../types";
-import { PAGE, baseStyles, colors, fonts, rhythm, BODY_MAX_W, pdfPageRootPadding, space } from "../theme";
-import { PdfFooter } from "../components/PdfFooter";
-import { PdfHeader } from "../components/PdfHeader";
+import { colors, fonts, rhythm, BODY_MAX_W, space } from "../theme";
+import { FixedInnerPage } from "../components/FixedInnerPage";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
 const styles = StyleSheet.create({
-  shell: {
-    flexDirection: "column",
-    flex: 1,
-  },
   methodSection: {
-    marginBottom: rhythm.lg,
+    marginBottom: 0,
   },
   methodKicker: {
     fontSize: 8,
@@ -63,7 +58,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     paddingVertical: space.cardPad,
     paddingHorizontal: space.cardPad,
-    marginBottom: rhythm.lg,
+    marginBottom: 0,
   },
   stripTitle: {
     fontSize: 7,
@@ -135,6 +130,12 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sans,
     lineHeight: 1.55,
   },
+  threeUp: {
+    flex: 1,
+    flexDirection: "column",
+    justifyContent: "space-between",
+    minHeight: 0,
+  },
 });
 
 /** PAGE 10 — Methodology + closing (fixed template). */
@@ -146,55 +147,51 @@ export function Page10MethodologyClosing({ data }: { data: ReportData }): ReactE
   const methodology = data.methodology?.trim() ?? "";
 
   return (
-    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding, baseStyles.pageColumn]}>
-      <View style={baseStyles.pageBodyFlex}>
-        <PdfTraceMarker page={10} section="Fixed:P10" />
-        <PdfHeader data={data} variant="inner" pageNum={10} />
-        <View style={styles.shell}>
-          {methodology ? (
-            <View style={styles.methodSection}>
-              <Text style={styles.methodKicker}>Methodology</Text>
-              <Text style={styles.methodSub}>How this snapshot was produced and how to read the tables.</Text>
-              <View style={styles.method}>
-                <Text style={styles.methodTitle}>Overview</Text>
-                <Text style={styles.methodBody}>{methodology}</Text>
-              </View>
-            </View>
-          ) : null}
-
-          <View style={styles.strip}>
-            <Text style={styles.stripTitle}>Run summary</Text>
-            <View style={styles.statsRow}>
-              <View style={styles.statCol}>
-                <Text style={styles.statVal}>{String(data.meta.responses)}</Text>
-                <Text style={styles.statLab}>Responses</Text>
-              </View>
-              <View style={styles.statVsep} />
-              <View style={styles.statCol}>
-                <Text style={styles.statVal}>{String(data.meta.confidence)}</Text>
-                <Text style={styles.statLab}>Confidence</Text>
-              </View>
-              <View style={styles.statVsep} />
-              <View style={styles.statCol}>
-                <Text style={[styles.statVal, { fontSize: 12, lineHeight: 1.35 }]}>{data.date}</Text>
-                <Text style={styles.statLab}>Report date</Text>
-              </View>
+    <FixedInnerPage data={data} pageNum={10} pagePaddingTop={100}>
+      <PdfTraceMarker page={10} section="Fixed:P10" />
+      <View style={styles.threeUp}>
+        {methodology ? (
+          <View style={styles.methodSection}>
+            <Text style={styles.methodKicker}>Methodology</Text>
+            <Text style={styles.methodSub}>How this snapshot was produced and how to read the tables.</Text>
+            <View style={styles.method}>
+              <Text style={styles.methodTitle}>Overview</Text>
+              <Text style={styles.methodBody}>{methodology}</Text>
             </View>
           </View>
+        ) : null}
 
-          <View style={styles.nextBlock}>
-            <Text style={styles.nextTitle}>What happens next</Text>
-            {next ? (
-              <Text style={styles.nextBody}>{next}</Text>
-            ) : (
-              <Text style={styles.nextPlaceholder}>
-                Your agency will align the next sprint to the priorities above and re-measure on the following snapshot.
-              </Text>
-            )}
+        <View style={styles.strip}>
+          <Text style={styles.stripTitle}>Run summary</Text>
+          <View style={styles.statsRow}>
+            <View style={styles.statCol}>
+              <Text style={styles.statVal}>{String(data.meta.responses)}</Text>
+              <Text style={styles.statLab}>Responses</Text>
+            </View>
+            <View style={styles.statVsep} />
+            <View style={styles.statCol}>
+              <Text style={styles.statVal}>{String(data.meta.confidence)}</Text>
+              <Text style={styles.statLab}>Confidence</Text>
+            </View>
+            <View style={styles.statVsep} />
+            <View style={styles.statCol}>
+              <Text style={[styles.statVal, { fontSize: 12, lineHeight: 1.35 }]}>{data.date}</Text>
+              <Text style={styles.statLab}>Report date</Text>
+            </View>
           </View>
         </View>
-        <PdfFooter data={data} />
+
+        <View style={styles.nextBlock}>
+          <Text style={styles.nextTitle}>What happens next</Text>
+          {next ? (
+            <Text style={styles.nextBody}>{next}</Text>
+          ) : (
+            <Text style={styles.nextPlaceholder}>
+              Your agency will align the next sprint to the priorities above and re-measure on the following snapshot.
+            </Text>
+          )}
+        </View>
       </View>
-    </Page>
+    </FixedInnerPage>
   );
 }

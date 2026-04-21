@@ -1,9 +1,16 @@
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { colors, fonts, rhythm, space } from "../theme";
+import { colors, fonts, rhythm, space, CONTENT_W } from "../theme";
 
-/** Inner row columns sum to 537 (540 − 3pt accent rail) */
-const W = { rank: 30, name: 116, bar: 231, count: 66, pill: 91 } as const;
+/** Inner row columns — 3pt accent rail; widths sum to `CONTENT_W` − 3 */
+const INNER_W = CONTENT_W - 3;
+const W = {
+  rank: 29,
+  name: 111,
+  bar: 221,
+  count: 63,
+  pill: INNER_W - 29 - 111 - 221 - 63,
+} as const;
 
 const styles = StyleSheet.create({
   rankHeader: {
@@ -17,7 +24,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sansBold,
   },
   rankOuter: {
-    width: 540,
+    width: CONTENT_W,
     flexDirection: "row",
     alignItems: "stretch",
     borderBottomWidth: 1,
@@ -178,9 +185,9 @@ export function WinRiskPriorityAlerts({
 /** Competitive ranking + WIN / RISK / PRIORITY — used on the dedicated snapshot slide. */
 export function RankingAlertsSection({ data }: { data: ReportData }) {
   return (
-    <View>
+    <View style={{ flex: 1, flexDirection: "column", justifyContent: "space-between", minHeight: 0 }}>
       <CompetitiveRankingBlock data={data} />
-      <WinRiskPriorityAlerts data={data} />
+      <WinRiskPriorityAlerts data={data} alertRowStyle={{ marginTop: 0 }} />
     </View>
   );
 }

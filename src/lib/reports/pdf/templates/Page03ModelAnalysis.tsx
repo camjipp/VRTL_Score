@@ -1,19 +1,16 @@
-import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
+import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ModelScoreRow, ReportData } from "../types";
-import { PAGE, colors, fonts, rhythm, baseStyles, CONTENT_W, pdfPageRootPadding, space } from "../theme";
+import { colors, fonts, rhythm, CONTENT_W, space } from "../theme";
 import { ChapterTitle } from "../components/ChapterTitle";
+import { FixedInnerPage } from "../components/FixedInnerPage";
 import { ModelAnalysisCard } from "../components/ModelAnalysisCard";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
-import { PdfFooter } from "../components/PdfFooter";
-import { PdfHeader } from "../components/PdfHeader";
 import { truncateAtWord } from "../fixed/pdfTextBudget";
 
 const GAP = 12;
 const TOP_W = (CONTENT_W - GAP) / 2;
 const COL3 = (CONTENT_W - 2 * GAP) / 3;
-
-const pagePadHeader90 = { ...pdfPageRootPadding, paddingTop: 90 } as const;
 
 function pickModel(models: readonly ModelScoreRow[], key: string): ModelScoreRow | null {
   const k = key.toLowerCase();
@@ -60,7 +57,8 @@ const styles = StyleSheet.create({
   },
   summaryBox: {
     width: CONTENT_W,
-    flexGrow: 1,
+    flex: 1,
+    minHeight: 0,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.rule,
@@ -123,12 +121,11 @@ export function Page03ModelAnalysis({ data }: { data: ReportData }): ReactElemen
   const worstLine = worst.insights[0] ? truncateAtWord(String(worst.insights[0]), 200) : "";
 
   return (
-    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pagePadHeader90, baseStyles.pageColumn]}>
-      <View style={[baseStyles.pageBody, { flex: 1, flexDirection: "column" }]}>
-        <PdfTraceMarker page={3} section="Fixed:P3" />
-        <PdfHeader data={data} variant="inner" pageNum={3} />
-        <ChapterTitle title="Model analysis" subtitle={subtitle} />
+    <FixedInnerPage data={data} pageNum={3}>
+      <PdfTraceMarker page={3} section="Fixed:P3" />
+      <ChapterTitle title="Model analysis" subtitle={subtitle} />
 
+      <View style={{ flex: 1, flexDirection: "column", justifyContent: "space-between", minHeight: 0 }}>
         <View style={styles.row2}>
           <SurfaceHighlight kind="strongest" model={best} title="Strongest surface" />
           <SurfaceHighlight kind="weakest" model={worst} title="Weakest surface" />
@@ -207,10 +204,8 @@ export function Page03ModelAnalysis({ data }: { data: ReportData }): ReactElemen
             <Text style={styles.summaryLine}>{`Weakest — ${worst.name} (${worst.score}): ${worstLine}`}</Text>
           ) : null}
         </View>
-
-        <PdfFooter data={data} />
       </View>
-    </Page>
+    </FixedInnerPage>
   );
 }
 

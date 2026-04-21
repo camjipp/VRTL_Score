@@ -1,3 +1,4 @@
+import { View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { RecommendationCard, ReportData } from "../types";
 import { FixedInnerPage } from "../components/FixedInnerPage";
@@ -18,11 +19,16 @@ type Props = {
 /** PAGE 6+ — Recommendations B: remaining cards, two per page (fixed template, repeated as needed). */
 export function Page06RecommendationsB({ data, pair, startNumber, sliceIndex }: Props): ReactElement {
   return (
-    <FixedInnerPage data={data} pageNum={6} pagePaddingTop={90}>
+    <FixedInnerPage data={data} pageNum={6}>
       <PdfTraceMarker page={6} section={`Fixed:P6-${sliceIndex}`} />
       <ChapterTitle title="Recommendations (continued)" subtitle="Next priorities from the same ordered list." />
       {pair.map((rec, i) => (
-        <NumberedRecommendationCard key={`rec-${sliceIndex}-${i}`} rec={rec} num={startNumber + i} />
+        <View
+          key={`rec-${sliceIndex}-${i}`}
+          style={i === pair.length - 1 ? { flexGrow: 1, minHeight: 0 } : {}}
+        >
+          <NumberedRecommendationCard rec={rec} num={startNumber + i} />
+        </View>
       ))}
     </FixedInnerPage>
   );

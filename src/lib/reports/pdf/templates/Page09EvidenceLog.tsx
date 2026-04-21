@@ -1,21 +1,22 @@
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "../types";
-import { colors, fonts, rhythm, BODY_MAX_W } from "../theme";
+import { colors, fonts, rhythm, BODY_MAX_W, CONTENT_W } from "../theme";
 import { formatEvidenceLogPillLabel, formatPdfEvidenceTableCell } from "@/lib/reports/formatEvidenceFieldDisplay";
 import { sanitizePdfString } from "../sanitizeReportData";
 import { FixedInnerPage } from "../components/FixedInnerPage";
 import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
+const W_TBL = CONTENT_W;
 const W = {
-  idx: 28,
-  label: 102,
-  yn: 40,
-  pos: 44,
-  str: 72,
-  comp: 40,
-  rest: 214,
+  idx: 27,
+  label: 97,
+  yn: 38,
+  pos: 42,
+  str: 69,
+  comp: 38,
+  rest: W_TBL - 27 - 97 - 38 - 42 - 69 - 38,
 } as const;
 
 const styles = StyleSheet.create({
@@ -35,7 +36,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: rhythm.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.rule,
-    width: 540,
+    width: W_TBL,
     alignItems: "center",
   },
   thText: {
@@ -53,7 +54,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: rhythm.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.rule,
-    width: 540,
+    width: W_TBL,
     minHeight: 28,
   },
   trAlt: { backgroundColor: colors.surface },
@@ -78,7 +79,9 @@ function logLabelPill(label: string): { bg: string; fg: string } {
 }
 
 /** PAGE 9 — Evidence log only (fixed template). */
-export function Page09EvidenceLog({ data }: { data: ReportData }): ReactElement {
+export function Page09EvidenceLog({ data }: { data: ReportData }): ReactElement | null {
+  if (!data.evidenceLog?.length) return null;
+
   return (
     <FixedInnerPage data={data} pageNum={9}>
       <PdfTraceMarker page={9} section="Fixed:P9" />
@@ -87,7 +90,7 @@ export function Page09EvidenceLog({ data }: { data: ReportData }): ReactElement 
         subtitle="Structured fields from a subset of analyzed answers. No raw model dumps."
       />
       <Text style={styles.caption}>Response sample — one row per analyzed answer in this export.</Text>
-      <View style={{ marginBottom: rhythm.sm }}>
+      <View style={{ flexGrow: 1, flexDirection: "column", minHeight: 0, marginBottom: rhythm.sm }}>
         <View style={styles.th}>
           <Text style={[styles.thText, { width: W.idx }]}>#</Text>
           <Text style={[styles.thText, { width: W.label }]}>Signal</Text>

@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "../types";
-import { colors, fonts, CONTENT_W, rhythm, space } from "../theme";
+import { colors, fonts, CONTENT_W, space } from "../theme";
 import { FixedInnerPage } from "../components/FixedInnerPage";
 import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
@@ -44,9 +44,6 @@ const styles = StyleSheet.create({
   stepSection: {
     width: CONTENT_W,
     flexDirection: "row",
-    marginBottom: space.block,
-  },
-  stepSectionLast: {
     marginBottom: 0,
   },
   accentBar: {
@@ -107,11 +104,10 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sans,
     maxWidth: CONTENT_W - 40,
   },
-  phasesCol: {
+  phasesWrap: {
     flex: 1,
     flexDirection: "column",
     justifyContent: "space-between",
-    paddingVertical: rhythm.sm,
     minHeight: 0,
   },
 });
@@ -120,21 +116,20 @@ const styles = StyleSheet.create({
 export function Page07ExecutionPlan({ data }: { data: ReportData }): ReactElement {
   const phases = data.executionPhases;
   return (
-    <FixedInnerPage data={data} pageNum={7} bodyVariant="flex" pagePaddingTop={90}>
+    <FixedInnerPage data={data} pageNum={7}>
       <PdfTraceMarker page={7} section="Fixed:P7" />
       <ChapterTitle
         title="Execution plan"
         subtitle="How we operationalize this snapshot: discovery, rebuild, proof, then measured iteration."
       />
-      <View style={styles.phasesCol}>
+      <View style={styles.phasesWrap}>
         {phases.map((ph, i) => {
           const phaseLine = String(ph.phase);
           const textLine = stripPhasePrefix(phaseLine, String(ph.text));
           const { main, impact } = splitImpact(textLine);
           const header = STEP_HEADERS[i] ?? `STEP ${i + 1}`;
-          const last = i === phases.length - 1;
           return (
-            <View key={`phase-${i}`} style={[styles.stepSection, last ? styles.stepSectionLast : {}]}>
+            <View key={`phase-${i}`} style={styles.stepSection}>
               <View style={styles.accentBar} />
               <View style={styles.stepCard}>
                 <Text style={styles.stepHeader}>{header}</Text>

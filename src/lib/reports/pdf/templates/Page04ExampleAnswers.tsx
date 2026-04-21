@@ -67,6 +67,7 @@ const styles = StyleSheet.create({
   },
   body: { fontFamily: fonts.sans, fontSize: 8.5, lineHeight: 1.58, color: colors.ink },
   takeawayOuter: {
+    flex: 1,
     flexDirection: "row",
     borderRadius: 8,
     overflow: "hidden",
@@ -74,6 +75,7 @@ const styles = StyleSheet.create({
     borderColor: colors.rule,
     backgroundColor: colors.surface2,
     marginTop: rhythm.md,
+    minHeight: 0,
   },
   takeawayBar: { width: 3, backgroundColor: colors.ink },
   takeawayInner: { flex: 1, paddingVertical: space.cardPad, paddingHorizontal: space.cardPad },
