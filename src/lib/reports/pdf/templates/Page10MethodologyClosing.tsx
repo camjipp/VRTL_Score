@@ -1,6 +1,7 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
+import type { ReactElement } from "react";
 import type { ReportData } from "../types";
-import { PAGE, colors, fonts, rhythm, baseStyles, BODY_MAX_W, pdfPageRootPadding, space } from "../theme";
+import { PAGE, baseStyles, colors, fonts, rhythm, BODY_MAX_W, pdfPageRootPadding, space } from "../theme";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
@@ -9,7 +10,6 @@ const styles = StyleSheet.create({
   shell: {
     flexDirection: "column",
     flex: 1,
-    minHeight: 0,
   },
   methodSection: {
     marginBottom: rhythm.lg,
@@ -137,8 +137,8 @@ const styles = StyleSheet.create({
   },
 });
 
-/** Final page: optional methodology, run summary, and “What happens next” — one balanced surface (no orphan methodology slide). */
-export function PageClosing({ data }: { data: ReportData }) {
+/** PAGE 10 — Methodology + closing (fixed template). */
+export function Page10MethodologyClosing({ data }: { data: ReportData }): ReactElement {
   const next =
     data.recommendedNextStepsVisible !== false && data.recommendedNextSteps?.trim()
       ? data.recommendedNextSteps.trim()
@@ -148,8 +148,8 @@ export function PageClosing({ data }: { data: ReportData }) {
   return (
     <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding, baseStyles.pageColumn]}>
       <View style={baseStyles.pageBodyFlex}>
-        <PdfTraceMarker page={7} section="Closing:start" />
-        <PdfHeader data={data} variant="inner" pageNum={7} />
+        <PdfTraceMarker page={10} section="Fixed:P10" />
+        <PdfHeader data={data} variant="inner" pageNum={10} />
         <View style={styles.shell}>
           {methodology ? (
             <View style={styles.methodSection}>

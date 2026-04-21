@@ -1,9 +1,9 @@
-import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
+import { StyleSheet, Text, View } from "@react-pdf/renderer";
+import type { ReactElement } from "react";
 import type { ReportData } from "../types";
-import { PAGE, colors, fonts, baseStyles, CONTENT_W, pdfPageRootPadding, rhythm, space } from "../theme";
+import { colors, fonts, CONTENT_W, rhythm, space } from "../theme";
+import { FixedInnerPage } from "../components/FixedInnerPage";
 import { ChapterTitle } from "../components/ChapterTitle";
-import { PdfFooter } from "../components/PdfFooter";
-import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
 const STEP_HEADERS = [
@@ -116,50 +116,41 @@ const styles = StyleSheet.create({
   },
 });
 
-export function Page4ExecutionPlan({ data }: { data: ReportData }) {
+/** PAGE 7 — Four-step execution plan (fixed template). */
+export function Page07ExecutionPlan({ data }: { data: ReportData }): ReactElement {
   const phases = data.executionPhases;
   return (
-    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding, baseStyles.pageColumn]}>
-      <View style={baseStyles.pageBodyFlex}>
-        <PdfTraceMarker page={5} section="Page4:start" />
-        <PdfHeader data={data} variant="inner" pageNum={5} />
-        <PdfTraceMarker page={5} section="Page4:after_header" />
-
-        <ChapterTitle
-          title="Execution plan"
-          subtitle="How we operationalize this snapshot: discovery, rebuild, proof, then measured iteration."
-        />
-
-        <PdfTraceMarker page={5} section="Page4:before_phases" />
-        <View style={styles.phasesCol}>
-          {phases.map((ph, i) => {
-            const phaseLine = String(ph.phase);
-            const textLine = stripPhasePrefix(phaseLine, String(ph.text));
-            const { main, impact } = splitImpact(textLine);
-            const header = STEP_HEADERS[i] ?? `STEP ${i + 1}`;
-            const last = i === phases.length - 1;
-            return (
-              <View key={`phase-${i}`} style={[styles.stepSection, last ? styles.stepSectionLast : {}]}>
-                <View style={styles.accentBar} />
-                <View style={styles.stepCard}>
-                  <Text style={styles.stepHeader}>{header}</Text>
-                  <Text style={styles.blockLabel}>What we execute</Text>
-                  <Text style={styles.copy}>{main}</Text>
-                  {impact ? (
-                    <View style={styles.impactBlock}>
-                      <Text style={styles.impactLabel}>How we measure it</Text>
-                      <Text style={styles.impactText}>{impact}</Text>
-                    </View>
-                  ) : null}
-                </View>
+    <FixedInnerPage data={data} pageNum={7} bodyVariant="flex">
+      <PdfTraceMarker page={7} section="Fixed:P7" />
+      <ChapterTitle
+        title="Execution plan"
+        subtitle="How we operationalize this snapshot: discovery, rebuild, proof, then measured iteration."
+      />
+      <View style={styles.phasesCol}>
+        {phases.map((ph, i) => {
+          const phaseLine = String(ph.phase);
+          const textLine = stripPhasePrefix(phaseLine, String(ph.text));
+          const { main, impact } = splitImpact(textLine);
+          const header = STEP_HEADERS[i] ?? `STEP ${i + 1}`;
+          const last = i === phases.length - 1;
+          return (
+            <View key={`phase-${i}`} style={[styles.stepSection, last ? styles.stepSectionLast : {}]}>
+              <View style={styles.accentBar} />
+              <View style={styles.stepCard}>
+                <Text style={styles.stepHeader}>{header}</Text>
+                <Text style={styles.blockLabel}>What we execute</Text>
+                <Text style={styles.copy}>{main}</Text>
+                {impact ? (
+                  <View style={styles.impactBlock}>
+                    <Text style={styles.impactLabel}>How we measure it</Text>
+                    <Text style={styles.impactText}>{impact}</Text>
+                  </View>
+                ) : null}
               </View>
-            );
-          })}
-        </View>
-
-        <PdfTraceMarker page={5} section="Page4:before_footer" />
-        <PdfFooter data={data} />
+            </View>
+          );
+        })}
       </View>
-    </Page>
+    </FixedInnerPage>
   );
 }

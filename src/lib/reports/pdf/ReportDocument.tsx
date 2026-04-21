@@ -3,86 +3,103 @@ import type { ReactElement } from "react";
 
 /** Prevent Helvetica syllable splits that read as corrupted mid-word characters in exports. */
 Font.registerHyphenationCallback((word) => (word.length === 0 ? [] : [word]));
-import type { ReportData } from "./types";
-import { Page1Overview } from "./pages/Page1Overview";
-import { PageModelAnalysisExamples } from "./pages/Page2ModelAnalysis";
-import { PageModelAnalysisMatrix } from "./pages/PageModelAnalysisMatrix";
-import { PageRankingAlerts } from "./pages/PageRankingAlerts";
-import { renderRecommendationPages } from "./pages/PageRecommendations";
-import { Page4ExecutionPlan } from "./pages/Page4ExecutionPlan";
-import { Page5DataSummary } from "./pages/Page5DataSummary";
-import { renderEvidenceSectionPages } from "./renderEvidenceSectionPages";
+
+import { sliceRecommendationsForFixedTemplates } from "./fixed/fixedRecommendationSlices";
 import {
-  shouldRenderDataSummaryPage,
-  shouldRenderEvidenceMethodologyPage,
-  shouldRenderExecutionPage,
-  shouldRenderModelAnalysisExamplesSubpage,
-  shouldRenderModelAnalysisPage,
-  shouldRenderRecommendationsPage,
-} from "./reportPageVisibility";
-
-type PageBuilder = {
-  num: number;
-  render: (data: ReportData) => ReactElement | ReactElement[];
-  include: (d: ReportData) => boolean;
-};
-
-function buildModelAnalysisSectionPages(data: ReportData): ReactElement[] {
-  const pages: ReactElement[] = [];
-  pages.push(<PageRankingAlerts key="pdf-ranking" data={data} />);
-  pages.push(<PageModelAnalysisMatrix key="pdf-matrix" data={data} />);
-  if (shouldRenderModelAnalysisExamplesSubpage(data)) {
-    const ex = <PageModelAnalysisExamples key="pdf-examples" data={data} />;
-    if (ex) pages.push(ex);
-  }
-  return pages;
-}
-
-const PAGE_BUILDERS: PageBuilder[] = [
-  { num: 1, render: (d) => <Page1Overview key="p1" data={d} />, include: () => true },
-  {
-    num: 2,
-    render: (d) => buildModelAnalysisSectionPages(d),
-    include: shouldRenderModelAnalysisPage,
-  },
-  {
-    num: 3,
-    render: (d) => renderRecommendationPages(d),
-    include: shouldRenderRecommendationsPage,
-  },
-  {
-    num: 4,
-    render: (d) => <Page4ExecutionPlan key="p4" data={d} />,
-    include: shouldRenderExecutionPage,
-  },
-  {
-    num: 5,
-    render: (d) => <Page5DataSummary key="p5" data={d} />,
-    include: shouldRenderDataSummaryPage,
-  },
-  {
-    num: 6,
-    render: (d) => renderEvidenceSectionPages(d),
-    include: shouldRenderEvidenceMethodologyPage,
-  },
-];
+  includeCompetitiveSnapshot,
+  includeDataSummary,
+  includeEvidenceLog,
+  includeExampleAnswers,
+  includeExecutionPlan,
+  includeExecutiveSummary,
+  includeMethodologyClosing,
+  includeModelAnalysis,
+  includeRecommendationsContinuation,
+  includeRecommendationsPage5,
+} from "./fixed/fixedSectionInclusion";
+import { Page01ExecutiveSummary } from "./templates/Page01ExecutiveSummary";
+import { Page02CompetitiveSnapshot } from "./templates/Page02CompetitiveSnapshot";
+import { Page03ModelAnalysis } from "./templates/Page03ModelAnalysis";
+import { Page04ExampleAnswers } from "./templates/Page04ExampleAnswers";
+import { Page05RecommendationsA } from "./templates/Page05RecommendationsA";
+import { Page06RecommendationsB } from "./templates/Page06RecommendationsB";
+import { Page07ExecutionPlan } from "./templates/Page07ExecutionPlan";
+import { Page08DataSummary } from "./templates/Page08DataSummary";
+import { Page09EvidenceLog } from "./templates/Page09EvidenceLog";
+import { Page10MethodologyClosing } from "./templates/Page10MethodologyClosing";
+import type { ReportData } from "./types";
 
 export type ReportDocumentProps = {
   data: ReportData;
-  /** If set, only these 1-based page numbers are included (for isolation probes). */
+  /** If set, only these logical section ids (1–10) are included. Section 6 includes every “Recommendations B” page. */
   pages?: number[];
 };
 
+/**
+ * Fixed-template report (slide-deck): one React template per logical page slot.
+ *
+ * | Logical id | Component | Content |
+ * |------------|-----------|---------|
+ * | 1 | `Page01ExecutiveSummary` | Executive summary |
+ * | 2 | `Page02CompetitiveSnapshot` | Ranking + WIN/RISK/PRIORITY |
+ * | 3 | `Page03ModelAnalysis` | Strongest/weakest + OpenAI/Gemini/Anthropic + summary |
+ * | 4 | `Page04ExampleAnswers` | Strength + vulnerable excerpts + takeaway |
+ * | 5 | `Page05RecommendationsA` | Recommendations 1–2 |
+ * | 6 | `Page06RecommendationsB` (×N) | Recommendations 3+ in pairs |
+ * | 7 | `Page07ExecutionPlan` | Four execution steps |
+ * | 8 | `Page08DataSummary` | Narrative + signals + competitive tables |
+ * | 9 | `Page09EvidenceLog` | Evidence table only |
+ * | 10 | `Page10MethodologyClosing` | Methodology + run summary + what’s next |
+ *
+ * `pages={[n]}` filters by logical id; id 6 includes every “Recommendations B” physical page.
+ */
 export function ReportDocument({ data, pages }: ReportDocumentProps): ReactElement<DocumentProps> {
-  /** Page probes (`pages=[n]`) force-include that section even if `include()` would skip it (empty data). */
   const probe = pages?.length ? new Set(pages) : null;
-  const children = PAGE_BUILDERS.filter((p) => {
-    if (probe) return probe.has(p.num);
-    return p.include(data);
-  }).flatMap((p) => {
-    const rendered = p.render(data);
-    return Array.isArray(rendered) ? rendered : [rendered];
-  });
+  const want = (sectionId: number) => !probe || probe.has(sectionId);
+
+  const children: ReactElement[] = [];
+
+  if (want(1) && includeExecutiveSummary()) {
+    children.push(<Page01ExecutiveSummary key="pdf-tpl-1" data={data} />);
+  }
+  if (want(2) && includeCompetitiveSnapshot(data)) {
+    children.push(<Page02CompetitiveSnapshot key="pdf-tpl-2" data={data} />);
+  }
+  if (want(3) && includeModelAnalysis(data)) {
+    children.push(<Page03ModelAnalysis key="pdf-tpl-3" data={data} />);
+  }
+  if (want(4) && includeExampleAnswers(data)) {
+    children.push(<Page04ExampleAnswers key="pdf-tpl-4" data={data} />);
+  }
+  if (want(5) && includeRecommendationsPage5(data)) {
+    children.push(<Page05RecommendationsA key="pdf-tpl-5" data={data} />);
+  }
+  if (want(6) && includeRecommendationsContinuation(data)) {
+    const { continuationPairs } = sliceRecommendationsForFixedTemplates(data.recommendations);
+    continuationPairs.forEach((pair, i) => {
+      children.push(
+        <Page06RecommendationsB
+          key={`pdf-tpl-6-${i}`}
+          data={data}
+          pair={pair}
+          startNumber={3 + i * 2}
+          sliceIndex={i}
+        />,
+      );
+    });
+  }
+  if (want(7) && includeExecutionPlan(data)) {
+    children.push(<Page07ExecutionPlan key="pdf-tpl-7" data={data} />);
+  }
+  if (want(8) && includeDataSummary(data)) {
+    children.push(<Page08DataSummary key="pdf-tpl-8" data={data} />);
+  }
+  if (want(9) && includeEvidenceLog(data)) {
+    children.push(<Page09EvidenceLog key="pdf-tpl-9" data={data} />);
+  }
+  if (want(10) && includeMethodologyClosing()) {
+    children.push(<Page10MethodologyClosing key="pdf-tpl-10" data={data} />);
+  }
 
   return (
     <Document title={`AI Authority Report: ${data.clientName}`} author={data.agencyName ?? ""} subject={data.clientName}>

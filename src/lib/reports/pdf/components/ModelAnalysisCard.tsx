@@ -174,7 +174,7 @@ export function ModelAnalysisCard({
   const posPill = deltaVsAvg >= 0;
 
   return (
-    <View style={[styles.root, { width: cardWidth }]} wrap={false}>
+    <View style={[styles.root, { width: cardWidth }]}>
       <View style={[styles.topBand, { backgroundColor: colors.surface2 }]} />
       <View style={styles.inner}>
         <Text style={styles.name}>{nameLine}</Text>
@@ -199,7 +199,7 @@ export function ModelAnalysisCard({
         {bulletLines.map((line, idx) => {
           const lineText = String(line);
           return (
-            <View key={`${modelId}-row-${idx}`} style={styles.bulletRow} wrap={false}>
+            <View key={`${modelId}-row-${idx}`} style={styles.bulletRow}>
               <View style={[styles.dot, { backgroundColor: colors.ink4 }]} />
               <Text
                 style={[compact ? styles.bulletTextCompact : styles.bulletText, { width: innerW - 12 }]}

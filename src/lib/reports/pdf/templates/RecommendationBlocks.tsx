@@ -1,17 +1,11 @@
-import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
-import type { ReactElement } from "react";
-import type { ReportData } from "../types";
+import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { RecommendationCard } from "../types";
-import { PAGE, colors, fonts, rhythm, baseStyles, pdfPageRootPadding, space, BODY_MAX_W, CONTENT_W } from "../theme";
-import { ChapterTitle } from "../components/ChapterTitle";
-import { PdfFooter } from "../components/PdfFooter";
-import { PdfHeader } from "../components/PdfHeader";
-import { PdfTraceMarker } from "../components/PdfTraceMarker";
+import { colors, fonts, rhythm, BODY_MAX_W, CONTENT_W, space } from "../theme";
 
 const STRIPE_BG = colors.ink2;
 const HIGH_ACCENT = "#DC2626";
 
-const styles = StyleSheet.create({
+export const recommendationStyles = StyleSheet.create({
   heroCard: {
     backgroundColor: colors.surface,
     borderWidth: 1,
@@ -19,8 +13,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderTopWidth: 3,
     borderTopColor: HIGH_ACCENT,
-    paddingTop: 20,
-    paddingBottom: 20,
+    paddingTop: 16,
+    paddingBottom: 16,
     paddingHorizontal: space.cardPad - 4,
     marginBottom: rhythm.md,
     width: CONTENT_W,
@@ -50,7 +44,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.06,
   },
   heroTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: fonts.sansBold,
     color: colors.ink,
     marginBottom: 8,
@@ -62,7 +56,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sansBold,
     color: colors.ink2,
     lineHeight: 1.55,
-    marginBottom: 12,
+    marginBottom: 10,
     maxWidth: BODY_MAX_W,
   },
   heroOutcomeLabel: {
@@ -74,7 +68,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   heroOutcome: {
-    fontSize: 9.5,
+    fontSize: 9,
     fontFamily: fonts.sansBold,
     color: colors.ink,
     lineHeight: 1.5,
@@ -104,13 +98,6 @@ const styles = StyleSheet.create({
   },
   stripeNum: { fontSize: 18, fontWeight: 400, color: colors.paper, fontFamily: fonts.sansBold },
   mid: { flex: 1, paddingVertical: space.cardPad - 2, paddingHorizontal: space.cardPad, paddingRight: 12 },
-  midNumbered: {
-    flex: 1,
-    paddingTop: space.cardPad - 2,
-    paddingBottom: 16,
-    paddingHorizontal: space.cardPad,
-    paddingRight: 12,
-  },
   priPill: {
     alignSelf: "flex-start",
     paddingVertical: 2,
@@ -153,13 +140,6 @@ const styles = StyleSheet.create({
     maxWidth: BODY_MAX_W - 24,
   },
   sep: { width: 1, backgroundColor: colors.rule },
-  right: {
-    width: 128,
-    backgroundColor: colors.surface2,
-    paddingVertical: space.cardPad - 2,
-    paddingHorizontal: 12,
-    justifyContent: "flex-start",
-  },
   rightNumbered: {
     width: 128,
     backgroundColor: colors.surface2,
@@ -178,16 +158,11 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   outText: { fontSize: 8, fontWeight: 400, lineHeight: 1.55, fontFamily: fonts.sansBold, color: colors.ink },
-  fill: { flex: 1, flexDirection: "column", minHeight: 0 },
-  fillCentered: {
-    flex: 1,
-    flexDirection: "column",
-    justifyContent: "center",
-    minHeight: 0,
-  },
 });
 
-function HeroCard({ rec }: { rec: RecommendationCard }) {
+const styles = recommendationStyles;
+
+export function PrimaryRecommendationCard({ rec }: { rec: RecommendationCard }) {
   const isHigh = rec.priority === "HIGH";
   return (
     <View
@@ -217,93 +192,38 @@ function HeroCard({ rec }: { rec: RecommendationCard }) {
   );
 }
 
-function NumberedCard({ rec, num }: { rec: RecommendationCard; num: number }) {
+export function NumberedRecommendationCard({ rec, num }: { rec: RecommendationCard; num: number }) {
   const cardHigh = rec.priority === "HIGH";
-  const titleLine = String(rec.title);
-  const insightLine = String(rec.insight);
-  const expLine = String(rec.expectedOutcome);
-  const actLine = String(rec.action);
-  const explLine = String(rec.explanation);
   return (
     <View style={[styles.card, styles.numberedCard, cardHigh ? styles.cardHigh : {}]}>
       <View style={[styles.leftStripe, { backgroundColor: STRIPE_BG }]}>
         <Text style={styles.stripeNum}>{String(num)}</Text>
       </View>
       <View style={styles.sep} />
-      <View style={styles.midNumbered}>
+      <View style={styles.mid}>
         <View style={styles.priPill}>
           <Text style={styles.priPillTxt}>{`${rec.priority} PRIORITY`}</Text>
         </View>
-        <Text style={styles.title}>{titleLine}</Text>
-        <Text style={styles.insight}>{insightLine}</Text>
+        <Text style={styles.title}>{String(rec.title)}</Text>
+        <Text style={styles.insight}>{String(rec.insight)}</Text>
         <View>
           <Text style={styles.micro}>Why it matters</Text>
           <Text style={styles.body} orphans={2} widows={2}>
-            {explLine}
+            {String(rec.explanation)}
           </Text>
         </View>
         <View>
           <Text style={[styles.micro, styles.microSpaced]}>What we do</Text>
           <Text style={styles.body} orphans={2} widows={2}>
-            {actLine}
+            {String(rec.action)}
           </Text>
         </View>
       </View>
       <View style={styles.sep} />
       <View style={styles.rightNumbered}>
         <Text style={styles.outLabel}>Expected outcome</Text>
-        <Text style={styles.outText}>{expLine}</Text>
+        <Text style={styles.outText}>{String(rec.expectedOutcome)}</Text>
       </View>
     </View>
   );
-}
-
-/** At most two recommendation cards per slide; each card is a single non-splitting block. */
-export function renderRecommendationPages(data: ReportData): ReactElement[] {
-  const recs = data.recommendations;
-  if (recs.length === 0) return [];
-
-  const [first, ...rest] = recs;
-  const pages: ReactElement[] = [];
-
-  pages.push(
-    <Page key="rec-p1" size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding, baseStyles.pageColumn]}>
-      <View style={baseStyles.pageBodyFlex}>
-        <PdfTraceMarker page={5} section="Rec:p1" />
-        <PdfHeader data={data} variant="inner" pageNum={5} />
-        <View style={styles.fill}>
-          <ChapterTitle
-            title="Recommendations"
-            subtitle="Highest-impact moves first: concrete execution tied to measurable recommendation outcomes."
-          />
-          {first ? <HeroCard rec={first} /> : null}
-          {rest[0] ? <NumberedCard rec={rest[0]} num={2} /> : null}
-        </View>
-        <PdfFooter data={data} />
-      </View>
-    </Page>,
-  );
-
-  for (let k = 1; k < rest.length; k += 2) {
-    const a = rest[k];
-    const b = rest[k + 1];
-    if (!a) break;
-    const pageIdx = (k + 1) / 2 + 1;
-    const singleCard = !b;
-    pages.push(
-      <Page key={`rec-p${pageIdx}`} size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding, baseStyles.pageColumn]}>
-        <View style={baseStyles.pageBodyFlex}>
-          <PdfTraceMarker page={5} section={`Rec:p${pageIdx}`} />
-          <PdfHeader data={data} variant="inner" pageNum={5} />
-          <View style={singleCard ? styles.fillCentered : styles.fill}>
-            <NumberedCard rec={a} num={k + 2} />
-            {b ? <NumberedCard rec={b} num={k + 3} /> : null}
-          </View>
-          <PdfFooter data={data} />
-        </View>
-      </Page>,
-    );
-  }
-
-  return pages;
 }

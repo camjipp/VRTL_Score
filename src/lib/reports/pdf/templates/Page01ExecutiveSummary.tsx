@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   statusText: { fontSize: 7.5, fontFamily: fonts.sansBold, textAlign: "center" },
   calloutWrap: {
     flexDirection: "row",
-    marginBottom: rhythm.lg,
+    marginBottom: 0,
     borderRadius: 6,
     overflow: "hidden",
     backgroundColor: colors.surface,
@@ -105,8 +105,8 @@ const styles = StyleSheet.create({
   calloutBar: { width: 4, backgroundColor: colors.cyan },
   calloutInner: {
     flex: 1,
-    paddingTop: 32,
-    paddingBottom: 32,
+    paddingTop: 28,
+    paddingBottom: 28,
     paddingHorizontal: space.cardPad + 8,
   },
   calloutKicker: {
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   bulletRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: 14,
+    marginBottom: 12,
     maxWidth: BODY_MAX_W + 8,
   },
   bulletMark: {
@@ -141,7 +141,8 @@ const styles = StyleSheet.create({
   },
 });
 
-export function Page1Overview({ data }: { data: ReportData }): ReactElement[] {
+/** PAGE 1 — Executive summary (fixed template). */
+export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactElement {
   const rankLine = `RANK #${data.rank} OF ${data.rankTotal}`;
   const statusUpper = String(data.status).toUpperCase();
   const leadingPill = data.rank === 1 ? "LEADING" : "CHALLENGER";
@@ -151,12 +152,11 @@ export function Page1Overview({ data }: { data: ReportData }): ReactElement[] {
     ? bottomBullets
     : [data.bottomLine.trim() || "No executive summary was provided for this report."];
 
-  return [
-    <Page key="p1-cover" size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
+  return (
+    <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
       <View style={baseStyles.pageBody}>
-        <PdfTraceMarker page={1} section="Page1:start" />
+        <PdfTraceMarker page={1} section="Fixed:P1" />
         <PdfHeader data={data} variant="cover" />
-        <PdfTraceMarker page={1} section="Page1:after_header" />
 
         <View style={styles.hero}>
           <View style={styles.heroLeft}>
@@ -166,21 +166,15 @@ export function Page1Overview({ data }: { data: ReportData }): ReactElement[] {
           <View style={styles.heroRight}>
             <View style={styles.kpiTile}>
               <Text style={styles.kpiVal}>{data.mentionRate}%</Text>
-              <Text style={styles.kpiLab}>
-                Mention{"\u00A0"}rate
-              </Text>
+              <Text style={styles.kpiLab}>Mention{"\u00A0"}rate</Text>
             </View>
             <View style={styles.kpiTile}>
               <Text style={styles.kpiVal}>{data.topPosition}%</Text>
-              <Text style={styles.kpiLab}>
-                Top{"\u00A0"}position
-              </Text>
+              <Text style={styles.kpiLab}>Top{"\u00A0"}position</Text>
             </View>
             <View style={[styles.kpiTile, authEmpty ? { opacity: 0.88 } : {}]}>
               <Text style={[styles.kpiVal, authEmpty ? { color: colors.ink4 } : {}]}>{data.authorityScore}%</Text>
-              <Text style={[styles.kpiLab, authEmpty ? { color: colors.ink4 } : {}]}>
-                Authority (citations)
-              </Text>
+              <Text style={[styles.kpiLab, authEmpty ? { color: colors.ink4 } : {}]}>Authority (citations)</Text>
             </View>
           </View>
         </View>
@@ -197,7 +191,7 @@ export function Page1Overview({ data }: { data: ReportData }): ReactElement[] {
           </View>
         </View>
 
-        <View style={[styles.calloutWrap, { marginBottom: 0 }]}>
+        <View style={styles.calloutWrap}>
           <View style={styles.calloutBar} />
           <View style={styles.calloutInner}>
             <Text style={styles.calloutKicker}>Bottom line</Text>
@@ -212,9 +206,8 @@ export function Page1Overview({ data }: { data: ReportData }): ReactElement[] {
           </View>
         </View>
 
-        <PdfTraceMarker page={1} section="Page1:cover_before_footer" />
         <PdfFooter data={data} />
       </View>
-    </Page>,
-  ];
+    </Page>
+  );
 }

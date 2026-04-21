@@ -49,7 +49,7 @@ export async function probeMinimalPdf(): Promise<MinimalProbeResult> {
 export async function probeReportPagesOneAtATime(data: ReportData): Promise<PageProbeRow[]> {
   const safe = sanitizeReportDataForPdf(data);
   const rows: PageProbeRow[] = [];
-  for (let p = 1; p <= 6; p++) {
+  for (let p = 1; p <= 10; p++) {
     resetPdfTrace();
     try {
       const buf = await renderToBuffer(
