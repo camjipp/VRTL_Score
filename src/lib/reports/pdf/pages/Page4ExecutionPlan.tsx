@@ -1,6 +1,6 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { PAGE, colors, fonts, baseStyles, CONTENT_W, space } from "../theme";
+import { PAGE, colors, fonts, baseStyles, CONTENT_W, pdfPageRootPadding, rhythm, space } from "../theme";
 import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
@@ -107,13 +107,20 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sans,
     maxWidth: CONTENT_W - 40,
   },
+  phasesCol: {
+    flex: 1,
+    flexDirection: "column",
+    justifyContent: "space-between",
+    paddingVertical: rhythm.sm,
+    minHeight: 0,
+  },
 });
 
 export function Page4ExecutionPlan({ data }: { data: ReportData }) {
   const phases = data.executionPhases;
   return (
-    <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
-      <View style={baseStyles.pageBody}>
+    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding, baseStyles.pageColumn]}>
+      <View style={baseStyles.pageBodyFlex}>
         <PdfTraceMarker page={5} section="Page4:start" />
         <PdfHeader data={data} variant="inner" pageNum={5} />
         <PdfTraceMarker page={5} section="Page4:after_header" />
@@ -124,7 +131,7 @@ export function Page4ExecutionPlan({ data }: { data: ReportData }) {
         />
 
         <PdfTraceMarker page={5} section="Page4:before_phases" />
-        <View>
+        <View style={styles.phasesCol}>
           {phases.map((ph, i) => {
             const phaseLine = String(ph.phase);
             const textLine = stripPhasePrefix(phaseLine, String(ph.text));

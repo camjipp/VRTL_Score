@@ -178,7 +178,13 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   outText: { fontSize: 8, fontWeight: 400, lineHeight: 1.55, fontFamily: fonts.sansBold, color: colors.ink },
-  fill: { flex: 1 },
+  fill: { flex: 1, flexDirection: "column", minHeight: 0 },
+  fillCentered: {
+    flex: 1,
+    flexDirection: "column",
+    justifyContent: "center",
+    minHeight: 0,
+  },
 });
 
 function HeroCard({ rec }: { rec: RecommendationCard }) {
@@ -261,8 +267,8 @@ export function renderRecommendationPages(data: ReportData): ReactElement[] {
   const pages: ReactElement[] = [];
 
   pages.push(
-    <Page key="rec-p1" size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding]}>
-      <View style={baseStyles.pageBody}>
+    <Page key="rec-p1" size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding, baseStyles.pageColumn]}>
+      <View style={baseStyles.pageBodyFlex}>
         <PdfTraceMarker page={5} section="Rec:p1" />
         <PdfHeader data={data} variant="inner" pageNum={5} />
         <View style={styles.fill}>
@@ -283,12 +289,13 @@ export function renderRecommendationPages(data: ReportData): ReactElement[] {
     const b = rest[k + 1];
     if (!a) break;
     const pageIdx = (k + 1) / 2 + 1;
+    const singleCard = !b;
     pages.push(
-      <Page key={`rec-p${pageIdx}`} size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding]}>
-        <View style={baseStyles.pageBody}>
+      <Page key={`rec-p${pageIdx}`} size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding, baseStyles.pageColumn]}>
+        <View style={baseStyles.pageBodyFlex}>
           <PdfTraceMarker page={5} section={`Rec:p${pageIdx}`} />
           <PdfHeader data={data} variant="inner" pageNum={5} />
-          <View style={styles.fill}>
+          <View style={singleCard ? styles.fillCentered : styles.fill}>
             <NumberedCard rec={a} num={k + 2} />
             {b ? <NumberedCard rec={b} num={k + 3} /> : null}
           </View>

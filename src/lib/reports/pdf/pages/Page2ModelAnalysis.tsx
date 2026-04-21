@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     width: EVIDENCE_COL_W,
     backgroundColor: colors.paper,
-    minHeight: 200,
+    minHeight: 140,
   },
   exampleAccent: { width: 3, backgroundColor: colors.ink2 },
   exampleInner: {
@@ -127,6 +127,12 @@ const styles = StyleSheet.create({
   slideFill: {
     flex: 1,
     flexDirection: "column",
+    minHeight: 0,
+    justifyContent: "flex-start",
+  },
+  excerptSpacer: {
+    flexGrow: 1,
+    minHeight: rhythm.md,
   },
 });
 
@@ -137,8 +143,8 @@ export function PageModelAnalysisExamples({ data }: { data: ReportData }) {
   if (!hasEvidence && !hasTakeaway) return null;
 
   return (
-    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding]}>
-      <View style={baseStyles.pageBody}>
+    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding, baseStyles.pageColumn]}>
+      <View style={baseStyles.pageBodyFlex}>
         <PdfTraceMarker page={4} section="ModelExamples:start" />
         <PdfHeader data={data} variant="inner" pageNum={4} />
 
@@ -209,6 +215,7 @@ export function PageModelAnalysisExamples({ data }: { data: ReportData }) {
               </View>
             </View>
           ) : null}
+          {hasEvidence && hasTakeaway ? <View style={styles.excerptSpacer} /> : null}
           {hasTakeaway ? (
             <View style={styles.takeawayOuter}>
               <View style={styles.takeawayBar} />

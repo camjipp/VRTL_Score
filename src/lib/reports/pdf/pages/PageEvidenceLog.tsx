@@ -90,7 +90,7 @@ function logLabelPill(label: string): { bg: string; fg: string } {
 
 export function PageEvidenceLog({ data }: { data: ReportData }) {
   return (
-    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding]}>
+    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding, baseStyles.pageColumn]}>
       <View style={baseStyles.pageBody}>
         <PdfTraceMarker page={7} section="EvidenceLog:start" />
         <PdfHeader data={data} variant="inner" pageNum={7} />

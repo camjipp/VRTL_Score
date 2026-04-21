@@ -72,10 +72,25 @@ export const baseStyles = StyleSheet.create({
     fontWeight: 400,
     color: colors.ink,
   },
+  /** Inner `<Page>` shell: column flex so `flex:1` children can balance vertical space. */
+  pageColumn: {
+    width: PAGE.width,
+    height: PAGE.height,
+    flexDirection: "column",
+  },
   pageBody: {
     paddingTop: PAGE.margin,
     paddingBottom: 46,
     paddingHorizontal: PAGE.margin,
+  },
+  /** Body area that grows to fill letter space between header band and footer clearance. */
+  pageBodyFlex: {
+    paddingTop: PAGE.margin,
+    paddingBottom: 46,
+    paddingHorizontal: PAGE.margin,
+    flex: 1,
+    flexDirection: "column",
+    minHeight: 0,
   },
   /** Only header + footer use `fixed` — repeats on each page, positioned in margin band. */
   headerFixedWrap: {

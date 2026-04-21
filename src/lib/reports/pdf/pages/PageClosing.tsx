@@ -8,7 +8,51 @@ import { PdfTraceMarker } from "../components/PdfTraceMarker";
 const styles = StyleSheet.create({
   shell: {
     flexDirection: "column",
-    justifyContent: "flex-start",
+    flex: 1,
+    minHeight: 0,
+  },
+  methodSection: {
+    marginBottom: rhythm.lg,
+  },
+  methodKicker: {
+    fontSize: 8,
+    fontWeight: 400,
+    letterSpacing: 0.12,
+    textTransform: "uppercase",
+    color: colors.ink3,
+    marginBottom: rhythm.sm,
+    fontFamily: fonts.sansBold,
+  },
+  methodSub: {
+    fontSize: 9,
+    lineHeight: 1.55,
+    color: colors.ink2,
+    fontFamily: fonts.sans,
+    maxWidth: BODY_MAX_W,
+    marginBottom: rhythm.sm,
+  },
+  method: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    borderRadius: 8,
+    padding: space.cardPad,
+  },
+  methodTitle: {
+    fontSize: 8,
+    fontWeight: 400,
+    color: colors.ink3,
+    marginBottom: rhythm.sm,
+    fontFamily: fonts.sansBold,
+    letterSpacing: 0.12,
+    textTransform: "uppercase",
+  },
+  methodBody: {
+    fontSize: 9.5,
+    lineHeight: 1.68,
+    color: colors.ink,
+    fontFamily: fonts.sans,
+    maxWidth: BODY_MAX_W,
   },
   strip: {
     borderRadius: 8,
@@ -68,7 +112,6 @@ const styles = StyleSheet.create({
     borderColor: colors.rule,
     backgroundColor: colors.surface2,
     padding: space.cardPad,
-    minHeight: 220,
   },
   nextTitle: {
     fontSize: 8,
@@ -94,19 +137,31 @@ const styles = StyleSheet.create({
   },
 });
 
-/** Final slide — run summary strip (responses, confidence, report date) + optional “What happens next”. */
+/** Final page: optional methodology, run summary, and “What happens next” — one balanced surface (no orphan methodology slide). */
 export function PageClosing({ data }: { data: ReportData }) {
   const next =
     data.recommendedNextStepsVisible !== false && data.recommendedNextSteps?.trim()
       ? data.recommendedNextSteps.trim()
       : "";
+  const methodology = data.methodology?.trim() ?? "";
 
   return (
-    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding]}>
-      <View style={baseStyles.pageBody}>
+    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding, baseStyles.pageColumn]}>
+      <View style={baseStyles.pageBodyFlex}>
         <PdfTraceMarker page={7} section="Closing:start" />
         <PdfHeader data={data} variant="inner" pageNum={7} />
         <View style={styles.shell}>
+          {methodology ? (
+            <View style={styles.methodSection}>
+              <Text style={styles.methodKicker}>Methodology</Text>
+              <Text style={styles.methodSub}>How this snapshot was produced and how to read the tables.</Text>
+              <View style={styles.method}>
+                <Text style={styles.methodTitle}>Overview</Text>
+                <Text style={styles.methodBody}>{methodology}</Text>
+              </View>
+            </View>
+          ) : null}
+
           <View style={styles.strip}>
             <Text style={styles.stripTitle}>Run summary</Text>
             <View style={styles.statsRow}>

@@ -21,6 +21,9 @@ const styles = StyleSheet.create({
     width: CONTENT_W,
     marginTop: rhythm.sm,
     flexDirection: "column",
+    flexGrow: 1,
+    justifyContent: "center",
+    minHeight: 0,
   },
   rowTop: {
     flexDirection: "row",
@@ -90,6 +93,16 @@ function avgOf(models: ReportData["modelScores"]) {
   return models.length ? Math.round(models.reduce((s, m) => s + m.score, 0) / models.length) : 0;
 }
 
+/** Avoid mid-word truncation in cross-model summary lines (react-pdf Text). */
+function truncateInsight(s: string, maxLen: number): string {
+  const t = String(s).trim();
+  if (t.length <= maxLen) return t;
+  const slice = t.slice(0, maxLen);
+  const lastSpace = slice.lastIndexOf(" ");
+  if (lastSpace > maxLen * 0.55) return `${slice.slice(0, lastSpace)}…`;
+  return `${slice.trimEnd()}…`;
+}
+
 /** Slide — 2×2 matrix: OpenAI + Anthropic (large row), Gemini + summary (compact row). Fixed heights; no overflow to next page. */
 export function PageModelAnalysisMatrix({ data }: { data: ReportData }) {
   const models = data.modelScores;
@@ -110,8 +123,8 @@ export function PageModelAnalysisMatrix({ data }: { data: ReportData }) {
       : `${spread} points from best to worst. Buyers see different short lists by assistant.`;
 
   return (
-    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding]}>
-      <View style={baseStyles.pageBody}>
+    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding, baseStyles.pageColumn]}>
+      <View style={baseStyles.pageBodyFlex}>
         <PdfTraceMarker page={3} section="ModelMatrix:start" />
         <PdfHeader data={data} variant="inner" pageNum={3} />
         <ChapterTitle title="Model analysis" subtitle={subtitle} />
@@ -186,7 +199,7 @@ export function PageModelAnalysisMatrix({ data }: { data: ReportData }) {
                   <>
                     <Text style={styles.summaryLabel}>Strongest</Text>
                     <Text style={styles.summaryBody}>
-                      {`${best.name} (${best.score}) — ${best.insights[0] ? String(best.insights[0]).slice(0, 140) : "Lead with what this assistant already rewards."}`}
+                      {`${best.name} (${best.score}) — ${best.insights[0] ? truncateInsight(String(best.insights[0]), 200) : "Lead with what this assistant already rewards."}`}
                     </Text>
                   </>
                 ) : null}
@@ -194,7 +207,7 @@ export function PageModelAnalysisMatrix({ data }: { data: ReportData }) {
                   <>
                     <Text style={styles.summaryLabel}>Weakest</Text>
                     <Text style={styles.summaryBody}>
-                      {`${worst.name} (${worst.score}) — ${worst.insights[0] ? String(worst.insights[0]).slice(0, 140) : "This path is where share is leaking."}`}
+                      {`${worst.name} (${worst.score}) — ${worst.insights[0] ? truncateInsight(String(worst.insights[0]), 200) : "This path is where share is leaking."}`}
                     </Text>
                   </>
                 ) : null}

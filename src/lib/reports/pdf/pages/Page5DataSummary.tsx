@@ -1,6 +1,6 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReportData } from "../types";
-import { PAGE, colors, fonts, rhythm, space, baseStyles, BODY_MAX_W } from "../theme";
+import { PAGE, colors, fonts, rhythm, space, baseStyles, BODY_MAX_W, pdfPageRootPadding } from "../theme";
 import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
@@ -136,7 +136,7 @@ export function Page5DataSummary({ data }: { data: ReportData }) {
   const maxM = Math.max(...data.competitiveTable.map((r) => r.mentions), 1);
 
   return (
-    <Page size={[PAGE.width, PAGE.height]} style={baseStyles.page}>
+    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding, baseStyles.pageColumn]}>
       <View style={baseStyles.pageBody}>
         <PdfTraceMarker page={6} section="Page5:start" />
         <PdfHeader data={data} variant="inner" pageNum={6} />

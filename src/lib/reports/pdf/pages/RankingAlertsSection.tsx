@@ -80,8 +80,8 @@ const styles = StyleSheet.create({
   },
 });
 
-/** Competitive ranking + WIN / RISK / PRIORITY — used on the dedicated snapshot slide. */
-export function RankingAlertsSection({ data }: { data: ReportData }) {
+/** Ranked competitor rows + mini-bars (no WIN/RISK row). */
+export function CompetitiveRankingBlock({ data }: { data: ReportData }) {
   const maxM = Math.max(...data.competitors.map((c) => c.mentions), 1);
   const clientM = data.competitors.find((c) => c.isClient)?.mentions ?? 0;
 
@@ -135,8 +135,21 @@ export function RankingAlertsSection({ data }: { data: ReportData }) {
           </View>
         );
       })}
+    </View>
+  );
+}
 
-      <View style={styles.alertRow}>
+/** WIN / RISK / PRIORITY strip — pair with {@link CompetitiveRankingBlock}. */
+export function WinRiskPriorityAlerts({
+  data,
+  alertRowStyle,
+}: {
+  data: ReportData;
+  /** e.g. `{ marginTop: 0 }` when a flex spacer already separates this row from the ranking block. */
+  alertRowStyle?: { marginTop?: number };
+}) {
+  return (
+    <View style={[styles.alertRow, ...(alertRowStyle ? [alertRowStyle] : [])]}>
         <View style={[styles.alertCard, styles.alertWin, styles.alertSp]}>
           <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.green }]}>
             <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.green, fontFamily: fonts.sansBold }}>WIN</Text>
@@ -159,6 +172,15 @@ export function RankingAlertsSection({ data }: { data: ReportData }) {
           <Text style={styles.alertDetail}>{data.alerts.priority.detail}</Text>
         </View>
       </View>
+  );
+}
+
+/** Competitive ranking + WIN / RISK / PRIORITY — used on the dedicated snapshot slide. */
+export function RankingAlertsSection({ data }: { data: ReportData }) {
+  return (
+    <View>
+      <CompetitiveRankingBlock data={data} />
+      <WinRiskPriorityAlerts data={data} />
     </View>
   );
 }
