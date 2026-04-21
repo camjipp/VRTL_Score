@@ -1,5 +1,5 @@
 import { Document, Font, type DocumentProps } from "@react-pdf/renderer";
-import type { ReactElement } from "react";
+import React, { type ReactElement } from "react";
 
 /** Prevent Helvetica syllable splits that read as corrupted mid-word characters in exports. */
 Font.registerHyphenationCallback((word) => (word.length === 0 ? [] : [word]));

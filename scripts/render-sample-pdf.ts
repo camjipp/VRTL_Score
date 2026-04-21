@@ -1,6 +1,8 @@
 /**
  * Writes a sample AI Authority PDF using `stanleyData` (fixed-template document).
- * Usage: npx tsx --tsconfig tsconfig.tools.json scripts/render-sample-pdf.ts [output.pdf]
+ * Uses `generatePDF` from `generatePdfServer` (same path as API export).
+ *
+ * Usage: pnpm exec tsx --tsconfig tsconfig.tools.json scripts/render-sample-pdf.ts [output.pdf]
  */
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
