@@ -3,22 +3,24 @@ import type { ReactElement } from "react";
 import type { EvidencePreview, ReportData } from "../types";
 import { vulnerableExcerptBlobUnsafe } from "../sanitizeReportData";
 import { colors, fonts, rhythm, CONTENT_W, space, BODY_MAX_W } from "../theme";
+import { exampleAnswersPurpose } from "../editorial/pdfNarrative";
 import { formatEvidenceLogPillLabel } from "@/lib/reports/formatEvidenceFieldDisplay";
+import { EditorialSectionHeader } from "../components/EditorialSectionHeader";
 import { FixedInnerPage } from "../components/FixedInnerPage";
-import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
 const GAP = 12;
 const COL_W = (CONTENT_W - GAP) / 2;
 
 const styles = StyleSheet.create({
-  label: {
+  evidenceLabel: {
     fontSize: 7,
     fontFamily: fonts.sansBold,
     letterSpacing: 0.12,
     textTransform: "uppercase",
-    color: colors.ink3,
+    color: colors.ink4,
     marginBottom: rhythm.sm,
+    marginTop: rhythm.sm,
   },
   row: { width: CONTENT_W, flexDirection: "row", alignItems: "stretch" },
   card: {
@@ -33,6 +35,14 @@ const styles = StyleSheet.create({
   },
   accent: { width: 3, backgroundColor: colors.ink2 },
   inner: { flex: 1, paddingVertical: space.cardPad - 4, paddingHorizontal: space.cardPad - 4 },
+  colKicker: {
+    fontSize: 6.5,
+    fontFamily: fonts.sansBold,
+    letterSpacing: 0.12,
+    textTransform: "uppercase",
+    color: colors.ink,
+    marginBottom: 8,
+  },
   kicker: {
     fontSize: 6,
     fontFamily: fonts.sansBold,
@@ -108,7 +118,7 @@ function findVulnerable(ev: readonly EvidencePreview[]): EvidencePreview | undef
   );
 }
 
-/** PAGE 4 — Example answers: client-readable excerpts only (fixed template). */
+/** PAGE 4 — Proof: what assistants actually say (strength vs. exposure). */
 export function Page04ExampleAnswers({ data }: { data: ReportData }): ReactElement {
   const strength = findStrength(data.evidencePreview);
   const vulnerable = findVulnerable(data.evidencePreview);
@@ -117,15 +127,18 @@ export function Page04ExampleAnswers({ data }: { data: ReportData }): ReactEleme
   return (
     <FixedInnerPage data={data} pageNum={4}>
       <PdfTraceMarker page={4} section="Fixed:P4" />
-      <ChapterTitle
-        title="Example answers"
-        subtitle="Representative assistant excerpts and the strategic takeaway for this snapshot."
+      <EditorialSectionHeader
+        sectionLabel="Proof"
+        title="What assistants are actually saying"
+        purpose={exampleAnswersPurpose()}
+        intro="Side-by-side: a representative strength versus a vulnerable pattern. The implication is what to protect and what to close before competitors do."
       />
-      <Text style={styles.label}>Client-readable excerpts</Text>
+      <Text style={styles.evidenceLabel}>Evidence — representative excerpts</Text>
       <View style={styles.row}>
         <View style={[styles.card, { marginRight: GAP }]}>
           <View style={styles.accent} />
           <View style={styles.inner}>
+            <Text style={styles.colKicker}>What good looks like</Text>
             <Text style={styles.kicker}>Excerpt</Text>
             <Text style={styles.badge}>
               {strength ? formatEvidenceLogPillLabel(String(strength.label)) : "Strength"}
@@ -147,6 +160,7 @@ export function Page04ExampleAnswers({ data }: { data: ReportData }): ReactEleme
         <View style={styles.card}>
           <View style={[styles.accent, { backgroundColor: colors.red }]} />
           <View style={styles.inner}>
+            <Text style={styles.colKicker}>Where you are exposed</Text>
             <Text style={styles.kicker}>Excerpt</Text>
             <Text style={styles.badge}>
               {vulnerable ? formatEvidenceLogPillLabel(String(vulnerable.label)) : "Vulnerable"}
@@ -189,7 +203,7 @@ export function Page04ExampleAnswers({ data }: { data: ReportData }): ReactEleme
         <View style={styles.takeawayOuter}>
           <View style={styles.takeawayBar} />
           <View style={styles.takeawayInner}>
-            <Text style={styles.takeawayTitle}>Strategic takeaway</Text>
+            <Text style={styles.takeawayTitle}>Implication — strategic takeaway</Text>
             <Text style={styles.takeawayBody}>{takeaway}</Text>
           </View>
         </View>

@@ -2,10 +2,11 @@ import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "../types";
 import { colors, fonts, rhythm, BODY_MAX_W, CONTENT_W } from "../theme";
+import { evidenceLogPurpose } from "../editorial/pdfNarrative";
+import { EditorialSectionHeader } from "../components/EditorialSectionHeader";
 import { formatEvidenceLogPillLabel, formatPdfEvidenceTableCell } from "@/lib/reports/formatEvidenceFieldDisplay";
 import { sanitizePdfString } from "../sanitizeReportData";
 import { FixedInnerPage } from "../components/FixedInnerPage";
-import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
 const W_TBL = CONTENT_W;
@@ -85,11 +86,13 @@ export function Page09EvidenceLog({ data }: { data: ReportData }): ReactElement 
   return (
     <FixedInnerPage data={data} pageNum={9}>
       <PdfTraceMarker page={9} section="Fixed:P9" />
-      <ChapterTitle
+      <EditorialSectionHeader
+        sectionLabel="Proof"
         title="Evidence log"
-        subtitle="Structured fields from a subset of analyzed answers. No raw model dumps."
+        purpose={evidenceLogPurpose()}
+        intro="Each row is one analyzed answer in this export—structured fields only, not raw transcripts or dumps."
       />
-      <Text style={styles.caption}>Response sample — one row per analyzed answer in this export.</Text>
+      <Text style={styles.caption}>Sample: one row per answer below.</Text>
       <View style={{ flexGrow: 1, flexDirection: "column", minHeight: 0, marginBottom: rhythm.sm }}>
         <View style={styles.th}>
           <Text style={[styles.thText, { width: W.idx }]}>#</Text>

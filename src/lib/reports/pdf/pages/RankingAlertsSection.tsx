@@ -85,6 +85,32 @@ const styles = StyleSheet.create({
     lineHeight: 1.68,
     fontFamily: fonts.sans,
   },
+  /** Opening page: tighter WIN/RISK/PRIORITY strip */
+  alertRowCompact: { flexDirection: "row", marginTop: rhythm.md, alignItems: "stretch" },
+  alertCardCompact: {
+    flex: 1,
+    borderRadius: 6,
+    paddingVertical: space.cardPad - 6,
+    paddingHorizontal: space.cardPad - 4,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    minHeight: 0,
+    overflow: "hidden",
+  },
+  alertTitleCompact: {
+    fontSize: 8.5,
+    fontWeight: 400,
+    color: colors.ink,
+    fontFamily: fonts.sansBold,
+    lineHeight: 1.22,
+  },
+  alertDetailCompact: {
+    fontSize: 7,
+    color: colors.ink,
+    marginTop: 6,
+    lineHeight: 1.55,
+    fontFamily: fonts.sans,
+  },
 });
 
 /** Ranked competitor rows + mini-bars (no WIN/RISK row). */
@@ -150,35 +176,42 @@ export function CompetitiveRankingBlock({ data }: { data: ReportData }) {
 export function WinRiskPriorityAlerts({
   data,
   alertRowStyle,
+  compact,
 }: {
   data: ReportData;
   /** e.g. `{ marginTop: 0 }` when a flex spacer already separates this row from the ranking block. */
   alertRowStyle?: { marginTop?: number };
+  /** Tighter typography for the opening page. */
+  compact?: boolean;
 }) {
+  const rowStyle = compact ? styles.alertRowCompact : styles.alertRow;
+  const card = compact ? styles.alertCardCompact : styles.alertCard;
+  const titleS = compact ? styles.alertTitleCompact : styles.alertTitle;
+  const detailS = compact ? styles.alertDetailCompact : styles.alertDetail;
   return (
-    <View style={[styles.alertRow, ...(alertRowStyle ? [alertRowStyle] : [])]}>
-        <View style={[styles.alertCard, styles.alertWin, styles.alertSp]}>
-          <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.green }]}>
-            <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.green, fontFamily: fonts.sansBold }}>WIN</Text>
-          </View>
-          <Text style={styles.alertTitle}>{data.alerts.win.title}</Text>
-          <Text style={styles.alertDetail}>{data.alerts.win.detail}</Text>
+    <View style={[rowStyle, ...(alertRowStyle ? [alertRowStyle] : [])]}>
+      <View style={[card, styles.alertWin, styles.alertSp]}>
+        <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.green }]}>
+          <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.green, fontFamily: fonts.sansBold }}>WIN</Text>
         </View>
-        <View style={[styles.alertCard, styles.alertRisk, styles.alertSp]}>
-          <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.orange }]}>
-            <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.orange, fontFamily: fonts.sansBold }}>RISK</Text>
-          </View>
-          <Text style={styles.alertTitle}>{data.alerts.risk.title}</Text>
-          <Text style={styles.alertDetail}>{data.alerts.risk.detail}</Text>
-        </View>
-        <View style={[styles.alertCard, styles.alertPri]}>
-          <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.red }]}>
-            <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.red, fontFamily: fonts.sansBold }}>PRIORITY</Text>
-          </View>
-          <Text style={styles.alertTitle}>{data.alerts.priority.title}</Text>
-          <Text style={styles.alertDetail}>{data.alerts.priority.detail}</Text>
-        </View>
+        <Text style={titleS}>{data.alerts.win.title}</Text>
+        <Text style={detailS}>{data.alerts.win.detail}</Text>
       </View>
+      <View style={[card, styles.alertRisk, styles.alertSp]}>
+        <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.orange }]}>
+          <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.orange, fontFamily: fonts.sansBold }}>RISK</Text>
+        </View>
+        <Text style={titleS}>{data.alerts.risk.title}</Text>
+        <Text style={detailS}>{data.alerts.risk.detail}</Text>
+      </View>
+      <View style={[card, styles.alertPri]}>
+        <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.red }]}>
+          <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.red, fontFamily: fonts.sansBold }}>PRIORITY</Text>
+        </View>
+        <Text style={titleS}>{data.alerts.priority.title}</Text>
+        <Text style={detailS}>{data.alerts.priority.detail}</Text>
+      </View>
+    </View>
   );
 }
 

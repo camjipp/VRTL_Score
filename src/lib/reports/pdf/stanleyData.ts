@@ -110,7 +110,7 @@ export const stanleyData: ReportData = {
       label: "STRENGTH",
       snippet:
         "For insulated drinkware, Stanley and Owala are frequently cited for durability and retail availability…",
-      note: "That is active recommendation share—refresh proof so competitors cannot erode the slot on the next model update.",
+      note: "That is active recommendation share. Refresh proof so competitors cannot erode the slot on the next model update.",
     },
     {
       label: "VULNERABLE",
@@ -126,7 +126,7 @@ export const stanleyData: ReportData = {
     },
     {
       phase: "Week 2 to 3",
-      text: "We rebuild Anthropic and Gemini surfaces first—shipped comparison pages, FAQs, and schema aligned to how those assistants retrieve.",
+      text: "We rebuild Anthropic and Gemini surfaces first: ship comparison pages, FAQs, and schema aligned to how those assistants retrieve.",
     },
     {
       phase: "Week 3 to 4",

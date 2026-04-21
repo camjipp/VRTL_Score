@@ -2,8 +2,9 @@ import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "../types";
 import { colors, fonts, rhythm, space, BODY_MAX_W, CONTENT_W } from "../theme";
+import { dataSummaryPurpose } from "../editorial/pdfNarrative";
+import { EditorialSectionHeader } from "../components/EditorialSectionHeader";
 import { FixedInnerPage } from "../components/FixedInnerPage";
-import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
 const W = CONTENT_W;
@@ -137,10 +138,15 @@ export function Page08DataSummary({ data }: { data: ReportData }): ReactElement 
   return (
     <FixedInnerPage data={data} pageNum={8}>
       <PdfTraceMarker page={8} section="Fixed:P8" />
-      <ChapterTitle
-        title="Data summary"
-        subtitle="What the tables imply before you scan the rows. The numbers below quantify each signal."
+      <EditorialSectionHeader
+        sectionLabel="Data"
+        title="Signals & competitive set"
+        purpose={dataSummaryPurpose()}
+        intro="Read the narrative first, then scan the tables—the rows quantify what the story above claims."
       />
+      <Text style={{ fontSize: 7, fontFamily: fonts.sansBold, letterSpacing: 0.1, color: colors.ink4, marginBottom: rhythm.sm, textTransform: "uppercase" }}>
+        What the numbers prove
+      </Text>
       <Text style={styles.interpret}>{data.dataSummaryInterpretation}</Text>
       <Text style={[styles.h, styles.hFirst]}>Signals</Text>
       <View style={{ marginBottom: space.block, width: W }}>

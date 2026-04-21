@@ -2,10 +2,13 @@ import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "../types";
 import { PAGE, colors, fonts, rhythm, baseStyles, space, BODY_MAX_W } from "../theme";
+import { executiveOpeningIntro } from "../editorial/pdfNarrative";
+import { EditorialSectionHeader } from "../components/EditorialSectionHeader";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 import { ScoreRing, SCORE_RING_COLUMN_W } from "../components/ScoreRing";
+import { WinRiskPriorityAlerts } from "../pages/RankingAlertsSection";
 
 function splitSummaryBullets(text: string): string[] {
   const raw = text.replace(/\s+/g, " ").trim();
@@ -26,14 +29,14 @@ function splitSummaryBullets(text: string): string[] {
 const styles = StyleSheet.create({
   hero: {
     flexDirection: "row",
-    alignItems: "center",
-    marginBottom: space.block,
+    alignItems: "stretch",
+    marginBottom: rhythm.md,
     backgroundColor: colors.surface,
     borderRadius: 6,
     borderWidth: 1,
     borderColor: colors.rule,
-    paddingVertical: rhythm.lg,
-    paddingHorizontal: rhythm.lg,
+    paddingVertical: rhythm.md,
+    paddingHorizontal: rhythm.md,
     overflow: "hidden",
   },
   heroLeft: {
@@ -42,35 +45,45 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexDirection: "column",
   },
-  divider: { width: 1, alignSelf: "stretch", backgroundColor: colors.rule, marginHorizontal: rhythm.md },
+  divider: { width: 1, alignSelf: "stretch", backgroundColor: colors.rule, marginHorizontal: rhythm.sm },
   heroRight: {
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    minHeight: 132,
+    alignItems: "stretch",
+    minHeight: 120,
   },
   kpiTile: {
     flex: 1,
-    marginHorizontal: 8,
-    paddingTop: rhythm.md,
-    paddingHorizontal: rhythm.md,
-    paddingBottom: rhythm.md,
+    marginHorizontal: 6,
+    paddingVertical: rhythm.sm,
+    paddingHorizontal: rhythm.sm,
     borderRadius: 4,
     backgroundColor: colors.paper,
     borderWidth: 1,
     borderColor: colors.rule,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  kpiVal: { fontSize: 24, fontWeight: 400, fontFamily: fonts.sansBold, lineHeight: 1.05, color: colors.ink },
+  /** Single-line percent so digits and % do not break apart */
+  kpiPct: {
+    fontSize: 20,
+    fontWeight: 400,
+    fontFamily: fonts.sansBold,
+    lineHeight: 1.1,
+    color: colors.ink,
+    textAlign: "center",
+  },
   kpiLab: {
-    fontSize: 6,
+    fontSize: 6.5,
     fontWeight: 400,
     color: colors.ink3,
-    marginTop: rhythm.sm,
+    marginTop: 6,
     letterSpacing: 0.06,
     textTransform: "uppercase",
     fontFamily: fonts.sansBold,
-    maxWidth: 92,
+    textAlign: "center",
+    maxWidth: 100,
   },
   statusStrip: {
     flexDirection: "row",
@@ -95,18 +108,21 @@ const styles = StyleSheet.create({
   statusText: { fontSize: 7.5, fontFamily: fonts.sansBold, textAlign: "center" },
   calloutWrap: {
     flexDirection: "row",
+    flex: 1,
     marginBottom: 0,
     borderRadius: 6,
     overflow: "hidden",
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.rule,
+    minHeight: 0,
   },
   calloutBar: { width: 4, backgroundColor: colors.cyan },
   calloutInner: {
     flex: 1,
-    paddingVertical: 32,
-    paddingHorizontal: space.cardPad + 8,
+    paddingVertical: 24,
+    paddingHorizontal: space.cardPad + 6,
+    justifyContent: "flex-start",
   },
   calloutKicker: {
     fontSize: 7,
@@ -114,18 +130,18 @@ const styles = StyleSheet.create({
     color: colors.ink3,
     fontFamily: fonts.sansBold,
     letterSpacing: 0.14,
-    marginBottom: rhythm.md + 4,
+    marginBottom: rhythm.md,
     textTransform: "uppercase",
   },
   bulletRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: 12,
+    marginBottom: 10,
     maxWidth: BODY_MAX_W + 8,
   },
   bulletMark: {
-    width: 18,
-    fontSize: 12,
+    width: 16,
+    fontSize: 11,
     lineHeight: 1.65,
     color: colors.cyan,
     fontFamily: fonts.sansBold,
@@ -133,14 +149,22 @@ const styles = StyleSheet.create({
   },
   bulletText: {
     flex: 1,
-    fontSize: 11,
-    lineHeight: 1.72,
+    fontSize: 10,
+    lineHeight: 1.68,
     color: colors.ink,
     fontFamily: fonts.sans,
   },
+  evidenceLabel: {
+    fontSize: 6.5,
+    fontFamily: fonts.sansBold,
+    letterSpacing: 0.12,
+    textTransform: "uppercase",
+    color: colors.ink4,
+    marginBottom: rhythm.xs,
+  },
 });
 
-/** PAGE 1 — Executive summary (fixed template). */
+/** PAGE 1 — Opening / executive thesis + immediate signals + takeaway. */
 export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactElement {
   const rankLine = `RANK #${data.rank} OF ${data.rankTotal}`;
   const statusUpper = String(data.status).toUpperCase();
@@ -151,6 +175,10 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
     ? bottomBullets
     : [data.bottomLine.trim() || "No executive summary was provided for this report."];
 
+  const mr = `${data.mentionRate}%`;
+  const tp = `${data.topPosition}%`;
+  const auth = `${data.authorityScore}%`;
+
   return (
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.pdfSlidePage}>
       <View style={baseStyles.pdfSlideContent}>
@@ -158,53 +186,64 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
         <PdfHeader data={data} variant="cover" />
 
         <View style={{ flex: 1, flexDirection: "column", minHeight: 0 }}>
-        <View style={styles.hero}>
-          <View style={styles.heroLeft}>
-            <ScoreRing score={data.overallScore} />
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.heroRight}>
-            <View style={styles.kpiTile}>
-              <Text style={styles.kpiVal}>{data.mentionRate}%</Text>
-              <Text style={styles.kpiLab}>Mention{"\u00A0"}rate</Text>
-            </View>
-            <View style={styles.kpiTile}>
-              <Text style={styles.kpiVal}>{data.topPosition}%</Text>
-              <Text style={styles.kpiLab}>Top{"\u00A0"}position</Text>
-            </View>
-            <View style={[styles.kpiTile, authEmpty ? { opacity: 0.88 } : {}]}>
-              <Text style={[styles.kpiVal, authEmpty ? { color: colors.ink4 } : {}]}>{data.authorityScore}%</Text>
-              <Text style={[styles.kpiLab, authEmpty ? { color: colors.ink4 } : {}]}>Authority (citations)</Text>
-            </View>
-          </View>
-        </View>
+          <EditorialSectionHeader
+            sectionLabel="Opening"
+            title="Executive summary"
+            purpose="The thesis of this report: where you stand in AI recommendations, and what to do about it first."
+            intro={executiveOpeningIntro(data)}
+          />
 
-        <View style={[styles.statusStrip, { marginBottom: rhythm.md }]}>
-          <View style={styles.statusCell}>
-            <Text style={[styles.statusText, { color: colors.ink2 }]}>{statusUpper}</Text>
-          </View>
-          <View style={styles.statusCell}>
-            <Text style={[styles.statusText, { color: colors.ink2 }]}>{rankLine}</Text>
-          </View>
-          <View style={[styles.statusCell, styles.statusCellLast]}>
-            <Text style={[styles.statusText, { color: colors.ink2 }]}>{leadingPill}</Text>
-          </View>
-        </View>
-
-        <View style={[styles.calloutWrap, { flex: 1 }]}>
-          <View style={styles.calloutBar} />
-          <View style={styles.calloutInner}>
-            <Text style={styles.calloutKicker}>Bottom line</Text>
-            {bottomLines.map((line, i) => (
-              <View key={`bl-${i}`} style={styles.bulletRow}>
-                <Text style={styles.bulletMark}>•</Text>
-                <Text style={styles.bulletText} orphans={2} widows={2}>
-                  {line}
-                </Text>
+          <Text style={styles.evidenceLabel}>Evidence — scores and share</Text>
+          <View style={styles.hero}>
+            <View style={styles.heroLeft}>
+              <ScoreRing score={data.overallScore} />
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.heroRight}>
+              <View style={styles.kpiTile}>
+                <Text style={styles.kpiPct}>{mr}</Text>
+                <Text style={styles.kpiLab}>Mention rate</Text>
               </View>
-            ))}
+              <View style={styles.kpiTile}>
+                <Text style={styles.kpiPct}>{tp}</Text>
+                <Text style={styles.kpiLab}>Top position</Text>
+              </View>
+              <View style={[styles.kpiTile, authEmpty ? { opacity: 0.88 } : {}]}>
+                <Text style={[styles.kpiPct, authEmpty ? { color: colors.ink4 } : {}]}>{auth}</Text>
+                <Text style={[styles.kpiLab, authEmpty ? { color: colors.ink4 } : {}]}>Authority (citations)</Text>
+              </View>
+            </View>
           </View>
-        </View>
+
+          <View style={styles.statusStrip}>
+            <View style={styles.statusCell}>
+              <Text style={[styles.statusText, { color: colors.ink2 }]}>{statusUpper}</Text>
+            </View>
+            <View style={styles.statusCell}>
+              <Text style={[styles.statusText, { color: colors.ink2 }]}>{rankLine}</Text>
+            </View>
+            <View style={[styles.statusCell, styles.statusCellLast]}>
+              <Text style={[styles.statusText, { color: colors.ink2 }]}>{leadingPill}</Text>
+            </View>
+          </View>
+
+          <Text style={[styles.evidenceLabel, { marginTop: rhythm.sm }]}>Implication — early signals</Text>
+          <WinRiskPriorityAlerts data={data} compact />
+
+          <View style={[styles.calloutWrap, { flex: 1 }]}>
+            <View style={styles.calloutBar} />
+            <View style={styles.calloutInner}>
+              <Text style={styles.calloutKicker}>Executive takeaway</Text>
+              {bottomLines.map((line, i) => (
+                <View key={`bl-${i}`} style={styles.bulletRow}>
+                  <Text style={styles.bulletMark}>•</Text>
+                  <Text style={styles.bulletText} orphans={2} widows={2}>
+                    {line}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </View>
         </View>
 
         <PdfFooter data={data} />

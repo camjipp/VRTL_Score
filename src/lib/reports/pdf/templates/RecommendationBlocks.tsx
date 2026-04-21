@@ -19,13 +19,16 @@ export const recommendationStyles = StyleSheet.create({
     marginBottom: rhythm.md,
     width: CONTENT_W,
   },
-  heroKicker: {
-    fontSize: 6.5,
+  micro: {
+    fontSize: 6,
     fontFamily: fonts.sansBold,
     color: colors.ink3,
-    letterSpacing: 0.14,
+    letterSpacing: 0.1,
+    marginBottom: 4,
     textTransform: "uppercase",
-    marginBottom: 8,
+  },
+  microSpaced: {
+    marginTop: 10,
   },
   heroPri: {
     alignSelf: "flex-start",
@@ -35,7 +38,7 @@ export const recommendationStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.rule,
     backgroundColor: colors.paper,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   heroPriTxt: {
     fontSize: 6,
@@ -47,7 +50,7 @@ export const recommendationStyles = StyleSheet.create({
     fontSize: 13,
     fontFamily: fonts.sansBold,
     color: colors.ink,
-    marginBottom: 8,
+    marginBottom: 6,
     lineHeight: 1.25,
     maxWidth: BODY_MAX_W,
   },
@@ -56,7 +59,14 @@ export const recommendationStyles = StyleSheet.create({
     fontFamily: fonts.sansBold,
     color: colors.ink2,
     lineHeight: 1.55,
-    marginBottom: 10,
+    marginBottom: 8,
+    maxWidth: BODY_MAX_W,
+  },
+  body: {
+    fontSize: 8,
+    lineHeight: 1.62,
+    color: colors.ink,
+    fontFamily: fonts.sans,
     maxWidth: BODY_MAX_W,
   },
   heroOutcomeLabel: {
@@ -119,26 +129,6 @@ export const recommendationStyles = StyleSheet.create({
     color: colors.ink2,
     maxWidth: BODY_MAX_W - 24,
   },
-  micro: {
-    fontSize: 6,
-    fontWeight: 400,
-    color: colors.ink3,
-    letterSpacing: 0.1,
-    marginBottom: 4,
-    marginTop: 2,
-    fontFamily: fonts.sansBold,
-    textTransform: "uppercase",
-  },
-  microSpaced: {
-    marginTop: 8,
-  },
-  body: {
-    fontSize: 8,
-    lineHeight: 1.62,
-    color: colors.ink,
-    fontFamily: fonts.sans,
-    maxWidth: BODY_MAX_W - 24,
-  },
   sep: { width: 1, backgroundColor: colors.rule },
   rightNumbered: {
     width: 128,
@@ -168,26 +158,24 @@ export function PrimaryRecommendationCard({ rec }: { rec: RecommendationCard }) 
     <View
       style={[styles.heroCard, isHigh ? { borderTopColor: HIGH_ACCENT } : { borderTopColor: colors.ink3 }]}
     >
-      <Text style={styles.heroKicker}>Primary action</Text>
+      <Text style={[styles.micro, { marginBottom: 8 }]}>Highest-priority action</Text>
       <View style={styles.heroPri}>
         <Text style={styles.heroPriTxt}>{`${rec.priority} PRIORITY`}</Text>
       </View>
+      <Text style={styles.micro}>The issue</Text>
       <Text style={styles.heroTitle}>{String(rec.title)}</Text>
+      <Text style={[styles.micro, styles.microSpaced]}>Key observation</Text>
       <Text style={styles.heroInsight}>{String(rec.insight)}</Text>
-      <Text style={styles.heroOutcomeLabel}>Expected outcome</Text>
+      <Text style={[styles.micro, styles.microSpaced]}>Why it matters</Text>
+      <Text style={styles.body} orphans={2} widows={2}>
+        {String(rec.explanation)}
+      </Text>
+      <Text style={[styles.micro, styles.microSpaced]}>What we do</Text>
+      <Text style={styles.body} orphans={2} widows={2}>
+        {String(rec.action)}
+      </Text>
+      <Text style={[styles.micro, styles.microSpaced]}>Expected result</Text>
       <Text style={styles.heroOutcome}>{String(rec.expectedOutcome)}</Text>
-      <View>
-        <Text style={[styles.micro, styles.microSpaced]}>Why it matters</Text>
-        <Text style={styles.body} orphans={2} widows={2}>
-          {String(rec.explanation)}
-        </Text>
-      </View>
-      <View>
-        <Text style={[styles.micro, styles.microSpaced]}>What we do</Text>
-        <Text style={styles.body} orphans={2} widows={2}>
-          {String(rec.action)}
-        </Text>
-      </View>
     </View>
   );
 }
@@ -204,10 +192,12 @@ export function NumberedRecommendationCard({ rec, num }: { rec: RecommendationCa
         <View style={styles.priPill}>
           <Text style={styles.priPillTxt}>{`${rec.priority} PRIORITY`}</Text>
         </View>
+        <Text style={styles.micro}>The issue</Text>
         <Text style={styles.title}>{String(rec.title)}</Text>
+        <Text style={styles.micro}>Key observation</Text>
         <Text style={styles.insight}>{String(rec.insight)}</Text>
         <View>
-          <Text style={styles.micro}>Why it matters</Text>
+          <Text style={[styles.micro, styles.microSpaced]}>Why it matters</Text>
           <Text style={styles.body} orphans={2} widows={2}>
             {String(rec.explanation)}
           </Text>
@@ -221,7 +211,7 @@ export function NumberedRecommendationCard({ rec, num }: { rec: RecommendationCa
       </View>
       <View style={styles.sep} />
       <View style={styles.rightNumbered}>
-        <Text style={styles.outLabel}>Expected outcome</Text>
+        <Text style={styles.outLabel}>Expected result</Text>
         <Text style={styles.outText}>{String(rec.expectedOutcome)}</Text>
       </View>
     </View>

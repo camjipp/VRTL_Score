@@ -1,8 +1,8 @@
 import { View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { RecommendationCard, ReportData } from "../types";
+import { EditorialSectionHeader } from "../components/EditorialSectionHeader";
 import { FixedInnerPage } from "../components/FixedInnerPage";
-import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 import { NumberedRecommendationCard } from "./RecommendationBlocks";
 
@@ -16,12 +16,17 @@ type Props = {
   sliceIndex: number;
 };
 
-/** PAGE 6+ — Recommendations B: remaining cards, two per page (fixed template, repeated as needed). */
+/** PAGE 6+ — Continuation of the same ranked plan. */
 export function Page06RecommendationsB({ data, pair, startNumber, sliceIndex }: Props): ReactElement {
+  const total = data.recommendations.length;
+  const end = startNumber + pair.length - 1;
+  const span = startNumber === end ? `${startNumber}` : `${startNumber}–${end}`;
+  const purpose = `Same ordered plan as the previous page — items ${span} of ${total}.`;
+
   return (
     <FixedInnerPage data={data} pageNum={6}>
       <PdfTraceMarker page={6} section={`Fixed:P6-${sliceIndex}`} />
-      <ChapterTitle title="Recommendations (continued)" subtitle="Next priorities from the same ordered list." />
+      <EditorialSectionHeader sectionLabel="Prioritized actions" title="Secondary priorities" purpose={purpose} />
       {pair.map((rec, i) => (
         <View
           key={`rec-${sliceIndex}-${i}`}

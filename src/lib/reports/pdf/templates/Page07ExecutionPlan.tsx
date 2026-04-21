@@ -2,8 +2,9 @@ import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "../types";
 import { colors, fonts, CONTENT_W, space } from "../theme";
+import { executionPlanPurpose } from "../editorial/pdfNarrative";
+import { EditorialSectionHeader } from "../components/EditorialSectionHeader";
 import { FixedInnerPage } from "../components/FixedInnerPage";
-import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
 const STEP_HEADERS = [
@@ -112,16 +113,30 @@ const styles = StyleSheet.create({
   },
 });
 
-/** PAGE 7 — Four-step execution plan (fixed template). */
+/** PAGE 7 — Execution as a sequenced process. */
 export function Page07ExecutionPlan({ data }: { data: ReportData }): ReactElement {
   const phases = data.executionPhases;
   return (
     <FixedInnerPage data={data} pageNum={7}>
       <PdfTraceMarker page={7} section="Fixed:P7" />
-      <ChapterTitle
-        title="Execution plan"
-        subtitle="How we operationalize this snapshot: discovery, rebuild, proof, then measured iteration."
+      <EditorialSectionHeader
+        sectionLabel="Execution"
+        title="How we fix this"
+        purpose={executionPlanPurpose()}
+        intro="Four stages from audit through authority-building to re-measurement—so progress is observable, not assumed."
       />
+      <Text
+        style={{
+          fontSize: 7,
+          fontFamily: fonts.sansBold,
+          letterSpacing: 0.1,
+          color: colors.ink4,
+          marginBottom: 8,
+          textTransform: "uppercase",
+        }}
+      >
+        Evidence — phased delivery
+      </Text>
       <View style={styles.phasesWrap}>
         {phases.map((ph, i) => {
           const phaseLine = String(ph.phase);

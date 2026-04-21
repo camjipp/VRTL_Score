@@ -1,29 +1,67 @@
-import { StyleSheet, View } from "@react-pdf/renderer";
+import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "../types";
-import { space } from "../theme";
+import { colors, fonts, rhythm, CONTENT_W, space } from "../theme";
+import {
+  competitiveLandscapePurpose,
+  competitivePositionImplication,
+  competitivePositionIntro,
+} from "../editorial/pdfNarrative";
+import { EditorialSectionHeader } from "../components/EditorialSectionHeader";
 import { FixedInnerPage } from "../components/FixedInnerPage";
-import { ChapterTitle } from "../components/ChapterTitle";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
-import { RankingAlertsSection } from "../pages/RankingAlertsSection";
+import { CompetitiveRankingBlock } from "../pages/RankingAlertsSection";
 
 const styles = StyleSheet.create({
-  block: { marginBottom: space.block },
+  implication: {
+    marginTop: space.block,
+    padding: space.cardPad,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderLeftWidth: 3,
+    borderColor: colors.rule,
+    borderLeftColor: colors.orange,
+    backgroundColor: colors.orangeLight,
+  },
+  implicationKicker: {
+    fontSize: 7,
+    fontFamily: fonts.sansBold,
+    letterSpacing: 0.12,
+    textTransform: "uppercase",
+    color: colors.ink3,
+    marginBottom: rhythm.sm,
+  },
+  implicationBody: {
+    fontSize: 9,
+    lineHeight: 1.58,
+    color: colors.ink,
+    fontFamily: fonts.sans,
+    maxWidth: CONTENT_W - 8,
+  },
 });
 
-/** PAGE 2 — Competitive snapshot only (fixed template). */
+/** PAGE 2 — Competitive leaderboard + immediate risk (signals on page 1). */
 export function Page02CompetitiveSnapshot({ data }: { data: ReportData }): ReactElement {
   return (
     <FixedInnerPage data={data} pageNum={2}>
       <PdfTraceMarker page={2} section="Fixed:P2" />
       <View style={{ flex: 1, flexDirection: "column", minHeight: 0 }}>
-        <View style={styles.block}>
-          <ChapterTitle
-            title="Competitive snapshot"
-            subtitle="How you rank today and the three signals we are watching in this test set."
-          />
+        <EditorialSectionHeader
+          sectionLabel="Competitive position"
+          title="Who you are racing"
+          purpose={competitiveLandscapePurpose()}
+          intro={competitivePositionIntro(data)}
+        />
+        <Text style={{ fontSize: 7, fontFamily: fonts.sansBold, letterSpacing: 0.1, color: colors.ink4, marginBottom: rhythm.sm, textTransform: "uppercase" }}>
+          Evidence — mention share by brand
+        </Text>
+        <View style={{ flex: 1, flexDirection: "column", justifyContent: "space-between", minHeight: 0 }}>
+          <CompetitiveRankingBlock data={data} />
+          <View style={styles.implication} wrap={false}>
+            <Text style={styles.implicationKicker}>Implication — immediate risk</Text>
+            <Text style={styles.implicationBody}>{competitivePositionImplication(data)}</Text>
+          </View>
         </View>
-        <RankingAlertsSection data={data} />
       </View>
     </FixedInnerPage>
   );

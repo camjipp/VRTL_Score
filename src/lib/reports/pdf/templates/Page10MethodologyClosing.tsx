@@ -2,6 +2,8 @@ import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "../types";
 import { colors, fonts, rhythm, BODY_MAX_W, space } from "../theme";
+import { closingPurpose } from "../editorial/pdfNarrative";
+import { EditorialSectionHeader } from "../components/EditorialSectionHeader";
 import { FixedInnerPage } from "../components/FixedInnerPage";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
@@ -138,7 +140,7 @@ const styles = StyleSheet.create({
   },
 });
 
-/** PAGE 10 — Methodology + closing (fixed template). */
+/** PAGE 10 — Methodology, confidence, and forward motion. */
 export function Page10MethodologyClosing({ data }: { data: ReportData }): ReactElement {
   const next =
     data.recommendedNextStepsVisible !== false && data.recommendedNextSteps?.trim()
@@ -149,11 +151,18 @@ export function Page10MethodologyClosing({ data }: { data: ReportData }): ReactE
   return (
     <FixedInnerPage data={data} pageNum={10} pagePaddingTop={100}>
       <PdfTraceMarker page={10} section="Fixed:P10" />
+      <EditorialSectionHeader
+        sectionLabel="Closing"
+        title="How we measured this & what happens next"
+        purpose={closingPurpose()}
+        intro="A concise close: what went into the snapshot, how strong the sample is, and the forward program—not a loose appendix."
+      />
+      <View style={{ flex: 1, minHeight: 0 }}>
       <View style={styles.threeUp}>
         {methodology ? (
           <View style={styles.methodSection}>
             <Text style={styles.methodKicker}>Methodology</Text>
-            <Text style={styles.methodSub}>How this snapshot was produced and how to read the tables.</Text>
+            <Text style={styles.methodSub}>How this snapshot was produced and how to read the scorecard fairly.</Text>
             <View style={styles.method}>
               <Text style={styles.methodTitle}>Overview</Text>
               <Text style={styles.methodBody}>{methodology}</Text>
@@ -162,7 +171,7 @@ export function Page10MethodologyClosing({ data }: { data: ReportData }): ReactE
         ) : null}
 
         <View style={styles.strip}>
-          <Text style={styles.stripTitle}>Run summary</Text>
+          <Text style={styles.stripTitle}>Run summary & confidence</Text>
           <View style={styles.statsRow}>
             <View style={styles.statCol}>
               <Text style={styles.statVal}>{String(data.meta.responses)}</Text>
@@ -191,6 +200,7 @@ export function Page10MethodologyClosing({ data }: { data: ReportData }): ReactE
             </Text>
           )}
         </View>
+      </View>
       </View>
     </FixedInnerPage>
   );
