@@ -12,16 +12,20 @@ type Props = {
   children: ReactNode;
   /** Use flex body so children can distribute vertical space (e.g. execution plan). */
   bodyVariant?: "default" | "flex";
+  /** Top inset for `<Page>` so chapter titles clear the fixed running header (default matches `pdfPageRootPadding`). */
+  pagePaddingTop?: number;
 };
 
 /**
  * Fixed-template inner page: one physical `<Page>` with header + footer and a single body slot.
  * Content layout is owned by each template — this shell does not implement flow-based breaks.
  */
-export function FixedInnerPage({ data, pageNum, children, bodyVariant = "default" }: Props) {
+export function FixedInnerPage({ data, pageNum, children, bodyVariant = "default", pagePaddingTop }: Props) {
   const bodyStyle = bodyVariant === "flex" ? baseStyles.pageBodyFlex : baseStyles.pageBody;
+  const pagePad =
+    pagePaddingTop != null ? { ...pdfPageRootPadding, paddingTop: pagePaddingTop } : pdfPageRootPadding;
   return (
-    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding, baseStyles.pageColumn]}>
+    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pagePad, baseStyles.pageColumn]}>
       <View style={bodyStyle}>
         <PdfHeader data={data} variant="inner" pageNum={pageNum} />
         {children}

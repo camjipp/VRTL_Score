@@ -13,6 +13,8 @@ const GAP = 12;
 const TOP_W = (CONTENT_W - GAP) / 2;
 const COL3 = (CONTENT_W - 2 * GAP) / 3;
 
+const pagePadHeader90 = { ...pdfPageRootPadding, paddingTop: 90 } as const;
+
 function pickModel(models: readonly ModelScoreRow[], key: string): ModelScoreRow | null {
   const k = key.toLowerCase();
   return models.find((m) => m.name.toLowerCase() === k) ?? models.find((m) => m.name.toLowerCase().includes(k)) ?? null;
@@ -58,6 +60,7 @@ const styles = StyleSheet.create({
   },
   summaryBox: {
     width: CONTENT_W,
+    flexGrow: 1,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.rule,
@@ -120,8 +123,8 @@ export function Page03ModelAnalysis({ data }: { data: ReportData }): ReactElemen
   const worstLine = worst.insights[0] ? truncateAtWord(String(worst.insights[0]), 200) : "";
 
   return (
-    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pdfPageRootPadding, baseStyles.pageColumn]}>
-      <View style={baseStyles.pageBody}>
+    <Page size={[PAGE.width, PAGE.height]} style={[baseStyles.page, pagePadHeader90, baseStyles.pageColumn]}>
+      <View style={[baseStyles.pageBody, { flex: 1, flexDirection: "column" }]}>
         <PdfTraceMarker page={3} section="Fixed:P3" />
         <PdfHeader data={data} variant="inner" pageNum={3} />
         <ChapterTitle title="Model analysis" subtitle={subtitle} />

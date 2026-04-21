@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
 export function Page07ExecutionPlan({ data }: { data: ReportData }): ReactElement {
   const phases = data.executionPhases;
   return (
-    <FixedInnerPage data={data} pageNum={7} bodyVariant="flex">
+    <FixedInnerPage data={data} pageNum={7} bodyVariant="flex" pagePaddingTop={90}>
       <PdfTraceMarker page={7} section="Fixed:P7" />
       <ChapterTitle
         title="Execution plan"

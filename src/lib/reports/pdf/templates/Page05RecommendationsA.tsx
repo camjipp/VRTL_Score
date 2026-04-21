@@ -12,7 +12,7 @@ export function Page05RecommendationsA({ data }: { data: ReportData }): ReactEle
   const [first, second] = page5Pair;
 
   return (
-    <FixedInnerPage data={data} pageNum={5}>
+    <FixedInnerPage data={data} pageNum={5} pagePaddingTop={90}>
       <PdfTraceMarker page={5} section="Fixed:P5" />
       <ChapterTitle
         title="Recommendations"

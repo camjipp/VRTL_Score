@@ -18,7 +18,7 @@ type Props = {
 /** PAGE 6+ — Recommendations B: remaining cards, two per page (fixed template, repeated as needed). */
 export function Page06RecommendationsB({ data, pair, startNumber, sliceIndex }: Props): ReactElement {
   return (
-    <FixedInnerPage data={data} pageNum={6}>
+    <FixedInnerPage data={data} pageNum={6} pagePaddingTop={90}>
       <PdfTraceMarker page={6} section={`Fixed:P6-${sliceIndex}`} />
       <ChapterTitle title="Recommendations (continued)" subtitle="Next priorities from the same ordered list." />
       {pair.map((rec, i) => (

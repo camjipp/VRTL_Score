@@ -76,7 +76,9 @@ export function ReportDocument({ data, pages }: ReportDocumentProps): ReactEleme
   }
   if (want(6) && includeRecommendationsContinuation(data)) {
     const { continuationPairs } = sliceRecommendationsForFixedTemplates(data.recommendations);
-    continuationPairs.forEach((pair, i) => {
+    /** Never emit a `<Page>` for an empty recommendation pair (avoids blank pages between sections). */
+    const nonEmptyPairs = continuationPairs.filter((pair) => pair.length > 0);
+    nonEmptyPairs.forEach((pair, i) => {
       children.push(
         <Page06RecommendationsB
           key={`pdf-tpl-6-${i}`}

@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   deltaBehind: { backgroundColor: colors.surface2 },
   deltaTied: { backgroundColor: colors.surface2 },
   deltaTxt: { fontSize: 6.5, fontWeight: 400, color: colors.ink3, fontFamily: fonts.sansBold },
-  alertRow: { flexDirection: "row", marginTop: space.block, alignItems: "stretch" },
+  alertRow: { flexDirection: "row", marginTop: 40, alignItems: "stretch" },
   alertSp: { marginRight: rhythm.sm },
   alertCard: {
     flex: 1,

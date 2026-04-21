@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
 /** PAGE 2 — Competitive snapshot only (fixed template). */
 export function Page02CompetitiveSnapshot({ data }: { data: ReportData }): ReactElement {
   return (
-    <FixedInnerPage data={data} pageNum={2}>
+    <FixedInnerPage data={data} pageNum={2} pagePaddingTop={90}>
       <PdfTraceMarker page={2} section="Fixed:P2" />
       <View style={styles.block}>
         <ChapterTitle
