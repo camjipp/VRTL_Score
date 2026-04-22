@@ -12,17 +12,24 @@ export function Page05RecommendationsA({ data }: { data: ReportData }): ReactEle
   const { page5Pair } = sliceRecommendationsForFixedTemplates(data.recommendations);
   const [first, second] = page5Pair;
   const total = data.recommendations.length;
-  const range =
-    first && second ? "Items 1–2" : first ? "Item 1" : "";
   const purpose =
     total <= 0
-      ? "Ordered fixes tied to measurable outcomes."
-      : `Your ranked action plan (${total} ${total === 1 ? "move" : "moves"} total), ordered by business impact.${range ? ` This page: ${range}.` : ""}`;
+      ? "Ranked moves tied to measurable outcomes."
+      : total === 1
+        ? "One move—execute it before you split attention across noise."
+        : total === 2
+          ? "Two moves below: #1 is the lead bet; #2 follows in the same wave when bandwidth allows."
+          : `Move #1 below is the lead bet. This page covers items 1–2 of ${total}—impact-ranked through the rest of the deck.`;
 
   return (
     <FixedInnerPage data={data} pageNum={5}>
       <PdfTraceMarker page={5} section="Fixed:P5" />
-      <EditorialSectionHeader sectionLabel="Prioritized actions" title="Top priorities" purpose={purpose} />
+      <EditorialSectionHeader
+        sectionLabel="Decision"
+        title="What we fix first"
+        purpose={purpose}
+        intro="Each item states what breaks, why it hurts, what we ship, and what improves—so you can approve work, not decode jargon."
+      />
       {first ? (
         <View style={second ? {} : { flexGrow: 1, minHeight: 0 }}>
           <PrimaryRecommendationCard rec={first} actionIndex={1} totalActions={total} />

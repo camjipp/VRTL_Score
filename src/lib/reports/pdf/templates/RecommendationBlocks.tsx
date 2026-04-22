@@ -72,7 +72,7 @@ export const recommendationStyles = StyleSheet.create({
     letterSpacing: 0.06,
   },
   heroTitle: {
-    fontSize: 14.5,
+    fontSize: 15.5,
     fontFamily: fonts.sansBold,
     color: colors.ink,
     marginBottom: 6,
@@ -100,14 +100,6 @@ export const recommendationStyles = StyleSheet.create({
     color: colors.ink,
     fontFamily: fonts.sans,
     maxWidth: BODY_MAX_W,
-  },
-  heroOutcomeLabel: {
-    fontSize: 6.5,
-    fontFamily: fonts.sansBold,
-    color: colors.ink3,
-    textTransform: "uppercase",
-    letterSpacing: 0.1,
-    marginBottom: 4,
   },
   heroOutcome: {
     fontSize: 9,
@@ -164,7 +156,7 @@ export const recommendationStyles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   priPillTxt: { fontSize: 5.5, fontWeight: 400, color: colors.ink3, fontFamily: fonts.sansBold, letterSpacing: 0.04 },
-  title: { fontSize: 8.5, fontWeight: 400, color: colors.ink2, marginBottom: 3, fontFamily: fonts.sansBold },
+  title: { fontSize: 9.75, fontWeight: 400, color: colors.ink, marginBottom: 4, fontFamily: fonts.sansBold },
   insight: {
     fontSize: 6.75,
     fontWeight: 400,
@@ -214,8 +206,8 @@ export function PrimaryRecommendationCard({
   const idx = actionIndex ?? 1;
   const microLead =
     totalActions != null && totalActions > 0
-      ? `Action ${idx} of ${totalActions} — highest impact first`
-      : "Highest-priority action";
+      ? `Move ${idx} of ${totalActions} · lead priority`
+      : "Lead priority";
   return (
     <View style={[styles.heroShell, isHigh ? {} : styles.heroShellStd]}>
       <View style={styles.heroStripe}>
@@ -226,19 +218,19 @@ export function PrimaryRecommendationCard({
         <View style={styles.heroPri}>
           <Text style={styles.heroPriTxt}>{`${rec.priority} PRIORITY`}</Text>
         </View>
-        <Text style={styles.micro}>The issue</Text>
+        <Text style={styles.micro}>Issue</Text>
         <Text style={styles.heroTitle}>{String(rec.title)}</Text>
-        <Text style={[styles.micro, styles.microSpaced]}>Key observation</Text>
+        <Text style={[styles.micro, styles.microSpaced]}>Signal</Text>
         <Text style={styles.heroInsight}>{String(rec.insight)}</Text>
         <Text style={[styles.micro, styles.microSpaced]}>Why it matters</Text>
         <Text style={styles.body} orphans={2} widows={2}>
           {String(rec.explanation)}
         </Text>
-        <Text style={[styles.micro, styles.microSpaced]}>What we do</Text>
+        <Text style={[styles.micro, styles.microSpaced]}>The move</Text>
         <Text style={styles.body} orphans={2} widows={2}>
           {String(rec.action)}
         </Text>
-        <Text style={[styles.micro, styles.microSpaced]}>Expected result</Text>
+        <Text style={[styles.micro, styles.microSpaced]}>Outcome</Text>
         <Text style={styles.heroOutcome}>{String(rec.expectedOutcome)}</Text>
       </View>
     </View>
@@ -257,9 +249,9 @@ export function NumberedRecommendationCard({ rec, num }: { rec: RecommendationCa
         <View style={styles.priPill}>
           <Text style={styles.priPillTxt}>{`${rec.priority} PRIORITY`}</Text>
         </View>
-        <Text style={styles.micro}>The issue</Text>
+        <Text style={styles.micro}>Issue</Text>
         <Text style={styles.title}>{String(rec.title)}</Text>
-        <Text style={styles.micro}>Key observation</Text>
+        <Text style={styles.micro}>Signal</Text>
         <Text style={styles.insight}>{String(rec.insight)}</Text>
         <View>
           <Text style={[styles.micro, styles.microSpaced]}>Why it matters</Text>
@@ -268,14 +260,14 @@ export function NumberedRecommendationCard({ rec, num }: { rec: RecommendationCa
           </Text>
         </View>
         <View>
-          <Text style={[styles.micro, styles.microSpaced]}>What we do</Text>
+          <Text style={[styles.micro, styles.microSpaced]}>The move</Text>
           <Text style={styles.numberedBody} orphans={2} widows={2}>
             {String(rec.action)}
           </Text>
         </View>
       </View>
       <View style={styles.rightNumbered}>
-        <Text style={styles.outLabel}>Expected result</Text>
+        <Text style={styles.outLabel}>Outcome</Text>
         <Text style={styles.outText}>{String(rec.expectedOutcome)}</Text>
       </View>
     </View>

@@ -21,15 +21,19 @@ export function Page06RecommendationsB({ data, pair, startNumber, sliceIndex }: 
   const total = data.recommendations.length;
   const end = startNumber + pair.length - 1;
   const span = startNumber === end ? `${startNumber}` : `${startNumber}–${end}`;
-  const purpose = `Same ordered plan as page 5 — items ${span} of ${total}.`;
+  const purpose = `Same ranked sequence as page 5—items ${span} of ${total}. These still matter; they are just not the first lever.`;
 
-  const title =
-    startNumber === end ? `Action ${startNumber}` : `Actions ${startNumber}–${end}`;
+  const title = startNumber === end ? `Next move · #${startNumber}` : `Next moves · #${startNumber}–${end}`;
 
   return (
     <FixedInnerPage data={data} pageNum={6}>
       <PdfTraceMarker page={6} section={`Fixed:P6-${sliceIndex}`} />
-      <EditorialSectionHeader sectionLabel="Prioritized actions" title={title} purpose={purpose} />
+      <EditorialSectionHeader
+        sectionLabel="Decision"
+        title={title}
+        purpose={purpose}
+        intro="Continuation of the plan—same structure, same bar for clarity."
+      />
       {pair.map((rec, i) => (
         <View
           key={`rec-${sliceIndex}-${i}`}

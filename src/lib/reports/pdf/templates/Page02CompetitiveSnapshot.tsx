@@ -13,17 +13,9 @@ import { PdfTraceMarker } from "../components/PdfTraceMarker";
 import { CompetitiveRankingBlock } from "../pages/RankingAlertsSection";
 
 const styles = StyleSheet.create({
-  explainer: {
-    fontSize: 9.25,
-    lineHeight: 1.5,
-    color: colors.ink2,
-    fontFamily: fonts.sans,
-    marginBottom: rhythm.sm + 2,
-    maxWidth: CONTENT_W - 4,
-  },
   implication: {
-    marginTop: rhythm.md,
-    paddingTop: rhythm.md + 2,
+    marginTop: rhythm.md - 2,
+    paddingTop: rhythm.md,
     borderTopWidth: 1,
     borderTopColor: colors.rule,
     paddingBottom: rhythm.sm,
@@ -33,11 +25,11 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sansBold,
     letterSpacing: 0.06,
     color: colors.ink,
-    marginBottom: rhythm.sm,
+    marginBottom: rhythm.sm - 2,
   },
   implicationBody: {
-    fontSize: 9.75,
-    lineHeight: 1.52,
+    fontSize: 10,
+    lineHeight: 1.5,
     color: colors.ink2,
     fontFamily: fonts.sans,
     maxWidth: CONTENT_W - 4,
@@ -53,7 +45,7 @@ function duplicateBrandFootnote(competitors: ReportData["competitors"]): string 
   }
   const hasDup = [...counts.values()].some((n) => n > 1);
   if (!hasDup) return null;
-  return "Similar brand labels appear more than once in this export—compare mention counts, and merge variants in your source data when they represent the same brand.";
+  return "Note: similar brand labels appear more than once in this export. Treat counts as directional until variants are merged in source data.";
 }
 
 /** PAGE 2 — Competitive leaderboard + immediate risk (signals on page 1). */
@@ -65,21 +57,18 @@ export function Page02CompetitiveSnapshot({ data }: { data: ReportData }): React
       <PdfTraceMarker page={2} section="Fixed:P2" />
       <View style={{ flex: 1, flexDirection: "column", minHeight: 0 }}>
         <EditorialSectionHeader
-          sectionLabel="Competitive position"
-          title="Who you're competing with"
+          sectionLabel="Threat"
+          title="Who can take your spot"
           purpose={competitiveLandscapePurpose()}
           intro={competitivePositionIntro(data)}
           density="table"
         />
-        <Text style={styles.explainer} orphans={2} widows={2}>
-          {`Bars show share of assistant mentions in this run (${data.meta.responses} responses). Numbers are mentions vs. total responses; deltas are mentions vs. your brand.`}
-        </Text>
         <View style={{ flex: 1, flexDirection: "column", justifyContent: "flex-start", minHeight: 0 }}>
           <View style={{ flex: 1, minHeight: 0 }}>
             <CompetitiveRankingBlock data={data} emphasis="focal" tableFootnote={dupNote} />
           </View>
           <View style={styles.implication}>
-            <Text style={styles.implicationKicker}>What this means for you</Text>
+            <Text style={styles.implicationKicker}>Why this is not secure</Text>
             <Text style={styles.implicationBody}>{competitivePositionImplication(data)}</Text>
           </View>
         </View>

@@ -255,7 +255,7 @@ export function CompetitiveRankingBlock({
             : {},
         ]}
       >
-        {focal ? "Mention share by brand (ranked)" : "Competitive ranking"}
+        {focal ? "Who is closest on mentions (this run)" : "Competitive ranking"}
       </Text>
       {data.competitors.map((c) => {
         const widthPct = Math.min(100, Math.max(0, Math.round((c.mentions / maxM) * 100)));

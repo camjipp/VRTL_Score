@@ -169,16 +169,16 @@ export function Page10MethodologyClosing({ data }: { data: ReportData }): ReactE
     <FixedInnerPage data={data} pageNum={10} pagePaddingTop={90}>
       <PdfTraceMarker page={10} section="Fixed:P10" />
       <EditorialSectionHeader
-        sectionLabel="Closing"
-        title="What this run means — and what happens next"
+        sectionLabel="Confidence"
+        title="What happens now—and why you can trust this"
         purpose={closingPurpose()}
-        intro="How we measured it, how confident the sample is, and the move after you close the loop."
+        intro="Methodology, sample strength, and the forward rhythm after delivery—so this reads as an operating cadence, not a one-off deck."
         density="tight"
       />
       <View style={{ flex: 1, minHeight: 0 }}>
         <View style={styles.closingStack}>
           <View style={styles.strip}>
-            <Text style={styles.stripTitle}>Run summary & confidence</Text>
+            <Text style={styles.stripTitle}>Sample strength & confidence</Text>
             <View style={styles.statsRow}>
               <View style={styles.statCol}>
                 <Text style={styles.statVal}>{String(data.meta.responses)}</Text>
@@ -198,18 +198,20 @@ export function Page10MethodologyClosing({ data }: { data: ReportData }): ReactE
           </View>
 
           <View style={styles.nextBlock}>
-            <Text style={styles.nextTitle}>What happens next</Text>
+            <Text style={styles.nextTitle}>Forward program</Text>
             {next ? (
               <Text style={styles.nextBody}>{next}</Text>
             ) : (
-              <Text style={styles.nextPlaceholder}>Execute priorities, re-measure, and lock the next sprint.</Text>
+              <Text style={styles.nextPlaceholder}>
+                Ship the priorities above, re-run the snapshot, and lock the next 30-day sprint from the delta.
+              </Text>
             )}
           </View>
 
           {methodology ? (
             <View style={styles.methodSection}>
               <Text style={styles.methodKicker}>Methodology</Text>
-              <Text style={styles.methodSub}>How this snapshot was produced and how to read the scorecard fairly.</Text>
+              <Text style={styles.methodSub}>How we produced this snapshot—and how to read the scorecard without overfitting a single answer.</Text>
               <View style={styles.method}>
                 <Text style={styles.methodTitle}>Overview</Text>
                 <Text style={styles.methodBody}>{methodology}</Text>

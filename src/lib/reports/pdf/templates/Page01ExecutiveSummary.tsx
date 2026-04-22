@@ -69,6 +69,14 @@ const styles = StyleSheet.create({
     paddingTop: 4,
     justifyContent: "flex-start",
   },
+  scoreCaption: {
+    fontSize: 6.5,
+    fontFamily: fonts.sansBold,
+    letterSpacing: 0.12,
+    textTransform: "uppercase",
+    color: colors.ink4,
+    marginBottom: 4,
+  },
   standingLabel: {
     fontSize: 7.5,
     fontFamily: fonts.sansBold,
@@ -77,10 +85,18 @@ const styles = StyleSheet.create({
     color: colors.ink4,
     marginBottom: 6,
   },
-  standingBody: {
-    fontSize: 9.5,
-    lineHeight: 1.5,
-    color: colors.ink2,
+  standingLead: {
+    fontSize: 10.25,
+    lineHeight: 1.42,
+    color: colors.ink,
+    fontFamily: fonts.sansBold,
+    marginBottom: 6,
+    maxWidth: BODY_MAX_W - SCORE_RING_COLUMN_W_HERO - 24,
+  },
+  standingMetrics: {
+    fontSize: 7.75,
+    lineHeight: 1.48,
+    color: colors.ink3,
     fontFamily: fonts.sans,
     maxWidth: BODY_MAX_W - SCORE_RING_COLUMN_W_HERO - 24,
   },
@@ -119,11 +135,11 @@ const styles = StyleSheet.create({
     marginBottom: rhythm.sm,
   },
   diagLine: {
-    fontSize: 9,
-    lineHeight: 1.48,
-    color: colors.ink2,
+    fontSize: 8.25,
+    lineHeight: 1.5,
+    color: colors.ink3,
     fontFamily: fonts.sans,
-    marginBottom: 6,
+    marginBottom: 5,
     maxWidth: BODY_MAX_W,
   },
 });
@@ -143,9 +159,10 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
   const tp = `${data.topPosition}%`;
   const auth = authEmpty ? "—" : `${data.authorityScore}%`;
 
-  const standing = `Mention rate ${mr} · Top position ${tp} · Authority (citations) ${auth}${
-    authEmpty ? " — not observed in this sample" : ""
-  }. Status: ${statusUpper}. ${rankLine}. ${positionLabel}.`;
+  const standingLead = `${positionLabel}. ${rankLine}. Status: ${statusUpper}.`;
+  const standingMetrics = `Mention rate ${mr} · Top-position rate ${tp} · Citations ${auth}${
+    authEmpty ? " (not observed in this sample)" : ""
+  }.`;
 
   return (
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.pdfSlidePage}>
@@ -154,9 +171,11 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
         <PdfHeader data={data} variant="cover" />
 
         <View style={{ flex: 1, flexDirection: "column", minHeight: 0 }}>
-          <Text style={styles.p1Section}>Executive summary</Text>
+          <Text style={styles.p1Section}>Diagnosis</Text>
           <Text style={styles.p1Focal} orphans={2} widows={2}>
-            You lead now, but the lead is vulnerable.
+            {data.rank === 1
+              ? "You lead this set—that lead is not yet a lock."
+              : `You are #${data.rank} of ${data.rankTotal}—execution will decide who moves first.`}
           </Text>
           <Text style={styles.p1Intro} orphans={2} widows={2}>
             {executiveOpeningIntro(data)}
@@ -164,17 +183,23 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
 
           <View style={styles.scoreRow}>
             <View style={styles.scoreCol}>
+              <Text style={[styles.scoreCaption, { textAlign: "center", width: SCORE_RING_COLUMN_W_HERO }]}>
+                Composite · 0–100
+              </Text>
               <ScoreRing score={data.overallScore} variant="hero" />
             </View>
             <View style={styles.standingCol}>
-              <Text style={styles.standingLabel}>Current standing</Text>
-              <Text style={styles.standingBody} orphans={2} widows={2}>
-                {standing}
+              <Text style={styles.standingLabel}>Where you stand</Text>
+              <Text style={styles.standingLead} orphans={2} widows={2}>
+                {standingLead}
+              </Text>
+              <Text style={styles.standingMetrics} orphans={2} widows={2}>
+                {standingMetrics}
               </Text>
             </View>
           </View>
 
-          <Text style={styles.mattersHead}>What matters now</Text>
+          <Text style={styles.mattersHead}>Early signals</Text>
           <Text style={styles.matterLine} orphans={2} widows={2}>
             <Text style={styles.matterPrefix}>Win — </Text>
             {`${data.alerts.win.title} ${data.alerts.win.detail}`.trim()}
@@ -189,7 +214,7 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
           </Text>
 
           <View style={styles.diagnosisWrap}>
-            <Text style={styles.diagnosisLabel}>Diagnosis</Text>
+            <Text style={styles.diagnosisLabel}>Supporting read</Text>
             {bottomLines.map((line, i) => (
               <Text key={`bl-${i}`} style={styles.diagLine} orphans={2} widows={2}>
                 {line}

@@ -1,8 +1,8 @@
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "../types";
-import { colors, fonts, rhythm, BODY_MAX_W, CONTENT_W } from "../theme";
-import { evidenceLogPurpose } from "../editorial/pdfNarrative";
+import { colors, fonts, rhythm, CONTENT_W } from "../theme";
+import { evidenceLogIntro, evidenceLogPurpose } from "../editorial/pdfNarrative";
 import { EditorialSectionHeader } from "../components/EditorialSectionHeader";
 import { formatEvidenceLogPillLabel, formatPdfEvidenceTableCell } from "@/lib/reports/formatEvidenceFieldDisplay";
 import { sanitizePdfString } from "../sanitizeReportData";
@@ -21,15 +21,6 @@ const W = {
 } as const;
 
 const styles = StyleSheet.create({
-  caption: {
-    fontSize: 8.5,
-    fontWeight: 400,
-    color: colors.ink2,
-    marginBottom: rhythm.sm,
-    fontFamily: fonts.sans,
-    lineHeight: 1.5,
-    maxWidth: BODY_MAX_W,
-  },
   th: {
     flexDirection: "row",
     backgroundColor: colors.surface2,
@@ -88,13 +79,10 @@ export function Page09EvidenceLog({ data }: { data: ReportData }): ReactElement 
       <PdfTraceMarker page={9} section="Fixed:P9" />
       <EditorialSectionHeader
         sectionLabel="Proof"
-        title="Evidence log"
+        title="Audit trail"
         purpose={evidenceLogPurpose()}
-        intro="Each row is one analyzed answer in this export—structured fields only, not raw transcripts or dumps."
+        intro={evidenceLogIntro()}
       />
-      <Text style={styles.caption}>
-        One row per sampled answer—structured fields for audit, not raw chat logs.
-      </Text>
       <View style={{ flexGrow: 1, flexDirection: "column", minHeight: 0, marginBottom: rhythm.sm }}>
         <View style={styles.th}>
           <Text style={[styles.thText, { width: W.idx }]}>#</Text>

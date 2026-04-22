@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "../types";
 import { colors, fonts, CONTENT_W, space } from "../theme";
-import { executionPlanPurpose } from "../editorial/pdfNarrative";
+import { executionPlanIntro, executionPlanPurpose } from "../editorial/pdfNarrative";
 import { EditorialSectionHeader } from "../components/EditorialSectionHeader";
 import { FixedInnerPage } from "../components/FixedInnerPage";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
@@ -132,22 +132,10 @@ export function Page07ExecutionPlan({ data }: { data: ReportData }): ReactElemen
       <PdfTraceMarker page={7} section="Fixed:P7" />
       <EditorialSectionHeader
         sectionLabel="Execution"
-        title="How this gets fixed"
+        title="How we fix it"
         purpose={executionPlanPurpose()}
-        intro="Audit, repair the weakest surfaces, earn proof, then re-measure—one loop, observable progress."
+        intro={executionPlanIntro()}
       />
-      <Text
-        style={{
-          fontSize: 7,
-          fontFamily: fonts.sansBold,
-          letterSpacing: 0.1,
-          color: colors.ink4,
-          marginBottom: 6,
-          textTransform: "uppercase",
-        }}
-      >
-        Evidence — phased delivery
-      </Text>
       <View style={styles.phasesWrap}>
         {phases.map((ph, i) => {
           const phaseLine = String(ph.phase);
@@ -164,7 +152,7 @@ export function Page07ExecutionPlan({ data }: { data: ReportData }): ReactElemen
                 <Text style={styles.copy}>{main}</Text>
                 {impact ? (
                   <View style={styles.impactBlock}>
-                    <Text style={styles.impactLabel}>How we measure it</Text>
+                    <Text style={styles.impactLabel}>Checkpoint</Text>
                     <Text style={styles.impactText}>{impact}</Text>
                   </View>
                 ) : null}

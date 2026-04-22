@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 import type { EvidencePreview, ReportData, VulnerableExcerptParts } from "../types";
 import { vulnerableExcerptBlobUnsafe } from "../sanitizeReportData";
 import { colors, fonts, rhythm, CONTENT_W, space, BODY_MAX_W } from "../theme";
-import { exampleAnswersPurpose } from "../editorial/pdfNarrative";
+import { exampleAnswersIntro, exampleAnswersPurpose } from "../editorial/pdfNarrative";
 import { formatEvidenceLogPillLabel } from "@/lib/reports/formatEvidenceFieldDisplay";
 import { EditorialSectionHeader } from "../components/EditorialSectionHeader";
 import { FixedInnerPage } from "../components/FixedInnerPage";
@@ -308,16 +308,16 @@ export function Page04ExampleAnswers({ data }: { data: ReportData }): ReactEleme
       <PdfTraceMarker page={4} section="Fixed:P4" />
       <EditorialSectionHeader
         sectionLabel="Proof"
-        title="What assistants are actually saying"
+        title="Is this real?"
         purpose={exampleAnswersPurpose()}
-        intro="Below: a strong pattern versus an exposure pattern, then the implication for share."
+        intro={exampleAnswersIntro()}
       />
       {excerptBlock}
       {takeaway ? (
         <View style={styles.takeawayOuter}>
           <View style={styles.takeawayBar} />
           <View style={styles.takeawayInner}>
-            <Text style={styles.takeawayTitle}>Implication</Text>
+            <Text style={styles.takeawayTitle}>Commercial read</Text>
             <Text style={styles.takeawayBody}>{takeaway}</Text>
           </View>
         </View>

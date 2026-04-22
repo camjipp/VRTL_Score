@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ModelScoreRow, ReportData } from "../types";
 import { colors, fonts, rhythm, CONTENT_W, space } from "../theme";
-import { modelAnalysisPurpose } from "../editorial/pdfNarrative";
+import { modelAnalysisIntro, modelAnalysisPurpose } from "../editorial/pdfNarrative";
 import { insightsForModelCard } from "../editorial/modelCardInsights";
 import { EditorialSectionHeader } from "../components/EditorialSectionHeader";
 import { FixedInnerPage } from "../components/FixedInnerPage";
@@ -99,13 +99,13 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   summaryLead: {
-    fontSize: 11.5,
-    lineHeight: 1.36,
+    fontSize: 12.5,
+    lineHeight: 1.32,
     color: colors.ink,
     fontFamily: fonts.sansBold,
-    marginBottom: 4,
+    marginBottom: 3,
   },
-  summaryMeta: { fontSize: 7.5, lineHeight: 1.45, color: colors.ink3, fontFamily: fonts.sans },
+  summaryMeta: { fontSize: 6.75, lineHeight: 1.4, color: colors.ink4, fontFamily: fonts.sans },
 });
 
 function SurfaceHighlight({
@@ -118,8 +118,8 @@ function SurfaceHighlight({
   title: string;
 }) {
   const insight = model.insights[0] ? truncateAtWord(String(model.insights[0]), 200) : "—";
-  const nameColor = kind === "weakest" ? "#991B1B" : colors.ink;
-  const scoreColor = kind === "weakest" ? "#B91C1C" : colors.ink;
+  const nameColor = colors.ink;
+  const scoreColor = kind === "weakest" ? colors.red : colors.ink;
   return (
     <View style={[styles.surfaceCard, kind === "strongest" ? styles.surfaceCardStrong : styles.surfaceCardWeak]}>
       <Text style={styles.surfaceKicker}>{title}</Text>
@@ -150,20 +150,20 @@ export function Page03ModelAnalysis({ data }: { data: ReportData }): ReactElemen
     <FixedInnerPage data={data} pageNum={3}>
       <PdfTraceMarker page={3} section="Fixed:P3" />
       <EditorialSectionHeader
-        sectionLabel="Model analysis"
-        title="Where you win — and where you disappear"
+        sectionLabel="Mechanism"
+        title="Why this is happening"
         purpose={purpose}
-        intro="The same buyer question can surface different leaders by assistant family. Exploit your strongest family; recover the weakest first."
+        intro={modelAnalysisIntro(best, worst)}
       />
 
       <View style={{ flex: 1, flexDirection: "column", justifyContent: "flex-start", minHeight: 0 }}>
         <View style={styles.row2}>
-          <SurfaceHighlight kind="strongest" model={best} title="Where you win" />
-          <SurfaceHighlight kind="weakest" model={worst} title="Where you lose" />
+          <SurfaceHighlight kind="strongest" model={best} title="Strongest surface" />
+          <SurfaceHighlight kind="weakest" model={worst} title="Weakest surface" />
         </View>
 
         <View>
-          <Text style={styles.rowLabel}>By assistant family</Text>
+          <Text style={styles.rowLabel}>Same category · different assistants</Text>
           <View style={styles.row3}>
             <View style={{ width: COL3 }}>
               {openai ? (
@@ -232,7 +232,7 @@ export function Page03ModelAnalysis({ data }: { data: ReportData }): ReactElemen
         </View>
 
         <View style={styles.summaryBox}>
-          <Text style={styles.summaryKicker}>What this means</Text>
+          <Text style={styles.summaryKicker}>Implication</Text>
           <Text style={styles.summaryLead}>{`Double down on ${best.name} (${best.score}). Recover ${worst.name} (${worst.score}) first.`}</Text>
           <Text style={styles.summaryMeta}>{`${spread} pt spread · ${a} avg across models`}</Text>
         </View>

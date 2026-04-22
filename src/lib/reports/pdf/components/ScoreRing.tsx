@@ -83,21 +83,23 @@ export function ScoreRing({ score, variant = "default" }: Props) {
           </Svg>
         </View>
 
-        <View style={{ position: "absolute", bottom: labelBottom, left: 0, width: W, alignItems: "center" }}>
-          <Text
-            style={{
-              fontSize: labelFont,
-              fontWeight: 400,
-              color: colors.ink3,
-              letterSpacing: 0.06,
-              fontFamily: fonts.sansBold,
-              textTransform: "uppercase",
-              textAlign: "center",
-            }}
-          >
-            OVERALL SCORE
-          </Text>
-        </View>
+        {variant !== "hero" ? (
+          <View style={{ position: "absolute", bottom: labelBottom, left: 0, width: W, alignItems: "center" }}>
+            <Text
+              style={{
+                fontSize: labelFont,
+                fontWeight: 400,
+                color: colors.ink3,
+                letterSpacing: 0.06,
+                fontFamily: fonts.sansBold,
+                textTransform: "uppercase",
+                textAlign: "center",
+              }}
+            >
+              OVERALL SCORE
+            </Text>
+          </View>
+        ) : null}
 
         <View
           style={{

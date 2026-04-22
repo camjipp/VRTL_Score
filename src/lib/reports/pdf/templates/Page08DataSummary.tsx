@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "../types";
 import { colors, fonts, rhythm, space, BODY_MAX_W, CONTENT_W } from "../theme";
-import { dataSummaryPurpose } from "../editorial/pdfNarrative";
+import { dataSummaryIntro, dataSummaryPurpose } from "../editorial/pdfNarrative";
 import { EditorialSectionHeader } from "../components/EditorialSectionHeader";
 import { FixedInnerPage } from "../components/FixedInnerPage";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
@@ -30,7 +30,8 @@ const styles = StyleSheet.create({
     fontSize: 9.5,
     lineHeight: 1.68,
     color: colors.ink,
-    marginBottom: rhythm.sm,
+    marginTop: rhythm.xs,
+    marginBottom: rhythm.sm + 2,
     fontFamily: fonts.sans,
     maxWidth: BODY_MAX_W,
   },
@@ -139,23 +140,11 @@ export function Page08DataSummary({ data }: { data: ReportData }): ReactElement 
     <FixedInnerPage data={data} pageNum={8}>
       <PdfTraceMarker page={8} section="Fixed:P8" />
       <EditorialSectionHeader
-        sectionLabel="Data"
-        title="Signals & competitive set"
+        sectionLabel="Supporting data"
+        title="What the numbers prove"
         purpose={dataSummaryPurpose()}
-        intro="These tables back the story in the pages above—signals first, then the competitive row set from the same run."
+        intro={dataSummaryIntro()}
       />
-      <Text
-        style={{
-          fontSize: 9,
-          lineHeight: 1.48,
-          color: colors.ink2,
-          fontFamily: fonts.sans,
-          marginBottom: rhythm.sm + 2,
-          maxWidth: BODY_MAX_W,
-        }}
-      >
-        Each row ties a signal or brand to counts and rates from this sample so a client can verify the diagnosis without opening another tool.
-      </Text>
       <Text style={styles.interpret}>{data.dataSummaryInterpretation}</Text>
       <Text style={[styles.h, styles.hFirst]}>Signals</Text>
       <View style={{ marginBottom: space.block, width: W }}>
