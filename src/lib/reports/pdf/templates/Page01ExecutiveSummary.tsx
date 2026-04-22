@@ -2,27 +2,17 @@ import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "../types";
 import { PAGE, colors, fonts, rhythm, baseStyles, BODY_MAX_W } from "../theme";
-import { clipPdfText, executiveOpeningIntro, pageOneHeadline, pageOneStandingLines } from "../editorial/pdfNarrative";
+import {
+  executiveOpeningIntro,
+  pageOneHeadline,
+  pageOneStandingBlock,
+  pageOneSupportingReadLines,
+  pageOneWhatMattersLines,
+} from "../editorial/pdfNarrative";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 import { ScoreRing, SCORE_RING_COLUMN_W_HERO } from "../components/ScoreRing";
-
-function splitSummaryBullets(text: string): string[] {
-  const raw = text.replace(/\s+/g, " ").trim();
-  if (!raw) return [];
-  if (raw.includes("\n")) {
-    return raw
-      .split(/\n+/)
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .slice(0, 6)
-      .map((c) => (/[.!?]$/.test(c) ? c : `${c}.`));
-  }
-  const parts = raw.split(/(?<=[.!?])\s+/).map((s) => s.trim()).filter(Boolean);
-  if (parts.length === 0) return [];
-  return parts.slice(0, 6).map((c) => (/[.!?]$/.test(c) ? c : `${c}.`));
-}
 
 const styles = StyleSheet.create({
   p1Section: {
@@ -39,7 +29,7 @@ const styles = StyleSheet.create({
     color: colors.ink,
     lineHeight: 1.14,
     letterSpacing: -0.03,
-    marginBottom: rhythm.sm,
+    marginBottom: rhythm.xs,
     maxWidth: BODY_MAX_W,
   },
   p1Intro: {
@@ -48,13 +38,13 @@ const styles = StyleSheet.create({
     color: colors.ink2,
     fontFamily: fonts.sans,
     maxWidth: BODY_MAX_W,
-    marginBottom: rhythm.md + 2,
+    marginBottom: rhythm.sm + 4,
   },
   scoreRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    paddingBottom: rhythm.md + 2,
-    marginBottom: rhythm.md + 2,
+    paddingBottom: rhythm.sm + 2,
+    marginBottom: rhythm.sm + 2,
     borderBottomWidth: 1,
     borderBottomColor: colors.rule,
     width: "100%",
@@ -65,91 +55,100 @@ const styles = StyleSheet.create({
   },
   standingCol: {
     flex: 1,
-    paddingLeft: rhythm.md + 4,
-    paddingTop: 4,
+    paddingLeft: rhythm.md + 2,
+    paddingTop: 2,
     justifyContent: "flex-start",
   },
-  scoreCaption: {
-    fontSize: 6.5,
-    fontFamily: fonts.sansBold,
-    letterSpacing: 0.12,
+  scoreClarify: {
+    fontSize: 8,
+    fontFamily: fonts.sans,
+    color: colors.ink2,
+    lineHeight: 1.35,
+    textAlign: "center",
+    marginTop: 4,
+    marginBottom: 2,
+    maxWidth: SCORE_RING_COLUMN_W_HERO,
+    alignSelf: "center",
+  },
+  scoreScaleNote: {
+    fontSize: 6.25,
+    fontFamily: fonts.sans,
+    letterSpacing: 0.04,
     textTransform: "uppercase",
     color: colors.ink4,
-    marginBottom: 4,
+    textAlign: "center",
+    marginTop: 0,
   },
   standingLabel: {
-    fontSize: 7.5,
+    fontSize: 7.75,
     fontFamily: fonts.sansBold,
-    letterSpacing: 0.08,
+    letterSpacing: 0.1,
     textTransform: "uppercase",
-    color: colors.ink4,
-    marginBottom: 6,
+    color: colors.ink3,
+    marginBottom: 4,
   },
   standingLead: {
-    fontSize: 10.25,
-    lineHeight: 1.42,
+    fontSize: 10,
+    lineHeight: 1.38,
     color: colors.ink,
     fontFamily: fonts.sansBold,
-    marginBottom: 6,
+    marginBottom: 5,
     maxWidth: BODY_MAX_W - SCORE_RING_COLUMN_W_HERO - 24,
   },
-  standingMetrics: {
-    fontSize: 7.75,
-    lineHeight: 1.48,
-    color: colors.ink3,
-    fontFamily: fonts.sans,
+  standingMetricLine: {
+    fontSize: 8,
+    lineHeight: 1.4,
+    color: colors.ink,
+    fontFamily: fonts.sansBold,
     maxWidth: BODY_MAX_W - SCORE_RING_COLUMN_W_HERO - 24,
+    marginBottom: 2,
   },
   mattersHead: {
-    fontSize: 8.5,
+    fontSize: 9.5,
     fontFamily: fonts.sansBold,
     color: colors.ink,
-    letterSpacing: 0.06,
-    marginBottom: rhythm.sm + 2,
-  },
-  matterLine: {
-    fontSize: 8.75,
-    lineHeight: 1.42,
-    color: colors.ink,
-    fontFamily: fonts.sans,
+    letterSpacing: -0.02,
     marginBottom: rhythm.sm,
+    marginTop: 2,
+  },
+  matterLead: {
+    fontSize: 9.25,
+    lineHeight: 1.38,
+    color: colors.ink,
+    fontFamily: fonts.sansBold,
+    marginBottom: rhythm.xs + 2,
     maxWidth: BODY_MAX_W,
   },
-  matterPrefix: {
-    fontFamily: fonts.sansBold,
+  matterLine: {
+    fontSize: 9,
+    lineHeight: 1.4,
     color: colors.ink,
+    fontFamily: fonts.sans,
+    marginBottom: rhythm.xs + 2,
+    maxWidth: BODY_MAX_W,
   },
   diagnosisWrap: {
-    marginTop: rhythm.md,
-    paddingTop: rhythm.md + 2,
+    marginTop: rhythm.sm + 2,
+    paddingTop: rhythm.sm + 2,
     borderTopWidth: 1,
     borderTopColor: colors.rule,
     width: "100%",
   },
   diagLine: {
-    fontSize: 8.25,
-    lineHeight: 1.5,
-    color: colors.ink3,
+    fontSize: 7.5,
+    lineHeight: 1.48,
+    color: colors.ink4,
     fontFamily: fonts.sans,
-    marginBottom: 5,
+    marginBottom: 3,
     maxWidth: BODY_MAX_W,
   },
 });
 
 /** PAGE 1 — Executive opening: position, signals in prose, short diagnosis (white, editorial). */
 export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactElement {
-  const bottomBullets = splitSummaryBullets(data.bottomLine);
-  const bottomLines = (
-    bottomBullets.length ? bottomBullets : [data.bottomLine.trim() || "No executive summary was provided for this report."]
-  ).slice(0, 3);
-
-  const [standL1, standL2] = pageOneStandingLines(data);
-
-  function terseMatter(title: string, detail: string, max: number): string {
-    const t = `${title} ${detail}`.replace(/\s+/g, " ").trim();
-    if (t.length <= max) return t;
-    return `${t.slice(0, max - 1).replace(/[\s,;:.!]+$/, "")}…`;
-  }
+  const standing = pageOneStandingBlock(data);
+  const matters = pageOneWhatMattersLines(data);
+  const supporting = pageOneSupportingReadLines(data);
 
   return (
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.pdfSlidePage}>
@@ -168,40 +167,40 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
 
           <View style={styles.scoreRow}>
             <View style={styles.scoreCol}>
-              <Text style={[styles.scoreCaption, { textAlign: "center", width: SCORE_RING_COLUMN_W_HERO }]}>
-                Composite · 0–100
-              </Text>
               <ScoreRing score={data.overallScore} variant="hero" />
+              <Text style={[styles.scoreClarify, { width: SCORE_RING_COLUMN_W_HERO }]}>
+                Composite authority across AI assistants
+              </Text>
+              <Text style={[styles.scoreScaleNote, { width: SCORE_RING_COLUMN_W_HERO }]}>0–100 index</Text>
             </View>
             <View style={styles.standingCol}>
               <Text style={styles.standingLabel}>Where you stand</Text>
               <Text style={styles.standingLead} orphans={2} widows={2}>
-                {standL1}
+                {standing.lead}
               </Text>
-              <Text style={styles.standingMetrics} orphans={2} widows={2}>
-                {standL2}
-              </Text>
+              {standing.metrics.map((m, i) => (
+                <Text key={`st-m-${i}`} style={styles.standingMetricLine} orphans={2} widows={2}>
+                  {m}
+                </Text>
+              ))}
             </View>
           </View>
 
-          <Text style={styles.mattersHead}>Early signals</Text>
-          <Text style={styles.matterLine} orphans={2} widows={2}>
-            <Text style={styles.matterPrefix}>Win — </Text>
-            {terseMatter(data.alerts.win.title, data.alerts.win.detail, 118)}
+          <Text style={styles.mattersHead}>What matters right now</Text>
+          <Text style={styles.matterLead} orphans={2} widows={2}>
+            {matters[0]}
           </Text>
           <Text style={styles.matterLine} orphans={2} widows={2}>
-            <Text style={styles.matterPrefix}>Risk — </Text>
-            {terseMatter(data.alerts.risk.title, data.alerts.risk.detail, 118)}
+            {matters[1]}
           </Text>
           <Text style={styles.matterLine} orphans={2} widows={2}>
-            <Text style={styles.matterPrefix}>Priority — </Text>
-            {terseMatter(data.alerts.priority.title, data.alerts.priority.detail, 118)}
+            {matters[2]}
           </Text>
 
           <View style={styles.diagnosisWrap}>
-            {bottomLines.map((line, i) => (
-              <Text key={`bl-${i}`} style={styles.diagLine} orphans={2} widows={2}>
-                {clipPdfText(line, 150)}
+            {supporting.map((line, i) => (
+              <Text key={`sr-${i}`} style={styles.diagLine} orphans={2} widows={2}>
+                {line}
               </Text>
             ))}
           </View>

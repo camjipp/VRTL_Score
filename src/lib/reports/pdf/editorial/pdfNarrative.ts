@@ -11,41 +11,130 @@ function sortedByMentions(data: ReportData) {
   return [...data.competitors].sort((a, b) => b.mentions - a.mentions);
 }
 
-/** Page 1 — dominant headline (rank + mention tightness). */
-export function pageOneHeadline(data: ReportData): string {
+function mentionLeaderContext(data: ReportData) {
   const rows = sortedByMentions(data);
   if (rows.length === 0) {
-    return data.rank === 1 ? "First in this set—add peers to stress-test." : `You are #${data.rank} of ${data.rankTotal}.`;
+    return {
+      rows,
+      topM: 0,
+      leaders: rows,
+      client: undefined as (typeof rows)[number] | undefined,
+      clientAtTop: false,
+      tiedTop: false,
+    };
   }
   const topM = rows[0]!.mentions;
   const leaders = rows.filter((r) => r.mentions === topM);
   const client = rows.find((r) => r.isClient);
   const clientAtTop = Boolean(client && client.mentions === topM);
-  if (leaders.length >= 2 && clientAtTop) return "You are tied for first. The lead is fragile.";
-  if (data.rank === 1 && clientAtTop) {
-    const runnerUp = rows.find((r) => r.mentions < topM);
-    if (runnerUp && topM - runnerUp.mentions <= 2) return "You sit first—by a hair. The lead is fragile.";
+  const tiedTop = leaders.length >= 2 && clientAtTop;
+  return { rows, topM, leaders, client, clientAtTop, tiedTop };
+}
+
+/** Page 1 — dominant headline (rank + mention tightness). */
+export function pageOneHeadline(data: ReportData): string {
+  const ctx = mentionLeaderContext(data);
+  if (ctx.rows.length === 0) {
+    return data.rank === 1 ? "First in this set—add peers to stress-test." : `You are #${data.rank} of ${data.rankTotal}.`;
+  }
+  if (ctx.tiedTop) return "You are tied for first. The lead is fragile.";
+  if (data.rank === 1 && ctx.clientAtTop) {
+    const runnerUp = ctx.rows.find((r) => r.mentions < ctx.topM);
+    if (runnerUp && ctx.topM - runnerUp.mentions <= 2) return "You sit first—by a hair. The lead is fragile.";
     return "You sit first. Defend it—#2 is close enough to matter.";
   }
   return `You are #${data.rank} of ${data.rankTotal}. The next moves decide who leads.`;
 }
 
-/** Page 1 — two short lines under “Where you stand” (scannable). */
-export function pageOneStandingLines(data: ReportData): readonly [string, string] {
-  const status = String(data.status).trim() || "—";
-  const auth =
-    data.authorityScore === 0 ? "Citations not observed" : `Citations ${data.authorityScore}%`;
-  const line1 = `Status: ${status} · Rank #${data.rank} of ${data.rankTotal}`;
-  const line2 = `Mentions ${data.mentionRate}% · Top position ${data.topPosition}% · ${auth}`;
-  return [line1, line2];
+export type PageOneStandingBlock = {
+  readonly lead: string;
+  readonly metrics: readonly [string, string, string];
+};
+
+/** Page 1 — “Where you stand” lead + metric lines (scannable). */
+export function pageOneStandingBlock(data: ReportData): PageOneStandingBlock {
+  const ctx = mentionLeaderContext(data);
+  const n = data.rankTotal;
+
+  let lead: string;
+  if (ctx.rows.length === 0) {
+    lead =
+      data.rank === 1
+        ? `You are #1 in this sample across ${n} tracked slots—add peers for a fuller read.`
+        : `You are #${data.rank} of ${n} in this sample.`;
+  } else if (ctx.tiedTop) {
+    lead = `You are tied for first across ${n} competitors.`;
+  } else if (data.rank === 1 && ctx.clientAtTop) {
+    lead = `You lead across ${n} competitors.`;
+  } else {
+    lead = `You are #${data.rank} of ${n} across this competitive set.`;
+  }
+
+  const auth = data.authorityScore === 0 ? "0%" : `${data.authorityScore}%`;
+  const metrics: readonly [string, string, string] = [
+    `Mention rate: ${data.mentionRate}%`,
+    `Top position: ${data.topPosition}%`,
+    `Citations: ${auth}`,
+  ];
+
+  return { lead, metrics };
+}
+
+/** Page 1 — three insight lines (replaces label-style “signals”). */
+export function pageOneWhatMattersLines(data: ReportData): readonly [string, string, string] {
+  const ctx = mentionLeaderContext(data);
+  const models = [...data.modelScores].sort((a, b) => b.score - a.score);
+  const best = models[0];
+  const worst = models[models.length - 1];
+
+  if (!best || !worst || best.name === worst.name) {
+    return [
+      clipPdfText(`${data.alerts.win.title} ${data.alerts.win.detail}`.replace(/\s+/g, " ").trim(), 130),
+      clipPdfText(`${data.alerts.risk.title} ${data.alerts.risk.detail}`.replace(/\s+/g, " ").trim(), 130),
+      clipPdfText(`${data.alerts.priority.title} ${data.alerts.priority.detail}`.replace(/\s+/g, " ").trim(), 130),
+    ] as const;
+  }
+
+  const leadingNow = data.rank === 1 || ctx.tiedTop;
+
+  const line1 = leadingNow
+    ? `You win on ${best.name} (${best.score}), which drives your current lead.`
+    : `You are strongest on ${best.name} (${best.score})—it is where you still earn share.`;
+
+  let line2: string;
+  if (ctx.tiedTop) {
+    line2 = "You are tied on mentions — competitors can overtake quickly.";
+  } else if (ctx.clientAtTop) {
+    line2 = "You lead on mentions — competitors can overtake quickly.";
+  } else {
+    line2 = "You are behind on mentions — competitors can widen the gap quickly.";
+  }
+
+  const line3 =
+    worst.score < 40
+      ? `You are not showing on ${worst.name} (${worst.score}), which creates direct exposure risk.`
+      : `You lag on ${worst.name} (${worst.score}), which creates exposure when buyers use that path.`;
+
+  return [clipPdfText(line1, 130), clipPdfText(line2, 130), clipPdfText(line3, 130)] as const;
+}
+
+/** Page 1 — short closing read under insights (mention/absence framing). */
+export function pageOneSupportingReadLines(data: ReportData): readonly [string, string, string] {
+  const absent = Math.max(0, Math.min(100, 100 - data.mentionRate));
+  return [
+    `You appear in ${data.mentionRate}% of assistant answers.`,
+    `${absent}% of the time, you are not recommended at all.`,
+    `That is uncontrolled share when buyers ask for options.`,
+  ] as const;
 }
 
 /** Page 1 — one line under headline. */
 export function executiveOpeningIntro(data: ReportData): string {
-  const name = data.clientName.trim() || "Your brand";
-  return data.rank === 1
-    ? `${name} is at the top of this sample—small shifts still flip recommendations.`
-    : `${name} is #${data.rank} of ${data.rankTotal}—tight enough that execution changes outcomes.`;
+  const ctx = mentionLeaderContext(data);
+  if (data.rank === 1 || ctx.tiedTop) {
+    return "You lead now, but small shifts can flip who gets recommended first.";
+  }
+  return "You are not leading this set yet—execution still decides who moves up the short list.";
 }
 
 /** Page 2 — purpose (one beat). */
