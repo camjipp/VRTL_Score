@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
-import type { EvidencePreview, ReportData } from "../types";
+import type { EvidencePreview, ReportData, VulnerableExcerptParts } from "../types";
 import { vulnerableExcerptBlobUnsafe } from "../sanitizeReportData";
 import { colors, fonts, rhythm, CONTENT_W, space, BODY_MAX_W } from "../theme";
 import { exampleAnswersPurpose } from "../editorial/pdfNarrative";
@@ -138,9 +138,43 @@ function findVulnerable(ev: readonly EvidencePreview[]): EvidencePreview | undef
   );
 }
 
-function hasRichVulnerableExcerpt(v: EvidencePreview | undefined): boolean {
-  if (!v?.vulnerableExcerpt) return false;
-  return !vulnerableExcerptBlobUnsafe(v.vulnerableExcerpt, String(v.snippet));
+function lineField(x: unknown): string {
+  if (x == null) return "";
+  if (typeof x === "string") return x.trim();
+  if (typeof x === "number" || typeof x === "boolean") return String(x).trim();
+  return "";
+}
+
+/**
+ * Coerce API / partial shapes into strings, then apply the same blob guard as sanitization.
+ * Returns null when there is nothing safe to render in the vulnerable column.
+ */
+function normalizeVulnerableExcerptForPage4(v: EvidencePreview | undefined): VulnerableExcerptParts | null {
+  const raw = v?.vulnerableExcerpt;
+  if (raw == null || typeof raw !== "object") return null;
+
+  const summary = lineField((raw as { summary?: unknown }).summary);
+  const competitorsLine = lineField((raw as { competitorsLine?: unknown }).competitorsLine);
+  const implication = lineField((raw as { implication?: unknown }).implication);
+
+  const parts: VulnerableExcerptParts = {
+    summary: summary || "Exposure detail unavailable for this row.",
+    competitorsLine:
+      competitorsLine || "See the competitive table and evidence log for named alternatives.",
+    implication: implication || "Prioritize proof and retrievable comparisons where this signal repeats.",
+  };
+
+  const snippet = String(v?.snippet ?? "");
+  try {
+    if (vulnerableExcerptBlobUnsafe(parts, snippet)) return null;
+  } catch {
+    return null;
+  }
+
+  const hasAnyOriginal = Boolean(summary || competitorsLine || implication);
+  if (!hasAnyOriginal) return null;
+
+  return parts;
 }
 
 function hasStrengthSnippet(s: EvidencePreview | undefined): boolean {
@@ -152,8 +186,25 @@ export function Page04ExampleAnswers({ data }: { data: ReportData }): ReactEleme
   const strength = findStrength(data.evidencePreview);
   const vulnerable = findVulnerable(data.evidencePreview);
   const strengthOk = hasStrengthSnippet(strength);
-  const vulnRich = hasRichVulnerableExcerpt(vulnerable);
+  const vulnParts = normalizeVulnerableExcerptForPage4(vulnerable);
+  const vulnRich = vulnParts != null;
   const takeaway = data.strategicTakeaway?.trim() ?? "";
+
+  if (
+    typeof process !== "undefined" &&
+    (process.env.NODE_ENV !== "production" || process.env.PDF_DEBUG_PAGE4 === "1") &&
+    vulnerable?.vulnerableExcerpt != null &&
+    vulnParts == null
+  ) {
+    const ex = vulnerable.vulnerableExcerpt as Record<string, unknown>;
+    console.warn("[pdf Page4] vulnerableExcerpt present but not renderable", {
+      label: vulnerable.label,
+      keys: Object.keys(vulnerable.vulnerableExcerpt as object),
+      summaryType: typeof ex.summary,
+      competitorsLineType: typeof ex.competitorsLine,
+      implicationType: typeof ex.implication,
+    });
+  }
 
   const strengthCardInner = (
     <View style={styles.inner}>
@@ -175,33 +226,34 @@ export function Page04ExampleAnswers({ data }: { data: ReportData }): ReactEleme
     </View>
   );
 
-  const vulnerableRichInner = vulnerable ? (
-    <View style={styles.inner}>
-      <Text style={styles.colKicker}>Where you are exposed</Text>
-      <Text style={styles.kicker}>Excerpt</Text>
-      <Text style={styles.badge}>
-        {formatEvidenceLogPillLabel(String(vulnerable.label))}
-      </Text>
-      <View style={{ marginBottom: 8 }}>
-        <Text style={styles.mini}>Summary</Text>
-        <Text style={styles.body} orphans={2} widows={2}>
-          {vulnerable.vulnerableExcerpt!.summary}
+  const vulnerableRichInner =
+    vulnerable && vulnParts ? (
+      <View style={styles.inner}>
+        <Text style={styles.colKicker}>Where you are exposed</Text>
+        <Text style={styles.kicker}>Excerpt</Text>
+        <Text style={styles.badge}>
+          {formatEvidenceLogPillLabel(String(vulnerable.label))}
         </Text>
+        <View style={{ marginBottom: 8 }}>
+          <Text style={styles.mini}>Summary</Text>
+          <Text style={styles.body} orphans={2} widows={2}>
+            {vulnParts.summary}
+          </Text>
+        </View>
+        <View style={{ marginBottom: 8 }}>
+          <Text style={styles.mini}>Competitors named</Text>
+          <Text style={styles.body} orphans={2} widows={2}>
+            {vulnParts.competitorsLine}
+          </Text>
+        </View>
+        <View>
+          <Text style={styles.mini}>Implication</Text>
+          <Text style={styles.body} orphans={2} widows={2}>
+            {vulnParts.implication}
+          </Text>
+        </View>
       </View>
-      <View style={{ marginBottom: 8 }}>
-        <Text style={styles.mini}>Competitors named</Text>
-        <Text style={styles.body} orphans={2} widows={2}>
-          {vulnerable.vulnerableExcerpt!.competitorsLine}
-        </Text>
-      </View>
-      <View>
-        <Text style={styles.mini}>Implication</Text>
-        <Text style={styles.body} orphans={2} widows={2}>
-          {vulnerable.vulnerableExcerpt!.implication}
-        </Text>
-      </View>
-    </View>
-  ) : null;
+    ) : null;
 
   let excerptBlock: ReactElement;
   if (!strengthOk && !vulnRich) {
