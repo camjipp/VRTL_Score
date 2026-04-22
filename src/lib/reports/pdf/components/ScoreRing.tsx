@@ -15,18 +15,18 @@ const RING_PRESETS = {
     labelBottom: 22,
     nudgeY: -6,
   },
-  /** Page 1 hero — larger dial + numerals for focal hierarchy */
+  /** Page 1 hero — dominant dial + numerals (agency deliverable focal) */
   hero: {
-    W: 216,
-    H: 150,
-    R: 66,
-    stroke: 16,
-    colW: 228,
-    scoreFont: 58,
-    fracFont: 8,
+    W: 238,
+    H: 166,
+    R: 74,
+    stroke: 17,
+    colW: 252,
+    scoreFont: 72,
+    fracFont: 9,
     labelFont: 6.5,
-    labelBottom: 24,
-    nudgeY: -8,
+    labelBottom: 26,
+    nudgeY: -10,
   },
 } as const;
 

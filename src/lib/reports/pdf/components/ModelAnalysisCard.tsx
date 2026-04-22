@@ -149,8 +149,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.rule,
   },
   innerSupporting: {
-    paddingVertical: 7,
-    paddingHorizontal: 8,
+    paddingVertical: 5,
+    paddingHorizontal: 6,
   },
 });
 

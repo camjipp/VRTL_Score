@@ -16,7 +16,8 @@ export const recommendationStyles = StyleSheet.create({
     borderTopWidth: 4,
     borderTopColor: HIGH_ACCENT,
     overflow: "hidden",
-    marginBottom: rhythm.md + 2,
+    marginTop: 6,
+    marginBottom: rhythm.md + 6,
     width: CONTENT_W,
   },
   heroShellStd: {
@@ -26,7 +27,7 @@ export const recommendationStyles = StyleSheet.create({
     width: 42,
     alignItems: "center",
     justifyContent: "flex-start",
-    paddingTop: 16,
+    paddingTop: 20,
     backgroundColor: STRIPE_BG,
   },
   heroStripeNum: {
@@ -38,9 +39,9 @@ export const recommendationStyles = StyleSheet.create({
   },
   heroBody: {
     flex: 1,
-    paddingTop: 14,
-    paddingBottom: 14,
-    paddingHorizontal: space.cardPad - 2,
+    paddingTop: 18,
+    paddingBottom: 18,
+    paddingHorizontal: space.cardPad + 2,
   },
   micro: {
     fontSize: 6,
@@ -70,10 +71,10 @@ export const recommendationStyles = StyleSheet.create({
     letterSpacing: 0.06,
   },
   heroTitle: {
-    fontSize: 13.5,
+    fontSize: 14.5,
     fontFamily: fonts.sansBold,
     color: colors.ink,
-    marginBottom: 4,
+    marginBottom: 6,
     lineHeight: 1.2,
     maxWidth: BODY_MAX_W,
   },
@@ -86,8 +87,15 @@ export const recommendationStyles = StyleSheet.create({
     maxWidth: BODY_MAX_W,
   },
   body: {
-    fontSize: 7.5,
+    fontSize: 7.75,
     lineHeight: 1.52,
+    color: colors.ink,
+    fontFamily: fonts.sans,
+    maxWidth: BODY_MAX_W,
+  },
+  numberedBody: {
+    fontSize: 7,
+    lineHeight: 1.48,
     color: colors.ink,
     fontFamily: fonts.sans,
     maxWidth: BODY_MAX_W,
@@ -109,7 +117,7 @@ export const recommendationStyles = StyleSheet.create({
   },
   card: {
     flexDirection: "row",
-    backgroundColor: colors.paper,
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.rule,
     borderRadius: 6,
@@ -117,7 +125,7 @@ export const recommendationStyles = StyleSheet.create({
     overflow: "hidden",
   },
   numberedCard: {
-    marginBottom: 8,
+    marginBottom: 6,
   },
   cardHigh: {
     borderLeftWidth: 3,
@@ -127,11 +135,17 @@ export const recommendationStyles = StyleSheet.create({
     width: 34,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: rhythm.sm + 4,
+    paddingVertical: rhythm.sm + 2,
     backgroundColor: STRIPE_SECONDARY,
   },
-  stripeNum: { fontSize: 16, fontWeight: 400, color: colors.paper, fontFamily: fonts.sansBold },
-  mid: { flex: 1, paddingVertical: space.cardPad - 4, paddingHorizontal: space.cardPad - 2, paddingRight: 10 },
+  stripeNum: { fontSize: 15, fontWeight: 400, color: colors.paper, fontFamily: fonts.sansBold },
+  mid: {
+    flex: 1,
+    paddingTop: 10,
+    paddingBottom: 10,
+    paddingLeft: space.cardPad - 2,
+    paddingRight: 8,
+  },
   priPill: {
     alignSelf: "flex-start",
     paddingVertical: 2,
@@ -143,23 +157,26 @@ export const recommendationStyles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   priPillTxt: { fontSize: 5.5, fontWeight: 400, color: colors.ink3, fontFamily: fonts.sansBold, letterSpacing: 0.04 },
-  title: { fontSize: 9, fontWeight: 400, color: colors.ink2, marginBottom: 3, fontFamily: fonts.sansBold },
+  title: { fontSize: 8.5, fontWeight: 400, color: colors.ink2, marginBottom: 3, fontFamily: fonts.sansBold },
   insight: {
-    fontSize: 7,
+    fontSize: 6.75,
     fontWeight: 400,
-    marginBottom: 5,
+    marginBottom: 4,
     fontFamily: fonts.sansBold,
-    lineHeight: 1.42,
+    lineHeight: 1.38,
     color: colors.ink3,
     maxWidth: BODY_MAX_W - 28,
   },
   sep: { width: 1, backgroundColor: colors.rule },
   rightNumbered: {
-    width: 118,
+    width: 112,
+    borderLeftWidth: 1,
+    borderLeftColor: colors.rule,
     backgroundColor: colors.surface,
-    paddingTop: space.cardPad - 4,
-    paddingBottom: 12,
-    paddingHorizontal: 10,
+    paddingTop: 10,
+    paddingBottom: 10,
+    paddingLeft: 11,
+    paddingRight: 10,
     justifyContent: "flex-start",
   },
   outLabel: {
@@ -239,18 +256,17 @@ export function NumberedRecommendationCard({ rec, num }: { rec: RecommendationCa
         <Text style={styles.insight}>{String(rec.insight)}</Text>
         <View>
           <Text style={[styles.micro, styles.microSpaced]}>Why it matters</Text>
-          <Text style={styles.body} orphans={2} widows={2}>
+          <Text style={styles.numberedBody} orphans={2} widows={2}>
             {String(rec.explanation)}
           </Text>
         </View>
         <View>
           <Text style={[styles.micro, styles.microSpaced]}>What we do</Text>
-          <Text style={styles.body} orphans={2} widows={2}>
+          <Text style={styles.numberedBody} orphans={2} widows={2}>
             {String(rec.action)}
           </Text>
         </View>
       </View>
-      <View style={styles.sep} />
       <View style={styles.rightNumbered}>
         <Text style={styles.outLabel}>Expected result</Text>
         <Text style={styles.outText}>{String(rec.expectedOutcome)}</Text>

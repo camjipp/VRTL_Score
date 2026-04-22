@@ -46,10 +46,11 @@ const styles = StyleSheet.create({
     flexDirection: "column",
   },
   focalHeadline: {
-    marginTop: 10,
-    paddingHorizontal: 4,
-    fontSize: 11.5,
-    lineHeight: 1.35,
+    marginTop: 14,
+    marginBottom: 12,
+    paddingHorizontal: 6,
+    fontSize: 13.5,
+    lineHeight: 1.28,
     fontFamily: fonts.sansBold,
     color: colors.ink,
     textAlign: "center",
@@ -77,18 +78,18 @@ const styles = StyleSheet.create({
   },
   /** Single-line percent so digits and % do not break apart */
   kpiPct: {
-    fontSize: 17,
+    fontSize: 14,
     fontWeight: 400,
     fontFamily: fonts.sansBold,
     lineHeight: 1.1,
-    color: colors.ink2,
+    color: colors.ink3,
     textAlign: "center",
   },
   kpiLab: {
-    fontSize: 6,
+    fontSize: 5.5,
     fontWeight: 400,
     color: colors.ink4,
-    marginTop: 4,
+    marginTop: 3,
     letterSpacing: 0.06,
     textTransform: "uppercase",
     fontFamily: fonts.sansBold,
@@ -129,38 +130,38 @@ const styles = StyleSheet.create({
   calloutBar: { width: 2, backgroundColor: colors.cyan },
   calloutInner: {
     flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: space.cardPad,
+    paddingVertical: 7,
+    paddingHorizontal: space.cardPad - 2,
     justifyContent: "flex-start",
   },
   calloutKicker: {
-    fontSize: 7,
+    fontSize: 6.5,
     fontWeight: 400,
     color: colors.ink4,
     fontFamily: fonts.sansBold,
     letterSpacing: 0.1,
-    marginBottom: rhythm.sm,
+    marginBottom: rhythm.sm - 2,
     textTransform: "uppercase",
   },
   bulletRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: 5,
+    marginBottom: 3,
     maxWidth: BODY_MAX_W + 8,
   },
   bulletMark: {
-    width: 14,
-    fontSize: 9,
-    lineHeight: 1.55,
+    width: 12,
+    fontSize: 8,
+    lineHeight: 1.38,
     color: colors.cyan,
     fontFamily: fonts.sansBold,
     marginTop: 0,
   },
   bulletText: {
     flex: 1,
-    fontSize: 8,
-    lineHeight: 1.48,
-    color: colors.ink2,
+    fontSize: 7.5,
+    lineHeight: 1.36,
+    color: colors.ink3,
     fontFamily: fonts.sans,
   },
   evidenceLabel: {
@@ -240,7 +241,7 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
           </View>
 
           <Text style={[styles.evidenceLabel, { marginTop: rhythm.xs }]}>Early signals</Text>
-          <WinRiskPriorityAlerts data={data} visualTier="secondary" />
+          <WinRiskPriorityAlerts data={data} visualTier="executive" />
 
           <View style={styles.calloutWrap}>
             <View style={styles.calloutBar} />

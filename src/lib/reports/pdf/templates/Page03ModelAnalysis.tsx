@@ -39,8 +39,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.cardPad - 2,
     backgroundColor: colors.surface,
   },
-  surfaceCardStrong: { borderTopWidth: 5, borderTopColor: colors.green },
-  surfaceCardWeak: { borderTopWidth: 5, borderTopColor: colors.red },
+  surfaceCardStrong: {
+    borderTopWidth: 6,
+    borderTopColor: colors.green,
+    borderWidth: 1,
+    borderColor: "#BBF7D0",
+    backgroundColor: colors.greenLight,
+  },
+  surfaceCardWeak: {
+    borderTopWidth: 6,
+    borderTopColor: colors.red,
+    borderWidth: 1,
+    borderColor: "#FECACA",
+    backgroundColor: "#FEF2F2",
+  },
   surfaceKicker: {
     fontSize: 8,
     fontFamily: fonts.sansBold,
@@ -69,7 +81,7 @@ const styles = StyleSheet.create({
   },
   summaryBox: {
     width: CONTENT_W,
-    marginTop: rhythm.sm,
+    marginTop: rhythm.md,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.rule,
@@ -85,11 +97,11 @@ const styles = StyleSheet.create({
     letterSpacing: 0.12,
     textTransform: "uppercase",
     color: colors.ink,
-    marginBottom: 4,
+    marginBottom: 5,
   },
   summaryLead: {
-    fontSize: 10.5,
-    lineHeight: 1.42,
+    fontSize: 11,
+    lineHeight: 1.38,
     color: colors.ink,
     fontFamily: fonts.sansBold,
     marginBottom: 3,
@@ -107,11 +119,13 @@ function SurfaceHighlight({
   title: string;
 }) {
   const insight = model.insights[0] ? truncateAtWord(String(model.insights[0]), 200) : "—";
+  const nameColor = kind === "weakest" ? "#991B1B" : colors.ink;
+  const scoreColor = kind === "weakest" ? "#B91C1C" : colors.ink;
   return (
     <View style={[styles.surfaceCard, kind === "strongest" ? styles.surfaceCardStrong : styles.surfaceCardWeak]}>
       <Text style={styles.surfaceKicker}>{title}</Text>
-      <Text style={styles.surfaceName}>{model.name}</Text>
-      <Text style={styles.surfaceScore}>{String(model.score)}</Text>
+      <Text style={[styles.surfaceName, { color: nameColor }]}>{model.name}</Text>
+      <Text style={[styles.surfaceScore, { color: scoreColor }]}>{String(model.score)}</Text>
       <Text style={styles.surfaceBody}>{insight}</Text>
     </View>
   );

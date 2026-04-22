@@ -145,6 +145,52 @@ const styles = StyleSheet.create({
     lineHeight: 1.48,
     fontFamily: fonts.sans,
   },
+  /** Page 1 — horizontal strip with clear gaps; PRIORITY reads most urgent */
+  alertRowExecutive: {
+    flexDirection: "row",
+    marginTop: rhythm.md + 2,
+    alignItems: "stretch",
+    justifyContent: "space-between",
+  },
+  alertSpExecutive: { marginRight: 11 },
+  alertCardExecutive: {
+    flex: 1,
+    borderRadius: 6,
+    paddingVertical: space.cardPad - 5,
+    paddingHorizontal: space.cardPad - 3,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    minHeight: 0,
+    overflow: "hidden",
+    backgroundColor: colors.paper,
+  },
+  alertWinExecutive: { borderTopWidth: 1, borderTopColor: colors.green, backgroundColor: colors.greenLight },
+  alertRiskExecutive: { borderTopWidth: 1, borderTopColor: colors.orange, backgroundColor: colors.orangeLight },
+  alertPriExecutive: {
+    borderTopWidth: 3,
+    borderTopColor: colors.red,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderLeftColor: "#FECACA",
+    borderRightColor: "#FECACA",
+    borderBottomColor: "#FECACA",
+    backgroundColor: colors.redLight,
+  },
+  alertTitleExecutive: {
+    fontSize: 8.75,
+    fontWeight: 400,
+    color: colors.ink,
+    fontFamily: fonts.sansBold,
+    lineHeight: 1.22,
+  },
+  alertDetailExecutive: {
+    fontSize: 7,
+    color: colors.ink2,
+    marginTop: 6,
+    lineHeight: 1.52,
+    fontFamily: fonts.sans,
+  },
 });
 
 /** Ranked competitor rows + mini-bars (no WIN/RISK row). */
@@ -162,7 +208,18 @@ export function CompetitiveRankingBlock({
 
   return (
     <View>
-      <Text style={[styles.rankHeader, focal ? { fontSize: 9, marginBottom: rhythm.sm + 2, marginTop: rhythm.sm + 2 } : {}]}>
+      <Text
+        style={[
+          styles.rankHeader,
+          focal
+            ? {
+                fontSize: 9,
+                marginBottom: rhythm.sm,
+                marginTop: rhythm.xs + 2,
+              }
+            : {},
+        ]}
+      >
         Competitive ranking
       </Text>
       {data.competitors.map((c) => {
@@ -179,7 +236,7 @@ export function CompetitiveRankingBlock({
               style={[
                 styles.rankInner,
                 { backgroundColor: isClient ? colors.cyanLight : "transparent" },
-                focal ? { paddingVertical: 9 } : {},
+                focal ? { paddingVertical: 10 } : {},
               ]}
             >
               <Text
@@ -235,44 +292,55 @@ export function WinRiskPriorityAlerts({
   alertRowStyle?: { marginTop?: number };
   /** Tighter typography for the opening page. */
   compact?: boolean;
-  /** `secondary` — tier-3 strip on page 1 (lighter than compact WIN/RISK). */
-  visualTier?: "default" | "secondary";
+  /** `secondary` — lighter strip; `executive` — page 1 premium strip with gaps and urgent PRIORITY. */
+  visualTier?: "default" | "secondary" | "executive";
 }) {
   const secondary = visualTier === "secondary";
-  const rowStyle = secondary
-    ? styles.alertRowSecondary
-    : compact
-      ? styles.alertRowCompact
-      : styles.alertRow;
-  const card = secondary
-    ? styles.alertCardSecondary
-    : compact
-      ? styles.alertCardCompact
-      : styles.alertCard;
-  const winExtra = secondary ? styles.alertWinSecondary : styles.alertWin;
-  const riskExtra = secondary ? styles.alertRiskSecondary : styles.alertRisk;
-  const priExtra = secondary ? styles.alertPriSecondary : styles.alertPri;
-  const titleS = secondary
-    ? styles.alertTitleSecondary
-    : compact
-      ? styles.alertTitleCompact
-      : styles.alertTitle;
-  const detailS = secondary
-    ? styles.alertDetailSecondary
-    : compact
-      ? styles.alertDetailCompact
-      : styles.alertDetail;
-  const pillFs = secondary ? 6 : 6.5;
+  const executive = visualTier === "executive";
+  const rowStyle = executive
+    ? styles.alertRowExecutive
+    : secondary
+      ? styles.alertRowSecondary
+      : compact
+        ? styles.alertRowCompact
+        : styles.alertRow;
+  const card = executive
+    ? styles.alertCardExecutive
+    : secondary
+      ? styles.alertCardSecondary
+      : compact
+        ? styles.alertCardCompact
+        : styles.alertCard;
+  const winExtra = executive ? styles.alertWinExecutive : secondary ? styles.alertWinSecondary : styles.alertWin;
+  const riskExtra = executive ? styles.alertRiskExecutive : secondary ? styles.alertRiskSecondary : styles.alertRisk;
+  const priExtra = executive ? styles.alertPriExecutive : secondary ? styles.alertPriSecondary : styles.alertPri;
+  const titleS = executive
+    ? styles.alertTitleExecutive
+    : secondary
+      ? styles.alertTitleSecondary
+      : compact
+        ? styles.alertTitleCompact
+        : styles.alertTitle;
+  const detailS = executive
+    ? styles.alertDetailExecutive
+    : secondary
+      ? styles.alertDetailSecondary
+      : compact
+        ? styles.alertDetailCompact
+        : styles.alertDetail;
+  const pillFs = executive ? 6.5 : secondary ? 6 : 6.5;
+  const spWin = executive ? styles.alertSpExecutive : styles.alertSp;
+  const spRisk = executive ? styles.alertSpExecutive : styles.alertSp;
   return (
     <View style={[rowStyle, ...(alertRowStyle ? [alertRowStyle] : [])]}>
-      <View style={[card, winExtra, styles.alertSp]}>
+      <View style={[card, winExtra, spWin]}>
         <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.green }]}>
           <Text style={{ fontSize: pillFs, fontWeight: 400, color: colors.green, fontFamily: fonts.sansBold }}>WIN</Text>
         </View>
         <Text style={titleS}>{data.alerts.win.title}</Text>
         <Text style={detailS}>{data.alerts.win.detail}</Text>
       </View>
-      <View style={[card, riskExtra, styles.alertSp]}>
+      <View style={[card, riskExtra, spRisk]}>
         <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.orange }]}>
           <Text style={{ fontSize: pillFs, fontWeight: 400, color: colors.orange, fontFamily: fonts.sansBold }}>RISK</Text>
         </View>

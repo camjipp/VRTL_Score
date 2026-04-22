@@ -40,6 +40,15 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sans,
     maxWidth: BODY_MAX_W,
   },
+  wrapTable: {
+    marginBottom: 8,
+  },
+  titleTable: {
+    marginBottom: 4,
+  },
+  introTable: {
+    marginTop: 6,
+  },
 });
 
 /**
@@ -61,18 +70,24 @@ export function EditorialSectionHeader({
   purpose?: string;
   intro?: string;
   minPresenceAhead?: number;
-  density?: "standard" | "tight";
+  /** `table` — compress stack when a data table follows immediately (e.g. page 2). */
+  density?: "standard" | "tight" | "table";
 }) {
   const purposeLine = purpose?.trim() ?? "";
+  const table = density === "table";
   return (
     <View
-      style={[styles.wrap, density === "tight" ? styles.wrapTight : {}]}
+      style={[
+        styles.wrap,
+        density === "tight" ? styles.wrapTight : {},
+        table ? styles.wrapTable : {},
+      ]}
       minPresenceAhead={minPresenceAhead}
     >
       <Text style={styles.sectionLabel} orphans={2}>
         {sectionLabel}
       </Text>
-      <Text style={styles.title} orphans={2}>
+      <Text style={[styles.title, table ? styles.titleTable : {}]} orphans={2}>
         {title}
       </Text>
       {purposeLine ? (
@@ -81,7 +96,7 @@ export function EditorialSectionHeader({
         </Text>
       ) : null}
       {intro ? (
-        <Text style={styles.intro} orphans={2} widows={2}>
+        <Text style={[styles.intro, table ? styles.introTable : {}]} orphans={2} widows={2}>
           {intro}
         </Text>
       ) : null}

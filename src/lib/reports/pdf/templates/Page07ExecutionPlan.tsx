@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
   stepSection: {
     width: CONTENT_W,
     flexDirection: "row",
-    marginBottom: 5,
+    marginBottom: 3,
   },
   stepSectionLast: {
     marginBottom: 0,
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 0,
     borderTopRightRadius: 6,
     borderBottomRightRadius: 6,
-    paddingVertical: space.cardPad - 4,
+    paddingVertical: space.cardPad - 6,
     paddingHorizontal: space.cardPad - 2,
   },
   stepHeader: {
@@ -138,7 +138,7 @@ export function Page07ExecutionPlan({ data }: { data: ReportData }): ReactElemen
           fontFamily: fonts.sansBold,
           letterSpacing: 0.1,
           color: colors.ink4,
-          marginBottom: 8,
+          marginBottom: 6,
           textTransform: "uppercase",
         }}
       >

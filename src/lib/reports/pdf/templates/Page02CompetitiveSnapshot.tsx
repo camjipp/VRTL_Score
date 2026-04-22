@@ -14,7 +14,7 @@ import { CompetitiveRankingBlock } from "../pages/RankingAlertsSection";
 
 const styles = StyleSheet.create({
   implication: {
-    marginTop: rhythm.sm + 4,
+    marginTop: rhythm.xs + 2,
     paddingVertical: space.cardPad - 2,
     paddingHorizontal: space.cardPad,
     borderRadius: 8,
@@ -52,13 +52,25 @@ export function Page02CompetitiveSnapshot({ data }: { data: ReportData }): React
           title="Your lead is fragile"
           purpose={competitiveLandscapePurpose()}
           intro={competitivePositionIntro(data)}
+          density="table"
         />
-        <Text style={{ fontSize: 7, fontFamily: fonts.sansBold, letterSpacing: 0.1, color: colors.ink4, marginBottom: rhythm.sm, textTransform: "uppercase" }}>
+        <Text
+          style={{
+            fontSize: 7,
+            fontFamily: fonts.sansBold,
+            letterSpacing: 0.1,
+            color: colors.ink4,
+            marginBottom: rhythm.xs + 2,
+            textTransform: "uppercase",
+          }}
+        >
           Evidence — mention share by brand
         </Text>
         <View style={{ flex: 1, flexDirection: "column", justifyContent: "flex-start", minHeight: 0 }}>
-          <CompetitiveRankingBlock data={data} emphasis="focal" />
-          <View style={styles.implication} wrap={false}>
+          <View style={{ flex: 1, minHeight: 0 }}>
+            <CompetitiveRankingBlock data={data} emphasis="focal" />
+          </View>
+          <View style={styles.implication}>
             <Text style={styles.implicationKicker}>Implication — immediate risk</Text>
             <Text style={styles.implicationBody}>{competitivePositionImplication(data)}</Text>
           </View>
