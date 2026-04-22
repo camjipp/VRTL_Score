@@ -46,6 +46,56 @@ export function pageOneHeadline(data: ReportData): string {
   return `You are #${data.rank} of ${data.rankTotal}. The next moves decide who leads.`;
 }
 
+/** Page 1 — headline split on first “. ” for two-line hero layout. */
+export function pageOneHeadlinePair(data: ReportData): readonly [string, string] {
+  const h = pageOneHeadline(data);
+  const idx = h.indexOf(". ");
+  if (idx !== -1) return [h.slice(0, idx + 1).trim(), h.slice(idx + 2).trim()] as const;
+  return [h, ""] as const;
+}
+
+/** Page 1 — tight line under position context (mention posture). */
+export function pageOnePositionSubline(data: ReportData): string {
+  const ctx = mentionLeaderContext(data);
+  if (ctx.rows.length === 0) return "Add peers to see how tight this set really is.";
+  if (ctx.tiedTop) return "Tied on mentions. Competitors are close.";
+  if (ctx.clientAtTop) {
+    const runner = ctx.rows.find((r) => !r.isClient && r.mentions < ctx.topM);
+    if (runner && ctx.topM - runner.mentions <= 2) return "Leading by a thin margin. Competitors are close.";
+    return "Leading on mentions. Competitors can still close the gap.";
+  }
+  return "Behind on mentions. Competitors hold the edge.";
+}
+
+/** Page 1 — short WIN / RISK / PRIORITY card bodies (data-driven). */
+export function pageOneSignalCardBodies(data: ReportData): readonly [string, string, string] {
+  const ctx = mentionLeaderContext(data);
+  const models = [...data.modelScores].sort((a, b) => b.score - a.score);
+  const best = models[0];
+  const worst = models[models.length - 1];
+
+  if (!best || !worst || best.name === worst.name) {
+    const a = data.alerts;
+    return [
+      clipPdfText(`${a.win.title} ${a.win.detail}`.replace(/\s+/g, " ").trim(), 72),
+      clipPdfText(`${a.risk.title} ${a.risk.detail}`.replace(/\s+/g, " ").trim(), 72),
+      clipPdfText(`${a.priority.title} ${a.priority.detail}`.replace(/\s+/g, " ").trim(), 72),
+    ] as const;
+  }
+
+  const win = `Strong on ${best.name} (${best.score})`;
+  const fragile = ctx.tiedTop || (data.rank === 1 && ctx.clientAtTop);
+  const risk = fragile
+    ? "Lead is fragile — competitors are close"
+    : "The short list is still open—execution shifts who wins.";
+  const priority =
+    worst.score < 40
+      ? `Not showing on ${worst.name} (${worst.score})`
+      : `Weak on ${worst.name} (${worst.score})`;
+
+  return [win, risk, priority] as const;
+}
+
 export type PageOneStandingBlock = {
   readonly lead: string;
   readonly metrics: readonly [string, string, string];
@@ -122,9 +172,9 @@ export function pageOneWhatMattersLines(data: ReportData): readonly [string, str
 export function pageOneSupportingReadLines(data: ReportData): readonly [string, string, string] {
   const absent = Math.max(0, Math.min(100, 100 - data.mentionRate));
   return [
-    `You appear in ${data.mentionRate}% of assistant answers.`,
-    `${absent}% of the time, you are not recommended at all.`,
-    `That is uncontrolled share when buyers ask for options.`,
+    `You appear in ${data.mentionRate}% of answers.`,
+    `${absent}% of the time, you are not recommended.`,
+    `That is lost recommendation share.`,
   ] as const;
 }
 

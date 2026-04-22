@@ -17,7 +17,7 @@ import {
   includeRecommendationsContinuation,
   includeRecommendationsPage5,
 } from "./fixed/fixedSectionInclusion";
-import { Page01ExecutiveSummary } from "./templates/Page01ExecutiveSummary";
+import { Page1 } from "./templates/Page1";
 import { Page02CompetitiveSnapshot } from "./templates/Page02CompetitiveSnapshot";
 import { Page03ModelAnalysis } from "./templates/Page03ModelAnalysis";
 import { Page04ExampleAnswers } from "./templates/Page04ExampleAnswers";
@@ -40,7 +40,7 @@ export type ReportDocumentProps = {
  *
  * | Logical id | Component | Content |
  * |------------|-----------|---------|
- * | 1 | `Page01ExecutiveSummary` | Executive summary |
+ * | 1 | `Page1` | Executive summary (A4 cover) |
  * | 2 | `Page02CompetitiveSnapshot` | Ranking + WIN/RISK/PRIORITY |
  * | 3 | `Page03ModelAnalysis` | Strongest/weakest + OpenAI/Gemini/Anthropic + summary |
  * | 4 | `Page04ExampleAnswers` | Strength + vulnerable excerpts + takeaway |
@@ -60,7 +60,7 @@ export function ReportDocument({ data, pages }: ReportDocumentProps): ReactEleme
   const children: ReactElement[] = [];
 
   if (want(1) && includeExecutiveSummary()) {
-    children.push(<Page01ExecutiveSummary key="pdf-tpl-1" data={data} />);
+    children.push(<Page1 key="pdf-tpl-1" data={data} />);
   }
   if (want(2) && includeCompetitiveSnapshot(data)) {
     children.push(<Page02CompetitiveSnapshot key="pdf-tpl-2" data={data} />);
