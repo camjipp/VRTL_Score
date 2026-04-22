@@ -147,13 +147,17 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   rootSupporting: {
+    backgroundColor: colors.paper,
     borderTopWidth: 0,
     borderLeftWidth: 0,
     borderRightWidth: 0,
     borderBottomWidth: 1,
     borderBottomColor: colors.rule,
-    borderRadius: 0,
-    backgroundColor: colors.paper,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    overflow: "hidden",
   },
   topBandSupporting: {
     height: 1,
@@ -207,7 +211,7 @@ export function ModelAnalysisCard({
   const posPill = deltaVsAvg >= 0;
 
   return (
-    <View style={[styles.root, { width: cardWidth }, supporting ? styles.rootSupporting : {}]}>
+    <View style={supporting ? [styles.rootSupporting, { width: cardWidth }] : [styles.root, { width: cardWidth }]}>
       <View style={[supporting ? styles.topBandSupporting : styles.topBand, supporting ? {} : { backgroundColor: colors.surface2 }]} />
       <View style={[styles.inner, supporting ? styles.innerSupporting : {}]}>
         <Text style={nameStyle}>{nameLine}</Text>

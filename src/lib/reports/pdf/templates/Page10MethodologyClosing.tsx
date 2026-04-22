@@ -56,7 +56,10 @@ const styles = StyleSheet.create({
     maxWidth: BODY_MAX_W,
   },
   strip: {
-    borderRadius: 0,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
     borderLeftWidth: 0,
     borderRightWidth: 0,
     borderBottomWidth: 1,
@@ -111,7 +114,10 @@ const styles = StyleSheet.create({
   },
   nextBlock: {
     marginTop: rhythm.md + 2,
-    borderRadius: 0,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
     borderTopWidth: 0,
     borderLeftWidth: 0,
     borderRightWidth: 0,

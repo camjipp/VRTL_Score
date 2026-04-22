@@ -32,7 +32,10 @@ const styles = StyleSheet.create({
   },
   card: {
     flexDirection: "row",
-    borderRadius: 0,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
     borderTopWidth: 0,
     borderRightWidth: 0,
     borderLeftWidth: 0,
@@ -70,7 +73,10 @@ const styles = StyleSheet.create({
   },
   quote: {
     backgroundColor: colors.paper,
-    borderRadius: 0,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
     borderTopWidth: 0,
     borderRightWidth: 0,
     borderBottomWidth: 0,
