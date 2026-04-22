@@ -25,7 +25,7 @@ export function Page05RecommendationsA({ data }: { data: ReportData }): ReactEle
       <EditorialSectionHeader sectionLabel="Prioritized actions" title="Top priorities" purpose={purpose} />
       {first ? (
         <View style={second ? {} : { flexGrow: 1, minHeight: 0 }}>
-          <PrimaryRecommendationCard rec={first} />
+          <PrimaryRecommendationCard rec={first} actionIndex={1} totalActions={total} />
         </View>
       ) : null}
       {second ? (

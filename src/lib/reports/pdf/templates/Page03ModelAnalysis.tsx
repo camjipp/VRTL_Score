@@ -28,55 +28,56 @@ const styles = StyleSheet.create({
     width: CONTENT_W,
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: GAP,
+    marginBottom: GAP + 2,
   },
   surfaceCard: {
     width: TOP_W,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.rule,
-    padding: space.cardPad - 2,
+    paddingVertical: space.cardPad,
+    paddingHorizontal: space.cardPad - 2,
     backgroundColor: colors.surface,
   },
-  surfaceCardStrong: { borderTopWidth: 4, borderTopColor: colors.green },
-  surfaceCardWeak: { borderTopWidth: 4, borderTopColor: colors.red },
+  surfaceCardStrong: { borderTopWidth: 5, borderTopColor: colors.green },
+  surfaceCardWeak: { borderTopWidth: 5, borderTopColor: colors.red },
   surfaceKicker: {
-    fontSize: 7,
+    fontSize: 8,
     fontFamily: fonts.sansBold,
     letterSpacing: 0.14,
     textTransform: "uppercase",
-    color: colors.ink3,
-    marginBottom: 6,
+    color: colors.ink2,
+    marginBottom: 8,
   },
-  surfaceName: { fontSize: 11, fontFamily: fonts.sansBold, color: colors.ink, marginBottom: 4 },
-  surfaceScore: { fontSize: 24, fontFamily: fonts.sansBold, color: colors.ink, marginBottom: 4 },
+  surfaceName: { fontSize: 12, fontFamily: fonts.sansBold, color: colors.ink, marginBottom: 5 },
+  surfaceScore: { fontSize: 30, fontFamily: fonts.sansBold, color: colors.ink, marginBottom: 5 },
   surfaceBody: { fontSize: 7.5, lineHeight: 1.42, color: colors.ink3, fontFamily: fonts.sans },
   rowLabel: {
-    fontSize: 7,
+    fontSize: 6.5,
     fontFamily: fonts.sansBold,
     letterSpacing: 0.12,
     textTransform: "uppercase",
     color: colors.ink4,
-    marginBottom: GAP,
+    marginBottom: rhythm.sm,
     width: CONTENT_W,
   },
   row3: {
     width: CONTENT_W,
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: GAP,
+    marginBottom: rhythm.sm,
   },
   summaryBox: {
     width: CONTENT_W,
-    flex: 1,
-    minHeight: 0,
+    marginTop: rhythm.sm,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.rule,
     borderTopWidth: 4,
     borderTopColor: colors.ink,
     backgroundColor: colors.surface2,
-    padding: space.cardPad,
+    paddingVertical: space.cardPad - 2,
+    paddingHorizontal: space.cardPad,
   },
   summaryKicker: {
     fontSize: 8,
@@ -84,16 +85,16 @@ const styles = StyleSheet.create({
     letterSpacing: 0.12,
     textTransform: "uppercase",
     color: colors.ink,
-    marginBottom: 6,
-  },
-  summaryLead: {
-    fontSize: 9,
-    lineHeight: 1.5,
-    color: colors.ink,
-    fontFamily: fonts.sansBold,
     marginBottom: 4,
   },
-  summaryMeta: { fontSize: 8, lineHeight: 1.45, color: colors.ink3, fontFamily: fonts.sans },
+  summaryLead: {
+    fontSize: 10.5,
+    lineHeight: 1.42,
+    color: colors.ink,
+    fontFamily: fonts.sansBold,
+    marginBottom: 3,
+  },
+  summaryMeta: { fontSize: 7.5, lineHeight: 1.45, color: colors.ink3, fontFamily: fonts.sans },
 });
 
 function SurfaceHighlight({
@@ -142,7 +143,7 @@ export function Page03ModelAnalysis({ data }: { data: ReportData }): ReactElemen
         intro="Three major families, three different short lists—double down where you lead; fix where you disappear."
       />
 
-      <View style={{ flex: 1, flexDirection: "column", justifyContent: "space-between", minHeight: 0 }}>
+      <View style={{ flex: 1, flexDirection: "column", justifyContent: "flex-start", minHeight: 0 }}>
         <View style={styles.row2}>
           <SurfaceHighlight kind="strongest" model={best} title="Where you win" />
           <SurfaceHighlight kind="weakest" model={worst} title="Where you lose" />
@@ -166,6 +167,7 @@ export function Page03ModelAnalysis({ data }: { data: ReportData }): ReactElemen
                   cardWidth={COL3}
                   maxBullets={1}
                   compact
+                  tier="supporting"
                 />
               ) : (
                 <EmptySlot label="OpenAI" />
@@ -186,6 +188,7 @@ export function Page03ModelAnalysis({ data }: { data: ReportData }): ReactElemen
                   cardWidth={COL3}
                   maxBullets={1}
                   compact
+                  tier="supporting"
                 />
               ) : (
                 <EmptySlot label="Gemini" />
@@ -206,6 +209,7 @@ export function Page03ModelAnalysis({ data }: { data: ReportData }): ReactElemen
                   cardWidth={COL3}
                   maxBullets={1}
                   compact
+                  tier="supporting"
                 />
               ) : (
                 <EmptySlot label="Anthropic" />

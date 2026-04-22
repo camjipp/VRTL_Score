@@ -3,21 +3,44 @@ import type { RecommendationCard } from "../types";
 import { colors, fonts, rhythm, BODY_MAX_W, CONTENT_W, space } from "../theme";
 
 const STRIPE_BG = colors.ink2;
+const STRIPE_SECONDARY = colors.ink3;
 const HIGH_ACCENT = "#DC2626";
 
 export const recommendationStyles = StyleSheet.create({
-  heroCard: {
+  heroShell: {
+    flexDirection: "row",
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.rule,
     borderRadius: 8,
-    borderTopWidth: 3,
+    borderTopWidth: 4,
     borderTopColor: HIGH_ACCENT,
-    paddingTop: 12,
-    paddingBottom: 12,
-    paddingHorizontal: space.cardPad - 4,
-    marginBottom: rhythm.md,
+    overflow: "hidden",
+    marginBottom: rhythm.md + 2,
     width: CONTENT_W,
+  },
+  heroShellStd: {
+    borderTopColor: colors.ink3,
+  },
+  heroStripe: {
+    width: 42,
+    alignItems: "center",
+    justifyContent: "flex-start",
+    paddingTop: 16,
+    backgroundColor: STRIPE_BG,
+  },
+  heroStripeNum: {
+    fontSize: 28,
+    fontWeight: 400,
+    color: colors.paper,
+    fontFamily: fonts.sansBold,
+    lineHeight: 1,
+  },
+  heroBody: {
+    flex: 1,
+    paddingTop: 14,
+    paddingBottom: 14,
+    paddingHorizontal: space.cardPad - 2,
   },
   micro: {
     fontSize: 6,
@@ -47,18 +70,18 @@ export const recommendationStyles = StyleSheet.create({
     letterSpacing: 0.06,
   },
   heroTitle: {
-    fontSize: 12,
+    fontSize: 13.5,
     fontFamily: fonts.sansBold,
     color: colors.ink,
     marginBottom: 4,
-    lineHeight: 1.22,
+    lineHeight: 1.2,
     maxWidth: BODY_MAX_W,
   },
   heroInsight: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontFamily: fonts.sansBold,
     color: colors.ink2,
-    lineHeight: 1.48,
+    lineHeight: 1.45,
     marginBottom: 6,
     maxWidth: BODY_MAX_W,
   },
@@ -78,7 +101,7 @@ export const recommendationStyles = StyleSheet.create({
     marginBottom: 4,
   },
   heroOutcome: {
-    fontSize: 8.5,
+    fontSize: 9,
     fontFamily: fonts.sansBold,
     color: colors.ink,
     lineHeight: 1.45,
@@ -94,88 +117,106 @@ export const recommendationStyles = StyleSheet.create({
     overflow: "hidden",
   },
   numberedCard: {
-    marginBottom: 10,
+    marginBottom: 8,
   },
   cardHigh: {
     borderLeftWidth: 3,
     borderLeftColor: HIGH_ACCENT,
   },
   leftStripe: {
-    width: 36,
+    width: 34,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: rhythm.md,
+    paddingVertical: rhythm.sm + 4,
+    backgroundColor: STRIPE_SECONDARY,
   },
-  stripeNum: { fontSize: 18, fontWeight: 400, color: colors.paper, fontFamily: fonts.sansBold },
-  mid: { flex: 1, paddingVertical: space.cardPad - 2, paddingHorizontal: space.cardPad, paddingRight: 12 },
+  stripeNum: { fontSize: 16, fontWeight: 400, color: colors.paper, fontFamily: fonts.sansBold },
+  mid: { flex: 1, paddingVertical: space.cardPad - 4, paddingHorizontal: space.cardPad - 2, paddingRight: 10 },
   priPill: {
     alignSelf: "flex-start",
     paddingVertical: 2,
     paddingHorizontal: 7,
     borderRadius: 3,
-    marginBottom: 8,
+    marginBottom: 6,
     borderWidth: 1,
     borderColor: colors.rule,
     backgroundColor: colors.surface,
   },
-  priPillTxt: { fontSize: 5.5, fontWeight: 400, color: colors.ink2, fontFamily: fonts.sansBold, letterSpacing: 0.04 },
-  title: { fontSize: 9.5, fontWeight: 400, color: colors.ink, marginBottom: 4, fontFamily: fonts.sansBold },
+  priPillTxt: { fontSize: 5.5, fontWeight: 400, color: colors.ink3, fontFamily: fonts.sansBold, letterSpacing: 0.04 },
+  title: { fontSize: 9, fontWeight: 400, color: colors.ink2, marginBottom: 3, fontFamily: fonts.sansBold },
   insight: {
-    fontSize: 7.5,
+    fontSize: 7,
     fontWeight: 400,
-    marginBottom: 6,
+    marginBottom: 5,
     fontFamily: fonts.sansBold,
-    lineHeight: 1.45,
-    color: colors.ink2,
-    maxWidth: BODY_MAX_W - 24,
+    lineHeight: 1.42,
+    color: colors.ink3,
+    maxWidth: BODY_MAX_W - 28,
   },
   sep: { width: 1, backgroundColor: colors.rule },
   rightNumbered: {
-    width: 128,
-    backgroundColor: colors.surface2,
-    paddingTop: space.cardPad - 2,
-    paddingBottom: 16,
-    paddingHorizontal: 12,
+    width: 118,
+    backgroundColor: colors.surface,
+    paddingTop: space.cardPad - 4,
+    paddingBottom: 12,
+    paddingHorizontal: 10,
     justifyContent: "flex-start",
   },
   outLabel: {
     fontSize: 5.5,
     fontWeight: 400,
-    color: colors.ink3,
+    color: colors.ink4,
     letterSpacing: 0.1,
-    marginBottom: 6,
+    marginBottom: 5,
     fontFamily: fonts.sansBold,
     textTransform: "uppercase",
   },
-  outText: { fontSize: 7.5, fontWeight: 400, lineHeight: 1.48, fontFamily: fonts.sansBold, color: colors.ink },
+  outText: { fontSize: 7, fontWeight: 400, lineHeight: 1.45, fontFamily: fonts.sansBold, color: colors.ink2 },
 });
 
 const styles = recommendationStyles;
 
-export function PrimaryRecommendationCard({ rec }: { rec: RecommendationCard }) {
+export function PrimaryRecommendationCard({
+  rec,
+  actionIndex,
+  totalActions,
+}: {
+  rec: RecommendationCard;
+  /** Global position in the ranked list (visual only). */
+  actionIndex?: number;
+  totalActions?: number;
+}) {
   const isHigh = rec.priority === "HIGH";
+  const idx = actionIndex ?? 1;
+  const microLead =
+    totalActions != null && totalActions > 0
+      ? `Action ${idx} of ${totalActions} — highest impact first`
+      : "Highest-priority action";
   return (
-    <View
-      style={[styles.heroCard, isHigh ? { borderTopColor: HIGH_ACCENT } : { borderTopColor: colors.ink3 }]}
-    >
-      <Text style={[styles.micro, { marginBottom: 8 }]}>Highest-priority action</Text>
-      <View style={styles.heroPri}>
-        <Text style={styles.heroPriTxt}>{`${rec.priority} PRIORITY`}</Text>
+    <View style={[styles.heroShell, isHigh ? {} : styles.heroShellStd]}>
+      <View style={styles.heroStripe}>
+        <Text style={styles.heroStripeNum}>{String(idx)}</Text>
       </View>
-      <Text style={styles.micro}>The issue</Text>
-      <Text style={styles.heroTitle}>{String(rec.title)}</Text>
-      <Text style={[styles.micro, styles.microSpaced]}>Key observation</Text>
-      <Text style={styles.heroInsight}>{String(rec.insight)}</Text>
-      <Text style={[styles.micro, styles.microSpaced]}>Why it matters</Text>
-      <Text style={styles.body} orphans={2} widows={2}>
-        {String(rec.explanation)}
-      </Text>
-      <Text style={[styles.micro, styles.microSpaced]}>What we do</Text>
-      <Text style={styles.body} orphans={2} widows={2}>
-        {String(rec.action)}
-      </Text>
-      <Text style={[styles.micro, styles.microSpaced]}>Expected result</Text>
-      <Text style={styles.heroOutcome}>{String(rec.expectedOutcome)}</Text>
+      <View style={styles.heroBody}>
+        <Text style={[styles.micro, { marginBottom: 8 }]}>{microLead}</Text>
+        <View style={styles.heroPri}>
+          <Text style={styles.heroPriTxt}>{`${rec.priority} PRIORITY`}</Text>
+        </View>
+        <Text style={styles.micro}>The issue</Text>
+        <Text style={styles.heroTitle}>{String(rec.title)}</Text>
+        <Text style={[styles.micro, styles.microSpaced]}>Key observation</Text>
+        <Text style={styles.heroInsight}>{String(rec.insight)}</Text>
+        <Text style={[styles.micro, styles.microSpaced]}>Why it matters</Text>
+        <Text style={styles.body} orphans={2} widows={2}>
+          {String(rec.explanation)}
+        </Text>
+        <Text style={[styles.micro, styles.microSpaced]}>What we do</Text>
+        <Text style={styles.body} orphans={2} widows={2}>
+          {String(rec.action)}
+        </Text>
+        <Text style={[styles.micro, styles.microSpaced]}>Expected result</Text>
+        <Text style={styles.heroOutcome}>{String(rec.expectedOutcome)}</Text>
+      </View>
     </View>
   );
 }
@@ -184,7 +225,7 @@ export function NumberedRecommendationCard({ rec, num }: { rec: RecommendationCa
   const cardHigh = rec.priority === "HIGH";
   return (
     <View style={[styles.card, styles.numberedCard, cardHigh ? styles.cardHigh : {}]}>
-      <View style={[styles.leftStripe, { backgroundColor: STRIPE_BG }]}>
+      <View style={styles.leftStripe}>
         <Text style={styles.stripeNum}>{String(num)}</Text>
       </View>
       <View style={styles.sep} />

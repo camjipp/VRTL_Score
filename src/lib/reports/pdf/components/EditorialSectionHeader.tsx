@@ -6,6 +6,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     width: "100%",
   },
+  wrapTight: {
+    marginBottom: 12,
+  },
   sectionLabel: {
     fontSize: 7,
     fontFamily: fonts.sansBold,
@@ -49,24 +52,34 @@ export function EditorialSectionHeader({
   purpose,
   intro,
   minPresenceAhead = 56,
+  /** Tighter bottom margin when the page hero sits immediately below. */
+  density = "standard",
 }: {
   sectionLabel: string;
   title: string;
-  purpose: string;
+  /** Omit or leave empty to skip the purpose line (use when the focal headline lives elsewhere). */
+  purpose?: string;
   intro?: string;
   minPresenceAhead?: number;
+  density?: "standard" | "tight";
 }) {
+  const purposeLine = purpose?.trim() ?? "";
   return (
-    <View style={styles.wrap} minPresenceAhead={minPresenceAhead}>
+    <View
+      style={[styles.wrap, density === "tight" ? styles.wrapTight : {}]}
+      minPresenceAhead={minPresenceAhead}
+    >
       <Text style={styles.sectionLabel} orphans={2}>
         {sectionLabel}
       </Text>
       <Text style={styles.title} orphans={2}>
         {title}
       </Text>
-      <Text style={styles.purpose} orphans={2} widows={2}>
-        {purpose}
-      </Text>
+      {purposeLine ? (
+        <Text style={styles.purpose} orphans={2} widows={2}>
+          {purposeLine}
+        </Text>
+      ) : null}
       {intro ? (
         <Text style={styles.intro} orphans={2} widows={2}>
           {intro}

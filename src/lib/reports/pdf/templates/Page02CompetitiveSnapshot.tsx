@@ -14,8 +14,9 @@ import { CompetitiveRankingBlock } from "../pages/RankingAlertsSection";
 
 const styles = StyleSheet.create({
   implication: {
-    marginTop: space.block,
-    padding: space.cardPad,
+    marginTop: rhythm.sm + 4,
+    paddingVertical: space.cardPad - 2,
+    paddingHorizontal: space.cardPad,
     borderRadius: 8,
     borderWidth: 1,
     borderLeftWidth: 3,
@@ -55,8 +56,8 @@ export function Page02CompetitiveSnapshot({ data }: { data: ReportData }): React
         <Text style={{ fontSize: 7, fontFamily: fonts.sansBold, letterSpacing: 0.1, color: colors.ink4, marginBottom: rhythm.sm, textTransform: "uppercase" }}>
           Evidence — mention share by brand
         </Text>
-        <View style={{ flex: 1, flexDirection: "column", justifyContent: "space-between", minHeight: 0 }}>
-          <CompetitiveRankingBlock data={data} />
+        <View style={{ flex: 1, flexDirection: "column", justifyContent: "flex-start", minHeight: 0 }}>
+          <CompetitiveRankingBlock data={data} emphasis="focal" />
           <View style={styles.implication} wrap={false}>
             <Text style={styles.implicationKicker}>Implication — immediate risk</Text>
             <Text style={styles.implicationBody}>{competitivePositionImplication(data)}</Text>

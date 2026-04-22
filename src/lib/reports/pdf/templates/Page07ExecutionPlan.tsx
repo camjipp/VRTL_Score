@@ -45,6 +45,9 @@ const styles = StyleSheet.create({
   stepSection: {
     width: CONTENT_W,
     flexDirection: "row",
+    marginBottom: 5,
+  },
+  stepSectionLast: {
     marginBottom: 0,
   },
   accentBar: {
@@ -61,8 +64,8 @@ const styles = StyleSheet.create({
     borderLeftWidth: 0,
     borderTopRightRadius: 6,
     borderBottomRightRadius: 6,
-    paddingVertical: space.cardPad,
-    paddingHorizontal: space.cardPad,
+    paddingVertical: space.cardPad - 4,
+    paddingHorizontal: space.cardPad - 2,
   },
   stepHeader: {
     fontSize: 10,
@@ -70,7 +73,11 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sansBold,
     color: colors.ink,
     letterSpacing: 0.02,
-    marginBottom: 10,
+    marginBottom: 8,
+  },
+  stepHeaderLead: {
+    fontSize: 11,
+    marginBottom: 7,
   },
   blockLabel: {
     fontSize: 6.5,
@@ -88,7 +95,7 @@ const styles = StyleSheet.create({
     maxWidth: CONTENT_W - 40,
   },
   impactBlock: {
-    marginTop: 12,
+    marginTop: 8,
   },
   impactLabel: {
     fontSize: 6.5,
@@ -108,7 +115,7 @@ const styles = StyleSheet.create({
   phasesWrap: {
     flex: 1,
     flexDirection: "column",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     minHeight: 0,
   },
 });
@@ -143,11 +150,12 @@ export function Page07ExecutionPlan({ data }: { data: ReportData }): ReactElemen
           const textLine = stripPhasePrefix(phaseLine, String(ph.text));
           const { main, impact } = splitImpact(textLine);
           const header = STEP_HEADERS[i] ?? `STEP ${i + 1}`;
+          const last = i === phases.length - 1;
           return (
-            <View key={`phase-${i}`} style={styles.stepSection}>
+            <View key={`phase-${i}`} style={[styles.stepSection, last ? styles.stepSectionLast : {}]}>
               <View style={styles.accentBar} />
               <View style={styles.stepCard}>
-                <Text style={styles.stepHeader}>{header}</Text>
+                <Text style={[styles.stepHeader, i === 0 ? styles.stepHeaderLead : {}]}>{header}</Text>
                 <Text style={styles.blockLabel}>Action</Text>
                 <Text style={styles.copy}>{main}</Text>
                 {impact ? (

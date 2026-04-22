@@ -17,6 +17,8 @@ export type ModelAnalysisCardProps = {
   maxBullets?: number;
   /** Tighter typography for bottom-row matrix slots. */
   compact?: boolean;
+  /** Page 3 — de-emphasize vs win/lose focal cards. */
+  tier?: "default" | "supporting";
 };
 
 /** Three columns + gaps = 540pt content: 172 + 12 + 172 + 12 + 172 */
@@ -138,6 +140,18 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sansBold,
     marginBottom: 4,
   },
+  rootSupporting: {
+    borderColor: "#E5E7EB",
+    backgroundColor: colors.surface2,
+  },
+  topBandSupporting: {
+    height: 1,
+    backgroundColor: colors.rule,
+  },
+  innerSupporting: {
+    paddingVertical: 7,
+    paddingHorizontal: 8,
+  },
 });
 
 export function ModelAnalysisCard({
@@ -153,10 +167,12 @@ export function ModelAnalysisCard({
   cardWidth = MODEL_CARD_WIDTH,
   maxBullets,
   compact = false,
+  tier = "default",
 }: ModelAnalysisCardProps) {
   void _bandColor;
   void _scoreAccent;
   void _bulletDotColor;
+  const supporting = tier === "supporting";
   const innerW = cardWidth - 14;
   const bulletLines = maxBullets != null ? insights.slice(0, maxBullets) : insights;
   const scorePct = Math.min(100, Math.max(0, Math.round(score)));
@@ -165,7 +181,12 @@ export function ModelAnalysisCard({
   const tickLeft = (innerW * avgPos) / 100 - 1;
 
   const nameLine = String(modelName).toUpperCase();
-  const nameStyle = compact ? [styles.name, { color: colors.ink3, fontSize: 7 }] : styles.name;
+  const nameStyle =
+    supporting
+      ? [styles.name, { color: colors.ink4, fontSize: 6.5, marginBottom: 4 }]
+      : compact
+        ? [styles.name, { color: colors.ink3, fontSize: 7 }]
+        : styles.name;
   const scoreLine = String(score);
   const deltaSign = deltaVsAvg >= 0 ? "+" : "-";
   const deltaAbs = String(Math.abs(deltaVsAvg));
@@ -175,11 +196,19 @@ export function ModelAnalysisCard({
   const posPill = deltaVsAvg >= 0;
 
   return (
-    <View style={[styles.root, { width: cardWidth }]}>
-      <View style={[styles.topBand, { backgroundColor: colors.surface2 }]} />
-      <View style={styles.inner}>
+    <View style={[styles.root, { width: cardWidth }, supporting ? styles.rootSupporting : {}]}>
+      <View style={[supporting ? styles.topBandSupporting : styles.topBand, supporting ? {} : { backgroundColor: colors.surface2 }]} />
+      <View style={[styles.inner, supporting ? styles.innerSupporting : {}]}>
         <Text style={nameStyle}>{nameLine}</Text>
-        <Text style={[compact ? styles.scoreCompact : styles.scoreLarge, { color: colors.ink }]}>{scoreLine}</Text>
+        <Text
+          style={[
+            supporting || compact ? styles.scoreCompact : styles.scoreLarge,
+            supporting ? { fontSize: 22, marginBottom: 3 } : {},
+            { color: supporting ? colors.ink2 : colors.ink },
+          ]}
+        >
+          {scoreLine}
+        </Text>
         <View style={styles.deltaRow}>
           <View style={[styles.deltaPill, posPill ? styles.deltaPillPos : styles.deltaPillNeg]}>
             <Text style={styles.deltaPillText}>{deltaLine}</Text>
@@ -203,7 +232,11 @@ export function ModelAnalysisCard({
             <View key={`${modelId}-row-${idx}`} style={styles.bulletRow}>
               <View style={[styles.dot, { backgroundColor: colors.ink4 }]} />
               <Text
-                style={[compact ? styles.bulletTextCompact : styles.bulletText, { width: innerW - 12 }]}
+                style={[
+                  compact ? styles.bulletTextCompact : styles.bulletText,
+                  { width: innerW - 12 },
+                  supporting ? { color: colors.ink3, fontSize: 6 } : {},
+                ]}
                 orphans={2}
                 widows={2}
               >

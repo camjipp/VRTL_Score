@@ -111,16 +111,60 @@ const styles = StyleSheet.create({
     lineHeight: 1.55,
     fontFamily: fonts.sans,
   },
+  /** Opening page — tier-3 strip: lighter shells than default WIN/RISK/PRIORITY */
+  alertRowSecondary: {
+    flexDirection: "row",
+    marginTop: rhythm.sm + 2,
+    alignItems: "stretch",
+  },
+  alertCardSecondary: {
+    flex: 1,
+    borderRadius: 5,
+    paddingVertical: space.cardPad - 8,
+    paddingHorizontal: space.cardPad - 6,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    minHeight: 0,
+    overflow: "hidden",
+    backgroundColor: colors.paper,
+  },
+  alertWinSecondary: { borderTopWidth: 1, borderTopColor: colors.green },
+  alertRiskSecondary: { borderTopWidth: 1, borderTopColor: colors.orange },
+  alertPriSecondary: { borderTopWidth: 1, borderTopColor: colors.red },
+  alertTitleSecondary: {
+    fontSize: 8,
+    fontWeight: 400,
+    color: colors.ink2,
+    fontFamily: fonts.sansBold,
+    lineHeight: 1.2,
+  },
+  alertDetailSecondary: {
+    fontSize: 6.5,
+    color: colors.ink3,
+    marginTop: 5,
+    lineHeight: 1.48,
+    fontFamily: fonts.sans,
+  },
 });
 
 /** Ranked competitor rows + mini-bars (no WIN/RISK row). */
-export function CompetitiveRankingBlock({ data }: { data: ReportData }) {
+export function CompetitiveRankingBlock({
+  data,
+  emphasis = "default",
+}: {
+  data: ReportData;
+  /** Page 2 focal: slightly larger type and row rhythm. */
+  emphasis?: "default" | "focal";
+}) {
   const maxM = Math.max(...data.competitors.map((c) => c.mentions), 1);
   const clientM = data.competitors.find((c) => c.isClient)?.mentions ?? 0;
+  const focal = emphasis === "focal";
 
   return (
     <View>
-      <Text style={styles.rankHeader}>Competitive ranking</Text>
+      <Text style={[styles.rankHeader, focal ? { fontSize: 9, marginBottom: rhythm.sm + 2, marginTop: rhythm.sm + 2 } : {}]}>
+        Competitive ranking
+      </Text>
       {data.competitors.map((c) => {
         const widthPct = Math.min(100, Math.max(0, Math.round((c.mentions / maxM) * 100)));
         const barRest = Math.max(0, 100 - widthPct);
@@ -131,14 +175,21 @@ export function CompetitiveRankingBlock({ data }: { data: ReportData }) {
         return (
           <View key={`rank-${c.name}`} style={styles.rankOuter}>
             <View style={[styles.rankAccent, { backgroundColor: isClient ? colors.cyan : "transparent" }]} />
-            <View style={[styles.rankInner, { backgroundColor: isClient ? colors.cyanLight : "transparent" }]}>
+            <View
+              style={[
+                styles.rankInner,
+                { backgroundColor: isClient ? colors.cyanLight : "transparent" },
+                focal ? { paddingVertical: 9 } : {},
+              ]}
+            >
               <Text
                 style={[
                   styles.rankIdx,
                   isClient ? {} : { color: colors.ink4, fontFamily: fonts.sans },
+                  focal ? { fontSize: 9 } : {},
                 ]}
               >{`#${c.rank}`}</Text>
-              <Text style={isClient ? styles.rankNameClient : styles.rankName}>{c.name}</Text>
+              <Text style={[isClient ? styles.rankNameClient : styles.rankName, focal ? { fontSize: isClient ? 9.5 : 9 } : {}]}>{c.name}</Text>
               <View style={styles.barWrap}>
                 <View style={styles.barInner}>
                   <View
@@ -177,36 +228,60 @@ export function WinRiskPriorityAlerts({
   data,
   alertRowStyle,
   compact,
+  visualTier = "default",
 }: {
   data: ReportData;
   /** e.g. `{ marginTop: 0 }` when a flex spacer already separates this row from the ranking block. */
   alertRowStyle?: { marginTop?: number };
   /** Tighter typography for the opening page. */
   compact?: boolean;
+  /** `secondary` — tier-3 strip on page 1 (lighter than compact WIN/RISK). */
+  visualTier?: "default" | "secondary";
 }) {
-  const rowStyle = compact ? styles.alertRowCompact : styles.alertRow;
-  const card = compact ? styles.alertCardCompact : styles.alertCard;
-  const titleS = compact ? styles.alertTitleCompact : styles.alertTitle;
-  const detailS = compact ? styles.alertDetailCompact : styles.alertDetail;
+  const secondary = visualTier === "secondary";
+  const rowStyle = secondary
+    ? styles.alertRowSecondary
+    : compact
+      ? styles.alertRowCompact
+      : styles.alertRow;
+  const card = secondary
+    ? styles.alertCardSecondary
+    : compact
+      ? styles.alertCardCompact
+      : styles.alertCard;
+  const winExtra = secondary ? styles.alertWinSecondary : styles.alertWin;
+  const riskExtra = secondary ? styles.alertRiskSecondary : styles.alertRisk;
+  const priExtra = secondary ? styles.alertPriSecondary : styles.alertPri;
+  const titleS = secondary
+    ? styles.alertTitleSecondary
+    : compact
+      ? styles.alertTitleCompact
+      : styles.alertTitle;
+  const detailS = secondary
+    ? styles.alertDetailSecondary
+    : compact
+      ? styles.alertDetailCompact
+      : styles.alertDetail;
+  const pillFs = secondary ? 6 : 6.5;
   return (
     <View style={[rowStyle, ...(alertRowStyle ? [alertRowStyle] : [])]}>
-      <View style={[card, styles.alertWin, styles.alertSp]}>
+      <View style={[card, winExtra, styles.alertSp]}>
         <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.green }]}>
-          <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.green, fontFamily: fonts.sansBold }}>WIN</Text>
+          <Text style={{ fontSize: pillFs, fontWeight: 400, color: colors.green, fontFamily: fonts.sansBold }}>WIN</Text>
         </View>
         <Text style={titleS}>{data.alerts.win.title}</Text>
         <Text style={detailS}>{data.alerts.win.detail}</Text>
       </View>
-      <View style={[card, styles.alertRisk, styles.alertSp]}>
+      <View style={[card, riskExtra, styles.alertSp]}>
         <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.orange }]}>
-          <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.orange, fontFamily: fonts.sansBold }}>RISK</Text>
+          <Text style={{ fontSize: pillFs, fontWeight: 400, color: colors.orange, fontFamily: fonts.sansBold }}>RISK</Text>
         </View>
         <Text style={titleS}>{data.alerts.risk.title}</Text>
         <Text style={detailS}>{data.alerts.risk.detail}</Text>
       </View>
-      <View style={[card, styles.alertPri]}>
+      <View style={[card, priExtra]}>
         <View style={[styles.alertPill, { backgroundColor: colors.paper, borderColor: colors.red }]}>
-          <Text style={{ fontSize: 6.5, fontWeight: 400, color: colors.red, fontFamily: fonts.sansBold }}>PRIORITY</Text>
+          <Text style={{ fontSize: pillFs, fontWeight: 400, color: colors.red, fontFamily: fonts.sansBold }}>PRIORITY</Text>
         </View>
         <Text style={titleS}>{data.alerts.priority.title}</Text>
         <Text style={detailS}>{data.alerts.priority.detail}</Text>
