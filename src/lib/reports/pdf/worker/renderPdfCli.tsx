@@ -12,6 +12,7 @@ import React from "react";
 
 import { ReportDocument } from "../ReportDocument";
 import type { ReportData } from "../types";
+import { PDF_PAGE_SIZE } from "../theme";
 
 export type WorkerPayload =
   | { mode: "minimal" }
@@ -30,7 +31,7 @@ async function run(): Promise<void> {
       React.createElement(
         Document,
         {},
-        React.createElement(Page, { size: "A4" }, React.createElement(Text, {}, "test"))
+        React.createElement(Page, { size: PDF_PAGE_SIZE }, React.createElement(Text, {}, "test"))
       )
     );
   } else {

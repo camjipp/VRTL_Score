@@ -3,6 +3,9 @@ import { StyleSheet } from "@react-pdf/renderer";
 /** US Letter — 612 × 792 pt; 36 pt margins on all sides */
 export const PAGE = { width: 612, height: 792, margin: 36 } as const;
 
+/** Every `<Page size={…}>` in the report must use this tuple (no A4/Letter mix). */
+export const PDF_PAGE_SIZE = [PAGE.width, PAGE.height] as [number, number];
+
 /** Slide layout: horizontal inset for designed pages (48pt each side → 516pt content width). */
 export const PDF_SLIDE_HORIZONTAL_PAD = 48;
 

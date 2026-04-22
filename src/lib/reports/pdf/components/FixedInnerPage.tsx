@@ -1,9 +1,10 @@
-import { Page, View } from "@react-pdf/renderer";
+import { View } from "@react-pdf/renderer";
 import type { ReactNode } from "react";
 import type { ReportData } from "../types";
-import { PAGE, baseStyles } from "../theme";
+import { baseStyles } from "../theme";
 import { PdfFooter } from "./PdfFooter";
 import { PdfHeader } from "./PdfHeader";
+import { ReportPage } from "./ReportPage";
 
 type Props = {
   data: ReportData;
@@ -20,15 +21,14 @@ const bodyColumn = { flex: 1, flexDirection: "column" as const, minHeight: 0 };
  * Fixed-template inner page: one physical `<Page>` with slide padding, header + footer, and a flex body slot.
  */
 export function FixedInnerPage({ data, pageNum, children, pagePaddingTop }: Props) {
-  const pageStyle =
-    pagePaddingTop != null ? [baseStyles.pdfSlidePage, { paddingTop: pagePaddingTop }] : baseStyles.pdfSlidePage;
+  const overlay = pagePaddingTop != null ? { paddingTop: pagePaddingTop } : undefined;
   return (
-    <Page size={[PAGE.width, PAGE.height]} style={pageStyle}>
+    <ReportPage pageStyleOverlay={overlay}>
       <View style={baseStyles.pdfSlideContent}>
         <PdfHeader data={data} variant="inner" pageNum={pageNum} />
         <View style={bodyColumn}>{children}</View>
         <PdfFooter data={data} />
       </View>
-    </Page>
+    </ReportPage>
   );
 }

@@ -7,6 +7,7 @@ import { getPdfLastTrace, resetPdfTrace } from "./pdfDiagnostics";
 import { ReportDocument } from "./ReportDocument";
 import { sanitizeReportDataForPdf } from "./sanitizeReportData";
 import type { ReportData } from "./types";
+import { PDF_PAGE_SIZE } from "./theme";
 
 export type GeneratePdfOptions = {
   pages?: number[];
@@ -28,7 +29,7 @@ function minimalPdfElement(): ReactElement<DocumentProps> {
   return React.createElement(
     Document,
     {},
-    React.createElement(Page, { size: "A4" }, React.createElement(Text, {}, "test"))
+    React.createElement(Page, { size: PDF_PAGE_SIZE }, React.createElement(Text, {}, "test"))
   );
 }
 

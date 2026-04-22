@@ -1,10 +1,7 @@
-import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
+import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "../types";
-import { fonts } from "../theme";
-
-/** A4 + 48 pt pad — Page 1 only (rest of document uses `PAGE` in theme). */
-const PAGE1 = { width: 595, height: 842, pad: 48 } as const;
+import { baseStyles, fonts } from "../theme";
 import {
   executiveOpeningIntro,
   pageOneHeadlinePair,
@@ -13,7 +10,9 @@ import {
   pageOneStandingBlock,
   pageOneSupportingReadLines,
 } from "../editorial/pdfNarrative";
+import { PdfFooter } from "../components/PdfFooter";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
+import { ReportPage } from "../components/ReportPage";
 
 /** Page 1 only — neutrals + brand green + red (no other hues). */
 const colors = {
@@ -33,29 +32,22 @@ const SIGNAL_ACCENT: readonly [typeof colors.green, typeof colors.red, typeof co
   colors.border,
 ];
 
+const bodyColumn = { flex: 1, flexDirection: "column" as const, minHeight: 0 };
+
+/** Distributes top / middle / bottom so the page fills vertically without a dead lower zone. */
+const pageFlow = {
+  flex: 1,
+  flexDirection: "column" as const,
+  justifyContent: "space-between" as const,
+  minHeight: 0,
+};
+
 const styles = StyleSheet.create({
-  page: {
-    width: PAGE1.width,
-    height: PAGE1.height,
-    backgroundColor: colors.bg,
-    padding: PAGE1.pad,
-    fontFamily: fonts.sans,
-    color: colors.text,
-  },
-  pageInner: {
-    flex: 1,
-    minHeight: PAGE1.height - PAGE1.pad * 2,
-    flexDirection: "column",
-    justifyContent: "space-between",
-  },
-  main: {
-    flexGrow: 0,
-  },
   headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: 10,
+    marginBottom: 8,
   },
   headerLeft: {
     fontSize: 7.5,
@@ -75,12 +67,16 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: colors.border,
     width: "100%",
-    marginBottom: 22,
+    marginBottom: 16,
+  },
+  /** Headline + subline + score + metrics read as one band */
+  heroMetricsBand: {
+    width: "100%",
   },
   heroRow: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 18,
+    alignItems: "flex-end",
+    marginBottom: 8,
   },
   heroLeft: {
     flex: 1,
@@ -100,19 +96,20 @@ const styles = StyleSheet.create({
     color: colors.text,
     lineHeight: 1.12,
     letterSpacing: -0.35,
-    marginTop: 4,
+    marginTop: 2,
   },
   heroSub: {
     fontSize: 9.25,
     fontFamily: fonts.sans,
     color: colors.muted,
     lineHeight: 1.45,
-    marginTop: 12,
+    marginTop: 8,
     maxWidth: 300,
   },
   heroRight: {
     width: 128,
     alignItems: "flex-end",
+    paddingBottom: 2,
   },
   scoreNum: {
     fontSize: 44,
@@ -126,7 +123,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: fonts.sans,
     color: colors.muted,
-    marginTop: 4,
+    marginTop: 2,
     textAlign: "right",
     width: "100%",
   },
@@ -135,7 +132,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sans,
     color: colors.muted,
     lineHeight: 1.35,
-    marginTop: 10,
+    marginTop: 6,
     textAlign: "right",
     width: "100%",
   },
@@ -145,12 +142,12 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderBottomWidth: 1,
     borderColor: colors.border,
-    paddingVertical: 11,
-    marginBottom: 14,
+    paddingVertical: 8,
+    marginBottom: 0,
   },
   metricCell: {
     flex: 1,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     borderRightWidth: 1,
     borderRightColor: colors.border,
   },
@@ -163,85 +160,83 @@ const styles = StyleSheet.create({
     letterSpacing: 0.06,
     textTransform: "uppercase",
     color: colors.muted,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   metricValue: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: fonts.sansBold,
     color: colors.text,
+  },
+  clusterMid: {
+    width: "100%",
   },
   positionLead: {
     fontSize: 10,
     fontFamily: fonts.sansBold,
     color: colors.text,
     lineHeight: 1.35,
-    marginBottom: 5,
+    marginBottom: 4,
   },
   positionSub: {
     fontSize: 9,
     fontFamily: fonts.sans,
     color: colors.muted,
     lineHeight: 1.45,
-    marginBottom: 18,
+    marginBottom: 16,
   },
   mattersTitle: {
     fontSize: 11,
     fontFamily: fonts.sansBold,
     color: colors.text,
     letterSpacing: -0.15,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   cardsRow: {
     flexDirection: "row",
     alignItems: "stretch",
     width: "100%",
-    marginBottom: 14,
+    marginBottom: 0,
   },
   card: {
     flex: 1,
     flexBasis: 0,
-    minHeight: 78,
+    minHeight: 72,
     backgroundColor: colors.surface,
-    paddingVertical: 11,
-    paddingHorizontal: 11,
-    paddingLeft: 13,
-    marginRight: 9,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    paddingLeft: 11,
+    marginRight: 8,
     borderLeftWidth: 3,
   },
   cardLast: {
     marginRight: 0,
   },
   cardLabel: {
-    fontSize: 7,
+    fontSize: 6.25,
     fontFamily: fonts.sansBold,
     letterSpacing: 0.12,
     textTransform: "uppercase",
     color: colors.muted,
-    marginBottom: 7,
+    marginBottom: 4,
   },
   cardBody: {
-    fontSize: 8.75,
-    fontFamily: fonts.sans,
+    fontSize: 9,
+    fontFamily: fonts.sansBold,
     color: colors.text,
-    lineHeight: 1.38,
+    lineHeight: 1.36,
+  },
+  clusterBottom: {
+    width: "100%",
+    paddingTop: 8,
   },
   supportingLine: {
     fontSize: 8,
     fontFamily: fonts.sans,
     color: colors.muted,
     lineHeight: 1.48,
-    marginBottom: 3,
   },
-  footerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingTop: 14,
-  },
-  footerText: {
-    fontSize: 8,
-    fontFamily: fonts.sans,
-    color: colors.muted,
+  supportingLineGap: {
+    marginBottom: 4,
   },
 });
 
@@ -256,7 +251,7 @@ function displayScore(score: number | null): string {
   return String(score);
 }
 
-/** A4 Page 1 — AI Authority Report cover (minimal, agency-facing). */
+/** Page 1 — AI Authority Report cover (same physical shell as all other pages). */
 export function Page1({ data }: { data: ReportData }): ReactElement {
   const standing = pageOneStandingBlock(data);
   const [h1, h2] = pageOneHeadlinePair(data);
@@ -268,93 +263,109 @@ export function Page1({ data }: { data: ReportData }): ReactElement {
   const citeLabel = `${data.authorityScore}%`;
 
   return (
-    <Page size={[PAGE1.width, PAGE1.height]} style={styles.page} wrap={false}>
-      <PdfTraceMarker page={1} section="Fixed:P1" />
-      <View style={styles.pageInner}>
-        <View style={styles.main}>
+    <ReportPage wrap={false}>
+      <View style={baseStyles.pdfSlideContent}>
+        <View wrap={false} fixed style={[baseStyles.headerFixedWrap, { top: 0 }]}>
           <View style={styles.headerRow}>
             <Text style={styles.headerLeft}>AI AUTHORITY REPORT</Text>
             <Text style={styles.headerRight}>{formatClientDate(data)}</Text>
           </View>
           <View style={styles.headerRule} />
+        </View>
 
-          <View style={styles.heroRow}>
-            <View style={styles.heroLeft}>
-              <Text style={styles.heroLine1} orphans={2} widows={2}>
-                {h1}
-              </Text>
-              {h2 ? (
-                <Text style={styles.heroLine2} orphans={2} widows={2}>
-                  {h2}
-                </Text>
-              ) : null}
-              <Text style={styles.heroSub} orphans={2} widows={2}>
-                {subline}
-              </Text>
-            </View>
-            <View style={styles.heroRight}>
-              <Text style={styles.scoreNum}>{displayScore(data.overallScore)}</Text>
-              <Text style={styles.scoreFrac}>/100</Text>
-              <Text style={styles.scoreCaption}>Composite authority score</Text>
-            </View>
-          </View>
+        <View style={bodyColumn}>
+          <PdfTraceMarker page={1} section="Fixed:P1" />
 
-          <View style={styles.metricsRow}>
-            <View style={styles.metricCell}>
-              <Text style={styles.metricLabel}>Mention rate</Text>
-              <Text style={styles.metricValue}>{data.mentionRate}%</Text>
-            </View>
-            <View style={styles.metricCell}>
-              <Text style={styles.metricLabel}>Top position</Text>
-              <Text style={styles.metricValue}>{data.topPosition}%</Text>
-            </View>
-            <View style={[styles.metricCell, styles.metricCellLast]}>
-              <Text style={styles.metricLabel}>Citations</Text>
-              <Text style={styles.metricValue}>
-                {citeZero ? <Text style={{ color: colors.red }}>{citeLabel}</Text> : citeLabel}
-              </Text>
-            </View>
-          </View>
-
-          <Text style={styles.positionLead} orphans={2} widows={2}>
-            {standing.lead}
-          </Text>
-          <Text style={styles.positionSub} orphans={2} widows={2}>
-            {positionSub}
-          </Text>
-
-          <Text style={styles.mattersTitle}>What matters right now</Text>
-          <View style={styles.cardsRow}>
-            {SIGNAL_LABELS.map((label, i) => (
-              <View
-                key={label}
-                wrap={false}
-                style={[
-                  styles.card,
-                  { borderLeftColor: SIGNAL_ACCENT[i] },
-                  ...(i === SIGNAL_LABELS.length - 1 ? [styles.cardLast] : []),
-                ]}
-              >
-                <Text style={styles.cardLabel}>{label}</Text>
-                <Text style={styles.cardBody} orphans={2} widows={2}>
-                  {cards[i]}
-                </Text>
+          <View style={pageFlow}>
+            <View style={styles.heroMetricsBand}>
+              <View style={styles.heroRow}>
+                <View style={styles.heroLeft}>
+                  <Text style={styles.heroLine1} orphans={2} widows={2}>
+                    {h1}
+                  </Text>
+                  {h2 ? (
+                    <Text style={styles.heroLine2} orphans={2} widows={2}>
+                      {h2}
+                    </Text>
+                  ) : null}
+                  <Text style={styles.heroSub} orphans={2} widows={2}>
+                    {subline}
+                  </Text>
+                </View>
+                <View style={styles.heroRight}>
+                  <Text style={styles.scoreNum}>{displayScore(data.overallScore)}</Text>
+                  <Text style={styles.scoreFrac}>/100</Text>
+                  <Text style={styles.scoreCaption}>Composite authority score</Text>
+                </View>
               </View>
-            ))}
+
+              <View style={styles.metricsRow}>
+                <View style={styles.metricCell}>
+                  <Text style={styles.metricLabel}>Mention rate</Text>
+                  <Text style={styles.metricValue}>{data.mentionRate}%</Text>
+                </View>
+                <View style={styles.metricCell}>
+                  <Text style={styles.metricLabel}>Top position</Text>
+                  <Text style={styles.metricValue}>{data.topPosition}%</Text>
+                </View>
+                <View style={[styles.metricCell, styles.metricCellLast]}>
+                  <Text style={styles.metricLabel}>Citations</Text>
+                  <Text style={styles.metricValue}>
+                    {citeZero ? <Text style={{ color: colors.red }}>{citeLabel}</Text> : citeLabel}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.clusterMid}>
+              <Text style={styles.positionLead} orphans={2} widows={2}>
+                {standing.lead}
+              </Text>
+              <Text style={styles.positionSub} orphans={2} widows={2}>
+                {positionSub}
+              </Text>
+
+              <Text style={styles.mattersTitle}>What matters right now</Text>
+              <View style={styles.cardsRow}>
+                {SIGNAL_LABELS.map((label, i) => (
+                  <View
+                    key={label}
+                    wrap={false}
+                    style={[
+                      styles.card,
+                      { borderLeftColor: SIGNAL_ACCENT[i] },
+                      ...(i === SIGNAL_LABELS.length - 1 ? [styles.cardLast] : []),
+                    ]}
+                  >
+                    <Text style={styles.cardLabel}>{label}</Text>
+                    <Text style={styles.cardBody} orphans={2} widows={2}>
+                      {cards[i]}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.clusterBottom}>
+              {supporting.map((line, i) => (
+                <Text
+                  key={`sup-${i}`}
+                  style={[
+                    styles.supportingLine,
+                    ...(i < supporting.length - 1 ? [styles.supportingLineGap] : []),
+                  ]}
+                  orphans={2}
+                  widows={2}
+                >
+                  {line}
+                </Text>
+              ))}
+            </View>
           </View>
-
-          {supporting.map((line, i) => (
-            <Text key={`sup-${i}`} style={styles.supportingLine} orphans={2} widows={2}>
-              {line}
-            </Text>
-          ))}
         </View>
 
-        <View style={styles.footerRow}>
-          <Text style={styles.footerText}>Confidential</Text>
-          <Text style={styles.footerText}>Page 1</Text>
-        </View>
+        <PdfFooter data={data} />
       </View>
-    </Page>
+    </ReportPage>
   );
 }
