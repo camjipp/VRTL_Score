@@ -28,7 +28,7 @@ export function Page05RecommendationsA({ data }: { data: ReportData }): ReactEle
         sectionLabel="Decision"
         title="What we fix first"
         purpose={purpose}
-        intro="Each item states what breaks, why it hurts, what we ship, and what improves—so you can approve work, not decode jargon."
+        intro="Approve issue → move → outcome. No jargon."
       />
       {first ? (
         <View style={second ? {} : { flexGrow: 1, minHeight: 0 }}>
@@ -37,7 +37,7 @@ export function Page05RecommendationsA({ data }: { data: ReportData }): ReactEle
       ) : null}
       {second ? (
         <View style={{ flexGrow: 1, minHeight: 0 }}>
-          <NumberedRecommendationCard rec={second} num={2} />
+          <NumberedRecommendationCard rec={second} num={2} secondary />
         </View>
       ) : null}
     </FixedInnerPage>

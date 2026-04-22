@@ -2,16 +2,16 @@ import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "../types";
 import { colors, fonts, CONTENT_W, space } from "../theme";
-import { executionPlanIntro, executionPlanPurpose } from "../editorial/pdfNarrative";
+import { clipPdfText, executionPlanIntro, executionPlanPurpose } from "../editorial/pdfNarrative";
 import { EditorialSectionHeader } from "../components/EditorialSectionHeader";
 import { FixedInnerPage } from "../components/FixedInnerPage";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 
 const STEP_HEADERS = [
-  "STEP 1 — AUDIT FOUNDATION",
-  "STEP 2 — FIX WEAKEST MODEL",
-  "STEP 3 — BUILD AUTHORITY",
-  "STEP 4 — RE-MEASURE & ITERATE",
+  "1 — Audit",
+  "2 — Rebuild weak surface",
+  "3 — Authority",
+  "4 — Re-measure",
 ] as const;
 
 const LEFT_ACCENT_W = 3;
@@ -148,12 +148,12 @@ export function Page07ExecutionPlan({ data }: { data: ReportData }): ReactElemen
               <View style={styles.accentBar} />
               <View style={styles.stepCard}>
                 <Text style={[styles.stepHeader, i === 0 ? styles.stepHeaderLead : {}]}>{header}</Text>
-                <Text style={styles.blockLabel}>Action</Text>
-                <Text style={styles.copy}>{main}</Text>
+                <Text style={styles.blockLabel}>What ships</Text>
+                <Text style={styles.copy}>{clipPdfText(main, 220)}</Text>
                 {impact ? (
                   <View style={styles.impactBlock}>
-                    <Text style={styles.impactLabel}>Checkpoint</Text>
-                    <Text style={styles.impactText}>{impact}</Text>
+                    <Text style={styles.impactLabel}>Outcome</Text>
+                    <Text style={styles.impactText}>{clipPdfText(impact, 160)}</Text>
                   </View>
                 ) : null}
               </View>

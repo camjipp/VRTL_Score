@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "../types";
 import { colors, fonts, rhythm, BODY_MAX_W, space } from "../theme";
-import { closingPurpose } from "../editorial/pdfNarrative";
+import { clipPdfText, closingPurpose } from "../editorial/pdfNarrative";
 import { EditorialSectionHeader } from "../components/EditorialSectionHeader";
 import { FixedInnerPage } from "../components/FixedInnerPage";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
@@ -172,7 +172,7 @@ export function Page10MethodologyClosing({ data }: { data: ReportData }): ReactE
         sectionLabel="Confidence"
         title="What happens now—and why you can trust this"
         purpose={closingPurpose()}
-        intro="Methodology, sample strength, and the forward rhythm after delivery—so this reads as an operating cadence, not a one-off deck."
+        intro="Method, sample strength, next week—repeatable cadence, not a one-off."
         density="tight"
       />
       <View style={{ flex: 1, minHeight: 0 }}>
@@ -200,10 +200,10 @@ export function Page10MethodologyClosing({ data }: { data: ReportData }): ReactE
           <View style={styles.nextBlock}>
             <Text style={styles.nextTitle}>Forward program</Text>
             {next ? (
-              <Text style={styles.nextBody}>{next}</Text>
+              <Text style={styles.nextBody}>{clipPdfText(next, 480)}</Text>
             ) : (
               <Text style={styles.nextPlaceholder}>
-                Ship the priorities above, re-run the snapshot, and lock the next 30-day sprint from the delta.
+                Ship priorities → re-snapshot → lock the next 30 days off the delta.
               </Text>
             )}
           </View>
@@ -211,7 +211,7 @@ export function Page10MethodologyClosing({ data }: { data: ReportData }): ReactE
           {methodology ? (
             <View style={styles.methodSection}>
               <Text style={styles.methodKicker}>Methodology</Text>
-              <Text style={styles.methodSub}>How we produced this snapshot—and how to read the scorecard without overfitting a single answer.</Text>
+              <Text style={styles.methodSub}>How we ran this—and how to read scores without overfitting one answer.</Text>
               <View style={styles.method}>
                 <Text style={styles.methodTitle}>Overview</Text>
                 <Text style={styles.methodBody}>{methodology}</Text>

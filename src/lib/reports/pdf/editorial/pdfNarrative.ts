@@ -1,94 +1,111 @@
 import type { ModelScoreRow, ReportData } from "../types";
 
-/** Page 1 — opening line under the focal headline (decisive, client-facing). */
+/** Hard cap for PDF prose blocks (react-pdf layout). */
+export function clipPdfText(s: string, max: number): string {
+  const t = String(s).replace(/\s+/g, " ").trim();
+  if (t.length <= max) return t;
+  return `${t.slice(0, max - 1).replace(/[\s,;:.!]+$/, "")}…`;
+}
+
+function sortedByMentions(data: ReportData) {
+  return [...data.competitors].sort((a, b) => b.mentions - a.mentions);
+}
+
+/** Page 1 — dominant headline (rank + mention tightness). */
+export function pageOneHeadline(data: ReportData): string {
+  const rows = sortedByMentions(data);
+  if (rows.length === 0) {
+    return data.rank === 1 ? "First in this set—add peers to stress-test." : `You are #${data.rank} of ${data.rankTotal}.`;
+  }
+  const topM = rows[0]!.mentions;
+  const leaders = rows.filter((r) => r.mentions === topM);
+  const client = rows.find((r) => r.isClient);
+  const clientAtTop = Boolean(client && client.mentions === topM);
+  if (leaders.length >= 2 && clientAtTop) return "You are tied for first. The lead is fragile.";
+  if (data.rank === 1 && clientAtTop) {
+    const runnerUp = rows.find((r) => r.mentions < topM);
+    if (runnerUp && topM - runnerUp.mentions <= 2) return "You sit first—by a hair. The lead is fragile.";
+    return "You sit first. Defend it—#2 is close enough to matter.";
+  }
+  return `You are #${data.rank} of ${data.rankTotal}. The next moves decide who leads.`;
+}
+
+/** Page 1 — two short lines under “Where you stand” (scannable). */
+export function pageOneStandingLines(data: ReportData): readonly [string, string] {
+  const status = String(data.status).trim() || "—";
+  const auth =
+    data.authorityScore === 0 ? "Citations not observed" : `Citations ${data.authorityScore}%`;
+  const line1 = `Status: ${status} · Rank #${data.rank} of ${data.rankTotal}`;
+  const line2 = `Mentions ${data.mentionRate}% · Top position ${data.topPosition}% · ${auth}`;
+  return [line1, line2];
+}
+
+/** Page 1 — one line under headline. */
 export function executiveOpeningIntro(data: ReportData): string {
   const name = data.clientName.trim() || "Your brand";
-  if (data.rank === 1) {
-    return `${name} is first in this sample—but the cluster is tight. One competitor proof sprint can reshuffle who gets recommended first.`;
-  }
-  return `${name} ranks #${data.rank} of ${data.rankTotal} in this sample. The set is tight enough that execution, not noise, will decide who owns the default recommendation.`;
+  return data.rank === 1
+    ? `${name} is at the top of this sample—small shifts still flip recommendations.`
+    : `${name} is #${data.rank} of ${data.rankTotal}—tight enough that execution changes outcomes.`;
 }
 
-/** Page 2 — purpose line (single idea: threat to position). */
+/** Page 2 — purpose (one beat). */
 export function competitiveLandscapePurpose(): string {
-  return "Who sits closest to you—and who can take your slot on the next assistant answer.";
+  return "Who sits closest—and who can take your slot.";
 }
 
-/** Page 2 — framing under the title (ties to table). */
+/** Page 2 — one line under title. */
 export function competitivePositionIntro(data: ReportData): string {
-  const rivals = data.competitors.filter((c) => !c.isClient);
-  const lead =
-    data.rank === 1
-      ? "You lead this set on mentions"
-      : `You are #${data.rank} of ${data.rankTotal} on mentions`;
-  const density =
-    rivals.length >= 3
-      ? "Several brands sit within a few mentions."
-      : rivals.length > 0
-        ? "The peer set is small—every mention swing matters."
-        : "Benchmark peers in your source data to tighten this read.";
-  return `${lead}. ${density} That is the threat surface behind first recommendation share.`;
-}
-
-/** Page 2 — closing band under the ranking (must read as consequence of the table). */
-export function competitivePositionImplication(data: ReportData): string {
-  return `${data.alerts.risk.title}: ${data.alerts.risk.detail}`;
-}
-
-/** Page 3 — one-line purpose under the title. */
-export function modelAnalysisPurpose(spread: number): string {
-  if (spread === 0) {
-    return "Same story across assistant families—consistency is the lever, not one lucky model.";
+  const rows = sortedByMentions(data);
+  if (rows.length < 2) return "Track more peers to see who can overtake you.";
+  const topM = rows[0]!.mentions;
+  const client = rows.find((r) => r.isClient);
+  const tiedTop = rows.filter((r) => r.mentions === topM).length >= 2;
+  if (tiedTop && client?.mentions === topM) return "Tied at the top on mentions—first pick still moves.";
+  if (client && client.mentions === topM) {
+    const next = rows.find((r) => r.mentions < topM);
+    if (next && topM - next.mentions <= 2) return "First by a razor margin—#2 can flip this on one sprint.";
   }
-  return "Different assistants return different short lists—so you do not have one “AI position,” you have several.";
+  return "Mention gaps this small swing who gets recommended first.";
 }
 
-/** Page 3 — intro under purpose (declarative; names injected by caller). */
+export function competitivePositionImplication(data: ReportData): string {
+  return clipPdfText(`${data.alerts.risk.title}: ${data.alerts.risk.detail}`, 220);
+}
+
+export function modelAnalysisPurpose(spread: number): string {
+  return spread === 0
+    ? "Same story in every assistant—consistency is the lever."
+    : "Different assistants, different short lists—that is the whole risk.";
+}
+
 export function modelAnalysisIntro(best: ModelScoreRow, worst: ModelScoreRow): string {
-  return `You lead in ${best.name}. You are exposed in ${worst.name}. The gap between them is the mechanism behind fragile share.`;
+  return `${best.name} wins you share. ${worst.name} costs you share.`;
 }
 
-/** Page 4 — purpose (proof, not theory). */
 export function exampleAnswersPurpose(): string {
-  return "Language straight from the run—what “good” looks like versus where you go quiet.";
+  return "Proof from the run—not theory.";
 }
 
-/** Page 4 — intro under purpose. */
-export function exampleAnswersIntro(): string {
-  return "Read the columns as contrast, not decoration: one pattern to protect, one pattern to close.";
-}
-
-/** Page 8 — purpose. */
 export function dataSummaryPurpose(): string {
-  return "The numbers behind the narrative—signals first, then the competitive row set from the same run.";
+  return "Signals and rows—the exhibit behind the story above.";
 }
 
-/** Page 8 — replaces filler; keep one thesis sentence before interpretation. */
-export function dataSummaryIntro(): string {
-  return "If the story above is the argument, this is the exhibit.";
-}
-
-/** Page 9 — purpose. */
 export function evidenceLogPurpose(): string {
-  return "Line-item answers behind the conclusions—inspectable, structured, not a raw dump.";
+  return "Every row: one sampled answer, structured for audit.";
 }
 
-/** Page 9 — intro under purpose. */
 export function evidenceLogIntro(): string {
-  return "Each row is one sampled answer in this export. Use it to verify how we labeled mention, position, and strength.";
+  return "Verify mention, position, and strength labels here.";
 }
 
-/** Page 10 — purpose. */
 export function closingPurpose(): string {
-  return "How we measured this, how strong the sample is, and what happens the week after delivery.";
+  return "Sample strength, method, and what we do next week.";
 }
 
-/** Page 7 — purpose. */
 export function executionPlanPurpose(): string {
-  return "Audit the foundation, rebuild the weakest surface, earn authority, then re-measure—one closed loop.";
+  return "Audit → rebuild the weak surface → earn proof → re-measure.";
 }
 
-/** Page 7 — intro under purpose. */
 export function executionPlanIntro(): string {
-  return "This is the delivery rhythm behind the priorities on the prior pages—not four disconnected tasks.";
+  return "One loop. Four beats. Same priorities as the prior pages.";
 }

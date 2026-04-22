@@ -2,7 +2,7 @@ import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "../types";
 import { PAGE, colors, fonts, rhythm, baseStyles, BODY_MAX_W } from "../theme";
-import { executiveOpeningIntro } from "../editorial/pdfNarrative";
+import { clipPdfText, executiveOpeningIntro, pageOneHeadline, pageOneStandingLines } from "../editorial/pdfNarrative";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
@@ -34,21 +34,21 @@ const styles = StyleSheet.create({
     marginBottom: rhythm.xs,
   },
   p1Focal: {
-    fontSize: 17,
+    fontSize: 19.5,
     fontFamily: fonts.sansBold,
     color: colors.ink,
-    lineHeight: 1.18,
-    letterSpacing: -0.02,
-    marginBottom: rhythm.sm + 2,
+    lineHeight: 1.14,
+    letterSpacing: -0.03,
+    marginBottom: rhythm.sm,
     maxWidth: BODY_MAX_W,
   },
   p1Intro: {
-    fontSize: 9.5,
-    lineHeight: 1.48,
+    fontSize: 9,
+    lineHeight: 1.42,
     color: colors.ink2,
     fontFamily: fonts.sans,
     maxWidth: BODY_MAX_W,
-    marginBottom: rhythm.md + 4,
+    marginBottom: rhythm.md + 2,
   },
   scoreRow: {
     flexDirection: "row",
@@ -108,11 +108,11 @@ const styles = StyleSheet.create({
     marginBottom: rhythm.sm + 2,
   },
   matterLine: {
-    fontSize: 9.25,
-    lineHeight: 1.48,
+    fontSize: 8.75,
+    lineHeight: 1.42,
     color: colors.ink,
     fontFamily: fonts.sans,
-    marginBottom: rhythm.sm + 2,
+    marginBottom: rhythm.sm,
     maxWidth: BODY_MAX_W,
   },
   matterPrefix: {
@@ -126,14 +126,6 @@ const styles = StyleSheet.create({
     borderTopColor: colors.rule,
     width: "100%",
   },
-  diagnosisLabel: {
-    fontSize: 7,
-    fontFamily: fonts.sansBold,
-    letterSpacing: 0.14,
-    textTransform: "uppercase",
-    color: colors.ink4,
-    marginBottom: rhythm.sm,
-  },
   diagLine: {
     fontSize: 8.25,
     lineHeight: 1.5,
@@ -146,23 +138,18 @@ const styles = StyleSheet.create({
 
 /** PAGE 1 — Executive opening: position, signals in prose, short diagnosis (white, editorial). */
 export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactElement {
-  const rankLine = `Rank #${data.rank} of ${data.rankTotal}`;
-  const statusUpper = String(data.status);
-  const positionLabel = data.rank === 1 ? "Leading this set" : "Challenger in this set";
-  const authEmpty = data.authorityScore === 0;
   const bottomBullets = splitSummaryBullets(data.bottomLine);
   const bottomLines = (
     bottomBullets.length ? bottomBullets : [data.bottomLine.trim() || "No executive summary was provided for this report."]
-  ).slice(0, 4);
+  ).slice(0, 3);
 
-  const mr = `${data.mentionRate}%`;
-  const tp = `${data.topPosition}%`;
-  const auth = authEmpty ? "—" : `${data.authorityScore}%`;
+  const [standL1, standL2] = pageOneStandingLines(data);
 
-  const standingLead = `${positionLabel}. ${rankLine}. Status: ${statusUpper}.`;
-  const standingMetrics = `Mention rate ${mr} · Top-position rate ${tp} · Citations ${auth}${
-    authEmpty ? " (not observed in this sample)" : ""
-  }.`;
+  function terseMatter(title: string, detail: string, max: number): string {
+    const t = `${title} ${detail}`.replace(/\s+/g, " ").trim();
+    if (t.length <= max) return t;
+    return `${t.slice(0, max - 1).replace(/[\s,;:.!]+$/, "")}…`;
+  }
 
   return (
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.pdfSlidePage}>
@@ -173,9 +160,7 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
         <View style={{ flex: 1, flexDirection: "column", minHeight: 0 }}>
           <Text style={styles.p1Section}>Diagnosis</Text>
           <Text style={styles.p1Focal} orphans={2} widows={2}>
-            {data.rank === 1
-              ? "You lead this set—that lead is not yet a lock."
-              : `You are #${data.rank} of ${data.rankTotal}—execution will decide who moves first.`}
+            {pageOneHeadline(data)}
           </Text>
           <Text style={styles.p1Intro} orphans={2} widows={2}>
             {executiveOpeningIntro(data)}
@@ -191,10 +176,10 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
             <View style={styles.standingCol}>
               <Text style={styles.standingLabel}>Where you stand</Text>
               <Text style={styles.standingLead} orphans={2} widows={2}>
-                {standingLead}
+                {standL1}
               </Text>
               <Text style={styles.standingMetrics} orphans={2} widows={2}>
-                {standingMetrics}
+                {standL2}
               </Text>
             </View>
           </View>
@@ -202,22 +187,21 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
           <Text style={styles.mattersHead}>Early signals</Text>
           <Text style={styles.matterLine} orphans={2} widows={2}>
             <Text style={styles.matterPrefix}>Win — </Text>
-            {`${data.alerts.win.title} ${data.alerts.win.detail}`.trim()}
+            {terseMatter(data.alerts.win.title, data.alerts.win.detail, 118)}
           </Text>
           <Text style={styles.matterLine} orphans={2} widows={2}>
             <Text style={styles.matterPrefix}>Risk — </Text>
-            {`${data.alerts.risk.title} ${data.alerts.risk.detail}`.trim()}
+            {terseMatter(data.alerts.risk.title, data.alerts.risk.detail, 118)}
           </Text>
           <Text style={styles.matterLine} orphans={2} widows={2}>
             <Text style={styles.matterPrefix}>Priority — </Text>
-            {`${data.alerts.priority.title} ${data.alerts.priority.detail}`.trim()}
+            {terseMatter(data.alerts.priority.title, data.alerts.priority.detail, 118)}
           </Text>
 
           <View style={styles.diagnosisWrap}>
-            <Text style={styles.diagnosisLabel}>Supporting read</Text>
             {bottomLines.map((line, i) => (
               <Text key={`bl-${i}`} style={styles.diagLine} orphans={2} widows={2}>
-                {line}
+                {clipPdfText(line, 150)}
               </Text>
             ))}
           </View>

@@ -21,17 +21,17 @@ const styles = StyleSheet.create({
     paddingBottom: rhythm.sm,
   },
   implicationKicker: {
-    fontSize: 8,
+    fontSize: 9,
     fontFamily: fonts.sansBold,
-    letterSpacing: 0.06,
+    letterSpacing: 0.04,
     color: colors.ink,
-    marginBottom: rhythm.sm - 2,
+    marginBottom: rhythm.sm - 4,
   },
   implicationBody: {
-    fontSize: 10,
-    lineHeight: 1.5,
-    color: colors.ink2,
-    fontFamily: fonts.sans,
+    fontSize: 10.5,
+    lineHeight: 1.42,
+    color: colors.ink,
+    fontFamily: fonts.sansBold,
     maxWidth: CONTENT_W - 4,
   },
 });
@@ -68,7 +68,7 @@ export function Page02CompetitiveSnapshot({ data }: { data: ReportData }): React
             <CompetitiveRankingBlock data={data} emphasis="focal" tableFootnote={dupNote} />
           </View>
           <View style={styles.implication}>
-            <Text style={styles.implicationKicker}>Why this is not secure</Text>
+            <Text style={styles.implicationKicker}>Bottom line</Text>
             <Text style={styles.implicationBody}>{competitivePositionImplication(data)}</Text>
           </View>
         </View>

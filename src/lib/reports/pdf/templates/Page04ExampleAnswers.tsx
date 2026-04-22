@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 import type { EvidencePreview, ReportData, VulnerableExcerptParts } from "../types";
 import { vulnerableExcerptBlobUnsafe } from "../sanitizeReportData";
 import { colors, fonts, rhythm, CONTENT_W, space, BODY_MAX_W } from "../theme";
-import { exampleAnswersIntro, exampleAnswersPurpose } from "../editorial/pdfNarrative";
+import { clipPdfText, exampleAnswersPurpose } from "../editorial/pdfNarrative";
 import { formatEvidenceLogPillLabel } from "@/lib/reports/formatEvidenceFieldDisplay";
 import { EditorialSectionHeader } from "../components/EditorialSectionHeader";
 import { FixedInnerPage } from "../components/FixedInnerPage";
@@ -13,8 +13,7 @@ const GAP = 12;
 const COL_W = (CONTENT_W - GAP) / 2;
 const CENTER_CARD_W = CONTENT_W - 88;
 
-const NO_EXCERPT_MSG =
-  "No strong example found in this sample. See evidence log for details.";
+const NO_EXCERPT_MSG = "No clean proof pair in this export—see the evidence log.";
 
 const styles = StyleSheet.create({
   row: { width: CONTENT_W, flexDirection: "row", alignItems: "stretch" },
@@ -49,22 +48,6 @@ const styles = StyleSheet.create({
   cardCentered: { width: CENTER_CARD_W },
   accent: { width: 3, backgroundColor: colors.ink2 },
   inner: { flex: 1, paddingVertical: space.cardPad - 4, paddingHorizontal: space.cardPad - 4 },
-  colKicker: {
-    fontSize: 6.5,
-    fontFamily: fonts.sansBold,
-    letterSpacing: 0.12,
-    textTransform: "uppercase",
-    color: colors.ink,
-    marginBottom: 8,
-  },
-  kicker: {
-    fontSize: 6,
-    fontFamily: fonts.sansBold,
-    letterSpacing: 0.14,
-    textTransform: "uppercase",
-    color: colors.ink3,
-    marginBottom: 6,
-  },
   badge: {
     fontSize: 6.5,
     fontFamily: fonts.sansBold,
@@ -214,20 +197,20 @@ export function Page04ExampleAnswers({ data }: { data: ReportData }): ReactEleme
 
   const strengthCardInner = (
     <View style={styles.inner}>
-      <Text style={styles.colKicker}>What good looks like</Text>
-      <Text style={styles.kicker}>Excerpt</Text>
       <Text style={styles.badge}>
         {strength ? formatEvidenceLogPillLabel(String(strength.label)) : "Strength"}
       </Text>
       {strength ? (
         <View style={styles.quote}>
-          <Text style={styles.quoteText} orphans={2} widows={2}>
-            {String(strength.snippet)}
+            <Text style={styles.quoteText} orphans={2} widows={2}>
+            {clipPdfText(String(strength.snippet), 420)}
           </Text>
         </View>
       ) : null}
       {strength?.note ? (
-        <Text style={[styles.body, { fontSize: 8, color: colors.ink2, marginTop: 6 }]}>{strength.note}</Text>
+        <Text style={[styles.body, { fontSize: 8, color: colors.ink2, marginTop: 6 }]}>
+          {clipPdfText(String(strength.note), 140)}
+        </Text>
       ) : null}
     </View>
   );
@@ -235,27 +218,23 @@ export function Page04ExampleAnswers({ data }: { data: ReportData }): ReactEleme
   const vulnerableRichInner =
     vulnerable && vulnParts ? (
       <View style={styles.inner}>
-        <Text style={styles.colKicker}>Where you are exposed</Text>
-        <Text style={styles.kicker}>Excerpt</Text>
-        <Text style={styles.badge}>
-          {formatEvidenceLogPillLabel(String(vulnerable.label))}
-        </Text>
-        <View style={{ marginBottom: 8 }}>
+        <Text style={styles.badge}>{formatEvidenceLogPillLabel(String(vulnerable.label))}</Text>
+        <View style={{ marginBottom: 6 }}>
           <Text style={styles.mini}>Summary</Text>
           <Text style={styles.body} orphans={2} widows={2}>
-            {vulnParts.summary}
+            {clipPdfText(vulnParts.summary, 160)}
           </Text>
         </View>
-        <View style={{ marginBottom: 8 }}>
-          <Text style={styles.mini}>Competitors named</Text>
+        <View style={{ marginBottom: 6 }}>
+          <Text style={styles.mini}>Names</Text>
           <Text style={styles.body} orphans={2} widows={2}>
-            {vulnParts.competitorsLine}
+            {clipPdfText(vulnParts.competitorsLine, 120)}
           </Text>
         </View>
         <View>
-          <Text style={styles.mini}>Implication</Text>
+          <Text style={styles.mini}>Impact</Text>
           <Text style={styles.body} orphans={2} widows={2}>
-            {vulnParts.implication}
+            {clipPdfText(vulnParts.implication, 160)}
           </Text>
         </View>
       </View>
@@ -306,19 +285,14 @@ export function Page04ExampleAnswers({ data }: { data: ReportData }): ReactEleme
   return (
     <FixedInnerPage data={data} pageNum={4}>
       <PdfTraceMarker page={4} section="Fixed:P4" />
-      <EditorialSectionHeader
-        sectionLabel="Proof"
-        title="Is this real?"
-        purpose={exampleAnswersPurpose()}
-        intro={exampleAnswersIntro()}
-      />
+      <EditorialSectionHeader sectionLabel="Proof" title="Is this real?" purpose={exampleAnswersPurpose()} />
       {excerptBlock}
       {takeaway ? (
         <View style={styles.takeawayOuter}>
           <View style={styles.takeawayBar} />
           <View style={styles.takeawayInner}>
-            <Text style={styles.takeawayTitle}>Commercial read</Text>
-            <Text style={styles.takeawayBody}>{takeaway}</Text>
+            <Text style={styles.takeawayTitle}>Impact</Text>
+            <Text style={styles.takeawayBody}>{clipPdfText(takeaway, 320)}</Text>
           </View>
         </View>
       ) : null}

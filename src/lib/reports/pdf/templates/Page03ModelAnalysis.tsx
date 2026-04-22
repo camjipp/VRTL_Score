@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ModelScoreRow, ReportData } from "../types";
 import { colors, fonts, rhythm, CONTENT_W, space } from "../theme";
-import { modelAnalysisIntro, modelAnalysisPurpose } from "../editorial/pdfNarrative";
+import { clipPdfText, modelAnalysisIntro, modelAnalysisPurpose } from "../editorial/pdfNarrative";
 import { insightsForModelCard } from "../editorial/modelCardInsights";
 import { EditorialSectionHeader } from "../components/EditorialSectionHeader";
 import { FixedInnerPage } from "../components/FixedInnerPage";
@@ -99,13 +99,13 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   summaryLead: {
-    fontSize: 12.5,
-    lineHeight: 1.32,
+    fontSize: 13.5,
+    lineHeight: 1.28,
     color: colors.ink,
     fontFamily: fonts.sansBold,
-    marginBottom: 3,
+    marginBottom: 2,
   },
-  summaryMeta: { fontSize: 6.75, lineHeight: 1.4, color: colors.ink4, fontFamily: fonts.sans },
+  summaryMeta: { fontSize: 7.25, lineHeight: 1.35, color: colors.ink3, fontFamily: fonts.sans },
 });
 
 function SurfaceHighlight({
@@ -117,7 +117,7 @@ function SurfaceHighlight({
   model: ModelScoreRow;
   title: string;
 }) {
-  const insight = model.insights[0] ? truncateAtWord(String(model.insights[0]), 200) : "—";
+  const insight = model.insights[0] ? clipPdfText(truncateAtWord(String(model.insights[0]), 200), 130) : "—";
   const nameColor = colors.ink;
   const scoreColor = kind === "weakest" ? colors.red : colors.ink;
   return (
@@ -144,17 +144,12 @@ export function Page03ModelAnalysis({ data }: { data: ReportData }): ReactElemen
   const anthropic = pickModel(models, "Anthropic");
   const gemini = pickModel(models, "Gemini");
 
-  const purpose = modelAnalysisPurpose(spread);
+  const purpose = clipPdfText(`${modelAnalysisPurpose(spread)} ${modelAnalysisIntro(best, worst)}`, 200);
 
   return (
     <FixedInnerPage data={data} pageNum={3}>
       <PdfTraceMarker page={3} section="Fixed:P3" />
-      <EditorialSectionHeader
-        sectionLabel="Mechanism"
-        title="Why this is happening"
-        purpose={purpose}
-        intro={modelAnalysisIntro(best, worst)}
-      />
+      <EditorialSectionHeader sectionLabel="Mechanism" title="Why this is happening" purpose={purpose} />
 
       <View style={{ flex: 1, flexDirection: "column", justifyContent: "flex-start", minHeight: 0 }}>
         <View style={styles.row2}>
@@ -232,9 +227,11 @@ export function Page03ModelAnalysis({ data }: { data: ReportData }): ReactElemen
         </View>
 
         <View style={styles.summaryBox}>
-          <Text style={styles.summaryKicker}>Implication</Text>
-          <Text style={styles.summaryLead}>{`Double down on ${best.name} (${best.score}). Recover ${worst.name} (${worst.score}) first.`}</Text>
-          <Text style={styles.summaryMeta}>{`${spread} pt spread · ${a} avg across models`}</Text>
+          <Text style={styles.summaryKicker}>Takeaway</Text>
+          <Text style={styles.summaryLead}>
+            {`Lead with ${best.name} (${best.score}). Fix ${worst.name} (${worst.score}) first.`}
+          </Text>
+          <Text style={styles.summaryMeta}>{`${spread} pt spread · ${a} avg`}</Text>
         </View>
       </View>
     </FixedInnerPage>

@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "../types";
 import { colors, fonts, rhythm, space, BODY_MAX_W, CONTENT_W } from "../theme";
-import { dataSummaryIntro, dataSummaryPurpose } from "../editorial/pdfNarrative";
+import { clipPdfText, dataSummaryPurpose } from "../editorial/pdfNarrative";
 import { EditorialSectionHeader } from "../components/EditorialSectionHeader";
 import { FixedInnerPage } from "../components/FixedInnerPage";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
@@ -143,9 +143,8 @@ export function Page08DataSummary({ data }: { data: ReportData }): ReactElement 
         sectionLabel="Supporting data"
         title="What the numbers prove"
         purpose={dataSummaryPurpose()}
-        intro={dataSummaryIntro()}
       />
-      <Text style={styles.interpret}>{data.dataSummaryInterpretation}</Text>
+      <Text style={styles.interpret}>{clipPdfText(data.dataSummaryInterpretation, 420)}</Text>
       <Text style={[styles.h, styles.hFirst]}>Signals</Text>
       <View style={{ marginBottom: space.block, width: W }}>
         <View style={styles.th}>

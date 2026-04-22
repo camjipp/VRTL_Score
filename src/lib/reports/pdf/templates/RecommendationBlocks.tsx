@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { RecommendationCard } from "../types";
+import { clipPdfText } from "../editorial/pdfNarrative";
 import { colors, fonts, rhythm, BODY_MAX_W, CONTENT_W, space } from "../theme";
 
 const STRIPE_BG = colors.ink2;
@@ -40,9 +41,9 @@ export const recommendationStyles = StyleSheet.create({
   },
   heroBody: {
     flex: 1,
-    paddingTop: 18,
-    paddingBottom: 18,
-    paddingHorizontal: space.cardPad + 2,
+    paddingTop: 20,
+    paddingBottom: 20,
+    paddingHorizontal: space.cardPad + 4,
   },
   micro: {
     fontSize: 6,
@@ -125,6 +126,9 @@ export const recommendationStyles = StyleSheet.create({
   },
   numberedCard: {
     marginBottom: 6,
+  },
+  numberedCardSecondary: {
+    opacity: 0.92,
   },
   cardHigh: {
     borderLeftWidth: 3,
@@ -221,54 +225,70 @@ export function PrimaryRecommendationCard({
         <Text style={styles.micro}>Issue</Text>
         <Text style={styles.heroTitle}>{String(rec.title)}</Text>
         <Text style={[styles.micro, styles.microSpaced]}>Signal</Text>
-        <Text style={styles.heroInsight}>{String(rec.insight)}</Text>
+        <Text style={styles.heroInsight}>{clipPdfText(String(rec.insight), 160)}</Text>
         <Text style={[styles.micro, styles.microSpaced]}>Why it matters</Text>
         <Text style={styles.body} orphans={2} widows={2}>
-          {String(rec.explanation)}
+          {clipPdfText(String(rec.explanation), 200)}
         </Text>
         <Text style={[styles.micro, styles.microSpaced]}>The move</Text>
         <Text style={styles.body} orphans={2} widows={2}>
-          {String(rec.action)}
+          {clipPdfText(String(rec.action), 200)}
         </Text>
         <Text style={[styles.micro, styles.microSpaced]}>Outcome</Text>
-        <Text style={styles.heroOutcome}>{String(rec.expectedOutcome)}</Text>
+        <Text style={styles.heroOutcome}>{clipPdfText(String(rec.expectedOutcome), 180)}</Text>
       </View>
     </View>
   );
 }
 
-export function NumberedRecommendationCard({ rec, num }: { rec: RecommendationCard; num: number }) {
+export function NumberedRecommendationCard({
+  rec,
+  num,
+  secondary,
+}: {
+  rec: RecommendationCard;
+  num: number;
+  /** Softer treatment when this is not the lead move (e.g. #2 on page 5). */
+  secondary?: boolean;
+}) {
   const cardHigh = rec.priority === "HIGH";
   return (
-    <View style={[styles.card, styles.numberedCard, cardHigh ? styles.cardHigh : {}]}>
+    <View
+      style={[
+        styles.card,
+        styles.numberedCard,
+        cardHigh ? styles.cardHigh : {},
+        secondary ? styles.numberedCardSecondary : {},
+      ]}
+    >
       <View style={styles.leftStripe}>
         <Text style={styles.stripeNum}>{String(num)}</Text>
       </View>
       <View style={styles.sep} />
-      <View style={styles.mid}>
+      <View style={[styles.mid, secondary ? { paddingTop: 8, paddingBottom: 8 } : {}]}>
         <View style={styles.priPill}>
           <Text style={styles.priPillTxt}>{`${rec.priority} PRIORITY`}</Text>
         </View>
         <Text style={styles.micro}>Issue</Text>
-        <Text style={styles.title}>{String(rec.title)}</Text>
+        <Text style={[styles.title, secondary ? { fontSize: 9.25 } : {}]}>{String(rec.title)}</Text>
         <Text style={styles.micro}>Signal</Text>
-        <Text style={styles.insight}>{String(rec.insight)}</Text>
+        <Text style={styles.insight}>{clipPdfText(String(rec.insight), 120)}</Text>
         <View>
           <Text style={[styles.micro, styles.microSpaced]}>Why it matters</Text>
           <Text style={styles.numberedBody} orphans={2} widows={2}>
-            {String(rec.explanation)}
+            {clipPdfText(String(rec.explanation), 160)}
           </Text>
         </View>
         <View>
           <Text style={[styles.micro, styles.microSpaced]}>The move</Text>
           <Text style={styles.numberedBody} orphans={2} widows={2}>
-            {String(rec.action)}
+            {clipPdfText(String(rec.action), 160)}
           </Text>
         </View>
       </View>
       <View style={styles.rightNumbered}>
         <Text style={styles.outLabel}>Outcome</Text>
-        <Text style={styles.outText}>{String(rec.expectedOutcome)}</Text>
+        <Text style={styles.outText}>{clipPdfText(String(rec.expectedOutcome), 140)}</Text>
       </View>
     </View>
   );

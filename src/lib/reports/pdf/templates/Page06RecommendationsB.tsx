@@ -21,25 +21,20 @@ export function Page06RecommendationsB({ data, pair, startNumber, sliceIndex }: 
   const total = data.recommendations.length;
   const end = startNumber + pair.length - 1;
   const span = startNumber === end ? `${startNumber}` : `${startNumber}–${end}`;
-  const purpose = `Same ranked sequence as page 5—items ${span} of ${total}. These still matter; they are just not the first lever.`;
+  const purpose = `Items ${span} of ${total}—after the lead move on page 5.`;
 
-  const title = startNumber === end ? `Next move · #${startNumber}` : `Next moves · #${startNumber}–${end}`;
+  const title = startNumber === end ? `Next · #${startNumber}` : `Next · #${startNumber}–${end}`;
 
   return (
     <FixedInnerPage data={data} pageNum={6}>
       <PdfTraceMarker page={6} section={`Fixed:P6-${sliceIndex}`} />
-      <EditorialSectionHeader
-        sectionLabel="Decision"
-        title={title}
-        purpose={purpose}
-        intro="Continuation of the plan—same structure, same bar for clarity."
-      />
+      <EditorialSectionHeader sectionLabel="Decision" title={title} purpose={purpose} />
       {pair.map((rec, i) => (
         <View
           key={`rec-${sliceIndex}-${i}`}
           style={i === pair.length - 1 ? { flexGrow: 1, minHeight: 0 } : {}}
         >
-          <NumberedRecommendationCard rec={rec} num={startNumber + i} />
+          <NumberedRecommendationCard rec={rec} num={startNumber + i} secondary />
         </View>
       ))}
     </FixedInnerPage>
