@@ -14,6 +14,8 @@ import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 import { ScoreRing, SCORE_RING_COLUMN_W_HERO } from "../components/ScoreRing";
 
+const SIGNAL_LABELS = ["WIN", "RISK", "PRIORITY"] as const;
+
 const styles = StyleSheet.create({
   p1Section: {
     fontSize: 7,
@@ -38,26 +40,28 @@ const styles = StyleSheet.create({
     color: colors.ink2,
     fontFamily: fonts.sans,
     maxWidth: BODY_MAX_W,
-    marginBottom: rhythm.sm + 4,
-  },
-  scoreRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    paddingBottom: rhythm.sm + 2,
     marginBottom: rhythm.sm + 2,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.rule,
-    width: "100%",
   },
-  scoreCol: {
+  /** Single hero: score dial + standing context read as one band */
+  heroBlock: {
+    flexDirection: "row",
+    alignItems: "stretch",
+    width: "100%",
+    paddingVertical: rhythm.sm + 2,
+    paddingHorizontal: rhythm.sm,
+    marginBottom: rhythm.sm + 2,
+  },
+  heroScore: {
     width: SCORE_RING_COLUMN_W_HERO,
     alignItems: "center",
+    flexShrink: 0,
   },
-  standingCol: {
+  heroContext: {
     flex: 1,
-    paddingLeft: rhythm.md + 2,
-    paddingTop: 2,
-    justifyContent: "flex-start",
+    flexDirection: "column",
+    justifyContent: "center",
+    paddingLeft: rhythm.md + 4,
+    minWidth: 0,
   },
   scoreClarify: {
     fontSize: 8,
@@ -85,22 +89,22 @@ const styles = StyleSheet.create({
     letterSpacing: 0.1,
     textTransform: "uppercase",
     color: colors.ink3,
-    marginBottom: 4,
+    marginBottom: 3,
   },
   standingLead: {
     fontSize: 10,
     lineHeight: 1.38,
     color: colors.ink,
     fontFamily: fonts.sansBold,
-    marginBottom: 5,
-    maxWidth: BODY_MAX_W - SCORE_RING_COLUMN_W_HERO - 24,
+    marginBottom: 4,
+    width: "100%",
   },
   standingMetricLine: {
     fontSize: 8,
     lineHeight: 1.4,
     color: colors.ink,
     fontFamily: fonts.sansBold,
-    maxWidth: BODY_MAX_W - SCORE_RING_COLUMN_W_HERO - 24,
+    width: "100%",
     marginBottom: 2,
   },
   mattersHead: {
@@ -109,37 +113,52 @@ const styles = StyleSheet.create({
     color: colors.ink,
     letterSpacing: -0.02,
     marginBottom: rhythm.sm,
-    marginTop: 2,
+    marginTop: 0,
   },
-  matterLead: {
-    fontSize: 9.25,
+  cardsRow: {
+    flexDirection: "row",
+    alignItems: "stretch",
+    width: "100%",
+    marginBottom: rhythm.sm + 2,
+  },
+  signalCard: {
+    flex: 1,
+    flexBasis: 0,
+    minHeight: 86,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    marginRight: rhythm.sm,
+  },
+  signalCardLast: {
+    marginRight: 0,
+  },
+  signalLabel: {
+    fontSize: 6.75,
+    fontFamily: fonts.sansBold,
+    letterSpacing: 0.14,
+    textTransform: "uppercase",
+    color: colors.ink4,
+    marginBottom: 6,
+  },
+  signalBody: {
+    fontSize: 8.35,
     lineHeight: 1.38,
     color: colors.ink,
-    fontFamily: fonts.sansBold,
-    marginBottom: rhythm.xs + 2,
-    maxWidth: BODY_MAX_W,
-  },
-  matterLine: {
-    fontSize: 9,
-    lineHeight: 1.4,
-    color: colors.ink,
     fontFamily: fonts.sans,
-    marginBottom: rhythm.xs + 2,
-    maxWidth: BODY_MAX_W,
   },
-  diagnosisWrap: {
-    marginTop: rhythm.sm + 2,
-    paddingTop: rhythm.sm + 2,
-    borderTopWidth: 1,
-    borderTopColor: colors.rule,
+  supportingWrap: {
+    marginTop: 0,
+    paddingTop: 0,
     width: "100%",
   },
-  diagLine: {
+  supportingLine: {
     fontSize: 7.5,
     lineHeight: 1.48,
     color: colors.ink4,
     fontFamily: fonts.sans,
-    marginBottom: 3,
+    marginBottom: 2,
     maxWidth: BODY_MAX_W,
   },
 });
@@ -154,7 +173,7 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.pdfSlidePage}>
       <View style={baseStyles.pdfSlideContent}>
         <PdfTraceMarker page={1} section="Fixed:P1" />
-        <PdfHeader data={data} variant="cover" />
+        <PdfHeader data={data} variant="cover" bottomRule={false} />
 
         <View style={{ flex: 1, flexDirection: "column", minHeight: 0 }}>
           <Text style={styles.p1Section}>Diagnosis</Text>
@@ -165,15 +184,15 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
             {executiveOpeningIntro(data)}
           </Text>
 
-          <View style={styles.scoreRow}>
-            <View style={styles.scoreCol}>
+          <View style={styles.heroBlock}>
+            <View style={styles.heroScore}>
               <ScoreRing score={data.overallScore} variant="hero" />
               <Text style={[styles.scoreClarify, { width: SCORE_RING_COLUMN_W_HERO }]}>
                 Composite authority across AI assistants
               </Text>
               <Text style={[styles.scoreScaleNote, { width: SCORE_RING_COLUMN_W_HERO }]}>0–100 index</Text>
             </View>
-            <View style={styles.standingCol}>
+            <View style={styles.heroContext}>
               <Text style={styles.standingLabel}>Where you stand</Text>
               <Text style={styles.standingLead} orphans={2} widows={2}>
                 {standing.lead}
@@ -187,26 +206,31 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
           </View>
 
           <Text style={styles.mattersHead}>What matters right now</Text>
-          <Text style={styles.matterLead} orphans={2} widows={2}>
-            {matters[0]}
-          </Text>
-          <Text style={styles.matterLine} orphans={2} widows={2}>
-            {matters[1]}
-          </Text>
-          <Text style={styles.matterLine} orphans={2} widows={2}>
-            {matters[2]}
-          </Text>
+          <View style={styles.cardsRow}>
+            {SIGNAL_LABELS.map((label, i) => (
+              <View
+                key={label}
+                wrap={false}
+                style={i === SIGNAL_LABELS.length - 1 ? [styles.signalCard, styles.signalCardLast] : styles.signalCard}
+              >
+                <Text style={styles.signalLabel}>{label}</Text>
+                <Text style={styles.signalBody} orphans={2} widows={2}>
+                  {matters[i]}
+                </Text>
+              </View>
+            ))}
+          </View>
 
-          <View style={styles.diagnosisWrap}>
+          <View style={styles.supportingWrap}>
             {supporting.map((line, i) => (
-              <Text key={`sr-${i}`} style={styles.diagLine} orphans={2} widows={2}>
+              <Text key={`sr-${i}`} style={styles.supportingLine} orphans={2} widows={2}>
                 {line}
               </Text>
             ))}
           </View>
         </View>
 
-        <PdfFooter data={data} />
+        <PdfFooter data={data} topRule={false} />
       </View>
     </Page>
   );
