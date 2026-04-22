@@ -278,7 +278,7 @@ export function mapSnapshotToReactPdfData(
         ? `${metrics.topCompetitor.name} pressure`
         : "Monitor changes";
   const riskDetail = metrics.isFragileLeadership
-    ? "Competitors inside striking distance"
+    ? "Rivals can overtake quickly"
     : models.length > 1 && models[models.length - 1][1] < 60
       ? `Score ${Math.round(models[models.length - 1][1])}`
       : metrics.topCompetitor

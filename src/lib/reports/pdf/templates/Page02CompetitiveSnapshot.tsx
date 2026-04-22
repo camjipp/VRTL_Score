@@ -48,7 +48,7 @@ export function Page02CompetitiveSnapshot({ data }: { data: ReportData }): React
       <View style={{ flex: 1, flexDirection: "column", minHeight: 0 }}>
         <EditorialSectionHeader
           sectionLabel="Competitive position"
-          title="Who you are racing"
+          title="Your lead is fragile"
           purpose={competitiveLandscapePurpose()}
           intro={competitivePositionIntro(data)}
         />

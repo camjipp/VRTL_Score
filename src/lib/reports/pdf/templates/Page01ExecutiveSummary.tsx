@@ -189,7 +189,7 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
           <EditorialSectionHeader
             sectionLabel="Opening"
             title="Executive summary"
-            purpose="Score, rank, early signals, and the headline takeaway."
+            purpose="You lead now, but the lead is vulnerable."
             intro={executiveOpeningIntro(data)}
           />
 
@@ -233,7 +233,7 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
           <View style={[styles.calloutWrap, { flex: 1 }]}>
             <View style={styles.calloutBar} />
             <View style={styles.calloutInner}>
-              <Text style={styles.calloutKicker}>Executive takeaway</Text>
+              <Text style={styles.calloutKicker}>Diagnosis</Text>
               {bottomLines.map((line, i) => (
                 <View key={`bl-${i}`} style={styles.bulletRow}>
                   <Text style={styles.bulletMark}>•</Text>

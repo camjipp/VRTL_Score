@@ -155,7 +155,7 @@ export function Page10MethodologyClosing({ data }: { data: ReportData }): ReactE
         sectionLabel="Closing"
         title="How we measured this & what happens next"
         purpose={closingPurpose()}
-        intro="Method, sample strength, and the forward program—in one close."
+        intro="Clear method. Clear confidence. Clear next move."
       />
       <View style={{ flex: 1, minHeight: 0 }}>
       <View style={styles.threeUp}>
@@ -195,9 +195,7 @@ export function Page10MethodologyClosing({ data }: { data: ReportData }): ReactE
           {next ? (
             <Text style={styles.nextBody}>{next}</Text>
           ) : (
-            <Text style={styles.nextPlaceholder}>
-              Your agency will align the next sprint to the priorities above and re-measure on the following snapshot.
-            </Text>
+            <Text style={styles.nextPlaceholder}>Execute priorities, re-measure, and lock the next sprint.</Text>
           )}
         </View>
       </View>

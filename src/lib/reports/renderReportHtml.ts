@@ -507,7 +507,7 @@ export function buildDataSummaryInterpretation(metrics: ReportMetricsSnapshot, c
   const parts: string[] = [];
   if (metrics.clientRank === 1 && metrics.isFragileLeadership) {
     parts.push(
-      `${clientName} leads on mentions, but rivals sit within striking distance. Volume leadership is not yet a stable default recommendation.`,
+      `${clientName} leads on mentions, but rivals are close enough to take first pick. This lead is not yet stable.`,
     );
   } else if (metrics.clientRank === 1) {
     parts.push(

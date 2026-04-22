@@ -27,7 +27,7 @@ export function getDefaultRecommendedNextStepsBody(weakestModelSurface: string):
   const w =
     weakestModelSurface.trim() || "the weakest assistant surface in this snapshot";
   return [
-    "We treat this as an ongoing program, not a one-off readout.",
+    "This is an operating rhythm, not a one-time report.",
     "",
     "Over the next 30–90 days, we will:",
     "• Prioritize the highest-impact fixes identified in this report",
@@ -35,7 +35,7 @@ export function getDefaultRecommendedNextStepsBody(weakestModelSurface: string):
     "• Expand citation and authority signals",
     "• Re-measure performance across models",
     "",
-    "Each snapshot tracks progress and informs the next set of actions.",
+    "Each snapshot confirms impact and sets the next sprint.",
   ].join("\n");
 }
 

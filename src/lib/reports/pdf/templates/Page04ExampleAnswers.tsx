@@ -149,9 +149,7 @@ export function Page04ExampleAnswers({ data }: { data: ReportData }): ReactEleme
                   {String(strength.snippet)}
                 </Text>
               </View>
-            ) : (
-              <Text style={styles.body}>No strength excerpt in this snapshot.</Text>
-            )}
+            ) : null}
             {strength?.note ? (
               <Text style={[styles.body, { fontSize: 8, color: colors.ink2, marginTop: 6 }]}>{strength.note}</Text>
             ) : null}
@@ -189,13 +187,9 @@ export function Page04ExampleAnswers({ data }: { data: ReportData }): ReactEleme
                   </View>
                 </>
               ) : (
-                <View style={styles.quote}>
-                  <Text style={styles.quoteText}>No excerpt available.</Text>
-                </View>
+                <Text style={styles.body}>No clean excerpt in this sample. See the evidence log for underlying rows.</Text>
               )
-            ) : (
-              <Text style={styles.body}>No vulnerable excerpt in this snapshot.</Text>
-            )}
+            ) : null}
           </View>
         </View>
       </View>

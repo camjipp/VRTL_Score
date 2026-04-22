@@ -148,7 +148,7 @@ export function Page07ExecutionPlan({ data }: { data: ReportData }): ReactElemen
               <View style={styles.accentBar} />
               <View style={styles.stepCard}>
                 <Text style={styles.stepHeader}>{header}</Text>
-                <Text style={styles.blockLabel}>What we execute</Text>
+                <Text style={styles.blockLabel}>Action</Text>
                 <Text style={styles.copy}>{main}</Text>
                 {impact ? (
                   <View style={styles.impactBlock}>

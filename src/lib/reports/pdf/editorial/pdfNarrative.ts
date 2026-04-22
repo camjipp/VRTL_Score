@@ -3,11 +3,11 @@ import type { ReportData } from "../types";
 /** Opening thesis — two short sentences; score block carries the rest. */
 export function executiveOpeningIntro(data: ReportData): string {
   const name = data.clientName.trim() || "Your brand";
-  return `This report scores how often assistants recommend ${name}, how you rank versus alternatives, and whether answers cite independent proof. You are #${data.rank} of ${data.rankTotal} today (${String(data.status).toLowerCase()}): the takeaway below is the headline.`;
+  return `${name} is winning share in this snapshot, but the position is exposed. You are #${data.rank} of ${data.rankTotal} (${String(data.status).toLowerCase()}), and the next section shows exactly where to defend and where to push.`;
 }
 
 export function competitiveLandscapePurpose(): string {
-  return "Full leaderboard: who earns the same mentions and how narrow the race is.";
+  return "Your lead is fragile: competitors are close enough to take first pick.";
 }
 
 /** Page 2 narrative: position security + risk (no duplicate table). */
@@ -37,7 +37,7 @@ export function exampleAnswersPurpose(): string {
 }
 
 export function dataSummaryPurpose(): string {
-  return "Numbers that back the narrative above—scan after you read the story.";
+  return "The critical numbers, fast.";
 }
 
 export function evidenceLogPurpose(): string {
@@ -45,7 +45,7 @@ export function evidenceLogPurpose(): string {
 }
 
 export function closingPurpose(): string {
-  return "Method, confidence, and what we do next.";
+  return "What this diagnosis means and what happens next.";
 }
 
 export function executionPlanPurpose(): string {
