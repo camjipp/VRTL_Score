@@ -90,18 +90,18 @@ const styles = StyleSheet.create({
   takeawayBar: { width: 3, backgroundColor: colors.ink },
   takeawayInner: { flex: 1, paddingVertical: space.cardPad, paddingHorizontal: space.cardPad },
   takeawayTitle: {
-    fontSize: 7,
-    letterSpacing: 0.1,
-    color: colors.ink3,
+    fontSize: 8,
+    letterSpacing: 0.08,
+    color: colors.ink2,
     textTransform: "uppercase",
-    marginBottom: 8,
+    marginBottom: 6,
     fontFamily: fonts.sansBold,
   },
   takeawayBody: {
-    fontSize: 9.5,
-    lineHeight: 1.65,
+    fontSize: 10,
+    lineHeight: 1.52,
     color: colors.ink,
-    fontFamily: fonts.sans,
+    fontFamily: fonts.sansBold,
     maxWidth: BODY_MAX_W,
   },
 });
@@ -131,9 +131,9 @@ export function Page04ExampleAnswers({ data }: { data: ReportData }): ReactEleme
         sectionLabel="Proof"
         title="What assistants are actually saying"
         purpose={exampleAnswersPurpose()}
-        intro="Side-by-side: a representative strength versus a vulnerable pattern. The implication is what to protect and what to close before competitors do."
+        intro="Strength versus exposure—then the move that closes the gap."
       />
-      <Text style={styles.evidenceLabel}>Evidence — representative excerpts</Text>
+      <Text style={styles.evidenceLabel}>Excerpts</Text>
       <View style={styles.row}>
         <View style={[styles.card, { marginRight: GAP }]}>
           <View style={styles.accent} />
@@ -203,7 +203,7 @@ export function Page04ExampleAnswers({ data }: { data: ReportData }): ReactEleme
         <View style={styles.takeawayOuter}>
           <View style={styles.takeawayBar} />
           <View style={styles.takeawayInner}>
-            <Text style={styles.takeawayTitle}>Implication — strategic takeaway</Text>
+            <Text style={styles.takeawayTitle}>Implication</Text>
             <Text style={styles.takeawayBody}>{takeaway}</Text>
           </View>
         </View>

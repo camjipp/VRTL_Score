@@ -3,6 +3,7 @@ import type { ReactElement } from "react";
 import type { ModelScoreRow, ReportData } from "../types";
 import { colors, fonts, rhythm, CONTENT_W, space } from "../theme";
 import { modelAnalysisPurpose } from "../editorial/pdfNarrative";
+import { insightsForModelCard } from "../editorial/modelCardInsights";
 import { EditorialSectionHeader } from "../components/EditorialSectionHeader";
 import { FixedInnerPage } from "../components/FixedInnerPage";
 import { ModelAnalysisCard } from "../components/ModelAnalysisCard";
@@ -48,8 +49,8 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   surfaceName: { fontSize: 11, fontFamily: fonts.sansBold, color: colors.ink, marginBottom: 4 },
-  surfaceScore: { fontSize: 22, fontFamily: fonts.sansBold, color: colors.ink, marginBottom: 6 },
-  surfaceBody: { fontSize: 8, lineHeight: 1.45, color: colors.ink2, fontFamily: fonts.sans },
+  surfaceScore: { fontSize: 24, fontFamily: fonts.sansBold, color: colors.ink, marginBottom: 4 },
+  surfaceBody: { fontSize: 7.5, lineHeight: 1.42, color: colors.ink3, fontFamily: fonts.sans },
   rowLabel: {
     fontSize: 7,
     fontFamily: fonts.sansBold,
@@ -83,9 +84,16 @@ const styles = StyleSheet.create({
     letterSpacing: 0.12,
     textTransform: "uppercase",
     color: colors.ink,
-    marginBottom: 8,
+    marginBottom: 6,
   },
-  summaryLine: { fontSize: 8, lineHeight: 1.5, color: colors.ink2, fontFamily: fonts.sans, marginBottom: 4 },
+  summaryLead: {
+    fontSize: 9,
+    lineHeight: 1.5,
+    color: colors.ink,
+    fontFamily: fonts.sansBold,
+    marginBottom: 4,
+  },
+  summaryMeta: { fontSize: 8, lineHeight: 1.45, color: colors.ink3, fontFamily: fonts.sans },
 });
 
 function SurfaceHighlight({
@@ -124,9 +132,6 @@ export function Page03ModelAnalysis({ data }: { data: ReportData }): ReactElemen
 
   const purpose = modelAnalysisPurpose(spread);
 
-  const bestLine = best.insights[0] ? truncateAtWord(String(best.insights[0]), 200) : "";
-  const worstLine = worst.insights[0] ? truncateAtWord(String(worst.insights[0]), 200) : "";
-
   return (
     <FixedInnerPage data={data} pageNum={3}>
       <PdfTraceMarker page={3} section="Fixed:P3" />
@@ -134,17 +139,17 @@ export function Page03ModelAnalysis({ data }: { data: ReportData }): ReactElemen
         sectionLabel="Model analysis"
         title="Performance by assistant family"
         purpose={purpose}
-        intro="OpenAI, Gemini, and Anthropic matter because buyers use different assistants—and each surfaces a different short list. Strong on one and weak on another still costs recommendation share."
+        intro="Three major families, three different short lists—double down where you lead; fix where you disappear."
       />
 
       <View style={{ flex: 1, flexDirection: "column", justifyContent: "space-between", minHeight: 0 }}>
         <View style={styles.row2}>
-          <SurfaceHighlight kind="strongest" model={best} title="Strongest model" />
-          <SurfaceHighlight kind="weakest" model={worst} title="Weakest model" />
+          <SurfaceHighlight kind="strongest" model={best} title="Where you win" />
+          <SurfaceHighlight kind="weakest" model={worst} title="Where you lose" />
         </View>
 
         <View>
-          <Text style={styles.rowLabel}>Full breakdown — OpenAI · Gemini · Anthropic</Text>
+          <Text style={styles.rowLabel}>By family — detail</Text>
           <View style={styles.row3}>
             <View style={{ width: COL3 }}>
               {openai ? (
@@ -154,7 +159,7 @@ export function Page03ModelAnalysis({ data }: { data: ReportData }): ReactElemen
                   score={openai.score}
                   deltaVsAvg={openai.deltaVsAvg}
                   avg={a}
-                  insights={openai.insights}
+                  insights={insightsForModelCard(openai, best, worst)}
                   bandColor={colors.surface2}
                   scoreAccent={colors.cyan}
                   bulletDotColor={colors.ink4}
@@ -174,7 +179,7 @@ export function Page03ModelAnalysis({ data }: { data: ReportData }): ReactElemen
                   score={gemini.score}
                   deltaVsAvg={gemini.deltaVsAvg}
                   avg={a}
-                  insights={gemini.insights}
+                  insights={insightsForModelCard(gemini, best, worst)}
                   bandColor={colors.surface2}
                   scoreAccent={colors.cyan}
                   bulletDotColor={colors.ink4}
@@ -194,7 +199,7 @@ export function Page03ModelAnalysis({ data }: { data: ReportData }): ReactElemen
                   score={anthropic.score}
                   deltaVsAvg={anthropic.deltaVsAvg}
                   avg={a}
-                  insights={anthropic.insights}
+                  insights={insightsForModelCard(anthropic, best, worst)}
                   bandColor={colors.surface2}
                   scoreAccent={colors.cyan}
                   bulletDotColor={colors.ink4}
@@ -210,14 +215,9 @@ export function Page03ModelAnalysis({ data }: { data: ReportData }): ReactElemen
         </View>
 
         <View style={styles.summaryBox}>
-          <Text style={styles.summaryKicker}>What this means overall</Text>
-          <Text style={styles.summaryLine}>{`Spread: ${spread} pts · Average: ${a}`}</Text>
-          {bestLine ? (
-            <Text style={styles.summaryLine}>{`Strongest — ${best.name} (${best.score}): ${bestLine}`}</Text>
-          ) : null}
-          {worstLine && worst !== best ? (
-            <Text style={styles.summaryLine}>{`Weakest — ${worst.name} (${worst.score}): ${worstLine}`}</Text>
-          ) : null}
+          <Text style={styles.summaryKicker}>What this means</Text>
+          <Text style={styles.summaryLead}>{`Double down on ${best.name} (${best.score}). Recover ${worst.name} (${worst.score}) first.`}</Text>
+          <Text style={styles.summaryMeta}>{`${spread} pt spread · ${a} avg across models`}</Text>
         </View>
       </View>
     </FixedInnerPage>

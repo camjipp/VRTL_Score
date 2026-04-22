@@ -507,7 +507,7 @@ export function buildDataSummaryInterpretation(metrics: ReportMetricsSnapshot, c
   const parts: string[] = [];
   if (metrics.clientRank === 1 && metrics.isFragileLeadership) {
     parts.push(
-      `${clientName} tops the mention table, but several rivals sit within striking distance—so volume leadership does not yet mean a stable default recommendation.`,
+      `${clientName} leads on mentions, but rivals sit within striking distance. Volume leadership is not yet a stable default recommendation.`,
     );
   } else if (metrics.clientRank === 1) {
     parts.push(
@@ -520,7 +520,7 @@ export function buildDataSummaryInterpretation(metrics: ReportMetricsSnapshot, c
   }
   if (metrics.citationRate < 25) {
     parts.push(
-      `Citation coverage is ${metrics.citationRate}%—without third-party proof, assistants have less to anchor a durable recommendation.`,
+      `Citation coverage is ${metrics.citationRate}%. With little third-party proof, assistants have less to anchor a durable recommendation.`,
     );
   }
   if (absent > 25) {

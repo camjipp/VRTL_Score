@@ -155,7 +155,7 @@ export function Page10MethodologyClosing({ data }: { data: ReportData }): ReactE
         sectionLabel="Closing"
         title="How we measured this & what happens next"
         purpose={closingPurpose()}
-        intro="A concise close: what went into the snapshot, how strong the sample is, and the forward program—not a loose appendix."
+        intro="Method, sample strength, and the forward program—in one close."
       />
       <View style={{ flex: 1, minHeight: 0 }}>
       <View style={styles.threeUp}>

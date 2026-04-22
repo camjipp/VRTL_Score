@@ -123,7 +123,7 @@ export function Page07ExecutionPlan({ data }: { data: ReportData }): ReactElemen
         sectionLabel="Execution"
         title="How we fix this"
         purpose={executionPlanPurpose()}
-        intro="Four stages from audit through authority-building to re-measurement—so progress is observable, not assumed."
+        intro="Audit → rebuild weak surfaces → earn proof → re-measure. Observable progress only."
       />
       <Text
         style={{

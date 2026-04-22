@@ -165,6 +165,7 @@ export function ModelAnalysisCard({
   const tickLeft = (innerW * avgPos) / 100 - 1;
 
   const nameLine = String(modelName).toUpperCase();
+  const nameStyle = compact ? [styles.name, { color: colors.ink3, fontSize: 7 }] : styles.name;
   const scoreLine = String(score);
   const deltaSign = deltaVsAvg >= 0 ? "+" : "-";
   const deltaAbs = String(Math.abs(deltaVsAvg));
@@ -177,7 +178,7 @@ export function ModelAnalysisCard({
     <View style={[styles.root, { width: cardWidth }]}>
       <View style={[styles.topBand, { backgroundColor: colors.surface2 }]} />
       <View style={styles.inner}>
-        <Text style={styles.name}>{nameLine}</Text>
+        <Text style={nameStyle}>{nameLine}</Text>
         <Text style={[compact ? styles.scoreCompact : styles.scoreLarge, { color: colors.ink }]}>{scoreLine}</Text>
         <View style={styles.deltaRow}>
           <View style={[styles.deltaPill, posPill ? styles.deltaPillPos : styles.deltaPillNeg]}>

@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
   hero: {
     flexDirection: "row",
     alignItems: "stretch",
-    marginBottom: rhythm.md,
+    marginBottom: rhythm.sm + 2,
     backgroundColor: colors.surface,
     borderRadius: 6,
     borderWidth: 1,
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   },
   /** Single-line percent so digits and % do not break apart */
   kpiPct: {
-    fontSize: 20,
+    fontSize: 23,
     fontWeight: 400,
     fontFamily: fonts.sansBold,
     lineHeight: 1.1,
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
   statusStrip: {
     flexDirection: "row",
     alignItems: "stretch",
-    marginBottom: rhythm.md,
+    marginBottom: rhythm.sm + 2,
     borderWidth: 1,
     borderColor: colors.rule,
     borderRadius: 4,
@@ -120,23 +120,23 @@ const styles = StyleSheet.create({
   calloutBar: { width: 4, backgroundColor: colors.cyan },
   calloutInner: {
     flex: 1,
-    paddingVertical: 24,
-    paddingHorizontal: space.cardPad + 6,
+    paddingVertical: 14,
+    paddingHorizontal: space.cardPad + 4,
     justifyContent: "flex-start",
   },
   calloutKicker: {
-    fontSize: 7,
+    fontSize: 8,
     fontWeight: 400,
-    color: colors.ink3,
+    color: colors.ink2,
     fontFamily: fonts.sansBold,
-    letterSpacing: 0.14,
-    marginBottom: rhythm.md,
+    letterSpacing: 0.12,
+    marginBottom: rhythm.sm + 2,
     textTransform: "uppercase",
   },
   bulletRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: 10,
+    marginBottom: 7,
     maxWidth: BODY_MAX_W + 8,
   },
   bulletMark: {
@@ -149,18 +149,18 @@ const styles = StyleSheet.create({
   },
   bulletText: {
     flex: 1,
-    fontSize: 10,
-    lineHeight: 1.68,
+    fontSize: 9.5,
+    lineHeight: 1.52,
     color: colors.ink,
     fontFamily: fonts.sans,
   },
   evidenceLabel: {
-    fontSize: 6.5,
+    fontSize: 6,
     fontFamily: fonts.sansBold,
-    letterSpacing: 0.12,
+    letterSpacing: 0.1,
     textTransform: "uppercase",
     color: colors.ink4,
-    marginBottom: rhythm.xs,
+    marginBottom: 4,
   },
 });
 
@@ -171,9 +171,9 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
   const leadingPill = data.rank === 1 ? "LEADING" : "CHALLENGER";
   const authEmpty = data.authorityScore === 0;
   const bottomBullets = splitSummaryBullets(data.bottomLine);
-  const bottomLines = bottomBullets.length
-    ? bottomBullets
-    : [data.bottomLine.trim() || "No executive summary was provided for this report."];
+  const bottomLines = (
+    bottomBullets.length ? bottomBullets : [data.bottomLine.trim() || "No executive summary was provided for this report."]
+  ).slice(0, 4);
 
   const mr = `${data.mentionRate}%`;
   const tp = `${data.topPosition}%`;
@@ -189,11 +189,11 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
           <EditorialSectionHeader
             sectionLabel="Opening"
             title="Executive summary"
-            purpose="The thesis of this report: where you stand in AI recommendations, and what to do about it first."
+            purpose="Score, rank, early signals, and the headline takeaway."
             intro={executiveOpeningIntro(data)}
           />
 
-          <Text style={styles.evidenceLabel}>Evidence — scores and share</Text>
+          <Text style={styles.evidenceLabel}>Scores & share</Text>
           <View style={styles.hero}>
             <View style={styles.heroLeft}>
               <ScoreRing score={data.overallScore} />
@@ -227,7 +227,7 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
             </View>
           </View>
 
-          <Text style={[styles.evidenceLabel, { marginTop: rhythm.sm }]}>Implication — early signals</Text>
+          <Text style={[styles.evidenceLabel, { marginTop: rhythm.xs }]}>Early signals</Text>
           <WinRiskPriorityAlerts data={data} compact />
 
           <View style={[styles.calloutWrap, { flex: 1 }]}>

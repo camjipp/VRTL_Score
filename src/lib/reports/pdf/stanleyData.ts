@@ -14,7 +14,7 @@ export const stanleyData: ReportData = {
   topPosition: 60,
   authorityScore: 0,
   bottomLine:
-    "You currently lead AI recommendation share in this set, appearing in 60% of tested assistant answers. That still leaves 40% with no Stanley mention. Each of those is missed recommendation share when buyers ask for options. Owala ties your mention count; Thermo Flask and hydro flask sit one to two mentions back. That is close enough that a focused content, entity, and citation sprint from any of them can replace your default first pick without intervention.",
+    "You lead recommendation share in this set (60% of answers), but 40% still omit you—each is lost share. Owala ties your mentions; Thermo Flask and hydro flask are one to two mentions back. Any of them can take first pick after one credible proof sprint.",
   tensionNote: undefined,
   competitors: [
     { name: "Stanley", mentions: 18, rate: 60, rank: 1, isClient: true },
@@ -30,7 +30,7 @@ export const stanleyData: ReportData = {
       deltaVsAvg: 38,
       insights: [
         "Strongest surface: this is the pattern to copy onto Gemini and Anthropic before competitors narrow the gap.",
-        "Expect rivals to study this path; refresh proof and cited facts proactively.",
+        "Refresh cited facts on money URLs so rivals cannot erode this path on the next model refresh.",
       ],
     },
     {
@@ -38,8 +38,8 @@ export const stanleyData: ReportData = {
       score: 39,
       deltaVsAvg: -13,
       insights: [
-        "Gemini-backed answers often omit Stanley from the short list. Recommendation share on that path is going to competitors.",
-        "Ship 3–5 cited comparison pages plus direct-answer FAQ blocks for the query shapes Gemini returns.",
+        "Gemini answers often omit Stanley from the short list; share on this path goes to competitors.",
+        "Ship cited comparison pages and FAQ blocks for the query shapes Gemini returns.",
       ],
     },
     {
@@ -47,62 +47,60 @@ export const stanleyData: ReportData = {
       score: 26,
       deltaVsAvg: -26,
       insights: [
-        "On Anthropic-powered answers, Stanley is often absent from the recommendation set. That reads as effectively invisible in many category decisions this assistant influences.",
-        "Rebuild with citation-backed comparison URLs, schema-aligned FAQs, and third-party proof this model can retrieve.",
+        "Anthropic answers frequently drop Stanley from the recommendation set—you read as absent in many category decisions.",
+        "Add citation-backed comparisons, schema-aligned FAQs, and retrievable third-party proof.",
       ],
     },
   ],
   alerts: {
     win: {
       title: "OpenAI strength",
-      detail: "Score 90. Clone URL structure, schema, and citation types onto Gemini and Anthropic first.",
+      detail: "Score 90. Mirror URL structure, schema, and citation patterns onto Gemini and Anthropic first.",
     },
     risk: {
       title: "Fragile #1",
-      detail: "Owala ties at 18 mentions; assistants can flip who they recommend first on the next credible proof sprint.",
+      detail: "Owala ties at 18 mentions; the next proof sprint can flip who gets named first.",
     },
     priority: {
       title: "Zero citation anchor",
-      detail: "0% authority. Without third-party proof, wins stay negotiable and easy for rivals to contest.",
+      detail: "0% authority. Without third-party proof, wins stay easy to contest.",
     },
   },
   recommendations: [
     {
       priority: "HIGH",
       title: "Close the 64-point model spread",
-      insight: "OpenAI scores 90 while Anthropic sits at 26.",
+      insight: "OpenAI 90 vs. Anthropic 26.",
       explanation:
-        "Different assistants recommend different winners. Buyers do not get one story, and you do not control who wins the short list on each path.",
+        "Different assistants recommend different winners. You do not control the short list on every path.",
       action:
-        "Ship 3–5 cited “vs.” and category comparison pages; add direct-answer FAQ blocks for the intents Gemini and Anthropic return; align Product/Organization schema and canonical entities on those URLs.",
-      expectedOutcome: "Target +10–15 points on trailing models within 90 days, visible as higher mention and top-position share on the next snapshot.",
+        "Ship 3–5 cited “vs.” pages; add FAQ blocks for Gemini and Anthropic intents; align Product/Organization schema on those URLs.",
+      expectedOutcome: "+10–15 pts on trailing models in 90 days—visible on the next snapshot.",
     },
     {
       priority: "HIGH",
-      title: "Win first-position, not just inclusion",
-      insight: "Mention rate and top-position rate both read 60%.",
-      explanation:
-        "When you appear mid-list, high-intent buyers still default to whoever the assistant names first.",
+      title: "Win first position, not just inclusion",
+      insight: "60% mention and 60% top-position.",
+      explanation: "Mid-list still loses to whoever the assistant names first.",
       action:
-        "Tighten headline claims and cited differentiators on money URLs; publish schema-aligned FAQs that answer the exact questions assistants paraphrase.",
-      expectedOutcome: "Measurable lift in top-position rate on priority intents within 60–90 days.",
+        "Tighten claims and differentiators on money URLs; publish FAQs that match how assistants paraphrase questions.",
+      expectedOutcome: "Higher top-position rate on priority intents in 60–90 days.",
     },
     {
       priority: "MEDIUM",
       title: "Break the tie with Owala",
-      insight: "Owala matches 18 mentions: zero cushion on the default recommendation.",
-      explanation: "Parity means the next credible citation or comparison asset from Owala can swap first pick.",
-      action:
-        "Refresh hero SKUs with proof points; secure two net-new trusted mentions (reviews, trade press, or category authorities) assistants can cite.",
-      expectedOutcome: "Open a 3–5+ mention cushion on head-to-head queries within a quarter.",
+      insight: "18 mentions each—no cushion.",
+      explanation: "The next credible asset from Owala can swap first pick.",
+      action: "Refresh hero SKUs with proof; add two net-new trusted mentions assistants can cite.",
+      expectedOutcome: "3–5+ mention cushion on head-to-head queries within a quarter.",
     },
     {
       priority: "LOW",
       title: "Consolidate Hydro Flask entity variants",
-      insight: "Lower-case and upper-case hydro flask rows split the signal.",
-      explanation: "Split entities dilute how models aggregate your equity in category answers.",
-      action: "Align canonical naming, sameAs, and product schema sitewide; redirect or consolidate duplicate listings.",
-      expectedOutcome: "Cleaner single-entity consolidation in aggregated assistant answers over time.",
+      insight: "Split rows dilute the signal.",
+      explanation: "Duplicate entities fragment how models aggregate your equity.",
+      action: "Align canonical naming, sameAs, and product schema; consolidate duplicate listings.",
+      expectedOutcome: "Cleaner single-entity signal in aggregated answers over time.",
     },
   ],
   evidencePreview: [
@@ -110,31 +108,31 @@ export const stanleyData: ReportData = {
       label: "STRENGTH",
       snippet:
         "For insulated drinkware, Stanley and Owala are frequently cited for durability and retail availability…",
-      note: "That is active recommendation share. Refresh proof so competitors cannot erode the slot on the next model update.",
+      note: "Active recommendation share. Refresh proof before competitors erode the slot.",
     },
     {
       label: "VULNERABLE",
       snippet:
         "Some assistants aggregate hydro flask variants inconsistently, which splits brand equity across listings…",
-      note: "Close the hole with cited comparisons, FAQs for these query shapes, and third-party proof assistants retrieve.",
+      note: "Close it with cited comparisons, FAQs for these query shapes, and retrievable third-party proof.",
     },
   ],
   executionPhases: [
     {
       phase: "Week 1 to 2",
-      text: "We audit structured content, schema, entity consistency, and citation gaps; benchmark competitor proof so priorities are explicit.",
+      text: "Audit content, schema, entities, and citation gaps; benchmark rival proof so priorities are explicit.",
     },
     {
       phase: "Week 2 to 3",
-      text: "We rebuild Anthropic and Gemini surfaces first: ship comparison pages, FAQs, and schema aligned to how those assistants retrieve.",
+      text: "Rebuild Anthropic and Gemini first: comparison pages, FAQs, and schema matched to how those models retrieve.",
     },
     {
       phase: "Week 3 to 4",
-      text: "We expand authority through reviews, trade press, and trusted third-party mentions assistants can cite; defend OpenAI with fresh proof.",
+      text: "Expand authority—reviews, trade press, trusted mentions assistants can cite; refresh OpenAI proof.",
     },
     {
       phase: "Week 4+",
-      text: "We re-measure with the next snapshot, read deltas by model, and lock the following 30-day sprint.",
+      text: "Re-measure; read deltas by model; lock the next 30-day sprint.",
     },
   ],
   signalSummary: [
@@ -193,9 +191,9 @@ export const stanleyData: ReportData = {
     generated: "April 1, 2026",
   },
   strategicTakeaway:
-    "Sixty-four points separate OpenAI from Anthropic. Buyers get different short lists depending on which assistant they use. Rebuild the weak surfaces with cited comparisons and FAQs before a competitor locks the default recommendation there.",
+    "64 points separate OpenAI from Anthropic—buyers see different short lists. Fix weak surfaces with cited comparisons and FAQs before a rival locks the default there.",
   dataSummaryInterpretation:
-    "Stanley leads the mention table, but Owala is tied and the next brands sit one to two mentions back. This is a contested default, not a locked win. Forty percent of answers omit you entirely, and citation coverage is 0%, so assistants have little third-party proof to anchor you ahead.",
+    "You lead mentions, but Owala ties and others sit one to two back: a contested default, not a lock. 40% of answers omit you; 0% citations means little third-party anchor.",
   recommendedNextSteps: getDefaultRecommendedNextStepsBody("Anthropic"),
   recommendedNextStepsVisible: true,
   agencyName: "Northbridge Digital",

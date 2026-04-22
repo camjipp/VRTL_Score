@@ -142,7 +142,7 @@ export function Page08DataSummary({ data }: { data: ReportData }): ReactElement 
         sectionLabel="Data"
         title="Signals & competitive set"
         purpose={dataSummaryPurpose()}
-        intro="Read the narrative first, then scan the tables—the rows quantify what the story above claims."
+        intro="Story first; rows second."
       />
       <Text style={{ fontSize: 7, fontFamily: fonts.sansBold, letterSpacing: 0.1, color: colors.ink4, marginBottom: rhythm.sm, textTransform: "uppercase" }}>
         What the numbers prove

@@ -1,9 +1,9 @@
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
-import { colors, fonts, rhythm, BODY_MAX_W, space } from "../theme";
+import { colors, fonts, rhythm, BODY_MAX_W } from "../theme";
 
 const styles = StyleSheet.create({
   wrap: {
-    marginBottom: space.section,
+    marginBottom: 20,
     width: "100%",
   },
   sectionLabel: {
@@ -15,25 +15,25 @@ const styles = StyleSheet.create({
     marginBottom: rhythm.xs,
   },
   title: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: fonts.sansBold,
     color: colors.ink,
-    marginBottom: rhythm.sm,
+    marginBottom: rhythm.xs,
     letterSpacing: -0.02,
   },
   purpose: {
-    fontSize: 9,
-    lineHeight: 1.55,
-    color: colors.ink2,
+    fontSize: 8,
+    lineHeight: 1.5,
+    color: colors.ink3,
     fontFamily: fonts.sans,
     maxWidth: BODY_MAX_W,
     marginBottom: 0,
   },
   intro: {
-    marginTop: rhythm.md,
-    fontSize: 9,
-    lineHeight: 1.62,
-    color: colors.ink,
+    marginTop: rhythm.sm + 2,
+    fontSize: 8.5,
+    lineHeight: 1.52,
+    color: colors.ink2,
     fontFamily: fonts.sans,
     maxWidth: BODY_MAX_W,
   },
