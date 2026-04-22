@@ -10,7 +10,8 @@ export const recommendationStyles = StyleSheet.create({
   heroShell: {
     flexDirection: "row",
     backgroundColor: colors.paper,
-    borderWidth: 0,
+    borderLeftWidth: 0,
+    borderRightWidth: 0,
     borderBottomWidth: 1,
     borderBottomColor: colors.rule,
     borderTopWidth: 3,
@@ -118,7 +119,9 @@ export const recommendationStyles = StyleSheet.create({
   card: {
     flexDirection: "row",
     backgroundColor: colors.paper,
-    borderWidth: 0,
+    borderTopWidth: 0,
+    borderRightWidth: 0,
+    borderLeftWidth: 0,
     borderBottomWidth: 1,
     borderBottomColor: colors.rule,
     borderRadius: 0,

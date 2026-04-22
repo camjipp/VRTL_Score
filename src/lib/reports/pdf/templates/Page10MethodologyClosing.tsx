@@ -31,9 +31,11 @@ const styles = StyleSheet.create({
   },
   method: {
     backgroundColor: colors.paper,
-    borderWidth: 0,
     borderTopWidth: 1,
     borderTopColor: colors.rule,
+    borderRightWidth: 0,
+    borderBottomWidth: 0,
+    borderLeftWidth: 0,
     paddingVertical: space.cardPad - 4,
     paddingHorizontal: 0,
   },
@@ -55,7 +57,8 @@ const styles = StyleSheet.create({
   },
   strip: {
     borderRadius: 0,
-    borderWidth: 0,
+    borderLeftWidth: 0,
+    borderRightWidth: 0,
     borderBottomWidth: 1,
     borderBottomColor: colors.rule,
     borderTopWidth: 3,
@@ -109,7 +112,9 @@ const styles = StyleSheet.create({
   nextBlock: {
     marginTop: rhythm.md + 2,
     borderRadius: 0,
-    borderWidth: 0,
+    borderTopWidth: 0,
+    borderLeftWidth: 0,
+    borderRightWidth: 0,
     borderBottomWidth: 1,
     borderBottomColor: colors.rule,
     backgroundColor: colors.paper,

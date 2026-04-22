@@ -26,8 +26,14 @@ export const MODEL_CARD_WIDTH = 172;
 const styles = StyleSheet.create({
   root: {
     backgroundColor: colors.paper,
-    borderWidth: 1,
-    borderColor: colors.rule,
+    borderTopWidth: 1,
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderLeftWidth: 1,
+    borderTopColor: colors.rule,
+    borderRightColor: colors.rule,
+    borderBottomColor: colors.rule,
+    borderLeftColor: colors.rule,
     borderRadius: 8,
     overflow: "hidden",
   },
@@ -141,7 +147,9 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   rootSupporting: {
-    borderWidth: 0,
+    borderTopWidth: 0,
+    borderLeftWidth: 0,
+    borderRightWidth: 0,
     borderBottomWidth: 1,
     borderBottomColor: colors.rule,
     borderRadius: 0,
