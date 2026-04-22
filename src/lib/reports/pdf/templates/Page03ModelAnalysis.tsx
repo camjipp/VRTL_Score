@@ -32,45 +32,41 @@ const styles = StyleSheet.create({
   },
   surfaceCard: {
     width: TOP_W,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.rule,
-    paddingVertical: space.cardPad,
+    paddingVertical: space.cardPad + 2,
     paddingHorizontal: space.cardPad - 2,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.paper,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.rule,
   },
   surfaceCardStrong: {
-    borderTopWidth: 6,
+    borderTopWidth: 5,
     borderTopColor: colors.green,
-    borderWidth: 1,
-    borderColor: "#BBF7D0",
     backgroundColor: colors.greenLight,
   },
   surfaceCardWeak: {
-    borderTopWidth: 6,
+    borderTopWidth: 5,
     borderTopColor: colors.red,
-    borderWidth: 1,
-    borderColor: "#FECACA",
-    backgroundColor: "#FEF2F2",
+    backgroundColor: colors.redLight,
   },
   surfaceKicker: {
     fontSize: 8,
     fontFamily: fonts.sansBold,
-    letterSpacing: 0.14,
-    textTransform: "uppercase",
-    color: colors.ink2,
-    marginBottom: 8,
-  },
-  surfaceName: { fontSize: 12, fontFamily: fonts.sansBold, color: colors.ink, marginBottom: 5 },
-  surfaceScore: { fontSize: 30, fontFamily: fonts.sansBold, color: colors.ink, marginBottom: 5 },
-  surfaceBody: { fontSize: 7.5, lineHeight: 1.42, color: colors.ink3, fontFamily: fonts.sans },
-  rowLabel: {
-    fontSize: 6.5,
-    fontFamily: fonts.sansBold,
     letterSpacing: 0.12,
     textTransform: "uppercase",
+    color: colors.ink3,
+    marginBottom: 10,
+  },
+  surfaceName: { fontSize: 13, fontFamily: fonts.sansBold, color: colors.ink, marginBottom: 6 },
+  surfaceScore: { fontSize: 32, fontFamily: fonts.sansBold, color: colors.ink, marginBottom: 6 },
+  surfaceBody: { fontSize: 8.25, lineHeight: 1.45, color: colors.ink2, fontFamily: fonts.sans },
+  rowLabel: {
+    fontSize: 7,
+    fontFamily: fonts.sansBold,
+    letterSpacing: 0.1,
+    textTransform: "uppercase",
     color: colors.ink4,
-    marginBottom: rhythm.sm,
+    marginBottom: rhythm.sm + 2,
+    marginTop: rhythm.sm,
     width: CONTENT_W,
   },
   row3: {
@@ -81,30 +77,27 @@ const styles = StyleSheet.create({
   },
   summaryBox: {
     width: CONTENT_W,
-    marginTop: rhythm.md,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.rule,
-    borderTopWidth: 4,
-    borderTopColor: colors.ink,
-    backgroundColor: colors.surface2,
-    paddingVertical: space.cardPad - 2,
-    paddingHorizontal: space.cardPad,
+    marginTop: rhythm.md + 6,
+    paddingTop: rhythm.md + 4,
+    borderTopWidth: 2,
+    borderTopColor: colors.rule,
+    backgroundColor: colors.paper,
+    paddingBottom: rhythm.sm,
   },
   summaryKicker: {
     fontSize: 8,
     fontFamily: fonts.sansBold,
-    letterSpacing: 0.12,
+    letterSpacing: 0.1,
     textTransform: "uppercase",
-    color: colors.ink,
-    marginBottom: 5,
+    color: colors.ink3,
+    marginBottom: 6,
   },
   summaryLead: {
-    fontSize: 11,
-    lineHeight: 1.38,
+    fontSize: 11.5,
+    lineHeight: 1.36,
     color: colors.ink,
     fontFamily: fonts.sansBold,
-    marginBottom: 3,
+    marginBottom: 4,
   },
   summaryMeta: { fontSize: 7.5, lineHeight: 1.45, color: colors.ink3, fontFamily: fonts.sans },
 });
@@ -152,9 +145,9 @@ export function Page03ModelAnalysis({ data }: { data: ReportData }): ReactElemen
       <PdfTraceMarker page={3} section="Fixed:P3" />
       <EditorialSectionHeader
         sectionLabel="Model analysis"
-        title="Performance by assistant family"
+        title="Where you win — and where you disappear"
         purpose={purpose}
-        intro="Three major families, three different short lists—double down where you lead; fix where you disappear."
+        intro="The same buyer question can surface different leaders by assistant family. Exploit your strongest family; recover the weakest first."
       />
 
       <View style={{ flex: 1, flexDirection: "column", justifyContent: "flex-start", minHeight: 0 }}>
@@ -164,7 +157,7 @@ export function Page03ModelAnalysis({ data }: { data: ReportData }): ReactElemen
         </View>
 
         <View>
-          <Text style={styles.rowLabel}>By family — detail</Text>
+          <Text style={styles.rowLabel}>By assistant family</Text>
           <View style={styles.row3}>
             <View style={{ width: COL3 }}>
               {openai ? (
@@ -247,18 +240,17 @@ function EmptySlot({ label }: { label: string }) {
     <View
       style={{
         width: COL3,
-        minHeight: 120,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: colors.rule,
+        minHeight: 72,
+        paddingVertical: rhythm.md,
+        paddingHorizontal: rhythm.sm,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.rule,
         justifyContent: "center",
-        alignItems: "center",
-        padding: rhythm.md,
-        backgroundColor: colors.surface2,
+        backgroundColor: colors.paper,
       }}
     >
       <Text style={{ fontSize: 8, fontFamily: fonts.sansBold, color: colors.ink3 }}>{label}</Text>
-      <Text style={{ fontSize: 7, color: colors.ink4, marginTop: 4, textAlign: "center" }}>No isolated score.</Text>
+      <Text style={{ fontSize: 7.5, color: colors.ink4, marginTop: 4 }}>No score in this export.</Text>
     </View>
   );
 }

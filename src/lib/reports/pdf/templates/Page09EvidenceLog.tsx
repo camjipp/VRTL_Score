@@ -92,7 +92,9 @@ export function Page09EvidenceLog({ data }: { data: ReportData }): ReactElement 
         purpose={evidenceLogPurpose()}
         intro="Each row is one analyzed answer in this export—structured fields only, not raw transcripts or dumps."
       />
-      <Text style={styles.caption}>Sample: one row per answer below.</Text>
+      <Text style={styles.caption}>
+        One row per sampled answer—structured fields for audit, not raw chat logs.
+      </Text>
       <View style={{ flexGrow: 1, flexDirection: "column", minHeight: 0, marginBottom: rhythm.sm }}>
         <View style={styles.th}>
           <Text style={[styles.thText, { width: W.idx }]}>#</Text>

@@ -30,12 +30,12 @@ const styles = StyleSheet.create({
     marginBottom: rhythm.sm - 2,
   },
   method: {
-    backgroundColor: colors.surface2,
-    borderWidth: 1,
-    borderColor: colors.rule,
-    borderRadius: 8,
+    backgroundColor: colors.paper,
+    borderWidth: 0,
+    borderTopWidth: 1,
+    borderTopColor: colors.rule,
     paddingVertical: space.cardPad - 4,
-    paddingHorizontal: space.cardPad - 2,
+    paddingHorizontal: 0,
   },
   methodTitle: {
     fontSize: 7,
@@ -54,14 +54,15 @@ const styles = StyleSheet.create({
     maxWidth: BODY_MAX_W,
   },
   strip: {
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.rule,
-    borderTopWidth: 4,
+    borderRadius: 0,
+    borderWidth: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.rule,
+    borderTopWidth: 3,
     borderTopColor: colors.cyan,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.paper,
     paddingVertical: space.cardPad + 2,
-    paddingHorizontal: space.cardPad,
+    paddingHorizontal: 0,
     marginBottom: 0,
   },
   stripTitle: {
@@ -106,13 +107,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   nextBlock: {
-    marginTop: rhythm.md,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.rule,
-    backgroundColor: colors.surface2,
+    marginTop: rhythm.md + 2,
+    borderRadius: 0,
+    borderWidth: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.rule,
+    backgroundColor: colors.paper,
     paddingVertical: space.cardPad - 2,
-    paddingHorizontal: space.cardPad - 2,
+    paddingHorizontal: 0,
   },
   nextTitle: {
     fontSize: 7.5,
@@ -157,9 +159,9 @@ export function Page10MethodologyClosing({ data }: { data: ReportData }): ReactE
       <PdfTraceMarker page={10} section="Fixed:P10" />
       <EditorialSectionHeader
         sectionLabel="Closing"
-        title="How we measured this & what happens next"
+        title="What this run means — and what happens next"
         purpose={closingPurpose()}
-        intro="Clear method. Clear confidence. Clear next move."
+        intro="How we measured it, how confident the sample is, and the move after you close the loop."
         density="tight"
       />
       <View style={{ flex: 1, minHeight: 0 }}>

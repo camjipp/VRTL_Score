@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
   stepSection: {
     width: CONTENT_W,
     flexDirection: "row",
-    marginBottom: 3,
+    marginBottom: 2,
   },
   stepSectionLast: {
     marginBottom: 0,
@@ -58,13 +58,14 @@ const styles = StyleSheet.create({
   stepCard: {
     flex: 1,
     flexDirection: "column",
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.rule,
+    backgroundColor: colors.paper,
+    borderWidth: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.rule,
     borderLeftWidth: 0,
-    borderTopRightRadius: 6,
-    borderBottomRightRadius: 6,
-    paddingVertical: space.cardPad - 6,
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 0,
+    paddingVertical: space.cardPad - 8,
     paddingHorizontal: space.cardPad - 2,
   },
   stepHeader: {
@@ -128,9 +129,9 @@ export function Page07ExecutionPlan({ data }: { data: ReportData }): ReactElemen
       <PdfTraceMarker page={7} section="Fixed:P7" />
       <EditorialSectionHeader
         sectionLabel="Execution"
-        title="How we fix this"
+        title="How this gets fixed"
         purpose={executionPlanPurpose()}
-        intro="Audit → rebuild weak surfaces → earn proof → re-measure. Observable progress only."
+        intro="Audit, repair the weakest surfaces, earn proof, then re-measure—one loop, observable progress."
       />
       <Text
         style={{

@@ -141,8 +141,11 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   rootSupporting: {
-    borderColor: "#E5E7EB",
-    backgroundColor: colors.surface2,
+    borderWidth: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.rule,
+    borderRadius: 0,
+    backgroundColor: colors.paper,
   },
   topBandSupporting: {
     height: 1,

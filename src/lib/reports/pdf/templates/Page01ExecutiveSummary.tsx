@@ -1,14 +1,12 @@
 import { Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import type { ReportData } from "../types";
-import { PAGE, colors, fonts, rhythm, baseStyles, space, BODY_MAX_W } from "../theme";
+import { PAGE, colors, fonts, rhythm, baseStyles, BODY_MAX_W } from "../theme";
 import { executiveOpeningIntro } from "../editorial/pdfNarrative";
-import { EditorialSectionHeader } from "../components/EditorialSectionHeader";
 import { PdfFooter } from "../components/PdfFooter";
 import { PdfHeader } from "../components/PdfHeader";
 import { PdfTraceMarker } from "../components/PdfTraceMarker";
 import { ScoreRing, SCORE_RING_COLUMN_W_HERO } from "../components/ScoreRing";
-import { WinRiskPriorityAlerts } from "../pages/RankingAlertsSection";
 
 function splitSummaryBullets(text: string): string[] {
   const raw = text.replace(/\s+/g, " ").trim();
@@ -27,158 +25,114 @@ function splitSummaryBullets(text: string): string[] {
 }
 
 const styles = StyleSheet.create({
-  hero: {
-    flexDirection: "row",
-    alignItems: "stretch",
-    marginBottom: rhythm.sm,
-    backgroundColor: colors.surface,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: colors.rule,
-    paddingVertical: rhythm.md + 2,
-    paddingHorizontal: rhythm.md,
-    overflow: "hidden",
+  p1Section: {
+    fontSize: 7,
+    fontFamily: fonts.sansBold,
+    letterSpacing: 0.2,
+    textTransform: "uppercase",
+    color: colors.ink4,
+    marginBottom: rhythm.xs,
   },
-  heroLeft: {
-    width: SCORE_RING_COLUMN_W_HERO,
-    alignItems: "center",
-    justifyContent: "flex-start",
-    flexDirection: "column",
-  },
-  focalHeadline: {
-    marginTop: 14,
-    marginBottom: 12,
-    paddingHorizontal: 6,
-    fontSize: 13.5,
-    lineHeight: 1.28,
+  p1Focal: {
+    fontSize: 17,
     fontFamily: fonts.sansBold,
     color: colors.ink,
-    textAlign: "center",
-    maxWidth: SCORE_RING_COLUMN_W_HERO,
+    lineHeight: 1.18,
+    letterSpacing: -0.02,
+    marginBottom: rhythm.sm + 2,
+    maxWidth: BODY_MAX_W,
   },
-  divider: { width: 1, alignSelf: "stretch", backgroundColor: colors.rule, marginHorizontal: rhythm.sm },
-  heroRight: {
-    flex: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "stretch",
-    minHeight: 112,
+  p1Intro: {
+    fontSize: 9.5,
+    lineHeight: 1.48,
+    color: colors.ink2,
+    fontFamily: fonts.sans,
+    maxWidth: BODY_MAX_W,
+    marginBottom: rhythm.md + 4,
   },
-  kpiTile: {
-    flex: 1,
-    marginHorizontal: 4,
-    paddingVertical: rhythm.sm - 2,
-    paddingHorizontal: rhythm.sm - 2,
-    borderRadius: 4,
-    backgroundColor: colors.surface2,
-    borderWidth: 1,
-    borderColor: colors.surface2,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  /** Single-line percent so digits and % do not break apart */
-  kpiPct: {
-    fontSize: 14,
-    fontWeight: 400,
-    fontFamily: fonts.sansBold,
-    lineHeight: 1.1,
-    color: colors.ink3,
-    textAlign: "center",
-  },
-  kpiLab: {
-    fontSize: 5.5,
-    fontWeight: 400,
-    color: colors.ink4,
-    marginTop: 3,
-    letterSpacing: 0.06,
-    textTransform: "uppercase",
-    fontFamily: fonts.sansBold,
-    textAlign: "center",
-    maxWidth: 100,
-  },
-  statusStrip: {
-    flexDirection: "row",
-    alignItems: "stretch",
-    marginBottom: rhythm.sm,
-    borderWidth: 1,
-    borderColor: colors.rule,
-    borderRadius: 4,
-    backgroundColor: colors.surface2,
-    overflow: "hidden",
-  },
-  statusCell: {
-    flex: 1,
-    paddingVertical: 7,
-    paddingHorizontal: rhythm.sm,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRightWidth: 1,
-    borderRightColor: colors.rule,
-  },
-  statusCellLast: { borderRightWidth: 0 },
-  statusText: { fontSize: 7, fontFamily: fonts.sansBold, textAlign: "center", color: colors.ink3 },
-  calloutWrap: {
-    flexDirection: "row",
-    marginTop: rhythm.sm,
-    marginBottom: 0,
-    borderRadius: 6,
-    overflow: "hidden",
-    backgroundColor: colors.surface2,
-    borderWidth: 1,
-    borderColor: colors.rule,
-  },
-  calloutBar: { width: 2, backgroundColor: colors.cyan },
-  calloutInner: {
-    flex: 1,
-    paddingVertical: 7,
-    paddingHorizontal: space.cardPad - 2,
-    justifyContent: "flex-start",
-  },
-  calloutKicker: {
-    fontSize: 6.5,
-    fontWeight: 400,
-    color: colors.ink4,
-    fontFamily: fonts.sansBold,
-    letterSpacing: 0.1,
-    marginBottom: rhythm.sm - 2,
-    textTransform: "uppercase",
-  },
-  bulletRow: {
+  scoreRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: 3,
-    maxWidth: BODY_MAX_W + 8,
+    paddingBottom: rhythm.md + 2,
+    marginBottom: rhythm.md + 2,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.rule,
+    width: "100%",
   },
-  bulletMark: {
-    width: 12,
-    fontSize: 8,
-    lineHeight: 1.38,
-    color: colors.cyan,
-    fontFamily: fonts.sansBold,
-    marginTop: 0,
+  scoreCol: {
+    width: SCORE_RING_COLUMN_W_HERO,
+    alignItems: "center",
   },
-  bulletText: {
+  standingCol: {
     flex: 1,
-    fontSize: 7.5,
-    lineHeight: 1.36,
-    color: colors.ink3,
-    fontFamily: fonts.sans,
+    paddingLeft: rhythm.md + 4,
+    paddingTop: 4,
+    justifyContent: "flex-start",
   },
-  evidenceLabel: {
-    fontSize: 6,
+  standingLabel: {
+    fontSize: 7.5,
     fontFamily: fonts.sansBold,
-    letterSpacing: 0.1,
+    letterSpacing: 0.08,
     textTransform: "uppercase",
     color: colors.ink4,
-    marginBottom: 3,
+    marginBottom: 6,
+  },
+  standingBody: {
+    fontSize: 9.5,
+    lineHeight: 1.5,
+    color: colors.ink2,
+    fontFamily: fonts.sans,
+    maxWidth: BODY_MAX_W - SCORE_RING_COLUMN_W_HERO - 24,
+  },
+  mattersHead: {
+    fontSize: 8.5,
+    fontFamily: fonts.sansBold,
+    color: colors.ink,
+    letterSpacing: 0.06,
+    marginBottom: rhythm.sm + 2,
+  },
+  matterLine: {
+    fontSize: 9.25,
+    lineHeight: 1.48,
+    color: colors.ink,
+    fontFamily: fonts.sans,
+    marginBottom: rhythm.sm + 2,
+    maxWidth: BODY_MAX_W,
+  },
+  matterPrefix: {
+    fontFamily: fonts.sansBold,
+    color: colors.ink,
+  },
+  diagnosisWrap: {
+    marginTop: rhythm.md,
+    paddingTop: rhythm.md + 2,
+    borderTopWidth: 1,
+    borderTopColor: colors.rule,
+    width: "100%",
+  },
+  diagnosisLabel: {
+    fontSize: 7,
+    fontFamily: fonts.sansBold,
+    letterSpacing: 0.14,
+    textTransform: "uppercase",
+    color: colors.ink4,
+    marginBottom: rhythm.sm,
+  },
+  diagLine: {
+    fontSize: 9,
+    lineHeight: 1.48,
+    color: colors.ink2,
+    fontFamily: fonts.sans,
+    marginBottom: 6,
+    maxWidth: BODY_MAX_W,
   },
 });
 
-/** PAGE 1 — Opening / executive thesis + immediate signals + takeaway. */
+/** PAGE 1 — Executive opening: position, signals in prose, short diagnosis (white, editorial). */
 export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactElement {
-  const rankLine = `RANK #${data.rank} OF ${data.rankTotal}`;
-  const statusUpper = String(data.status).toUpperCase();
-  const leadingPill = data.rank === 1 ? "LEADING" : "CHALLENGER";
+  const rankLine = `Rank #${data.rank} of ${data.rankTotal}`;
+  const statusUpper = String(data.status);
+  const positionLabel = data.rank === 1 ? "Leading this set" : "Challenger in this set";
   const authEmpty = data.authorityScore === 0;
   const bottomBullets = splitSummaryBullets(data.bottomLine);
   const bottomLines = (
@@ -187,7 +141,11 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
 
   const mr = `${data.mentionRate}%`;
   const tp = `${data.topPosition}%`;
-  const auth = `${data.authorityScore}%`;
+  const auth = authEmpty ? "—" : `${data.authorityScore}%`;
+
+  const standing = `Mention rate ${mr} · Top position ${tp} · Authority (citations) ${auth}${
+    authEmpty ? " — not observed in this sample" : ""
+  }. Status: ${statusUpper}. ${rankLine}. ${positionLabel}.`;
 
   return (
     <Page size={[PAGE.width, PAGE.height]} style={baseStyles.pdfSlidePage}>
@@ -196,66 +154,47 @@ export function Page01ExecutiveSummary({ data }: { data: ReportData }): ReactEle
         <PdfHeader data={data} variant="cover" />
 
         <View style={{ flex: 1, flexDirection: "column", minHeight: 0 }}>
-          <EditorialSectionHeader
-            sectionLabel="Opening"
-            title="Executive summary"
-            intro={executiveOpeningIntro(data)}
-            density="tight"
-          />
+          <Text style={styles.p1Section}>Executive summary</Text>
+          <Text style={styles.p1Focal} orphans={2} widows={2}>
+            You lead now, but the lead is vulnerable.
+          </Text>
+          <Text style={styles.p1Intro} orphans={2} widows={2}>
+            {executiveOpeningIntro(data)}
+          </Text>
 
-          <Text style={styles.evidenceLabel}>Scores & share</Text>
-          <View style={styles.hero}>
-            <View style={styles.heroLeft}>
+          <View style={styles.scoreRow}>
+            <View style={styles.scoreCol}>
               <ScoreRing score={data.overallScore} variant="hero" />
-              <Text style={styles.focalHeadline} orphans={2} widows={2}>
-                You lead now, but the lead is vulnerable.
+            </View>
+            <View style={styles.standingCol}>
+              <Text style={styles.standingLabel}>Current standing</Text>
+              <Text style={styles.standingBody} orphans={2} widows={2}>
+                {standing}
               </Text>
             </View>
-            <View style={styles.divider} />
-            <View style={styles.heroRight}>
-              <View style={styles.kpiTile}>
-                <Text style={styles.kpiPct}>{mr}</Text>
-                <Text style={styles.kpiLab}>Mention rate</Text>
-              </View>
-              <View style={styles.kpiTile}>
-                <Text style={styles.kpiPct}>{tp}</Text>
-                <Text style={styles.kpiLab}>Top position</Text>
-              </View>
-              <View style={[styles.kpiTile, authEmpty ? { opacity: 0.85 } : {}]}>
-                <Text style={[styles.kpiPct, authEmpty ? { color: colors.ink4 } : {}]}>{auth}</Text>
-                <Text style={[styles.kpiLab, authEmpty ? { color: colors.ink4 } : {}]}>Authority (citations)</Text>
-              </View>
-            </View>
           </View>
 
-          <View style={styles.statusStrip}>
-            <View style={styles.statusCell}>
-              <Text style={styles.statusText}>{statusUpper}</Text>
-            </View>
-            <View style={styles.statusCell}>
-              <Text style={styles.statusText}>{rankLine}</Text>
-            </View>
-            <View style={[styles.statusCell, styles.statusCellLast]}>
-              <Text style={styles.statusText}>{leadingPill}</Text>
-            </View>
-          </View>
+          <Text style={styles.mattersHead}>What matters now</Text>
+          <Text style={styles.matterLine} orphans={2} widows={2}>
+            <Text style={styles.matterPrefix}>Win — </Text>
+            {`${data.alerts.win.title} ${data.alerts.win.detail}`.trim()}
+          </Text>
+          <Text style={styles.matterLine} orphans={2} widows={2}>
+            <Text style={styles.matterPrefix}>Risk — </Text>
+            {`${data.alerts.risk.title} ${data.alerts.risk.detail}`.trim()}
+          </Text>
+          <Text style={styles.matterLine} orphans={2} widows={2}>
+            <Text style={styles.matterPrefix}>Priority — </Text>
+            {`${data.alerts.priority.title} ${data.alerts.priority.detail}`.trim()}
+          </Text>
 
-          <Text style={[styles.evidenceLabel, { marginTop: rhythm.xs }]}>Early signals</Text>
-          <WinRiskPriorityAlerts data={data} visualTier="executive" />
-
-          <View style={styles.calloutWrap}>
-            <View style={styles.calloutBar} />
-            <View style={styles.calloutInner}>
-              <Text style={styles.calloutKicker}>Diagnosis</Text>
-              {bottomLines.map((line, i) => (
-                <View key={`bl-${i}`} style={styles.bulletRow}>
-                  <Text style={styles.bulletMark}>•</Text>
-                  <Text style={styles.bulletText} orphans={2} widows={2}>
-                    {line}
-                  </Text>
-                </View>
-              ))}
-            </View>
+          <View style={styles.diagnosisWrap}>
+            <Text style={styles.diagnosisLabel}>Diagnosis</Text>
+            {bottomLines.map((line, i) => (
+              <Text key={`bl-${i}`} style={styles.diagLine} orphans={2} widows={2}>
+                {line}
+              </Text>
+            ))}
           </View>
         </View>
 

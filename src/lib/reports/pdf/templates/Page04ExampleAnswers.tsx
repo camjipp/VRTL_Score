@@ -17,15 +17,6 @@ const NO_EXCERPT_MSG =
   "No strong example found in this sample. See evidence log for details.";
 
 const styles = StyleSheet.create({
-  evidenceLabel: {
-    fontSize: 7,
-    fontFamily: fonts.sansBold,
-    letterSpacing: 0.12,
-    textTransform: "uppercase",
-    color: colors.ink4,
-    marginBottom: rhythm.sm,
-    marginTop: rhythm.sm,
-  },
   row: { width: CONTENT_W, flexDirection: "row", alignItems: "stretch" },
   centerBand: {
     width: CONTENT_W,
@@ -41,9 +32,10 @@ const styles = StyleSheet.create({
   },
   card: {
     flexDirection: "row",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.rule,
+    borderRadius: 0,
+    borderWidth: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.rule,
     overflow: "hidden",
     backgroundColor: colors.paper,
     minHeight: 0,
@@ -75,11 +67,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   quote: {
-    backgroundColor: colors.surface,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: colors.rule,
-    paddingVertical: 10,
+    backgroundColor: colors.paper,
+    borderRadius: 0,
+    borderLeftWidth: 2,
+    borderLeftColor: colors.rule,
+    paddingVertical: 8,
     paddingHorizontal: 10,
     marginBottom: 8,
   },
@@ -95,19 +87,19 @@ const styles = StyleSheet.create({
   body: { fontFamily: fonts.sans, fontSize: 8.5, lineHeight: 1.58, color: colors.ink },
   takeawayOuter: {
     flexDirection: "row",
-    borderRadius: 6,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: colors.rule,
-    backgroundColor: colors.surface2,
-    marginTop: rhythm.sm + 2,
+    marginTop: rhythm.md,
+    paddingTop: rhythm.md,
+    borderTopWidth: 2,
+    borderTopColor: colors.rule,
+    backgroundColor: colors.paper,
     minHeight: 0,
   },
-  takeawayBar: { width: 3, backgroundColor: colors.ink },
+  takeawayBar: { width: 2, backgroundColor: colors.ink2 },
   takeawayInner: {
     flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: space.cardPad - 2,
+    paddingVertical: 4,
+    paddingLeft: rhythm.md,
+    paddingRight: rhythm.sm,
   },
   takeawayTitle: {
     fontSize: 6.5,
@@ -304,9 +296,8 @@ export function Page04ExampleAnswers({ data }: { data: ReportData }): ReactEleme
         sectionLabel="Proof"
         title="What assistants are actually saying"
         purpose={exampleAnswersPurpose()}
-        intro="Strength versus exposure—then the move that closes the gap."
+        intro="Below: a strong pattern versus an exposure pattern, then the implication for share."
       />
-      <Text style={styles.evidenceLabel}>Excerpts</Text>
       {excerptBlock}
       {takeaway ? (
         <View style={styles.takeawayOuter}>

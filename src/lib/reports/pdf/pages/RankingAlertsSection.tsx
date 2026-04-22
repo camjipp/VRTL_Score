@@ -53,6 +53,14 @@ const styles = StyleSheet.create({
   deltaBehind: { backgroundColor: colors.surface2 },
   deltaTied: { backgroundColor: colors.surface2 },
   deltaTxt: { fontSize: 6.5, fontWeight: 400, color: colors.ink3, fontFamily: fonts.sansBold },
+  tableFootnote: {
+    marginTop: rhythm.sm + 4,
+    fontSize: 7,
+    lineHeight: 1.45,
+    color: colors.ink4,
+    fontFamily: fonts.sans,
+    maxWidth: CONTENT_W - 4,
+  },
   alertRow: { flexDirection: "row", marginTop: 40, alignItems: "stretch" },
   alertSp: { marginRight: rhythm.sm },
   alertCard: {
@@ -197,10 +205,13 @@ const styles = StyleSheet.create({
 export function CompetitiveRankingBlock({
   data,
   emphasis = "default",
+  tableFootnote,
 }: {
   data: ReportData;
   /** Page 2 focal: slightly larger type and row rhythm. */
   emphasis?: "default" | "focal";
+  /** Optional note under the table (e.g. duplicate brand labels). */
+  tableFootnote?: string | null;
 }) {
   const maxM = Math.max(...data.competitors.map((c) => c.mentions), 1);
   const clientM = data.competitors.find((c) => c.isClient)?.mentions ?? 0;
@@ -220,7 +231,7 @@ export function CompetitiveRankingBlock({
             : {},
         ]}
       >
-        Competitive ranking
+        {focal ? "Mention share by brand (ranked)" : "Competitive ranking"}
       </Text>
       {data.competitors.map((c) => {
         const widthPct = Math.min(100, Math.max(0, Math.round((c.mentions / maxM) * 100)));
@@ -276,6 +287,11 @@ export function CompetitiveRankingBlock({
           </View>
         );
       })}
+      {tableFootnote ? (
+        <Text style={styles.tableFootnote} orphans={2} widows={2}>
+          {tableFootnote}
+        </Text>
+      ) : null}
     </View>
   );
 }

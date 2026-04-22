@@ -142,10 +142,19 @@ export function Page08DataSummary({ data }: { data: ReportData }): ReactElement 
         sectionLabel="Data"
         title="Signals & competitive set"
         purpose={dataSummaryPurpose()}
-        intro="Read this page as proof, not prose."
+        intro="These tables back the story in the pages above—signals first, then the competitive row set from the same run."
       />
-      <Text style={{ fontSize: 7, fontFamily: fonts.sansBold, letterSpacing: 0.1, color: colors.ink4, marginBottom: rhythm.sm, textTransform: "uppercase" }}>
-        What the numbers prove
+      <Text
+        style={{
+          fontSize: 9,
+          lineHeight: 1.48,
+          color: colors.ink2,
+          fontFamily: fonts.sans,
+          marginBottom: rhythm.sm + 2,
+          maxWidth: BODY_MAX_W,
+        }}
+      >
+        Each row ties a signal or brand to counts and rates from this sample so a client can verify the diagnosis without opening another tool.
       </Text>
       <Text style={styles.interpret}>{data.dataSummaryInterpretation}</Text>
       <Text style={[styles.h, styles.hFirst]}>Signals</Text>

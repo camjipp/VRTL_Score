@@ -1,13 +1,13 @@
 import type { ReportData } from "../types";
 
-/** Opening thesis — two short sentences; score block carries the rest. */
+/** Opening thesis — framing only; rank and metrics sit in the standing line on page 1. */
 export function executiveOpeningIntro(data: ReportData): string {
   const name = data.clientName.trim() || "Your brand";
-  return `${name} is winning share in this snapshot, but the position is exposed. You are #${data.rank} of ${data.rankTotal} (${String(data.status).toLowerCase()}), and the next section shows exactly where to defend and where to push.`;
+  return `${name} leads assistant visibility in this snapshot, but the set is tight—who gets recommended first can still move with proof and coverage.`;
 }
 
 export function competitiveLandscapePurpose(): string {
-  return "Your lead is fragile: competitors are close enough to take first pick.";
+  return "Mention share in this sample: how close each rival is, and where the bar moves next.";
 }
 
 /** Page 2 narrative: position security + risk (no duplicate table). */
@@ -28,20 +28,20 @@ export function competitivePositionImplication(data: ReportData): string {
 
 export function modelAnalysisPurpose(spread: number): string {
   return spread === 0
-    ? "Even performance across families—consistency is the story."
-    : "Sharp gaps by assistant family—buyers see different short lists.";
+    ? "Same story across families—consistency is the lever."
+    : "Different families surface different short lists—win where you lead, fix where you vanish.";
 }
 
 export function exampleAnswersPurpose(): string {
-  return "Side-by-side proof: strength versus exposure, and why it costs share.";
+  return "What strong answers look like next to exposure—and what that costs you in share.";
 }
 
 export function dataSummaryPurpose(): string {
-  return "The critical numbers, fast.";
+  return "Signals and competitive rows that back the narrative above—read as evidence.";
 }
 
 export function evidenceLogPurpose(): string {
-  return "Structured fields per sampled answer—no raw dumps.";
+  return "Structured fields per sampled answer—supporting detail, not a raw dump.";
 }
 
 export function closingPurpose(): string {
