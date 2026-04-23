@@ -14,10 +14,10 @@ import { LockedNarrativeStack } from "./LockedNarrativeStack";
 import { lockedStyles } from "./lockedDocumentStyles";
 import { narrativeEvidence } from "./pageNarratives";
 
-const CARD_H = 200;
+const CARD_H = 300;
 
 const local = StyleSheet.create({
-  row: { flexDirection: "row", height: CARD_H },
+  row: { flexDirection: "row", minHeight: CARD_H },
 });
 
 function brandName(data: ReportData): string {
@@ -106,6 +106,17 @@ export function PageAiEvidence({ data }: { data: ReportData }): ReactElement {
     v?.note?.trim() && !looksLikeStructuredBlob(String(v.note)) ? clipPdfText(String(v.note)) : "";
   const slice = narrativeEvidence(data);
 
+  const strengthPrompt = s?.prompt?.trim() ? clipPdfText(String(s.prompt), 260) : "";
+  const strengthExcerpt =
+    s?.responseExcerpt?.trim() && !looksLikeStructuredBlob(String(s.responseExcerpt))
+      ? clipPdfText(String(s.responseExcerpt), 460)
+      : "";
+  const vulnPrompt = v?.prompt?.trim() ? clipPdfText(String(v.prompt), 260) : "";
+  const vulnExcerpt =
+    v?.responseExcerpt?.trim() && !looksLikeStructuredBlob(String(v.responseExcerpt))
+      ? clipPdfText(String(v.responseExcerpt), 460)
+      : "";
+
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[6]!}>
       <LockedNarrativeStack slice={slice} variant="compact" include={["headline"]} />
@@ -113,15 +124,39 @@ export function PageAiEvidence({ data }: { data: ReportData }): ReactElement {
         <View style={lockedStyles.ev_cardStrength}>
           <Text style={lockedStyles.ev_badge}>STRENGTH</Text>
           {strengthHint ? <Text style={lockedStyles.ev_badgeHint}>{strengthHint}</Text> : null}
-          <View style={lockedStyles.ev_quote}>
-            <Text style={lockedStyles.ev_quoteText}>{strengthBody(data)}</Text>
-          </View>
+          {strengthPrompt ? (
+            <>
+              <Text style={lockedStyles.ev_fieldLabel}>Prompt</Text>
+              <Text style={lockedStyles.ev_promptText}>{`"${strengthPrompt}"`}</Text>
+            </>
+          ) : null}
+          <Text style={lockedStyles.ev_fieldLabel}>AI response</Text>
+          {strengthExcerpt ? (
+            <Text style={lockedStyles.ev_responseExcerpt}>{strengthExcerpt}</Text>
+          ) : (
+            <View style={lockedStyles.ev_quote}>
+              <Text style={lockedStyles.ev_quoteText}>{strengthBody(data)}</Text>
+            </View>
+          )}
           {strengthNote ? <Text style={lockedStyles.ev_note}>{strengthNote}</Text> : null}
         </View>
         <View style={lockedStyles.ev_cardRisk}>
           <Text style={lockedStyles.ev_badge}>VULNERABLE</Text>
           {vulnHint ? <Text style={lockedStyles.ev_badgeHint}>{vulnHint}</Text> : null}
-          {vulnerableQuote}
+          {vulnPrompt ? (
+            <>
+              <Text style={lockedStyles.ev_fieldLabel}>Prompt</Text>
+              <Text style={lockedStyles.ev_promptText}>{`"${vulnPrompt}"`}</Text>
+            </>
+          ) : null}
+          <Text style={lockedStyles.ev_fieldLabel}>AI response</Text>
+          {vulnParts ? (
+            vulnerableQuote
+          ) : vulnExcerpt ? (
+            <Text style={lockedStyles.ev_responseExcerpt}>{vulnExcerpt}</Text>
+          ) : (
+            vulnerableQuote
+          )}
           {vulnNote ? <Text style={lockedStyles.ev_note}>{vulnNote}</Text> : null}
         </View>
       </View>

@@ -18,6 +18,7 @@ import type {
 } from "@/lib/reports/pdf/types";
 import { formatProviderDisplayName } from "@/lib/reports/formatProviderDisplayName";
 import { clipPdfText } from "@/lib/reports/pdf/editorial/pdfNarrative";
+import { formatEvidenceSnippetForPdf } from "@/lib/reports/pdf/sanitizeReportData";
 import { PDF_METHODOLOGY_TEXT } from "@/lib/reports/pdfTheme";
 
 function normalizeRecommendationPriority(p: string | undefined): RecommendationCard["priority"] {
@@ -134,6 +135,18 @@ export function mapSnapshotToReactPdfData(
   const vulnerableExamples = labeled.filter((r) => r.label === "VULNERABLE").slice(0, 2);
 
   const evidencePreview: EvidencePreview[] = [];
+  function buildResponseExcerpt(rawText: string | null | undefined, fallback: string): string {
+    const raw = (rawText ?? "").trim();
+    if (!raw) return fallback;
+    const humanized = formatEvidenceSnippetForPdf(raw);
+    /** Avoid echoing the placeholder string from the sanitizer. */
+    if (!humanized || humanized === "No signal") return fallback;
+    return clipPdfText(humanized, 420);
+  }
+  function buildPromptLine(promptText: string | null | undefined): string | undefined {
+    const p = (promptText ?? "").replace(/\s+/g, " ").trim();
+    return p.length > 0 ? clipPdfText(p, 220) : undefined;
+  }
   if (strengthExamples[0]) {
     const pj = strengthExamples[0].parsed_json;
     const { quote, impact } = clientEvidenceCallout(
@@ -147,6 +160,11 @@ export function mapSnapshotToReactPdfData(
       label: "STRENGTH",
       snippet: quote,
       note: impact,
+      prompt: buildPromptLine(strengthExamples[0].prompt_text),
+      responseExcerpt: buildResponseExcerpt(
+        strengthExamples[0].raw_text,
+        `Assistants include ${client.name} among the brands they present to buyers evaluating this category.`,
+      ),
     });
   }
   if (vulnerableExamples[0]) {
@@ -163,6 +181,11 @@ export function mapSnapshotToReactPdfData(
       label: "VULNERABLE",
       snippet: quote,
       note: impact,
+      prompt: buildPromptLine(vulnerableExamples[0].prompt_text),
+      responseExcerpt: buildResponseExcerpt(
+        vulnerableExamples[0].raw_text,
+        `Answer covered the category without naming ${client.name}; other brands received the recommendation instead.`,
+      ),
     });
   }
   if (evidencePreview.length === 0 && responses[0]) {
@@ -176,6 +199,11 @@ export function mapSnapshotToReactPdfData(
       label: lab,
       snippet: quote,
       note: impact,
+      prompt: buildPromptLine(r0.prompt_text),
+      responseExcerpt: buildResponseExcerpt(
+        r0.raw_text,
+        `The assistant answered this prompt without clearly recommending ${client.name}.`,
+      ),
     });
   }
 

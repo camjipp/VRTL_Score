@@ -247,14 +247,28 @@ function generateInsights(data: ReportData, metrics: ReturnType<typeof calculate
   
   // Competitor threat
   if (metrics.topCompetitor && metrics.topCompetitor.mentions >= metrics.mentioned) {
+    const tied = metrics.topCompetitor.mentions === metrics.mentioned;
+    const title = tied ? "Tied with top competitor on mentions" : "Competitor ahead on mentions";
+    const insight = tied
+      ? `${metrics.topCompetitor.name} is named in ${metrics.topCompetitor.mentions} answers—matching yours (${metrics.mentioned}).`
+      : `${metrics.topCompetitor.name} is named in ${metrics.topCompetitor.mentions} answers vs. your ${metrics.mentioned}.`;
+    const whyItMatters = tied
+      ? "Assistants have no clear default between you. Whoever earns the next proof wins the recommendation slot."
+      : "Assistants already treat them as the safer default on overlapping intents.";
+    const expectedImpact = tied
+      ? "Open a clear mention edge in 90 days; become the unambiguous default on head-to-head intents."
+      : "Narrow the mention gap in 90 days; reclaim top-position answers on head-to-head intents.";
+    const consequence = tied
+      ? `${metrics.topCompetitor.name} can pull ahead the moment they publish one more cited asset than you.`
+      : `${metrics.topCompetitor.name} solidifies as the model’s “obvious pick” while you stay optional.`;
     insights.push({
       priority: "HIGH",
-      title: "Competitor ahead on mentions",
-      insight: `${metrics.topCompetitor.name} is named in ${metrics.topCompetitor.mentions} answers vs. your ${metrics.mentioned}.`,
-      whyItMatters: "Assistants already treat them as the safer default on overlapping intents.",
+      title,
+      insight,
+      whyItMatters,
       action: "Map their cited URLs and proof; counter with differentiated comparison pages, third-party reviews/trade mentions, and clearer entity + offer copy.",
-      expectedImpact: "Narrow the mention gap in 90 days; reclaim top-position answers on head-to-head intents.",
-      consequence: `${metrics.topCompetitor.name} solidifies as the model’s “obvious pick” while you stay optional.`,
+      expectedImpact,
+      consequence,
     });
   }
   

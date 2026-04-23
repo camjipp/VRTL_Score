@@ -31,9 +31,19 @@ export function PageRecommendations({ data }: { data: ReportData }): ReactElemen
           cards.map((c, i) => {
             const last = i === cards.length - 1;
             const box = last ? lockedStyles.rec_itemLast : lockedStyles.rec_item;
+            const dotStyle =
+              c.priority === "HIGH"
+                ? lockedStyles.rec_priorityDotHigh
+                : c.priority === "MEDIUM"
+                  ? lockedStyles.rec_priorityDotMedium
+                  : lockedStyles.rec_priorityDotLow;
             return (
               <View key={i} style={[box, local.cardH]} wrap={false}>
-                <Text style={lockedStyles.rec_priority}>{clipPdfText(c.priority, 24)}</Text>
+                <View style={lockedStyles.rec_priorityRow}>
+                  <View style={[lockedStyles.rec_priorityDot, dotStyle]} />
+                  <Text style={lockedStyles.rec_priorityLabel}>{clipPdfText(c.priority, 24)}</Text>
+                  <Text style={lockedStyles.rec_priorityRank}>{`Priority ${i + 1}`}</Text>
+                </View>
                 <Text style={lockedStyles.rec_title}>{clipPdfText(c.title)}</Text>
                 <Text style={lockedStyles.rec_insight}>{clipPdfText(c.insight)}</Text>
                 <Text style={lockedStyles.rec_labelFirst}>Context</Text>

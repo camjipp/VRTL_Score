@@ -24,6 +24,37 @@ function fmtScore(n: number | null): string {
   return String(Math.round(n));
 }
 
+type Health = "strong" | "moderate" | "weak";
+
+/**
+ * Classify a 0–100 signal into a health band. Zero/near-zero gets its own “weak”
+ * styling so the page can visually differentiate an absent signal (Authority=0)
+ * from a present-but-moderate one (Mention Rate=60).
+ */
+function classify(value: number, strongAt: number, moderateAt: number): Health {
+  if (!Number.isFinite(value) || value <= 0) return "weak";
+  if (value >= strongAt) return "strong";
+  if (value >= moderateAt) return "moderate";
+  return "weak";
+}
+
+function healthStyles(h: Health) {
+  return {
+    cell:
+      h === "strong"
+        ? lockedStyles.perf_metricCellStrong
+        : h === "moderate"
+          ? lockedStyles.perf_metricCellModerate
+          : lockedStyles.perf_metricCellWeak,
+    value:
+      h === "strong"
+        ? lockedStyles.perf_metricValueStrong
+        : h === "moderate"
+          ? lockedStyles.perf_metricValueModerate
+          : lockedStyles.perf_metricValueWeak,
+  };
+}
+
 export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactElement {
   const slice = narrativePerformance(data);
   const score = data.overallScore;
@@ -45,26 +76,61 @@ export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactEl
       </View>
       <View style={lockedStyles.perf_metricsBand} wrap={false}>
         <View style={[lockedStyles.perf_metricsRow, local.metricsRow]} wrap={false}>
-          <View style={lockedStyles.perf_metricCellFirst}>
-            <Text style={lockedStyles.perf_metricLabel}>Mention rate</Text>
-            <Text style={lockedStyles.perf_metricValue}>{clipPdfText(String(data.mentionRate))}</Text>
-            <Text style={lockedStyles.perf_metricHint}>How often your brand appears in AI answers.</Text>
-          </View>
-          <View style={lockedStyles.perf_metricCell}>
-            <Text style={lockedStyles.perf_metricLabel}>Top position</Text>
-            <Text style={lockedStyles.perf_metricValue}>{clipPdfText(String(data.topPosition))}</Text>
-            <Text style={lockedStyles.perf_metricHint}>How often you are the first recommendation.</Text>
-          </View>
-          <View style={lockedStyles.perf_metricCell}>
-            <Text style={lockedStyles.perf_metricLabel}>Authority</Text>
-            <Text style={lockedStyles.perf_metricValue}>{clipPdfText(String(data.authorityScore))}</Text>
-            <Text style={lockedStyles.perf_metricHint}>How often AI supports your brand with citations or proof.</Text>
-          </View>
-          <View style={lockedStyles.perf_metricCellLast}>
-            <Text style={lockedStyles.perf_metricLabel}>Rank</Text>
-            <Text style={lockedStyles.perf_metricValue}>{clipPdfText(`${data.rank}/${data.rankTotal}`)}</Text>
-            <Text style={lockedStyles.perf_metricHint}>Your position compared to competitors.</Text>
-          </View>
+          {(() => {
+            const mh = classify(data.mentionRate, 65, 40);
+            const sMention = healthStyles(mh);
+            return (
+              <View style={[lockedStyles.perf_metricCellFirst, sMention.cell]}>
+                <Text style={lockedStyles.perf_metricLabel}>Mention rate</Text>
+                <Text style={[lockedStyles.perf_metricValue, sMention.value]}>
+                  {clipPdfText(String(data.mentionRate))}
+                </Text>
+                <Text style={lockedStyles.perf_metricHint}>How often your brand appears in AI answers.</Text>
+              </View>
+            );
+          })()}
+          {(() => {
+            const th = classify(data.topPosition, 40, 20);
+            const sTop = healthStyles(th);
+            return (
+              <View style={[lockedStyles.perf_metricCell, sTop.cell]}>
+                <Text style={lockedStyles.perf_metricLabel}>Top position</Text>
+                <Text style={[lockedStyles.perf_metricValue, sTop.value]}>
+                  {clipPdfText(String(data.topPosition))}
+                </Text>
+                <Text style={lockedStyles.perf_metricHint}>How often you are the first recommendation.</Text>
+              </View>
+            );
+          })()}
+          {(() => {
+            const ah = classify(data.authorityScore, 30, 10);
+            const sAuth = healthStyles(ah);
+            return (
+              <View style={[lockedStyles.perf_metricCell, sAuth.cell]}>
+                <Text style={lockedStyles.perf_metricLabel}>Authority</Text>
+                <Text style={[lockedStyles.perf_metricValue, sAuth.value]}>
+                  {clipPdfText(String(data.authorityScore))}
+                </Text>
+                <Text style={lockedStyles.perf_metricHint}>
+                  How often AI supports your brand with citations or proof.
+                </Text>
+              </View>
+            );
+          })()}
+          {(() => {
+            const rank = data.rank || 0;
+            const rh: Health = rank === 1 ? "strong" : rank <= 3 ? "moderate" : "weak";
+            const sRank = healthStyles(rh);
+            return (
+              <View style={[lockedStyles.perf_metricCellLast, sRank.cell]}>
+                <Text style={lockedStyles.perf_metricLabel}>Rank</Text>
+                <Text style={[lockedStyles.perf_metricValue, sRank.value]}>
+                  {clipPdfText(`${data.rank}/${data.rankTotal}`)}
+                </Text>
+                <Text style={lockedStyles.perf_metricHint}>Your position compared to competitors.</Text>
+              </View>
+            );
+          })()}
         </View>
       </View>
       <LockedNarrativeStack

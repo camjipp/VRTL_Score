@@ -119,11 +119,17 @@ function titleCaseWords(s: string): string {
     .join(" ");
 }
 
-/** Merge case-variant brand rows (e.g. “hydro flask” + “Hydro Flask”) for consistent PDF tables. */
+/**
+ * Merge case-variant brand rows (e.g. “hydro flask” + “Hydro Flask”) for consistent PDF tables.
+ *
+ * Rate is recomputed from `mentions / totalResponses` where `totalResponses` is recovered
+ * from the client row (pre-merge `mentions / rate`). This guarantees Page 4 and Page 8 agree
+ * on the same brand's mention rate, independent of which variant was listed first.
+ */
 function mergeCompetitorRows(rows: readonly CompetitorRow[]): CompetitorRow[] {
   const m = new Map<
     string,
-    { mentions: number; rate: number; isClient: boolean; display: string }
+    { mentions: number; isClient: boolean; display: string }
   >();
   for (const r of rows) {
     const key = r.name.trim().toLowerCase();
@@ -133,29 +139,32 @@ function mergeCompetitorRows(rows: readonly CompetitorRow[]): CompetitorRow[] {
     if (!cur) {
       m.set(key, {
         mentions: r.mentions,
-        rate: r.rate,
         isClient: Boolean(r.isClient),
         display,
       });
     } else {
-      const totalM = cur.mentions + r.mentions;
-      const wr =
-        totalM > 0
-          ? Math.round((cur.rate * cur.mentions + r.rate * r.mentions) / totalM)
-          : cur.rate;
       m.set(key, {
-        mentions: totalM,
-        rate: wr,
+        mentions: cur.mentions + r.mentions,
         isClient: cur.isClient || Boolean(r.isClient),
         display: cur.display.length >= display.length ? cur.display : display,
       });
     }
   }
+  const client = rows.find((r) => r.isClient);
+  const totalResponses =
+    client && client.rate > 0 && client.mentions > 0
+      ? Math.round((client.mentions / client.rate) * 100)
+      : 0;
   return [...m.values()]
     .map((v) => ({
       name: v.display,
       mentions: v.mentions,
-      rate: v.rate,
+      rate:
+        totalResponses > 0
+          ? Math.round((v.mentions / totalResponses) * 100)
+          : v.mentions > 0
+            ? 0
+            : 0,
       rank: 0,
       isClient: v.isClient,
     }))
@@ -163,19 +172,39 @@ function mergeCompetitorRows(rows: readonly CompetitorRow[]): CompetitorRow[] {
     .map((r, i) => ({ ...r, rank: i + 1 }));
 }
 
+/** Parse a percentage-shaped string ("43%", "43") into a number; returns NaN on failure. */
+function parseRateString(raw: string): number {
+  const n = Number(String(raw).replace(/[^0-9.+-]/g, ""));
+  return Number.isFinite(n) ? n : Number.NaN;
+}
+
+/**
+ * Merge case-variant competitive-table rows and recompute rates so they agree
+ * with the competitor panel on page 4. Rate is derived from mentions / total,
+ * where `total` comes from the client ("You") row's own mentions ÷ rate.
+ */
 function mergeCompetitiveTableRows(rows: readonly CompetitiveTableRow[]): CompetitiveTableRow[] {
   const you = rows.find((r) => r.status === "You");
   const others = rows.filter((r) => r.status !== "You");
-  const m = new Map<string, { mentions: number; rate: string; brand: string }>();
+  const m = new Map<string, { mentions: number; brand: string }>();
   for (const r of others) {
     const key = r.brand.trim().toLowerCase();
     if (!key) continue;
     const brand = titleCaseWords(r.brand.trim());
     const ex = m.get(key);
-    if (!ex) m.set(key, { mentions: r.mentions, rate: r.rate, brand });
-    else m.set(key, { mentions: ex.mentions + r.mentions, rate: ex.rate, brand: ex.brand });
+    if (!ex) m.set(key, { mentions: r.mentions, brand });
+    else m.set(key, { mentions: ex.mentions + r.mentions, brand: ex.brand });
   }
   const clientM = you?.mentions ?? 0;
+  const clientRate = you ? parseRateString(you.rate) : Number.NaN;
+  const totalResponses =
+    Number.isFinite(clientRate) && clientRate > 0 && clientM > 0
+      ? Math.round((clientM / clientRate) * 100)
+      : 0;
+  const formatRate = (mentions: number): string => {
+    if (totalResponses <= 0) return "—";
+    return `${Math.round((mentions / totalResponses) * 100)}%`;
+  };
   const mergedOthers = [...m.values()]
     .map((v) => {
       const gap = v.mentions - clientM;
@@ -184,7 +213,7 @@ function mergeCompetitiveTableRows(rows: readonly CompetitiveTableRow[]): Compet
       return {
         brand: v.brand,
         mentions: v.mentions,
-        rate: v.rate,
+        rate: formatRate(v.mentions),
         vsYou: gap > 0 ? `+${gap}` : String(gap),
         status,
       } satisfies CompetitiveTableRow;
@@ -195,6 +224,7 @@ function mergeCompetitiveTableRows(rows: readonly CompetitiveTableRow[]): Compet
       {
         ...you,
         brand: titleCaseWords(you.brand),
+        rate: totalResponses > 0 ? formatRate(you.mentions) : you.rate,
         vsYou: "—",
         status: "You" as const,
       },
@@ -433,6 +463,10 @@ export function sanitizeReportDataForPdf(data: ReportData): ReportData {
         label,
         snippet,
         note: e.note != null ? sanitizePdfString(e.note) : e.note,
+        prompt: e.prompt != null ? sanitizePdfString(e.prompt) : e.prompt,
+        model: e.model != null ? sanitizePdfString(e.model) : e.model,
+        responseExcerpt:
+          e.responseExcerpt != null ? sanitizePdfString(e.responseExcerpt) : e.responseExcerpt,
         vulnerableExcerpt,
       };
     }),

@@ -8,13 +8,12 @@ import { LockedNarrativeStack } from "./LockedNarrativeStack";
 import { lockedStyles } from "./lockedDocumentStyles";
 import { narrativeClosing } from "./pageNarratives";
 
-const LOG_ROWS = 8;
-const ROW_H = 12;
-const PHASE_MAX = 3;
+/** Cap list length so the appendix reliably fits above the page footer. */
+const LOG_ROWS = 7;
+const PHASE_MAX = 2;
 
 const local = StyleSheet.create({
-  thH: { height: ROW_H },
-  trH: { minHeight: ROW_H },
+  thH: { height: 14 },
 });
 
 export function PageClosing({ data }: { data: ReportData }): ReactElement {
@@ -33,16 +32,10 @@ export function PageClosing({ data }: { data: ReportData }): ReactElement {
         <Text style={lockedStyles.close_h_next}>Next steps</Text>
         <Text style={lockedStyles.close_nextBody}>{next || " "}</Text>
       </View>
-      <LockedNarrativeStack
-        slice={slice}
-        variant="compact"
-        stackRole="afterPrimary"
-        include={["interpretation", "implication"]}
-      />
       <View style={lockedStyles.close_block} wrap={false}>
         <Text style={lockedStyles.close_h_exec}>Execution</Text>
         {phases.map((ph, i) => (
-          <View key={i} style={{ marginBottom: 8 }} wrap={false}>
+          <View key={i} style={{ marginBottom: 6 }} wrap={false}>
             <Text style={lockedStyles.close_phaseTitle}>{clipPdfText(ph.phase)}</Text>
             <Text style={lockedStyles.close_phaseBody}>{clipPdfText(ph.text)}</Text>
           </View>
@@ -52,32 +45,29 @@ export function PageClosing({ data }: { data: ReportData }): ReactElement {
         <Text style={lockedStyles.close_h_method}>Methodology</Text>
         <Text style={lockedStyles.close_methodBody}>{clipPdfText(data.methodology)}</Text>
       </View>
-      <View style={lockedStyles.close_logWrap} wrap={false}>
+      <View style={lockedStyles.close_logWrap}>
         <Text style={lockedStyles.close_logEyebrow}>Evidence appendix</Text>
-        <View style={[lockedStyles.close_logTh, local.thH]}>
+        <View style={[lockedStyles.close_logTh, local.thH]} wrap={false}>
           <Text style={[lockedStyles.close_logThText, lockedStyles.close_c1]}>#</Text>
           <Text style={[lockedStyles.close_logThText, lockedStyles.close_c2]}>Label</Text>
           <Text style={[lockedStyles.close_logThText, lockedStyles.close_c3]}>Mentioned</Text>
           <Text style={[lockedStyles.close_logThText, lockedStyles.close_c4]}>Position</Text>
           <Text style={[lockedStyles.close_logThText, lockedStyles.close_c5]}>Prompt / context</Text>
         </View>
-        {log.map((r) => (
-          <View key={r.idx} style={[lockedStyles.close_logTr, local.trH]} wrap={false}>
-            <Text style={[lockedStyles.close_logCell, lockedStyles.close_c1]}>{String(r.idx)}</Text>
-            <Text style={[lockedStyles.close_logCell, lockedStyles.close_c2]}>{clipPdfText(r.label)}</Text>
-            <Text style={[lockedStyles.close_logCell, lockedStyles.close_c3]}>{clipPdfText(r.mentioned)}</Text>
-            <Text style={[lockedStyles.close_logCell, lockedStyles.close_c4]}>{clipPdfText(r.position)}</Text>
-            <View style={[lockedStyles.close_c5, { flexDirection: "column", paddingRight: 2 }]}>
-              <Text style={lockedStyles.close_logCell}>
-                {clipPdfText(`Other brands cited: ${r.competitors}`)}
-              </Text>
-              {r.strength ? (
-                <Text style={lockedStyles.close_logCellMuted}>{clipPdfText(`Strength: ${r.strength}`)}</Text>
-              ) : null}
-              {r.note ? <Text style={lockedStyles.close_logCellMuted}>{clipPdfText(r.note)}</Text> : null}
+        {log.map((r) => {
+          const contextLine = r.note
+            ? clipPdfText(r.note, 120)
+            : clipPdfText(`Also cited: ${r.competitors || "—"}`, 120);
+          return (
+            <View key={r.idx} style={lockedStyles.close_logTr} wrap={false}>
+              <Text style={[lockedStyles.close_logCell, lockedStyles.close_c1]}>{String(r.idx)}</Text>
+              <Text style={[lockedStyles.close_logCell, lockedStyles.close_c2]}>{clipPdfText(r.label)}</Text>
+              <Text style={[lockedStyles.close_logCell, lockedStyles.close_c3]}>{clipPdfText(r.mentioned)}</Text>
+              <Text style={[lockedStyles.close_logCell, lockedStyles.close_c4]}>{clipPdfText(r.position)}</Text>
+              <Text style={[lockedStyles.close_logCell, lockedStyles.close_c5]}>{contextLine}</Text>
             </View>
-          </View>
-        ))}
+          );
+        })}
       </View>
     </PdfInnerPage>
   );

@@ -38,6 +38,12 @@ export type EvidencePreview = {
   label: string;
   snippet: string;
   note?: string;
+  /** Original prompt text sent to the assistant; shown verbatim on the evidence page. */
+  prompt?: string;
+  /** Model attribution for the quoted response (e.g. "OpenAI"). */
+  model?: string;
+  /** Short, human-readable excerpt of the assistant's raw answer. */
+  responseExcerpt?: string;
   /** Set during PDF sanitization when label indicates a vulnerable signal. */
   vulnerableExcerpt?: VulnerableExcerptParts;
 };
