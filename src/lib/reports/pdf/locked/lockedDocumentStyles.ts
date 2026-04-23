@@ -490,67 +490,70 @@ export const lockedStyles = StyleSheet.create({
     maxWidth: "100%",
   },
 
-  /* Competitive — signal strips + sharp table */
-  comp_tableIntro: {
-    fontSize: LD.size.bodySm,
-    fontFamily: LD.font.sans,
-    color: LD.color.ink2,
-    lineHeight: LD.lineHeight.relaxed,
-    marginBottom: LD.space.sm,
-    maxWidth: "100%",
-  },
-  comp_integrityNote: {
-    fontSize: LD.size.micro,
-    fontFamily: LD.font.sans,
-    color: LD.color.ink4,
-    fontStyle: "italic",
-    marginBottom: LD.space.lg,
-    lineHeight: LD.lineHeight.normal,
-  },
-  comp_stripList: {
-    marginBottom: LD.space.lg,
-  },
-  comp_stripRow: {
+  /* Competitive — market-share view + secondary breakdown */
+  comp_pieRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    paddingVertical: LD.space.xs,
-    paddingLeft: LD.space.sm,
-    marginBottom: LD.space.sm,
-    borderLeftWidth: 2,
+    marginBottom: LD.space.xl,
   },
-  comp_stripRowLast: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    paddingVertical: LD.space.xs,
-    paddingLeft: LD.space.sm,
-    marginBottom: 0,
-    borderLeftWidth: 2,
+  comp_pieColChart: {
+    width: "46%",
+    paddingRight: LD.space.sm,
   },
-  comp_stripWin: {
-    borderLeftColor: LD.color.signalStrong,
+  comp_pieColAside: {
+    width: "54%",
+    paddingLeft: LD.space.md,
+    justifyContent: "flex-start",
   },
-  comp_stripRisk: {
-    borderLeftColor: LD.color.risk,
-  },
-  comp_stripPriority: {
-    borderLeftColor: LD.color.signalStrong,
-  },
-  comp_stripLabel: {
-    width: 64,
+  comp_pieChartTitle: {
     fontSize: LD.size.micro,
     fontFamily: LD.font.sansBold,
-    color: LD.color.ink2,
+    color: LD.color.ink3,
     letterSpacing: LD.trackEyebrow,
     textTransform: "uppercase",
-    paddingTop: 1,
+    marginBottom: LD.space.sm,
   },
-  comp_stripBody: {
-    flex: 1,
+  comp_pieAside: {
     fontSize: LD.size.bodySm,
-    color: LD.color.ink,
-    lineHeight: LD.lineHeight.relaxed,
     fontFamily: LD.font.sans,
+    color: LD.color.ink2,
+    lineHeight: LD.lineHeight.editorial,
+    maxWidth: "100%",
   },
+  comp_secondaryBlock: {
+    marginTop: LD.space.md,
+  },
+  comp_secondaryLabel: {
+    fontSize: LD.size.micro,
+    fontFamily: LD.font.sansBold,
+    color: LD.color.ink4,
+    letterSpacing: LD.trackEyebrow,
+    textTransform: "uppercase",
+    marginBottom: LD.space.xs,
+  },
+  comp_tableThMuted: {
+    flexDirection: "row",
+    borderBottomWidth: LD.border.hairline,
+    borderBottomColor: LD.color.rule,
+    alignItems: "center",
+    backgroundColor: LD.color.paper,
+  },
+  comp_thTextMuted: {
+    fontSize: LD.size.micro,
+    fontFamily: LD.font.sansBold,
+    color: LD.color.ink4,
+    letterSpacing: LD.trackEyebrow,
+    textTransform: "uppercase",
+  },
+  comp_tableTrSecondary: {
+    flexDirection: "row",
+    borderBottomWidth: LD.border.hairline,
+    borderBottomColor: LD.color.rule,
+    alignItems: "center",
+    overflow: "hidden",
+    backgroundColor: LD.color.paper,
+  },
+  comp_mentionBarNeutralFill: { height: 4, backgroundColor: "#D4D4D4" },
   comp_tableKicker: {
     fontSize: LD.size.bodySm,
     fontFamily: LD.font.sans,
@@ -637,6 +640,7 @@ export const lockedStyles = StyleSheet.create({
   },
   comp_td: { fontSize: LD.size.bodySm, color: LD.color.ink, fontFamily: LD.font.sans },
   comp_tdMuted: { fontSize: LD.size.bodySm, color: LD.color.ink3, fontFamily: LD.font.sans },
+  comp_tdOther: { fontSize: LD.size.bodySm, color: LD.color.ink4, fontFamily: LD.font.sans },
   comp_tdClient: { fontSize: LD.size.bodySm, color: LD.color.ink, fontFamily: LD.font.sansBold },
   comp_tdTied: { fontSize: LD.size.bodySm, color: LD.color.ink, fontFamily: LD.font.sansBold },
   comp_cellName: { width: "30%", paddingRight: LD.space.xs, paddingLeft: LD.space.xs },
@@ -646,14 +650,14 @@ export const lockedStyles = StyleSheet.create({
   comp_cellFlag: { width: "8%" },
   comp_mentionBarTrack: {
     flexDirection: "row",
-    height: 5,
+    height: 4,
     marginTop: 2,
     width: "100%",
   },
-  comp_mentionBarFill: { height: 5, backgroundColor: "#E5E7EB" },
-  comp_mentionBarFillTied: { height: 5, backgroundColor: "#6B7280" },
-  comp_mentionBarFillClient: { height: 5, backgroundColor: LD.color.ink },
-  comp_mentionBarRest: { height: 5, backgroundColor: LD.color.rule },
+  comp_mentionBarFill: { height: 4, backgroundColor: "#E8EAEE" },
+  comp_mentionBarFillTied: { height: 4, backgroundColor: "#3F3F46" },
+  comp_mentionBarFillClient: { height: 4, backgroundColor: LD.color.ink },
+  comp_mentionBarRest: { height: 4, backgroundColor: LD.color.rule },
 
   /* Model — fracture as dominant ruled block; grid as register */
   model_fractureShell: {

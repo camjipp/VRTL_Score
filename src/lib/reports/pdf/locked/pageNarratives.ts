@@ -46,50 +46,19 @@ export function narrativePerformance(d: ReportData): NarrativeSlice {
   };
 }
 
-/** Page 4 — competitive. */
-export function narrativeCompetitive(d: ReportData): NarrativeSlice {
-  const you = d.competitors.find((row) => row.isClient);
-  const others = d.competitors.filter((row) => !row.isClient);
-  const headline =
-    d.rank === 1
-      ? clipPdfText(
-          "You are not the clear default choice.\n\nYou are tied at the top — and ties do not hold.",
-          420,
-        )
-      : clipPdfText("You are in the pack—whoever looks like the obvious answer still wins the recommendation.");
-  const takeaway = competitiveTakeawayLine(d, you, others);
+/** Page 4 — competitive (market-share framing; pie + secondary table on page). */
+export function narrativeCompetitive(_d: ReportData): NarrativeSlice {
   return {
-    headline,
-    interpretation: clipPdfText(takeaway),
+    headline: clipPdfText("You share the decision with competitors.", 420),
+    interpretation: clipPdfText(
+      "Your brand appears often — but so do others. There is no clear default.",
+      520,
+    ),
     implication: clipPdfText(
-      "Use Win / Risk / Priority as guardrails for where the table moves next if you pause.",
+      "Recommendation share is split—buyers see a short list, not a single owner of the category.",
+      420,
     ),
   };
-}
-
-function competitiveTakeawayLine(
-  d: ReportData,
-  you: ReportData["competitors"][number] | undefined,
-  others: ReportData["competitors"],
-): string {
-  if (!you || others.length === 0) {
-    return clipPdfText("Pair mentions with rank: volume plus better rank is the default shoppers hear.");
-  }
-  const tie = others.find((r) => r.mentions === you.mentions);
-  if (tie) {
-    return clipPdfText(
-      `${tie.name} matches you on mentions. When assistants choose between equal options, they default to the brand with stronger authority signals.`,
-    );
-  }
-  const ahead = others.filter((r) => r.rank < you.rank).sort((a, b) => b.mentions - a.mentions)[0];
-  if (ahead) {
-    return clipPdfText(
-      `${ahead.name} ranks ahead of you here; closing that gap is how you stop losing recommendation share on the same questions.`,
-    );
-  }
-  return clipPdfText(
-    `${client(d)}: watch rivals gaining mentions with a better rank—that shifts the default.`,
-  );
 }
 
 /** Page 5 — model breakdown. */

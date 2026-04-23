@@ -389,12 +389,6 @@ export function sanitizeReportDataForPdf(data: ReportData): ReportData {
     rate: sanitizePdfString(r.rate),
     vsYou: sanitizePdfString(r.vsYou),
   }));
-  const othersPre = data.competitiveTable.filter((r) => r.status !== "You").length;
-  const othersPost = competitiveTableMerged.filter((r) => r.status !== "You").length;
-  const integrityNote =
-    competitorsMerged.length < data.competitors.length || othersPost < othersPre
-      ? "Name variants were combined for accuracy."
-      : undefined;
   const clientBrand = sanitizePdfString(data.clientName);
 
   return {
@@ -412,7 +406,7 @@ export function sanitizeReportDataForPdf(data: ReportData): ReportData {
     recommendedNextStepsVisible: data.recommendedNextStepsVisible,
     agencyLogoUrl: data.agencyLogoUrl,
     agencyName: data.agencyName == null ? data.agencyName : sanitizePdfString(data.agencyName),
-    integrityNote,
+    integrityNote: undefined,
     meta: {
       responses: data.meta.responses,
       confidence: sanitizePdfString(data.meta.confidence),
