@@ -5,7 +5,9 @@ import { clipPdfText } from "../editorial/pdfNarrative";
 import type { CompetitiveTableRow, ReportData, SignalRow } from "../types";
 import { LOCKED_PAGE_HEADER, REPORT_CONTENT_HALF_H, REPORT_CONTENT_SPLIT_GUTTER } from "./layoutConstants";
 import { LD } from "./lockedDesignTokens";
+import { LockedNarrativeStack } from "./LockedNarrativeStack";
 import { lockedStyles } from "./lockedDocumentStyles";
+import { narrativeDataSummary } from "./pageNarratives";
 
 const SIGNAL_ROWS = 6;
 const COMP_ROWS = 6;
@@ -34,10 +36,7 @@ function pad<T>(rows: readonly T[], n: number): (T | null)[] {
 export function PageDataSummary({ data }: { data: ReportData }): ReactElement {
   const signals = pad(data.signalSummary, SIGNAL_ROWS) as (SignalRow | null)[];
   const comp = pad(data.competitiveTable, COMP_ROWS) as (CompetitiveTableRow | null)[];
-
-  const interp = data.dataSummaryInterpretation?.trim()
-    ? clipPdfText(data.dataSummaryInterpretation, 130)
-    : "";
+  const slice = narrativeDataSummary(data);
 
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[8]!}>
@@ -45,7 +44,12 @@ export function PageDataSummary({ data }: { data: ReportData }): ReactElement {
         <View style={lockedStyles.data_bandHeader}>
           <Text style={lockedStyles.data_bandTitle}>Signal summary</Text>
         </View>
-        {interp ? <Text style={lockedStyles.bandCaptionLead}>{interp}</Text> : null}
+        <LockedNarrativeStack
+          slice={slice}
+          variant="compact"
+          compactMaxHeight={96}
+          include={["headline", "interpretation", "implication"]}
+        />
         <View style={[lockedStyles.data_th, local.thH]}>
           <Text style={[lockedStyles.data_thText, lockedStyles.data_sigA]}>Signal</Text>
           <Text style={[lockedStyles.data_thText, lockedStyles.data_sigB]}>Count</Text>

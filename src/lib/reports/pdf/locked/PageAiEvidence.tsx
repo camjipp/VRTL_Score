@@ -10,7 +10,9 @@ import {
   normalizeVulnerableExcerptParts,
 } from "./aiEvidencePick";
 import { LOCKED_PAGE_HEADER } from "./layoutConstants";
+import { LockedNarrativeStack } from "./LockedNarrativeStack";
 import { lockedStyles } from "./lockedDocumentStyles";
+import { narrativeEvidence } from "./pageNarratives";
 
 const CARD_H = 200;
 
@@ -33,11 +35,11 @@ function vulnerableFromParts(parts: VulnerableExcerptParts): { lead: string; det
   const summary = parts.summary.replace(/\s+/g, " ").trim();
   const names = parts.competitorsLine.replace(/\s+/g, " ").trim();
   const impl = parts.implication.replace(/\s+/g, " ").trim();
-  const lead = clipPdfText(summary, 125);
+  const lead = clipPdfText(summary, 118);
   const detail = names
-    ? clipPdfText(`Competitors recommended in the same answer include ${names.replace(/\.$/, "")}.`, 138)
+    ? clipPdfText(`Competitors recommended in the same answer include ${names.replace(/\.$/, "")}.`, 130)
     : "";
-  const impact = clipPdfText(impl, 118);
+  const impact = clipPdfText(impl, 108);
   return { lead, detail, impact };
 }
 
@@ -48,7 +50,7 @@ export function PageAiEvidence({ data }: { data: ReportData }): ReactElement {
   const strengthHint = s ? clipPdfText(formatEvidenceLogPillLabel(String(s.label)), 48) : "";
   const vulnHint = v ? clipPdfText(formatEvidenceLogPillLabel(String(v.label)), 48) : "";
 
-  const strengthNote = s?.note?.trim() ? clipPdfText(String(s.note), 100) : "";
+  const strengthNote = s?.note?.trim() ? clipPdfText(String(s.note), 90) : "";
 
   let vulnerableQuote: ReactElement;
   if (vulnParts) {
@@ -64,8 +66,8 @@ export function PageAiEvidence({ data }: { data: ReportData }): ReactElement {
     const raw = v?.snippet?.trim() ? String(v.snippet) : "";
     const body = raw
       ? looksLikeStructuredBlob(raw)
-        ? clipPdfText("This signal is not shown in raw form here. See the evidence log for the full response context.", 160)
-        : clipPdfText(raw, 260)
+        ? clipPdfText("This signal is not shown in raw form here. See the evidence log for the full response context.", 150)
+        : clipPdfText(raw, 240)
       : clipPdfText("No exposure excerpt in this export.", 120);
     vulnerableQuote = (
       <View style={lockedStyles.ev_quote}>
@@ -74,10 +76,12 @@ export function PageAiEvidence({ data }: { data: ReportData }): ReactElement {
     );
   }
 
-  const vulnNote = v?.note?.trim() ? clipPdfText(String(v.note), 95) : "";
+  const vulnNote = v?.note?.trim() ? clipPdfText(String(v.note), 85) : "";
+  const slice = narrativeEvidence(data);
 
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[6]!}>
+      <LockedNarrativeStack slice={slice} variant="compact" include={["headline"]} />
       <View style={local.row} wrap={false}>
         <View style={lockedStyles.ev_cardStrength}>
           <Text style={lockedStyles.ev_badge}>STRENGTH</Text>
@@ -94,6 +98,12 @@ export function PageAiEvidence({ data }: { data: ReportData }): ReactElement {
           {vulnNote ? <Text style={lockedStyles.ev_note}>{vulnNote}</Text> : null}
         </View>
       </View>
+      <LockedNarrativeStack
+        slice={slice}
+        stackRole="afterPrimary"
+        variant="compact"
+        include={["interpretation", "implication"]}
+      />
     </PdfInnerPage>
   );
 }

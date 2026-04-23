@@ -4,7 +4,9 @@ import { PdfInnerPage } from "../components/PdfInnerPage";
 import { clipPdfText } from "../editorial/pdfNarrative";
 import type { ReportData } from "../types";
 import { LOCKED_PAGE_HEADER } from "./layoutConstants";
+import { LockedNarrativeStack } from "./LockedNarrativeStack";
 import { lockedStyles } from "./lockedDocumentStyles";
+import { narrativeClosing } from "./pageNarratives";
 
 const LOG_ROWS = 5;
 const ROW_H = 16;
@@ -22,13 +24,21 @@ export function PageClosing({ data }: { data: ReportData }): ReactElement {
     data.recommendedNextStepsVisible === false
       ? ""
       : clipPdfText(data.recommendedNextSteps || "", 400);
+  const slice = narrativeClosing(data);
 
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[9]!}>
+      <LockedNarrativeStack slice={slice} include={["headline"]} />
       <View style={lockedStyles.close_block} wrap={false}>
         <Text style={lockedStyles.close_h_next}>Next steps</Text>
         <Text style={lockedStyles.close_nextBody}>{next || clipPdfText(" ", 8)}</Text>
       </View>
+      <LockedNarrativeStack
+        slice={slice}
+        variant="compact"
+        stackRole="afterPrimary"
+        include={["interpretation", "implication"]}
+      />
       <View style={lockedStyles.close_block} wrap={false}>
         <Text style={lockedStyles.close_h_exec}>Execution</Text>
         {phases.map((ph, i) => (

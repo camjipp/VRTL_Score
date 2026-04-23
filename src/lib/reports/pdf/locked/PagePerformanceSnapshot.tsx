@@ -4,10 +4,12 @@ import { PdfInnerPage } from "../components/PdfInnerPage";
 import { clipPdfText } from "../editorial/pdfNarrative";
 import type { ReportData } from "../types";
 import { LOCKED_PAGE_HEADER } from "./layoutConstants";
+import { LockedNarrativeStack } from "./LockedNarrativeStack";
 import { lockedStyles } from "./lockedDocumentStyles";
+import { narrativePerformance } from "./pageNarratives";
 
-const HERO_H = 124;
-const METRIC_H = 64;
+const HERO_H = 110;
+const METRIC_H = 58;
 
 const local = StyleSheet.create({
   hero: { height: HERO_H },
@@ -20,9 +22,10 @@ function fmtScore(n: number | null): string {
 }
 
 export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactElement {
-  const line = clipPdfText(data.bottomLine || data.tensionNote || " ", 200);
+  const slice = narrativePerformance(data);
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[3]!}>
+      <LockedNarrativeStack slice={slice} include={["headline"]} />
       <View style={[lockedStyles.perf_hero, local.hero]} wrap={false}>
         <Text style={lockedStyles.perf_score}>{fmtScore(data.overallScore)}</Text>
         <Text style={lockedStyles.perf_status}>{clipPdfText(data.status, 120)}</Text>
@@ -50,7 +53,11 @@ export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactEl
           </View>
         </View>
       </View>
-      <Text style={lockedStyles.perf_support}>{line}</Text>
+      <LockedNarrativeStack
+        slice={slice}
+        stackRole="afterPrimary"
+        include={["interpretation", "implication", "action"]}
+      />
     </PdfInnerPage>
   );
 }

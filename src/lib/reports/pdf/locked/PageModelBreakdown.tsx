@@ -4,7 +4,9 @@ import { PdfInnerPage } from "../components/PdfInnerPage";
 import { clipPdfText } from "../editorial/pdfNarrative";
 import type { ModelScoreRow, ReportData } from "../types";
 import { LOCKED_PAGE_HEADER } from "./layoutConstants";
+import { LockedNarrativeStack } from "./LockedNarrativeStack";
 import { lockedStyles } from "./lockedDocumentStyles";
+import { narrativeModel } from "./pageNarratives";
 
 const FRACTURE_H = 108;
 const ROW_H = 44;
@@ -14,7 +16,6 @@ const COLS = 3;
 const local = StyleSheet.create({
   fracture: { minHeight: FRACTURE_H },
   gridRow: { flexDirection: "row", height: ROW_H, marginBottom: 6 },
-  takeawayBlock: { marginTop: 24 },
 });
 
 function sortedModels(rows: readonly ModelScoreRow[]): ModelScoreRow[] {
@@ -36,12 +37,14 @@ export function PageModelBreakdown({ data }: { data: ReportData }): ReactElement
   const best = sorted[0];
   const worst = sorted[sorted.length - 1];
   const grid = rowsOfThree(sorted);
+  const slice = narrativeModel(data);
 
   const gap =
     best && worst && best.name !== worst.name ? Math.max(0, Math.round(best.score - worst.score)) : null;
 
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[5]!}>
+      <LockedNarrativeStack slice={slice} include={["headline"]} />
       <View style={[lockedStyles.model_fractureShell, local.fracture]} wrap={false}>
         <Text style={lockedStyles.model_fractureEyebrow}>Models disagree on you</Text>
         {best && worst && best.name !== worst.name ? (
@@ -100,10 +103,11 @@ export function PageModelBreakdown({ data }: { data: ReportData }): ReactElement
           })}
         </View>
       ))}
-      <View style={local.takeawayBlock}>
-        <Text style={lockedStyles.model_takeawayLabel}>Interpretation</Text>
-        <Text style={lockedStyles.model_takeaway}>{clipPdfText(data.strategicTakeaway, 165)}</Text>
-      </View>
+      <LockedNarrativeStack
+        slice={slice}
+        stackRole="afterPrimary"
+        include={["interpretation", "implication", "action"]}
+      />
     </PdfInnerPage>
   );
 }

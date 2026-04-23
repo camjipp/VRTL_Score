@@ -46,7 +46,7 @@ export function ReportDocument({ data, pages }: ReportDocumentProps): ReactEleme
   return (
     <Document title={`AI Authority Report: ${data.clientName}`} author={data.agencyName ?? ""} subject={data.clientName}>
       {want(1) ? <PageCover key="locked-p1" data={data} /> : null}
-      {want(2) ? <PageToc key="locked-p2" /> : null}
+      {want(2) ? <PageToc key="locked-p2" data={data} /> : null}
       {want(3) ? <PagePerformanceSnapshot key="locked-p3" data={data} /> : null}
       {want(4) ? <PageCompetitiveLandscape key="locked-p4" data={data} /> : null}
       {want(5) ? <PageModelBreakdown key="locked-p5" data={data} /> : null}

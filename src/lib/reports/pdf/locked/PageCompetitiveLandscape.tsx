@@ -4,7 +4,9 @@ import { PdfInnerPage } from "../components/PdfInnerPage";
 import { clipPdfText } from "../editorial/pdfNarrative";
 import type { ReportData } from "../types";
 import { LOCKED_PAGE_HEADER } from "./layoutConstants";
+import { LockedNarrativeStack } from "./LockedNarrativeStack";
 import { lockedStyles } from "./lockedDocumentStyles";
+import { narrativeCompetitive } from "./pageNarratives";
 
 const ROW_H = 22;
 const TABLE_ROWS = 6;
@@ -33,9 +35,11 @@ function alertBody(title: string, detail: string): string {
 export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactElement {
   const { win, risk, priority } = data.alerts;
   const tableRows = padRows(data.competitors, TABLE_ROWS);
+  const slice = narrativeCompetitive(data);
 
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[4]!}>
+      <LockedNarrativeStack slice={slice} include={["headline"]} />
       <View style={lockedStyles.comp_alertsRow} wrap={false}>
         <View style={[lockedStyles.comp_alert, local.alertH]}>
           <Text style={lockedStyles.comp_alertEyebrow}>Win</Text>
@@ -80,6 +84,11 @@ export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactE
           );
         })}
       </View>
+      <LockedNarrativeStack
+        slice={slice}
+        stackRole="afterPrimary"
+        include={["interpretation", "implication"]}
+      />
     </PdfInnerPage>
   );
 }
