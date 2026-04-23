@@ -19,8 +19,8 @@ export const reportFrameStyles = StyleSheet.create({
     right: REPORT_FRAME.inset,
     height: REPORT_FRAME.headerHeight,
     justifyContent: "center",
-    borderBottomWidth: LD.border.hairline,
-    borderBottomColor: LD.color.rule,
+    borderBottomWidth: LD.border.accentRule,
+    borderBottomColor: LD.color.ink,
   },
   headerTitle: {
     fontSize: LD.size.titleSm,

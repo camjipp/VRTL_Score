@@ -8,7 +8,7 @@ import { lockedStyles } from "./lockedDocumentStyles";
 
 const ROW_H = 22;
 const TABLE_ROWS = 6;
-const ALERT_H = 64;
+const ALERT_H = 58;
 
 const local = StyleSheet.create({
   alertH: { height: ALERT_H },
@@ -59,19 +59,22 @@ export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactE
           <Text style={[lockedStyles.comp_thText, lockedStyles.comp_cellFlag]}>You</Text>
         </View>
         {tableRows.map((r, i) => {
-          const rowStyle = i % 2 === 1 ? lockedStyles.comp_tableTrAlt : lockedStyles.comp_tableTr;
+          const rowStyle = r?.isClient ? lockedStyles.comp_tableTrClient : lockedStyles.comp_tableTr;
+          const nameStyle = r?.isClient ? lockedStyles.comp_tdClient : lockedStyles.comp_td;
           return (
             <View key={i} style={[rowStyle, local.trH]} wrap={false}>
-              <Text style={[lockedStyles.comp_td, lockedStyles.comp_cellName]}>
+              <Text style={[nameStyle, lockedStyles.comp_cellName]}>
                 {r ? clipPdfText(r.name, 36) : " "}
               </Text>
-              <Text style={[lockedStyles.comp_td, lockedStyles.comp_cellNum]}>{r ? String(r.mentions) : " "}</Text>
+              <Text style={[r?.isClient ? lockedStyles.comp_tdClient : lockedStyles.comp_td, lockedStyles.comp_cellNum]}>
+                {r ? String(r.mentions) : " "}
+              </Text>
               <Text style={[lockedStyles.comp_td, lockedStyles.comp_cellRate]}>
                 {r ? clipPdfText(String(r.rate), 10) : " "}
               </Text>
               <Text style={[lockedStyles.comp_td, lockedStyles.comp_cellRank]}>{r ? String(r.rank) : " "}</Text>
               <Text style={[lockedStyles.comp_tdMuted, lockedStyles.comp_cellFlag]}>
-                {r?.isClient ? "Yes" : r ? "—" : " "}
+                {r?.isClient ? "You" : r ? "—" : " "}
               </Text>
             </View>
           );

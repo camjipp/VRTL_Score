@@ -2,7 +2,7 @@ import { colors, fonts } from "../theme";
 
 /**
  * Design tokens for the locked 9-page report only.
- * Layout geometry lives in `layoutConstants` / per-page constants — not here.
+ * Editorial / premium memo bias: sharp corners, rules over boxes, strong type steps.
  */
 export const LD = {
   font: fonts,
@@ -24,9 +24,11 @@ export const LD = {
 
   /** Typography scale (pt). */
   size: {
+    /** Cover main title — commanding, not dashboard-sized. */
+    coverDisplay: 27,
     display2: 22,
     display1: 40,
-    title: 11,
+    title: 12,
     titleSm: 10,
     lead: 10,
     body: 8.5,
@@ -34,27 +36,23 @@ export const LD = {
     label: 7,
     caption: 6.5,
     micro: 6,
-    tocTitle: 10,
+    tocTitle: 11,
     tocPage: 9,
     metricValue: 12,
     metricHero: 40,
-    /** Performance snapshot command score (dominant focal). */
     commandScore: 56,
-    /** Secondary metric numerals (below hero). */
     metricSecondary: 10,
   },
 
   lineHeight: {
     none: 1,
-    tight: 1.15,
+    tight: 1.12,
     snug: 1.28,
     normal: 1.45,
     relaxed: 1.55,
-    /** Editorial supporting copy. */
     editorial: 1.68,
   },
 
-  /** Spacing rhythm (pt). */
   space: {
     xxs: 2,
     xs: 4,
@@ -63,29 +61,30 @@ export const LD = {
     lg: 12,
     xl: 16,
     xxl: 20,
+    xxxl: 28,
   },
 
+  /** Sharp report geometry — avoid soft SaaS rounding. */
   radius: {
-    xs: 3,
-    sm: 5,
-    md: 6,
+    xs: 0,
+    sm: 0,
+    md: 0,
   },
 
-  /** Hairline / divider */
   border: {
     hairline: 1,
     rule: colors.rule,
     strong: colors.ink4,
+    /** Table / section emphasis */
+    accentRule: 2,
   },
 
-  /** Card interior padding (pt). */
   cardPad: {
-    sm: 10,
-    md: 12,
-    lg: 14,
+    sm: 8,
+    md: 10,
+    lg: 12,
   },
 
-  /** Fixed table row heights (pt) — must match page implementations. */
   row: {
     competitor: 22,
     modelGrid: 44,
@@ -93,6 +92,5 @@ export const LD = {
     evidenceLog: 16,
   },
 
-  /** Letter-spacing for uppercase labels */
-  trackEyebrow: 0.45,
+  trackEyebrow: 0.5,
 } as const;

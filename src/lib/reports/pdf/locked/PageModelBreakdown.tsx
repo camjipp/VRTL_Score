@@ -12,9 +12,9 @@ const MAX_SLOTS = 9;
 const COLS = 3;
 
 const local = StyleSheet.create({
-  fracture: { height: FRACTURE_H },
+  fracture: { minHeight: FRACTURE_H },
   gridRow: { flexDirection: "row", height: ROW_H, marginBottom: 6 },
-  takeawayBlock: { marginTop: 20 },
+  takeawayBlock: { marginTop: 24 },
 });
 
 function sortedModels(rows: readonly ModelScoreRow[]): ModelScoreRow[] {
@@ -81,18 +81,20 @@ export function PageModelBreakdown({ data }: { data: ReportData }): ReactElement
         <View key={ri} style={local.gridRow} wrap={false}>
           {row.map((m, ci) => {
             const last = ci === row.length - 1;
+            if (!m) {
+              const emptyBox = last ? lockedStyles.model_cellEmptyLast : lockedStyles.model_cellEmpty;
+              return (
+                <View key={ci} style={emptyBox}>
+                  <Text style={lockedStyles.model_name}> </Text>
+                </View>
+              );
+            }
             const box = last ? lockedStyles.model_cellLast : lockedStyles.model_cell;
             return (
               <View key={ci} style={box}>
-                {m ? (
-                  <>
-                    <Text style={lockedStyles.model_cellLabel}>Model</Text>
-                    <Text style={lockedStyles.model_name}>{clipPdfText(m.name, 22)}</Text>
-                    <Text style={lockedStyles.model_score}>{clipPdfText(String(m.score), 12)}</Text>
-                  </>
-                ) : (
-                  <Text style={lockedStyles.model_name}> </Text>
-                )}
+                <Text style={lockedStyles.model_cellLabel}>Model</Text>
+                <Text style={lockedStyles.model_name}>{clipPdfText(m.name, 22)}</Text>
+                <Text style={lockedStyles.model_score}>{clipPdfText(String(m.score), 12)}</Text>
               </View>
             );
           })}

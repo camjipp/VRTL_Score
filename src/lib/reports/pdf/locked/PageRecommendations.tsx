@@ -20,13 +20,13 @@ export function PageRecommendations({ data }: { data: ReportData }): ReactElemen
     <PdfInnerPage title={LOCKED_PAGE_HEADER[7]!}>
       <View style={lockedStyles.rec_col}>
         {cards.length === 0 ? (
-          <View style={[lockedStyles.rec_cardLast, local.cardH]} wrap={false}>
+          <View style={[lockedStyles.rec_itemLast, local.cardH]} wrap={false}>
             <Text style={lockedStyles.rec_title}>{clipPdfText("No recommendations in this export.", 120)}</Text>
           </View>
         ) : (
           cards.map((c, i) => {
             const last = i === cards.length - 1;
-            const box = last ? lockedStyles.rec_cardLast : lockedStyles.rec_card;
+            const box = last ? lockedStyles.rec_itemLast : lockedStyles.rec_item;
             return (
               <View key={i} style={[box, local.cardH]} wrap={false}>
                 <Text style={lockedStyles.rec_priority}>{clipPdfText(c.priority, 12)}</Text>
@@ -35,7 +35,7 @@ export function PageRecommendations({ data }: { data: ReportData }): ReactElemen
                 <Text style={lockedStyles.rec_labelFirst}>Context</Text>
                 <Text style={lockedStyles.rec_line}>{clipPdfText(c.explanation, 180)}</Text>
                 <Text style={lockedStyles.rec_label}>Action</Text>
-                <Text style={lockedStyles.rec_line}>{clipPdfText(c.action, 150)}</Text>
+                <Text style={lockedStyles.rec_actionLine}>{clipPdfText(c.action, 150)}</Text>
                 <Text style={lockedStyles.rec_label}>Outcome</Text>
                 <Text style={lockedStyles.rec_line}>{clipPdfText(c.expectedOutcome, 110)}</Text>
               </View>

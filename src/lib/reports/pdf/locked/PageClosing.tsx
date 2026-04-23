@@ -25,7 +25,11 @@ export function PageClosing({ data }: { data: ReportData }): ReactElement {
 
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[9]!}>
-      <View style={lockedStyles.close_block}>
+      <View style={lockedStyles.close_block} wrap={false}>
+        <Text style={lockedStyles.close_h_next}>Next steps</Text>
+        <Text style={lockedStyles.close_nextBody}>{next || clipPdfText(" ", 8)}</Text>
+      </View>
+      <View style={lockedStyles.close_block} wrap={false}>
         <Text style={lockedStyles.close_h_exec}>Execution</Text>
         {phases.map((ph, i) => (
           <View key={i} style={{ marginBottom: 8 }} wrap={false}>
@@ -34,13 +38,9 @@ export function PageClosing({ data }: { data: ReportData }): ReactElement {
           </View>
         ))}
       </View>
-      <View style={lockedStyles.close_block} wrap={false}>
+      <View style={lockedStyles.close_blockTight} wrap={false}>
         <Text style={lockedStyles.close_h_method}>Methodology</Text>
         <Text style={lockedStyles.close_methodBody}>{clipPdfText(data.methodology, 280)}</Text>
-      </View>
-      <View style={lockedStyles.close_block} wrap={false}>
-        <Text style={lockedStyles.close_h_next}>Next steps</Text>
-        <Text style={lockedStyles.close_nextBody}>{next || clipPdfText(" ", 8)}</Text>
       </View>
       <View style={lockedStyles.close_logWrap} wrap={false}>
         <Text style={lockedStyles.close_logEyebrow}>Evidence appendix</Text>
