@@ -1,5 +1,6 @@
 import { normalizeDisplayText } from "@/lib/text/normalizeDisplayText";
-import type { ReportData, VulnerableExcerptParts } from "./types";
+import { clipPdfText } from "./editorial/pdfNarrative";
+import type { CompetitiveTableRow, CompetitorRow, ReportData, VulnerableExcerptParts } from "./types";
 
 /**
  * Normalize user- and model-generated strings for reliable PDF rendering.
@@ -108,6 +109,101 @@ function tryParseLooseJson(cleaned: string): unknown | null {
 }
 
 /** JSON-like evidence snippets → plain-language lines (client PDF; no raw code blocks). */
+function titleCaseWords(s: string): string {
+  const t = s.trim();
+  if (!t) return t;
+  return t
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
+/** Merge case-variant brand rows (e.g. “hydro flask” + “Hydro Flask”) for consistent PDF tables. */
+function mergeCompetitorRows(rows: readonly CompetitorRow[]): CompetitorRow[] {
+  const m = new Map<
+    string,
+    { mentions: number; rate: number; isClient: boolean; display: string }
+  >();
+  for (const r of rows) {
+    const key = r.name.trim().toLowerCase();
+    if (!key) continue;
+    const display = titleCaseWords(r.name.trim());
+    const cur = m.get(key);
+    if (!cur) {
+      m.set(key, {
+        mentions: r.mentions,
+        rate: r.rate,
+        isClient: Boolean(r.isClient),
+        display,
+      });
+    } else {
+      const totalM = cur.mentions + r.mentions;
+      const wr =
+        totalM > 0
+          ? Math.round((cur.rate * cur.mentions + r.rate * r.mentions) / totalM)
+          : cur.rate;
+      m.set(key, {
+        mentions: totalM,
+        rate: wr,
+        isClient: cur.isClient || Boolean(r.isClient),
+        display: cur.display.length >= display.length ? cur.display : display,
+      });
+    }
+  }
+  return [...m.values()]
+    .map((v) => ({
+      name: v.display,
+      mentions: v.mentions,
+      rate: v.rate,
+      rank: 0,
+      isClient: v.isClient,
+    }))
+    .sort((a, b) => b.mentions - a.mentions)
+    .map((r, i) => ({ ...r, rank: i + 1 }));
+}
+
+function mergeCompetitiveTableRows(rows: readonly CompetitiveTableRow[]): CompetitiveTableRow[] {
+  const you = rows.find((r) => r.status === "You");
+  const others = rows.filter((r) => r.status !== "You");
+  const m = new Map<string, { mentions: number; rate: string; brand: string }>();
+  for (const r of others) {
+    const key = r.brand.trim().toLowerCase();
+    if (!key) continue;
+    const brand = titleCaseWords(r.brand.trim());
+    const ex = m.get(key);
+    if (!ex) m.set(key, { mentions: r.mentions, rate: r.rate, brand });
+    else m.set(key, { mentions: ex.mentions + r.mentions, rate: ex.rate, brand: ex.brand });
+  }
+  const clientM = you?.mentions ?? 0;
+  const mergedOthers = [...m.values()]
+    .map((v) => {
+      const gap = v.mentions - clientM;
+      const status: CompetitiveTableRow["status"] =
+        gap > 0 ? "Ahead" : gap < 0 ? "Behind" : "Tied";
+      return {
+        brand: v.brand,
+        mentions: v.mentions,
+        rate: v.rate,
+        vsYou: gap > 0 ? `+${gap}` : String(gap),
+        status,
+      } satisfies CompetitiveTableRow;
+    })
+    .sort((a, b) => b.mentions - a.mentions);
+  if (you) {
+    return [
+      {
+        ...you,
+        brand: titleCaseWords(you.brand),
+        vsYou: "—",
+        status: "You" as const,
+      },
+      ...mergedOthers,
+    ];
+  }
+  return mergedOthers;
+}
+
 export function formatEvidenceSnippetForPdf(raw: string): string {
   const stripped = stripCodeFencesAndBackticks(String(raw));
   const cleaned = sanitizePdfString(stripped).trim();
@@ -168,12 +264,40 @@ export function buildVulnerableExcerptForPdf(
   snippet: string,
   note: string | undefined,
   competitorNames: readonly string[],
+  clientBrand: string,
 ): VulnerableExcerptParts {
   const n = note != null ? sanitizePdfString(note).trim() : "";
   const base = formatEvidenceSnippetForPdf(snippet);
   const loose = tryParseLooseJson(stripCodeFencesAndBackticks(String(snippet)).trim());
   if (loose && typeof loose === "object" && !Array.isArray(loose)) {
     const o = loose as Record<string, unknown>;
+    const clientMentioned = o.client_mentioned;
+    if (clientMentioned === false || clientMentioned === "false" || clientMentioned === 0) {
+      const cm = o.competitors_mentioned;
+      let names: string[] = [];
+      if (Array.isArray(cm)) {
+        const seen = new Set<string>();
+        for (const x of cm) {
+          const w = titleCaseWords(sanitizePdfString(String(x)));
+          const k = w.toLowerCase();
+          if (k && !seen.has(k)) {
+            seen.add(k);
+            names.push(w);
+          }
+        }
+      }
+      const competitorsLine =
+        names.length > 0
+          ? names.join(", ")
+          : competitorNames.length > 0
+            ? competitorNames.slice(0, 8).join(", ")
+            : "Other brands received the recommendation instead.";
+      return {
+        summary: `${sanitizePdfString(clientBrand || "Your brand")} was not mentioned in this response.`,
+        competitorsLine,
+        implication: "This is direct lost recommendation share.",
+      };
+    }
     const summary =
       [o.summary, o.message, o.headline, o.description]
         .map((x) => (typeof x === "string" ? sanitizePdfString(x).trim() : ""))
@@ -181,7 +305,17 @@ export function buildVulnerableExcerptForPdf(
     const compsRaw = o.competitors ?? o.competitor_names ?? o.brands;
     let competitorsLine = "";
     if (Array.isArray(compsRaw)) {
-      competitorsLine = compsRaw.map((x) => sanitizePdfString(String(x))).filter(Boolean).join(", ");
+      const seen = new Set<string>();
+      const parts: string[] = [];
+      for (const x of compsRaw) {
+        const w = titleCaseWords(sanitizePdfString(String(x)));
+        const k = w.toLowerCase();
+        if (k && !seen.has(k)) {
+          seen.add(k);
+          parts.push(w);
+        }
+      }
+      competitorsLine = parts.join(", ");
     } else if (typeof compsRaw === "string") {
       competitorsLine = sanitizePdfString(compsRaw);
     } else if (typeof o.competitor === "string") {
@@ -201,20 +335,41 @@ export function buildVulnerableExcerptForPdf(
     };
   }
 
-  const summary =
-    base.length > 220 ? `${base.slice(0, 217).trim()}…` : base || "Exposure in this signal is elevated.";
+  const summary = base || "Exposure in this signal is elevated.";
   const competitorsLine = competitorNames.length
     ? competitorNames.slice(0, 6).join(", ")
     : "See competitive table for named alternatives.";
   const implication = n || "Prioritize proof and structured answers for the query shapes where you are weakest.";
-  return { summary, competitorsLine, implication };
+  return {
+    summary: clipPdfText(summary),
+    competitorsLine: clipPdfText(competitorsLine),
+    implication: clipPdfText(implication),
+  };
 }
 
 /** Deep-copy ReportData with every string field sanitized for PDF output. */
 export function sanitizeReportDataForPdf(data: ReportData): ReportData {
+  const competitorsMerged = mergeCompetitorRows(data.competitors).map((c) => ({
+    ...c,
+    name: sanitizePdfString(c.name),
+  }));
+  const competitiveTableMerged = mergeCompetitiveTableRows(data.competitiveTable).map((r) => ({
+    ...r,
+    brand: sanitizePdfString(r.brand),
+    rate: sanitizePdfString(r.rate),
+    vsYou: sanitizePdfString(r.vsYou),
+  }));
+  const othersPre = data.competitiveTable.filter((r) => r.status !== "You").length;
+  const othersPost = competitiveTableMerged.filter((r) => r.status !== "You").length;
+  const integrityNote =
+    competitorsMerged.length < data.competitors.length || othersPost < othersPre
+      ? "Name variants were combined for accuracy."
+      : undefined;
+  const clientBrand = sanitizePdfString(data.clientName);
+
   return {
     ...data,
-    clientName: sanitizePdfString(data.clientName),
+    clientName: clientBrand,
     domain: sanitizePdfString(data.domain),
     date: sanitizePdfString(data.date),
     status: sanitizePdfString(data.status),
@@ -227,15 +382,13 @@ export function sanitizeReportDataForPdf(data: ReportData): ReportData {
     recommendedNextStepsVisible: data.recommendedNextStepsVisible,
     agencyLogoUrl: data.agencyLogoUrl,
     agencyName: data.agencyName == null ? data.agencyName : sanitizePdfString(data.agencyName),
+    integrityNote,
     meta: {
       responses: data.meta.responses,
       confidence: sanitizePdfString(data.meta.confidence),
       generated: sanitizePdfString(data.meta.generated),
     },
-    competitors: data.competitors.map((c) => ({
-      ...c,
-      name: sanitizePdfString(c.name),
-    })),
+    competitors: competitorsMerged,
     modelScores: data.modelScores.map((m) => ({
       ...m,
       name: sanitizePdfString(m.name),
@@ -267,10 +420,10 @@ export function sanitizeReportDataForPdf(data: ReportData): ReportData {
       const label = sanitizePdfString(e.label);
       const rawSnip = String(e.snippet);
       const snippet = formatEvidenceSnippetForPdf(rawSnip);
-      const competitorNames = data.competitors.map((c) => sanitizePdfString(c.name));
+      const competitorNames = competitorsMerged.map((c) => c.name);
       let vulnerableExcerpt: VulnerableExcerptParts | undefined =
         label.toUpperCase().includes("VULNERABLE") || label.toUpperCase().includes("INVISIBLE")
-          ? buildVulnerableExcerptForPdf(rawSnip, e.note, competitorNames)
+          ? buildVulnerableExcerptForPdf(rawSnip, e.note, competitorNames, clientBrand)
           : undefined;
       if (vulnerableExcerpt && vulnerableExcerptBlobUnsafe(vulnerableExcerpt, rawSnip)) {
         vulnerableExcerpt = undefined;
@@ -294,12 +447,7 @@ export function sanitizeReportDataForPdf(data: ReportData): ReportData {
       rate: sanitizePdfString(s.rate),
       actionNote: sanitizePdfString(s.actionNote),
     })),
-    competitiveTable: data.competitiveTable.map((r) => ({
-      ...r,
-      brand: sanitizePdfString(r.brand),
-      rate: sanitizePdfString(r.rate),
-      vsYou: sanitizePdfString(r.vsYou),
-    })),
+    competitiveTable: competitiveTableMerged,
     evidenceLog: data.evidenceLog.map((r) => ({
       ...r,
       label: sanitizePdfString(r.label),

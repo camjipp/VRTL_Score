@@ -1,10 +1,19 @@
 import type { ModelScoreRow, ReportData } from "../types";
 
-/** Hard cap for PDF prose blocks (react-pdf layout). */
-export function clipPdfText(s: string, max: number): string {
+const PDF_TEXT_HARD_MAX = 14_000;
+
+/**
+ * Trims and optionally caps PDF strings. Omit `max` (or pass a large value) for full prose so
+ * client-facing sentences are not cut mid-thought; use a modest `max` only for tight table cells.
+ */
+export function clipPdfText(s: string, max: number = PDF_TEXT_HARD_MAX): string {
   const t = String(s).replace(/\s+/g, " ").trim();
-  if (t.length <= max) return t;
-  return `${t.slice(0, max - 1).replace(/[\s,;:.!]+$/, "")}…`;
+  const cap = Math.min(Math.max(max, 1), PDF_TEXT_HARD_MAX);
+  if (t.length <= cap) return t;
+  let cut = t.slice(0, cap - 1);
+  const sp = cut.lastIndexOf(" ");
+  if (sp > cap * 0.55) cut = cut.slice(0, sp);
+  return `${cut.replace(/[\s,;:.!]+$/, "").trimEnd()}…`;
 }
 
 function sortedByMentions(data: ReportData) {
@@ -77,9 +86,9 @@ export function pageOneSignalCardBodies(data: ReportData): readonly [string, str
   if (!best || !worst || best.name === worst.name) {
     const a = data.alerts;
     return [
-      clipPdfText(`${a.win.title} ${a.win.detail}`.replace(/\s+/g, " ").trim(), 72),
-      clipPdfText(`${a.risk.title} ${a.risk.detail}`.replace(/\s+/g, " ").trim(), 72),
-      clipPdfText(`${a.priority.title} ${a.priority.detail}`.replace(/\s+/g, " ").trim(), 72),
+      clipPdfText(`${a.win.title} ${a.win.detail}`.replace(/\s+/g, " ").trim()),
+      clipPdfText(`${a.risk.title} ${a.risk.detail}`.replace(/\s+/g, " ").trim()),
+      clipPdfText(`${a.priority.title} ${a.priority.detail}`.replace(/\s+/g, " ").trim()),
     ] as const;
   }
 
@@ -139,9 +148,9 @@ export function pageOneWhatMattersLines(data: ReportData): readonly [string, str
 
   if (!best || !worst || best.name === worst.name) {
     return [
-      clipPdfText(`${data.alerts.win.title} ${data.alerts.win.detail}`.replace(/\s+/g, " ").trim(), 130),
-      clipPdfText(`${data.alerts.risk.title} ${data.alerts.risk.detail}`.replace(/\s+/g, " ").trim(), 130),
-      clipPdfText(`${data.alerts.priority.title} ${data.alerts.priority.detail}`.replace(/\s+/g, " ").trim(), 130),
+      clipPdfText(`${data.alerts.win.title} ${data.alerts.win.detail}`.replace(/\s+/g, " ").trim()),
+      clipPdfText(`${data.alerts.risk.title} ${data.alerts.risk.detail}`.replace(/\s+/g, " ").trim()),
+      clipPdfText(`${data.alerts.priority.title} ${data.alerts.priority.detail}`.replace(/\s+/g, " ").trim()),
     ] as const;
   }
 
@@ -165,7 +174,7 @@ export function pageOneWhatMattersLines(data: ReportData): readonly [string, str
       ? `You are not showing on ${worst.name} (${worst.score}), which creates direct exposure risk.`
       : `You lag on ${worst.name} (${worst.score}), which creates exposure when buyers use that path.`;
 
-  return [clipPdfText(line1, 130), clipPdfText(line2, 130), clipPdfText(line3, 130)] as const;
+  return [clipPdfText(line1), clipPdfText(line2), clipPdfText(line3)] as const;
 }
 
 /** Page 1 — short closing read under insights (mention/absence framing). */
@@ -208,7 +217,7 @@ export function competitivePositionIntro(data: ReportData): string {
 }
 
 export function competitivePositionImplication(data: ReportData): string {
-  return clipPdfText(`${data.alerts.risk.title}: ${data.alerts.risk.detail}`, 220);
+  return clipPdfText(`${data.alerts.risk.title}: ${data.alerts.risk.detail}`);
 }
 
 export function modelAnalysisPurpose(spread: number): string {

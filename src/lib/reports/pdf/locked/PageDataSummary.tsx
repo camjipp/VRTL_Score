@@ -44,12 +44,7 @@ export function PageDataSummary({ data }: { data: ReportData }): ReactElement {
         <View style={lockedStyles.data_bandHeader}>
           <Text style={lockedStyles.data_bandTitle}>Signal summary</Text>
         </View>
-        <LockedNarrativeStack
-          slice={slice}
-          variant="compact"
-          compactMaxHeight={108}
-          include={["headline", "interpretation", "implication"]}
-        />
+        <LockedNarrativeStack slice={slice} variant="compact" include={["headline", "interpretation"]} />
         <View style={[lockedStyles.data_th, local.thH]}>
           <Text style={[lockedStyles.data_thText, lockedStyles.data_sigA]}>Signal</Text>
           <Text style={[lockedStyles.data_thText, lockedStyles.data_sigB]}>Count</Text>
@@ -59,9 +54,7 @@ export function PageDataSummary({ data }: { data: ReportData }): ReactElement {
         </View>
         {signals.map((r, i) => (
           <View key={`s-${i}`} style={[lockedStyles.data_tr, local.trH]} wrap={false}>
-            <Text style={[lockedStyles.data_td, lockedStyles.data_sigA]}>
-              {r ? clipPdfText(r.signal, 40) : " "}
-            </Text>
+            <Text style={[lockedStyles.data_td, lockedStyles.data_sigA]}>{r ? clipPdfText(r.signal) : " "}</Text>
             <Text style={[lockedStyles.data_td, lockedStyles.data_sigB]}>{r ? String(r.count) : " "}</Text>
             <Text style={[lockedStyles.data_tdMuted, lockedStyles.data_sigC]}>
               {r ? clipPdfText(r.rate, 10) : " "}
@@ -70,7 +63,7 @@ export function PageDataSummary({ data }: { data: ReportData }): ReactElement {
               {r ? clipPdfText(r.status, 12) : " "}
             </Text>
             <Text style={[lockedStyles.data_td, lockedStyles.data_sigE]}>
-              {r ? clipPdfText(r.actionNote, 48) : " "}
+              {r ? clipPdfText(r.actionNote) : " "}
             </Text>
           </View>
         ))}
@@ -80,6 +73,7 @@ export function PageDataSummary({ data }: { data: ReportData }): ReactElement {
         <View style={lockedStyles.data_bandHeader}>
           <Text style={lockedStyles.data_bandTitleSecondary}>Competitive set</Text>
         </View>
+        <LockedNarrativeStack slice={slice} variant="compact" include={["implication"]} />
         <View style={[lockedStyles.data_th, local.thH]}>
           <Text style={[lockedStyles.data_thText, lockedStyles.data_compA]}>Brand</Text>
           <Text style={[lockedStyles.data_thText, lockedStyles.data_compB]}>Mentions</Text>
@@ -89,9 +83,7 @@ export function PageDataSummary({ data }: { data: ReportData }): ReactElement {
         </View>
         {comp.map((r, i) => (
           <View key={`c-${i}`} style={[lockedStyles.data_tr, local.trH]} wrap={false}>
-            <Text style={[lockedStyles.data_td, lockedStyles.data_compA]}>
-              {r ? clipPdfText(r.brand, 32) : " "}
-            </Text>
+            <Text style={[lockedStyles.data_td, lockedStyles.data_compA]}>{r ? clipPdfText(r.brand) : " "}</Text>
             <Text style={[lockedStyles.data_td, lockedStyles.data_compB]}>{r ? String(r.mentions) : " "}</Text>
             <Text style={[lockedStyles.data_tdMuted, lockedStyles.data_compC]}>
               {r ? clipPdfText(r.rate, 10) : " "}

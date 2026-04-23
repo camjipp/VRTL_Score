@@ -19,9 +19,11 @@ export const lockedStyles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
     paddingHorizontal: LD.space.xxxl,
+    paddingTop: 96,
+    paddingBottom: 72,
   },
   cover_rule: {
     width: 56,
@@ -72,8 +74,6 @@ export const lockedStyles = StyleSheet.create({
   },
   nar_stackCompact: {
     marginBottom: LD.space.sm + 2,
-    maxHeight: 58,
-    overflow: "hidden",
   },
   nar_stackCover: {
     marginBottom: 0,
@@ -152,6 +152,14 @@ export const lockedStyles = StyleSheet.create({
     fontFamily: LD.font.sans,
     color: LD.color.ink2,
     lineHeight: LD.lineHeight.relaxed,
+    marginBottom: LD.space.sm,
+    maxWidth: "100%",
+  },
+  perf_transparency: {
+    fontSize: LD.size.micro,
+    fontFamily: LD.font.sans,
+    color: LD.color.ink4,
+    lineHeight: LD.lineHeight.normal,
     marginBottom: LD.space.lg,
     maxWidth: "100%",
   },
@@ -168,7 +176,7 @@ export const lockedStyles = StyleSheet.create({
     flex: 1,
     paddingTop: LD.space.sm,
   },
-  perf_tierLine: {
+  perf_scoreContext: {
     fontSize: LD.size.title,
     fontFamily: LD.font.sansBold,
     color: LD.color.ink2,
@@ -391,8 +399,16 @@ export const lockedStyles = StyleSheet.create({
     fontFamily: LD.font.sans,
     color: LD.color.ink2,
     lineHeight: LD.lineHeight.relaxed,
-    marginBottom: LD.space.lg,
+    marginBottom: LD.space.sm,
     maxWidth: "100%",
+  },
+  comp_integrityNote: {
+    fontSize: LD.size.micro,
+    fontFamily: LD.font.sans,
+    color: LD.color.ink4,
+    fontStyle: "italic",
+    marginBottom: LD.space.lg,
+    lineHeight: LD.lineHeight.normal,
   },
   comp_alertsRow: { flexDirection: "row", marginBottom: LD.space.xl },
   comp_alert: {
@@ -609,6 +625,20 @@ export const lockedStyles = StyleSheet.create({
     color: LD.color.ink,
     letterSpacing: -0.2,
   },
+  model_scoreBarTrack: {
+    flexDirection: "row",
+    height: 4,
+    marginTop: LD.space.sm,
+    width: "100%",
+  },
+  model_scoreBarFill: {
+    backgroundColor: LD.color.accent,
+    height: 4,
+  },
+  model_scoreBarRest: {
+    backgroundColor: LD.color.rule,
+    height: 4,
+  },
   model_takeawayLabel: {
     fontSize: LD.size.micro,
     fontFamily: LD.font.sansBold,
@@ -692,6 +722,21 @@ export const lockedStyles = StyleSheet.create({
     color: LD.color.ink3,
     lineHeight: LD.lineHeight.editorial,
     fontFamily: LD.font.sans,
+  },
+  ev_listIntro: {
+    fontSize: LD.size.bodySm,
+    fontFamily: LD.font.sansBold,
+    color: LD.color.ink2,
+    marginBottom: LD.space.xs,
+    marginTop: LD.space.xs,
+  },
+  ev_bullet: {
+    fontSize: LD.size.bodySm,
+    color: LD.color.ink2,
+    lineHeight: LD.lineHeight.relaxed,
+    fontFamily: LD.font.sans,
+    marginBottom: LD.space.xxs,
+    paddingLeft: LD.space.sm,
   },
   ev_note: {
     fontSize: LD.size.caption,
@@ -908,11 +953,23 @@ export const lockedStyles = StyleSheet.create({
     flexDirection: "row",
     borderBottomWidth: LD.border.hairline,
     borderBottomColor: LD.color.rule,
-    alignItems: "center",
-    overflow: "hidden",
+    alignItems: "flex-start",
+    paddingVertical: 3,
     backgroundColor: LD.color.paper,
   },
-  close_logCell: { fontSize: LD.size.micro, color: LD.color.ink4, fontFamily: LD.font.sans },
+  close_logCell: {
+    fontSize: LD.size.micro,
+    color: LD.color.ink4,
+    fontFamily: LD.font.sans,
+    lineHeight: LD.lineHeight.normal,
+  },
+  close_logCellMuted: {
+    fontSize: 6,
+    color: LD.color.ink4,
+    fontFamily: LD.font.sans,
+    lineHeight: LD.lineHeight.normal,
+    marginTop: 2,
+  },
   close_logThText: {
     fontSize: LD.size.micro,
     fontFamily: LD.font.sansBold,

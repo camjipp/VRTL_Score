@@ -27,9 +27,9 @@ function padRows<T>(rows: readonly T[], n: number): (T | null)[] {
 function alertBody(title: string, detail: string): string {
   const t = title.replace(/\s+/g, " ").trim();
   const d = detail.replace(/\s+/g, " ").trim();
-  if (!t) return clipPdfText(d, 200);
-  if (!d) return clipPdfText(t, 200);
-  return clipPdfText(`${t} — ${d}`, 200);
+  if (!t) return clipPdfText(d);
+  if (!d) return clipPdfText(t);
+  return clipPdfText(`${t} — ${d}`);
 }
 
 export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactElement {
@@ -41,11 +41,9 @@ export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactE
     <PdfInnerPage title={LOCKED_PAGE_HEADER[4]!}>
       <LockedNarrativeStack slice={slice} include={["headline"]} />
       <Text style={lockedStyles.comp_tableIntro}>
-        {clipPdfText(
-          "This table shows how often each brand is recommended and how they rank against you in this export.",
-          160,
-        )}
+        {clipPdfText("This table shows how often each brand is recommended and how they compare to you.")}
       </Text>
+      {data.integrityNote ? <Text style={lockedStyles.comp_integrityNote}>{data.integrityNote}</Text> : null}
       <View style={lockedStyles.comp_alertsRow} wrap={false}>
         <View style={[lockedStyles.comp_alert, local.alertH]}>
           <Text style={lockedStyles.comp_alertEyebrow}>Win</Text>
@@ -74,7 +72,7 @@ export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactE
           return (
             <View key={i} style={[rowStyle, local.trH]} wrap={false}>
               <Text style={[nameStyle, lockedStyles.comp_cellName]}>
-                {r ? clipPdfText(r.name, 36) : " "}
+                {r ? clipPdfText(r.name) : " "}
               </Text>
               <Text style={[r?.isClient ? lockedStyles.comp_tdClient : lockedStyles.comp_td, lockedStyles.comp_cellNum]}>
                 {r ? String(r.mentions) : " "}

@@ -9,7 +9,7 @@ import { lockedStyles } from "./lockedDocumentStyles";
 import { narrativeModel } from "./pageNarratives";
 
 const FRACTURE_H = 108;
-const ROW_H = 44;
+const ROW_H = 52;
 const MAX_SLOTS = 9;
 const COLS = 3;
 
@@ -20,6 +20,17 @@ const local = StyleSheet.create({
 
 function sortedModels(rows: readonly ModelScoreRow[]): ModelScoreRow[] {
   return [...rows].sort((a, b) => b.score - a.score);
+}
+
+function ModelScoreBar({ score }: { score: number }): ReactElement {
+  const s = Math.min(100, Math.max(0, score));
+  const rest = 100 - s;
+  return (
+    <View style={lockedStyles.model_scoreBarTrack} wrap={false}>
+      <View style={[lockedStyles.model_scoreBarFill, { flex: Math.max(1, s) }]} />
+      <View style={[lockedStyles.model_scoreBarRest, { flex: Math.max(1, rest) }]} />
+    </View>
+  );
 }
 
 function rowsOfThree(models: ModelScoreRow[]): (ModelScoreRow | null)[][] {
@@ -46,13 +57,16 @@ export function PageModelBreakdown({ data }: { data: ReportData }): ReactElement
     <PdfInnerPage title={LOCKED_PAGE_HEADER[5]!}>
       <LockedNarrativeStack slice={slice} include={["headline"]} />
       <View style={[lockedStyles.model_fractureShell, local.fracture]} wrap={false}>
-        <Text style={lockedStyles.model_fractureEyebrow}>Models disagree on you</Text>
+        <Text style={lockedStyles.model_fractureEyebrow}>
+          {gap != null && gap >= 15 ? `${gap}-point spread across models` : "Models disagree on you"}
+        </Text>
         {best && worst && best.name !== worst.name ? (
           <View style={lockedStyles.model_fractureRow}>
             <View style={[lockedStyles.model_pole, lockedStyles.model_poleBest]}>
               <Text style={lockedStyles.model_poleLabel}>Strongest read</Text>
-              <Text style={lockedStyles.model_poleName}>{clipPdfText(best.name, 22)}</Text>
+              <Text style={lockedStyles.model_poleName}>{clipPdfText(best.name)}</Text>
               <Text style={lockedStyles.model_poleScore}>{String(best.score)}</Text>
+              <ModelScoreBar score={best.score} />
             </View>
             <View style={lockedStyles.model_gapColumn}>
               <Text style={lockedStyles.model_gapLabel}>Spread</Text>
@@ -61,18 +75,20 @@ export function PageModelBreakdown({ data }: { data: ReportData }): ReactElement
             </View>
             <View style={[lockedStyles.model_pole, lockedStyles.model_poleWorst]}>
               <Text style={lockedStyles.model_poleLabel}>Weakest read</Text>
-              <Text style={lockedStyles.model_poleName}>{clipPdfText(worst.name, 22)}</Text>
+              <Text style={lockedStyles.model_poleName}>{clipPdfText(worst.name)}</Text>
               <Text style={lockedStyles.model_poleScore}>{String(worst.score)}</Text>
+              <ModelScoreBar score={worst.score} />
             </View>
           </View>
         ) : best ? (
           <View style={lockedStyles.model_fractureRow}>
             <View style={[lockedStyles.model_pole, lockedStyles.model_poleBest, { flex: 1, marginRight: 0 }]}>
               <Text style={lockedStyles.model_poleLabel}>Primary signal</Text>
-              <Text style={lockedStyles.model_poleName}>{clipPdfText(best.name, 28)}</Text>
+              <Text style={lockedStyles.model_poleName}>{clipPdfText(best.name)}</Text>
               <Text style={lockedStyles.model_poleScore}>{String(best.score)}</Text>
+              <ModelScoreBar score={best.score} />
               <Text style={[lockedStyles.model_gapCaption, { marginTop: 6, textAlign: "left" }]}>
-                {clipPdfText("Add model coverage to measure how assistants diverge on you.", 96)}
+                {clipPdfText("Add model coverage to measure how assistants diverge on you.")}
               </Text>
             </View>
           </View>
@@ -96,8 +112,9 @@ export function PageModelBreakdown({ data }: { data: ReportData }): ReactElement
             return (
               <View key={ci} style={box}>
                 <Text style={lockedStyles.model_cellLabel}>Model</Text>
-                <Text style={lockedStyles.model_name}>{clipPdfText(m.name, 22)}</Text>
-                <Text style={lockedStyles.model_score}>{clipPdfText(String(m.score), 12)}</Text>
+                <Text style={lockedStyles.model_name}>{clipPdfText(m.name)}</Text>
+                <Text style={lockedStyles.model_score}>{clipPdfText(String(m.score))}</Text>
+                <ModelScoreBar score={m.score} />
               </View>
             );
           })}

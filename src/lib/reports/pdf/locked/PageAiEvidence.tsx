@@ -32,58 +32,69 @@ function looksLikeStructuredBlob(s: string): boolean {
 
 function strengthBody(data: ReportData): string {
   const s = findStrengthPreview(data.evidencePreview);
-  if (!s?.snippet?.trim()) return clipPdfText("No strength excerpt in this export.", 280);
+  if (!s?.snippet?.trim()) return clipPdfText("No strength excerpt in this export.");
   const raw = String(s.snippet).trim();
   if (looksLikeStructuredBlob(raw)) {
     return clipPdfText(
-      `In this answer, ${clipPdfText(brandName(data), 28)} is positioned as a brand the assistant is willing to recommend.`,
-      200,
+      `In this answer, ${brandName(data)} is positioned as a brand the assistant is willing to recommend.`,
     );
   }
-  return clipPdfText(raw, 280);
+  return clipPdfText(raw);
 }
 
-function vulnerableFromParts(parts: VulnerableExcerptParts): { lead: string; detail: string; impact: string } {
-  const summary = parts.summary.replace(/\s+/g, " ").trim();
-  const names = parts.competitorsLine.replace(/\s+/g, " ").trim();
-  const impl = parts.implication.replace(/\s+/g, " ").trim();
-  const lead = clipPdfText(summary, 118);
-  const detail = names
-    ? clipPdfText(`Competitors recommended in the same answer include ${names.replace(/\.$/, "")}.`, 130)
-    : "";
-  const impact = clipPdfText(impl, 108);
-  return { lead, detail, impact };
+function competitorBulletsFromLine(namesLine: string): string[] {
+  const t = namesLine.replace(/\s+/g, " ").trim();
+  if (!t) return [];
+  return t
+    .split(/\s*,\s*|\s*;\s*|\s+and\s+/i)
+    .map((s) => s.trim().replace(/\.$/, ""))
+    .filter(Boolean);
+}
+
+function vulnerableBlockFromParts(parts: VulnerableExcerptParts): ReactElement {
+  const lead = clipPdfText(parts.summary.replace(/\s+/g, " ").trim());
+  const bullets = competitorBulletsFromLine(parts.competitorsLine);
+  const impact = clipPdfText(parts.implication.replace(/\s+/g, " ").trim());
+  return (
+    <View style={lockedStyles.ev_quote}>
+      <Text style={lockedStyles.ev_quoteLead}>{lead}</Text>
+      {bullets.length > 0 ? (
+        <>
+          <Text style={lockedStyles.ev_listIntro}>Instead, AI recommended:</Text>
+          {bullets.map((b, i) => (
+            <Text key={i} style={lockedStyles.ev_bullet}>
+              {`• ${clipPdfText(b)}`}
+            </Text>
+          ))}
+        </>
+      ) : null}
+      {impact ? <Text style={lockedStyles.ev_quoteImpact}>{impact}</Text> : null}
+    </View>
+  );
 }
 
 export function PageAiEvidence({ data }: { data: ReportData }): ReactElement {
   const s = findStrengthPreview(data.evidencePreview);
   const v = findVulnerablePreview(data.evidencePreview);
   const vulnParts = normalizeVulnerableExcerptParts(v);
-  const strengthHint = s ? clipPdfText(formatEvidenceLogPillLabel(String(s.label)), 48) : "";
-  const vulnHint = v ? clipPdfText(formatEvidenceLogPillLabel(String(v.label)), 48) : "";
+  const strengthHint = s ? clipPdfText(formatEvidenceLogPillLabel(String(s.label)), 80) : "";
+  const vulnHint = v ? clipPdfText(formatEvidenceLogPillLabel(String(v.label)), 80) : "";
 
-  const strengthNote = s?.note?.trim() ? clipPdfText(String(s.note), 90) : "";
+  const strengthNote =
+    s?.note?.trim() && !looksLikeStructuredBlob(String(s.note)) ? clipPdfText(String(s.note)) : "";
 
   let vulnerableQuote: ReactElement;
   if (vulnParts) {
-    const { lead, detail, impact } = vulnerableFromParts(vulnParts);
-    vulnerableQuote = (
-      <View style={lockedStyles.ev_quote}>
-        <Text style={lockedStyles.ev_quoteLead}>{lead}</Text>
-        {detail ? <Text style={lockedStyles.ev_quoteDetail}>{detail}</Text> : null}
-        {impact ? <Text style={lockedStyles.ev_quoteImpact}>{impact}</Text> : null}
-      </View>
-    );
+    vulnerableQuote = vulnerableBlockFromParts(vulnParts);
   } else {
     const raw = v?.snippet?.trim() ? String(v.snippet) : "";
     const body = raw
       ? looksLikeStructuredBlob(raw)
         ? clipPdfText(
-            `${clipPdfText(brandName(data), 28)} was not mentioned in this response; the assistant recommended other brands instead.`,
-            200,
+            `${brandName(data)} was not mentioned in this response. The assistant recommended other brands instead.`,
           )
-        : clipPdfText(raw, 240)
-      : clipPdfText("No exposure excerpt in this export.", 120);
+        : clipPdfText(raw)
+      : clipPdfText("No exposure excerpt in this export.");
     vulnerableQuote = (
       <View style={lockedStyles.ev_quote}>
         <Text style={lockedStyles.ev_quoteLead}>{body}</Text>
@@ -91,7 +102,8 @@ export function PageAiEvidence({ data }: { data: ReportData }): ReactElement {
     );
   }
 
-  const vulnNote = v?.note?.trim() ? clipPdfText(String(v.note), 85) : "";
+  const vulnNote =
+    v?.note?.trim() && !looksLikeStructuredBlob(String(v.note)) ? clipPdfText(String(v.note)) : "";
   const slice = narrativeEvidence(data);
 
   return (

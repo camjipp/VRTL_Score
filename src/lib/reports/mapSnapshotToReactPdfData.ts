@@ -17,6 +17,7 @@ import type {
   SignalRow,
 } from "@/lib/reports/pdf/types";
 import { formatProviderDisplayName } from "@/lib/reports/formatProviderDisplayName";
+import { clipPdfText } from "@/lib/reports/pdf/editorial/pdfNarrative";
 import { PDF_METHODOLOGY_TEXT } from "@/lib/reports/pdfTheme";
 
 function normalizeRecommendationPriority(p: string | undefined): RecommendationCard["priority"] {
@@ -252,8 +253,8 @@ export function mapSnapshotToReactPdfData(
     const pos = (pj?.client_position ?? "").trim();
     const str = (pj?.recommendation_strength ?? "").toString().trim();
     const prompt = (r.prompt_text ?? "").replace(/\s+/g, " ").trim();
-    const note =
-      prompt.length > 92 ? `${prompt.slice(0, 89).trimEnd()}…` : prompt.length > 0 ? prompt : undefined;
+    /** Long prompts stay readable in the appendix without blowing past a single letter page. */
+    const note = prompt.length > 0 ? clipPdfText(prompt, 640) : undefined;
     return {
       idx: idx + 1,
       label: getSnapshotEvidenceLabel(pj),

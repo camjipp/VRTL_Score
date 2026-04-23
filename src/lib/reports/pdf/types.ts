@@ -116,4 +116,6 @@ export type ReportData = {
   recommendedNextStepsVisible?: boolean;
   agencyLogoUrl?: string | null;
   agencyName?: string | null;
+  /** PDF-only: set when competitor/table rows were merged for case-variant names. */
+  integrityNote?: string;
 };

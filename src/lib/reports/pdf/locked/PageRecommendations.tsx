@@ -25,7 +25,7 @@ export function PageRecommendations({ data }: { data: ReportData }): ReactElemen
       <View style={lockedStyles.rec_col}>
         {cards.length === 0 ? (
           <View style={[lockedStyles.rec_itemLast, local.cardH]} wrap={false}>
-            <Text style={lockedStyles.rec_title}>{clipPdfText("No recommendations in this export.", 120)}</Text>
+            <Text style={lockedStyles.rec_title}>{clipPdfText("No recommendations in this export.")}</Text>
           </View>
         ) : (
           cards.map((c, i) => {
@@ -33,15 +33,15 @@ export function PageRecommendations({ data }: { data: ReportData }): ReactElemen
             const box = last ? lockedStyles.rec_itemLast : lockedStyles.rec_item;
             return (
               <View key={i} style={[box, local.cardH]} wrap={false}>
-                <Text style={lockedStyles.rec_priority}>{clipPdfText(c.priority, 12)}</Text>
-                <Text style={lockedStyles.rec_title}>{clipPdfText(c.title, 88)}</Text>
-                <Text style={lockedStyles.rec_insight}>{clipPdfText(c.insight, 120)}</Text>
+                <Text style={lockedStyles.rec_priority}>{clipPdfText(c.priority, 24)}</Text>
+                <Text style={lockedStyles.rec_title}>{clipPdfText(c.title)}</Text>
+                <Text style={lockedStyles.rec_insight}>{clipPdfText(c.insight)}</Text>
                 <Text style={lockedStyles.rec_labelFirst}>Context</Text>
-                <Text style={lockedStyles.rec_line}>{clipPdfText(c.explanation, 160)}</Text>
+                <Text style={lockedStyles.rec_line}>{clipPdfText(c.explanation)}</Text>
                 <Text style={lockedStyles.rec_label}>Action</Text>
-                <Text style={lockedStyles.rec_actionLine}>{clipPdfText(c.action, 140)}</Text>
+                <Text style={lockedStyles.rec_actionLine}>{clipPdfText(c.action)}</Text>
                 <Text style={lockedStyles.rec_label}>Outcome</Text>
-                <Text style={lockedStyles.rec_line}>{clipPdfText(c.expectedOutcome, 100)}</Text>
+                <Text style={lockedStyles.rec_line}>{clipPdfText(c.expectedOutcome)}</Text>
               </View>
             );
           })
