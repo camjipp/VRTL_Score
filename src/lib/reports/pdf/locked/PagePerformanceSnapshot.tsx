@@ -3,22 +3,16 @@ import type { ReactElement } from "react";
 import { ScoreRing } from "../components/ScoreRing";
 import { PdfInnerPage } from "../components/PdfInnerPage";
 import { clipPdfText } from "../editorial/pdfNarrative";
-import { colors } from "../theme";
 import type { ReportData } from "../types";
 import { LOCKED_PAGE_HEADER } from "./layoutConstants";
 import { LD } from "./lockedDesignTokens";
-import { LockedNarrativeStack } from "./LockedNarrativeStack";
 import { lockedStyles } from "./lockedDocumentStyles";
-import { narrativePerformance, transparencyRunNote } from "./pageNarratives";
 
-const METRIC_H = 78;
+const METRIC_H = 92;
 
 const local = StyleSheet.create({
   metricsRow: { flexDirection: "row", minHeight: METRIC_H },
 });
-
-const PERF_OPENING =
-  "Your AI Authority Score is how often—and how strongly—assistants recommend your brand.";
 
 function fmtScore(n: number | null): string {
   if (n == null || Number.isNaN(n)) return "—";
@@ -34,29 +28,24 @@ function classify(value: number, strongAt: number, moderateAt: number): Health {
   return "weak";
 }
 
-function healthStyles(h: Health) {
-  return {
-    cell:
-      h === "strong"
-        ? lockedStyles.perf_metricCellStrong
-        : h === "moderate"
-          ? lockedStyles.perf_metricCellModerate
-          : lockedStyles.perf_metricCellWeak,
-    value:
-      h === "strong"
-        ? lockedStyles.perf_metricValueStrong
-        : h === "moderate"
-          ? lockedStyles.perf_metricValueModerate
-          : lockedStyles.perf_metricValueWeak,
-  };
+function valueStyle(h: Health) {
+  if (h === "strong") return lockedStyles.perf_metricValueStrong;
+  if (h === "weak") return lockedStyles.perf_metricValueWeak;
+  return lockedStyles.perf_metricValueModerate;
 }
 
-function PctBar({ pct, fill }: { pct: number; fill?: string }): ReactElement {
+function barFill(h: Health): string {
+  if (h === "weak") return LD.color.risk;
+  if (h === "strong") return LD.color.signalStrong;
+  return LD.color.ink3;
+}
+
+function PctBar({ pct, fill }: { pct: number; fill: string }): ReactElement {
   const p = Math.min(100, Math.max(0, Math.round(pct)));
   const rest = 100 - p;
   return (
     <View style={lockedStyles.perf_miniBarTrack} wrap={false}>
-      <View style={[lockedStyles.perf_miniBarFill, { flex: Math.max(1, p), backgroundColor: fill ?? colors.cyan }]} />
+      <View style={[lockedStyles.perf_miniBarFill, { flex: Math.max(1, p), backgroundColor: fill }]} />
       <View style={[lockedStyles.perf_miniBarRest, { flex: Math.max(1, rest) }]} />
     </View>
   );
@@ -67,107 +56,165 @@ function rankBarPct(rank: number, rankTotal: number): number {
   return Math.min(100, Math.max(0, Math.round(((rankTotal - rank + 1) / rankTotal) * 100)));
 }
 
+function heroLeadForStatus(status: string): string {
+  const s = (status || "").trim();
+  const map: Record<string, string> = {
+    Dominant: "You are often the default recommendation when this category comes up.",
+    Strong: "You show up strongly—close to owning the first recommendation consistently.",
+    Moderate: "You appear in answers, but the first slot is still up for grabs.",
+    Contested: "You show up often, but are not the default choice.",
+    Weak: "You are rarely recommended first—visibility needs concentrated repair.",
+    Unknown: "Snapshot coverage was not enough to stabilize this tier yet.",
+  };
+  return map[s] ?? "Visibility is mixed; the row below isolates where leverage shows up.";
+}
+
+function perfWhatsHappening(d: ReportData): string {
+  const m = Math.min(100, Math.max(0, Math.round(d.mentionRate)));
+  const miss = Math.max(0, 100 - m);
+  return clipPdfText(`You are included in ${m}% of answers — but missing in ${miss}%.`, 220);
+}
+
+function perfDriving(d: ReportData): string {
+  const parts: string[] = [];
+  const tp = d.topPosition;
+  const auth = d.authorityScore;
+  if (tp < 25) parts.push("You are not consistently ranked first.");
+  else if (tp < 45) parts.push("First-slot wins are still inconsistent.");
+  if (auth === 0) parts.push("You have zero citation support in this sample.");
+  else if (auth < 15) parts.push("Citation support is very thin.");
+  if (parts.length === 0) parts.push("Signals are uneven across mentions, position, and proof.");
+  return clipPdfText(parts.slice(0, 2).join(" "), 260);
+}
+
+function perfRisk(d: ReportData): string {
+  const t = (d.tensionNote || "").trim();
+  if (t) return clipPdfText(t, 280);
+  const client = d.competitors.find((c) => c.isClient);
+  const others = d.competitors.filter((c) => !c.isClient).sort((a, b) => b.mentions - a.mentions);
+  const runner = others[0];
+  if (
+    client &&
+    runner &&
+    runner.mentions >= client.mentions - 3 &&
+    runner.mentions <= client.mentions + 6
+  ) {
+    return "Competitors are close enough to take your position with minimal improvement.";
+  }
+  const bl = (d.bottomLine || "").trim();
+  if (bl) return clipPdfText(bl, 280);
+  return "Competitors can still close the gap on first-slot recommendations with sharper proof.";
+}
+
 export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactElement {
-  const slice = narrativePerformance(data);
   const score = data.overallScore;
-  const tier = (data.status || "").trim() || "Moderate visibility, not dominant";
-  const scoreContext =
+  const tier = (data.status || "").trim() || "Moderate";
+  const scoreHeadline =
     score == null || Number.isNaN(score)
-      ? clipPdfText(`— / 100 — ${tier}`)
-      : clipPdfText(`${fmtScore(score)} / 100 — ${tier}`);
+      ? clipPdfText(`— / 100 — ${tier}`, 140)
+      : clipPdfText(`${fmtScore(score)} / 100 — ${tier}`, 140);
 
   const rankPct = rankBarPct(data.rank, data.rankTotal);
 
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[3]!}>
-      <Text style={lockedStyles.perf_opening}>{clipPdfText(PERF_OPENING)}</Text>
-      <Text style={lockedStyles.perf_transparency}>{transparencyRunNote(data)}</Text>
       <View style={lockedStyles.perf_heroRow} wrap={false}>
         <View style={lockedStyles.perf_heroDial} wrap={false}>
-          <ScoreRing score={score} variant="hero" scoreLabel={null} zoneTrack />
-          <View style={lockedStyles.perf_zoneLegend} wrap={false}>
-            <View style={[lockedStyles.perf_zoneLegendSeg, { flex: 40, backgroundColor: "#EF4444" }]} />
-            <View style={[lockedStyles.perf_zoneLegendSeg, { flex: 30, backgroundColor: "#F59E0B" }]} />
-            <View style={[lockedStyles.perf_zoneLegendSeg, { flex: 30, backgroundColor: colors.green }]} />
-          </View>
-          <Text style={lockedStyles.perf_zoneLegendLabel} wrap={false}>
-            0–40 at risk · 40–70 building · 70–100 strong
-          </Text>
+          <ScoreRing
+            score={score}
+            variant="performance"
+            scoreLabel={null}
+            palette="neutral"
+            showFraction={false}
+          />
         </View>
         <View style={lockedStyles.perf_heroAside} wrap={false}>
-          <Text style={lockedStyles.perf_scoreContext}>{scoreContext}</Text>
+          <Text style={lockedStyles.perf_heroHeadline}>{scoreHeadline}</Text>
+          <Text style={lockedStyles.perf_heroLead}>{clipPdfText(heroLeadForStatus(tier), 240)}</Text>
+          <Text style={lockedStyles.perf_heroSupport}>
+            Measured across real AI responses from OpenAI, Google Gemini, and Anthropic.
+          </Text>
         </View>
       </View>
+
       <View style={lockedStyles.perf_metricsBand} wrap={false}>
         <View style={[lockedStyles.perf_metricsRow, local.metricsRow]} wrap={false}>
           {(() => {
             const mh = classify(data.mentionRate, 65, 40);
-            const sMention = healthStyles(mh);
             return (
-              <View style={[lockedStyles.perf_metricCellFirst, sMention.cell]}>
+              <View style={lockedStyles.perf_metricCellFirst}>
                 <Text style={lockedStyles.perf_metricLabel}>Mention rate</Text>
-                <Text style={[lockedStyles.perf_metricValue, sMention.value]}>
+                <Text style={[lockedStyles.perf_metricValue, valueStyle(mh)]}>
                   {clipPdfText(String(data.mentionRate))}%
                 </Text>
-                <PctBar pct={data.mentionRate} />
-                <Text style={lockedStyles.perf_metricHint}>Share of answers that name you.</Text>
+                <PctBar pct={data.mentionRate} fill={barFill(mh)} />
+                <Text style={lockedStyles.perf_metricHelp}>Share of answers that include you.</Text>
               </View>
             );
           })()}
           {(() => {
             const th = classify(data.topPosition, 40, 20);
-            const sTop = healthStyles(th);
             return (
-              <View style={[lockedStyles.perf_metricCell, sTop.cell]}>
+              <View style={lockedStyles.perf_metricCell}>
                 <Text style={lockedStyles.perf_metricLabel}>Top position</Text>
-                <Text style={[lockedStyles.perf_metricValue, sTop.value]}>
+                <Text style={[lockedStyles.perf_metricValue, valueStyle(th)]}>
                   {clipPdfText(String(data.topPosition))}%
                 </Text>
-                <PctBar pct={data.topPosition} />
-                <Text style={lockedStyles.perf_metricHint}>First recommendation slot.</Text>
+                <PctBar pct={data.topPosition} fill={barFill(th)} />
+                <Text style={lockedStyles.perf_metricHelp}>Share of answers where you are listed first.</Text>
               </View>
             );
           })()}
           {(() => {
             const ah = classify(data.authorityScore, 30, 10);
-            const sAuth = healthStyles(ah);
             return (
-              <View style={[lockedStyles.perf_metricCell, sAuth.cell]}>
+              <View style={lockedStyles.perf_metricCell}>
                 <Text style={lockedStyles.perf_metricLabel}>Authority</Text>
-                <Text style={[lockedStyles.perf_metricValue, sAuth.value]}>
+                <Text style={[lockedStyles.perf_metricValue, valueStyle(ah)]}>
                   {clipPdfText(String(data.authorityScore))}%
                 </Text>
-                <PctBar pct={data.authorityScore} />
-                <Text style={lockedStyles.perf_metricHint}>Answers with citations or proof.</Text>
+                <PctBar pct={data.authorityScore} fill={barFill(ah)} />
+                <Text style={lockedStyles.perf_metricHelp}>Answers with citations or proof.</Text>
               </View>
             );
           })()}
           {(() => {
             const rank = data.rank || 0;
             const rh: Health = rank === 1 ? "strong" : rank <= 3 ? "moderate" : "weak";
-            const sRank = healthStyles(rh);
             return (
-              <View style={[lockedStyles.perf_metricCellLast, sRank.cell]}>
+              <View style={lockedStyles.perf_metricCellLast}>
                 <Text style={lockedStyles.perf_metricLabel}>Rank</Text>
-                <Text style={[lockedStyles.perf_metricValue, sRank.value]}>
+                <Text style={[lockedStyles.perf_metricValue, valueStyle(rh)]}>
                   {clipPdfText(`${data.rank}/${data.rankTotal}`)}
                 </Text>
-                <PctBar pct={rankPct} fill={LD.color.ink} />
-                <Text style={lockedStyles.perf_metricHint}>Leaderboard position (bar = relative strength).</Text>
+                <PctBar pct={rankPct} fill={barFill(rh)} />
+                <Text style={lockedStyles.perf_metricHelp}>Leaderboard position (bar = relative strength).</Text>
               </View>
             );
           })()}
         </View>
       </View>
-      <Text style={lockedStyles.perf_takeawayLine} wrap={false}>
-        {slice.headline}
-      </Text>
-      <LockedNarrativeStack
-        slice={slice}
-        stackRole="afterPrimary"
-        include={["interpretation", "implication"]}
-      />
-      {slice.action ? <Text style={lockedStyles.nar_action}>{slice.action}</Text> : null}
+
+      <View style={lockedStyles.perf_diagWrap} wrap={false}>
+        <View style={lockedStyles.perf_diagBlock} wrap={false}>
+          <Text style={lockedStyles.perf_diagTitle}>{"What's happening"}</Text>
+          <Text style={lockedStyles.perf_diagBody}>{perfWhatsHappening(data)}</Text>
+        </View>
+        <View style={lockedStyles.perf_diagBlock} wrap={false}>
+          <Text style={lockedStyles.perf_diagTitle}>Why it matters</Text>
+          <Text style={lockedStyles.perf_diagBody}>
+            When you are missing, competitors take the recommendation.
+          </Text>
+        </View>
+        <View style={lockedStyles.perf_diagBlock} wrap={false}>
+          <Text style={lockedStyles.perf_diagTitle}>{"What's driving it"}</Text>
+          <Text style={lockedStyles.perf_diagBody}>{perfDriving(data)}</Text>
+        </View>
+        <View style={lockedStyles.perf_diagBlock} wrap={false}>
+          <Text style={lockedStyles.perf_diagTitle}>Risk</Text>
+          <Text style={lockedStyles.perf_diagBody}>{perfRisk(data)}</Text>
+        </View>
+      </View>
     </PdfInnerPage>
   );
 }

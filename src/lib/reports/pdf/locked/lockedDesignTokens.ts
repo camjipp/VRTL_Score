@@ -20,6 +20,8 @@ export const LD = {
     accentMuted: colors.cyanLight,
     risk: colors.red,
     riskMuted: colors.redLight,
+    /** PDF-readable green for clearly strong signals (not decorative). */
+    signalStrong: "#15803d",
   },
 
   /** Typography scale (pt). */

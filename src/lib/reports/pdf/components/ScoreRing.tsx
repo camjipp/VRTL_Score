@@ -28,6 +28,19 @@ const RING_PRESETS = {
     labelBottom: 26,
     nudgeY: -10,
   },
+  /** Performance snapshot — smaller arc, large integer focal */
+  performance: {
+    W: 200,
+    H: 132,
+    R: 60,
+    stroke: 13,
+    colW: 208,
+    scoreFont: 54,
+    fracFont: 8,
+    labelFont: 0,
+    labelBottom: 0,
+    nudgeY: -4,
+  },
 } as const;
 
 export type ScoreRingVariant = keyof typeof RING_PRESETS;
@@ -55,7 +68,16 @@ type Props = {
   scoreLabel?: string | null;
   /** Draw 0–40 / 40–70 / 70–100 zone colors along the track (strategic gauge). */
   zoneTrack?: boolean;
+  /**
+   * `vivid` — legacy cyan / multi-zone amber (when `zoneTrack`).
+   * `neutral` — gray track, progress red (under 40) / near-black (40–69) / green (70+); no orange.
+   */
+  palette?: "vivid" | "neutral";
+  /** When false, only the integer score is shown (no `/100` line). */
+  showFraction?: boolean;
 };
+
+const NEUTRAL_STRONG = "#15803d";
 
 function zoneStrokeForScore(s: number | null): string {
   if (s == null || Number.isNaN(s)) return colors.cyan;
@@ -64,7 +86,26 @@ function zoneStrokeForScore(s: number | null): string {
   return ZONE_GREEN;
 }
 
-export function ScoreRing({ score, variant = "default", ringStroke, scoreLabel, zoneTrack }: Props) {
+function neutralProgressStroke(s: number | null): string {
+  if (s == null || Number.isNaN(s)) return colors.ink2;
+  if (s < 40) return ZONE_RED;
+  if (s < 70) return colors.ink;
+  return NEUTRAL_STRONG;
+}
+
+const ZONE_NEUTRAL_LOW = "#E5E7EB";
+const ZONE_NEUTRAL_MID = "#D1D5DB";
+const ZONE_NEUTRAL_HIGH = "#CBD5E1";
+
+export function ScoreRing({
+  score,
+  variant = "default",
+  ringStroke,
+  scoreLabel,
+  zoneTrack,
+  palette = "vivid",
+  showFraction = true,
+}: Props) {
   const p = RING_PRESETS[variant];
   const { W, H, R, stroke: STROKE, colW, scoreFont, fracFont, labelFont, labelBottom, nudgeY } = p;
   const CX = W / 2;
@@ -94,19 +135,33 @@ export function ScoreRing({ score, variant = "default", ringStroke, scoreLabel, 
   const rest = Math.max(0.001, ARC_LEN - filled);
 
   const display = score == null ? "—" : String(score);
-  const fillStroke = ringStroke ?? (zoneTrack ? zoneStrokeForScore(score) : colors.cyan);
+  const fillStroke =
+    ringStroke ??
+    (palette === "neutral"
+      ? neutralProgressStroke(score)
+      : zoneTrack
+        ? zoneStrokeForScore(score)
+        : colors.cyan);
   const labelText = scoreLabel === undefined ? "OVERALL SCORE" : scoreLabel;
+  const zoneSlicesVivid = zoneTrack && palette === "vivid";
+  const zoneSlicesNeutral = zoneTrack && palette === "neutral";
 
   return (
     <View style={{ width: colW, alignItems: "center" }}>
       <View style={{ width: W, height: H, position: "relative" }}>
         <View style={{ position: "absolute", top: 0, left: 0, width: W, height: H }}>
           <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
-            {zoneTrack ? (
+            {zoneSlicesVivid ? (
               <>
                 <Path d={arcSliceD(135, 243)} stroke={ZONE_RED} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
                 <Path d={arcSliceD(243, 324)} stroke={ZONE_AMBER} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
                 <Path d={arcSliceD(324, 405)} stroke={ZONE_GREEN} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
+              </>
+            ) : zoneSlicesNeutral ? (
+              <>
+                <Path d={arcSliceD(135, 243)} stroke={ZONE_NEUTRAL_LOW} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
+                <Path d={arcSliceD(243, 324)} stroke={ZONE_NEUTRAL_MID} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
+                <Path d={arcSliceD(324, 405)} stroke={ZONE_NEUTRAL_HIGH} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
               </>
             ) : (
               <Path d={ARC_D} stroke={RING_TRACK} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
@@ -122,7 +177,7 @@ export function ScoreRing({ score, variant = "default", ringStroke, scoreLabel, 
           </Svg>
         </View>
 
-        {variant !== "hero" && labelText !== null && labelText.length > 0 ? (
+        {variant !== "hero" && variant !== "performance" && labelText !== null && labelText.length > 0 ? (
           <View style={{ position: "absolute", bottom: labelBottom, left: 0, width: W, alignItems: "center" }}>
             <Text
               style={{
@@ -169,18 +224,20 @@ export function ScoreRing({ score, variant = "default", ringStroke, scoreLabel, 
             >
               {display}
             </Text>
-            <Text
-              style={{
-                fontSize: fracFont,
-                color: colors.ink4,
-                fontFamily: fonts.sans,
-                lineHeight: 1,
-                marginTop: 2,
-                textAlign: "center",
-              }}
-            >
-              /100
-            </Text>
+            {showFraction ? (
+              <Text
+                style={{
+                  fontSize: fracFont,
+                  color: colors.ink4,
+                  fontFamily: fonts.sans,
+                  lineHeight: 1,
+                  marginTop: 2,
+                  textAlign: "center",
+                }}
+              >
+                /100
+              </Text>
+            ) : null}
           </View>
         </View>
       </View>
