@@ -274,7 +274,7 @@ export function buildVulnerableExcerptForPdf(
     const clientMentioned = o.client_mentioned;
     if (clientMentioned === false || clientMentioned === "false" || clientMentioned === 0) {
       const cm = o.competitors_mentioned;
-      let names: string[] = [];
+      const names: string[] = [];
       if (Array.isArray(cm)) {
         const seen = new Set<string>();
         for (const x of cm) {
