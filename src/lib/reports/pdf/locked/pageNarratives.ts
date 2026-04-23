@@ -52,7 +52,7 @@ export function narrativeCompetitive(d: ReportData): NarrativeSlice {
   const others = d.competitors.filter((row) => !row.isClient);
   const headline =
     d.rank === 1
-      ? clipPdfText("You are leading, but the gap is thin.")
+      ? clipPdfText("You are not the clear default choice.")
       : clipPdfText("You are in the pack—whoever looks like the obvious answer still wins the recommendation.");
   const takeaway = competitiveTakeawayLine(d, you, others);
   return {
@@ -75,7 +75,7 @@ function competitiveTakeawayLine(
   const tie = others.find((r) => r.mentions === you.mentions);
   if (tie) {
     return clipPdfText(
-      `${tie.name} is tied with you on mentions, meaning you are not a clear default choice when both names appear.`,
+      `${tie.name} matches you on mentions. When assistants choose between equal options, they default to the brand with stronger authority signals.`,
     );
   }
   const ahead = others.filter((r) => r.rank < you.rank).sort((a, b) => b.mentions - a.mentions)[0];

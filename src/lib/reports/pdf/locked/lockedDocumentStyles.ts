@@ -100,6 +100,14 @@ export const lockedStyles = StyleSheet.create({
     borderTopWidth: LD.border.hairline,
     borderTopColor: LD.color.rule,
   },
+  nar_stackPlain: {
+    marginTop: 0,
+    marginBottom: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
+    borderTopWidth: 0,
+    borderBottomWidth: 0,
+  },
   nar_stackCompact: {
     marginBottom: LD.space.sm + 2,
   },
@@ -499,50 +507,63 @@ export const lockedStyles = StyleSheet.create({
     marginBottom: LD.space.lg,
     lineHeight: LD.lineHeight.normal,
   },
-  comp_alertsRow: { flexDirection: "row", marginBottom: LD.space.xl },
-  comp_alert: {
-    flex: 1,
-    marginRight: LD.space.md,
-    paddingVertical: LD.space.sm + 2,
-    paddingHorizontal: LD.space.sm + 2,
-    borderLeftWidth: LD.border.accentRule,
-    borderLeftColor: LD.color.ink,
-    overflow: "hidden",
+  comp_stripList: {
+    marginBottom: LD.space.lg,
   },
-  comp_alertWin: {
-    borderLeftColor: LD.color.accent,
-    backgroundColor: LD.color.surface2,
+  comp_stripRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    paddingVertical: LD.space.xs,
+    paddingLeft: LD.space.sm,
+    marginBottom: LD.space.sm,
+    borderLeftWidth: 2,
   },
-  comp_alertRisk: {
+  comp_stripRowLast: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    paddingVertical: LD.space.xs,
+    paddingLeft: LD.space.sm,
+    marginBottom: 0,
+    borderLeftWidth: 2,
+  },
+  comp_stripWin: {
+    borderLeftColor: LD.color.signalStrong,
+  },
+  comp_stripRisk: {
     borderLeftColor: LD.color.risk,
-    backgroundColor: LD.color.riskMuted,
   },
-  comp_alertPriority: {
-    borderLeftColor: LD.color.accent,
-    backgroundColor: LD.color.surface2,
+  comp_stripPriority: {
+    borderLeftColor: LD.color.signalStrong,
   },
-  comp_alertLast: {
-    flex: 1,
-    marginRight: 0,
-    paddingVertical: LD.space.sm + 2,
-    paddingHorizontal: LD.space.sm + 2,
-    borderLeftWidth: LD.border.accentRule,
-    borderLeftColor: LD.color.ink,
-    overflow: "hidden",
-  },
-  comp_alertEyebrow: {
+  comp_stripLabel: {
+    width: 64,
     fontSize: LD.size.micro,
     fontFamily: LD.font.sansBold,
-    color: LD.color.ink4,
+    color: LD.color.ink2,
     letterSpacing: LD.trackEyebrow,
     textTransform: "uppercase",
-    marginBottom: LD.space.xs,
+    paddingTop: 1,
   },
-  comp_alertBody: {
+  comp_stripBody: {
+    flex: 1,
     fontSize: LD.size.bodySm,
     color: LD.color.ink,
-    lineHeight: LD.lineHeight.snug,
+    lineHeight: LD.lineHeight.relaxed,
     fontFamily: LD.font.sans,
+  },
+  comp_tableKicker: {
+    fontSize: LD.size.bodySm,
+    fontFamily: LD.font.sans,
+    color: LD.color.ink2,
+    lineHeight: LD.lineHeight.relaxed,
+    marginBottom: LD.space.sm,
+    maxWidth: "100%",
+  },
+  comp_bottomInsightBand: {
+    marginTop: LD.space.lg,
+    paddingTop: LD.space.md,
+    borderTopWidth: LD.border.hairline,
+    borderTopColor: LD.color.ink3,
   },
   comp_tableTh: {
     flexDirection: "row",
@@ -564,10 +585,10 @@ export const lockedStyles = StyleSheet.create({
     borderBottomWidth: LD.border.hairline,
     borderBottomColor: LD.color.ink,
     borderLeftWidth: 4,
-    borderLeftColor: LD.color.accent,
+    borderLeftColor: LD.color.ink,
     alignItems: "center",
     overflow: "hidden",
-    backgroundColor: LD.color.surface2,
+    backgroundColor: LD.color.paper,
   },
   comp_thText: {
     fontSize: LD.size.micro,
@@ -591,7 +612,7 @@ export const lockedStyles = StyleSheet.create({
     marginTop: 2,
     width: "100%",
   },
-  comp_mentionBarFill: { height: 5, backgroundColor: LD.color.accent },
+  comp_mentionBarFill: { height: 5, backgroundColor: LD.color.ink4 },
   comp_mentionBarFillClient: { height: 5, backgroundColor: LD.color.ink },
   comp_mentionBarRest: { height: 5, backgroundColor: LD.color.rule },
 

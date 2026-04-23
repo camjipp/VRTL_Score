@@ -10,10 +10,8 @@ import { narrativeCompetitive } from "./pageNarratives";
 
 const ROW_H = 24;
 const TABLE_ROWS = 6;
-const ALERT_H = 58;
 
 const local = StyleSheet.create({
-  alertH: { height: ALERT_H },
   thH: { height: ROW_H },
   trH: { height: ROW_H },
 });
@@ -40,6 +38,21 @@ function maxMentions(rows: readonly (CompetitorRow | null)[]): number {
   return m;
 }
 
+function mentionTieKicker(d: ReportData): string {
+  const you = d.competitors.find((c) => c.isClient);
+  if (!you) {
+    return clipPdfText("Compare mention counts to see who dominates volume for this sample.", 140);
+  }
+  const tiedWithYou = d.competitors.some((c) => !c.isClient && c.mentions === you.mentions);
+  if (tiedWithYou) {
+    return "You are tied on mentions with competitors.";
+  }
+  return clipPdfText(
+    "You are not tied on raw mentions in this sample—rank and rate still shape who sounds like the default.",
+    160,
+  );
+}
+
 function MentionShareBar({ mentions, max, isClient }: { mentions: number; max: number; isClient: boolean }): ReactElement {
   const pct = Math.min(100, Math.round((mentions / Math.max(1, max)) * 100));
   const rest = 100 - pct;
@@ -57,6 +70,7 @@ export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactE
   const tableRows = padRows(data.competitors, TABLE_ROWS);
   const slice = narrativeCompetitive(data);
   const mMax = maxMentions(tableRows);
+  const tableKicker = mentionTieKicker(data);
 
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[4]!}>
@@ -65,20 +79,21 @@ export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactE
         {clipPdfText("Mention volume vs. you—bars make the pack scannable at a glance.")}
       </Text>
       {data.integrityNote ? <Text style={lockedStyles.comp_integrityNote}>{data.integrityNote}</Text> : null}
-      <View style={lockedStyles.comp_alertsRow} wrap={false}>
-        <View style={[lockedStyles.comp_alert, lockedStyles.comp_alertWin, local.alertH]}>
-          <Text style={lockedStyles.comp_alertEyebrow}>Win</Text>
-          <Text style={lockedStyles.comp_alertBody}>{alertBody(win.title, win.detail)}</Text>
+      <View style={lockedStyles.comp_stripList} wrap={false}>
+        <View style={[lockedStyles.comp_stripRow, lockedStyles.comp_stripWin]} wrap={false}>
+          <Text style={lockedStyles.comp_stripLabel}>Win</Text>
+          <Text style={lockedStyles.comp_stripBody}>{alertBody(win.title, win.detail)}</Text>
         </View>
-        <View style={[lockedStyles.comp_alert, lockedStyles.comp_alertRisk, local.alertH]}>
-          <Text style={lockedStyles.comp_alertEyebrow}>Risk</Text>
-          <Text style={lockedStyles.comp_alertBody}>{alertBody(risk.title, risk.detail)}</Text>
+        <View style={[lockedStyles.comp_stripRow, lockedStyles.comp_stripRisk]} wrap={false}>
+          <Text style={lockedStyles.comp_stripLabel}>Risk</Text>
+          <Text style={lockedStyles.comp_stripBody}>{alertBody(risk.title, risk.detail)}</Text>
         </View>
-        <View style={[lockedStyles.comp_alertLast, lockedStyles.comp_alertPriority, local.alertH]}>
-          <Text style={lockedStyles.comp_alertEyebrow}>Priority</Text>
-          <Text style={lockedStyles.comp_alertBody}>{alertBody(priority.title, priority.detail)}</Text>
+        <View style={[lockedStyles.comp_stripRowLast, lockedStyles.comp_stripPriority]} wrap={false}>
+          <Text style={lockedStyles.comp_stripLabel}>Priority</Text>
+          <Text style={lockedStyles.comp_stripBody}>{alertBody(priority.title, priority.detail)}</Text>
         </View>
       </View>
+      <Text style={lockedStyles.comp_tableKicker}>{tableKicker}</Text>
       <View wrap={false}>
         <View style={[lockedStyles.comp_tableTh, local.thH]}>
           <Text style={[lockedStyles.comp_thText, lockedStyles.comp_cellName]}>Name</Text>
@@ -111,11 +126,13 @@ export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactE
           );
         })}
       </View>
-      <LockedNarrativeStack
-        slice={slice}
-        stackRole="afterPrimary"
-        include={["interpretation", "implication"]}
-      />
+      <View style={lockedStyles.comp_bottomInsightBand} wrap={false}>
+        <LockedNarrativeStack
+          slice={slice}
+          stackRole="plain"
+          include={["interpretation", "implication"]}
+        />
+      </View>
     </PdfInnerPage>
   );
 }

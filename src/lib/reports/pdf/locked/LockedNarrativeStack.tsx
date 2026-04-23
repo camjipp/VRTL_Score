@@ -14,8 +14,8 @@ type Props = {
   compactMaxHeight?: number;
   /** Omit parts to place primary content between headline and interpretation. Default: all. */
   include?: readonly NarrativePart[];
-  /** `afterPrimary`: rule above block (interpretation / implication / action). */
-  stackRole?: "top" | "afterPrimary";
+  /** `afterPrimary`: rule above block (interpretation / implication / action). `plain`: no outer rule (wrap in parent). */
+  stackRole?: "top" | "afterPrimary" | "plain";
 };
 
 const ALL: readonly NarrativePart[] = ["headline", "interpretation", "implication", "action", "inaction"];
@@ -37,7 +37,9 @@ export function LockedNarrativeStack({
         ? lockedStyles.nar_stackCover
         : stackRole === "afterPrimary"
           ? lockedStyles.nar_stackAfter
-          : lockedStyles.nar_stack;
+          : stackRole === "plain"
+            ? lockedStyles.nar_stackPlain
+            : lockedStyles.nar_stack;
   const h =
     variant === "compact" ? lockedStyles.nar_headlineCompact : lockedStyles.nar_headline;
   const i =
