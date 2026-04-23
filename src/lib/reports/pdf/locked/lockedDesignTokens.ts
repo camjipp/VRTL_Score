@@ -44,8 +44,10 @@ export const LD = {
     label: 7,
     caption: 6.5,
     micro: 6,
-    tocTitle: 11,
-    tocPage: 9,
+    /** TOC row titles — navigation prominence. */
+    tocTitle: 14,
+    /** TOC page numerals — secondary, de-emphasized. */
+    tocPage: 8,
     metricValue: 12,
     metricHero: 40,
     commandScore: 56,

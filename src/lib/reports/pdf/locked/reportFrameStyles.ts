@@ -28,6 +28,12 @@ export const reportFrameStyles = StyleSheet.create({
     color: LD.color.ink,
     letterSpacing: -0.12,
   },
+  /** TOC and similar pages — ~2× default header for primary section feel. */
+  headerTitleProminent: {
+    fontSize: LD.size.display2,
+    letterSpacing: -0.35,
+    lineHeight: LD.lineHeight.tight,
+  },
   content: {
     position: "absolute",
     top: REPORT_FRAME.contentTop,

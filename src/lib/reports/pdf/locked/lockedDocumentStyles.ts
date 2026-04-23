@@ -166,15 +166,6 @@ export const lockedStyles = StyleSheet.create({
     lineHeight: LD.lineHeight.snug,
     marginTop: LD.space.xxs,
   },
-  toc_framing: {
-    fontSize: LD.size.bodySm,
-    fontFamily: LD.font.sans,
-    color: LD.color.ink2,
-    lineHeight: LD.lineHeight.relaxed,
-    marginBottom: LD.space.xl,
-    maxWidth: "100%",
-  },
-
   perf_opening: {
     fontSize: LD.size.body,
     fontFamily: LD.font.sans,
@@ -343,29 +334,35 @@ export const lockedStyles = StyleSheet.create({
     overflow: "hidden",
   },
 
+  toc_list: {
+    marginTop: LD.space.md,
+    borderTopWidth: LD.border.hairline,
+    borderTopColor: LD.color.rule,
+  },
   toc_row: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "baseline",
-    paddingVertical: LD.space.sm + 3,
+    paddingVertical: LD.space.sm + 1,
     borderBottomWidth: LD.border.hairline,
     borderBottomColor: LD.color.rule,
   },
   toc_title: {
     flex: 1,
-    paddingRight: LD.space.xl,
+    paddingRight: LD.space.lg,
     fontSize: LD.size.tocTitle,
     fontFamily: LD.font.sansBold,
     color: LD.color.ink,
     lineHeight: LD.lineHeight.snug,
-    letterSpacing: -0.08,
+    letterSpacing: -0.12,
   },
   toc_page: {
-    width: 36,
+    width: 40,
     textAlign: "right",
     fontSize: LD.size.tocPage,
     fontFamily: LD.font.sans,
     color: LD.color.ink4,
+    letterSpacing: 0.04,
   },
 
   /* Performance — open hero, metrics as ruled band */

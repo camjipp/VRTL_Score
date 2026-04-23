@@ -23,11 +23,6 @@ export function transparencyRunNote(d: ReportData): string {
   return clipPdfText("Based on a fixed set of AI prompt runs across major models.");
 }
 
-/** Page 2 — single framing line under TOC title (no memo block). */
-export const narrativeTocFraming = clipPdfText(
-  "This report shows how AI recommends your brand versus competitors.",
-);
-
 /** Page 3 — performance: tight copy; visuals carry the page. */
 export function narrativePerformance(d: ReportData): NarrativeSlice {
   return {
