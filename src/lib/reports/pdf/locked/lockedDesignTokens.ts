@@ -24,12 +24,14 @@ export const LD = {
 
   /** Typography scale (pt). */
   size: {
-    /** Cover poster title — near full-line presence. */
-    coverPoster: 58,
+    /** Cover poster title — dominant hero on page 1. */
+    coverPoster: 64,
     /** Cover client name (below title). */
-    coverClient: 17,
+    coverClient: 19,
     /** Cover date line. */
-    coverDate: 10,
+    coverDate: 9,
+    /** Agency publisher line (top of cover). */
+    coverAgency: 9,
     /** Cover main title — commanding, not dashboard-sized. */
     coverDisplay: 27,
     display2: 22,
