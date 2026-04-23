@@ -38,23 +38,12 @@ function rankBarPct(rank: number, rankTotal: number): number {
   return Math.min(100, Math.max(0, Math.round(((rankTotal - rank + 1) / rankTotal) * 100)));
 }
 
-function primaryInsightForTier(tier: string): string {
-  const t = (tier || "").trim();
-  if (t === "Dominant") return "You are defining the category for assistants in this sample.";
-  if (t === "Strong") return "You are a leading recommendation, with room to make first-slot outcomes even more automatic.";
-  if (t === "Weak") return "You are underrepresented when buyers ask assistants for guidance in this category.";
-  return "You are visible — but not the default choice.";
-}
-
-function heroSupportingForTier(tier: string): string {
-  const t = (tier || "").trim();
-  if (t === "Dominant" || t === "Strong") {
-    return "Assistants already surface you frequently. The next step is defending that default position with proof and freshness so recommendations do not drift to challengers.";
-  }
-  if (t === "Weak") {
-    return "You appear in fewer assistant answers than leaders in this category. Raising mention rate—and pairing it with credible proof—is how you move from occasional mention to reliable recommendation.";
-  }
-  return "Assistants include you often, but they do not consistently recommend you first. That means competitors still win decisions even when you are in the conversation.";
+function scoreLeadParagraph(score: number | null): string {
+  const n = score == null || Number.isNaN(score) ? "—" : String(Math.round(score));
+  return clipPdfText(
+    `Your AI Authority Score is ${n} out of 100. You are visible, but not the default choice. Top models include you often, but they do not consistently recommend you first. That means competitors still win decisions—even when you are in the conversation.`,
+    900,
+  );
 }
 
 function diagnosisParagraphs(d: ReportData): [string, string] {
@@ -82,9 +71,9 @@ function diagnosisParagraphs(d: ReportData): [string, string] {
 
 export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactElement {
   const score = data.overallScore;
-  const tier = (data.status || "").trim() || "Moderate";
   const rankPct = rankBarPct(data.rank, data.rankTotal);
   const [diagP1, diagP2] = diagnosisParagraphs(data);
+  const scoreLead = scoreLeadParagraph(score);
 
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[3]!}>
@@ -92,22 +81,13 @@ export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactEl
         <Text style={lockedStyles.perf_sectionEyebrow}>Score</Text>
         <View style={lockedStyles.perf_heroRow} wrap={false}>
           <View style={lockedStyles.perf_heroDial} wrap={false}>
-            <ScoreRing
-              score={score}
-              variant="performance"
-              scoreLabel={null}
-              palette="neutral"
-              showFraction={false}
-              arcScoreTick
-            />
+            <ScoreRing score={score} variant="performance" scoreLabel={null} showFraction={false} />
           </View>
           <View style={lockedStyles.perf_heroAside} wrap={false}>
-            <Text style={lockedStyles.perf_heroVerdictTitle}>AI Authority Score</Text>
-            <Text style={lockedStyles.perf_heroPrimaryInsight}>{primaryInsightForTier(tier)}</Text>
-            <Text style={lockedStyles.perf_heroSupporting}>{heroSupportingForTier(tier)}</Text>
-            <Text style={lockedStyles.perf_heroContext}>
-              Measured across OpenAI, Google Gemini, and Anthropic responses.
-            </Text>
+            <Text style={lockedStyles.perf_heroVerdictTitle}>AI Authority Score (Out of 100)</Text>
+            <View style={lockedStyles.perf_heroTakeawayWrap} wrap={false}>
+              <Text style={lockedStyles.perf_heroTakeaway}>{scoreLead}</Text>
+            </View>
           </View>
         </View>
       </View>

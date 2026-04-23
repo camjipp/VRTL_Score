@@ -58,6 +58,11 @@ const ZONE_RED = "#EF4444";
 const ZONE_AMBER = "#F59E0B";
 const ZONE_GREEN = "#00e87a";
 
+/** Performance snapshot track: 0–35 / 35–65 / 65–100 along the horseshoe (continuous). */
+const WAG_RED = "#EF4444";
+const WAG_AMBER = "#F59E0B";
+const WAG_GREEN = "#22C55E";
+
 type Props = {
   score: number | null;
   variant?: ScoreRingVariant;
@@ -69,13 +74,11 @@ type Props = {
   zoneTrack?: boolean;
   /**
    * `vivid` — legacy cyan / multi-zone amber (when `zoneTrack`).
-   * `neutral` — gray track, progress red (under 40) / near-black (40–69) / brand green #22C55E (70+); no orange.
+   * `neutral` — gray track, progress red (under 40) / near-black (40–69) / brand green (70+); no orange.
    */
   palette?: "vivid" | "neutral";
   /** When false, only the integer score is shown (no `/100` line). */
   showFraction?: boolean;
-  /** Short radial tick on the arc at the current score (0–100). */
-  arcScoreTick?: boolean;
 };
 
 /** VRTL brand green (70+ on neutral performance gauge). */
@@ -99,12 +102,6 @@ const ZONE_NEUTRAL_LOW = "#E5E7EB";
 const ZONE_NEUTRAL_MID = "#D1D5DB";
 const ZONE_NEUTRAL_HIGH = "#CBD5E1";
 
-/** Score 0–100 → angle (deg) on the 270° horseshoe (135° … 405°). */
-function angleForScore100(s: number): number {
-  const clamped = Math.min(100, Math.max(0, s));
-  return 135 + (clamped / 100) * 270;
-}
-
 export function ScoreRing({
   score,
   variant = "default",
@@ -113,7 +110,6 @@ export function ScoreRing({
   zoneTrack,
   palette = "vivid",
   showFraction = true,
-  arcScoreTick = false,
 }: Props) {
   const p = RING_PRESETS[variant];
   const { W, H, R, stroke: STROKE, colW, scoreFont, fracFont, labelFont, labelBottom, nudgeY } = p;
@@ -154,24 +150,23 @@ export function ScoreRing({
   const labelText = scoreLabel === undefined ? "OVERALL SCORE" : scoreLabel;
   const zoneSlicesVivid = zoneTrack && palette === "vivid";
   const zoneSlicesNeutral = zoneTrack && palette === "neutral";
+  const isPerformanceWag = variant === "performance";
 
-  const tickAngle = score == null || Number.isNaN(score) ? null : angleForScore100(score);
-  let tickLineD: string | null = null;
-  if (tickAngle != null && arcScoreTick) {
-    const t = tickAngle * DEG;
-    const x1 = CX + (R - 2) * Math.cos(t);
-    const y1 = CY + (R - 2) * Math.sin(t);
-    const x2 = CX + (R + STROKE + 8) * Math.cos(t);
-    const y2 = CY + (R + STROKE + 8) * Math.sin(t);
-    tickLineD = `M ${x1.toFixed(2)} ${y1.toFixed(2)} L ${x2.toFixed(2)} ${y2.toFixed(2)}`;
-  }
+  const wagAngle35 = 135 + (35 / 100) * 270;
+  const wagAngle65 = 135 + (65 / 100) * 270;
 
   return (
     <View style={{ width: colW, alignItems: "center" }}>
       <View style={{ width: W, height: H, position: "relative" }}>
         <View style={{ position: "absolute", top: 0, left: 0, width: W, height: H }}>
           <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
-            {zoneSlicesVivid ? (
+            {isPerformanceWag ? (
+              <>
+                <Path d={arcSliceD(135, wagAngle35)} stroke={WAG_RED} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
+                <Path d={arcSliceD(wagAngle35, wagAngle65)} stroke={WAG_AMBER} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
+                <Path d={arcSliceD(wagAngle65, 405)} stroke={WAG_GREEN} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
+              </>
+            ) : zoneSlicesVivid ? (
               <>
                 <Path d={arcSliceD(135, 243)} stroke={ZONE_RED} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
                 <Path d={arcSliceD(243, 324)} stroke={ZONE_AMBER} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
@@ -186,16 +181,15 @@ export function ScoreRing({
             ) : (
               <Path d={ARC_D} stroke={RING_TRACK} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
             )}
-            <Path
-              d={ARC_D}
-              stroke={fillStroke}
-              strokeWidth={STROKE}
-              fill="none"
-              strokeLinecap="butt"
-              strokeDasharray={`${filled} ${rest + ARC_LEN}`}
-            />
-            {tickLineD ? (
-              <Path d={tickLineD} stroke={colors.ink} strokeWidth={3} fill="none" strokeLinecap="butt" />
+            {!isPerformanceWag ? (
+              <Path
+                d={ARC_D}
+                stroke={fillStroke}
+                strokeWidth={STROKE}
+                fill="none"
+                strokeLinecap="butt"
+                strokeDasharray={`${filled} ${rest + ARC_LEN}`}
+              />
             ) : null}
           </Svg>
         </View>
