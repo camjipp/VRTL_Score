@@ -214,7 +214,14 @@ function RunSnapshotButton({
     >
       {loading ? (
         <span className="flex items-center gap-2">
-          <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+          <svg
+            className={cn(
+              "h-4 w-4 animate-spin",
+              variant === "primary" ? "text-[var(--vrtl-spinner-on-solid)]" : "text-[var(--vrtl-spinner)]",
+            )}
+            fill="none"
+            viewBox="0 0 24 24"
+          >
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path
               className="opacity-75"
@@ -704,7 +711,7 @@ export default function PricingPage() {
     <Suspense
       fallback={
         <div className="page-marketing flex min-h-screen items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-[var(--accent-marketing)]" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-[var(--vrtl-spinner)]" />
         </div>
       }
     >

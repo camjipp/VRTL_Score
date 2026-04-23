@@ -232,7 +232,7 @@ export function LoginForm({ nextPath, siteOrigin = "" }: { nextPath: string; sit
             sizes="(max-width: 768px) 85vw, 240px"
             unoptimized={BRAND_LOCKUP_IMAGE_UNOPTIMIZED}
           />
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/[0.08] border-t-[var(--accent-marketing)]" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/[0.08] border-t-[var(--vrtl-spinner)]" />
           <p className="mt-4 text-sm text-[var(--text-secondary)]">Signing you in…</p>
         </div>
       )}

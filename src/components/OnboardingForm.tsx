@@ -330,7 +330,7 @@ export function OnboardingForm() {
       <div className="mx-auto max-w-6xl px-6 py-10 md:px-10 md:py-14 lg:px-12">
         {isAuthenticated === null && (
           <div className="flex min-h-[50vh] items-center justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/[0.08] border-t-[var(--accent-marketing)]" />
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/[0.08] border-t-[var(--vrtl-spinner)]" />
           </div>
         )}
 
@@ -459,7 +459,7 @@ export function OnboardingForm() {
                   <button type="submit" disabled={authBusy || !legalAccepted} className={primaryBtnClass}>
                     {authBusy ? (
                       <>
-                        <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <svg className="h-4 w-4 animate-spin text-[var(--vrtl-spinner-on-solid)]" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                           <path
                             className="opacity-75"
@@ -509,7 +509,7 @@ export function OnboardingForm() {
           <div className="mx-auto max-w-xl">
             {loading ? (
               <div className="flex min-h-[50vh] items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/[0.08] border-t-[var(--accent-marketing)]" />
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/[0.08] border-t-[var(--vrtl-spinner)]" />
               </div>
             ) : (
               <>
@@ -726,7 +726,7 @@ export function OnboardingForm() {
                         <button type="button" disabled={saving} onClick={() => finishSetup()} className={primaryBtnClass}>
                           {saving ? (
                             <>
-                              <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                              <svg className="h-4 w-4 animate-spin text-[var(--vrtl-spinner-on-solid)]" fill="none" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                 <path
                                   className="opacity-75"

@@ -5,7 +5,7 @@ import type { NarrativeSlice } from "./pageNarratives";
 
 const center = StyleSheet.create({ c: { textAlign: "center" as const } });
 
-export type NarrativePart = "headline" | "interpretation" | "implication" | "action";
+export type NarrativePart = "headline" | "interpretation" | "implication" | "action" | "inaction";
 
 type Props = {
   slice: NarrativeSlice;
@@ -18,7 +18,7 @@ type Props = {
   stackRole?: "top" | "afterPrimary";
 };
 
-const ALL: readonly NarrativePart[] = ["headline", "interpretation", "implication", "action"];
+const ALL: readonly NarrativePart[] = ["headline", "interpretation", "implication", "action", "inaction"];
 
 export function LockedNarrativeStack({
   slice,
@@ -52,6 +52,9 @@ export function LockedNarrativeStack({
       {want("interpretation") ? <Text style={cx ? [i, cx] : i}>{slice.interpretation}</Text> : null}
       {want("implication") ? <Text style={cx ? [m, cx] : m}>{slice.implication}</Text> : null}
       {want("action") && slice.action ? <Text style={cx ? [a, cx] : a}>{slice.action}</Text> : null}
+      {want("inaction") && slice.inaction ? (
+        <Text style={cx ? [lockedStyles.nar_inaction, cx] : lockedStyles.nar_inaction}>{slice.inaction}</Text>
+      ) : null}
     </View>
   );
 }

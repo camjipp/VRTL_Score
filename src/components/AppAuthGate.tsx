@@ -43,7 +43,7 @@ export function AppAuthGate({ children }: AppAuthGateProps) {
 
   if (!ready) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-bg">
+      <div className="vrtl-app flex min-h-screen flex-col items-center justify-center bg-bg">
         <Image
           src={BRAND_LOCKUP_SRC}
           alt="VRTL Score"
@@ -54,7 +54,7 @@ export function AppAuthGate({ children }: AppAuthGateProps) {
           sizes="(max-width: 768px) 85vw, 280px"
           unoptimized={BRAND_LOCKUP_IMAGE_UNOPTIMIZED}
         />
-        <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-text/20 border-t-text" />
+        <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-white/10 border-t-accent" />
       </div>
     );
   }

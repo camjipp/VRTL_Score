@@ -106,7 +106,7 @@ export function PageModelBreakdown({ data }: { data: ReportData }): ReactElement
       <LockedNarrativeStack
         slice={slice}
         stackRole="afterPrimary"
-        include={["interpretation", "implication", "action"]}
+        include={["interpretation", "implication", "action", "inaction"]}
       />
     </PdfInnerPage>
   );

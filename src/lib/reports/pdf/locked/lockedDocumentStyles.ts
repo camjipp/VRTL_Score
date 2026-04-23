@@ -30,24 +30,25 @@ export const lockedStyles = StyleSheet.create({
     marginBottom: LD.space.xl,
   },
   cover_title: {
-    fontSize: LD.size.coverDisplay,
+    fontSize: LD.size.coverPoster,
     fontFamily: LD.font.sansBold,
     color: LD.color.ink,
     textAlign: "center",
-    letterSpacing: -0.55,
+    letterSpacing: -1.1,
     lineHeight: LD.lineHeight.tight,
-    marginBottom: LD.space.lg,
+    marginBottom: LD.space.xl,
+    maxWidth: "100%",
   },
   cover_client: {
-    fontSize: LD.size.lead,
+    fontSize: LD.size.coverClient,
     fontFamily: LD.font.sans,
     color: LD.color.ink2,
     textAlign: "center",
     lineHeight: LD.lineHeight.normal,
-    marginBottom: LD.space.sm + 2,
+    marginBottom: LD.space.md,
   },
   cover_date: {
-    fontSize: LD.size.caption,
+    fontSize: LD.size.coverDate,
     fontFamily: LD.font.sans,
     color: LD.color.ink4,
     textAlign: "center",
@@ -137,13 +138,58 @@ export const lockedStyles = StyleSheet.create({
     lineHeight: LD.lineHeight.snug,
     marginTop: LD.space.xxs,
   },
-  cover_narBlock: {
-    marginTop: LD.space.xl,
-    paddingTop: LD.space.lg,
-    borderTopWidth: LD.border.hairline,
-    borderTopColor: LD.color.rule,
-    maxWidth: 420,
-    alignSelf: "center",
+  toc_framing: {
+    fontSize: LD.size.bodySm,
+    fontFamily: LD.font.sans,
+    color: LD.color.ink2,
+    lineHeight: LD.lineHeight.relaxed,
+    marginBottom: LD.space.xl,
+    maxWidth: "100%",
+  },
+
+  perf_opening: {
+    fontSize: LD.size.body,
+    fontFamily: LD.font.sans,
+    color: LD.color.ink2,
+    lineHeight: LD.lineHeight.relaxed,
+    marginBottom: LD.space.lg,
+    maxWidth: "100%",
+  },
+  perf_heroRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: LD.space.lg,
+  },
+  perf_heroDial: {
+    width: 200,
+    marginRight: LD.space.lg,
+  },
+  perf_heroAside: {
+    flex: 1,
+    paddingTop: LD.space.sm,
+  },
+  perf_tierLine: {
+    fontSize: LD.size.title,
+    fontFamily: LD.font.sansBold,
+    color: LD.color.ink2,
+    lineHeight: LD.lineHeight.snug,
+    marginTop: LD.space.sm,
+    maxWidth: "100%",
+  },
+  perf_metricHint: {
+    fontSize: LD.size.micro,
+    fontFamily: LD.font.sans,
+    color: LD.color.ink4,
+    lineHeight: LD.lineHeight.normal,
+    marginTop: LD.space.xxs + 1,
+    maxWidth: "100%",
+  },
+  nar_inaction: {
+    fontSize: LD.size.caption,
+    fontFamily: LD.font.sans,
+    color: LD.color.ink3,
+    lineHeight: LD.lineHeight.editorial,
+    marginTop: LD.space.xs,
   },
 
   eyebrow: {
@@ -340,6 +386,14 @@ export const lockedStyles = StyleSheet.create({
   },
 
   /* Competitive — signal strips + sharp table */
+  comp_tableIntro: {
+    fontSize: LD.size.bodySm,
+    fontFamily: LD.font.sans,
+    color: LD.color.ink2,
+    lineHeight: LD.lineHeight.relaxed,
+    marginBottom: LD.space.lg,
+    maxWidth: "100%",
+  },
   comp_alertsRow: { flexDirection: "row", marginBottom: LD.space.xl },
   comp_alert: {
     flex: 1,

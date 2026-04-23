@@ -47,7 +47,7 @@ export function PageDataSummary({ data }: { data: ReportData }): ReactElement {
         <LockedNarrativeStack
           slice={slice}
           variant="compact"
-          compactMaxHeight={96}
+          compactMaxHeight={108}
           include={["headline", "interpretation", "implication"]}
         />
         <View style={[lockedStyles.data_th, local.thH]}>

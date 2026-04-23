@@ -50,7 +50,7 @@ export function PageRecommendations({ data }: { data: ReportData }): ReactElemen
       <LockedNarrativeStack
         slice={slice}
         stackRole="afterPrimary"
-        include={["interpretation", "implication"]}
+        include={["interpretation", "implication", "inaction"]}
       />
     </PdfInnerPage>
   );

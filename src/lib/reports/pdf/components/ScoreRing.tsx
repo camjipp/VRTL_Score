@@ -42,9 +42,16 @@ const DEG = Math.PI / 180;
 
 const RING_TRACK = "#D1D5DB";
 
-type Props = { score: number | null; variant?: ScoreRingVariant };
+type Props = {
+  score: number | null;
+  variant?: ScoreRingVariant;
+  /** Arc fill (defaults to brand score color). */
+  ringStroke?: string;
+  /** Upper label under arc; `null` hides the label row. */
+  scoreLabel?: string | null;
+};
 
-export function ScoreRing({ score, variant = "default" }: Props) {
+export function ScoreRing({ score, variant = "default", ringStroke, scoreLabel }: Props) {
   const p = RING_PRESETS[variant];
   const { W, H, R, stroke: STROKE, colW, scoreFont, fracFont, labelFont, labelBottom, nudgeY } = p;
   const CX = W / 2;
@@ -65,6 +72,8 @@ export function ScoreRing({ score, variant = "default" }: Props) {
   const rest = Math.max(0.001, ARC_LEN - filled);
 
   const display = score == null ? "—" : String(score);
+  const fillStroke = ringStroke ?? colors.cyan;
+  const labelText = scoreLabel === undefined ? "OVERALL SCORE" : scoreLabel;
 
   return (
     <View style={{ width: colW, alignItems: "center" }}>
@@ -74,7 +83,7 @@ export function ScoreRing({ score, variant = "default" }: Props) {
             <Path d={ARC_D} stroke={RING_TRACK} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
             <Path
               d={ARC_D}
-              stroke={colors.cyan}
+              stroke={fillStroke}
               strokeWidth={STROKE}
               fill="none"
               strokeLinecap="butt"
@@ -83,7 +92,7 @@ export function ScoreRing({ score, variant = "default" }: Props) {
           </Svg>
         </View>
 
-        {variant !== "hero" ? (
+        {variant !== "hero" && labelText !== null && labelText.length > 0 ? (
           <View style={{ position: "absolute", bottom: labelBottom, left: 0, width: W, alignItems: "center" }}>
             <Text
               style={{
@@ -96,7 +105,7 @@ export function ScoreRing({ score, variant = "default" }: Props) {
                 textAlign: "center",
               }}
             >
-              OVERALL SCORE
+              {labelText}
             </Text>
           </View>
         ) : null}

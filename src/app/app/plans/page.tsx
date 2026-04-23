@@ -381,7 +381,14 @@ export default function PlansPage() {
                       >
                         {checkoutLoading === plan.id || (isCurrentPlan && portalLoading) ? (
                           <span className="flex items-center gap-2">
-                            <svg className="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <svg
+                              className={cn(
+                                "h-3.5 w-3.5 animate-spin",
+                                showPrimaryCta ? "text-[var(--vrtl-spinner-on-solid)]" : "text-[var(--vrtl-spinner)]",
+                              )}
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
                               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                               <path
                                 className="opacity-75"

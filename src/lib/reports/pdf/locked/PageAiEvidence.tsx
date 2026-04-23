@@ -20,15 +20,27 @@ const local = StyleSheet.create({
   row: { flexDirection: "row", height: CARD_H },
 });
 
-function strengthBody(data: ReportData): string {
-  const s = findStrengthPreview(data.evidencePreview);
-  if (!s?.snippet?.trim()) return clipPdfText("No strength excerpt in this export.", 280);
-  return clipPdfText(String(s.snippet), 280);
+function brandName(data: ReportData): string {
+  const n = data.clientName?.trim();
+  return n && n.length > 0 ? n : "Your brand";
 }
 
 function looksLikeStructuredBlob(s: string): boolean {
   const t = s.trim();
   return t.startsWith("{") || t.startsWith("[") || /"\w+"\s*:/.test(t);
+}
+
+function strengthBody(data: ReportData): string {
+  const s = findStrengthPreview(data.evidencePreview);
+  if (!s?.snippet?.trim()) return clipPdfText("No strength excerpt in this export.", 280);
+  const raw = String(s.snippet).trim();
+  if (looksLikeStructuredBlob(raw)) {
+    return clipPdfText(
+      `In this answer, ${clipPdfText(brandName(data), 28)} is positioned as a brand the assistant is willing to recommend.`,
+      200,
+    );
+  }
+  return clipPdfText(raw, 280);
 }
 
 function vulnerableFromParts(parts: VulnerableExcerptParts): { lead: string; detail: string; impact: string } {
@@ -66,7 +78,10 @@ export function PageAiEvidence({ data }: { data: ReportData }): ReactElement {
     const raw = v?.snippet?.trim() ? String(v.snippet) : "";
     const body = raw
       ? looksLikeStructuredBlob(raw)
-        ? clipPdfText("This signal is not shown in raw form here. See the evidence log for the full response context.", 150)
+        ? clipPdfText(
+            `${clipPdfText(brandName(data), 28)} was not mentioned in this response; the assistant recommended other brands instead.`,
+            200,
+          )
         : clipPdfText(raw, 240)
       : clipPdfText("No exposure excerpt in this export.", 120);
     vulnerableQuote = (
@@ -102,7 +117,7 @@ export function PageAiEvidence({ data }: { data: ReportData }): ReactElement {
         slice={slice}
         stackRole="afterPrimary"
         variant="compact"
-        include={["interpretation", "implication"]}
+        include={["interpretation", "implication", "inaction"]}
       />
     </PdfInnerPage>
   );

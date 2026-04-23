@@ -9,7 +9,7 @@ function CallbackFallback() {
       style={{ backgroundColor: "#05070A" }}
     >
       <div
-        className="h-8 w-8 animate-spin rounded-full border-2 border-[#1A212B] border-t-[#10A37F]"
+        className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-[var(--vrtl-spinner)]"
       />
       <p className="mt-4 text-sm text-[#8B98A5]">Completing sign-in…</p>
     </main>

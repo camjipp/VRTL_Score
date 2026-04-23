@@ -307,7 +307,7 @@ export function AppEntitlementGate({ children }: Props) {
                 style={{ backgroundColor: GATE_DARK.border }}
               >
                 <div
-                  className="h-full rounded-full bg-[#10A37F] transition-all duration-500 ease-out"
+                  className="h-full rounded-full bg-[var(--vrtl-spinner)] transition-all duration-500 ease-out"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -325,7 +325,7 @@ export function AppEntitlementGate({ children }: Props) {
             <div className="flex flex-col items-center gap-6">
               <div
                 className="h-8 w-8 animate-spin rounded-full border-2"
-                style={{ borderColor: GATE_DARK.border, borderTopColor: "#10A37F" }}
+                style={{ borderColor: GATE_DARK.border, borderTopColor: "var(--vrtl-spinner)" }}
               />
             </div>
           )}

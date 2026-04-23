@@ -444,6 +444,9 @@ html {
   --text-muted: #444444;
   /* Aligned with product accent #22C55E */
   --accent-marketing: #22c55e;
+  /* Loaders: one highlight everywhere; darker glyph on solid green CTAs */
+  --vrtl-spinner: var(--accent-marketing);
+  --vrtl-spinner-on-solid: #15803d;
   --accent-bg: rgba(34, 197, 94, 0.1);
   --accent-border: rgba(34, 197, 94, 0.25);
   --marketing-red: #ff4040;

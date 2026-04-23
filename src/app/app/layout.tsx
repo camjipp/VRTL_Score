@@ -31,7 +31,7 @@ function LoadingScreen() {
         sizes="(max-width: 768px) 85vw, 280px"
         unoptimized={BRAND_LOCKUP_IMAGE_UNOPTIMIZED}
       />
-      <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/10 border-t-text-2" />
+      <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/10 border-t-accent" />
     </div>
   );
 }

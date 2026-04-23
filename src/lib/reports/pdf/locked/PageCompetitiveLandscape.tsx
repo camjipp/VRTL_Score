@@ -40,6 +40,12 @@ export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactE
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[4]!}>
       <LockedNarrativeStack slice={slice} include={["headline"]} />
+      <Text style={lockedStyles.comp_tableIntro}>
+        {clipPdfText(
+          "This table shows how often each brand is recommended and how they rank against you in this export.",
+          160,
+        )}
+      </Text>
       <View style={lockedStyles.comp_alertsRow} wrap={false}>
         <View style={[lockedStyles.comp_alert, local.alertH]}>
           <Text style={lockedStyles.comp_alertEyebrow}>Win</Text>
