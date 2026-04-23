@@ -38,6 +38,10 @@ export const LD = {
     tocPage: 9,
     metricValue: 12,
     metricHero: 40,
+    /** Performance snapshot command score (dominant focal). */
+    commandScore: 56,
+    /** Secondary metric numerals (below hero). */
+    metricSecondary: 10,
   },
 
   lineHeight: {
@@ -46,6 +50,8 @@ export const LD = {
     snug: 1.28,
     normal: 1.45,
     relaxed: 1.55,
+    /** Editorial supporting copy. */
+    editorial: 1.68,
   },
 
   /** Spacing rhythm (pt). */

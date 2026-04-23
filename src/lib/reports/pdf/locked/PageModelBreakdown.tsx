@@ -6,14 +6,15 @@ import type { ModelScoreRow, ReportData } from "../types";
 import { LOCKED_PAGE_HEADER } from "./layoutConstants";
 import { lockedStyles } from "./lockedDocumentStyles";
 
-const HIGHLIGHT_H = 56;
+const FRACTURE_H = 108;
 const ROW_H = 44;
 const MAX_SLOTS = 9;
 const COLS = 3;
 
 const local = StyleSheet.create({
-  highlight: { height: HIGHLIGHT_H },
+  fracture: { height: FRACTURE_H },
   gridRow: { flexDirection: "row", height: ROW_H, marginBottom: 6 },
+  takeawayBlock: { marginTop: 20 },
 });
 
 function sortedModels(rows: readonly ModelScoreRow[]): ModelScoreRow[] {
@@ -30,25 +31,51 @@ function rowsOfThree(models: ModelScoreRow[]): (ModelScoreRow | null)[][] {
   return out;
 }
 
-function highlightLine(data: ReportData, sorted: ModelScoreRow[]): string {
-  const best = sorted[0];
-  const worst = sorted[sorted.length - 1];
-  if (best && worst && best.name !== worst.name) {
-    return clipPdfText(`Strongest ${best.name} (${best.score}). Weakest ${worst.name} (${worst.score}).`, 200);
-  }
-  if (best) return clipPdfText(`Primary model signal: ${best.name} (${best.score}).`, 200);
-  return "No model rows in this export.";
-}
-
 export function PageModelBreakdown({ data }: { data: ReportData }): ReactElement {
   const sorted = sortedModels(data.modelScores);
-  const hl = highlightLine(data, sorted);
+  const best = sorted[0];
+  const worst = sorted[sorted.length - 1];
   const grid = rowsOfThree(sorted);
+
+  const gap =
+    best && worst && best.name !== worst.name ? Math.max(0, Math.round(best.score - worst.score)) : null;
 
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[5]!}>
-      <View style={[lockedStyles.model_highlight, local.highlight]} wrap={false}>
-        <Text style={lockedStyles.model_highlightText}>{hl}</Text>
+      <View style={[lockedStyles.model_fractureShell, local.fracture]} wrap={false}>
+        <Text style={lockedStyles.model_fractureEyebrow}>Models disagree on you</Text>
+        {best && worst && best.name !== worst.name ? (
+          <View style={lockedStyles.model_fractureRow}>
+            <View style={[lockedStyles.model_pole, lockedStyles.model_poleBest]}>
+              <Text style={lockedStyles.model_poleLabel}>Strongest read</Text>
+              <Text style={lockedStyles.model_poleName}>{clipPdfText(best.name, 22)}</Text>
+              <Text style={lockedStyles.model_poleScore}>{String(best.score)}</Text>
+            </View>
+            <View style={lockedStyles.model_gapColumn}>
+              <Text style={lockedStyles.model_gapLabel}>Spread</Text>
+              <Text style={lockedStyles.model_gapValue}>{gap === 0 ? "0" : String(gap)}</Text>
+              <Text style={lockedStyles.model_gapCaption}>points between best and worst</Text>
+            </View>
+            <View style={[lockedStyles.model_pole, lockedStyles.model_poleWorst]}>
+              <Text style={lockedStyles.model_poleLabel}>Weakest read</Text>
+              <Text style={lockedStyles.model_poleName}>{clipPdfText(worst.name, 22)}</Text>
+              <Text style={lockedStyles.model_poleScore}>{String(worst.score)}</Text>
+            </View>
+          </View>
+        ) : best ? (
+          <View style={lockedStyles.model_fractureRow}>
+            <View style={[lockedStyles.model_pole, lockedStyles.model_poleBest, { flex: 1, marginRight: 0 }]}>
+              <Text style={lockedStyles.model_poleLabel}>Primary signal</Text>
+              <Text style={lockedStyles.model_poleName}>{clipPdfText(best.name, 28)}</Text>
+              <Text style={lockedStyles.model_poleScore}>{String(best.score)}</Text>
+              <Text style={[lockedStyles.model_gapCaption, { marginTop: 6, textAlign: "left" }]}>
+                {clipPdfText("Add model coverage to measure how assistants diverge on you.", 96)}
+              </Text>
+            </View>
+          </View>
+        ) : (
+          <Text style={lockedStyles.model_takeaway}>No model rows in this export.</Text>
+        )}
       </View>
       {grid.map((row, ri) => (
         <View key={ri} style={local.gridRow} wrap={false}>
@@ -59,6 +86,7 @@ export function PageModelBreakdown({ data }: { data: ReportData }): ReactElement
               <View key={ci} style={box}>
                 {m ? (
                   <>
+                    <Text style={lockedStyles.model_cellLabel}>Model</Text>
                     <Text style={lockedStyles.model_name}>{clipPdfText(m.name, 22)}</Text>
                     <Text style={lockedStyles.model_score}>{clipPdfText(String(m.score), 12)}</Text>
                   </>
@@ -70,9 +98,9 @@ export function PageModelBreakdown({ data }: { data: ReportData }): ReactElement
           })}
         </View>
       ))}
-      <View style={{ marginTop: 8 }}>
-        <Text style={lockedStyles.model_takeawayLabel}>Read</Text>
-        <Text style={lockedStyles.model_takeaway}>{clipPdfText(data.strategicTakeaway, 220)}</Text>
+      <View style={local.takeawayBlock}>
+        <Text style={lockedStyles.model_takeawayLabel}>Interpretation</Text>
+        <Text style={lockedStyles.model_takeaway}>{clipPdfText(data.strategicTakeaway, 165)}</Text>
       </View>
     </PdfInnerPage>
   );

@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 import { PdfInnerPage } from "../components/PdfInnerPage";
 import { clipPdfText } from "../editorial/pdfNarrative";
 import { formatEvidenceLogPillLabel } from "@/lib/reports/formatEvidenceFieldDisplay";
-import type { ReportData } from "../types";
+import type { ReportData, VulnerableExcerptParts } from "../types";
 import {
   findStrengthPreview,
   findVulnerablePreview,
@@ -20,54 +20,78 @@ const local = StyleSheet.create({
 
 function strengthBody(data: ReportData): string {
   const s = findStrengthPreview(data.evidencePreview);
-  if (!s?.snippet?.trim()) return clipPdfText("No strength excerpt in this export.", 300);
-  return clipPdfText(String(s.snippet), 300);
+  if (!s?.snippet?.trim()) return clipPdfText("No strength excerpt in this export.", 280);
+  return clipPdfText(String(s.snippet), 280);
+}
+
+function looksLikeStructuredBlob(s: string): boolean {
+  const t = s.trim();
+  return t.startsWith("{") || t.startsWith("[") || /"\w+"\s*:/.test(t);
+}
+
+function vulnerableFromParts(parts: VulnerableExcerptParts): { lead: string; detail: string; impact: string } {
+  const summary = parts.summary.replace(/\s+/g, " ").trim();
+  const names = parts.competitorsLine.replace(/\s+/g, " ").trim();
+  const impl = parts.implication.replace(/\s+/g, " ").trim();
+  const lead = clipPdfText(summary, 125);
+  const detail = names
+    ? clipPdfText(`Competitors recommended in the same answer include ${names.replace(/\.$/, "")}.`, 138)
+    : "";
+  const impact = clipPdfText(impl, 118);
+  return { lead, detail, impact };
 }
 
 export function PageAiEvidence({ data }: { data: ReportData }): ReactElement {
   const s = findStrengthPreview(data.evidencePreview);
   const v = findVulnerablePreview(data.evidencePreview);
   const vulnParts = normalizeVulnerableExcerptParts(v);
-  const strengthLabel = s ? formatEvidenceLogPillLabel(String(s.label)) : "Strength";
-  const vulnLabel = v ? formatEvidenceLogPillLabel(String(v.label)) : "Exposure";
+  const strengthHint = s ? clipPdfText(formatEvidenceLogPillLabel(String(s.label)), 48) : "";
+  const vulnHint = v ? clipPdfText(formatEvidenceLogPillLabel(String(v.label)), 48) : "";
 
-  const strengthNote = s?.note?.trim()
-    ? clipPdfText(String(s.note), 110)
-    : "";
+  const strengthNote = s?.note?.trim() ? clipPdfText(String(s.note), 100) : "";
+
+  let vulnerableQuote: ReactElement;
+  if (vulnParts) {
+    const { lead, detail, impact } = vulnerableFromParts(vulnParts);
+    vulnerableQuote = (
+      <View style={lockedStyles.ev_quote}>
+        <Text style={lockedStyles.ev_quoteLead}>{lead}</Text>
+        {detail ? <Text style={lockedStyles.ev_quoteDetail}>{detail}</Text> : null}
+        {impact ? <Text style={lockedStyles.ev_quoteImpact}>{impact}</Text> : null}
+      </View>
+    );
+  } else {
+    const raw = v?.snippet?.trim() ? String(v.snippet) : "";
+    const body = raw
+      ? looksLikeStructuredBlob(raw)
+        ? clipPdfText("This signal is not shown in raw form here. See the evidence log for the full response context.", 160)
+        : clipPdfText(raw, 260)
+      : clipPdfText("No exposure excerpt in this export.", 120);
+    vulnerableQuote = (
+      <View style={lockedStyles.ev_quote}>
+        <Text style={lockedStyles.ev_quoteLead}>{body}</Text>
+      </View>
+    );
+  }
+
+  const vulnNote = v?.note?.trim() ? clipPdfText(String(v.note), 95) : "";
 
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[6]!}>
       <View style={local.row} wrap={false}>
         <View style={lockedStyles.ev_cardStrength}>
-          <Text style={lockedStyles.ev_badge}>{strengthLabel}</Text>
+          <Text style={lockedStyles.ev_badge}>STRENGTH</Text>
+          {strengthHint ? <Text style={lockedStyles.ev_badgeHint}>{strengthHint}</Text> : null}
           <View style={lockedStyles.ev_quote}>
             <Text style={lockedStyles.ev_quoteText}>{strengthBody(data)}</Text>
           </View>
           {strengthNote ? <Text style={lockedStyles.ev_note}>{strengthNote}</Text> : null}
         </View>
         <View style={lockedStyles.ev_cardRisk}>
-          <Text style={lockedStyles.ev_badge}>{vulnLabel}</Text>
-          {vulnParts ? (
-            <>
-              <Text style={lockedStyles.ev_micro}>Summary</Text>
-              <Text style={lockedStyles.ev_microBody}>{clipPdfText(vulnParts.summary, 95)}</Text>
-              <Text style={lockedStyles.ev_micro}>Named alternatives</Text>
-              <Text style={lockedStyles.ev_microBody}>{clipPdfText(vulnParts.competitorsLine, 72)}</Text>
-              <Text style={lockedStyles.ev_micro}>Impact</Text>
-              <Text style={lockedStyles.ev_microBody}>{clipPdfText(vulnParts.implication, 85)}</Text>
-            </>
-          ) : (
-            <>
-              <View style={lockedStyles.ev_quote}>
-                <Text style={lockedStyles.ev_quoteText}>
-                  {v?.snippet?.trim()
-                    ? clipPdfText(String(v.snippet), 280)
-                    : clipPdfText("No exposure excerpt in this export.", 120)}
-                </Text>
-              </View>
-              {v?.note?.trim() ? <Text style={lockedStyles.ev_note}>{clipPdfText(String(v.note), 100)}</Text> : null}
-            </>
-          )}
+          <Text style={lockedStyles.ev_badge}>VULNERABLE</Text>
+          {vulnHint ? <Text style={lockedStyles.ev_badgeHint}>{vulnHint}</Text> : null}
+          {vulnerableQuote}
+          {vulnNote ? <Text style={lockedStyles.ev_note}>{vulnNote}</Text> : null}
         </View>
       </View>
     </PdfInnerPage>

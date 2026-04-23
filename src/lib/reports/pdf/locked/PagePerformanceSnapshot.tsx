@@ -6,8 +6,9 @@ import type { ReportData } from "../types";
 import { LOCKED_PAGE_HEADER } from "./layoutConstants";
 import { lockedStyles } from "./lockedDocumentStyles";
 
-const HERO_H = 96;
-const METRIC_H = 72;
+/** Fixed content-region bands (unchanged frame; inner rhythm only). */
+const HERO_H = 118;
+const METRIC_H = 64;
 
 const local = StyleSheet.create({
   hero: { height: HERO_H },
@@ -20,14 +21,16 @@ function fmtScore(n: number | null): string {
 }
 
 export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactElement {
-  const line = clipPdfText(data.bottomLine || data.tensionNote || " ", 220);
+  const line = clipPdfText(data.bottomLine || data.tensionNote || " ", 200);
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[3]!}>
       <View style={[lockedStyles.perf_hero, local.hero]} wrap={false}>
-        <Text style={lockedStyles.perf_score}>{fmtScore(data.overallScore)}</Text>
-        <Text style={lockedStyles.perf_status}>{clipPdfText(data.status, 120)}</Text>
+        <View style={lockedStyles.perf_heroBand}>
+          <Text style={lockedStyles.perf_score}>{fmtScore(data.overallScore)}</Text>
+          <Text style={lockedStyles.perf_status}>{clipPdfText(data.status, 120)}</Text>
+        </View>
       </View>
-      <View style={local.metricsRow} wrap={false}>
+      <View style={[lockedStyles.perf_metricsRow, local.metricsRow]} wrap={false}>
         <View style={lockedStyles.perf_metricCell}>
           <Text style={lockedStyles.perf_metricLabel}>Mention rate</Text>
           <Text style={lockedStyles.perf_metricValue}>{clipPdfText(String(data.mentionRate), 24)}</Text>
