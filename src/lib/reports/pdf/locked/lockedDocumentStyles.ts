@@ -179,6 +179,14 @@ export const lockedStyles = StyleSheet.create({
     paddingBottom: 0,
     borderBottomWidth: 0,
   },
+  perf_sectionDiagnosis: {
+    width: "100%",
+    marginTop: LD.space.xxxl,
+    marginBottom: LD.space.xxl,
+    paddingTop: LD.space.md,
+    paddingBottom: 0,
+    borderBottomWidth: 0,
+  },
   perf_sectionEyebrow: {
     fontSize: LD.size.caption,
     fontFamily: LD.font.sansBold,
@@ -187,11 +195,12 @@ export const lockedStyles = StyleSheet.create({
     textTransform: "uppercase",
     marginBottom: LD.space.md,
   },
-  perf_heroScoreLine: {
-    fontSize: 28,
+  perf_heroVerdictTitle: {
+    fontSize: LD.size.display2,
     fontFamily: LD.font.sansBold,
     color: LD.color.ink,
     lineHeight: LD.lineHeight.snug,
+    letterSpacing: -0.15,
     marginBottom: LD.space.md,
     maxWidth: "100%",
   },
@@ -257,15 +266,19 @@ export const lockedStyles = StyleSheet.create({
   perf_diagNarrativeWrap: {
     maxWidth: "100%",
     paddingLeft: LD.space.md,
+    paddingVertical: LD.space.sm,
     borderLeftWidth: LD.border.accentRule,
     borderLeftColor: LD.color.ink,
   },
   perf_diagNarrative: {
-    fontSize: LD.size.body,
+    fontSize: LD.size.lead,
     fontFamily: LD.font.sans,
     color: LD.color.ink2,
-    lineHeight: LD.lineHeight.editorial,
+    lineHeight: 1.75,
     maxWidth: "100%",
+  },
+  perf_diagNarrativeGap: {
+    marginBottom: LD.space.lg,
   },
   nar_inaction: {
     fontSize: LD.size.caption,

@@ -57,86 +57,34 @@ function heroSupportingForTier(tier: string): string {
   return "Assistants include you often, but they do not consistently recommend you first. That means competitors still win decisions even when you are in the conversation.";
 }
 
-function buildDiagnosisNarrative(d: ReportData): string {
+function diagnosisParagraphs(d: ReportData): [string, string] {
   const m = Math.min(100, Math.max(0, Math.round(d.mentionRate)));
   const miss = Math.max(0, 100 - m);
-  const tp = d.topPosition;
-  const auth = d.authorityScore;
   const authStr = String(d.authorityScore);
 
-  const parts: string[] = [];
-
-  parts.push(
-    `You appear in ${m}% of assistant responses, which puts you in the conversation more often than most competitors.`,
+  const p1 = clipPdfText(
+    `You appear in ${m}% of assistant responses, which puts you in the conversation more often than most competitors. However, visibility alone is not enough. In the remaining ${miss}% of responses, you are not mentioned at all—giving competitors full control over those decisions.`,
+    1200,
   );
 
-  parts.push(
-    `However, visibility alone is not enough. In the remaining ${miss}% of responses, you are not mentioned at all—giving competitors full control over those decisions.`,
+  const authorityProof =
+    d.authorityScore === 0
+      ? "In this sample, none of your mentions include citations or supporting proof."
+      : `In this sample, only ${authStr}% of mentions include citations or supporting proof.`;
+
+  const p2 = clipPdfText(
+    `Even when you are included, assistants often place you first, but not consistently enough to make you the default choice. The biggest issue is authority. ${authorityProof} Without that, assistants are more likely to favor competitors that appear more credible. Right now, you look strong on presence, but weak on trust—and that creates instability in your position.`,
+    1200,
   );
 
-  if (tp < 35) {
-    parts.push(
-      "Even when you are included, you are not consistently positioned as the first recommendation. That means assistants are not treating you as the default choice.",
-    );
-  } else if (tp >= 55) {
-    parts.push(
-      `When you are included, assistants often place you first (${String(d.topPosition)}% of answers in this sample). The remaining risk is when you are absent—and whether rivals own those answers outright.`,
-    );
-  } else {
-    parts.push(
-      `Even when you are included, first-slot positioning is mixed (${String(d.topPosition)}% list you first), so assistants are not fully standardizing on you as the default.`,
-    );
-  }
-
-  if (auth === 0) {
-    parts.push(
-      "The biggest issue is authority. In this sample, none of your mentions include citations or supporting proof. Without that, assistants are more likely to favor competitors that appear more credible.",
-    );
-  } else if (auth < 15) {
-    parts.push(
-      `Authority is still a gap: only ${authStr}% of mentions in this sample include citations or supporting proof, so credibility is easy for rivals to challenge.`,
-    );
-  } else {
-    parts.push(
-      `Citation-backed authority is present at ${authStr}% of mentions in this sample, but gaps in presence and first-slot outcomes still give competitors room to win the answer.`,
-    );
-  }
-
-  if (auth === 0) {
-    if (m >= 50) {
-      parts.push(
-        "Right now, you look strong on presence, but weak on trust. That combination creates instability—your position can be replaced quickly if a competitor strengthens their authority signals.",
-      );
-    } else {
-      parts.push(
-        "With room to grow on presence and no citation-backed proof in this sample, assistants have little anchor for a durable recommendation—closing both gaps is the priority.",
-      );
-    }
-  } else if (m >= 50 && auth < 15) {
-    parts.push(
-      "Right now, you look strong on presence relative to many peers, but proof is still thin—rivals can look more credible until citation depth catches up.",
-    );
-  } else if (m >= 50 && auth >= 15) {
-    parts.push(
-      "You pair solid presence with some proof—tightening first-slot consistency and deepening citations are what make the recommendation feel inevitable instead of optional.",
-    );
-  } else {
-    parts.push(
-      "Taken together, visibility, first-slot outcomes, and citation-backed authority explain where assistants default today—and where the next gains will come from.",
-    );
-  }
-
-  return clipPdfText(parts.join("\n\n"), 2200);
+  return [p1, p2];
 }
 
 export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactElement {
   const score = data.overallScore;
   const tier = (data.status || "").trim() || "Moderate";
-  const scoreLine =
-    score == null || Number.isNaN(score) ? "— / 100" : clipPdfText(`${fmtScore(score)} / 100`, 24);
-
   const rankPct = rankBarPct(data.rank, data.rankTotal);
-  const narrative = buildDiagnosisNarrative(data);
+  const [diagP1, diagP2] = diagnosisParagraphs(data);
 
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[3]!}>
@@ -150,12 +98,11 @@ export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactEl
               scoreLabel={null}
               palette="neutral"
               showFraction={false}
-              arcZoneLabels
               arcScoreTick
             />
           </View>
           <View style={lockedStyles.perf_heroAside} wrap={false}>
-            <Text style={lockedStyles.perf_heroScoreLine}>{scoreLine}</Text>
+            <Text style={lockedStyles.perf_heroVerdictTitle}>AI Authority Score</Text>
             <Text style={lockedStyles.perf_heroPrimaryInsight}>{primaryInsightForTier(tier)}</Text>
             <Text style={lockedStyles.perf_heroSupporting}>{heroSupportingForTier(tier)}</Text>
             <Text style={lockedStyles.perf_heroContext}>
@@ -224,11 +171,16 @@ export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactEl
         </View>
       </View>
 
-      <View style={lockedStyles.perf_sectionTight} wrap={false}>
+      <View style={lockedStyles.perf_sectionDiagnosis} wrap={false}>
         <Text style={lockedStyles.perf_sectionEyebrow}>Diagnosis</Text>
         <View style={lockedStyles.perf_diagWrap} wrap={false}>
           <View style={lockedStyles.perf_diagNarrativeWrap} wrap={false}>
-            <Text style={lockedStyles.perf_diagNarrative}>{narrative}</Text>
+            <Text style={[lockedStyles.perf_diagNarrative, lockedStyles.perf_diagNarrativeGap]} wrap={false}>
+              {diagP1}
+            </Text>
+            <Text style={lockedStyles.perf_diagNarrative} wrap={false}>
+              {diagP2}
+            </Text>
           </View>
         </View>
       </View>

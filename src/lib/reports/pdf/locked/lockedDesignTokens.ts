@@ -20,8 +20,8 @@ export const LD = {
     accentMuted: colors.cyanLight,
     risk: colors.red,
     riskMuted: colors.redLight,
-    /** PDF-readable green for clearly strong signals (not decorative). */
-    signalStrong: "#15803d",
+    /** VRTL brand green — strong / positive signals in locked PDF. */
+    signalStrong: "#22C55E",
   },
 
   /** Typography scale (pt). */

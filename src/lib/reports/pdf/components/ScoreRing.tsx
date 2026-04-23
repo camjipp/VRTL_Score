@@ -69,22 +69,17 @@ type Props = {
   zoneTrack?: boolean;
   /**
    * `vivid` — legacy cyan / multi-zone amber (when `zoneTrack`).
-   * `neutral` — gray track, progress red (under 40) / near-black (40–69) / green (70+); no orange.
+   * `neutral` — gray track, progress red (under 40) / near-black (40–69) / brand green #22C55E (70+); no orange.
    */
   palette?: "vivid" | "neutral";
   /** When false, only the integer score is shown (no `/100` line). */
   showFraction?: boolean;
-  /**
-   * When true (intended with `variant="performance"` + neutral palette), draws three
-   * track segments for 0–50 / 50–70 / 70–100 and places Weak / Contested / Strong labels
-   * near the arc.
-   */
-  arcZoneLabels?: boolean;
   /** Short radial tick on the arc at the current score (0–100). */
   arcScoreTick?: boolean;
 };
 
-const NEUTRAL_STRONG = "#15803d";
+/** VRTL brand green (70+ on neutral performance gauge). */
+const BRAND_SCORE_GREEN = "#22C55E";
 
 function zoneStrokeForScore(s: number | null): string {
   if (s == null || Number.isNaN(s)) return colors.cyan;
@@ -97,7 +92,7 @@ function neutralProgressStroke(s: number | null): string {
   if (s == null || Number.isNaN(s)) return colors.ink2;
   if (s < 40) return ZONE_RED;
   if (s < 70) return colors.ink;
-  return NEUTRAL_STRONG;
+  return BRAND_SCORE_GREEN;
 }
 
 const ZONE_NEUTRAL_LOW = "#E5E7EB";
@@ -118,7 +113,6 @@ export function ScoreRing({
   zoneTrack,
   palette = "vivid",
   showFraction = true,
-  arcZoneLabels = false,
   arcScoreTick = false,
 }: Props) {
   const p = RING_PRESETS[variant];
@@ -160,24 +154,6 @@ export function ScoreRing({
   const labelText = scoreLabel === undefined ? "OVERALL SCORE" : scoreLabel;
   const zoneSlicesVivid = zoneTrack && palette === "vivid";
   const zoneSlicesNeutral = zoneTrack && palette === "neutral";
-  const perfWcsTrack = arcZoneLabels && palette === "neutral";
-
-  const labelR = R + STROKE * 0.5 + 10;
-  const zoneLabelStyle = {
-    position: "absolute" as const,
-    fontSize: 8.5,
-    fontFamily: fonts.sansBold,
-    color: colors.ink2,
-    width: 56,
-    textAlign: "center" as const,
-  };
-
-  function labelAnchor(angleDeg: number): { left: number; top: number } {
-    const t = angleDeg * DEG;
-    const x = CX + labelR * Math.cos(t);
-    const y = CY + labelR * Math.sin(t);
-    return { left: x - 28, top: y - 5 };
-  }
 
   const tickAngle = score == null || Number.isNaN(score) ? null : angleForScore100(score);
   let tickLineD: string | null = null;
@@ -205,12 +181,6 @@ export function ScoreRing({
               <>
                 <Path d={arcSliceD(135, 243)} stroke={ZONE_NEUTRAL_LOW} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
                 <Path d={arcSliceD(243, 324)} stroke={ZONE_NEUTRAL_MID} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
-                <Path d={arcSliceD(324, 405)} stroke={ZONE_NEUTRAL_HIGH} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
-              </>
-            ) : perfWcsTrack ? (
-              <>
-                <Path d={arcSliceD(135, 270)} stroke={ZONE_NEUTRAL_LOW} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
-                <Path d={arcSliceD(270, 324)} stroke={ZONE_NEUTRAL_MID} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
                 <Path d={arcSliceD(324, 405)} stroke={ZONE_NEUTRAL_HIGH} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
               </>
             ) : (
@@ -246,14 +216,6 @@ export function ScoreRing({
               {labelText}
             </Text>
           </View>
-        ) : null}
-
-        {arcZoneLabels ? (
-          <>
-            <Text style={[zoneLabelStyle, labelAnchor(202.5)]}>Weak</Text>
-            <Text style={[zoneLabelStyle, labelAnchor(297)]}>Contested</Text>
-            <Text style={[zoneLabelStyle, labelAnchor(364.5)]}>Strong</Text>
-          </>
         ) : null}
 
         <View
