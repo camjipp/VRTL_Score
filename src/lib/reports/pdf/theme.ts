@@ -1,10 +1,13 @@
 import { StyleSheet } from "@react-pdf/renderer";
 
-/** US Letter — 612 × 792 pt; 36 pt margins on all sides */
-export const PAGE = { width: 612, height: 792, margin: 36 } as const;
+/** Letter — canonical physical size for every report page (pt). */
+export const PDF_PAGE_WIDTH = 612 as const;
+export const PDF_PAGE_HEIGHT = 792 as const;
 
-/** Every `<Page size={…}>` in the report must use this tuple (no A4/Letter mix). */
-export const PDF_PAGE_SIZE = [PAGE.width, PAGE.height] as [number, number];
+export const PAGE = { width: PDF_PAGE_WIDTH, height: PDF_PAGE_HEIGHT, margin: 36 } as const;
+
+/** Every `<Page size={…}>` must use this tuple only. */
+export const PDF_PAGE_SIZE = [PDF_PAGE_WIDTH, PDF_PAGE_HEIGHT] as [number, number];
 
 /** Slide layout: horizontal inset for designed pages (48pt each side → 516pt content width). */
 export const PDF_SLIDE_HORIZONTAL_PAD = 48;
@@ -72,8 +75,8 @@ export const fonts = {
 
 export const baseStyles = StyleSheet.create({
   page: {
-    width: PAGE.width,
-    height: PAGE.height,
+    width: PDF_PAGE_WIDTH,
+    height: PDF_PAGE_HEIGHT,
     backgroundColor: colors.paper,
     padding: 0,
     fontFamily: fonts.sans,
@@ -82,28 +85,31 @@ export const baseStyles = StyleSheet.create({
   },
   /** Inner `<Page>` shell: column flex so `flex:1` children can balance vertical space. */
   pageColumn: {
-    width: PAGE.width,
-    height: PAGE.height,
+    width: PDF_PAGE_WIDTH,
+    height: PDF_PAGE_HEIGHT,
     flexDirection: "column",
   },
-  /** Designed slide `<Page>`: fixed padding; content uses `pdfSlideContent` inside (no double horizontal inset). */
+  /**
+   * Slide `<Page>` shell — fixed header/footer clearances; body flows in `pdfSlideContent`.
+   * Do not change dimensions ad hoc per template.
+   */
   pdfSlidePage: {
-    width: PAGE.width,
-    height: PAGE.height,
+    width: PDF_PAGE_WIDTH,
+    height: PDF_PAGE_HEIGHT,
     backgroundColor: colors.paper,
     fontFamily: fonts.sans,
     fontWeight: 400,
     color: colors.ink,
     flexDirection: "column",
     paddingTop: 90,
-    paddingBottom: 56,
+    paddingBottom: 60,
     paddingHorizontal: PDF_SLIDE_HORIZONTAL_PAD,
   },
-  /** Stretches between fixed header and fixed footer on slide pages. */
+  /** Main flow column below fixed header; keeps content above footer band. */
   pdfSlideContent: {
     flex: 1,
     flexDirection: "column",
-    minHeight: 0,
+    justifyContent: "flex-start",
   },
   pageBody: {
     paddingTop: PAGE.margin,
@@ -117,7 +123,7 @@ export const baseStyles = StyleSheet.create({
     paddingHorizontal: PAGE.margin,
     flex: 1,
     flexDirection: "column",
-    minHeight: 0,
+    justifyContent: "flex-start",
   },
   /** Only header + footer use `fixed` — repeats on each page, positioned in margin band. */
   headerFixedWrap: {
@@ -130,12 +136,16 @@ export const baseStyles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "flex-start",
     marginBottom: rhythm.lg,
     paddingBottom: rhythm.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.rule,
+  },
+  /** Title stack — flexes so meta stays right without `space-between`. */
+  headerRowTitle: {
+    flex: 1,
+    paddingRight: 12,
   },
   /** Primary report label — minimal header */
   reportTitleMain: {
@@ -183,7 +193,6 @@ export const baseStyles = StyleSheet.create({
     fontFamily: fonts.sansBold,
   },
   headerMeta: {
-    alignItems: "flex-end",
     maxWidth: 300,
   },
   clientName: {
@@ -234,24 +243,29 @@ export const baseStyles = StyleSheet.create({
     fontFamily: fonts.sans,
     maxWidth: BODY_MAX_W,
   },
+  /** Fixed footer band — no flex; children positioned explicitly. */
   footer: {
     position: "absolute",
-    bottom: 20,
+    bottom: 24,
     left: PDF_SLIDE_HORIZONTAL_PAD,
     right: PDF_SLIDE_HORIZONTAL_PAD,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
     borderTopWidth: 1,
     borderTopColor: colors.rule,
     paddingTop: 8,
+    minHeight: 22,
   },
   footerText: {
+    position: "absolute",
+    left: 0,
+    top: 8,
     fontSize: 7.5,
     color: colors.ink3,
     fontFamily: fonts.sans,
   },
   footerPageNum: {
+    position: "absolute",
+    right: 0,
+    top: 8,
     fontSize: 7.5,
     color: colors.ink2,
     fontFamily: fonts.sansBold,

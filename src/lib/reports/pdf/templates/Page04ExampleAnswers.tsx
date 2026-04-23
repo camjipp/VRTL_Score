@@ -42,7 +42,6 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.rule,
     overflow: "hidden",
     backgroundColor: colors.paper,
-    minHeight: 0,
   },
   cardHalf: { width: COL_W },
   cardCentered: { width: CENTER_CARD_W },
@@ -89,7 +88,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
     borderLeftWidth: 0,
     backgroundColor: colors.paper,
-    minHeight: 0,
   },
   takeawayBar: { width: 2, backgroundColor: colors.ink2 },
   takeawayInner: {

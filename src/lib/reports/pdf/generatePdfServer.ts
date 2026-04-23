@@ -4,6 +4,7 @@ import type { ReactElement } from "react";
 import React from "react";
 
 import { getPdfLastTrace, resetPdfTrace } from "./pdfDiagnostics";
+import { LOCKED_REPORT_PAGE_COUNT } from "./locked/layoutConstants";
 import { ReportDocument } from "./ReportDocument";
 import { sanitizeReportDataForPdf } from "./sanitizeReportData";
 import type { ReportData } from "./types";
@@ -50,7 +51,7 @@ export async function probeMinimalPdf(): Promise<MinimalProbeResult> {
 export async function probeReportPagesOneAtATime(data: ReportData): Promise<PageProbeRow[]> {
   const safe = sanitizeReportDataForPdf(data);
   const rows: PageProbeRow[] = [];
-  for (let p = 1; p <= 10; p++) {
+  for (let p = 1; p <= LOCKED_REPORT_PAGE_COUNT; p++) {
     resetPdfTrace();
     try {
       const buf = await renderToBuffer(

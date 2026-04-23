@@ -13,7 +13,7 @@ type Props = {
  * Single physical page shell: canonical `size`, `pdfSlidePage` padding, paper background.
  * All report `<Page>` instances should render through this (or `FixedInnerPage`, which uses it).
  */
-export function ReportPage({ children, wrap = false, pageStyleOverlay }: Props): ReactElement {
+export function ReportPage({ children, wrap, pageStyleOverlay }: Props): ReactElement {
   const pageStyle =
     pageStyleOverlay != null ? [baseStyles.pdfSlidePage, pageStyleOverlay] : baseStyles.pdfSlidePage;
   return (

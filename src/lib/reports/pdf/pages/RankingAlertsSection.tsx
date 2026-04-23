@@ -114,7 +114,6 @@ const styles = StyleSheet.create({
     borderRightColor: colors.rule,
     borderBottomColor: colors.rule,
     borderLeftColor: colors.rule,
-    minHeight: 0,
     overflow: "hidden",
   },
   alertTitleCompact: {
@@ -150,7 +149,6 @@ const styles = StyleSheet.create({
     borderRightColor: colors.rule,
     borderBottomColor: colors.rule,
     borderLeftColor: colors.rule,
-    minHeight: 0,
     overflow: "hidden",
     backgroundColor: colors.paper,
   },
@@ -176,7 +174,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginTop: rhythm.md + 2,
     alignItems: "stretch",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
   },
   alertSpExecutive: { marginRight: 11 },
   alertCardExecutive: {
@@ -192,7 +190,6 @@ const styles = StyleSheet.create({
     borderRightColor: colors.rule,
     borderBottomColor: colors.rule,
     borderLeftColor: colors.rule,
-    minHeight: 0,
     overflow: "hidden",
     backgroundColor: colors.paper,
   },
@@ -401,9 +398,11 @@ export function WinRiskPriorityAlerts({
 /** Competitive ranking + WIN / RISK / PRIORITY — used on the dedicated snapshot slide. */
 export function RankingAlertsSection({ data }: { data: ReportData }) {
   return (
-    <View style={{ flex: 1, flexDirection: "column", justifyContent: "space-between", minHeight: 0 }}>
+    <View style={{ width: CONTENT_W, flexDirection: "column", justifyContent: "flex-start" }}>
       <CompetitiveRankingBlock data={data} />
-      <WinRiskPriorityAlerts data={data} alertRowStyle={{ marginTop: 0 }} />
+      <View style={{ marginTop: rhythm.lg }}>
+        <WinRiskPriorityAlerts data={data} alertRowStyle={{ marginTop: 0 }} />
+      </View>
     </View>
   );
 }

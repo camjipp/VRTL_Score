@@ -43,7 +43,6 @@ const styles = StyleSheet.create({
   },
   inner: {
     padding: 10,
-    flexGrow: 1,
   },
   name: {
     fontSize: 8,

@@ -117,10 +117,8 @@ const styles = StyleSheet.create({
     maxWidth: CONTENT_W - 40,
   },
   phasesWrap: {
-    flex: 1,
     flexDirection: "column",
     justifyContent: "flex-start",
-    minHeight: 0,
   },
 });
 

@@ -10,13 +10,17 @@ type Props = {
 
 export function PdfFooter({ data: _data, topRule = true }: Props) {
   void _data;
+  const footerBand = topRule
+    ? baseStyles.footer
+    : [baseStyles.footer, { borderTopWidth: 0, paddingTop: 4, minHeight: 16 }];
+  const textTop = topRule ? 8 : 4;
   return (
-    <View
-      style={topRule ? baseStyles.footer : [baseStyles.footer, { borderTopWidth: 0, paddingTop: 4 }]}
-      fixed
-    >
-      <Text style={baseStyles.footerText}>Confidential</Text>
-      <Text style={baseStyles.footerPageNum} render={({ pageNumber }) => `Page ${pageNumber}`} />
+    <View style={footerBand} fixed>
+      <Text style={[baseStyles.footerText, { top: textTop }]}>Confidential</Text>
+      <Text
+        style={[baseStyles.footerPageNum, { top: textTop }]}
+        render={({ pageNumber }) => `Page ${pageNumber}`}
+      />
     </View>
   );
 }

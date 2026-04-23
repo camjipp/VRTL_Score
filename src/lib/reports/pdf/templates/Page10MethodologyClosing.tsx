@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   statsRow: {
     flexDirection: "row",
     alignItems: "stretch",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     width: "100%",
   },
   statCol: {
@@ -150,10 +150,8 @@ const styles = StyleSheet.create({
     lineHeight: 1.5,
   },
   closingStack: {
-    flex: 1,
     flexDirection: "column",
     justifyContent: "flex-start",
-    minHeight: 0,
   },
 });
 
@@ -175,7 +173,7 @@ export function Page10MethodologyClosing({ data }: { data: ReportData }): ReactE
         intro="Method, sample strength, next week—repeatable cadence, not a one-off."
         density="tight"
       />
-      <View style={{ flex: 1, minHeight: 0 }}>
+      <View>
         <View style={styles.closingStack}>
           <View style={styles.strip}>
             <Text style={styles.stripTitle}>Sample strength & confidence</Text>

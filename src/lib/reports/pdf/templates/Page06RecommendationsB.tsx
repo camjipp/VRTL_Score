@@ -30,10 +30,7 @@ export function Page06RecommendationsB({ data, pair, startNumber, sliceIndex }: 
       <PdfTraceMarker page={6} section={`Fixed:P6-${sliceIndex}`} />
       <EditorialSectionHeader sectionLabel="Decision" title={title} purpose={purpose} />
       {pair.map((rec, i) => (
-        <View
-          key={`rec-${sliceIndex}-${i}`}
-          style={i === pair.length - 1 ? { flexGrow: 1, minHeight: 0 } : {}}
-        >
+        <View key={`rec-${sliceIndex}-${i}`}>
           <NumberedRecommendationCard rec={rec} num={startNumber + i} secondary />
         </View>
       ))}

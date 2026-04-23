@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
   row2: {
     width: CONTENT_W,
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     marginBottom: GAP + 2,
   },
   surfaceCard: {
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   row3: {
     width: CONTENT_W,
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     marginBottom: rhythm.sm,
   },
   summaryBox: {
@@ -112,16 +112,24 @@ function SurfaceHighlight({
   kind,
   model,
   title,
+  bandStyle,
 }: {
   kind: "strongest" | "weakest";
   model: ModelScoreRow;
   title: string;
+  bandStyle?: Record<string, string | number>;
 }) {
   const insight = model.insights[0] ? clipPdfText(truncateAtWord(String(model.insights[0]), 200), 130) : "—";
   const nameColor = colors.ink;
   const scoreColor = kind === "weakest" ? colors.red : colors.ink;
   return (
-    <View style={[styles.surfaceCard, kind === "strongest" ? styles.surfaceCardStrong : styles.surfaceCardWeak]}>
+    <View
+      style={[
+        styles.surfaceCard,
+        kind === "strongest" ? styles.surfaceCardStrong : styles.surfaceCardWeak,
+        ...(bandStyle ? [bandStyle] : []),
+      ]}
+    >
       <Text style={styles.surfaceKicker}>{title}</Text>
       <Text style={[styles.surfaceName, { color: nameColor }]}>{model.name}</Text>
       <Text style={[styles.surfaceScore, { color: scoreColor }]}>{String(model.score)}</Text>
@@ -151,16 +159,16 @@ export function Page03ModelAnalysis({ data }: { data: ReportData }): ReactElemen
       <PdfTraceMarker page={3} section="Fixed:P3" />
       <EditorialSectionHeader sectionLabel="Mechanism" title="Why this is happening" purpose={purpose} />
 
-      <View style={{ flex: 1, flexDirection: "column", justifyContent: "flex-start", minHeight: 0 }}>
+      <View style={{ flexDirection: "column", justifyContent: "flex-start" }}>
         <View style={styles.row2}>
-          <SurfaceHighlight kind="strongest" model={best} title="Strongest surface" />
+          <SurfaceHighlight kind="strongest" model={best} title="Strongest surface" bandStyle={{ marginRight: GAP }} />
           <SurfaceHighlight kind="weakest" model={worst} title="Weakest surface" />
         </View>
 
         <View>
           <Text style={styles.rowLabel}>Same category · different assistants</Text>
           <View style={styles.row3}>
-            <View style={{ width: COL3 }}>
+            <View style={{ width: COL3, marginRight: GAP }}>
               {openai ? (
                 <ModelAnalysisCard
                   modelId="p3-openai"
@@ -181,7 +189,7 @@ export function Page03ModelAnalysis({ data }: { data: ReportData }): ReactElemen
                 <EmptySlot label="OpenAI" />
               )}
             </View>
-            <View style={{ width: COL3 }}>
+            <View style={{ width: COL3, marginRight: GAP }}>
               {gemini ? (
                 <ModelAnalysisCard
                   modelId="p3-gemini"

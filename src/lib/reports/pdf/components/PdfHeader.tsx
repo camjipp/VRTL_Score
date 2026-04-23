@@ -18,7 +18,7 @@ export function PdfHeader({ data, variant = "inner", pageNum, bottomRule = true 
   const tracePage = pageNum ?? (variant === "cover" ? 1 : 0);
 
   return (
-    <View wrap={false} fixed style={[baseStyles.headerFixedWrap, { top: 0 }]}>
+    <View fixed style={[baseStyles.headerFixedWrap, { top: 0 }]}>
       <View
         style={
           bottomRule
@@ -26,7 +26,7 @@ export function PdfHeader({ data, variant = "inner", pageNum, bottomRule = true 
             : [baseStyles.headerRow, { borderBottomWidth: 0, paddingBottom: rhythm.xs }]
         }
       >
-        <View style={{ flex: 1, paddingRight: 12 }}>
+        <View style={baseStyles.headerRowTitle}>
           <PdfTraceMarker page={tracePage} section={`PdfHeader:title:${variant}`} />
           <Text style={baseStyles.reportTitleMain}>AI Authority Report</Text>
         </View>

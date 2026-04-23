@@ -32,22 +32,23 @@ const SIGNAL_ACCENT: readonly [typeof colors.green, typeof colors.red, typeof co
   colors.border,
 ];
 
-const bodyColumn = { flex: 1, flexDirection: "column" as const, minHeight: 0 };
-
-/** Distributes top / middle / bottom so the page fills vertically without a dead lower zone. */
-const pageFlow = {
+/** Flow body — flex-start only (no vertical `space-between`; avoids overlap with fixed footer). */
+const bodyFlow = {
   flex: 1,
   flexDirection: "column" as const,
-  justifyContent: "space-between" as const,
-  minHeight: 0,
+  justifyContent: "flex-start" as const,
+  marginBottom: 20,
 };
 
 const styles = StyleSheet.create({
   headerRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "flex-start",
     marginBottom: 8,
+  },
+  headerTitleSlot: {
+    flex: 1,
+    paddingRight: 8,
   },
   headerLeft: {
     fontSize: 7.5,
@@ -72,6 +73,7 @@ const styles = StyleSheet.create({
   /** Headline + subline + score + metrics read as one band */
   heroMetricsBand: {
     width: "100%",
+    marginBottom: 24,
   },
   heroRow: {
     flexDirection: "row",
@@ -169,6 +171,7 @@ const styles = StyleSheet.create({
   },
   clusterMid: {
     width: "100%",
+    marginBottom: 24,
   },
   positionLead: {
     fontSize: 10,
@@ -228,6 +231,7 @@ const styles = StyleSheet.create({
   clusterBottom: {
     width: "100%",
     paddingTop: 8,
+    marginBottom: 20,
   },
   supportingLine: {
     fontSize: 8,
@@ -263,104 +267,100 @@ export function Page1({ data }: { data: ReportData }): ReactElement {
   const citeLabel = `${data.authorityScore}%`;
 
   return (
-    <ReportPage wrap={false}>
+    <ReportPage>
       <View style={baseStyles.pdfSlideContent}>
-        <View wrap={false} fixed style={[baseStyles.headerFixedWrap, { top: 0 }]}>
+        <View fixed style={[baseStyles.headerFixedWrap, { top: 0 }]}>
           <View style={styles.headerRow}>
-            <Text style={styles.headerLeft}>AI AUTHORITY REPORT</Text>
+            <View style={styles.headerTitleSlot}>
+              <Text style={styles.headerLeft}>AI AUTHORITY REPORT</Text>
+            </View>
             <Text style={styles.headerRight}>{formatClientDate(data)}</Text>
           </View>
           <View style={styles.headerRule} />
         </View>
 
-        <View style={bodyColumn}>
+        <View style={bodyFlow}>
           <PdfTraceMarker page={1} section="Fixed:P1" />
 
-          <View style={pageFlow}>
-            <View style={styles.heroMetricsBand}>
-              <View style={styles.heroRow}>
-                <View style={styles.heroLeft}>
-                  <Text style={styles.heroLine1} orphans={2} widows={2}>
-                    {h1}
-                  </Text>
-                  {h2 ? (
-                    <Text style={styles.heroLine2} orphans={2} widows={2}>
-                      {h2}
-                    </Text>
-                  ) : null}
-                  <Text style={styles.heroSub} orphans={2} widows={2}>
-                    {subline}
-                  </Text>
-                </View>
-                <View style={styles.heroRight}>
-                  <Text style={styles.scoreNum}>{displayScore(data.overallScore)}</Text>
-                  <Text style={styles.scoreFrac}>/100</Text>
-                  <Text style={styles.scoreCaption}>Composite authority score</Text>
-                </View>
-              </View>
-
-              <View style={styles.metricsRow}>
-                <View style={styles.metricCell}>
-                  <Text style={styles.metricLabel}>Mention rate</Text>
-                  <Text style={styles.metricValue}>{data.mentionRate}%</Text>
-                </View>
-                <View style={styles.metricCell}>
-                  <Text style={styles.metricLabel}>Top position</Text>
-                  <Text style={styles.metricValue}>{data.topPosition}%</Text>
-                </View>
-                <View style={[styles.metricCell, styles.metricCellLast]}>
-                  <Text style={styles.metricLabel}>Citations</Text>
-                  <Text style={styles.metricValue}>
-                    {citeZero ? <Text style={{ color: colors.red }}>{citeLabel}</Text> : citeLabel}
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.clusterMid}>
-              <Text style={styles.positionLead} orphans={2} widows={2}>
-                {standing.lead}
-              </Text>
-              <Text style={styles.positionSub} orphans={2} widows={2}>
-                {positionSub}
-              </Text>
-
-              <Text style={styles.mattersTitle}>What matters right now</Text>
-              <View style={styles.cardsRow}>
-                {SIGNAL_LABELS.map((label, i) => (
-                  <View
-                    key={label}
-                    wrap={false}
-                    style={[
-                      styles.card,
-                      { borderLeftColor: SIGNAL_ACCENT[i] },
-                      ...(i === SIGNAL_LABELS.length - 1 ? [styles.cardLast] : []),
-                    ]}
-                  >
-                    <Text style={styles.cardLabel}>{label}</Text>
-                    <Text style={styles.cardBody} orphans={2} widows={2}>
-                      {cards[i]}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-
-            <View style={styles.clusterBottom}>
-              {supporting.map((line, i) => (
-                <Text
-                  key={`sup-${i}`}
-                  style={[
-                    styles.supportingLine,
-                    ...(i < supporting.length - 1 ? [styles.supportingLineGap] : []),
-                  ]}
-                  orphans={2}
-                  widows={2}
-                >
-                  {line}
+          <View style={styles.heroMetricsBand}>
+            <View style={styles.heroRow}>
+              <View style={styles.heroLeft}>
+                <Text style={styles.heroLine1} orphans={2} widows={2}>
+                  {h1}
                 </Text>
+                {h2 ? (
+                  <Text style={styles.heroLine2} orphans={2} widows={2}>
+                    {h2}
+                  </Text>
+                ) : null}
+                <Text style={styles.heroSub} orphans={2} widows={2}>
+                  {subline}
+                </Text>
+              </View>
+              <View style={styles.heroRight}>
+                <Text style={styles.scoreNum}>{displayScore(data.overallScore)}</Text>
+                <Text style={styles.scoreFrac}>/100</Text>
+                <Text style={styles.scoreCaption}>Composite authority score</Text>
+              </View>
+            </View>
+
+            <View style={styles.metricsRow}>
+              <View style={styles.metricCell}>
+                <Text style={styles.metricLabel}>Mention rate</Text>
+                <Text style={styles.metricValue}>{data.mentionRate}%</Text>
+              </View>
+              <View style={styles.metricCell}>
+                <Text style={styles.metricLabel}>Top position</Text>
+                <Text style={styles.metricValue}>{data.topPosition}%</Text>
+              </View>
+              <View style={[styles.metricCell, styles.metricCellLast]}>
+                <Text style={styles.metricLabel}>Citations</Text>
+                <Text style={styles.metricValue}>
+                  {citeZero ? <Text style={{ color: colors.red }}>{citeLabel}</Text> : citeLabel}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.clusterMid}>
+            <Text style={styles.positionLead} orphans={2} widows={2}>
+              {standing.lead}
+            </Text>
+            <Text style={styles.positionSub} orphans={2} widows={2}>
+              {positionSub}
+            </Text>
+
+            <Text style={styles.mattersTitle}>What matters right now</Text>
+            <View style={styles.cardsRow}>
+              {SIGNAL_LABELS.map((label, i) => (
+                <View
+                  key={label}
+                  style={[
+                    styles.card,
+                    { borderLeftColor: SIGNAL_ACCENT[i] },
+                    ...(i === SIGNAL_LABELS.length - 1 ? [styles.cardLast] : []),
+                  ]}
+                >
+                  <Text style={styles.cardLabel}>{label}</Text>
+                  <Text style={styles.cardBody} orphans={2} widows={2}>
+                    {cards[i]}
+                  </Text>
+                </View>
               ))}
             </View>
+          </View>
+
+          <View style={styles.clusterBottom}>
+            {supporting.map((line, i) => (
+              <Text
+                key={`sup-${i}`}
+                style={[styles.supportingLine, ...(i < supporting.length - 1 ? [styles.supportingLineGap] : [])]}
+                orphans={2}
+                widows={2}
+              >
+                {line}
+              </Text>
+            ))}
           </View>
         </View>
 

@@ -83,7 +83,7 @@ export function Page09EvidenceLog({ data }: { data: ReportData }): ReactElement 
         purpose={evidenceLogPurpose()}
         intro={evidenceLogIntro()}
       />
-      <View style={{ flexGrow: 1, flexDirection: "column", minHeight: 0, marginBottom: rhythm.sm }}>
+      <View style={{ flexDirection: "column", marginBottom: rhythm.sm }}>
         <View style={styles.th}>
           <Text style={[styles.thText, { width: W.idx }]}>#</Text>
           <Text style={[styles.thText, { width: W.label }]}>Signal</Text>

@@ -175,7 +175,7 @@ export function Page08DataSummary({ data }: { data: ReportData }): ReactElement 
       </View>
 
       <Text style={styles.h}>Competitive set</Text>
-      <View style={{ flexGrow: 1, minHeight: 0, width: W }}>
+      <View style={{ width: W }}>
         <View style={styles.th}>
           <Text style={[styles.thText, { width: C.brand }]}>Brand</Text>
           <Text style={[styles.thText, { width: C.bar }]}>Mentions</Text>

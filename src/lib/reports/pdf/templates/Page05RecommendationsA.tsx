@@ -31,12 +31,12 @@ export function Page05RecommendationsA({ data }: { data: ReportData }): ReactEle
         intro="Approve issue → move → outcome. No jargon."
       />
       {first ? (
-        <View style={second ? {} : { flexGrow: 1, minHeight: 0 }}>
+        <View>
           <PrimaryRecommendationCard rec={first} actionIndex={1} totalActions={total} />
         </View>
       ) : null}
       {second ? (
-        <View style={{ flexGrow: 1, minHeight: 0 }}>
+        <View>
           <NumberedRecommendationCard rec={second} num={2} secondary />
         </View>
       ) : null}
