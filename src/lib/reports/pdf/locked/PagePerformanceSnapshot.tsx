@@ -5,13 +5,15 @@ import { PdfInnerPage } from "../components/PdfInnerPage";
 import { clipPdfText } from "../editorial/pdfNarrative";
 import type { ReportData } from "../types";
 import { LOCKED_PAGE_HEADER } from "./layoutConstants";
-import { LD } from "./lockedDesignTokens";
 import { lockedStyles } from "./lockedDocumentStyles";
 
-const METRIC_H = 92;
+const METRIC_H = 76;
 
 const local = StyleSheet.create({
   metricsRow: { flexDirection: "row", minHeight: METRIC_H },
+  scaleLabelCell: { flex: 5 },
+  scaleLabelCellMid: { flex: 2 },
+  scaleLabelCellEnd: { flex: 3 },
 });
 
 function fmtScore(n: number | null): string {
@@ -34,26 +36,48 @@ function valueStyle(h: Health) {
   return lockedStyles.perf_metricValueModerate;
 }
 
-function barFill(h: Health): string {
-  if (h === "weak") return LD.color.risk;
-  if (h === "strong") return LD.color.signalStrong;
-  return LD.color.ink3;
-}
-
-function PctBar({ pct, fill }: { pct: number; fill: string }): ReactElement {
-  const p = Math.min(100, Math.max(0, Math.round(pct)));
-  const rest = 100 - p;
-  return (
-    <View style={lockedStyles.perf_miniBarTrack} wrap={false}>
-      <View style={[lockedStyles.perf_miniBarFill, { flex: Math.max(1, p), backgroundColor: fill }]} />
-      <View style={[lockedStyles.perf_miniBarRest, { flex: Math.max(1, rest) }]} />
-    </View>
-  );
-}
-
 function rankBarPct(rank: number, rankTotal: number): number {
   if (rankTotal <= 0 || !Number.isFinite(rank)) return 0;
   return Math.min(100, Math.max(0, Math.round(((rankTotal - rank + 1) / rankTotal) * 100)));
+}
+
+/** Horizontal scale 0–100: Weak 0–50, Contested 50–70, Strong 70–100 (aligned to report tier bands). */
+function ScorePositionScale({ score }: { score: number | null }): ReactElement {
+  const s = score == null || Number.isNaN(score) ? null : Math.min(100, Math.max(0, score));
+  const leftFlex = s == null ? 0 : Math.round(s);
+  const rightFlex = s == null ? 100 : Math.max(0, 100 - leftFlex);
+
+  return (
+    <View style={lockedStyles.perf_scaleWrap} wrap={false}>
+      <Text style={lockedStyles.perf_scaleTitle}>Weak — Contested — Strong</Text>
+      <View style={lockedStyles.perf_scaleMarkerRow} wrap={false}>
+        <View style={{ flex: leftFlex, minWidth: 0 }} />
+        <View style={s == null ? lockedStyles.perf_scaleTickMuted : lockedStyles.perf_scaleTick} />
+        <View style={{ flex: rightFlex, minWidth: 0 }} />
+      </View>
+      <View style={lockedStyles.perf_scaleTrackRow} wrap={false}>
+        <View style={lockedStyles.perf_scaleSegWeak} />
+        <View style={lockedStyles.perf_scaleSegContested} />
+        <View style={lockedStyles.perf_scaleSegStrong} />
+      </View>
+      <View style={lockedStyles.perf_scaleLabelsRow} wrap={false}>
+        <View style={local.scaleLabelCell}>
+          <Text style={lockedStyles.perf_scaleZoneLabel}>Weak</Text>
+        </View>
+        <View style={local.scaleLabelCellMid}>
+          <Text style={lockedStyles.perf_scaleZoneLabel}>Contested</Text>
+        </View>
+        <View style={local.scaleLabelCellEnd}>
+          <Text style={lockedStyles.perf_scaleZoneLabel}>Strong</Text>
+        </View>
+      </View>
+      {s == null ? (
+        <Text style={lockedStyles.perf_scaleScoreHint} wrap={false}>
+          No overall score for this run.
+        </Text>
+      ) : null}
+    </View>
+  );
 }
 
 function heroLeadForStatus(status: string): string {
@@ -118,101 +142,109 @@ export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactEl
 
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[3]!}>
-      <View style={lockedStyles.perf_heroRow} wrap={false}>
-        <View style={lockedStyles.perf_heroDial} wrap={false}>
-          <ScoreRing
-            score={score}
-            variant="performance"
-            scoreLabel={null}
-            palette="neutral"
-            showFraction={false}
-          />
+      <View style={lockedStyles.perf_section} wrap={false}>
+        <Text style={lockedStyles.perf_sectionEyebrow}>Score</Text>
+        <View style={lockedStyles.perf_heroRow} wrap={false}>
+          <View style={lockedStyles.perf_heroDial} wrap={false}>
+            <ScoreRing
+              score={score}
+              variant="performance"
+              scoreLabel={null}
+              palette="neutral"
+              showFraction={false}
+            />
+          </View>
+          <View style={lockedStyles.perf_heroAside} wrap={false}>
+            <Text style={lockedStyles.perf_heroHeadline}>{scoreHeadline}</Text>
+            <Text style={lockedStyles.perf_heroLead}>{clipPdfText(heroLeadForStatus(tier), 240)}</Text>
+            <Text style={lockedStyles.perf_heroSupport}>
+              Measured across real AI responses from OpenAI, Google Gemini, and Anthropic.
+            </Text>
+          </View>
         </View>
-        <View style={lockedStyles.perf_heroAside} wrap={false}>
-          <Text style={lockedStyles.perf_heroHeadline}>{scoreHeadline}</Text>
-          <Text style={lockedStyles.perf_heroLead}>{clipPdfText(heroLeadForStatus(tier), 240)}</Text>
-          <Text style={lockedStyles.perf_heroSupport}>
-            Measured across real AI responses from OpenAI, Google Gemini, and Anthropic.
-          </Text>
+        <ScorePositionScale score={score} />
+      </View>
+
+      <View style={lockedStyles.perf_section} wrap={false}>
+        <Text style={lockedStyles.perf_sectionEyebrow}>Supporting metrics</Text>
+        <View style={lockedStyles.perf_metricsBand} wrap={false}>
+          <View style={[lockedStyles.perf_metricsRow, local.metricsRow]} wrap={false}>
+            {(() => {
+              const mh = classify(data.mentionRate, 65, 40);
+              return (
+                <View style={lockedStyles.perf_metricCellFirst}>
+                  <Text style={lockedStyles.perf_metricLabel}>Mention rate</Text>
+                  <Text style={[lockedStyles.perf_metricValue, valueStyle(mh)]}>
+                    {clipPdfText(String(data.mentionRate))}%
+                  </Text>
+                  <Text style={lockedStyles.perf_metricHelp}>Share of answers that include you.</Text>
+                </View>
+              );
+            })()}
+            {(() => {
+              const th = classify(data.topPosition, 40, 20);
+              return (
+                <View style={lockedStyles.perf_metricCell}>
+                  <Text style={lockedStyles.perf_metricLabel}>Top position</Text>
+                  <Text style={[lockedStyles.perf_metricValue, valueStyle(th)]}>
+                    {clipPdfText(String(data.topPosition))}%
+                  </Text>
+                  <Text style={lockedStyles.perf_metricHelp}>Share of answers where you are listed first.</Text>
+                </View>
+              );
+            })()}
+            {(() => {
+              const ah = classify(data.authorityScore, 30, 10);
+              return (
+                <View style={lockedStyles.perf_metricCell}>
+                  <Text style={lockedStyles.perf_metricLabel}>Authority</Text>
+                  <Text style={[lockedStyles.perf_metricValue, valueStyle(ah)]}>
+                    {clipPdfText(String(data.authorityScore))}%
+                  </Text>
+                  <Text style={lockedStyles.perf_metricHelp}>Answers with citations or proof.</Text>
+                </View>
+              );
+            })()}
+            {(() => {
+              const rank = data.rank || 0;
+              const rh: Health = rank === 1 ? "strong" : rank <= 3 ? "moderate" : "weak";
+              return (
+                <View style={lockedStyles.perf_metricCellLast}>
+                  <Text style={lockedStyles.perf_metricLabel}>Rank</Text>
+                  <Text style={[lockedStyles.perf_metricValue, valueStyle(rh)]}>
+                    {clipPdfText(`${data.rank}/${data.rankTotal}`)}
+                  </Text>
+                  <Text style={lockedStyles.perf_metricHelp}>
+                    Leaderboard position ({fmtScore(rankPct)}% relative strength).
+                  </Text>
+                </View>
+              );
+            })()}
+          </View>
         </View>
       </View>
 
-      <View style={lockedStyles.perf_metricsBand} wrap={false}>
-        <View style={[lockedStyles.perf_metricsRow, local.metricsRow]} wrap={false}>
-          {(() => {
-            const mh = classify(data.mentionRate, 65, 40);
-            return (
-              <View style={lockedStyles.perf_metricCellFirst}>
-                <Text style={lockedStyles.perf_metricLabel}>Mention rate</Text>
-                <Text style={[lockedStyles.perf_metricValue, valueStyle(mh)]}>
-                  {clipPdfText(String(data.mentionRate))}%
-                </Text>
-                <PctBar pct={data.mentionRate} fill={barFill(mh)} />
-                <Text style={lockedStyles.perf_metricHelp}>Share of answers that include you.</Text>
-              </View>
-            );
-          })()}
-          {(() => {
-            const th = classify(data.topPosition, 40, 20);
-            return (
-              <View style={lockedStyles.perf_metricCell}>
-                <Text style={lockedStyles.perf_metricLabel}>Top position</Text>
-                <Text style={[lockedStyles.perf_metricValue, valueStyle(th)]}>
-                  {clipPdfText(String(data.topPosition))}%
-                </Text>
-                <PctBar pct={data.topPosition} fill={barFill(th)} />
-                <Text style={lockedStyles.perf_metricHelp}>Share of answers where you are listed first.</Text>
-              </View>
-            );
-          })()}
-          {(() => {
-            const ah = classify(data.authorityScore, 30, 10);
-            return (
-              <View style={lockedStyles.perf_metricCell}>
-                <Text style={lockedStyles.perf_metricLabel}>Authority</Text>
-                <Text style={[lockedStyles.perf_metricValue, valueStyle(ah)]}>
-                  {clipPdfText(String(data.authorityScore))}%
-                </Text>
-                <PctBar pct={data.authorityScore} fill={barFill(ah)} />
-                <Text style={lockedStyles.perf_metricHelp}>Answers with citations or proof.</Text>
-              </View>
-            );
-          })()}
-          {(() => {
-            const rank = data.rank || 0;
-            const rh: Health = rank === 1 ? "strong" : rank <= 3 ? "moderate" : "weak";
-            return (
-              <View style={lockedStyles.perf_metricCellLast}>
-                <Text style={lockedStyles.perf_metricLabel}>Rank</Text>
-                <Text style={[lockedStyles.perf_metricValue, valueStyle(rh)]}>
-                  {clipPdfText(`${data.rank}/${data.rankTotal}`)}
-                </Text>
-                <PctBar pct={rankPct} fill={barFill(rh)} />
-                <Text style={lockedStyles.perf_metricHelp}>Leaderboard position (bar = relative strength).</Text>
-              </View>
-            );
-          })()}
-        </View>
-      </View>
-
-      <View style={lockedStyles.perf_diagWrap} wrap={false}>
-        <View style={lockedStyles.perf_diagBlock} wrap={false}>
-          <Text style={lockedStyles.perf_diagTitle}>{"What's happening"}</Text>
-          <Text style={lockedStyles.perf_diagBody}>{perfWhatsHappening(data)}</Text>
-        </View>
-        <View style={lockedStyles.perf_diagBlock} wrap={false}>
-          <Text style={lockedStyles.perf_diagTitle}>Why it matters</Text>
-          <Text style={lockedStyles.perf_diagBody}>
-            When you are missing, competitors take the recommendation.
-          </Text>
-        </View>
-        <View style={lockedStyles.perf_diagBlock} wrap={false}>
-          <Text style={lockedStyles.perf_diagTitle}>{"What's driving it"}</Text>
-          <Text style={lockedStyles.perf_diagBody}>{perfDriving(data)}</Text>
-        </View>
-        <View style={lockedStyles.perf_diagBlock} wrap={false}>
-          <Text style={lockedStyles.perf_diagTitle}>Risk</Text>
-          <Text style={lockedStyles.perf_diagBody}>{perfRisk(data)}</Text>
+      <View style={lockedStyles.perf_sectionTight} wrap={false}>
+        <Text style={lockedStyles.perf_sectionEyebrow}>Diagnosis</Text>
+        <View style={lockedStyles.perf_diagWrap} wrap={false}>
+          <View style={lockedStyles.perf_diagBlock} wrap={false}>
+            <Text style={lockedStyles.perf_diagTitle}>{"What's happening"}</Text>
+            <Text style={lockedStyles.perf_diagBody}>{perfWhatsHappening(data)}</Text>
+          </View>
+          <View style={lockedStyles.perf_diagBlock} wrap={false}>
+            <Text style={lockedStyles.perf_diagTitle}>Why it matters</Text>
+            <Text style={lockedStyles.perf_diagBody}>
+              When you are missing, competitors take the recommendation.
+            </Text>
+          </View>
+          <View style={lockedStyles.perf_diagBlock} wrap={false}>
+            <Text style={lockedStyles.perf_diagTitle}>{"What's driving it"}</Text>
+            <Text style={lockedStyles.perf_diagBody}>{perfDriving(data)}</Text>
+          </View>
+          <View style={lockedStyles.perf_diagBlockLast} wrap={false}>
+            <Text style={lockedStyles.perf_diagTitle}>Risk</Text>
+            <Text style={lockedStyles.perf_diagBody}>{perfRisk(data)}</Text>
+          </View>
         </View>
       </View>
     </PdfInnerPage>
