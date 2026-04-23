@@ -1,5 +1,4 @@
-import { Path, Svg } from "@react-pdf/renderer";
-import { Text, View } from "@react-pdf/renderer";
+import { Path, Svg, Text, View } from "@react-pdf/renderer";
 import { colors, fonts } from "../theme";
 
 const RING_PRESETS = {
@@ -28,14 +27,14 @@ const RING_PRESETS = {
     labelBottom: 26,
     nudgeY: -10,
   },
-  /** Performance snapshot — smaller arc, large integer focal */
+  /** Performance snapshot — compact arc, large integer focal */
   performance: {
-    W: 200,
-    H: 132,
-    R: 60,
-    stroke: 13,
-    colW: 208,
-    scoreFont: 54,
+    W: 184,
+    H: 118,
+    R: 52,
+    stroke: 12,
+    colW: 192,
+    scoreFont: 46,
     fracFont: 8,
     labelFont: 0,
     labelBottom: 0,
@@ -75,6 +74,14 @@ type Props = {
   palette?: "vivid" | "neutral";
   /** When false, only the integer score is shown (no `/100` line). */
   showFraction?: boolean;
+  /**
+   * When true (intended with `variant="performance"` + neutral palette), draws three
+   * track segments for 0–50 / 50–70 / 70–100 and places Weak / Contested / Strong labels
+   * near the arc.
+   */
+  arcZoneLabels?: boolean;
+  /** Short radial tick on the arc at the current score (0–100). */
+  arcScoreTick?: boolean;
 };
 
 const NEUTRAL_STRONG = "#15803d";
@@ -97,6 +104,12 @@ const ZONE_NEUTRAL_LOW = "#E5E7EB";
 const ZONE_NEUTRAL_MID = "#D1D5DB";
 const ZONE_NEUTRAL_HIGH = "#CBD5E1";
 
+/** Score 0–100 → angle (deg) on the 270° horseshoe (135° … 405°). */
+function angleForScore100(s: number): number {
+  const clamped = Math.min(100, Math.max(0, s));
+  return 135 + (clamped / 100) * 270;
+}
+
 export function ScoreRing({
   score,
   variant = "default",
@@ -105,6 +118,8 @@ export function ScoreRing({
   zoneTrack,
   palette = "vivid",
   showFraction = true,
+  arcZoneLabels = false,
+  arcScoreTick = false,
 }: Props) {
   const p = RING_PRESETS[variant];
   const { W, H, R, stroke: STROKE, colW, scoreFont, fracFont, labelFont, labelBottom, nudgeY } = p;
@@ -145,6 +160,35 @@ export function ScoreRing({
   const labelText = scoreLabel === undefined ? "OVERALL SCORE" : scoreLabel;
   const zoneSlicesVivid = zoneTrack && palette === "vivid";
   const zoneSlicesNeutral = zoneTrack && palette === "neutral";
+  const perfWcsTrack = arcZoneLabels && palette === "neutral";
+
+  const labelR = R + STROKE * 0.5 + 10;
+  const zoneLabelStyle = {
+    position: "absolute" as const,
+    fontSize: 8.5,
+    fontFamily: fonts.sansBold,
+    color: colors.ink2,
+    width: 56,
+    textAlign: "center" as const,
+  };
+
+  function labelAnchor(angleDeg: number): { left: number; top: number } {
+    const t = angleDeg * DEG;
+    const x = CX + labelR * Math.cos(t);
+    const y = CY + labelR * Math.sin(t);
+    return { left: x - 28, top: y - 5 };
+  }
+
+  const tickAngle = score == null || Number.isNaN(score) ? null : angleForScore100(score);
+  let tickLineD: string | null = null;
+  if (tickAngle != null && arcScoreTick) {
+    const t = tickAngle * DEG;
+    const x1 = CX + (R - 2) * Math.cos(t);
+    const y1 = CY + (R - 2) * Math.sin(t);
+    const x2 = CX + (R + STROKE + 8) * Math.cos(t);
+    const y2 = CY + (R + STROKE + 8) * Math.sin(t);
+    tickLineD = `M ${x1.toFixed(2)} ${y1.toFixed(2)} L ${x2.toFixed(2)} ${y2.toFixed(2)}`;
+  }
 
   return (
     <View style={{ width: colW, alignItems: "center" }}>
@@ -163,6 +207,12 @@ export function ScoreRing({
                 <Path d={arcSliceD(243, 324)} stroke={ZONE_NEUTRAL_MID} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
                 <Path d={arcSliceD(324, 405)} stroke={ZONE_NEUTRAL_HIGH} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
               </>
+            ) : perfWcsTrack ? (
+              <>
+                <Path d={arcSliceD(135, 270)} stroke={ZONE_NEUTRAL_LOW} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
+                <Path d={arcSliceD(270, 324)} stroke={ZONE_NEUTRAL_MID} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
+                <Path d={arcSliceD(324, 405)} stroke={ZONE_NEUTRAL_HIGH} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
+              </>
             ) : (
               <Path d={ARC_D} stroke={RING_TRACK} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
             )}
@@ -174,6 +224,9 @@ export function ScoreRing({
               strokeLinecap="butt"
               strokeDasharray={`${filled} ${rest + ARC_LEN}`}
             />
+            {tickLineD ? (
+              <Path d={tickLineD} stroke={colors.ink} strokeWidth={3} fill="none" strokeLinecap="butt" />
+            ) : null}
           </Svg>
         </View>
 
@@ -193,6 +246,14 @@ export function ScoreRing({
               {labelText}
             </Text>
           </View>
+        ) : null}
+
+        {arcZoneLabels ? (
+          <>
+            <Text style={[zoneLabelStyle, labelAnchor(202.5)]}>Weak</Text>
+            <Text style={[zoneLabelStyle, labelAnchor(297)]}>Contested</Text>
+            <Text style={[zoneLabelStyle, labelAnchor(364.5)]}>Strong</Text>
+          </>
         ) : null}
 
         <View

@@ -11,9 +11,6 @@ const METRIC_H = 76;
 
 const local = StyleSheet.create({
   metricsRow: { flexDirection: "row", minHeight: METRIC_H },
-  scaleLabelCell: { flex: 5 },
-  scaleLabelCellMid: { flex: 2 },
-  scaleLabelCellEnd: { flex: 3 },
 });
 
 function fmtScore(n: number | null): string {
@@ -41,104 +38,105 @@ function rankBarPct(rank: number, rankTotal: number): number {
   return Math.min(100, Math.max(0, Math.round(((rankTotal - rank + 1) / rankTotal) * 100)));
 }
 
-/** Horizontal scale 0–100: Weak 0–50, Contested 50–70, Strong 70–100 (aligned to report tier bands). */
-function ScorePositionScale({ score }: { score: number | null }): ReactElement {
-  const s = score == null || Number.isNaN(score) ? null : Math.min(100, Math.max(0, score));
-  const leftFlex = s == null ? 0 : Math.round(s);
-  const rightFlex = s == null ? 100 : Math.max(0, 100 - leftFlex);
-
-  return (
-    <View style={lockedStyles.perf_scaleWrap} wrap={false}>
-      <Text style={lockedStyles.perf_scaleTitle}>Weak — Contested — Strong</Text>
-      <View style={lockedStyles.perf_scaleMarkerRow} wrap={false}>
-        <View style={{ flex: leftFlex, minWidth: 0 }} />
-        <View style={s == null ? lockedStyles.perf_scaleTickMuted : lockedStyles.perf_scaleTick} />
-        <View style={{ flex: rightFlex, minWidth: 0 }} />
-      </View>
-      <View style={lockedStyles.perf_scaleTrackRow} wrap={false}>
-        <View style={lockedStyles.perf_scaleSegWeak} />
-        <View style={lockedStyles.perf_scaleSegContested} />
-        <View style={lockedStyles.perf_scaleSegStrong} />
-      </View>
-      <View style={lockedStyles.perf_scaleLabelsRow} wrap={false}>
-        <View style={local.scaleLabelCell}>
-          <Text style={lockedStyles.perf_scaleZoneLabel}>Weak</Text>
-        </View>
-        <View style={local.scaleLabelCellMid}>
-          <Text style={lockedStyles.perf_scaleZoneLabel}>Contested</Text>
-        </View>
-        <View style={local.scaleLabelCellEnd}>
-          <Text style={lockedStyles.perf_scaleZoneLabel}>Strong</Text>
-        </View>
-      </View>
-      {s == null ? (
-        <Text style={lockedStyles.perf_scaleScoreHint} wrap={false}>
-          No overall score for this run.
-        </Text>
-      ) : null}
-    </View>
-  );
+function primaryInsightForTier(tier: string): string {
+  const t = (tier || "").trim();
+  if (t === "Dominant") return "You are defining the category for assistants in this sample.";
+  if (t === "Strong") return "You are a leading recommendation, with room to make first-slot outcomes even more automatic.";
+  if (t === "Weak") return "You are underrepresented when buyers ask assistants for guidance in this category.";
+  return "You are visible — but not the default choice.";
 }
 
-function heroLeadForStatus(status: string): string {
-  const s = (status || "").trim();
-  const map: Record<string, string> = {
-    Dominant: "You are often the default recommendation when this category comes up.",
-    Strong: "You show up strongly—close to owning the first recommendation consistently.",
-    Moderate: "You appear in answers, but the first slot is still up for grabs.",
-    Contested: "You show up often, but are not the default choice.",
-    Weak: "You are rarely recommended first—visibility needs concentrated repair.",
-    Unknown: "Snapshot coverage was not enough to stabilize this tier yet.",
-  };
-  return map[s] ?? "Visibility is mixed; the row below isolates where leverage shows up.";
+function heroSupportingForTier(tier: string): string {
+  const t = (tier || "").trim();
+  if (t === "Dominant" || t === "Strong") {
+    return "Assistants already surface you frequently. The next step is defending that default position with proof and freshness so recommendations do not drift to challengers.";
+  }
+  if (t === "Weak") {
+    return "You appear in fewer assistant answers than leaders in this category. Raising mention rate—and pairing it with credible proof—is how you move from occasional mention to reliable recommendation.";
+  }
+  return "Assistants include you often, but they do not consistently recommend you first. That means competitors still win decisions even when you are in the conversation.";
 }
 
-function perfWhatsHappening(d: ReportData): string {
+function buildDiagnosisNarrative(d: ReportData): string {
   const m = Math.min(100, Math.max(0, Math.round(d.mentionRate)));
   const miss = Math.max(0, 100 - m);
-  return clipPdfText(`You are included in ${m}% of answers — but missing in ${miss}%.`, 220);
-}
-
-function perfDriving(d: ReportData): string {
-  const parts: string[] = [];
   const tp = d.topPosition;
   const auth = d.authorityScore;
-  if (tp < 25) parts.push("You are not consistently ranked first.");
-  else if (tp < 45) parts.push("First-slot wins are still inconsistent.");
-  if (auth === 0) parts.push("You have zero citation support in this sample.");
-  else if (auth < 15) parts.push("Citation support is very thin.");
-  if (parts.length === 0) parts.push("Signals are uneven across mentions, position, and proof.");
-  return clipPdfText(parts.slice(0, 2).join(" "), 260);
-}
+  const authStr = String(d.authorityScore);
 
-function perfRisk(d: ReportData): string {
-  const t = (d.tensionNote || "").trim();
-  if (t) return clipPdfText(t, 280);
-  const client = d.competitors.find((c) => c.isClient);
-  const others = d.competitors.filter((c) => !c.isClient).sort((a, b) => b.mentions - a.mentions);
-  const runner = others[0];
-  if (
-    client &&
-    runner &&
-    runner.mentions >= client.mentions - 3 &&
-    runner.mentions <= client.mentions + 6
-  ) {
-    return "Competitors are close enough to take your position with minimal improvement.";
+  const parts: string[] = [];
+
+  parts.push(
+    `You appear in ${m}% of assistant responses, which puts you in the conversation more often than most competitors.`,
+  );
+
+  parts.push(
+    `However, visibility alone is not enough. In the remaining ${miss}% of responses, you are not mentioned at all—giving competitors full control over those decisions.`,
+  );
+
+  if (tp < 35) {
+    parts.push(
+      "Even when you are included, you are not consistently positioned as the first recommendation. That means assistants are not treating you as the default choice.",
+    );
+  } else if (tp >= 55) {
+    parts.push(
+      `When you are included, assistants often place you first (${String(d.topPosition)}% of answers in this sample). The remaining risk is when you are absent—and whether rivals own those answers outright.`,
+    );
+  } else {
+    parts.push(
+      `Even when you are included, first-slot positioning is mixed (${String(d.topPosition)}% list you first), so assistants are not fully standardizing on you as the default.`,
+    );
   }
-  const bl = (d.bottomLine || "").trim();
-  if (bl) return clipPdfText(bl, 280);
-  return "Competitors can still close the gap on first-slot recommendations with sharper proof.";
+
+  if (auth === 0) {
+    parts.push(
+      "The biggest issue is authority. In this sample, none of your mentions include citations or supporting proof. Without that, assistants are more likely to favor competitors that appear more credible.",
+    );
+  } else if (auth < 15) {
+    parts.push(
+      `Authority is still a gap: only ${authStr}% of mentions in this sample include citations or supporting proof, so credibility is easy for rivals to challenge.`,
+    );
+  } else {
+    parts.push(
+      `Citation-backed authority is present at ${authStr}% of mentions in this sample, but gaps in presence and first-slot outcomes still give competitors room to win the answer.`,
+    );
+  }
+
+  if (auth === 0) {
+    if (m >= 50) {
+      parts.push(
+        "Right now, you look strong on presence, but weak on trust. That combination creates instability—your position can be replaced quickly if a competitor strengthens their authority signals.",
+      );
+    } else {
+      parts.push(
+        "With room to grow on presence and no citation-backed proof in this sample, assistants have little anchor for a durable recommendation—closing both gaps is the priority.",
+      );
+    }
+  } else if (m >= 50 && auth < 15) {
+    parts.push(
+      "Right now, you look strong on presence relative to many peers, but proof is still thin—rivals can look more credible until citation depth catches up.",
+    );
+  } else if (m >= 50 && auth >= 15) {
+    parts.push(
+      "You pair solid presence with some proof—tightening first-slot consistency and deepening citations are what make the recommendation feel inevitable instead of optional.",
+    );
+  } else {
+    parts.push(
+      "Taken together, visibility, first-slot outcomes, and citation-backed authority explain where assistants default today—and where the next gains will come from.",
+    );
+  }
+
+  return clipPdfText(parts.join("\n\n"), 2200);
 }
 
 export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactElement {
   const score = data.overallScore;
   const tier = (data.status || "").trim() || "Moderate";
-  const scoreHeadline =
-    score == null || Number.isNaN(score)
-      ? clipPdfText(`— / 100 — ${tier}`, 140)
-      : clipPdfText(`${fmtScore(score)} / 100 — ${tier}`, 140);
+  const scoreLine =
+    score == null || Number.isNaN(score) ? "— / 100" : clipPdfText(`${fmtScore(score)} / 100`, 24);
 
   const rankPct = rankBarPct(data.rank, data.rankTotal);
+  const narrative = buildDiagnosisNarrative(data);
 
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[3]!}>
@@ -152,17 +150,19 @@ export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactEl
               scoreLabel={null}
               palette="neutral"
               showFraction={false}
+              arcZoneLabels
+              arcScoreTick
             />
           </View>
           <View style={lockedStyles.perf_heroAside} wrap={false}>
-            <Text style={lockedStyles.perf_heroHeadline}>{scoreHeadline}</Text>
-            <Text style={lockedStyles.perf_heroLead}>{clipPdfText(heroLeadForStatus(tier), 240)}</Text>
-            <Text style={lockedStyles.perf_heroSupport}>
-              Measured across real AI responses from OpenAI, Google Gemini, and Anthropic.
+            <Text style={lockedStyles.perf_heroScoreLine}>{scoreLine}</Text>
+            <Text style={lockedStyles.perf_heroPrimaryInsight}>{primaryInsightForTier(tier)}</Text>
+            <Text style={lockedStyles.perf_heroSupporting}>{heroSupportingForTier(tier)}</Text>
+            <Text style={lockedStyles.perf_heroContext}>
+              Measured across OpenAI, Google Gemini, and Anthropic responses.
             </Text>
           </View>
         </View>
-        <ScorePositionScale score={score} />
       </View>
 
       <View style={lockedStyles.perf_section} wrap={false}>
@@ -173,7 +173,7 @@ export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactEl
               const mh = classify(data.mentionRate, 65, 40);
               return (
                 <View style={lockedStyles.perf_metricCellFirst}>
-                  <Text style={lockedStyles.perf_metricLabel}>Mention rate</Text>
+                  <Text style={lockedStyles.perf_metricLabel}>Mention Rate</Text>
                   <Text style={[lockedStyles.perf_metricValue, valueStyle(mh)]}>
                     {clipPdfText(String(data.mentionRate))}%
                   </Text>
@@ -185,7 +185,7 @@ export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactEl
               const th = classify(data.topPosition, 40, 20);
               return (
                 <View style={lockedStyles.perf_metricCell}>
-                  <Text style={lockedStyles.perf_metricLabel}>Top position</Text>
+                  <Text style={lockedStyles.perf_metricLabel}>Top Position</Text>
                   <Text style={[lockedStyles.perf_metricValue, valueStyle(th)]}>
                     {clipPdfText(String(data.topPosition))}%
                   </Text>
@@ -227,23 +227,8 @@ export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactEl
       <View style={lockedStyles.perf_sectionTight} wrap={false}>
         <Text style={lockedStyles.perf_sectionEyebrow}>Diagnosis</Text>
         <View style={lockedStyles.perf_diagWrap} wrap={false}>
-          <View style={lockedStyles.perf_diagBlock} wrap={false}>
-            <Text style={lockedStyles.perf_diagTitle}>{"What's happening"}</Text>
-            <Text style={lockedStyles.perf_diagBody}>{perfWhatsHappening(data)}</Text>
-          </View>
-          <View style={lockedStyles.perf_diagBlock} wrap={false}>
-            <Text style={lockedStyles.perf_diagTitle}>Why it matters</Text>
-            <Text style={lockedStyles.perf_diagBody}>
-              When you are missing, competitors take the recommendation.
-            </Text>
-          </View>
-          <View style={lockedStyles.perf_diagBlock} wrap={false}>
-            <Text style={lockedStyles.perf_diagTitle}>{"What's driving it"}</Text>
-            <Text style={lockedStyles.perf_diagBody}>{perfDriving(data)}</Text>
-          </View>
-          <View style={lockedStyles.perf_diagBlockLast} wrap={false}>
-            <Text style={lockedStyles.perf_diagTitle}>Risk</Text>
-            <Text style={lockedStyles.perf_diagBody}>{perfRisk(data)}</Text>
+          <View style={lockedStyles.perf_diagNarrativeWrap} wrap={false}>
+            <Text style={lockedStyles.perf_diagNarrative}>{narrative}</Text>
           </View>
         </View>
       </View>
