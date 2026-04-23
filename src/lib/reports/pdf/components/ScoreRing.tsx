@@ -58,10 +58,17 @@ const ZONE_RED = "#EF4444";
 const ZONE_AMBER = "#F59E0B";
 const ZONE_GREEN = "#00e87a";
 
-/** Performance snapshot track: 0–35 / 35–65 / 65–100 along the horseshoe (continuous). */
-const WAG_RED = "#EF4444";
-const WAG_AMBER = "#F59E0B";
-const WAG_GREEN = "#22C55E";
+/** Performance snapshot: single fill color by score band (0–35 / 35–65 / 65–100). */
+const PERF_RED = "#EF4444";
+const PERF_AMBER = "#F59E0B";
+const PERF_GREEN = "#22C55E";
+
+function performanceFillColor(s: number | null): string {
+  if (s == null || Number.isNaN(s)) return colors.ink4;
+  if (s < 35) return PERF_RED;
+  if (s < 65) return PERF_AMBER;
+  return PERF_GREEN;
+}
 
 type Props = {
   score: number | null;
@@ -150,22 +157,16 @@ export function ScoreRing({
   const labelText = scoreLabel === undefined ? "OVERALL SCORE" : scoreLabel;
   const zoneSlicesVivid = zoneTrack && palette === "vivid";
   const zoneSlicesNeutral = zoneTrack && palette === "neutral";
-  const isPerformanceWag = variant === "performance";
-
-  const wagAngle35 = 135 + (35 / 100) * 270;
-  const wagAngle65 = 135 + (65 / 100) * 270;
+  const isPerformanceArc = variant === "performance";
+  const progressStroke = isPerformanceArc ? performanceFillColor(score) : fillStroke;
 
   return (
     <View style={{ width: colW, alignItems: "center" }}>
       <View style={{ width: W, height: H, position: "relative" }}>
         <View style={{ position: "absolute", top: 0, left: 0, width: W, height: H }}>
           <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
-            {isPerformanceWag ? (
-              <>
-                <Path d={arcSliceD(135, wagAngle35)} stroke={WAG_RED} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
-                <Path d={arcSliceD(wagAngle35, wagAngle65)} stroke={WAG_AMBER} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
-                <Path d={arcSliceD(wagAngle65, 405)} stroke={WAG_GREEN} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
-              </>
+            {isPerformanceArc ? (
+              <Path d={ARC_D} stroke={RING_TRACK} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
             ) : zoneSlicesVivid ? (
               <>
                 <Path d={arcSliceD(135, 243)} stroke={ZONE_RED} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
@@ -181,16 +182,14 @@ export function ScoreRing({
             ) : (
               <Path d={ARC_D} stroke={RING_TRACK} strokeWidth={STROKE} fill="none" strokeLinecap="butt" />
             )}
-            {!isPerformanceWag ? (
-              <Path
-                d={ARC_D}
-                stroke={fillStroke}
-                strokeWidth={STROKE}
-                fill="none"
-                strokeLinecap="butt"
-                strokeDasharray={`${filled} ${rest + ARC_LEN}`}
-              />
-            ) : null}
+            <Path
+              d={ARC_D}
+              stroke={progressStroke}
+              strokeWidth={STROKE}
+              fill="none"
+              strokeLinecap="butt"
+              strokeDasharray={`${filled} ${rest + ARC_LEN}`}
+            />
           </Svg>
         </View>
 
