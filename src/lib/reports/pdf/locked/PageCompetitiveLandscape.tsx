@@ -16,6 +16,11 @@ const local = StyleSheet.create({
   trH: { height: ROW_H },
 });
 
+function formatCompetitorRate(rate: number | string): string {
+  const s = String(rate);
+  return s.includes("%") ? clipPdfText(s, 12) : clipPdfText(`${s}%`, 12);
+}
+
 function padRows<T>(rows: readonly T[], n: number): (T | null)[] {
   const out: (T | null)[] = [...rows.slice(0, n)];
   while (out.length < n) out.push(null);
@@ -53,10 +58,60 @@ function mentionTieKicker(d: ReportData): string {
   );
 }
 
-function MentionShareBar({ mentions, max, isClient }: { mentions: number; max: number; isClient: boolean }): ReactElement {
+function competitiveWinLine(d: ReportData): string {
+  const sorted = [...d.modelScores].sort((a, b) => b.score - a.score);
+  const best = sorted[0];
+  if (best) {
+    return clipPdfText(`You perform strongest on ${best.name} (Score ${best.score}).`, 200);
+  }
+  return alertBody(d.alerts.win.title, d.alerts.win.detail);
+}
+
+function competitiveRiskLine(): string {
+  return "Your lead is not defended — competitors can replace you quickly.";
+}
+
+function competitivePriorityLine(d: ReportData): string {
+  const sorted = [...d.modelScores].sort((a, b) => a.score - b.score);
+  const worst = sorted[0];
+  if (worst) {
+    return clipPdfText(`You are underexposed on ${worst.name} — this is where you lose decisions.`, 200);
+  }
+  return alertBody(d.alerts.priority.title, d.alerts.priority.detail);
+}
+
+function bottomInsightParas(d: ReportData): { first: string; second: string } {
+  const you = d.competitors.find((c) => c.isClient);
+  const tied = you && d.competitors.some((c) => !c.isClient && c.mentions === you.mentions);
+  const first = tied
+    ? "You are tied on mentions. When assistants choose between equal options, they default to the brand with stronger authority signals."
+    : "Mention share splits across rivals—when assistants hedge, they still default to whoever reads as most credible, not whoever appears most often.";
+  const second =
+    d.authorityScore === 0
+      ? "Right now, you have none."
+      : `Right now, your citation-backed authority is at ${String(d.authorityScore)}% in this sample—still easy for rivals to sound more credible.`;
+  return { first: clipPdfText(first, 520), second: clipPdfText(second, 320) };
+}
+
+type BarVariant = "client" | "tied" | "other";
+
+function MentionShareBar({
+  mentions,
+  max,
+  variant,
+}: {
+  mentions: number;
+  max: number;
+  variant: BarVariant;
+}): ReactElement {
   const pct = Math.min(100, Math.round((mentions / Math.max(1, max)) * 100));
   const rest = 100 - pct;
-  const fill = isClient ? lockedStyles.comp_mentionBarFillClient : lockedStyles.comp_mentionBarFill;
+  const fill =
+    variant === "client"
+      ? lockedStyles.comp_mentionBarFillClient
+      : variant === "tied"
+        ? lockedStyles.comp_mentionBarFillTied
+        : lockedStyles.comp_mentionBarFill;
   return (
     <View style={lockedStyles.comp_mentionBarTrack} wrap={false}>
       <View style={[fill, { flex: Math.max(1, pct) }]} />
@@ -66,11 +121,12 @@ function MentionShareBar({ mentions, max, isClient }: { mentions: number; max: n
 }
 
 export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactElement {
-  const { win, risk, priority } = data.alerts;
   const tableRows = padRows(data.competitors, TABLE_ROWS);
   const slice = narrativeCompetitive(data);
   const mMax = maxMentions(tableRows);
   const tableKicker = mentionTieKicker(data);
+  const you = data.competitors.find((c) => c.isClient);
+  const bottom = bottomInsightParas(data);
 
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[4]!}>
@@ -82,41 +138,45 @@ export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactE
       <View style={lockedStyles.comp_stripList} wrap={false}>
         <View style={[lockedStyles.comp_stripRow, lockedStyles.comp_stripWin]} wrap={false}>
           <Text style={lockedStyles.comp_stripLabel}>Win</Text>
-          <Text style={lockedStyles.comp_stripBody}>{alertBody(win.title, win.detail)}</Text>
+          <Text style={lockedStyles.comp_stripBody}>{competitiveWinLine(data)}</Text>
         </View>
         <View style={[lockedStyles.comp_stripRow, lockedStyles.comp_stripRisk]} wrap={false}>
           <Text style={lockedStyles.comp_stripLabel}>Risk</Text>
-          <Text style={lockedStyles.comp_stripBody}>{alertBody(risk.title, risk.detail)}</Text>
+          <Text style={lockedStyles.comp_stripBody}>{competitiveRiskLine()}</Text>
         </View>
         <View style={[lockedStyles.comp_stripRowLast, lockedStyles.comp_stripPriority]} wrap={false}>
           <Text style={lockedStyles.comp_stripLabel}>Priority</Text>
-          <Text style={lockedStyles.comp_stripBody}>{alertBody(priority.title, priority.detail)}</Text>
+          <Text style={lockedStyles.comp_stripBody}>{competitivePriorityLine(data)}</Text>
         </View>
       </View>
       <Text style={lockedStyles.comp_tableKicker}>{tableKicker}</Text>
       <View wrap={false}>
         <View style={[lockedStyles.comp_tableTh, local.thH]}>
           <Text style={[lockedStyles.comp_thText, lockedStyles.comp_cellName]}>Name</Text>
-          <Text style={[lockedStyles.comp_thText, lockedStyles.comp_cellNum]}>#</Text>
           <Text style={[lockedStyles.comp_thText, lockedStyles.comp_cellBar]}>Volume</Text>
           <Text style={[lockedStyles.comp_thText, lockedStyles.comp_cellRate]}>Rate</Text>
           <Text style={[lockedStyles.comp_thText, lockedStyles.comp_cellRank]}>Rank</Text>
           <Text style={[lockedStyles.comp_thText, lockedStyles.comp_cellFlag]}>You</Text>
         </View>
         {tableRows.map((r, i) => {
+          const tiedToYou = Boolean(
+            r && you && !r.isClient && r.mentions === you.mentions,
+          );
+          const barVariant: BarVariant = r?.isClient ? "client" : tiedToYou ? "tied" : "other";
           const rowStyle = r?.isClient ? lockedStyles.comp_tableTrClient : lockedStyles.comp_tableTr;
-          const nameStyle = r?.isClient ? lockedStyles.comp_tdClient : lockedStyles.comp_td;
+          const nameStyle = r?.isClient
+            ? lockedStyles.comp_tdClient
+            : tiedToYou
+              ? lockedStyles.comp_tdTied
+              : lockedStyles.comp_td;
           return (
             <View key={i} style={[rowStyle, local.trH]} wrap={false}>
               <Text style={[nameStyle, lockedStyles.comp_cellName]}>{r ? clipPdfText(r.name) : " "}</Text>
-              <Text style={[r?.isClient ? lockedStyles.comp_tdClient : lockedStyles.comp_td, lockedStyles.comp_cellNum]}>
-                {r ? String(r.mentions) : " "}
-              </Text>
               <View style={lockedStyles.comp_cellBar}>
-                {r ? <MentionShareBar mentions={r.mentions} max={mMax} isClient={Boolean(r.isClient)} /> : null}
+                {r ? <MentionShareBar mentions={r.mentions} max={mMax} variant={barVariant} /> : null}
               </View>
               <Text style={[lockedStyles.comp_td, lockedStyles.comp_cellRate]}>
-                {r ? clipPdfText(`${r.rate}%`, 12) : " "}
+                {r ? formatCompetitorRate(r.rate) : " "}
               </Text>
               <Text style={[lockedStyles.comp_td, lockedStyles.comp_cellRank]}>{r ? String(r.rank) : " "}</Text>
               <Text style={[lockedStyles.comp_tdMuted, lockedStyles.comp_cellFlag]}>
@@ -127,11 +187,14 @@ export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactE
         })}
       </View>
       <View style={lockedStyles.comp_bottomInsightBand} wrap={false}>
-        <LockedNarrativeStack
-          slice={slice}
-          stackRole="plain"
-          include={["interpretation", "implication"]}
-        />
+        <Text style={lockedStyles.comp_bottomInsightPara}>{bottom.first}</Text>
+        <Text style={lockedStyles.comp_bottomInsightParaLast}>{bottom.second}</Text>
+      </View>
+      <View style={lockedStyles.comp_stakesBlock} wrap={false}>
+        <Text style={lockedStyles.comp_stakesTitle}>{"IF NOTHING CHANGES"}</Text>
+        <Text style={lockedStyles.comp_stakesBody}>
+          Assistants will begin defaulting to competitors even when you are present in the answer.
+        </Text>
       </View>
     </PdfInnerPage>
   );

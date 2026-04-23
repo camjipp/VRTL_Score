@@ -52,7 +52,10 @@ export function narrativeCompetitive(d: ReportData): NarrativeSlice {
   const others = d.competitors.filter((row) => !row.isClient);
   const headline =
     d.rank === 1
-      ? clipPdfText("You are not the clear default choice.")
+      ? clipPdfText(
+          "You are not the clear default choice.\n\nYou are tied at the top — and ties do not hold.",
+          420,
+        )
       : clipPdfText("You are in the pack—whoever looks like the obvious answer still wins the recommendation.");
   const takeaway = competitiveTakeawayLine(d, you, others);
   return {
