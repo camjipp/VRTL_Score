@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
-import type { ReactElement } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { PdfInnerPage } from "../components/PdfInnerPage";
 import { clipPdfText } from "../editorial/pdfNarrative";
 import { formatEvidenceLogPillLabel } from "@/lib/reports/formatEvidenceFieldDisplay";
@@ -28,6 +28,35 @@ function brandName(data: ReportData): string {
 function looksLikeStructuredBlob(s: string): boolean {
   const t = s.trim();
   return t.startsWith("{") || t.startsWith("[") || /"\w+"\s*:/.test(t);
+}
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/** Highlights client brand inside an excerpt for faster scanning. */
+function HighlightedExcerpt({ text, brand }: { text: string; brand: string }): ReactElement {
+  const b = brand.trim();
+  if (!b || !text.trim()) {
+    return <Text style={lockedStyles.ev_responseExcerpt}>{text}</Text>;
+  }
+  let parts: string[];
+  try {
+    parts = text.split(new RegExp(`(${escapeRegExp(b)})`, "gi"));
+  } catch {
+    return <Text style={lockedStyles.ev_responseExcerpt}>{text}</Text>;
+  }
+  const nodes: ReactNode[] = parts.map((part, i) => {
+    if (part.toLowerCase() === b.toLowerCase()) {
+      return (
+        <Text key={i} style={lockedStyles.ev_brandHit}>
+          {part}
+        </Text>
+      );
+    }
+    return <Text key={i}>{part}</Text>;
+  });
+  return <Text style={lockedStyles.ev_responseExcerpt}>{nodes}</Text>;
 }
 
 function strengthBody(data: ReportData): string {
@@ -132,7 +161,7 @@ export function PageAiEvidence({ data }: { data: ReportData }): ReactElement {
           ) : null}
           <Text style={lockedStyles.ev_fieldLabel}>AI response</Text>
           {strengthExcerpt ? (
-            <Text style={lockedStyles.ev_responseExcerpt}>{strengthExcerpt}</Text>
+            <HighlightedExcerpt text={strengthExcerpt} brand={brandName(data)} />
           ) : (
             <View style={lockedStyles.ev_quote}>
               <Text style={lockedStyles.ev_quoteText}>{strengthBody(data)}</Text>
@@ -153,7 +182,7 @@ export function PageAiEvidence({ data }: { data: ReportData }): ReactElement {
           {vulnParts ? (
             vulnerableQuote
           ) : vulnExcerpt ? (
-            <Text style={lockedStyles.ev_responseExcerpt}>{vulnExcerpt}</Text>
+            <HighlightedExcerpt text={vulnExcerpt} brand={brandName(data)} />
           ) : (
             vulnerableQuote
           )}
@@ -164,7 +193,7 @@ export function PageAiEvidence({ data }: { data: ReportData }): ReactElement {
         slice={slice}
         stackRole="afterPrimary"
         variant="compact"
-        include={["interpretation", "implication", "inaction"]}
+        include={["implication"]}
       />
     </PdfInnerPage>
   );

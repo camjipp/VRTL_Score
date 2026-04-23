@@ -52,6 +52,8 @@ export function PageModelBreakdown({ data }: { data: ReportData }): ReactElement
 
   const gap =
     best && worst && best.name !== worst.name ? Math.max(0, Math.round(best.score - worst.score)) : null;
+  const avgScore =
+    sorted.length > 0 ? Math.round(sorted.reduce((s, m) => s + m.score, 0) / sorted.length) : 0;
 
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[5]!}>
@@ -68,7 +70,7 @@ export function PageModelBreakdown({ data }: { data: ReportData }): ReactElement
               <Text style={lockedStyles.model_poleScore}>{String(best.score)}</Text>
               <ModelScoreBar score={best.score} />
             </View>
-            <View style={lockedStyles.model_gapColumn}>
+            <View style={[lockedStyles.model_gapColumn, lockedStyles.model_gapColumnStrong]}>
               <Text style={lockedStyles.model_gapLabel}>Spread</Text>
               <Text style={lockedStyles.model_gapValue}>{gap === 0 ? "0" : String(gap)}</Text>
               <Text style={lockedStyles.model_gapCaption}>points between best and worst</Text>
@@ -95,6 +97,18 @@ export function PageModelBreakdown({ data }: { data: ReportData }): ReactElement
         ) : (
           <Text style={lockedStyles.model_takeaway}>No model rows in this export.</Text>
         )}
+        {sorted.length > 0 ? (
+          <View style={lockedStyles.model_avgRow} wrap={false}>
+            <Text style={lockedStyles.model_avgLabel}>Blended average (same 0–100 scale)</Text>
+            <View style={lockedStyles.model_avgBarTrack} wrap={false}>
+              <View style={[lockedStyles.model_scoreBarFill, { flex: Math.max(1, avgScore) }]} />
+              <View style={[lockedStyles.model_scoreBarRest, { flex: Math.max(1, 100 - avgScore) }]} />
+            </View>
+            <Text style={[lockedStyles.model_gapCaption, { textAlign: "left", marginTop: 4 }]}>
+              {String(avgScore)} — compare each bar above to this baseline.
+            </Text>
+          </View>
+        ) : null}
       </View>
       {grid.map((row, ri) => (
         <View key={ri} style={local.gridRow} wrap={false}>
@@ -123,7 +137,7 @@ export function PageModelBreakdown({ data }: { data: ReportData }): ReactElement
       <LockedNarrativeStack
         slice={slice}
         stackRole="afterPrimary"
-        include={["interpretation", "implication", "action", "inaction"]}
+        include={["interpretation", "implication", "action"]}
       />
     </PdfInnerPage>
   );

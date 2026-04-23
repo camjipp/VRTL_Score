@@ -6,18 +6,19 @@ import { clipPdfText } from "../editorial/pdfNarrative";
 import { colors } from "../theme";
 import type { ReportData } from "../types";
 import { LOCKED_PAGE_HEADER } from "./layoutConstants";
+import { LD } from "./lockedDesignTokens";
 import { LockedNarrativeStack } from "./LockedNarrativeStack";
 import { lockedStyles } from "./lockedDocumentStyles";
 import { narrativePerformance, transparencyRunNote } from "./pageNarratives";
 
-const METRIC_H = 72;
+const METRIC_H = 78;
 
 const local = StyleSheet.create({
-  metricsRow: { flexDirection: "row", height: METRIC_H },
+  metricsRow: { flexDirection: "row", minHeight: METRIC_H },
 });
 
 const PERF_OPENING =
-  "Your AI Authority Score measures how often and how strongly AI systems recommend your brand.";
+  "Your AI Authority Score is how often—and how strongly—assistants recommend your brand.";
 
 function fmtScore(n: number | null): string {
   if (n == null || Number.isNaN(n)) return "—";
@@ -26,11 +27,6 @@ function fmtScore(n: number | null): string {
 
 type Health = "strong" | "moderate" | "weak";
 
-/**
- * Classify a 0–100 signal into a health band. Zero/near-zero gets its own “weak”
- * styling so the page can visually differentiate an absent signal (Authority=0)
- * from a present-but-moderate one (Mention Rate=60).
- */
 function classify(value: number, strongAt: number, moderateAt: number): Health {
   if (!Number.isFinite(value) || value <= 0) return "weak";
   if (value >= strongAt) return "strong";
@@ -55,12 +51,32 @@ function healthStyles(h: Health) {
   };
 }
 
+function PctBar({ pct, fill }: { pct: number; fill?: string }): ReactElement {
+  const p = Math.min(100, Math.max(0, Math.round(pct)));
+  const rest = 100 - p;
+  return (
+    <View style={lockedStyles.perf_miniBarTrack} wrap={false}>
+      <View style={[lockedStyles.perf_miniBarFill, { flex: Math.max(1, p), backgroundColor: fill ?? colors.cyan }]} />
+      <View style={[lockedStyles.perf_miniBarRest, { flex: Math.max(1, rest) }]} />
+    </View>
+  );
+}
+
+function rankBarPct(rank: number, rankTotal: number): number {
+  if (rankTotal <= 0 || !Number.isFinite(rank)) return 0;
+  return Math.min(100, Math.max(0, Math.round(((rankTotal - rank + 1) / rankTotal) * 100)));
+}
+
 export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactElement {
   const slice = narrativePerformance(data);
   const score = data.overallScore;
   const tier = (data.status || "").trim() || "Moderate visibility, not dominant";
   const scoreContext =
-    score == null || Number.isNaN(score) ? clipPdfText(`— / 100 — ${tier}`) : clipPdfText(`${fmtScore(score)} / 100 — ${tier}`);
+    score == null || Number.isNaN(score)
+      ? clipPdfText(`— / 100 — ${tier}`)
+      : clipPdfText(`${fmtScore(score)} / 100 — ${tier}`);
+
+  const rankPct = rankBarPct(data.rank, data.rankTotal);
 
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[3]!}>
@@ -68,7 +84,15 @@ export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactEl
       <Text style={lockedStyles.perf_transparency}>{transparencyRunNote(data)}</Text>
       <View style={lockedStyles.perf_heroRow} wrap={false}>
         <View style={lockedStyles.perf_heroDial} wrap={false}>
-          <ScoreRing score={score} scoreLabel={null} ringStroke={colors.cyan} />
+          <ScoreRing score={score} variant="hero" scoreLabel={null} zoneTrack />
+          <View style={lockedStyles.perf_zoneLegend} wrap={false}>
+            <View style={[lockedStyles.perf_zoneLegendSeg, { flex: 40, backgroundColor: "#EF4444" }]} />
+            <View style={[lockedStyles.perf_zoneLegendSeg, { flex: 30, backgroundColor: "#F59E0B" }]} />
+            <View style={[lockedStyles.perf_zoneLegendSeg, { flex: 30, backgroundColor: colors.green }]} />
+          </View>
+          <Text style={lockedStyles.perf_zoneLegendLabel} wrap={false}>
+            0–40 at risk · 40–70 building · 70–100 strong
+          </Text>
         </View>
         <View style={lockedStyles.perf_heroAside} wrap={false}>
           <Text style={lockedStyles.perf_scoreContext}>{scoreContext}</Text>
@@ -83,9 +107,10 @@ export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactEl
               <View style={[lockedStyles.perf_metricCellFirst, sMention.cell]}>
                 <Text style={lockedStyles.perf_metricLabel}>Mention rate</Text>
                 <Text style={[lockedStyles.perf_metricValue, sMention.value]}>
-                  {clipPdfText(String(data.mentionRate))}
+                  {clipPdfText(String(data.mentionRate))}%
                 </Text>
-                <Text style={lockedStyles.perf_metricHint}>How often your brand appears in AI answers.</Text>
+                <PctBar pct={data.mentionRate} />
+                <Text style={lockedStyles.perf_metricHint}>Share of answers that name you.</Text>
               </View>
             );
           })()}
@@ -96,9 +121,10 @@ export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactEl
               <View style={[lockedStyles.perf_metricCell, sTop.cell]}>
                 <Text style={lockedStyles.perf_metricLabel}>Top position</Text>
                 <Text style={[lockedStyles.perf_metricValue, sTop.value]}>
-                  {clipPdfText(String(data.topPosition))}
+                  {clipPdfText(String(data.topPosition))}%
                 </Text>
-                <Text style={lockedStyles.perf_metricHint}>How often you are the first recommendation.</Text>
+                <PctBar pct={data.topPosition} />
+                <Text style={lockedStyles.perf_metricHint}>First recommendation slot.</Text>
               </View>
             );
           })()}
@@ -109,11 +135,10 @@ export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactEl
               <View style={[lockedStyles.perf_metricCell, sAuth.cell]}>
                 <Text style={lockedStyles.perf_metricLabel}>Authority</Text>
                 <Text style={[lockedStyles.perf_metricValue, sAuth.value]}>
-                  {clipPdfText(String(data.authorityScore))}
+                  {clipPdfText(String(data.authorityScore))}%
                 </Text>
-                <Text style={lockedStyles.perf_metricHint}>
-                  How often AI supports your brand with citations or proof.
-                </Text>
+                <PctBar pct={data.authorityScore} />
+                <Text style={lockedStyles.perf_metricHint}>Answers with citations or proof.</Text>
               </View>
             );
           })()}
@@ -127,17 +152,22 @@ export function PagePerformanceSnapshot({ data }: { data: ReportData }): ReactEl
                 <Text style={[lockedStyles.perf_metricValue, sRank.value]}>
                   {clipPdfText(`${data.rank}/${data.rankTotal}`)}
                 </Text>
-                <Text style={lockedStyles.perf_metricHint}>Your position compared to competitors.</Text>
+                <PctBar pct={rankPct} fill={LD.color.ink} />
+                <Text style={lockedStyles.perf_metricHint}>Leaderboard position (bar = relative strength).</Text>
               </View>
             );
           })()}
         </View>
       </View>
+      <Text style={lockedStyles.perf_takeawayLine} wrap={false}>
+        {slice.headline}
+      </Text>
       <LockedNarrativeStack
         slice={slice}
         stackRole="afterPrimary"
-        include={["headline", "interpretation", "implication", "action", "inaction"]}
+        include={["interpretation", "implication"]}
       />
+      {slice.action ? <Text style={lockedStyles.nar_action}>{slice.action}</Text> : null}
     </PdfInnerPage>
   );
 }

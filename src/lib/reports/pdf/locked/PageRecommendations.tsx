@@ -8,11 +8,11 @@ import { LockedNarrativeStack } from "./LockedNarrativeStack";
 import { lockedStyles } from "./lockedDocumentStyles";
 import { narrativeRecommendations } from "./pageNarratives";
 
-const CARD_H = 128;
+const CARD_H = 138;
 const MAX_CARDS = 3;
 
 const local = StyleSheet.create({
-  cardH: { height: CARD_H },
+  cardH: { minHeight: CARD_H },
 });
 
 export function PageRecommendations({ data }: { data: ReportData }): ReactElement {
@@ -45,13 +45,13 @@ export function PageRecommendations({ data }: { data: ReportData }): ReactElemen
                   <Text style={lockedStyles.rec_priorityRank}>{`Priority ${i + 1}`}</Text>
                 </View>
                 <Text style={lockedStyles.rec_title}>{clipPdfText(c.title)}</Text>
-                <Text style={lockedStyles.rec_insight}>{clipPdfText(c.insight)}</Text>
+                <Text style={lockedStyles.rec_insight}>{clipPdfText(c.insight, 110)}</Text>
                 <Text style={lockedStyles.rec_labelFirst}>Context</Text>
-                <Text style={lockedStyles.rec_line}>{clipPdfText(c.explanation)}</Text>
+                <Text style={lockedStyles.rec_line}>{clipPdfText(c.explanation, 150)}</Text>
                 <Text style={lockedStyles.rec_label}>Action</Text>
                 <Text style={lockedStyles.rec_actionLine}>{clipPdfText(c.action)}</Text>
                 <Text style={lockedStyles.rec_label}>Outcome</Text>
-                <Text style={lockedStyles.rec_line}>{clipPdfText(c.expectedOutcome)}</Text>
+                <Text style={lockedStyles.rec_line}>{clipPdfText(c.expectedOutcome, 100)}</Text>
               </View>
             );
           })
@@ -60,7 +60,7 @@ export function PageRecommendations({ data }: { data: ReportData }): ReactElemen
       <LockedNarrativeStack
         slice={slice}
         stackRole="afterPrimary"
-        include={["interpretation", "implication", "inaction"]}
+        include={["interpretation", "implication"]}
       />
     </PdfInnerPage>
   );

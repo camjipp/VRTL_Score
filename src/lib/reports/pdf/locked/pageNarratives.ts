@@ -28,17 +28,17 @@ export const narrativeTocFraming = clipPdfText(
   "This report shows how AI recommends your brand versus competitors.",
 );
 
-/** Page 3 — performance: interpretation + stakes after the metric band. */
+/** Page 3 — performance: tight copy; visuals carry the page. */
 export function narrativePerformance(d: ReportData): NarrativeSlice {
   return {
     headline: clipPdfText(
       "You appear often, but you are not consistently the default recommendation.",
     ),
     interpretation: clipPdfText(
-      "This score blends how often assistants name you, how often you are first, and how often they support you with proof-like signals—so it tracks recommendation power, not vanity traffic.",
+      "The score blends mentions, first position, and proof signals—recommendation power, not traffic.",
     ),
     implication: clipPdfText(
-      "When you are not the default, competitors capture buyer decisions even when you are mentioned.",
+      "When you are not the default, competitors still win the decision—even if you are mentioned.",
     ),
     action: d.bottomLine?.trim()
       ? clipPdfText(d.bottomLine)
@@ -46,7 +46,7 @@ export function narrativePerformance(d: ReportData): NarrativeSlice {
         ? clipPdfText(d.tensionNote)
         : undefined,
     inaction: clipPdfText(
-      "If you do nothing, assistants keep rehearsing the same short list of safe brands and your share of new decisions erodes at the margin.",
+      "Inaction lets assistants keep a short safe list of brands; your share erodes at the margin.",
     ),
   };
 }
@@ -64,7 +64,7 @@ export function narrativeCompetitive(d: ReportData): NarrativeSlice {
     headline,
     interpretation: clipPdfText(takeaway),
     implication: clipPdfText(
-      "Use the Win, Risk, and Priority strips above as guardrails: they tell you where the table is most likely to move next if you pause execution.",
+      "Use Win / Risk / Priority as guardrails for where the table moves next if you pause.",
     ),
   };
 }
@@ -75,9 +75,7 @@ function competitiveTakeawayLine(
   others: ReportData["competitors"],
 ): string {
   if (!you || others.length === 0) {
-    return clipPdfText(
-      "Compare mentions and rank together: whoever pairs volume with a better rank is the default shoppers hear most.",
-    );
+    return clipPdfText("Pair mentions with rank: volume plus better rank is the default shoppers hear.");
   }
   const tie = others.find((r) => r.mentions === you.mentions);
   if (tie) {
@@ -92,7 +90,7 @@ function competitiveTakeawayLine(
     );
   }
   return clipPdfText(
-    `${client(d)}: watch for any rival gaining mentions while holding a better rank—that combination signals a shifting default.`,
+    `${client(d)}: watch rivals gaining mentions with a better rank—that shifts the default.`,
   );
 }
 
@@ -115,11 +113,11 @@ export function narrativeModel(d: ReportData): NarrativeSlice {
     headline,
     interpretation: clipPdfText(interp),
     implication: clipPdfText(
-      "That inconsistency means your visibility depends on where customers search, which creates uneven demand. Different models are also used by different audiences, so the fracture shows up in real pipeline, not just dashboards.",
+      "Visibility depends on which assistant shoppers use—uneven demand and real pipeline risk.",
     ),
     action: d.strategicTakeaway?.trim() ? clipPdfText(d.strategicTakeaway) : undefined,
     inaction: clipPdfText(
-      "If you do nothing, the weakest model view keeps dragging down blended outcomes while steadier competitors compound their advantage.",
+      "Ignoring the weak surface drags blended outcomes while steadier rivals compound.",
     ),
   };
 }
@@ -129,13 +127,9 @@ export function narrativeEvidence(d: ReportData): NarrativeSlice {
   const c = client(d);
   return {
     headline: clipPdfText(`When ${c} is missing from an answer, competitors take the recommendation slot instead.`),
-    interpretation: clipPdfText(
-      "When your brand is missing, competitors inherit the recommendation the shopper would have seen next.",
-    ),
-    implication: clipPdfText("This represents direct lost recommendation share on that query shape."),
-    inaction: clipPdfText(
-      "If you do nothing, those gaps repeat across similar prompts until another name becomes the habitual answer.",
-    ),
+    interpretation: clipPdfText("When you are missing, competitors inherit the next recommendation slot."),
+    implication: clipPdfText("Direct lost recommendation share on that query shape."),
+    inaction: clipPdfText("Gaps repeat until another name becomes the habitual answer."),
   };
 }
 
@@ -144,18 +138,18 @@ export function narrativeRecommendations(d: ReportData): NarrativeSlice {
   const first = d.recommendations[0];
   const interpretation =
     first?.title?.trim().length
-      ? `Start with “${first.title.trim()}” and the cards below—each ties a proof move to a measurable outcome.`
-      : "Each recommendation pairs a proof move with an outcome so execution stays tied to revenue risk, not busywork.";
+      ? `Lead with “${first.title.trim()}”—each card ties proof to a measurable outcome.`
+      : "Each card ties a proof move to a measurable outcome.";
   return {
     headline: clipPdfText(
       "These are the highest-impact actions to increase AI recommendation share.",
     ),
     interpretation: clipPdfText(interpretation),
     implication: clipPdfText(
-      "If not addressed, competitors will continue gaining ground in AI-driven decisions while your proof stays uneven across models.",
+      "Without execution, rivals keep gaining in AI-driven decisions while your proof stays uneven.",
     ),
     inaction: clipPdfText(
-      "If you do nothing, default answers harden and buyers learn a shorter list of safe brands without you on it.",
+      "Default answers harden; buyers learn a shorter list of safe brands without you.",
     ),
   };
 }
@@ -170,10 +164,10 @@ export function narrativeDataSummary(d: ReportData): NarrativeSlice {
   return {
     headline: clipPdfText("This data explains why your score is where it is."),
     interpretation: clipPdfText(
-      baseInterp || syntheticInsight || "The rows below connect mention posture, authority, and gaps to the headline score you saw up front.",
+      baseInterp || syntheticInsight || "Rows link mentions, authority, and gaps to the headline score.",
     ),
     implication: clipPdfText(
-      "Treat strengths as proof to defend, improvable rows as near-term leaks, and gap rows as places where competitors can take share if you pause investment.",
+      "Defend strengths, fix improvable rows fast, and close gaps before rivals take share.",
     ),
   };
 }
