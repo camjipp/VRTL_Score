@@ -1,4 +1,5 @@
 import type { CompetitorRow } from "../types";
+import { LD } from "./lockedDesignTokens";
 
 export type ShareSlice = {
   row: CompetitorRow;
@@ -6,9 +7,10 @@ export type ShareSlice = {
   pct: number;
 };
 
-const PIE_CLIENT = "#0D0D0D";
-const PIE_TOP_OTHER = "#52525C";
-const PIE_OTHER_GRAYS = ["#A1A1AA", "#C4C4C4", "#D4D4D8", "#E5E5E5"] as const;
+export const PIE_CLIENT_FILL = "#0D0D0D";
+/** Top competitor by mentions — VRTL green (matches locked report signal token). */
+export const PIE_TOP_COMPETITOR_FILL = LD.color.signalStrong;
+const PIE_OTHER_GRAYS = ["#D4D4D8", "#E2E2E7", "#ECECEF", "#F0F0F3"] as const;
 
 /** Normalize mention counts to integer percentages summing to 100. */
 export function normalizeMentionShares(competitors: readonly CompetitorRow[]): ShareSlice[] {
@@ -41,24 +43,48 @@ export function normalizeMentionShares(competitors: readonly CompetitorRow[]): S
 }
 
 /**
- * Client = black (#0D0D0D); strongest competitor by mentions = dark gray;
- * remaining competitors = lighter grays (no chroma).
+ * Client = black; strongest competitor by mentions = VRTL green;
+ * remaining competitors = light gray shades.
  */
 export function fillForShareSlice(slice: ShareSlice, all: readonly ShareSlice[]): string {
-  if (slice.row.isClient) return PIE_CLIENT;
+  if (slice.row.isClient) return PIE_CLIENT_FILL;
   const others = all.filter((s) => !s.row.isClient);
-  if (others.length === 0) return PIE_CLIENT;
+  if (others.length === 0) return PIE_CLIENT_FILL;
   const sorted = others.slice().sort((a, b) => {
     if (b.row.mentions !== a.row.mentions) return b.row.mentions - a.row.mentions;
     return a.row.rank - b.row.rank;
   });
   const top = sorted[0]!;
   if (top.row.name === slice.row.name && top.row.rank === slice.row.rank) {
-    return PIE_TOP_OTHER;
+    return PIE_TOP_COMPETITOR_FILL;
   }
   const pos = sorted.findIndex((s) => s.row.name === slice.row.name && s.row.rank === slice.row.rank);
   const grayIdx = Math.max(0, pos - 1);
   return PIE_OTHER_GRAYS[grayIdx % PIE_OTHER_GRAYS.length]!;
+}
+
+/** Light-on-dark slices need white label text; gray slices use dark ink. */
+export function sliceLabelTextColor(slice: ShareSlice, all: readonly ShareSlice[]): string {
+  const fill = fillForShareSlice(slice, all);
+  if (fill === PIE_CLIENT_FILL || fill === PIE_TOP_COMPETITOR_FILL) return "#FFFFFF";
+  return "#111827";
+}
+
+/** Mid-slice point for inline labels (same angle convention as {@link pieSlicePath}). */
+export function pieSliceLabelPosition(
+  cx: number,
+  cy: number,
+  r: number,
+  startDeg: number,
+  sweepDeg: number,
+): { x: number; y: number } {
+  const midDeg = startDeg + sweepDeg / 2;
+  const rad = Math.PI / 180;
+  const rr = r * 0.54;
+  return {
+    x: cx + rr * Math.cos(midDeg * rad),
+    y: cy + rr * Math.sin(midDeg * rad),
+  };
 }
 
 /** Degrees: 0° = 3 o'clock. Slices start at −90° (12 o'clock) and sweep clockwise. */
