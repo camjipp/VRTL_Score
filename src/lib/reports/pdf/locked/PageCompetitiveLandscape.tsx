@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "@react-pdf/renderer";
+import { Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import { ShareOfRecommendationsPie } from "../components/ShareOfRecommendationsPie";
 import { PdfInnerPage } from "../components/PdfInnerPage";
@@ -9,9 +9,6 @@ import { normalizeMentionShares, shareDeltaCallout, type ShareSlice } from "./co
 import { LockedNarrativeStack } from "./LockedNarrativeStack";
 import { lockedStyles } from "./lockedDocumentStyles";
 import { narrativeCompetitive } from "./pageNarratives";
-
-const ROW_H = 22;
-const TABLE_ROWS = 6;
 
 const SECONDARY_EXPLANATION = clipPdfText(
   "When AI models generate answers, they rarely present a single option. Instead, they offer a short list of brands.\n\nIn that environment, being included is not enough — the brand that appears most credible becomes the default recommendation.",
@@ -28,28 +25,39 @@ const WHAT_THIS_MEANS_BODY = clipPdfText(
   560,
 );
 
-const local = StyleSheet.create({
-  thH: { height: ROW_H },
-  trH: { height: ROW_H },
-});
-
-function formatCompetitorRate(rate: number | string): string {
-  const s = String(rate);
-  return s.includes("%") ? clipPdfText(s, 12) : clipPdfText(`${s}%`, 12);
+function sharePctForRow(row: CompetitorRow, slices: readonly ShareSlice[]): number {
+  const m = slices.find((s) => s.row.name === row.name && s.row.rank === row.rank);
+  return m?.pct ?? 0;
 }
 
-function padRows<T>(rows: readonly T[], n: number): (T | null)[] {
-  const out: (T | null)[] = [...rows.slice(0, n)];
-  while (out.length < n) out.push(null);
-  return out;
+/** Proxy for recommendation presence using the row rate (0–100) from the export. */
+function positionStrengthFromRate(rate: number): "Strong" | "Moderate" | "Weak" {
+  if (rate >= 55) return "Strong";
+  if (rate >= 35) return "Moderate";
+  return "Weak";
 }
 
-function maxMentions(rows: readonly (CompetitorRow | null)[]): number {
-  let m = 1;
-  for (const r of rows) {
-    if (r && r.mentions > m) m = r.mentions;
-  }
-  return m;
+function competitorStatus(row: CompetitorRow, client: CompetitorRow | undefined): string {
+  if (row.isClient) return "You";
+  if (!client) return "—";
+  if (row.mentions === client.mentions) return "Tied";
+  if (Math.abs(row.mentions - client.mentions) === 1) return "Close";
+  return "Behind";
+}
+
+function tiedAtTop(competitors: readonly CompetitorRow[]): boolean {
+  const client = competitors.find((c) => c.isClient);
+  if (!client) return false;
+  return competitors.some((c) => !c.isClient && c.mentions === client.mentions);
+}
+
+function positionsSupportLine(tied: boolean): string {
+  return clipPdfText(
+    tied
+      ? "You are tied at the top. When multiple brands appear equally, assistants default to the one that looks most credible."
+      : "When multiple brands appear equally, assistants default to the one that looks most credible.",
+    520,
+  );
 }
 
 function timesPhraseForRemainder(remainder: number): string {
@@ -85,30 +93,14 @@ function buildPrimaryParagraphs(
   return [p1, p2, p3];
 }
 
-function NeutralMentionBar({
-  mentions,
-  max,
-}: {
-  mentions: number;
-  max: number;
-}): ReactElement {
-  const pct = Math.min(100, Math.round((mentions / Math.max(1, max)) * 100));
-  const rest = 100 - pct;
-  return (
-    <View style={lockedStyles.comp_mentionBarTrack} wrap={false}>
-      <View style={[lockedStyles.comp_mentionBarNeutralFill, { flex: Math.max(1, pct) }]} />
-      <View style={[lockedStyles.comp_mentionBarRest, { flex: Math.max(1, rest) }]} />
-    </View>
-  );
-}
-
 export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactElement {
   const slice = narrativeCompetitive(data);
   const shareSlices = normalizeMentionShares(data.competitors);
   const deltaLine = shareDeltaCallout(shareSlices);
   const [p1, p2, p3] = buildPrimaryParagraphs(data, shareSlices);
-  const tableRows = padRows(data.competitors, TABLE_ROWS);
-  const mMax = maxMentions(tableRows);
+  const client = data.competitors.find((c) => c.isClient);
+  const sortedCompetitors = [...data.competitors].sort((a, b) => a.rank - b.rank);
+  const tied = tiedAtTop(data.competitors);
 
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[4]!}>
@@ -135,35 +127,38 @@ export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactE
         </View>
       </View>
       <View style={lockedStyles.comp_secondaryBlock} wrap={false}>
-        <Text style={lockedStyles.comp_secondaryLabel}>{"Mention detail"}</Text>
-        <View wrap={false}>
-          <View style={[lockedStyles.comp_tableThMuted, local.thH]}>
-            <Text style={[lockedStyles.comp_thTextMuted, lockedStyles.comp_cellName]}>Name</Text>
-            <Text style={[lockedStyles.comp_thTextMuted, lockedStyles.comp_cellBar]}>Volume</Text>
-            <Text style={[lockedStyles.comp_thTextMuted, lockedStyles.comp_cellRate]}>Rate</Text>
-            <Text style={[lockedStyles.comp_thTextMuted, lockedStyles.comp_cellRank]}>Rank</Text>
-            <Text style={[lockedStyles.comp_thTextMuted, lockedStyles.comp_cellFlag]}>You</Text>
+        <Text style={lockedStyles.comp_positionsTitle}>{"Competitive Positions"}</Text>
+        <View style={lockedStyles.comp_positionsTable} wrap={false}>
+          <View style={lockedStyles.comp_positionsThRow} wrap={false}>
+            <Text style={[lockedStyles.comp_positionsThText, lockedStyles.comp_positionsColBrand]}>Brand</Text>
+            <Text style={[lockedStyles.comp_positionsThText, lockedStyles.comp_positionsColMentions]}>
+              Mentions
+            </Text>
+            <Text style={[lockedStyles.comp_positionsThText, lockedStyles.comp_positionsColShare]}>Share</Text>
+            <Text style={[lockedStyles.comp_positionsThText, lockedStyles.comp_positionsColStrength]}>
+              Position Strength
+            </Text>
+            <Text style={[lockedStyles.comp_positionsThText, lockedStyles.comp_positionsColStatus]}>Status</Text>
           </View>
-          {tableRows.map((r, i) => (
-            <View key={i} style={[lockedStyles.comp_tableTrSecondary, local.trH]} wrap={false}>
-              <Text style={[lockedStyles.comp_tdOther, lockedStyles.comp_cellName]}>
-                {r ? clipPdfText(r.name) : " "}
-              </Text>
-              <View style={lockedStyles.comp_cellBar}>
-                {r ? <NeutralMentionBar mentions={r.mentions} max={mMax} /> : null}
+          {sortedCompetitors.map((r, i) => {
+            const alt = i % 2 === 1;
+            const rowBg = alt ? lockedStyles.comp_positionsRowBgAlt : lockedStyles.comp_positionsRowBg;
+            const td = r.isClient ? lockedStyles.comp_positionsTdClient : lockedStyles.comp_positionsTd;
+            const share = sharePctForRow(r, shareSlices);
+            const strength = positionStrengthFromRate(Number(r.rate));
+            const status = competitorStatus(r, client);
+            return (
+              <View key={`${r.name}-${r.rank}`} style={[lockedStyles.comp_positionsTr, rowBg]} wrap={false}>
+                <Text style={[td, lockedStyles.comp_positionsColBrand]}>{clipPdfText(r.name, 36)}</Text>
+                <Text style={[td, lockedStyles.comp_positionsColMentions]}>{String(r.mentions)}</Text>
+                <Text style={[td, lockedStyles.comp_positionsColShare]}>{`${share}%`}</Text>
+                <Text style={[td, lockedStyles.comp_positionsColStrength]}>{strength}</Text>
+                <Text style={[td, lockedStyles.comp_positionsColStatus]}>{status}</Text>
               </View>
-              <Text style={[lockedStyles.comp_tdOther, lockedStyles.comp_cellRate]}>
-                {r ? formatCompetitorRate(r.rate) : " "}
-              </Text>
-              <Text style={[lockedStyles.comp_tdOther, lockedStyles.comp_cellRank]}>
-                {r ? String(r.rank) : " "}
-              </Text>
-              <Text style={[lockedStyles.comp_tdOther, lockedStyles.comp_cellFlag]}>
-                {r?.isClient ? "You" : r ? "—" : " "}
-              </Text>
-            </View>
-          ))}
+            );
+          })}
         </View>
+        <Text style={lockedStyles.comp_positionsSupport}>{positionsSupportLine(tied)}</Text>
       </View>
       <View style={lockedStyles.comp_bottomInsightBand} wrap={false}>
         <Text style={lockedStyles.comp_bottomInsightParaLast}>{BOTTOM_INSIGHT}</Text>
