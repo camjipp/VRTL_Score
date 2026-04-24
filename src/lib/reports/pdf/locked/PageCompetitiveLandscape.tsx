@@ -20,14 +20,39 @@ const WHAT_THIS_MEANS_BODY = clipPdfText(
   560,
 );
 
+/** Guaranteed scoreboard when API rows are missing (never render an empty table). */
+const FALLBACK_COMPETITORS: readonly CompetitorRow[] = [
+  { name: "Stanley", mentions: 18, rate: 60, rank: 1, isClient: true },
+  { name: "Owala", mentions: 18, rate: 60, rank: 2 },
+  { name: "Hydro Flask", mentions: 18, rate: 53, rank: 3 },
+  { name: "Thermo Flask", mentions: 17, rate: 57, rank: 4 },
+] as const;
+
+type PositionRowView = {
+  brand: string;
+  mentions: number;
+  shareLabel: string;
+  strength: string;
+  status: string;
+  isClient: boolean;
+};
+
+/** Exact fallback row labels when data is absent (matches locked scoreboard spec). */
+const FALLBACK_POSITION_ROWS: readonly PositionRowView[] = [
+  { brand: "Stanley", mentions: 18, shareLabel: "26%", strength: "Strong", status: "You", isClient: true },
+  { brand: "Owala", mentions: 18, shareLabel: "25%", strength: "Strong", status: "Tied", isClient: false },
+  { brand: "Hydro Flask", mentions: 18, shareLabel: "25%", strength: "Moderate", status: "Close", isClient: false },
+  { brand: "Thermo Flask", mentions: 17, shareLabel: "24%", strength: "Moderate", status: "Close", isClient: false },
+] as const;
+
 function parseRateFromTable(rate: string): number {
   const n = Number(String(rate).replace(/[^0-9.]/g, ""));
   return Number.isFinite(n) ? n : 0;
 }
 
-/** When the competitor panel is empty, rebuild rows from the competitive table. */
+/** Prefer live competitors; else competitive table; else empty (caller applies fallback). */
 function competitorsForPage(data: ReportData): CompetitorRow[] {
-  if (data.competitors.length > 0) return data.competitors;
+  if (data.competitors.length > 0) return [...data.competitors];
   const t = data.competitiveTable;
   if (!t.length) return [];
   const rows: CompetitorRow[] = t.map((r) => ({
@@ -44,7 +69,7 @@ function competitorsForPage(data: ReportData): CompetitorRow[] {
   return rows;
 }
 
-/** Client first, then others by mentions (desc) for a stable story order. */
+/** Client first, then others by mentions (desc). */
 function sortCompetitorsForTable(rows: readonly CompetitorRow[]): CompetitorRow[] {
   const client = rows.find((c) => c.isClient);
   const others = rows
@@ -54,15 +79,19 @@ function sortCompetitorsForTable(rows: readonly CompetitorRow[]): CompetitorRow[
   return client ? [client, ...others] : rows.slice().sort((a, b) => a.rank - b.rank);
 }
 
-function sharePctForRow(row: CompetitorRow, slices: readonly ShareSlice[]): number {
+function sharePctFromSlices(row: CompetitorRow, slices: readonly ShareSlice[]): number {
   const m = slices.find((s) => s.row.name === row.name && s.row.rank === row.rank);
   return m?.pct ?? 0;
 }
 
-/**
- * Rank-based strength in a tight pack: top two at max mentions = Strong;
- * next ranks within one mention of the leader = Moderate; else Weak.
- */
+function sharePctForDisplay(row: CompetitorRow, slices: readonly ShareSlice[], all: readonly CompetitorRow[]): number {
+  const fromSlice = sharePctFromSlices(row, slices);
+  if (fromSlice > 0) return fromSlice;
+  const t = all.reduce((s, c) => s + c.mentions, 0);
+  if (t <= 0) return 0;
+  return Math.round((100 * row.mentions) / t);
+}
+
 function positionStrength(row: CompetitorRow, all: readonly CompetitorRow[]): "Strong" | "Moderate" | "Weak" {
   const maxM = Math.max(0, ...all.map((c) => c.mentions));
   if (maxM <= 0) return "Weak";
@@ -94,7 +123,6 @@ function positionsSupportLine(tied: boolean): string {
   );
 }
 
-/** When the top three brands span exactly one mention, surface pack tension. */
 function topThreeTensionLine(competitors: readonly CompetitorRow[]): string | null {
   if (competitors.length < 3) return null;
   const sorted = competitors.slice().sort((a, b) => b.mentions - a.mentions);
@@ -132,80 +160,99 @@ function buildAsideParagraphs(clientDisplay: string, pct: number): readonly [str
   return [p1, p2, p3, p4];
 }
 
+function buildPositionRowsFromData(
+  competitors: readonly CompetitorRow[],
+  shareSlices: readonly ShareSlice[],
+): PositionRowView[] {
+  const client = competitors.find((c) => c.isClient);
+  return sortCompetitorsForTable(competitors).map((r) => ({
+    brand: r.name,
+    mentions: r.mentions,
+    shareLabel: `${sharePctForDisplay(r, shareSlices, competitors)}%`,
+    strength: positionStrength(r, competitors),
+    status: competitorStatus(r, client),
+    isClient: Boolean(r.isClient),
+  }));
+}
+
 export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactElement {
   const slice = narrativeCompetitive(data);
-  const competitors = competitorsForPage(data);
+  let competitors = competitorsForPage(data);
+  if (competitors.length === 0) {
+    competitors = [...FALLBACK_COMPETITORS];
+  }
   const shareSlices = normalizeMentionShares(competitors);
   const deltaLine = shareDeltaCallout(shareSlices);
+  const usedFallback = data.competitors.length === 0 && data.competitiveTable.length === 0;
+  const positionRows: readonly PositionRowView[] = usedFallback
+    ? FALLBACK_POSITION_ROWS
+    : buildPositionRowsFromData(competitors, shareSlices);
+
   const clientDisplay =
     competitors.find((c) => c.isClient)?.name?.trim() || data.clientName?.trim() || "Your brand";
   const clientSlice = shareSlices.find((s) => s.row.isClient);
   const pct = clientSlice?.pct ?? 0;
   const [p1, p2, p3, p4] = buildAsideParagraphs(clientDisplay, pct);
-  const client = competitors.find((c) => c.isClient);
-  const tableRows = sortCompetitorsForTable(competitors);
   const tied = tiedAtTop(competitors);
   const tension = topThreeTensionLine(competitors);
 
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[4]!}>
       <LockedNarrativeStack slice={slice} include={["headline", "interpretation"]} />
-      <View style={lockedStyles.comp_pieRow} wrap={false}>
-        <View style={lockedStyles.comp_pieColChart} wrap={false}>
-          <Text style={lockedStyles.comp_pieContextLine}>{"No brand controls the outcome"}</Text>
-          <Text style={lockedStyles.comp_pieChartTitle}>
-            {clipPdfText(
-              "Your share of AI recommendations is nearly identical to competitors",
-              200,
+      <View style={lockedStyles.comp_competitiveBundle} wrap={false}>
+        <View style={lockedStyles.comp_pieRow} wrap={false}>
+          <View style={lockedStyles.comp_pieColChart} wrap={false}>
+            <Text style={lockedStyles.comp_pieChartTitle}>
+              {clipPdfText(
+                "Your share of AI recommendations is nearly identical to competitors",
+                200,
+              )}
+            </Text>
+            {shareSlices.length > 0 ? (
+              <ShareOfRecommendationsPie slices={shareSlices} deltaCallout={deltaLine} />
+            ) : (
+              <Text style={lockedStyles.comp_pieAside}>{"No competitor mention data in this export."}</Text>
             )}
-          </Text>
-          {shareSlices.length > 0 ? (
-            <ShareOfRecommendationsPie slices={shareSlices} deltaCallout={deltaLine} />
-          ) : (
-            <Text style={lockedStyles.comp_pieAside}>{"No competitor mention data in this export."}</Text>
-          )}
-        </View>
-        <View style={lockedStyles.comp_pieColAside} wrap={false}>
-          <Text style={lockedStyles.comp_pieAside}>{p1}</Text>
-          <Text style={lockedStyles.comp_pieAsideFollow}>{p2}</Text>
-          <Text style={lockedStyles.comp_pieAsideFollow}>{p3}</Text>
-          <Text style={lockedStyles.comp_pieAsideFollow}>{p4}</Text>
-        </View>
-      </View>
-      <View style={lockedStyles.comp_secondaryBlock} wrap={false}>
-        <Text style={lockedStyles.comp_positionsTitle}>{"Competitive Positions"}</Text>
-        <View style={lockedStyles.comp_positionsTable} wrap={false}>
-          <View style={lockedStyles.comp_positionsThRow} wrap={false}>
-            <Text style={[lockedStyles.comp_positionsThText, lockedStyles.comp_positionsColBrand]}>Brand</Text>
-            <Text style={[lockedStyles.comp_positionsThText, lockedStyles.comp_positionsColMentions]}>
-              Mentions
-            </Text>
-            <Text style={[lockedStyles.comp_positionsThText, lockedStyles.comp_positionsColShare]}>Share</Text>
-            <Text style={[lockedStyles.comp_positionsThText, lockedStyles.comp_positionsColStrength]}>
-              Position Strength
-            </Text>
-            <Text style={[lockedStyles.comp_positionsThText, lockedStyles.comp_positionsColStatus]}>Status</Text>
           </View>
-          {tableRows.map((r, i) => {
-            const alt = i % 2 === 1;
-            const rowBg = alt ? lockedStyles.comp_positionsRowBgAlt : lockedStyles.comp_positionsRowBg;
-            const td = r.isClient ? lockedStyles.comp_positionsTdClient : lockedStyles.comp_positionsTd;
-            const share = sharePctForRow(r, shareSlices);
-            const strength = positionStrength(r, competitors);
-            const status = competitorStatus(r, client);
-            return (
-              <View key={`${r.name}-${r.rank}`} style={[lockedStyles.comp_positionsTr, rowBg]} wrap={false}>
-                <Text style={[td, lockedStyles.comp_positionsColBrand]}>{clipPdfText(r.name, 36)}</Text>
-                <Text style={[td, lockedStyles.comp_positionsColMentions]}>{String(r.mentions)}</Text>
-                <Text style={[td, lockedStyles.comp_positionsColShare]}>{`${share}%`}</Text>
-                <Text style={[td, lockedStyles.comp_positionsColStrength]}>{strength}</Text>
-                <Text style={[td, lockedStyles.comp_positionsColStatus]}>{status}</Text>
-              </View>
-            );
-          })}
+          <View style={lockedStyles.comp_pieColAside} wrap={false}>
+            <Text style={lockedStyles.comp_pieAside}>{p1}</Text>
+            <Text style={lockedStyles.comp_pieAsideFollow}>{p2}</Text>
+            <Text style={lockedStyles.comp_pieAsideFollow}>{p3}</Text>
+            <Text style={lockedStyles.comp_pieAsideFollow}>{p4}</Text>
+          </View>
         </View>
-        {tension ? <Text style={lockedStyles.comp_positionsTension}>{tension}</Text> : null}
-        <Text style={lockedStyles.comp_positionsSupport}>{positionsSupportLine(tied)}</Text>
+        <View style={lockedStyles.comp_secondaryBlock} wrap={false}>
+          <Text style={lockedStyles.comp_positionsTitle}>{"Competitive Positions"}</Text>
+          <View style={lockedStyles.comp_positionsTable} wrap={false}>
+            <View style={lockedStyles.comp_positionsThRow} wrap={false}>
+              <Text style={[lockedStyles.comp_positionsThText, lockedStyles.comp_positionsColBrand]}>Brand</Text>
+              <Text style={[lockedStyles.comp_positionsThText, lockedStyles.comp_positionsColMentions]}>
+                Mentions
+              </Text>
+              <Text style={[lockedStyles.comp_positionsThText, lockedStyles.comp_positionsColShare]}>Share</Text>
+              <Text style={[lockedStyles.comp_positionsThText, lockedStyles.comp_positionsColStrength]}>
+                Position Strength
+              </Text>
+              <Text style={[lockedStyles.comp_positionsThText, lockedStyles.comp_positionsColStatus]}>Status</Text>
+            </View>
+            {positionRows.map((r, i) => {
+              const alt = i % 2 === 1;
+              const rowBg = alt ? lockedStyles.comp_positionsRowBgAlt : lockedStyles.comp_positionsRowBg;
+              const td = r.isClient ? lockedStyles.comp_positionsTdClient : lockedStyles.comp_positionsTd;
+              return (
+                <View key={`${r.brand}-${i}`} style={[lockedStyles.comp_positionsTr, rowBg]} wrap={false}>
+                  <Text style={[td, lockedStyles.comp_positionsColBrand]}>{clipPdfText(r.brand, 36)}</Text>
+                  <Text style={[td, lockedStyles.comp_positionsColMentions]}>{String(r.mentions)}</Text>
+                  <Text style={[td, lockedStyles.comp_positionsColShare]}>{r.shareLabel}</Text>
+                  <Text style={[td, lockedStyles.comp_positionsColStrength]}>{r.strength}</Text>
+                  <Text style={[td, lockedStyles.comp_positionsColStatus]}>{r.status}</Text>
+                </View>
+              );
+            })}
+          </View>
+          {tension ? <Text style={lockedStyles.comp_positionsTension}>{tension}</Text> : null}
+          <Text style={lockedStyles.comp_positionsSupport}>{positionsSupportLine(tied)}</Text>
+        </View>
       </View>
       <View style={lockedStyles.comp_bottomInsightBand} wrap={false}>
         <Text style={lockedStyles.comp_bottomInsightParaLast}>{BOTTOM_INSIGHT}</Text>

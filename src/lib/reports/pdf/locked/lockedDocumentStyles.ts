@@ -490,11 +490,14 @@ export const lockedStyles = StyleSheet.create({
     maxWidth: "100%",
   },
 
-  /* Competitive — market-share view + secondary breakdown */
+  /* Competitive — market-share view + positions table (one visual block) */
+  comp_competitiveBundle: {
+    marginBottom: LD.space.lg,
+  },
   comp_pieRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: LD.space.xl,
+    marginBottom: 0,
   },
   comp_pieColChart: {
     width: "52%",
@@ -505,14 +508,6 @@ export const lockedStyles = StyleSheet.create({
     paddingLeft: LD.space.md,
     justifyContent: "flex-start",
   },
-  comp_pieContextLine: {
-    fontSize: LD.size.caption,
-    fontFamily: LD.font.sansBold,
-    color: LD.color.ink2,
-    lineHeight: LD.lineHeight.snug,
-    marginBottom: LD.space.xs + 2,
-    maxWidth: "100%",
-  },
   comp_pieChartTitle: {
     fontSize: LD.size.bodySm,
     fontFamily: LD.font.sansBold,
@@ -520,7 +515,7 @@ export const lockedStyles = StyleSheet.create({
     letterSpacing: -0.06,
     textTransform: "none" as const,
     lineHeight: LD.lineHeight.snug,
-    marginBottom: LD.space.sm,
+    marginBottom: LD.space.xs,
     maxWidth: "100%",
   },
   comp_pieDeltaCallout: {
@@ -569,7 +564,11 @@ export const lockedStyles = StyleSheet.create({
     marginTop: LD.space.sm + 2,
   },
   comp_secondaryBlock: {
-    marginTop: LD.space.md,
+    marginTop: -22,
+    paddingTop: LD.space.sm,
+    borderTopWidth: 1,
+    borderTopColor: "#E0E0E0",
+    borderStyle: "solid",
   },
   comp_positionsTitle: {
     fontSize: LD.size.micro,
@@ -577,7 +576,7 @@ export const lockedStyles = StyleSheet.create({
     color: LD.color.ink3,
     letterSpacing: LD.trackEyebrow,
     textTransform: "none" as const,
-    marginBottom: LD.space.sm,
+    marginBottom: LD.space.xs + 2,
   },
   comp_positionsTable: {
     borderWidth: 1,
@@ -592,12 +591,12 @@ export const lockedStyles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#E0E0E0",
     borderStyle: "solid",
-    paddingVertical: 6,
-    paddingHorizontal: 8,
-    minHeight: 22,
+    paddingVertical: 3,
+    paddingHorizontal: 5,
+    minHeight: 26,
   },
   comp_positionsThText: {
-    fontSize: LD.size.micro,
+    fontSize: 10,
     fontFamily: LD.font.sansBold,
     color: LD.color.ink3,
     letterSpacing: LD.trackEyebrow,
@@ -609,9 +608,9 @@ export const lockedStyles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#E0E0E0",
     borderStyle: "solid",
-    paddingVertical: 5,
-    paddingHorizontal: 8,
-    minHeight: 22,
+    paddingVertical: 2,
+    paddingHorizontal: 5,
+    minHeight: 24,
   },
   comp_positionsRowBg: {
     backgroundColor: "#FFFFFF",
@@ -620,16 +619,16 @@ export const lockedStyles = StyleSheet.create({
     backgroundColor: "#FAFAFA",
   },
   comp_positionsTd: {
-    fontSize: LD.size.bodySm,
+    fontSize: 10,
     fontFamily: LD.font.sans,
     color: LD.color.ink2,
-    lineHeight: LD.lineHeight.normal,
+    lineHeight: 1.35,
   },
   comp_positionsTdClient: {
-    fontSize: LD.size.bodySm,
+    fontSize: 10,
     fontFamily: LD.font.sansBold,
     color: LD.color.ink,
-    lineHeight: LD.lineHeight.normal,
+    lineHeight: 1.35,
   },
   comp_positionsColBrand: { width: "26%" },
   comp_positionsColMentions: { width: "12%" },
