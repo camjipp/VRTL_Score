@@ -7,10 +7,14 @@ export type ShareSlice = {
   pct: number;
 };
 
-export const PIE_CLIENT_FILL = "#0D0D0D";
-/** Top competitor by mentions — VRTL green (matches locked report signal token). */
-export const PIE_TOP_COMPETITOR_FILL = LD.color.signalStrong;
-const PIE_OTHER_GRAYS = ["#D4D4D8", "#E2E2E7", "#ECECEF", "#F0F0F3"] as const;
+/** Client (Stanley) — VRTL green */
+export const PIE_CLIENT_FILL = LD.color.signalStrong;
+/** Top competitor by mentions — black */
+export const PIE_TOP_COMPETITOR_FILL = "#0D0D0D";
+const PIE_OTHER_GRAYS = ["#D1D5DB", "#E5E7EB"] as const;
+
+/** Subtle ring on client slice only (darker green on green fill). */
+export const PIE_CLIENT_OUTLINE = "#166534";
 
 /** Normalize mention counts to integer percentages summing to 100. */
 export function normalizeMentionShares(competitors: readonly CompetitorRow[]): ShareSlice[] {
@@ -43,8 +47,8 @@ export function normalizeMentionShares(competitors: readonly CompetitorRow[]): S
 }
 
 /**
- * Client = black; strongest competitor by mentions = VRTL green;
- * remaining competitors = light gray shades.
+ * Client = VRTL green; strongest competitor by mentions = black;
+ * remaining competitors = #D1D5DB / #E5E7EB.
  */
 export function fillForShareSlice(slice: ShareSlice, all: readonly ShareSlice[]): string {
   if (slice.row.isClient) return PIE_CLIENT_FILL;
@@ -63,28 +67,28 @@ export function fillForShareSlice(slice: ShareSlice, all: readonly ShareSlice[])
   return PIE_OTHER_GRAYS[grayIdx % PIE_OTHER_GRAYS.length]!;
 }
 
-/** Light-on-dark slices need white label text; gray slices use dark ink. */
-export function sliceLabelTextColor(slice: ShareSlice, all: readonly ShareSlice[]): string {
-  const fill = fillForShareSlice(slice, all);
-  if (fill === PIE_CLIENT_FILL || fill === PIE_TOP_COMPETITOR_FILL) return "#FFFFFF";
-  return "#111827";
+/** Legend: client first, then others by share (desc). */
+export function legendSlicesOrdered(slices: readonly ShareSlice[]): ShareSlice[] {
+  const client = slices.find((s) => s.row.isClient);
+  const others = slices
+    .filter((s) => !s.row.isClient)
+    .slice()
+    .sort((a, b) => b.pct - a.pct || a.row.rank - b.row.rank);
+  return client ? [client, ...others] : others;
 }
 
-/** Mid-slice point for inline labels (same angle convention as {@link pieSlicePath}). */
-export function pieSliceLabelPosition(
-  cx: number,
-  cy: number,
-  r: number,
-  startDeg: number,
-  sweepDeg: number,
-): { x: number; y: number } {
-  const midDeg = startDeg + sweepDeg / 2;
-  const rad = Math.PI / 180;
-  const rr = r * 0.54;
-  return {
-    x: cx + rr * Math.cos(midDeg * rad),
-    y: cy + rr * Math.sin(midDeg * rad),
-  };
+/** Small delta line when client is within ±3 points of the top share. */
+export function shareDeltaCallout(slices: readonly ShareSlice[]): string | null {
+  const client = slices.find((s) => s.row.isClient);
+  if (!client) return null;
+  const others = slices.filter((s) => !s.row.isClient);
+  if (others.length === 0) return null;
+  const maxOther = Math.max(...others.map((s) => s.pct));
+  const d = client.pct - maxOther;
+  if (d === 0) return "You match the leader — effectively tied";
+  if (d > 0 && d <= 3) return `You lead by +${d}% — effectively tied`;
+  if (d < 0 && d >= -3) return `You trail by ${Math.abs(d)}% — effectively tied`;
+  return null;
 }
 
 /** Degrees: 0° = 3 o'clock. Slices start at −90° (12 o'clock) and sweep clockwise. */

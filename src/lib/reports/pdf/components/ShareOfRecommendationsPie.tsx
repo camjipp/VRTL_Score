@@ -4,25 +4,28 @@ import { clipPdfText } from "../editorial/pdfNarrative";
 import type { ShareSlice } from "../locked/competitiveSharePie";
 import {
   fillForShareSlice,
-  pieSliceLabelPosition,
+  legendSlicesOrdered,
   pieSlicePath,
-  sliceLabelTextColor,
+  PIE_CLIENT_OUTLINE,
 } from "../locked/competitiveSharePie";
-import { LD } from "../locked/lockedDesignTokens";
-import { fonts } from "../theme";
+import { lockedStyles } from "../locked/lockedDocumentStyles";
 
-/** ~12% larger than prior chart for clearer hierarchy. */
+/** ~12% larger than original baseline for readability. */
 const W = 256;
 const H = 212;
 const CX = W / 2;
 const CY = H / 2 - 2;
 const R = 87;
-const SLICE_STROKE = "#FFFFFF";
-const SLICE_STROKE_W = 1.1;
-const MIN_SWEEP_DEG_FOR_INLINE = 17;
+
+const LEGEND_SUPPORT = clipPdfText(
+  "No brand controls the outcome — decisions are split almost evenly.",
+  520,
+);
 
 type Props = {
   slices: readonly ShareSlice[];
+  /** Optional small line when client share is within a few points of the leader. */
+  deltaCallout?: string | null;
 };
 
 type SliceDraw = {
@@ -43,93 +46,54 @@ function buildSliceDraws(slices: readonly ShareSlice[]): SliceDraw[] {
   return out;
 }
 
-function inlineLabelText(s: ShareSlice, sweepDeg: number): string {
-  const maxName = sweepDeg > 32 ? 22 : sweepDeg > 22 ? 14 : 10;
-  return `${clipPdfText(s.row.name, maxName)} — ${s.pct}%`;
+/** Draw non-client slices first so the client wedge reads on top with its outline. */
+function sortDrawsForPaintOrder(draws: readonly SliceDraw[]): SliceDraw[] {
+  return draws.slice().sort((a, b) => {
+    if (a.slice.row.isClient === b.slice.row.isClient) return 0;
+    return a.slice.row.isClient ? 1 : -1;
+  });
 }
 
-export function ShareOfRecommendationsPie({ slices }: Props): ReactElement {
+export function ShareOfRecommendationsPie({ slices, deltaCallout }: Props): ReactElement {
   const draws = buildSliceDraws(slices);
-  const smallForLegend = draws.filter((d) => d.sweepDeg < MIN_SWEEP_DEG_FOR_INLINE);
+  const paintOrder = sortDrawsForPaintOrder(draws);
+  const legendRows = legendSlicesOrdered(slices);
 
   return (
     <View style={{ width: W }}>
       <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
-        {draws.map((d, i) => {
+        {paintOrder.map((d, i) => {
           const dPath = pieSlicePath(CX, CY, R, d.startDeg, d.sweepDeg);
           if (!dPath) return null;
           const fill = fillForShareSlice(d.slice, slices);
+          const isClient = Boolean(d.slice.row.isClient);
           return (
             <Path
               key={`p-${d.slice.row.name}-${d.slice.row.rank}-${i}`}
               d={dPath}
               fill={fill}
-              stroke={SLICE_STROKE}
-              strokeWidth={SLICE_STROKE_W}
+              {...(isClient ? { stroke: PIE_CLIENT_OUTLINE, strokeWidth: 1.05 } : {})}
             />
           );
         })}
-        {draws.map((d, i) => {
-          if (d.sweepDeg < MIN_SWEEP_DEG_FOR_INLINE) return null;
-          const { x, y } = pieSliceLabelPosition(CX, CY, R, d.startDeg, d.sweepDeg);
-          const fill = sliceLabelTextColor(d.slice, slices);
-          const fs = d.sweepDeg > 34 ? 6.25 : d.sweepDeg > 24 ? 5.75 : 5.25;
-          const label = inlineLabelText(d.slice, d.sweepDeg);
+      </Svg>
+      {deltaCallout ? (
+        <Text style={lockedStyles.comp_pieDeltaCallout}>{clipPdfText(deltaCallout, 120)}</Text>
+      ) : null}
+      <View style={lockedStyles.comp_pieLegendWrap}>
+        {legendRows.map((s, i) => {
+          const fill = fillForShareSlice(s, slices);
           return (
-            <Text
-              key={`t-${d.slice.row.name}-${d.slice.row.rank}-${i}`}
-              x={x}
-              y={y + fs * 0.28}
-              textAnchor="middle"
-              style={{
-                fontSize: fs,
-                fontFamily: fonts.sansBold,
-                fill,
-              }}
-            >
-              {label}
-            </Text>
+            <View key={`${s.row.name}-${s.row.rank}-${i}`} style={lockedStyles.comp_pieLegendRow} wrap={false}>
+              <View style={[lockedStyles.comp_pieLegendSwatch, { backgroundColor: fill }]} />
+              <Text style={lockedStyles.comp_pieLegendText}>
+                {`${clipPdfText(s.row.name, 40)} — ${s.pct}%`}
+              </Text>
+            </View>
           );
         })}
-      </Svg>
-      {smallForLegend.length > 0 ? (
-        <View style={{ marginTop: 5 }}>
-          {smallForLegend.map((d, i) => {
-            const fill = fillForShareSlice(d.slice, slices);
-            return (
-              <View
-                key={`sm-${d.slice.row.name}-${i}`}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  marginBottom: 2,
-                }}
-                wrap={false}
-              >
-                <View
-                  style={{
-                    width: 5,
-                    height: 5,
-                    backgroundColor: fill,
-                    marginRight: 5,
-                    borderWidth: 0.5,
-                    borderColor: LD.color.rule,
-                  }}
-                />
-                <Text
-                  style={{
-                    fontSize: LD.size.micro,
-                    fontFamily: LD.font.sans,
-                    color: LD.color.ink3,
-                  }}
-                >
-                  {`${clipPdfText(d.slice.row.name, 32)} — ${d.slice.pct}%`}
-                </Text>
-              </View>
-            );
-          })}
-        </View>
-      ) : null}
+      </View>
+      <Text style={lockedStyles.comp_pieLegendSupport}>{LEGEND_SUPPORT}</Text>
     </View>
   );
 }

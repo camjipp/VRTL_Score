@@ -5,7 +5,7 @@ import { PdfInnerPage } from "../components/PdfInnerPage";
 import { clipPdfText } from "../editorial/pdfNarrative";
 import type { CompetitorRow, ReportData } from "../types";
 import { LOCKED_PAGE_HEADER } from "./layoutConstants";
-import { normalizeMentionShares, type ShareSlice } from "./competitiveSharePie";
+import { normalizeMentionShares, shareDeltaCallout, type ShareSlice } from "./competitiveSharePie";
 import { LockedNarrativeStack } from "./LockedNarrativeStack";
 import { lockedStyles } from "./lockedDocumentStyles";
 import { narrativeCompetitive } from "./pageNarratives";
@@ -105,6 +105,7 @@ function NeutralMentionBar({
 export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactElement {
   const slice = narrativeCompetitive(data);
   const shareSlices = normalizeMentionShares(data.competitors);
+  const deltaLine = shareDeltaCallout(shareSlices);
   const [p1, p2, p3] = buildPrimaryParagraphs(data, shareSlices);
   const tableRows = padRows(data.competitors, TABLE_ROWS);
   const mMax = maxMentions(tableRows);
@@ -114,9 +115,14 @@ export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactE
       <LockedNarrativeStack slice={slice} include={["headline", "interpretation"]} />
       <View style={lockedStyles.comp_pieRow} wrap={false}>
         <View style={lockedStyles.comp_pieColChart} wrap={false}>
-          <Text style={lockedStyles.comp_pieChartTitle}>{"How AI divides buyer decisions"}</Text>
+          <Text style={lockedStyles.comp_pieChartTitle}>
+            {clipPdfText(
+              "Your share of AI recommendations is nearly identical to competitors",
+              200,
+            )}
+          </Text>
           {shareSlices.length > 0 ? (
-            <ShareOfRecommendationsPie slices={shareSlices} />
+            <ShareOfRecommendationsPie slices={shareSlices} deltaCallout={deltaLine} />
           ) : (
             <Text style={lockedStyles.comp_pieAside}>{"No competitor mention data in this export."}</Text>
           )}
