@@ -8,7 +8,7 @@ export const stanleyData: ReportData = {
   date: "April 1, 2026",
   overallScore: 52,
   rank: 1,
-  rankTotal: 5,
+  rankTotal: 4,
   status: "Contested",
   mentionRate: 60,
   topPosition: 60,
@@ -19,9 +19,8 @@ export const stanleyData: ReportData = {
   competitors: [
     { name: "Stanley", mentions: 18, rate: 60, rank: 1, isClient: true },
     { name: "Owala", mentions: 18, rate: 60, rank: 2 },
-    { name: "Thermo Flask", mentions: 17, rate: 57, rank: 3 },
-    { name: "hydro flask", mentions: 16, rate: 53, rank: 4 },
-    { name: "Hydro Flask", mentions: 2, rate: 7, rank: 5 },
+    { name: "Hydro Flask", mentions: 18, rate: 53, rank: 3 },
+    { name: "Thermo Flask", mentions: 17, rate: 57, rank: 4 },
   ],
   modelScores: [
     {
@@ -168,9 +167,8 @@ export const stanleyData: ReportData = {
   competitiveTable: [
     { brand: "Stanley", mentions: 18, rate: "60%", vsYou: "—", status: "You" },
     { brand: "Owala", mentions: 18, rate: "60%", vsYou: "0", status: "Tied" },
+    { brand: "Hydro Flask", mentions: 18, rate: "60%", vsYou: "0", status: "Tied" },
     { brand: "Thermo Flask", mentions: 17, rate: "57%", vsYou: "-1", status: "Behind" },
-    { brand: "hydro flask", mentions: 16, rate: "53%", vsYou: "-2", status: "Behind" },
-    { brand: "Hydro Flask", mentions: 2, rate: "7%", vsYou: "-16", status: "Behind" },
   ],
   evidenceLog: Array.from({ length: 10 }, (_, i) => ({
     idx: i + 1,

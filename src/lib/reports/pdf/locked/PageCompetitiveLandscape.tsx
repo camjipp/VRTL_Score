@@ -10,30 +10,64 @@ import { LockedNarrativeStack } from "./LockedNarrativeStack";
 import { lockedStyles } from "./lockedDocumentStyles";
 import { narrativeCompetitive } from "./pageNarratives";
 
-const SECONDARY_EXPLANATION = clipPdfText(
-  "When AI models generate answers, they rarely present a single option. Instead, they offer a short list of brands.\n\nIn that environment, being included is not enough — the brand that appears most credible becomes the default recommendation.",
-  520,
-);
-
 const BOTTOM_INSIGHT = clipPdfText(
   "Right now, you are not that brand.\n\nYou are present — but not preferred.",
   520,
 );
 
 const WHAT_THIS_MEANS_BODY = clipPdfText(
-  "You are not losing because you are invisible.\n\nYou are losing because you are not the obvious choice.\n\nUntil that changes, AI will continue splitting decisions across competitors — and you will not control the outcome.",
+  "You are not losing because you are invisible. You are losing because you are not the obvious choice.\n\nUntil that changes, AI will continue splitting decisions across competitors — and you will not control the outcome.",
   560,
 );
+
+function parseRateFromTable(rate: string): number {
+  const n = Number(String(rate).replace(/[^0-9.]/g, ""));
+  return Number.isFinite(n) ? n : 0;
+}
+
+/** When the competitor panel is empty, rebuild rows from the competitive table. */
+function competitorsForPage(data: ReportData): CompetitorRow[] {
+  if (data.competitors.length > 0) return data.competitors;
+  const t = data.competitiveTable;
+  if (!t.length) return [];
+  const rows: CompetitorRow[] = t.map((r) => ({
+    name: r.brand.trim(),
+    mentions: r.mentions,
+    rate: parseRateFromTable(r.rate),
+    rank: 0,
+    isClient: r.status === "You",
+  }));
+  rows.sort((a, b) => b.mentions - a.mentions || a.name.localeCompare(b.name));
+  rows.forEach((r, i) => {
+    r.rank = i + 1;
+  });
+  return rows;
+}
+
+/** Client first, then others by mentions (desc) for a stable story order. */
+function sortCompetitorsForTable(rows: readonly CompetitorRow[]): CompetitorRow[] {
+  const client = rows.find((c) => c.isClient);
+  const others = rows
+    .filter((c) => !c.isClient)
+    .slice()
+    .sort((a, b) => b.mentions - a.mentions || a.rank - b.rank);
+  return client ? [client, ...others] : rows.slice().sort((a, b) => a.rank - b.rank);
+}
 
 function sharePctForRow(row: CompetitorRow, slices: readonly ShareSlice[]): number {
   const m = slices.find((s) => s.row.name === row.name && s.row.rank === row.rank);
   return m?.pct ?? 0;
 }
 
-/** Proxy for recommendation presence using the row rate (0–100) from the export. */
-function positionStrengthFromRate(rate: number): "Strong" | "Moderate" | "Weak" {
-  if (rate >= 55) return "Strong";
-  if (rate >= 35) return "Moderate";
+/**
+ * Rank-based strength in a tight pack: top two at max mentions = Strong;
+ * next ranks within one mention of the leader = Moderate; else Weak.
+ */
+function positionStrength(row: CompetitorRow, all: readonly CompetitorRow[]): "Strong" | "Moderate" | "Weak" {
+  const maxM = Math.max(0, ...all.map((c) => c.mentions));
+  if (maxM <= 0) return "Weak";
+  if (row.rank <= 2 && row.mentions === maxM) return "Strong";
+  if (row.rank <= 4 && row.mentions >= maxM - 1) return "Moderate";
   return "Weak";
 }
 
@@ -60,53 +94,65 @@ function positionsSupportLine(tied: boolean): string {
   );
 }
 
-function timesPhraseForRemainder(remainder: number): string {
-  if (remainder >= 72 && remainder <= 78) return "nearly three out of four times";
-  if (remainder >= 64 && remainder <= 69) return "nearly two out of three times";
-  if (remainder >= 47 && remainder <= 53) return "roughly half the time";
-  return `about ${remainder}% of the time`;
+/** When the top three brands span exactly one mention, surface pack tension. */
+function topThreeTensionLine(competitors: readonly CompetitorRow[]): string | null {
+  if (competitors.length < 3) return null;
+  const sorted = competitors.slice().sort((a, b) => b.mentions - a.mentions);
+  const top3 = sorted.slice(0, 3);
+  const m = top3.map((r) => r.mentions);
+  const spread = Math.max(...m) - Math.min(...m);
+  if (spread === 1) return "Top 3 brands are separated by just 1 mention";
+  return null;
 }
 
-function buildPrimaryParagraphs(
-  data: ReportData,
-  slices: readonly ShareSlice[],
-): readonly [string, string, string] {
-  const clientDisplay =
-    data.competitors.find((c) => c.isClient)?.name?.trim() ||
-    data.clientName?.trim() ||
-    "Your brand";
-  const clientSlice = slices.find((s) => s.row.isClient);
-  const pct = clientSlice?.pct ?? 0;
+function buildAsideParagraphs(clientDisplay: string, pct: number): readonly [string, string, string, string] {
   const remainder = Math.max(0, Math.min(100, 100 - pct));
   const p1 = clipPdfText(
-    `${clientDisplay} accounts for roughly ${pct}% of AI recommendations in this category.`,
+    `${clientDisplay} accounts for ${pct}% of AI recommendations in this category.`,
     520,
   );
-  const p2 = clipPdfText(
-    `That means ${timesPhraseForRemainder(remainder)}, buyers are shown a competitor alongside you — or instead of you.`,
-    520,
-  );
+  const p2 =
+    remainder >= 72 && remainder <= 79
+      ? clipPdfText(
+          "That means in nearly three out of four cases, buyers are shown a competitor alongside you — or instead of you.",
+          520,
+        )
+      : clipPdfText(
+          `That means in about ${remainder}% of answers, buyers are shown a competitor alongside you — or instead of you.`,
+          520,
+        );
   const p3 = clipPdfText(
-    "There is no dominant brand in this set. Decisions are being split across multiple options.",
+    "There is no dominant brand here. Decisions are split across multiple options.",
     520,
   );
-  return [p1, p2, p3];
+  const p4 = clipPdfText(
+    "In this environment, being included is not enough. The brand that appears most credible becomes the default recommendation.",
+    520,
+  );
+  return [p1, p2, p3, p4];
 }
 
 export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactElement {
   const slice = narrativeCompetitive(data);
-  const shareSlices = normalizeMentionShares(data.competitors);
+  const competitors = competitorsForPage(data);
+  const shareSlices = normalizeMentionShares(competitors);
   const deltaLine = shareDeltaCallout(shareSlices);
-  const [p1, p2, p3] = buildPrimaryParagraphs(data, shareSlices);
-  const client = data.competitors.find((c) => c.isClient);
-  const sortedCompetitors = [...data.competitors].sort((a, b) => a.rank - b.rank);
-  const tied = tiedAtTop(data.competitors);
+  const clientDisplay =
+    competitors.find((c) => c.isClient)?.name?.trim() || data.clientName?.trim() || "Your brand";
+  const clientSlice = shareSlices.find((s) => s.row.isClient);
+  const pct = clientSlice?.pct ?? 0;
+  const [p1, p2, p3, p4] = buildAsideParagraphs(clientDisplay, pct);
+  const client = competitors.find((c) => c.isClient);
+  const tableRows = sortCompetitorsForTable(competitors);
+  const tied = tiedAtTop(competitors);
+  const tension = topThreeTensionLine(competitors);
 
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[4]!}>
       <LockedNarrativeStack slice={slice} include={["headline", "interpretation"]} />
       <View style={lockedStyles.comp_pieRow} wrap={false}>
         <View style={lockedStyles.comp_pieColChart} wrap={false}>
+          <Text style={lockedStyles.comp_pieContextLine}>{"No brand controls the outcome"}</Text>
           <Text style={lockedStyles.comp_pieChartTitle}>
             {clipPdfText(
               "Your share of AI recommendations is nearly identical to competitors",
@@ -123,7 +169,7 @@ export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactE
           <Text style={lockedStyles.comp_pieAside}>{p1}</Text>
           <Text style={lockedStyles.comp_pieAsideFollow}>{p2}</Text>
           <Text style={lockedStyles.comp_pieAsideFollow}>{p3}</Text>
-          <Text style={lockedStyles.comp_pieSecondaryAside}>{SECONDARY_EXPLANATION}</Text>
+          <Text style={lockedStyles.comp_pieAsideFollow}>{p4}</Text>
         </View>
       </View>
       <View style={lockedStyles.comp_secondaryBlock} wrap={false}>
@@ -140,12 +186,12 @@ export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactE
             </Text>
             <Text style={[lockedStyles.comp_positionsThText, lockedStyles.comp_positionsColStatus]}>Status</Text>
           </View>
-          {sortedCompetitors.map((r, i) => {
+          {tableRows.map((r, i) => {
             const alt = i % 2 === 1;
             const rowBg = alt ? lockedStyles.comp_positionsRowBgAlt : lockedStyles.comp_positionsRowBg;
             const td = r.isClient ? lockedStyles.comp_positionsTdClient : lockedStyles.comp_positionsTd;
             const share = sharePctForRow(r, shareSlices);
-            const strength = positionStrengthFromRate(Number(r.rate));
+            const strength = positionStrength(r, competitors);
             const status = competitorStatus(r, client);
             return (
               <View key={`${r.name}-${r.rank}`} style={[lockedStyles.comp_positionsTr, rowBg]} wrap={false}>
@@ -158,6 +204,7 @@ export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactE
             );
           })}
         </View>
+        {tension ? <Text style={lockedStyles.comp_positionsTension}>{tension}</Text> : null}
         <Text style={lockedStyles.comp_positionsSupport}>{positionsSupportLine(tied)}</Text>
       </View>
       <View style={lockedStyles.comp_bottomInsightBand} wrap={false}>

@@ -17,11 +17,6 @@ const CX = W / 2;
 const CY = H / 2 - 2;
 const R = 87;
 
-const LEGEND_SUPPORT = clipPdfText(
-  "No brand controls the outcome — decisions are split almost evenly.",
-  520,
-);
-
 type Props = {
   slices: readonly ShareSlice[];
   /** Optional small line when client share is within a few points of the leader. */
@@ -93,7 +88,6 @@ export function ShareOfRecommendationsPie({ slices, deltaCallout }: Props): Reac
           );
         })}
       </View>
-      <Text style={lockedStyles.comp_pieLegendSupport}>{LEGEND_SUPPORT}</Text>
     </View>
   );
 }
