@@ -29,7 +29,7 @@ export function normalizeMentionShares(competitors: readonly CompetitorRow[]): S
     pct: Math.floor(exact + 1e-9),
     rem: exact - Math.floor(exact + 1e-9),
   }));
-  let sum = withFloor.reduce((s, x) => s + x.pct, 0);
+  const sum = withFloor.reduce((s, x) => s + x.pct, 0);
   const deficit = 100 - sum;
   const order = [...withFloor.keys()].sort((a, b) => withFloor[b]!.rem - withFloor[a]!.rem);
   const out = withFloor.map((x) => ({ row: x.row, pct: x.pct }));
