@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "@react-pdf/renderer";
+import { Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import { PdfInnerPage } from "../components/PdfInnerPage";
 import { clipPdfText } from "../editorial/pdfNarrative";
@@ -8,165 +8,201 @@ import { LockedNarrativeStack } from "./LockedNarrativeStack";
 import { lockedStyles } from "./lockedDocumentStyles";
 import { narrativeModel } from "./pageNarratives";
 
-const FRACTURE_H = 108;
-const ROW_H = 52;
-const COLS = 3;
-
-const local = StyleSheet.create({
-  fracture: { minHeight: FRACTURE_H },
-  gridRow: { flexDirection: "row", height: ROW_H, marginBottom: 6 },
-});
-
 function sortedModels(rows: readonly ModelScoreRow[]): ModelScoreRow[] {
   return [...rows].sort((a, b) => b.score - a.score);
 }
 
-function ModelScoreBar({ score }: { score: number }): ReactElement {
+function modelSignal(score: number): "Strong" | "Moderate" | "Weak" {
+  if (score >= 70) return "Strong";
+  if (score >= 50) return "Moderate";
+  return "Weak";
+}
+
+function formatDelta(score: number, avg: number): string {
+  const d = Math.round(score - avg);
+  if (d === 0) return "0";
+  return d > 0 ? `+${d}` : String(d);
+}
+
+function deltaTextStyle(score: number, avg: number) {
+  const d = Math.round(score - avg);
+  if (d > 0) return lockedStyles.model_scoresTdDeltaStrong;
+  if (d < 0) return lockedStyles.model_scoresTdDeltaWeak;
+  return lockedStyles.model_scoresTd;
+}
+
+function ProfileSpark({ score }: { score: number }): ReactElement {
   const s = Math.min(100, Math.max(0, score));
   const rest = 100 - s;
   return (
-    <View style={lockedStyles.model_scoreBarTrack} wrap={false}>
-      <View style={[lockedStyles.model_scoreBarFill, { flex: Math.max(1, s) }]} />
-      <View style={[lockedStyles.model_scoreBarRest, { flex: Math.max(1, rest) }]} />
+    <View style={{ width: 52 }} wrap={false}>
+      <View style={lockedStyles.model_profileTrack} wrap={false}>
+        <View style={[lockedStyles.model_profileFill, { flex: Math.max(1, s) }]} />
+        <View style={[lockedStyles.model_profileRest, { flex: Math.max(1, rest) }]} />
+      </View>
     </View>
   );
 }
 
-function rowsOfThree(models: ModelScoreRow[]): (ModelScoreRow | null)[][] {
-  const cap = Math.max(COLS, models.length);
-  const slots: (ModelScoreRow | null)[] = [...models.slice(0, cap)];
-  while (slots.length % COLS !== 0) slots.push(null);
-  const out: (ModelScoreRow | null)[][] = [];
-  for (let i = 0; i < slots.length; i += COLS) {
-    out.push(slots.slice(i, i + COLS) as (ModelScoreRow | null)[]);
+function spreadAsideHeadline(best: ModelScoreRow | undefined, worst: ModelScoreRow | undefined): string {
+  if (best && worst && best.name !== worst.name) {
+    return clipPdfText(
+      `${best.name} reads strongest here; ${worst.name} reads weakest on the same scale.`,
+      280,
+    );
   }
-  return out;
+  if (best) {
+    return clipPdfText("One model signal in this export—add coverage to compare how each model answers.", 260);
+  }
+  return clipPdfText("No per-model scores in this export yet.", 200);
 }
 
 export function PageModelBreakdown({ data }: { data: ReportData }): ReactElement {
   const sorted = sortedModels(data.modelScores);
   const best = sorted[0];
   const worst = sorted[sorted.length - 1];
-  const showFracturePoles = Boolean(best && worst && best.name !== worst.name);
-  /** Avoid repeating the same models in the fracture row and the roster grid. */
-  const gridModels: ModelScoreRow[] = (() => {
-    if (sorted.length === 0) return [];
-    if (!showFracturePoles) return sorted;
-    const middle = sorted.filter((m) => m.name !== best!.name && m.name !== worst!.name);
-    if (middle.length > 0) return middle;
-    if (sorted.length === 2) return [];
-    return sorted;
-  })();
-  const rosterIsPartial = showFracturePoles && gridModels.length > 0 && gridModels.length < sorted.length;
-  const grid = rowsOfThree(gridModels);
   const slice = narrativeModel(data);
 
+  const showPoles = Boolean(best && worst && best.name !== worst.name);
   const gap =
-    best && worst && best.name !== worst.name ? Math.max(0, Math.round(best.score - worst.score)) : null;
+    showPoles ? Math.max(0, Math.round((best?.score ?? 0) - (worst?.score ?? 0))) : null;
   const avgScore =
     sorted.length > 0 ? Math.round(sorted.reduce((s, m) => s + m.score, 0) / sorted.length) : 0;
+
+  const tensionLine =
+    showPoles && gap != null && gap >= 15 && worst
+      ? clipPdfText(
+          `${gap} points from best to worst model in this snapshot—parity work should start on ${worst.name} first.`,
+          420,
+        )
+      : null;
 
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[5]!}>
       <LockedNarrativeStack slice={slice} include={["headline"]} />
-      <View style={[lockedStyles.model_fractureShell, local.fracture]} wrap={false}>
-        <Text style={lockedStyles.model_fractureEyebrow}>
-          {"Model divergence"}
-        </Text>
-        {showFracturePoles ? (
-          <View style={lockedStyles.model_fractureRow}>
-            <View style={[lockedStyles.model_pole, lockedStyles.model_poleBest]}>
-              <Text style={lockedStyles.model_poleLabel}>Strongest read</Text>
-              <Text style={lockedStyles.model_poleName}>{clipPdfText(best.name)}</Text>
-              <Text style={lockedStyles.model_poleScore}>{String(best.score)}</Text>
-              <ModelScoreBar score={best.score} />
-            </View>
-            <View style={[lockedStyles.model_gapColumn, lockedStyles.model_gapColumnStrong]}>
-              <Text style={lockedStyles.model_gapLabel}>Spread</Text>
-              <Text style={lockedStyles.model_gapValue}>{gap === 0 ? "0" : String(gap)}</Text>
-              <Text style={lockedStyles.model_gapCaption}>points between best and worst</Text>
-            </View>
-            <View style={[lockedStyles.model_pole, lockedStyles.model_poleWorst]}>
-              <Text style={lockedStyles.model_poleLabel}>Weakest read</Text>
-              <Text style={lockedStyles.model_poleName}>{clipPdfText(worst.name)}</Text>
-              <Text style={lockedStyles.model_poleScore}>{String(worst.score)}</Text>
-              <ModelScoreBar score={worst.score} />
-            </View>
-          </View>
-        ) : best ? (
-          <View style={lockedStyles.model_fractureRow}>
-            <View style={[lockedStyles.model_pole, lockedStyles.model_poleBest, { flex: 1, marginRight: 0 }]}>
-              <Text style={lockedStyles.model_poleLabel}>Primary signal</Text>
-              <Text style={lockedStyles.model_poleName}>{clipPdfText(best.name)}</Text>
-              <Text style={lockedStyles.model_poleScore}>{String(best.score)}</Text>
-              <ModelScoreBar score={best.score} />
-              <Text style={[lockedStyles.model_gapCaption, { marginTop: 6, textAlign: "left" }]}>
-                {clipPdfText("Add model coverage to see how different AI answers diverge on you.")}
-              </Text>
-            </View>
-          </View>
-        ) : (
-          <Text style={lockedStyles.model_takeaway}>No model rows in this export.</Text>
-        )}
-        {sorted.length > 0 ? (
-          <View style={lockedStyles.model_avgRow} wrap={false}>
-            <Text style={lockedStyles.model_avgLabel}>Blended average (same 0–100 scale)</Text>
-            <View style={lockedStyles.model_avgBarTrack} wrap={false}>
-              <View style={[lockedStyles.model_scoreBarFill, { flex: Math.max(1, avgScore) }]} />
-              <View style={[lockedStyles.model_scoreBarRest, { flex: Math.max(1, 100 - avgScore) }]} />
-            </View>
-            <Text style={[lockedStyles.model_gapCaption, { textAlign: "left", marginTop: 4 }]}>
-              {String(avgScore)} — compare each bar above to this baseline.
-            </Text>
-          </View>
-        ) : null}
-      </View>
-      {rosterIsPartial && gridModels.length === 1 ? (
+
+      {sorted.length === 0 ? (
+        <View style={lockedStyles.perf_section} wrap={false}>
+          <Text style={lockedStyles.model_takeawayLabel}>Model data</Text>
+          <Text style={lockedStyles.model_takeaway}>
+            {clipPdfText("No model rows in this export. Once scores exist, this page compares them on one scale.")}
+          </Text>
+        </View>
+      ) : (
         <>
-          <Text style={lockedStyles.model_rosterEyebrow}>Other models (same scale)</Text>
-          <View style={local.gridRow} wrap={false}>
-            <View style={lockedStyles.model_cellSolo}>
-              <Text style={lockedStyles.model_cellLabel}>Model</Text>
-              <Text style={lockedStyles.model_name}>{clipPdfText(gridModels[0]!.name)}</Text>
-              <Text style={lockedStyles.model_score}>{clipPdfText(String(gridModels[0]!.score))}</Text>
-              <ModelScoreBar score={gridModels[0]!.score} />
+          <View style={lockedStyles.perf_section} wrap={false}>
+            <Text style={lockedStyles.perf_sectionEyebrow}>Spread at a glance</Text>
+            <View style={lockedStyles.model_spreadRow} wrap={false}>
+              <View style={lockedStyles.model_spreadDial} wrap={false}>
+                {gap != null ? (
+                  <Text style={lockedStyles.model_spreadGapNumber}>{String(gap)}</Text>
+                ) : (
+                  <Text style={lockedStyles.model_spreadGapNumberMuted}>—</Text>
+                )}
+                <Text style={lockedStyles.model_spreadGapCaption}>
+                  {gap != null
+                    ? clipPdfText("Points between highest- and lowest-scoring models (same 0–100 scale).", 120)
+                    : clipPdfText("Not enough distinct models to show a spread in this export.", 120)}
+                </Text>
+              </View>
+              <View style={lockedStyles.model_spreadAside} wrap={false}>
+                <Text style={lockedStyles.model_spreadAsideLabel}>Range</Text>
+                <Text style={lockedStyles.model_spreadAsideHeadline}>{spreadAsideHeadline(best, worst)}</Text>
+                {best ? (
+                  <View style={lockedStyles.model_spreadFactsRow} wrap={false}>
+                    <Text style={lockedStyles.model_spreadFactKey}>Highest</Text>
+                    <Text style={lockedStyles.model_spreadFactVal}>
+                      {clipPdfText(best.name, 28)} — {String(best.score)}
+                    </Text>
+                  </View>
+                ) : null}
+                <View style={lockedStyles.model_spreadFactsRow} wrap={false}>
+                  <Text style={lockedStyles.model_spreadFactKey}>Blended</Text>
+                  <Text style={lockedStyles.model_spreadFactVal}>
+                    {String(avgScore)} across {String(sorted.length)} model{sorted.length === 1 ? "" : "s"}
+                  </Text>
+                </View>
+                {showPoles && worst ? (
+                  <View style={lockedStyles.model_spreadFactsRow} wrap={false}>
+                    <Text style={lockedStyles.model_spreadFactKey}>Lowest</Text>
+                    <Text style={lockedStyles.model_spreadFactVal}>
+                      {clipPdfText(worst.name, 28)} — {String(worst.score)}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
             </View>
           </View>
-        </>
-      ) : gridModels.length > 0 ? (
-        <>
-          {rosterIsPartial ? <Text style={lockedStyles.model_rosterEyebrow}>Other models (same scale)</Text> : null}
-          {grid.map((row, ri) => (
-            <View key={ri} style={local.gridRow} wrap={false}>
-              {row.map((m, ci) => {
-                const last = ci === row.length - 1;
-                if (!m) {
-                  const emptyBox = last ? lockedStyles.model_cellEmptyLast : lockedStyles.model_cellEmpty;
-                  return (
-                    <View key={ci} style={emptyBox}>
-                      <Text style={lockedStyles.model_name}> </Text>
-                    </View>
-                  );
-                }
-                const box = last ? lockedStyles.model_cellLast : lockedStyles.model_cell;
+
+          <View style={lockedStyles.model_scoresBlock} wrap={false}>
+            <Text style={lockedStyles.model_scoresTitle}>Scores by model</Text>
+            <View style={lockedStyles.model_scoresTable} wrap={false}>
+              <View style={lockedStyles.model_scoresThRow} wrap={false}>
+                <Text style={[lockedStyles.model_scoresThText, lockedStyles.model_scoresColModel]}>Model</Text>
+                <Text style={[lockedStyles.model_scoresThText, lockedStyles.model_scoresColScore]}>Score</Text>
+                <Text style={[lockedStyles.model_scoresThText, lockedStyles.model_scoresColDelta]}>vs blended</Text>
+                <Text style={[lockedStyles.model_scoresThText, lockedStyles.model_scoresColSignal]}>Signal</Text>
+                <Text style={[lockedStyles.model_scoresThText, lockedStyles.model_scoresColProfile]}>Shape</Text>
+              </View>
+              {sorted.map((m, i) => {
+                const isBest = i === 0;
+                const isWorst = i === sorted.length - 1 && sorted.length > 1;
+                const rowBg =
+                  isBest && showPoles
+                    ? lockedStyles.model_scoresTrBest
+                    : isWorst && showPoles
+                      ? lockedStyles.model_scoresTrWorst
+                      : sorted.length === 1 && isBest
+                        ? lockedStyles.model_scoresTrBest
+                        : i % 2 === 1
+                          ? lockedStyles.model_scoresRowBgAlt
+                          : lockedStyles.model_scoresRowBg;
+                const nameStyle =
+                  isBest || isWorst ? lockedStyles.model_scoresTdEmphasis : lockedStyles.model_scoresTd;
                 return (
-                  <View key={ci} style={box}>
-                    <Text style={lockedStyles.model_cellLabel}>Model</Text>
-                    <Text style={lockedStyles.model_name}>{clipPdfText(m.name)}</Text>
-                    <Text style={lockedStyles.model_score}>{clipPdfText(String(m.score))}</Text>
-                    <ModelScoreBar score={m.score} />
+                  <View key={`${m.name}-${i}`} style={[lockedStyles.model_scoresTr, rowBg]} wrap={false}>
+                    <Text style={[nameStyle, lockedStyles.model_scoresColModel]}>{clipPdfText(m.name, 32)}</Text>
+                    <Text style={[lockedStyles.model_scoresTdEmphasis, lockedStyles.model_scoresColScore]}>
+                      {String(m.score)}
+                    </Text>
+                    <Text style={[deltaTextStyle(m.score, avgScore), lockedStyles.model_scoresColDelta]}>
+                      {formatDelta(m.score, avgScore)}
+                    </Text>
+                    <Text style={[lockedStyles.model_scoresTd, lockedStyles.model_scoresColSignal]}>
+                      {modelSignal(m.score)}
+                    </Text>
+                    <View style={[lockedStyles.model_scoresColProfile, { justifyContent: "center" }]} wrap={false}>
+                      <ProfileSpark score={m.score} />
+                    </View>
                   </View>
                 );
               })}
             </View>
-          ))}
+            {tensionLine ? <Text style={lockedStyles.model_scoresTension}>{tensionLine}</Text> : null}
+            <Text style={lockedStyles.model_scoresFoot}>
+              {clipPdfText(
+                "Each row is the same 0–100 scale as your headline AI Authority Score—deltas are against the blended average above.",
+                520,
+              )}
+            </Text>
+          </View>
+
+          <View style={lockedStyles.perf_sectionDiagnosis} wrap={false}>
+            <Text style={lockedStyles.perf_sectionEyebrow}>Implication</Text>
+            <View style={lockedStyles.perf_diagWrap} wrap={false}>
+              <View style={lockedStyles.perf_diagNarrativeWrap} wrap={false}>
+                <Text style={[lockedStyles.perf_diagNarrative, lockedStyles.perf_diagNarrativeGap]}>
+                  {slice.interpretation}
+                </Text>
+                <Text style={[lockedStyles.perf_diagNarrative, lockedStyles.perf_diagNarrativeGap]}>
+                  {slice.implication}
+                </Text>
+                {slice.action ? <Text style={lockedStyles.model_implicationAction}>{slice.action}</Text> : null}
+              </View>
+            </View>
+          </View>
         </>
-      ) : null}
-      <View style={lockedStyles.model_closingBlock} wrap={false}>
-        <Text style={lockedStyles.model_closingLead}>{slice.interpretation}</Text>
-        <Text style={lockedStyles.model_closingBody}>{slice.implication}</Text>
-        {slice.action ? <Text style={lockedStyles.model_closingAction}>{slice.action}</Text> : null}
-      </View>
+      )}
     </PdfInnerPage>
   );
 }
