@@ -209,7 +209,11 @@ export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactE
             </View>
             {positionRows.map((r, i) => {
               const alt = i % 2 === 1;
-              const rowBg = alt ? lockedStyles.comp_positionsRowBgAlt : lockedStyles.comp_positionsRowBg;
+              const rowBg = r.isClient
+                ? lockedStyles.comp_positionsTrClient
+                : alt
+                  ? lockedStyles.comp_positionsRowBgAlt
+                  : lockedStyles.comp_positionsRowBg;
               const td = r.isClient ? lockedStyles.comp_positionsTdClient : lockedStyles.comp_positionsTd;
               return (
                 <View key={`${r.brand}-${i}`} style={[lockedStyles.comp_positionsTr, rowBg]} wrap={false}>

@@ -493,26 +493,31 @@ export const lockedStyles = StyleSheet.create({
   /* Competitive — market-share view + positions table (one visual block) */
   comp_competitiveBundle: {
     marginTop: -12,
-    marginBottom: LD.space.lg,
+    marginBottom: LD.space.md,
   },
   comp_topSection: {
-    marginBottom: 0,
+    marginBottom: LD.space.xs,
   },
   comp_pieRow: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
     marginBottom: 0,
   },
   comp_pieColChart: {
     width: "52%",
-    paddingRight: LD.space.xs,
+    paddingRight: 0,
     flexShrink: 0,
   },
   comp_pieColAside: {
     width: "48%",
-    paddingLeft: LD.space.sm,
-    justifyContent: "flex-start",
-    maxWidth: 350,
+    paddingLeft: LD.space.md,
+    paddingTop: 2,
+    paddingBottom: 2,
+    justifyContent: "center",
+    maxWidth: "100%",
+    borderLeftWidth: 1,
+    borderLeftColor: "#E5E7EB",
+    borderStyle: "solid",
   },
   comp_insightLabel: {
     fontSize: 8.5,
@@ -534,14 +539,14 @@ export const lockedStyles = StyleSheet.create({
     fontFamily: LD.font.sans,
     color: "#374151",
     lineHeight: 1.55,
-    maxWidth: 350,
+    maxWidth: "100%",
   },
   comp_insightBodyFollow: {
     fontSize: 10.5,
     fontFamily: LD.font.sans,
     color: "#374151",
     lineHeight: 1.55,
-    maxWidth: 350,
+    maxWidth: "100%",
     marginTop: 11,
   },
   /** Pie + legend row: bounded width so legend never stacks on top of the chart. */
@@ -608,8 +613,8 @@ export const lockedStyles = StyleSheet.create({
     textAlign: "left",
   },
   comp_secondaryBlock: {
-    marginTop: 24,
-    paddingTop: LD.space.md,
+    marginTop: LD.space.lg,
+    paddingTop: LD.space.sm + 2,
     borderTopWidth: 1,
     borderTopColor: "#E0E0E0",
     borderStyle: "solid",
@@ -656,6 +661,13 @@ export const lockedStyles = StyleSheet.create({
     paddingHorizontal: 5,
     minHeight: 24,
   },
+  /** Ties client row to pie green — subtle scoreboard cue. */
+  comp_positionsTrClient: {
+    borderLeftWidth: 2,
+    borderLeftColor: "#22C55E",
+    paddingLeft: 4,
+    backgroundColor: "#F7FDF9",
+  },
   comp_positionsRowBg: {
     backgroundColor: "#FFFFFF",
   },
@@ -671,7 +683,7 @@ export const lockedStyles = StyleSheet.create({
   comp_positionsTdClient: {
     fontSize: 10,
     fontFamily: LD.font.sansBold,
-    color: LD.color.ink,
+    color: "#111111",
     lineHeight: 1.35,
   },
   comp_positionsColBrand: { width: "26%" },
@@ -693,12 +705,12 @@ export const lockedStyles = StyleSheet.create({
     fontFamily: LD.font.sans,
     color: LD.color.ink2,
     lineHeight: LD.lineHeight.editorial,
-    marginTop: 0,
+    marginTop: LD.space.xs,
     maxWidth: "100%",
   },
   comp_bottomInsightBand: {
-    marginTop: LD.space.lg,
-    paddingTop: LD.space.md,
+    marginTop: LD.space.md,
+    paddingTop: LD.space.sm + 2,
     borderTopWidth: LD.border.hairline,
     borderTopColor: LD.color.ink3,
   },
