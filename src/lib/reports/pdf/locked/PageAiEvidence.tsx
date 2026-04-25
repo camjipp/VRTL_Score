@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "@react-pdf/renderer";
+import { Text, View } from "@react-pdf/renderer";
 import type { ReactElement, ReactNode } from "react";
 import { PdfInnerPage } from "../components/PdfInnerPage";
 import { clipPdfText } from "../editorial/pdfNarrative";
@@ -240,15 +240,24 @@ function VulnerabilityMainContent({
   return vulnerableQuoteFallback;
 }
 
-const local = StyleSheet.create({
-  bandModelSub: {
-    fontSize: 8,
-    fontFamily: LD.font.sans,
-    color: LD.color.ink3,
-    marginBottom: 10,
-    marginTop: -6,
-  },
-});
+function PromptRail({ tone, prompt }: { tone: "strong" | "risk"; prompt: string }): ReactElement {
+  const rail =
+    tone === "strong" ? lockedStyles.ev_promptRailStrong : lockedStyles.ev_promptRailRisk;
+  return (
+    <View style={[lockedStyles.ev_promptRail, rail]} wrap={false}>
+      <Text style={lockedStyles.ev_promptKicker}>Prompt</Text>
+      {prompt ? (
+        <View style={[lockedStyles.ev_promptShell, { marginBottom: 0 }]} wrap={false}>
+          <Text style={lockedStyles.ev_promptBody}>{`"${prompt}"`}</Text>
+        </View>
+      ) : (
+        <Text style={lockedStyles.ev_glanceModel}>
+          {clipPdfText("No prompt line was captured for this row in the export.")}
+        </Text>
+      )}
+    </View>
+  );
+}
 
 export function PageAiEvidence({ data }: { data: ReportData }): ReactElement {
   const s = findStrengthPreview(data.evidencePreview);
@@ -301,57 +310,78 @@ export function PageAiEvidence({ data }: { data: ReportData }): ReactElement {
   const strengthModel = s?.model?.trim() ? clipPdfText(s.model, 40) : "";
   const vulnModel = v?.model?.trim() ? clipPdfText(v.model, 40) : "";
 
+  const strengthVerdict = clipPdfText(
+    "You are included in this answer with a favorable recommendation signal on this prompt shape.",
+    240,
+  );
+  const exposureVerdict = clipPdfText(
+    "You are omitted in this answer—other brands occupy the recommendation slot on the same query shape.",
+    260,
+  );
+
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[6]!}>
       <LockedNarrativeStack slice={slice} variant="compact" include={["headline"]} />
 
-      <View style={lockedStyles.ev_strengthBand} wrap={false}>
-        <View style={lockedStyles.ev_bandHeaderRow} wrap={false}>
-          <View style={lockedStyles.ev_bandStripeS} />
-          <Text style={lockedStyles.ev_bandHeading}>Strength signal</Text>
-          {strengthHint ? <Text style={lockedStyles.ev_bandMeta}>{strengthHint}</Text> : null}
-        </View>
-        {strengthModel ? (
-          <Text style={local.bandModelSub} wrap={false}>
-            {`Model: ${strengthModel}`}
-          </Text>
-        ) : null}
-        {strengthPrompt ? (
-          <View style={lockedStyles.ev_promptShell} wrap={false}>
-            <Text style={lockedStyles.ev_promptKicker}>Prompt tested</Text>
-            <Text style={lockedStyles.ev_promptBody}>{`"${strengthPrompt}"`}</Text>
+      <View style={lockedStyles.perf_section} wrap={false}>
+        <Text style={lockedStyles.perf_sectionEyebrow}>Proof at a glance</Text>
+        <Text style={[lockedStyles.ev_glanceModel, { marginBottom: LD.space.sm, maxWidth: "100%" }]}>
+          {clipPdfText(
+            "Two prompt runs from the same export: one where you win recommendation share, and one where you do not.",
+            520,
+          )}
+        </Text>
+        <View style={lockedStyles.ev_glanceRow} wrap={false}>
+          <View style={lockedStyles.ev_glanceCellStrong} wrap={false}>
+            <Text style={lockedStyles.ev_glanceEyebrow}>Strength</Text>
+            <Text style={lockedStyles.ev_glanceVerdict}>{strengthVerdict}</Text>
+            {strengthHint ? <Text style={lockedStyles.ev_glanceLog}>{strengthHint}</Text> : null}
+            {strengthModel ? (
+              <Text style={lockedStyles.ev_glanceModel} wrap={false}>
+                {`Model: ${strengthModel}`}
+              </Text>
+            ) : null}
           </View>
-        ) : null}
-        <Text style={lockedStyles.ev_responseKicker}>What the model returned</Text>
-        <StrengthMainContent data={data} excerpt={strengthExcerpt} />
-        {strengthNote ? <Text style={lockedStyles.ev_note}>{strengthNote}</Text> : null}
+          <View style={lockedStyles.ev_glanceCellRisk} wrap={false}>
+            <Text style={lockedStyles.ev_glanceEyebrow}>Exposure</Text>
+            <Text style={lockedStyles.ev_glanceVerdict}>{exposureVerdict}</Text>
+            {vulnHint ? <Text style={lockedStyles.ev_glanceLog}>{vulnHint}</Text> : null}
+            {vulnModel ? (
+              <Text style={lockedStyles.ev_glanceModel} wrap={false}>
+                {`Model: ${vulnModel}`}
+              </Text>
+            ) : null}
+          </View>
+        </View>
       </View>
 
-      <View style={lockedStyles.ev_riskBand} wrap={false}>
-        <View style={lockedStyles.ev_bandHeaderRow} wrap={false}>
-          <View style={lockedStyles.ev_bandStripeR} />
-          <Text style={lockedStyles.ev_bandHeading}>Exposure signal</Text>
-          {vulnHint ? <Text style={lockedStyles.ev_bandMeta}>{vulnHint}</Text> : null}
-        </View>
-        {vulnModel ? (
-          <Text style={local.bandModelSub} wrap={false}>
-            {`Model: ${vulnModel}`}
-          </Text>
-        ) : null}
-        {vulnPrompt ? (
-          <View style={lockedStyles.ev_promptShell} wrap={false}>
-            <Text style={lockedStyles.ev_promptKicker}>Prompt tested</Text>
-            <Text style={lockedStyles.ev_promptBody}>{`"${vulnPrompt}"`}</Text>
+      <View style={lockedStyles.perf_section} wrap={false}>
+        <Text style={lockedStyles.perf_sectionEyebrow}>Strength proof</Text>
+        <View style={lockedStyles.ev_proofSplitRow} wrap={false}>
+          <PromptRail tone="strong" prompt={strengthPrompt} />
+          <View style={lockedStyles.ev_answerRail} wrap={false}>
+            <Text style={lockedStyles.ev_responseKicker}>Model output</Text>
+            <StrengthMainContent data={data} excerpt={strengthExcerpt} />
+            {strengthNote ? <Text style={lockedStyles.ev_note}>{strengthNote}</Text> : null}
           </View>
-        ) : null}
-        <Text style={lockedStyles.ev_responseKicker}>What the model returned</Text>
-        <VulnerabilityMainContent
-          data={data}
-          vulnParts={vulnParts}
-          vulnExcerpt={vulnExcerpt}
-          vulnerableQuoteFallback={vulnerableQuote}
-        />
-        {vulnNote ? <Text style={lockedStyles.ev_note}>{vulnNote}</Text> : null}
+        </View>
+      </View>
+
+      <View style={lockedStyles.perf_section} wrap={false}>
+        <Text style={lockedStyles.perf_sectionEyebrow}>Exposure proof</Text>
+        <View style={lockedStyles.ev_proofSplitRow} wrap={false}>
+          <PromptRail tone="risk" prompt={vulnPrompt} />
+          <View style={lockedStyles.ev_answerRail} wrap={false}>
+            <Text style={lockedStyles.ev_responseKicker}>Model output</Text>
+            <VulnerabilityMainContent
+              data={data}
+              vulnParts={vulnParts}
+              vulnExcerpt={vulnExcerpt}
+              vulnerableQuoteFallback={vulnerableQuote}
+            />
+            {vulnNote ? <Text style={lockedStyles.ev_note}>{vulnNote}</Text> : null}
+          </View>
+        </View>
       </View>
 
       <View style={lockedStyles.perf_sectionDiagnosis} wrap={false}>
