@@ -1,5 +1,4 @@
 import type { CompetitorRow } from "../types";
-import { LD } from "./lockedDesignTokens";
 
 export type ShareSlice = {
   row: CompetitorRow;
@@ -8,13 +7,10 @@ export type ShareSlice = {
 };
 
 /** Client (Stanley) — VRTL green */
-export const PIE_CLIENT_FILL = LD.color.signalStrong;
+export const PIE_CLIENT_FILL = "#22C55E";
 /** Top competitor by mentions — black */
-export const PIE_TOP_COMPETITOR_FILL = "#0D0D0D";
-const PIE_OTHER_GRAYS = ["#D1D5DB", "#E5E7EB"] as const;
-
-/** Subtle ring on client slice only (darker green on green fill). */
-export const PIE_CLIENT_OUTLINE = "#166534";
+export const PIE_TOP_COMPETITOR_FILL = "#111111";
+const PIE_OTHER_GRAYS = ["#9CA3AF", "#D1D5DB"] as const;
 
 /** Normalize mention counts to integer percentages summing to 100. */
 export function normalizeMentionShares(competitors: readonly CompetitorRow[]): ShareSlice[] {

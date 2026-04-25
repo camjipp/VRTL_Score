@@ -5,16 +5,15 @@ import {
   fillForShareSlice,
   legendSlicesOrdered,
   pieSlicePath,
-  PIE_CLIENT_OUTLINE,
 } from "../locked/competitiveSharePie";
 import { lockedStyles } from "../locked/lockedDocumentStyles";
 
-/** ~12% larger than original baseline for readability. */
-const W = 256;
-const H = 212;
+/** Increased scale (~12%) for stronger visual weight. */
+const W = 286;
+const H = 238;
 const CX = W / 2;
 const CY = H / 2 - 2;
-const R = 87;
+const R = 98;
 
 type Props = {
   slices: readonly ShareSlice[];
@@ -50,36 +49,48 @@ export function ShareOfRecommendationsPie({ slices }: Props): ReactElement {
   const draws = buildSliceDraws(slices);
   const paintOrder = sortDrawsForPaintOrder(draws);
   const legendRows = legendSlicesOrdered(slices);
+  const client = slices.find((s) => s.row.isClient);
+  const maxOther = Math.max(0, ...slices.filter((s) => !s.row.isClient).map((s) => s.pct));
+  const diff = (client?.pct ?? 0) - maxOther;
+  const microInsight =
+    diff === 1 ? "+1% lead — effectively tied" : "Nearly even split — no brand dominates";
 
   return (
-    <View style={lockedStyles.comp_pieChartLegendRow} wrap={false}>
-      <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
-        {paintOrder.map((d, i) => {
-          const dPath = pieSlicePath(CX, CY, R, d.startDeg, d.sweepDeg);
-          if (!dPath) return null;
-          const fill = fillForShareSlice(d.slice, slices);
-          const isClient = Boolean(d.slice.row.isClient);
-          return (
-            <Path
-              key={`p-${d.slice.row.name}-${d.slice.row.rank}-${i}`}
-              d={dPath}
-              fill={fill}
-              {...(isClient ? { stroke: PIE_CLIENT_OUTLINE, strokeWidth: 1.05 } : {})}
-            />
-          );
-        })}
-      </Svg>
-      <View style={lockedStyles.comp_pieLegendWrap}>
-        {legendRows.map((s, i) => {
-          const fill = fillForShareSlice(s, slices);
-          return (
-            <View key={`${s.row.name}-${s.row.rank}-${i}`} style={lockedStyles.comp_pieLegendRow} wrap={false}>
-              <View style={[lockedStyles.comp_pieLegendSwatch, { backgroundColor: fill }]} />
-              <Text style={lockedStyles.comp_pieLegendText}>{`${s.row.name} — ${s.pct}%`}</Text>
-            </View>
-          );
-        })}
+    <View>
+      <View style={lockedStyles.comp_pieChartLegendRow} wrap={false}>
+        <View style={lockedStyles.comp_pieChartWrap} wrap={false}>
+          <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
+            {paintOrder.map((d, i) => {
+              const isClient = Boolean(d.slice.row.isClient);
+              const midDeg = d.startDeg + d.sweepDeg / 2;
+              const rad = (Math.PI / 180) * midDeg;
+              const offset = isClient ? 2.5 : 0;
+              const cx = CX + Math.cos(rad) * offset;
+              const cy = CY + Math.sin(rad) * offset;
+              const dPath = pieSlicePath(cx, cy, R, d.startDeg, d.sweepDeg);
+              if (!dPath) return null;
+              const fill = fillForShareSlice(d.slice, slices);
+              return <Path key={`p-${d.slice.row.name}-${d.slice.row.rank}-${i}`} d={dPath} fill={fill} />;
+            })}
+          </Svg>
+          <View style={lockedStyles.comp_pieCenterLabel} wrap={false}>
+            <Text style={lockedStyles.comp_pieCenterPct}>{`${client?.pct ?? 0}%`}</Text>
+            <Text style={lockedStyles.comp_pieCenterBrand}>{client?.row.name ?? "Stanley"}</Text>
+          </View>
+        </View>
+        <View style={lockedStyles.comp_pieLegendWrap}>
+          {legendRows.map((s, i) => {
+            const fill = fillForShareSlice(s, slices);
+            return (
+              <View key={`${s.row.name}-${s.row.rank}-${i}`} style={lockedStyles.comp_pieLegendRow} wrap={false}>
+                <View style={[lockedStyles.comp_pieLegendSwatch, { backgroundColor: fill }]} />
+                <Text style={lockedStyles.comp_pieLegendText}>{`${s.row.name} — ${s.pct}%`}</Text>
+              </View>
+            );
+          })}
+        </View>
       </View>
+      <Text style={lockedStyles.comp_pieMicroInsight}>{microInsight}</Text>
     </View>
   );
 }

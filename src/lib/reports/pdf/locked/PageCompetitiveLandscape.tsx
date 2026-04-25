@@ -131,20 +131,16 @@ function topThreeTensionLine(competitors: readonly CompetitorRow[]): string | nu
   return null;
 }
 
-function buildAsideParagraphs(): readonly [string, string, string] {
+function buildAsideParagraphs(): readonly [string, string] {
   const p1 = clipPdfText(
-    "AI recommendations are split across multiple brands — no single company controls the outcome.",
+    "Stanley holds 26% of recommendations, but competitors match that presence almost exactly. Buyers are consistently shown comparable alternatives.",
     520,
   );
   const p2 = clipPdfText(
-    "Stanley accounts for 26% of recommendations in this category, meaning buyers are consistently shown comparable alternatives.",
+    "In this environment, visibility is not the advantage — preference is. The brand that appears most credible becomes the default recommendation.",
     520,
   );
-  const p3 = clipPdfText(
-    "In this environment, being included is not enough — the brand that appears most credible becomes the default recommendation.",
-    520,
-  );
-  return [p1, p2, p3];
+  return [p1, p2];
 }
 
 function buildPositionRowsFromData(
@@ -173,7 +169,7 @@ export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactE
     ? FALLBACK_POSITION_ROWS
     : buildPositionRowsFromData(competitors, shareSlices);
 
-  const [p1, p2, p3] = buildAsideParagraphs();
+  const [p1, p2] = buildAsideParagraphs();
   const tied = tiedAtTop(competitors);
   const tension = topThreeTensionLine(competitors);
 
@@ -186,13 +182,14 @@ export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactE
               {shareSlices.length > 0 ? (
                 <ShareOfRecommendationsPie slices={shareSlices} />
               ) : (
-                <Text style={lockedStyles.comp_pieAside}>{"No competitor mention data in this export."}</Text>
+                <Text style={lockedStyles.comp_insightBody}>{"No competitor mention data in this export."}</Text>
               )}
             </View>
             <View style={lockedStyles.comp_pieColAside} wrap={false}>
-              <Text style={lockedStyles.comp_pieAside}>{p1}</Text>
-              <Text style={lockedStyles.comp_pieAsideFollow}>{p2}</Text>
-              <Text style={lockedStyles.comp_pieAsideFollow}>{p3}</Text>
+              <Text style={lockedStyles.comp_insightLabel}>{"DECISION DYNAMICS"}</Text>
+              <Text style={lockedStyles.comp_insightHeadline}>{"No brand controls the outcome"}</Text>
+              <Text style={lockedStyles.comp_insightBody}>{p1}</Text>
+              <Text style={lockedStyles.comp_insightBodyFollow}>{p2}</Text>
             </View>
           </View>
         </View>
