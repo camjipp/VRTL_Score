@@ -9,12 +9,12 @@ import { normalizeMentionShares, type ShareSlice } from "./competitiveSharePie";
 import { lockedStyles } from "./lockedDocumentStyles";
 
 const BOTTOM_INSIGHT = clipPdfText(
-  "Right now, you are not that brand.\n\nYou are present — but not preferred.",
+  "You are in the set, but not yet the default choice.",
   520,
 );
 
 const WHAT_THIS_MEANS_BODY = clipPdfText(
-  "You are not losing because you are invisible. You are losing because you are not the obvious choice.\n\nUntil that changes, AI will continue splitting decisions across competitors — and you will not control the outcome.",
+  "This is a preference problem, not a visibility problem.\n\nWhen recommendation share is clustered, assistants default to the brand that signals the most authority and trust. Until that preference is built, outcomes will stay fragmented across comparable competitors.",
   560,
 );
 
@@ -115,8 +115,8 @@ function tiedAtTop(competitors: readonly CompetitorRow[]): boolean {
 function positionsSupportLine(tied: boolean): string {
   return clipPdfText(
     tied
-      ? "You are tied at the top. When multiple brands appear equally, assistants default to the one that looks most credible."
-      : "When multiple brands appear equally, assistants default to the one that looks most credible.",
+      ? "You are tied at the top on share. In a clustered market, credibility decides who becomes the default recommendation."
+      : "In a clustered market, credibility decides who becomes the default recommendation.",
     520,
   );
 }
