@@ -111,7 +111,7 @@ function positionsSupportLine(tied: boolean): string {
   return clipPdfText(
     tied
       ? "You are tied at the top on share. In a clustered market, credibility determines the default recommendation."
-      : "In a clustered market, credibility decides who becomes the default recommendation.",
+      : "In a clustered market, credibility determines the default recommendation.",
     520,
   );
 }

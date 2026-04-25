@@ -520,7 +520,7 @@ export const lockedStyles = StyleSheet.create({
     borderStyle: "solid",
   },
   comp_insightLabel: {
-    fontSize: 8.5,
+    fontSize: 7.5,
     fontFamily: LD.font.sansBold,
     color: "#6B7280",
     letterSpacing: 0.5,
@@ -606,7 +606,7 @@ export const lockedStyles = StyleSheet.create({
     marginRight: LD.space.xs + 1,
   },
   comp_pieLegendText: {
-    fontSize: LD.size.caption,
+    fontSize: 8,
     fontFamily: LD.font.sans,
     color: "#111111",
     lineHeight: LD.lineHeight.normal,
@@ -620,7 +620,7 @@ export const lockedStyles = StyleSheet.create({
     borderStyle: "solid",
   },
   comp_positionsTitle: {
-    fontSize: LD.size.micro,
+    fontSize: 7.5,
     fontFamily: LD.font.sansBold,
     color: LD.color.ink3,
     letterSpacing: LD.trackEyebrow,
@@ -692,7 +692,7 @@ export const lockedStyles = StyleSheet.create({
   comp_positionsColStrength: { width: "30%" },
   comp_positionsColStatus: { width: "21%" },
   comp_positionsTension: {
-    fontSize: LD.size.caption,
+    fontSize: 8,
     fontFamily: LD.font.sansBold,
     color: LD.color.ink2,
     lineHeight: LD.lineHeight.snug,
@@ -738,7 +738,7 @@ export const lockedStyles = StyleSheet.create({
     maxWidth: "100%",
   },
   comp_stakesTitle: {
-    fontSize: LD.size.caption,
+    fontSize: 7.5,
     fontFamily: LD.font.sansBold,
     color: LD.color.ink,
     letterSpacing: LD.trackEyebrow,
