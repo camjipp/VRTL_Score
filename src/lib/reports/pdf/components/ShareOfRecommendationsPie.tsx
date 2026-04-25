@@ -19,6 +19,8 @@ type Props = {
   slices: readonly ShareSlice[];
 };
 
+const MAX_VISUAL_SLICES = 4;
+
 type SliceDraw = {
   slice: ShareSlice;
   startDeg: number;
@@ -46,10 +48,11 @@ function sortDrawsForPaintOrder(draws: readonly SliceDraw[]): SliceDraw[] {
 }
 
 export function ShareOfRecommendationsPie({ slices }: Props): ReactElement {
-  const draws = buildSliceDraws(slices);
+  const ordered = legendSlicesOrdered(slices).slice(0, MAX_VISUAL_SLICES);
+  const draws = buildSliceDraws(ordered);
   const paintOrder = sortDrawsForPaintOrder(draws);
-  const legendRows = legendSlicesOrdered(slices);
-  const client = slices.find((s) => s.row.isClient);
+  const legendRows = ordered;
+  const client = ordered.find((s) => s.row.isClient) ?? slices.find((s) => s.row.isClient);
 
   return (
     <View>
@@ -59,7 +62,7 @@ export function ShareOfRecommendationsPie({ slices }: Props): ReactElement {
             {paintOrder.map((d, i) => {
               const dPath = pieSlicePath(CX, CY, R, d.startDeg, d.sweepDeg);
               if (!dPath) return null;
-              const fill = fillForShareSlice(d.slice, slices);
+              const fill = fillForShareSlice(d.slice, ordered);
               return <Path key={`p-${d.slice.row.name}-${d.slice.row.rank}-${i}`} d={dPath} fill={fill} />;
             })}
           </Svg>
