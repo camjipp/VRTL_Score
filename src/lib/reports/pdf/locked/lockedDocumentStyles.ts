@@ -1098,8 +1098,8 @@ export const lockedStyles = StyleSheet.create({
     paddingHorizontal: 6,
   },
   ev_metaKey: {
-    width: "38%",
-    fontSize: 8,
+    width: "36%",
+    fontSize: 8.5,
     fontFamily: LD.font.sansBold,
     color: LD.color.ink3,
     lineHeight: 1.4,
@@ -1107,7 +1107,7 @@ export const lockedStyles = StyleSheet.create({
   },
   ev_metaVal: {
     flex: 1,
-    fontSize: 8,
+    fontSize: 8.5,
     fontFamily: LD.font.sans,
     color: LD.color.ink2,
     lineHeight: 1.45,
@@ -1119,6 +1119,14 @@ export const lockedStyles = StyleSheet.create({
     borderLeftWidth: LD.border.hairline,
     borderLeftColor: LD.color.ink3,
     backgroundColor: LD.color.surface2,
+  },
+  ev_excerptKicker: {
+    fontSize: 7.5,
+    fontFamily: LD.font.sansBold,
+    color: LD.color.ink4,
+    letterSpacing: LD.trackEyebrow,
+    textTransform: "uppercase",
+    marginBottom: LD.space.xs,
   },
   ev_quote: {
     paddingLeft: LD.space.md,

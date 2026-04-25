@@ -45,8 +45,19 @@ function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+/**
+ * Many exports join `key: value` fields with ". " on a single line. Without newlines,
+ * the kv parser treats the whole blob as one value — normalize before splitting.
+ */
+function normalizeEvidenceSnippetLines(raw: string): string {
+  const t = raw.trim();
+  if (!t || /\r?\n/.test(t)) return t;
+  return t.replace(/\.(\s+)(?=[A-Za-z][^\n:]{0,56}:)/g, ".\n");
+}
+
 function splitMetadataAndProse(raw: string): { pairs: KvPair[]; prose: string } | null {
-  const lines = raw.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  const normalized = normalizeEvidenceSnippetLines(raw);
+  const lines = normalized.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
   const pairs: KvPair[] = [];
   let i = 0;
   for (; i < lines.length; i++) {
@@ -67,6 +78,21 @@ function splitMetadataAndProse(raw: string): { pairs: KvPair[]; prose: string } 
   return { pairs, prose };
 }
 
+/** Long prose fields belong in the excerpt block, not a dense table cell. */
+function partitionEvidencePairs(pairs: readonly KvPair[]): { table: KvPair[]; excerpt: string } {
+  const table: KvPair[] = [];
+  const excerpts: string[] = [];
+  for (const p of pairs) {
+    const k = p.key.trim().toLowerCase();
+    if (/^(evidence\s+snippet|snippet|response\s*excerpt|answer\s*excerpt)$/.test(k)) {
+      if (p.val.trim()) excerpts.push(p.val.trim());
+    } else {
+      table.push(p);
+    }
+  }
+  return { table, excerpt: excerpts.join("\n\n").trim() };
+}
+
 function EvidenceMetaTable({ pairs }: { pairs: readonly KvPair[] }): ReactElement {
   return (
     <View style={lockedStyles.ev_metaTable} wrap={false}>
@@ -76,7 +102,7 @@ function EvidenceMetaTable({ pairs }: { pairs: readonly KvPair[] }): ReactElemen
         return (
           <View key={`${p.key}-${idx}`} style={row} wrap={false}>
             <Text style={lockedStyles.ev_metaKey}>{clipPdfText(p.key, 44)}</Text>
-            <Text style={lockedStyles.ev_metaVal}>{clipPdfText(p.val, 220)}</Text>
+            <Text style={lockedStyles.ev_metaVal}>{clipPdfText(p.val, 320)}</Text>
           </View>
         );
       })}
@@ -171,12 +197,15 @@ function StrengthMainContent({
   }
   const split = raw ? splitMetadataAndProse(raw) : null;
   if (split) {
+    const { table, excerpt: snippetExcerpt } = partitionEvidencePairs(split.pairs);
+    const proseMerged = [snippetExcerpt, split.prose].filter(Boolean).join("\n\n").trim();
     return (
       <>
-        <EvidenceMetaTable pairs={split.pairs} />
-        {split.prose ? (
+        {table.length > 0 ? <EvidenceMetaTable pairs={table} /> : null}
+        {proseMerged ? (
           <View style={lockedStyles.ev_excerptShell} wrap={false}>
-            <HighlightedExcerpt text={clipPdfText(split.prose, 520)} brand={brandName(data)} />
+            {snippetExcerpt ? <Text style={lockedStyles.ev_excerptKicker}>Evidence excerpt</Text> : null}
+            <HighlightedExcerpt text={clipPdfText(proseMerged, 720)} brand={brandName(data)} />
           </View>
         ) : null}
       </>
