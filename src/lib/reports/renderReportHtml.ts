@@ -500,7 +500,7 @@ export function clientEvidenceCallout(
     return {
       quote:
         prose ||
-        `On this pattern, assistants include ${clientName} among the brands they present to buyers evaluating the category.`,
+        `On this pattern, AI answers include ${clientName} among the brands they present to buyers evaluating the category.`,
       impact:
         "That is active recommendation share. Refresh proof and citations so a competitor cannot erode the slot on the next model update.",
     };
@@ -510,7 +510,7 @@ export function clientEvidenceCallout(
     quote:
       prose ||
       `This answer covered the category without naming ${clientName}; recommendation share on similar intents went elsewhere.`,
-    impact: `${comp} owned the narrative here—close the hole with cited comparison pages, direct-answer FAQs for these query shapes, and third-party proof assistants can retrieve.`,
+    impact: `${comp} owned the narrative here—close the hole with cited comparison pages, direct-answer FAQs for these query shapes, and third-party proof AI can retrieve.`,
   };
 }
 
