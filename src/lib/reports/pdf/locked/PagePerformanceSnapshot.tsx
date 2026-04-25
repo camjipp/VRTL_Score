@@ -52,7 +52,7 @@ function diagnosisParagraphs(d: ReportData): [string, string] {
   const authStr = String(d.authorityScore);
 
   const p1 = clipPdfText(
-    `You appear in ${m}% of assistant responses, which puts you in the conversation more often than most competitors. However, visibility alone is not enough. In the remaining ${miss}% of responses, you are not mentioned at all—giving competitors full control over those decisions.`,
+    `You appear in ${m}% of AI responses, which puts you in the conversation more often than most competitors. However, visibility alone is not enough. In the remaining ${miss}% of responses, you are not mentioned at all—giving competitors full control over those decisions.`,
     1200,
   );
 
@@ -62,7 +62,7 @@ function diagnosisParagraphs(d: ReportData): [string, string] {
       : `In this sample, only ${authStr}% of mentions include citations or supporting proof.`;
 
   const p2 = clipPdfText(
-    `Even when you are included, assistants often place you first, but not consistently enough to make you the default choice. The biggest issue is authority. ${authorityProof} Without that, assistants are more likely to favor competitors that appear more credible. Right now, you look strong on presence, but weak on trust—and that creates instability in your position.`,
+    `Even when you are included, AI answers often place you first, but not consistently enough to make you the default choice. The biggest issue is authority. ${authorityProof} Without that, those answers are more likely to favor competitors that appear more credible. Right now, you look strong on presence, but weak on trust—and that creates instability in your position.`,
     1200,
   );
 

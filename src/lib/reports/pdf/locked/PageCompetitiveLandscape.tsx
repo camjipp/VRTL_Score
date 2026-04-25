@@ -9,7 +9,7 @@ import { normalizeMentionShares, type ShareSlice } from "./competitiveSharePie";
 import { lockedStyles } from "./lockedDocumentStyles";
 
 const WHAT_THIS_MEANS_BODY = clipPdfText(
-  "You are in the set, but not yet the default choice.\n\nThis is a preference problem, not a visibility problem. When recommendation share is clustered, assistants default to the brand that signals the most authority and trust. Until that preference is built, outcomes will stay fragmented across comparable competitors.",
+  "You are in the set, but not yet the default choice.\n\nThis is a preference problem, not a visibility problem. When recommendation share is clustered, AI systems default to the brand that signals the most authority and trust. Until that preference is built, outcomes will stay fragmented across comparable competitors.",
   560,
 );
 

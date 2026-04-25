@@ -41,7 +41,7 @@ export function narrativePerformance(d: ReportData): NarrativeSlice {
         ? clipPdfText(d.tensionNote)
         : undefined,
     inaction: clipPdfText(
-      "Inaction lets assistants keep a short safe list of brands; your share erodes at the margin.",
+      "Inaction lets AI answers keep a short safe list of brands; your share erodes at the margin.",
     ),
   };
 }
@@ -67,7 +67,7 @@ export function narrativeModel(d: ReportData): NarrativeSlice {
     best && worst && best.name !== worst.name ? Math.max(0, Math.round(best.score - worst.score)) : null;
   const headline =
     gap != null && gap >= 15
-      ? clipPdfText(`${gap}-point spread across models: assistants disagree on your brand.`)
+      ? clipPdfText(`${gap}-point spread across models: AI answers differ on your brand.`)
       : clipPdfText("AI systems disagree on your brand.");
   const interp =
     best && worst && best.name !== worst.name
@@ -77,7 +77,7 @@ export function narrativeModel(d: ReportData): NarrativeSlice {
     headline,
     interpretation: clipPdfText(interp),
     implication: clipPdfText(
-      "Visibility depends on which assistant shoppers use—uneven demand and real pipeline risk.",
+      "Visibility depends on which AI system shoppers use—uneven demand and real pipeline risk.",
     ),
     action: d.strategicTakeaway?.trim() ? clipPdfText(d.strategicTakeaway) : undefined,
     inaction: clipPdfText(
@@ -144,7 +144,7 @@ export function narrativeClosing(_d: ReportData): NarrativeSlice {
       "If you execute these steps, your AI Authority Score should improve within 60–90 days.",
     ),
     implication: clipPdfText(
-      "Buyers will keep asking assistants the same questions; the only question is whether your evidence stack improves faster than the next best alternative.",
+      "Buyers will keep asking AI the same questions; the only question is whether your evidence stack improves faster than the next best alternative.",
     ),
   };
 }

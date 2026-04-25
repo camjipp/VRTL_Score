@@ -90,7 +90,7 @@ export function PageModelBreakdown({ data }: { data: ReportData }): ReactElement
               <Text style={lockedStyles.model_poleScore}>{String(best.score)}</Text>
               <ModelScoreBar score={best.score} />
               <Text style={[lockedStyles.model_gapCaption, { marginTop: 6, textAlign: "left" }]}>
-                {clipPdfText("Add model coverage to measure how assistants diverge on you.")}
+                {clipPdfText("Add model coverage to see how different AI answers diverge on you.")}
               </Text>
             </View>
           </View>

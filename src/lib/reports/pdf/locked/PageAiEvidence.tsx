@@ -65,7 +65,7 @@ function strengthBody(data: ReportData): string {
   const raw = String(s.snippet).trim();
   if (looksLikeStructuredBlob(raw)) {
     return clipPdfText(
-      `In this answer, ${brandName(data)} is positioned as a brand the assistant is willing to recommend.`,
+      `In this answer, ${brandName(data)} is positioned as a brand this AI is willing to recommend.`,
     );
   }
   return clipPdfText(raw);
@@ -120,7 +120,7 @@ export function PageAiEvidence({ data }: { data: ReportData }): ReactElement {
     const body = raw
       ? looksLikeStructuredBlob(raw)
         ? clipPdfText(
-            `${brandName(data)} was not mentioned in this response. The assistant recommended other brands instead.`,
+            `${brandName(data)} was not mentioned in this response. The AI recommended other brands instead.`,
           )
         : clipPdfText(raw)
       : clipPdfText("No exposure excerpt in this export.");
