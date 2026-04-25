@@ -8,13 +8,8 @@ import { LOCKED_PAGE_HEADER } from "./layoutConstants";
 import { normalizeMentionShares, type ShareSlice } from "./competitiveSharePie";
 import { lockedStyles } from "./lockedDocumentStyles";
 
-const BOTTOM_INSIGHT = clipPdfText(
-  "You are in the set, but not yet the default choice.",
-  520,
-);
-
 const WHAT_THIS_MEANS_BODY = clipPdfText(
-  "This is a preference problem, not a visibility problem.\n\nWhen recommendation share is clustered, assistants default to the brand that signals the most authority and trust. Until that preference is built, outcomes will stay fragmented across comparable competitors.",
+  "You are in the set, but not yet the default choice.\n\nThis is a preference problem, not a visibility problem. When recommendation share is clustered, assistants default to the brand that signals the most authority and trust. Until that preference is built, outcomes will stay fragmented across comparable competitors.",
   560,
 );
 
@@ -115,7 +110,7 @@ function tiedAtTop(competitors: readonly CompetitorRow[]): boolean {
 function positionsSupportLine(tied: boolean): string {
   return clipPdfText(
     tied
-      ? "You are tied at the top on share. In a clustered market, credibility decides who becomes the default recommendation."
+      ? "You are tied at the top on share. In a clustered market, credibility determines the default recommendation."
       : "In a clustered market, credibility decides who becomes the default recommendation.",
     520,
   );
@@ -229,9 +224,6 @@ export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactE
           {tension ? <Text style={lockedStyles.comp_positionsTension}>{tension}</Text> : null}
           <Text style={lockedStyles.comp_positionsSupport}>{positionsSupportLine(tied)}</Text>
         </View>
-      </View>
-      <View style={lockedStyles.comp_bottomInsightBand} wrap={false}>
-        <Text style={lockedStyles.comp_bottomInsightParaLast}>{BOTTOM_INSIGHT}</Text>
       </View>
       <View style={lockedStyles.comp_stakesBlock} wrap={false}>
         <Text style={lockedStyles.comp_stakesTitle}>{"WHAT THIS MEANS"}</Text>
