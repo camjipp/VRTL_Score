@@ -761,7 +761,7 @@ export const lockedStyles = StyleSheet.create({
     overflow: "hidden",
   },
   model_fractureEyebrow: {
-    fontSize: LD.size.micro,
+    fontSize: 7.5,
     fontFamily: LD.font.sansBold,
     color: LD.color.ink4,
     letterSpacing: LD.trackEyebrow,
@@ -834,7 +834,7 @@ export const lockedStyles = StyleSheet.create({
     lineHeight: LD.lineHeight.tight,
   },
   model_gapCaption: {
-    fontSize: LD.size.micro,
+    fontSize: 7,
     fontFamily: LD.font.sans,
     color: LD.color.ink3,
     marginTop: LD.space.xxs,
@@ -856,7 +856,7 @@ export const lockedStyles = StyleSheet.create({
     borderTopColor: LD.color.rule,
   },
   model_avgLabel: {
-    fontSize: LD.size.micro,
+    fontSize: 7.5,
     fontFamily: LD.font.sansBold,
     color: LD.color.ink4,
     letterSpacing: LD.trackEyebrow,
@@ -904,7 +904,7 @@ export const lockedStyles = StyleSheet.create({
     overflow: "hidden",
   },
   model_cellLabel: {
-    fontSize: LD.size.micro,
+    fontSize: 7,
     fontFamily: LD.font.sans,
     color: LD.color.ink4,
     letterSpacing: LD.trackEyebrow,
@@ -952,6 +952,32 @@ export const lockedStyles = StyleSheet.create({
     overflow: "hidden",
     lineHeight: LD.lineHeight.editorial,
     fontFamily: LD.font.sans,
+  },
+  model_closingBlock: {
+    marginTop: LD.space.sm,
+    paddingTop: LD.space.sm,
+    borderTopWidth: LD.border.hairline,
+    borderTopColor: LD.color.rule,
+  },
+  model_closingLead: {
+    fontSize: 10.5,
+    fontFamily: LD.font.sans,
+    color: "#374151",
+    lineHeight: 1.55,
+    marginBottom: LD.space.xs,
+  },
+  model_closingBody: {
+    fontSize: 9.5,
+    fontFamily: LD.font.sans,
+    color: LD.color.ink2,
+    lineHeight: 1.55,
+    marginBottom: LD.space.xs,
+  },
+  model_closingAction: {
+    fontSize: 9,
+    fontFamily: LD.font.sansBold,
+    color: "#111111",
+    lineHeight: 1.5,
   },
 
   /* Evidence — excerpt columns, not cards */

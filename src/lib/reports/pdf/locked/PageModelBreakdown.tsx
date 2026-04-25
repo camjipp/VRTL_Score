@@ -10,7 +10,6 @@ import { narrativeModel } from "./pageNarratives";
 
 const FRACTURE_H = 108;
 const ROW_H = 52;
-const MAX_SLOTS = 9;
 const COLS = 3;
 
 const local = StyleSheet.create({
@@ -34,8 +33,9 @@ function ModelScoreBar({ score }: { score: number }): ReactElement {
 }
 
 function rowsOfThree(models: ModelScoreRow[]): (ModelScoreRow | null)[][] {
-  const slots: (ModelScoreRow | null)[] = [...models.slice(0, MAX_SLOTS)];
-  while (slots.length < MAX_SLOTS) slots.push(null);
+  const cap = Math.max(COLS, models.length);
+  const slots: (ModelScoreRow | null)[] = [...models.slice(0, cap)];
+  while (slots.length % COLS !== 0) slots.push(null);
   const out: (ModelScoreRow | null)[][] = [];
   for (let i = 0; i < slots.length; i += COLS) {
     out.push(slots.slice(i, i + COLS) as (ModelScoreRow | null)[]);
@@ -60,7 +60,7 @@ export function PageModelBreakdown({ data }: { data: ReportData }): ReactElement
       <LockedNarrativeStack slice={slice} include={["headline"]} />
       <View style={[lockedStyles.model_fractureShell, local.fracture]} wrap={false}>
         <Text style={lockedStyles.model_fractureEyebrow}>
-          {gap != null && gap >= 15 ? `${gap}-point spread across models` : "Models disagree on you"}
+          {"Model divergence"}
         </Text>
         {best && worst && best.name !== worst.name ? (
           <View style={lockedStyles.model_fractureRow}>
@@ -134,11 +134,11 @@ export function PageModelBreakdown({ data }: { data: ReportData }): ReactElement
           })}
         </View>
       ))}
-      <LockedNarrativeStack
-        slice={slice}
-        stackRole="afterPrimary"
-        include={["interpretation", "implication", "action"]}
-      />
+      <View style={lockedStyles.model_closingBlock} wrap={false}>
+        <Text style={lockedStyles.model_closingLead}>{slice.interpretation}</Text>
+        <Text style={lockedStyles.model_closingBody}>{slice.implication}</Text>
+        {slice.action ? <Text style={lockedStyles.model_closingAction}>{slice.action}</Text> : null}
+      </View>
     </PdfInnerPage>
   );
 }
