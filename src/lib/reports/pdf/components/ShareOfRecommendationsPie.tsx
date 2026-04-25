@@ -8,12 +8,15 @@ import {
 } from "../locked/competitiveSharePie";
 import { lockedStyles } from "../locked/lockedDocumentStyles";
 
-/** Increased scale (~12%) for stronger visual weight. */
-const W = 286;
-const H = 238;
+/**
+ * Pie + legend must fit the left column (~half of content width minus padding).
+ * US Letter content ≈ 532pt wide → ~260pt per half column; keep chart+gap+legend under that.
+ */
+const W = 142;
+const H = 142;
 const CX = W / 2;
 const CY = H / 2;
-const R = 98;
+const R = 64;
 
 type Props = {
   slices: readonly ShareSlice[];
@@ -52,10 +55,9 @@ export function ShareOfRecommendationsPie({ slices }: Props): ReactElement {
   const draws = buildSliceDraws(ordered);
   const paintOrder = sortDrawsForPaintOrder(draws);
   const legendRows = ordered;
-  const client = ordered.find((s) => s.row.isClient) ?? slices.find((s) => s.row.isClient);
 
   return (
-    <View>
+    <View style={lockedStyles.comp_pieBlockRoot} wrap={false}>
       <View style={lockedStyles.comp_pieChartLegendRow} wrap={false}>
         <View style={lockedStyles.comp_pieChartWrap} wrap={false}>
           <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
@@ -66,16 +68,17 @@ export function ShareOfRecommendationsPie({ slices }: Props): ReactElement {
               return <Path key={`p-${d.slice.row.name}-${d.slice.row.rank}-${i}`} d={dPath} fill={fill} />;
             })}
           </Svg>
-          <View style={lockedStyles.comp_pieCenterLabel} wrap={false}>
-            <Text style={lockedStyles.comp_pieCenterPct}>{`${client?.pct ?? 0}%`}</Text>
-            <Text style={lockedStyles.comp_pieCenterBrand}>{client?.row.name ?? "Stanley"}</Text>
-          </View>
         </View>
         <View style={lockedStyles.comp_pieLegendWrap}>
           {legendRows.map((s, i) => {
-            const fill = fillForShareSlice(s, slices);
+            const fill = fillForShareSlice(s, ordered);
+            const isLast = i === legendRows.length - 1;
             return (
-              <View key={`${s.row.name}-${s.row.rank}-${i}`} style={lockedStyles.comp_pieLegendRow} wrap={false}>
+              <View
+                key={`${s.row.name}-${s.row.rank}-${i}`}
+                style={isLast ? [lockedStyles.comp_pieLegendRow, lockedStyles.comp_pieLegendRowLast] : lockedStyles.comp_pieLegendRow}
+                wrap={false}
+              >
                 <View style={[lockedStyles.comp_pieLegendSwatch, { backgroundColor: fill }]} />
                 <Text style={lockedStyles.comp_pieLegendText}>{`${s.row.name} — ${s.pct}%`}</Text>
               </View>

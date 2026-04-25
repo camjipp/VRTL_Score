@@ -504,11 +504,12 @@ export const lockedStyles = StyleSheet.create({
     marginBottom: 0,
   },
   comp_pieColChart: {
-    width: "50%",
+    width: "52%",
     paddingRight: LD.space.xs,
+    flexShrink: 0,
   },
   comp_pieColAside: {
-    width: "50%",
+    width: "48%",
     paddingLeft: LD.space.sm,
     justifyContent: "flex-start",
     maxWidth: 350,
@@ -543,35 +544,21 @@ export const lockedStyles = StyleSheet.create({
     maxWidth: 350,
     marginTop: 11,
   },
+  /** Pie + legend row: bounded width so legend never stacks on top of the chart. */
+  comp_pieBlockRoot: {
+    width: "100%",
+    alignSelf: "flex-start",
+  },
   comp_pieChartLegendRow: {
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "flex-start",
   },
   comp_pieChartWrap: {
-    width: 286,
-    height: 238,
-    position: "relative",
-  },
-  comp_pieCenterLabel: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  comp_pieCenterPct: {
-    fontSize: 22,
-    fontFamily: LD.font.sansBold,
-    color: "#111111",
-    lineHeight: LD.lineHeight.tight,
-  },
-  comp_pieCenterBrand: {
-    fontSize: 11,
-    fontFamily: LD.font.sans,
-    color: "#111111",
-    marginTop: 2,
+    width: 142,
+    height: 142,
+    flexShrink: 0,
   },
   comp_pieChartTitle: {
     fontSize: LD.size.bodySm,
@@ -594,14 +581,19 @@ export const lockedStyles = StyleSheet.create({
   },
   comp_pieLegendWrap: {
     marginTop: 0,
-    marginLeft: LD.space.sm,
+    marginLeft: 8,
     alignSelf: "center",
-    width: 120,
+    width: 124,
+    flexGrow: 0,
+    flexShrink: 0,
   },
   comp_pieLegendRow: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 8,
+  },
+  comp_pieLegendRowLast: {
+    marginBottom: 0,
   },
   comp_pieLegendSwatch: {
     width: 8,
