@@ -176,8 +176,8 @@ export const lockedStyles = StyleSheet.create({
   },
   perf_section: {
     width: "100%",
-    marginBottom: LD.space.xxl,
-    paddingBottom: LD.space.xl,
+    marginBottom: LD.space.lg,
+    paddingBottom: LD.space.md,
     borderBottomWidth: LD.border.hairline,
     borderBottomColor: LD.color.rule,
   },
@@ -189,14 +189,14 @@ export const lockedStyles = StyleSheet.create({
   },
   perf_sectionDiagnosis: {
     width: "100%",
-    marginTop: LD.space.xxxl,
-    marginBottom: LD.space.xxl,
-    paddingTop: LD.space.md,
+    marginTop: LD.space.xl,
+    marginBottom: LD.space.lg,
+    paddingTop: LD.space.sm,
     paddingBottom: 0,
     borderBottomWidth: 0,
   },
   perf_sectionEyebrow: {
-    fontSize: LD.size.caption,
+    fontSize: 7.5,
     fontFamily: LD.font.sansBold,
     color: LD.color.ink3,
     letterSpacing: LD.trackEyebrow,
@@ -220,10 +220,10 @@ export const lockedStyles = StyleSheet.create({
     borderLeftColor: LD.color.ink3,
   },
   perf_heroTakeaway: {
-    fontSize: LD.size.titleSm,
+    fontSize: 9.5,
     fontFamily: LD.font.sans,
     color: LD.color.ink,
-    lineHeight: 1.72,
+    lineHeight: 1.58,
     maxWidth: "100%",
   },
   perf_heroRow: {
@@ -270,10 +270,10 @@ export const lockedStyles = StyleSheet.create({
     borderLeftColor: LD.color.ink,
   },
   perf_diagNarrative: {
-    fontSize: LD.size.lead,
+    fontSize: 9.5,
     fontFamily: LD.font.sans,
     color: LD.color.ink2,
-    lineHeight: 1.75,
+    lineHeight: 1.6,
     maxWidth: "100%",
   },
   perf_diagNarrativeGap: {
