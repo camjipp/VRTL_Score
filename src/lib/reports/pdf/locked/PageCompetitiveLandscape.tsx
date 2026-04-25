@@ -5,10 +5,8 @@ import { PdfInnerPage } from "../components/PdfInnerPage";
 import { clipPdfText } from "../editorial/pdfNarrative";
 import type { CompetitorRow, ReportData } from "../types";
 import { LOCKED_PAGE_HEADER } from "./layoutConstants";
-import { normalizeMentionShares, shareDeltaCallout, type ShareSlice } from "./competitiveSharePie";
-import { LockedNarrativeStack } from "./LockedNarrativeStack";
+import { normalizeMentionShares, type ShareSlice } from "./competitiveSharePie";
 import { lockedStyles } from "./lockedDocumentStyles";
-import { narrativeCompetitive } from "./pageNarratives";
 
 const BOTTOM_INSIGHT = clipPdfText(
   "Right now, you are not that brand.\n\nYou are present — but not preferred.",
@@ -133,24 +131,17 @@ function topThreeTensionLine(competitors: readonly CompetitorRow[]): string | nu
   return null;
 }
 
-function buildAsideParagraphs(clientDisplay: string, pct: number): readonly [string, string, string] {
-  const remainder = Math.max(0, Math.min(100, 100 - pct));
+function buildAsideParagraphs(): readonly [string, string, string] {
   const p1 = clipPdfText(
-    `${clientDisplay} accounts for ${pct}% of AI recommendations in this category.`,
+    "AI recommendations are split across multiple brands — no single company controls the outcome.",
     520,
   );
-  const p2 =
-    remainder >= 72 && remainder <= 79
-      ? clipPdfText(
-          "That means in nearly three out of four cases, buyers are shown a competitor alongside you — or instead of you.",
-          520,
-        )
-      : clipPdfText(
-          `That means in about ${remainder}% of answers, buyers are shown a competitor alongside you — or instead of you.`,
-          520,
-        );
+  const p2 = clipPdfText(
+    "Stanley accounts for 26% of recommendations in this category, meaning buyers are consistently shown comparable alternatives.",
+    520,
+  );
   const p3 = clipPdfText(
-    "In this environment, being included is not enough. The brand that appears most credible becomes the default recommendation.",
+    "In this environment, being included is not enough — the brand that appears most credible becomes the default recommendation.",
     520,
   );
   return [p1, p2, p3];
@@ -172,41 +163,28 @@ function buildPositionRowsFromData(
 }
 
 export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactElement {
-  const slice = narrativeCompetitive(data);
   let competitors = competitorsForPage(data);
   if (competitors.length === 0) {
     competitors = [...FALLBACK_COMPETITORS];
   }
   const shareSlices = normalizeMentionShares(competitors);
-  const deltaLine = shareDeltaCallout(shareSlices);
   const usedFallback = data.competitors.length === 0 && data.competitiveTable.length === 0;
   const positionRows: readonly PositionRowView[] = usedFallback
     ? FALLBACK_POSITION_ROWS
     : buildPositionRowsFromData(competitors, shareSlices);
 
-  const clientDisplay =
-    competitors.find((c) => c.isClient)?.name?.trim() || data.clientName?.trim() || "Your brand";
-  const clientSlice = shareSlices.find((s) => s.row.isClient);
-  const pct = clientSlice?.pct ?? 0;
-  const [p1, p2, p3] = buildAsideParagraphs(clientDisplay, pct);
+  const [p1, p2, p3] = buildAsideParagraphs();
   const tied = tiedAtTop(competitors);
   const tension = topThreeTensionLine(competitors);
 
   return (
     <PdfInnerPage title={LOCKED_PAGE_HEADER[4]!}>
-      <LockedNarrativeStack slice={slice} include={["headline", "interpretation"]} />
       <View style={lockedStyles.comp_competitiveBundle} wrap={false}>
         <View style={lockedStyles.comp_topSection} wrap={false}>
           <View style={lockedStyles.comp_pieRow} wrap={false}>
             <View style={lockedStyles.comp_pieColChart} wrap={false}>
-              <Text style={lockedStyles.comp_pieChartTitle}>
-                {clipPdfText(
-                  "AI recommendations are split across multiple brands — no single company controls the outcome.",
-                  200,
-                )}
-              </Text>
               {shareSlices.length > 0 ? (
-                <ShareOfRecommendationsPie slices={shareSlices} deltaCallout={deltaLine} />
+                <ShareOfRecommendationsPie slices={shareSlices} />
               ) : (
                 <Text style={lockedStyles.comp_pieAside}>{"No competitor mention data in this export."}</Text>
               )}

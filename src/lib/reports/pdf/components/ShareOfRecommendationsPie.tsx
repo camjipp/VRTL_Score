@@ -1,6 +1,5 @@
 import { Path, Svg, Text, View } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
-import { clipPdfText } from "../editorial/pdfNarrative";
 import type { ShareSlice } from "../locked/competitiveSharePie";
 import {
   fillForShareSlice,
@@ -19,8 +18,6 @@ const R = 87;
 
 type Props = {
   slices: readonly ShareSlice[];
-  /** Optional small line when client share is within a few points of the leader. */
-  deltaCallout?: string | null;
 };
 
 type SliceDraw = {
@@ -49,13 +46,13 @@ function sortDrawsForPaintOrder(draws: readonly SliceDraw[]): SliceDraw[] {
   });
 }
 
-export function ShareOfRecommendationsPie({ slices, deltaCallout }: Props): ReactElement {
+export function ShareOfRecommendationsPie({ slices }: Props): ReactElement {
   const draws = buildSliceDraws(slices);
   const paintOrder = sortDrawsForPaintOrder(draws);
   const legendRows = legendSlicesOrdered(slices);
 
   return (
-    <View style={{ width: W }}>
+    <View style={lockedStyles.comp_pieChartLegendRow} wrap={false}>
       <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
         {paintOrder.map((d, i) => {
           const dPath = pieSlicePath(CX, CY, R, d.startDeg, d.sweepDeg);
@@ -72,18 +69,13 @@ export function ShareOfRecommendationsPie({ slices, deltaCallout }: Props): Reac
           );
         })}
       </Svg>
-      {deltaCallout ? (
-        <Text style={lockedStyles.comp_pieDeltaCallout}>{clipPdfText(deltaCallout, 120)}</Text>
-      ) : null}
       <View style={lockedStyles.comp_pieLegendWrap}>
         {legendRows.map((s, i) => {
           const fill = fillForShareSlice(s, slices);
           return (
             <View key={`${s.row.name}-${s.row.rank}-${i}`} style={lockedStyles.comp_pieLegendRow} wrap={false}>
               <View style={[lockedStyles.comp_pieLegendSwatch, { backgroundColor: fill }]} />
-              <Text style={lockedStyles.comp_pieLegendText}>
-                {`${clipPdfText(s.row.name, 40)} — ${s.pct}%`}
-              </Text>
+              <Text style={lockedStyles.comp_pieLegendText}>{`${s.row.name} — ${s.pct}%`}</Text>
             </View>
           );
         })}

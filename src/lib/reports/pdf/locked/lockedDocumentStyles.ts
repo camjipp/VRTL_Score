@@ -512,6 +512,10 @@ export const lockedStyles = StyleSheet.create({
     paddingLeft: LD.space.sm,
     justifyContent: "flex-start",
   },
+  comp_pieChartLegendRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   comp_pieChartTitle: {
     fontSize: LD.size.bodySm,
     fontFamily: LD.font.sansBold,
@@ -532,25 +536,27 @@ export const lockedStyles = StyleSheet.create({
     maxWidth: "100%",
   },
   comp_pieLegendWrap: {
-    marginTop: -2,
-    alignSelf: "flex-start",
-    width: "100%",
+    marginTop: 0,
+    marginLeft: LD.space.sm,
+    alignSelf: "center",
+    width: 120,
   },
   comp_pieLegendRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 2,
+    marginBottom: 8,
   },
   comp_pieLegendSwatch: {
-    width: 7,
-    height: 7,
-    marginRight: LD.space.sm,
+    width: 8,
+    height: 8,
+    marginRight: LD.space.xs + 1,
   },
   comp_pieLegendText: {
     fontSize: LD.size.caption,
     fontFamily: LD.font.sans,
-    color: LD.color.ink2,
+    color: LD.color.ink,
     lineHeight: LD.lineHeight.normal,
+    textAlign: "left",
   },
   comp_pieAside: {
     fontSize: LD.size.bodySm,
@@ -568,7 +574,7 @@ export const lockedStyles = StyleSheet.create({
     marginTop: LD.space.sm + 2,
   },
   comp_secondaryBlock: {
-    marginTop: 28,
+    marginTop: 24,
     paddingTop: LD.space.md,
     borderTopWidth: 1,
     borderTopColor: "#E0E0E0",

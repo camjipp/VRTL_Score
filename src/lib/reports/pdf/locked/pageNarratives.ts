@@ -49,11 +49,8 @@ export function narrativePerformance(d: ReportData): NarrativeSlice {
 /** Page 4 — competitive (market-share framing; pie + secondary table on page). */
 export function narrativeCompetitive(_d: ReportData): NarrativeSlice {
   return {
-    headline: clipPdfText("You share the decision with competitors.", 420),
-    interpretation: clipPdfText(
-      "AI recommendations are split across multiple brands — no single company controls the outcome.",
-      520,
-    ),
+    headline: "",
+    interpretation: "",
     implication: clipPdfText(
       "Recommendation share is split—buyers see a short list, not a single owner of the category.",
       420,
