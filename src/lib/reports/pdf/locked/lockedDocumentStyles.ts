@@ -492,7 +492,11 @@ export const lockedStyles = StyleSheet.create({
 
   /* Competitive — market-share view + positions table (one visual block) */
   comp_competitiveBundle: {
+    marginTop: -12,
     marginBottom: LD.space.lg,
+  },
+  comp_topSection: {
+    marginBottom: 0,
   },
   comp_pieRow: {
     flexDirection: "row",
@@ -500,12 +504,12 @@ export const lockedStyles = StyleSheet.create({
     marginBottom: 0,
   },
   comp_pieColChart: {
-    width: "52%",
-    paddingRight: LD.space.sm,
+    width: "50%",
+    paddingRight: LD.space.xs,
   },
   comp_pieColAside: {
-    width: "48%",
-    paddingLeft: LD.space.md,
+    width: "50%",
+    paddingLeft: LD.space.sm,
     justifyContent: "flex-start",
   },
   comp_pieChartTitle: {
@@ -515,7 +519,7 @@ export const lockedStyles = StyleSheet.create({
     letterSpacing: -0.06,
     textTransform: "none" as const,
     lineHeight: LD.lineHeight.snug,
-    marginBottom: LD.space.xs,
+    marginBottom: LD.space.xxs,
     maxWidth: "100%",
   },
   comp_pieDeltaCallout: {
@@ -528,7 +532,7 @@ export const lockedStyles = StyleSheet.create({
     maxWidth: "100%",
   },
   comp_pieLegendWrap: {
-    marginTop: 0,
+    marginTop: -2,
     alignSelf: "flex-start",
     width: "100%",
   },
@@ -564,8 +568,8 @@ export const lockedStyles = StyleSheet.create({
     marginTop: LD.space.sm + 2,
   },
   comp_secondaryBlock: {
-    marginTop: -22,
-    paddingTop: LD.space.sm,
+    marginTop: 28,
+    paddingTop: LD.space.md,
     borderTopWidth: 1,
     borderTopColor: "#E0E0E0",
     borderStyle: "solid",

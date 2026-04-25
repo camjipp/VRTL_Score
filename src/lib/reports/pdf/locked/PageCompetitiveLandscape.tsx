@@ -133,7 +133,7 @@ function topThreeTensionLine(competitors: readonly CompetitorRow[]): string | nu
   return null;
 }
 
-function buildAsideParagraphs(clientDisplay: string, pct: number): readonly [string, string, string, string] {
+function buildAsideParagraphs(clientDisplay: string, pct: number): readonly [string, string, string] {
   const remainder = Math.max(0, Math.min(100, 100 - pct));
   const p1 = clipPdfText(
     `${clientDisplay} accounts for ${pct}% of AI recommendations in this category.`,
@@ -150,14 +150,10 @@ function buildAsideParagraphs(clientDisplay: string, pct: number): readonly [str
           520,
         );
   const p3 = clipPdfText(
-    "There is no dominant brand here. Decisions are split across multiple options.",
-    520,
-  );
-  const p4 = clipPdfText(
     "In this environment, being included is not enough. The brand that appears most credible becomes the default recommendation.",
     520,
   );
-  return [p1, p2, p3, p4];
+  return [p1, p2, p3];
 }
 
 function buildPositionRowsFromData(
@@ -192,7 +188,7 @@ export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactE
     competitors.find((c) => c.isClient)?.name?.trim() || data.clientName?.trim() || "Your brand";
   const clientSlice = shareSlices.find((s) => s.row.isClient);
   const pct = clientSlice?.pct ?? 0;
-  const [p1, p2, p3, p4] = buildAsideParagraphs(clientDisplay, pct);
+  const [p1, p2, p3] = buildAsideParagraphs(clientDisplay, pct);
   const tied = tiedAtTop(competitors);
   const tension = topThreeTensionLine(competitors);
 
@@ -200,25 +196,26 @@ export function PageCompetitiveLandscape({ data }: { data: ReportData }): ReactE
     <PdfInnerPage title={LOCKED_PAGE_HEADER[4]!}>
       <LockedNarrativeStack slice={slice} include={["headline", "interpretation"]} />
       <View style={lockedStyles.comp_competitiveBundle} wrap={false}>
-        <View style={lockedStyles.comp_pieRow} wrap={false}>
-          <View style={lockedStyles.comp_pieColChart} wrap={false}>
-            <Text style={lockedStyles.comp_pieChartTitle}>
-              {clipPdfText(
-                "Your share of AI recommendations is nearly identical to competitors",
-                200,
+        <View style={lockedStyles.comp_topSection} wrap={false}>
+          <View style={lockedStyles.comp_pieRow} wrap={false}>
+            <View style={lockedStyles.comp_pieColChart} wrap={false}>
+              <Text style={lockedStyles.comp_pieChartTitle}>
+                {clipPdfText(
+                  "AI recommendations are split across multiple brands — no single company controls the outcome.",
+                  200,
+                )}
+              </Text>
+              {shareSlices.length > 0 ? (
+                <ShareOfRecommendationsPie slices={shareSlices} deltaCallout={deltaLine} />
+              ) : (
+                <Text style={lockedStyles.comp_pieAside}>{"No competitor mention data in this export."}</Text>
               )}
-            </Text>
-            {shareSlices.length > 0 ? (
-              <ShareOfRecommendationsPie slices={shareSlices} deltaCallout={deltaLine} />
-            ) : (
-              <Text style={lockedStyles.comp_pieAside}>{"No competitor mention data in this export."}</Text>
-            )}
-          </View>
-          <View style={lockedStyles.comp_pieColAside} wrap={false}>
-            <Text style={lockedStyles.comp_pieAside}>{p1}</Text>
-            <Text style={lockedStyles.comp_pieAsideFollow}>{p2}</Text>
-            <Text style={lockedStyles.comp_pieAsideFollow}>{p3}</Text>
-            <Text style={lockedStyles.comp_pieAsideFollow}>{p4}</Text>
+            </View>
+            <View style={lockedStyles.comp_pieColAside} wrap={false}>
+              <Text style={lockedStyles.comp_pieAside}>{p1}</Text>
+              <Text style={lockedStyles.comp_pieAsideFollow}>{p2}</Text>
+              <Text style={lockedStyles.comp_pieAsideFollow}>{p3}</Text>
+            </View>
           </View>
         </View>
         <View style={lockedStyles.comp_secondaryBlock} wrap={false}>

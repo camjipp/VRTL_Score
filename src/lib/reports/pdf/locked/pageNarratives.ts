@@ -51,7 +51,7 @@ export function narrativeCompetitive(_d: ReportData): NarrativeSlice {
   return {
     headline: clipPdfText("You share the decision with competitors.", 420),
     interpretation: clipPdfText(
-      "Your brand appears often — but so do others. There is no clear default.",
+      "AI recommendations are split across multiple brands — no single company controls the outcome.",
       520,
     ),
     implication: clipPdfText(
