@@ -76,7 +76,7 @@ function buildPublicPreviewData(base: ReportData): ReportData {
       "You lead the rank table, but a wide spread across models is the risk: assistants can recommend different winners. Standardize facts, citations, and comparison narratives before a competitor locks the default answer.",
     dataSummaryInterpretation:
       "You lead this anonymized sample, but the rates below show where answers still omit the brand or lack citations—treat those rows as unstable recommendation share until proof and comparisons close the gaps.",
-    recommendedNextSteps: getDefaultRecommendedNextStepsBody("your weakest assistant surface"),
+    recommendedNextSteps: getDefaultRecommendedNextStepsBody("your weakest model"),
     recommendedNextStepsVisible: true,
     recommendations: base.recommendations.map((r, i) => ({
       ...r,

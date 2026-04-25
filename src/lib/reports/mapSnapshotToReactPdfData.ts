@@ -39,11 +39,11 @@ const DEFAULT_EXECUTION: ExecutionPhase[] = [
   },
   {
     phase: "Week 2 to 3",
-    text: "We rebuild the weakest model surface first—shipped pages, FAQs, and schema aligned to how that assistant retrieves answers.",
+    text: "We rebuild the weakest model surface first—shipped pages, FAQs, and schema aligned to how that model retrieves answers.",
   },
   {
     phase: "Week 3–4",
-    text: "We expand authority through cited comparison assets, reviews, trade press, and trusted third-party mentions assistants can cite.",
+    text: "We expand authority through cited comparison assets, reviews, trade press, and trusted third-party mentions AI answers can cite.",
   },
   {
     phase: "Week 4+",
@@ -64,7 +64,7 @@ function buildModelInsights(name: string, val: number, _avg: number): string[] {
   if (isWeak) {
     const first =
       name === "Anthropic"
-        ? "On Anthropic-powered answers, the brand is often absent from the recommendation set. That reads as effectively invisible in many category decisions this assistant influences."
+        ? "On Anthropic-powered answers, the brand is often absent from the recommendation set. That reads as effectively invisible in many category decisions on that path."
         : `${name} returns answers where you are frequently missing from the short list buyers see. Recommendation share on this path is going to others.`;
     return [first, "Ship 3–5 cited comparison pages plus direct-answer FAQ blocks for the query shapes this model returns."];
   }
@@ -82,7 +82,7 @@ function buildStrategicTakeaway(models: [string, number][], _avg: number): strin
   const hi = models[0][1];
   const lo = models[models.length - 1][1];
   if (hi >= 70 && lo < 50) {
-    return `${Math.round(hi - lo)} points separate your best and worst assistant surface. Buyers get different short lists depending on which AI they use. Rebuild the weak surface with cited comparisons and FAQs before a competitor locks the default recommendation there.`;
+    return `${Math.round(hi - lo)} points separate your highest- and lowest-scoring models. Buyers get different short lists depending on which AI they use. Rebuild the weak surface with cited comparisons and FAQs before a competitor locks the default recommendation there.`;
   }
   if (models.every(([, s]) => s >= 70)) {
     return "Strong across engines. Treat this as defense: monitor rivals, refresh proof monthly, and protect first-position answers.";
@@ -202,7 +202,7 @@ export function mapSnapshotToReactPdfData(
       prompt: buildPromptLine(r0.prompt_text),
       responseExcerpt: buildResponseExcerpt(
         r0.raw_text,
-        `The assistant answered this prompt without clearly recommending ${client.name}.`,
+        `This answer did not clearly recommend ${client.name}.`,
       ),
     });
   }

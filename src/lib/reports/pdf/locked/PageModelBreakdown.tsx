@@ -47,7 +47,18 @@ export function PageModelBreakdown({ data }: { data: ReportData }): ReactElement
   const sorted = sortedModels(data.modelScores);
   const best = sorted[0];
   const worst = sorted[sorted.length - 1];
-  const grid = rowsOfThree(sorted);
+  const showFracturePoles = Boolean(best && worst && best.name !== worst.name);
+  /** Avoid repeating the same models in the fracture row and the roster grid. */
+  const gridModels: ModelScoreRow[] = (() => {
+    if (sorted.length === 0) return [];
+    if (!showFracturePoles) return sorted;
+    const middle = sorted.filter((m) => m.name !== best!.name && m.name !== worst!.name);
+    if (middle.length > 0) return middle;
+    if (sorted.length === 2) return [];
+    return sorted;
+  })();
+  const rosterIsPartial = showFracturePoles && gridModels.length > 0 && gridModels.length < sorted.length;
+  const grid = rowsOfThree(gridModels);
   const slice = narrativeModel(data);
 
   const gap =
@@ -62,7 +73,7 @@ export function PageModelBreakdown({ data }: { data: ReportData }): ReactElement
         <Text style={lockedStyles.model_fractureEyebrow}>
           {"Model divergence"}
         </Text>
-        {best && worst && best.name !== worst.name ? (
+        {showFracturePoles ? (
           <View style={lockedStyles.model_fractureRow}>
             <View style={[lockedStyles.model_pole, lockedStyles.model_poleBest]}>
               <Text style={lockedStyles.model_poleLabel}>Strongest read</Text>
@@ -110,30 +121,47 @@ export function PageModelBreakdown({ data }: { data: ReportData }): ReactElement
           </View>
         ) : null}
       </View>
-      {grid.map((row, ri) => (
-        <View key={ri} style={local.gridRow} wrap={false}>
-          {row.map((m, ci) => {
-            const last = ci === row.length - 1;
-            if (!m) {
-              const emptyBox = last ? lockedStyles.model_cellEmptyLast : lockedStyles.model_cellEmpty;
-              return (
-                <View key={ci} style={emptyBox}>
-                  <Text style={lockedStyles.model_name}> </Text>
-                </View>
-              );
-            }
-            const box = last ? lockedStyles.model_cellLast : lockedStyles.model_cell;
-            return (
-              <View key={ci} style={box}>
-                <Text style={lockedStyles.model_cellLabel}>Model</Text>
-                <Text style={lockedStyles.model_name}>{clipPdfText(m.name)}</Text>
-                <Text style={lockedStyles.model_score}>{clipPdfText(String(m.score))}</Text>
-                <ModelScoreBar score={m.score} />
-              </View>
-            );
-          })}
-        </View>
-      ))}
+      {rosterIsPartial && gridModels.length === 1 ? (
+        <>
+          <Text style={lockedStyles.model_rosterEyebrow}>Other models (same scale)</Text>
+          <View style={local.gridRow} wrap={false}>
+            <View style={lockedStyles.model_cellSolo}>
+              <Text style={lockedStyles.model_cellLabel}>Model</Text>
+              <Text style={lockedStyles.model_name}>{clipPdfText(gridModels[0]!.name)}</Text>
+              <Text style={lockedStyles.model_score}>{clipPdfText(String(gridModels[0]!.score))}</Text>
+              <ModelScoreBar score={gridModels[0]!.score} />
+            </View>
+          </View>
+        </>
+      ) : gridModels.length > 0 ? (
+        <>
+          {rosterIsPartial ? <Text style={lockedStyles.model_rosterEyebrow}>Other models (same scale)</Text> : null}
+          {grid.map((row, ri) => (
+            <View key={ri} style={local.gridRow} wrap={false}>
+              {row.map((m, ci) => {
+                const last = ci === row.length - 1;
+                if (!m) {
+                  const emptyBox = last ? lockedStyles.model_cellEmptyLast : lockedStyles.model_cellEmpty;
+                  return (
+                    <View key={ci} style={emptyBox}>
+                      <Text style={lockedStyles.model_name}> </Text>
+                    </View>
+                  );
+                }
+                const box = last ? lockedStyles.model_cellLast : lockedStyles.model_cell;
+                return (
+                  <View key={ci} style={box}>
+                    <Text style={lockedStyles.model_cellLabel}>Model</Text>
+                    <Text style={lockedStyles.model_name}>{clipPdfText(m.name)}</Text>
+                    <Text style={lockedStyles.model_score}>{clipPdfText(String(m.score))}</Text>
+                    <ModelScoreBar score={m.score} />
+                  </View>
+                );
+              })}
+            </View>
+          ))}
+        </>
+      ) : null}
       <View style={lockedStyles.model_closingBlock} wrap={false}>
         <Text style={lockedStyles.model_closingLead}>{slice.interpretation}</Text>
         <Text style={lockedStyles.model_closingBody}>{slice.implication}</Text>

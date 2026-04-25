@@ -17,7 +17,7 @@ export const PDF_REPORT_TITLE = "Competitive AI Presence Report";
 
 /** Neutral methodology copy (no product branding) — short, client-skimmable. */
 export const PDF_METHODOLOGY_TEXT =
-  "We run a fixed set of category and brand-intent prompts against leading assistants, then score how often you appear, how you are positioned, and whether answers cite verifiable sources. Results are directional: use them alongside your CRM, search, and revenue data.";
+  "We run a fixed set of category and brand-intent prompts against leading AI models, then score how often you appear, how you are positioned, and whether answers cite verifiable sources. Results are directional: use them alongside your CRM, search, and revenue data.";
 
 /**
  * Default “What happens next” body — agency voice only (no platform/provider).
@@ -25,7 +25,7 @@ export const PDF_METHODOLOGY_TEXT =
  */
 export function getDefaultRecommendedNextStepsBody(weakestModelSurface: string): string {
   const w =
-    weakestModelSurface.trim() || "the weakest assistant surface in this snapshot";
+    weakestModelSurface.trim() || "the weakest model in this snapshot";
   return [
     "This is an operating rhythm, not a one-time report.",
     "",

@@ -869,6 +869,23 @@ export const lockedStyles = StyleSheet.create({
     width: "100%",
     marginTop: LD.space.xxs,
   },
+  model_rosterEyebrow: {
+    fontSize: 7.5,
+    fontFamily: LD.font.sansBold,
+    color: LD.color.ink4,
+    letterSpacing: LD.trackEyebrow,
+    textTransform: "uppercase",
+    marginTop: LD.space.md,
+    marginBottom: LD.space.xxs,
+  },
+  model_cellSolo: {
+    width: "100%",
+    paddingVertical: LD.space.sm,
+    paddingHorizontal: LD.space.xs + 2,
+    borderBottomWidth: LD.border.hairline,
+    borderBottomColor: LD.color.ink,
+    overflow: "hidden",
+  },
   model_cell: {
     flex: 1,
     marginRight: LD.space.sm,
