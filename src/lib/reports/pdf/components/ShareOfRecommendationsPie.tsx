@@ -12,7 +12,7 @@ import { lockedStyles } from "../locked/lockedDocumentStyles";
 const W = 286;
 const H = 238;
 const CX = W / 2;
-const CY = H / 2 - 2;
+const CY = H / 2;
 const R = 98;
 
 type Props = {
@@ -50,10 +50,6 @@ export function ShareOfRecommendationsPie({ slices }: Props): ReactElement {
   const paintOrder = sortDrawsForPaintOrder(draws);
   const legendRows = legendSlicesOrdered(slices);
   const client = slices.find((s) => s.row.isClient);
-  const maxOther = Math.max(0, ...slices.filter((s) => !s.row.isClient).map((s) => s.pct));
-  const diff = (client?.pct ?? 0) - maxOther;
-  const microInsight =
-    diff === 1 ? "+1% lead — effectively tied" : "Nearly even split — no brand dominates";
 
   return (
     <View>
@@ -61,13 +57,7 @@ export function ShareOfRecommendationsPie({ slices }: Props): ReactElement {
         <View style={lockedStyles.comp_pieChartWrap} wrap={false}>
           <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
             {paintOrder.map((d, i) => {
-              const isClient = Boolean(d.slice.row.isClient);
-              const midDeg = d.startDeg + d.sweepDeg / 2;
-              const rad = (Math.PI / 180) * midDeg;
-              const offset = isClient ? 2.5 : 0;
-              const cx = CX + Math.cos(rad) * offset;
-              const cy = CY + Math.sin(rad) * offset;
-              const dPath = pieSlicePath(cx, cy, R, d.startDeg, d.sweepDeg);
+              const dPath = pieSlicePath(CX, CY, R, d.startDeg, d.sweepDeg);
               if (!dPath) return null;
               const fill = fillForShareSlice(d.slice, slices);
               return <Path key={`p-${d.slice.row.name}-${d.slice.row.rank}-${i}`} d={dPath} fill={fill} />;
@@ -90,7 +80,6 @@ export function ShareOfRecommendationsPie({ slices }: Props): ReactElement {
           })}
         </View>
       </View>
-      <Text style={lockedStyles.comp_pieMicroInsight}>{microInsight}</Text>
     </View>
   );
 }

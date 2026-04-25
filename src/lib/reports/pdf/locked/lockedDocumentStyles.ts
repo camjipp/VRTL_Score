@@ -601,7 +601,7 @@ export const lockedStyles = StyleSheet.create({
   comp_pieLegendRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 6,
+    marginBottom: 8,
   },
   comp_pieLegendSwatch: {
     width: 8,
@@ -614,14 +614,6 @@ export const lockedStyles = StyleSheet.create({
     color: "#111111",
     lineHeight: LD.lineHeight.normal,
     textAlign: "left",
-  },
-  comp_pieMicroInsight: {
-    fontSize: 10,
-    fontFamily: LD.font.sans,
-    color: "#6B7280",
-    lineHeight: LD.lineHeight.normal,
-    marginTop: 4,
-    marginBottom: 0,
   },
   comp_secondaryBlock: {
     marginTop: 24,

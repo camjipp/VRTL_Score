@@ -8,8 +8,8 @@ export type ShareSlice = {
 
 /** Client (Stanley) — VRTL green */
 export const PIE_CLIENT_FILL = "#22C55E";
-/** Top competitor by mentions — black */
-export const PIE_TOP_COMPETITOR_FILL = "#111111";
+/** Top competitor by mentions — charcoal */
+export const PIE_TOP_COMPETITOR_FILL = "#1F2937";
 const PIE_OTHER_GRAYS = ["#9CA3AF", "#D1D5DB"] as const;
 
 /** Normalize mention counts to integer percentages summing to 100. */
