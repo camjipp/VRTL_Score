@@ -701,10 +701,10 @@ export const lockedStyles = StyleSheet.create({
     maxWidth: "100%",
   },
   comp_positionsSupport: {
-    fontSize: LD.size.bodySm,
+    fontSize: 10.5,
     fontFamily: LD.font.sans,
-    color: LD.color.ink2,
-    lineHeight: LD.lineHeight.editorial,
+    color: "#374151",
+    lineHeight: 1.55,
     marginTop: LD.space.xs,
     maxWidth: "100%",
   },
@@ -746,10 +746,10 @@ export const lockedStyles = StyleSheet.create({
     marginBottom: LD.space.sm,
   },
   comp_stakesBody: {
-    fontSize: LD.size.bodySm,
+    fontSize: 10.5,
     fontFamily: LD.font.sans,
-    color: LD.color.ink2,
-    lineHeight: LD.lineHeight.editorial,
+    color: "#374151",
+    lineHeight: 1.55,
     maxWidth: "100%",
   },
   /* Model — fracture as dominant ruled block; grid as register */
