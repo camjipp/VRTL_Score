@@ -188,14 +188,9 @@ function StrengthMainContent({
 }): ReactElement {
   const s = findStrengthPreview(data.evidencePreview);
   const raw = s?.snippet?.trim() ? String(s.snippet).trim() : "";
-  if (excerpt) {
-    return (
-      <View style={lockedStyles.ev_excerptShell} wrap={false}>
-        <HighlightedExcerpt text={excerpt} brand={brandName(data)} />
-      </View>
-    );
-  }
-  const split = raw ? splitMetadataAndProse(raw) : null;
+  // Prefer parsing whichever source has kv-style metadata first.
+  const source = excerpt || raw;
+  const split = source ? splitMetadataAndProse(source) : null;
   if (split) {
     const { table, excerpt: snippetExcerpt } = partitionEvidencePairs(split.pairs);
     const proseMerged = [snippetExcerpt, split.prose].filter(Boolean).join("\n\n").trim();
@@ -209,6 +204,13 @@ function StrengthMainContent({
           </View>
         ) : null}
       </>
+    );
+  }
+  if (excerpt) {
+    return (
+      <View style={lockedStyles.ev_excerptShell} wrap={false}>
+        <HighlightedExcerpt text={excerpt} brand={brandName(data)} />
+      </View>
     );
   }
   return (
