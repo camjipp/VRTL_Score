@@ -1002,6 +1002,7 @@ export const lockedStyles = StyleSheet.create({
     marginRight: LD.space.md,
     paddingHorizontal: LD.space.md,
     paddingVertical: LD.space.md,
+    minHeight: 96,
     borderTopWidth: 3,
     borderTopColor: LD.color.accent,
     backgroundColor: "#F7FDF9",
@@ -1013,6 +1014,7 @@ export const lockedStyles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: LD.space.md,
     paddingVertical: LD.space.md,
+    minHeight: 96,
     borderTopWidth: 3,
     borderTopColor: LD.color.risk,
     backgroundColor: "#FFF7F7",
@@ -1029,11 +1031,11 @@ export const lockedStyles = StyleSheet.create({
     marginBottom: LD.space.sm,
   },
   ev_glanceVerdict: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontFamily: LD.font.sansBold,
     color: LD.color.ink,
-    lineHeight: 1.35,
-    marginBottom: LD.space.xs,
+    lineHeight: 1.32,
+    marginBottom: LD.space.sm,
   },
   ev_glanceLog: {
     fontSize: 7.5,
@@ -1048,6 +1050,7 @@ export const lockedStyles = StyleSheet.create({
     fontFamily: LD.font.sans,
     color: LD.color.ink3,
     lineHeight: 1.45,
+    marginTop: LD.space.xxs,
   },
   ev_proofSplitRow: {
     flexDirection: "row",

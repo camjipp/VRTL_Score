@@ -2,7 +2,6 @@ import { Text, View } from "@react-pdf/renderer";
 import type { ReactElement, ReactNode } from "react";
 import { PdfInnerPage } from "../components/PdfInnerPage";
 import { clipPdfText } from "../editorial/pdfNarrative";
-import { formatEvidenceLogPillLabel } from "@/lib/reports/formatEvidenceFieldDisplay";
 import type { ReportData, VulnerableExcerptParts } from "../types";
 import {
   findStrengthPreview,
@@ -94,6 +93,12 @@ function partitionEvidencePairs(pairs: readonly KvPair[]): { table: KvPair[]; ex
 }
 
 function EvidenceMetaTable({ pairs }: { pairs: readonly KvPair[] }): ReactElement {
+  const tidyValue = (s: string): string => {
+    const t = s.trim();
+    if (/^(true|false|top|mid|low)\.$/i.test(t)) return t.slice(0, -1);
+    if (/^\d+\.$/.test(t)) return t.slice(0, -1);
+    return t;
+  };
   return (
     <View style={lockedStyles.ev_metaTable} wrap={false}>
       {pairs.map((p, idx) => {
@@ -102,7 +107,7 @@ function EvidenceMetaTable({ pairs }: { pairs: readonly KvPair[] }): ReactElemen
         return (
           <View key={`${p.key}-${idx}`} style={row} wrap={false}>
             <Text style={lockedStyles.ev_metaKey}>{clipPdfText(p.key, 44)}</Text>
-            <Text style={lockedStyles.ev_metaVal}>{clipPdfText(p.val, 320)}</Text>
+            <Text style={lockedStyles.ev_metaVal}>{clipPdfText(tidyValue(p.val), 320)}</Text>
           </View>
         );
       })}
@@ -265,8 +270,6 @@ export function PageAiEvidence({ data }: { data: ReportData }): ReactElement {
   const s = findStrengthPreview(data.evidencePreview);
   const v = findVulnerablePreview(data.evidencePreview);
   const vulnParts = normalizeVulnerableExcerptParts(v);
-  const strengthHint = s ? clipPdfText(formatEvidenceLogPillLabel(String(s.label)), 80) : "";
-  const vulnHint = v ? clipPdfText(formatEvidenceLogPillLabel(String(v.label)), 80) : "";
 
   const strengthNote =
     s?.note?.trim() && !looksLikeStructuredBlob(String(s.note))
@@ -337,7 +340,6 @@ export function PageAiEvidence({ data }: { data: ReportData }): ReactElement {
           <View style={lockedStyles.ev_glanceCellStrong} wrap={false}>
             <Text style={lockedStyles.ev_glanceEyebrow}>Strength</Text>
             <Text style={lockedStyles.ev_glanceVerdict}>{strengthVerdict}</Text>
-            {strengthHint ? <Text style={lockedStyles.ev_glanceLog}>{strengthHint}</Text> : null}
             {strengthModel ? (
               <Text style={lockedStyles.ev_glanceModel} wrap={false}>
                 {`Model: ${strengthModel}`}
@@ -347,7 +349,6 @@ export function PageAiEvidence({ data }: { data: ReportData }): ReactElement {
           <View style={lockedStyles.ev_glanceCellRisk} wrap={false}>
             <Text style={lockedStyles.ev_glanceEyebrow}>Exposure</Text>
             <Text style={lockedStyles.ev_glanceVerdict}>{exposureVerdict}</Text>
-            {vulnHint ? <Text style={lockedStyles.ev_glanceLog}>{vulnHint}</Text> : null}
             {vulnModel ? (
               <Text style={lockedStyles.ev_glanceModel} wrap={false}>
                 {`Model: ${vulnModel}`}
